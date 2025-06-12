@@ -109,9 +109,24 @@ namespace Game
         friend Entity::Entity();
     };
 
-    class Component : public GameInstance
+    class Component
     {
+    public:
         Component(ComponentType type);
+
+        union
+        {
+            struct
+            {
+                int xOffset, yOffset, Width, Height;
+                Color4 Color;
+                char Flags;
+            } ShapeComponent;
+            struct
+            {
+
+            } EntityContainerComponent;
+        };
     private:
         const ComponentType m_type;
         Entity* parent;
