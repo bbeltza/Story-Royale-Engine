@@ -2,9 +2,9 @@
 
 #include "Engine.h"
 #include "Window.h"
+#include "Input.h"
 #include "ECS.h"
 #include "GameSettings.h"
-#include "SDL.hpp"
 
 #define WCENTERED SDL_WINDOWPOS_CENTERED
 
@@ -12,6 +12,8 @@ static void EngineRun();
 static void EngineClose();
 static bool WindowPollEvents();
 static SDL_Event sdl_event;
+
+static char Keys[512];
 
 SDL_Window* Engine::Window::sdl_Window;
 SDL_Renderer* Engine::Window::sdl_Renderer;
@@ -26,16 +28,13 @@ void Engine::Init()
 
     Game_SetWorld(EntryWorld)
 
-    Window::sdl_Window = SDL_CreateWindow(GameSettings::Title, WCENTERED, WCENTERED, GameSettings::StartResolution::width, GameSettings::StartResolution::height, 0);
+    Window::sdl_Window = SDL_CreateWindow(GameSettings::Title, WCENTERED, WCENTERED, GameSettings::StartResolution::width, GameSettings::StartResolution::height, SDL_WINDOW_RESIZABLE);
     Window::sdl_Renderer = SDL_CreateRenderer(Window::sdl_Window, -1, SDL_RENDERER_PRESENTVSYNC);
     SDL_SetRenderDrawBlendMode(Window::sdl_Renderer, SDL_BLENDMODE_BLEND);
 
     EngineRun();
     EngineClose();
 }
-
-
-
 
 void EngineRun()
 {
@@ -68,12 +67,40 @@ bool WindowPollEvents()
         {
         case SDL_QUIT:
             return 0;
+        case SDL_KEYDOWN:
+            if (sdl_event.key.keysym.sym > 512)
+                Keys[sdl_event.key.keysym.scancode] |= 3;
+            else
+            {
+                Keys[sdl_event.key.keysym.scancode] |= 1;
+                Keys[sdl_event.key.keysym.sym] |= 2;
+            }
+                
+            
+            break;
+        case SDL_KEYUP:
+            if (sdl_event.key.keysym.sym > 512)
+                Keys[sdl_event.key.keysym.scancode] &= ~3;
+            else
+            {
+                Keys[sdl_event.key.keysym.scancode] &= ~1;
+                Keys[sdl_event.key.keysym.sym] &= ~2;
+            }
+            break;
         default:
             break;
         }
-
     }
 
     return 1;
 }
 
+bool Engine::Input::isKeyPressed(SDL_KeyCode keycode)
+{
+    return Keys[keycode & ~(1 << 30)] & 2;
+}
+
+bool Engine::Input::isKeyPressed(SDL_Scancode scancode)
+{
+    return Keys[scancode] & 1;
+}

@@ -1,4 +1,7 @@
 #include "ECS.h"
+#include "Window.h"
+
+Game::Entity* Game::Entity::s_targetEntityComponent = nullptr;
 
 Game::Entity::Entity()
 {
@@ -12,6 +15,14 @@ Game::Entity::~Entity()
 {
     while (!this->m_Components.empty())
         this->popComponent();
+}
+
+Game::Component* Game::Entity::pushComponent(ENUM_ComponentType type)
+{
+    this->s_targetEntityComponent = this;
+    Component* newComp = new Component(type);
+    this->s_targetEntityComponent = nullptr;
+    return newComp;
 }
 
 void Game::Entity::popComponent()

@@ -1,9 +1,10 @@
 #include <iostream>
-#include "Window.h"
 #include "ECS.h"
+#include "Window.h"
 
 Game::World* Game::currentWorld = nullptr;
 Game::World* Game::World::s_TargetEntityWorld = nullptr;
+unsigned int Game::World::center[2];
 
 Game::World::World()
 {
@@ -39,16 +40,5 @@ void Game::World::removeEntity(void* address)
             break;
         }
             
-    }
-}
-
-void Game::World::Render()
-{
-    for (auto entity : this->m_Entities)
-    {
-        SDL_Rect r{entity->x - 5, entity->y - 5, 10, 10};
-
-        SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(Engine::Window::sdl_Renderer, &r);
     }
 }
