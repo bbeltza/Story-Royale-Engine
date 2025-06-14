@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include "System.h"
 
-#include <Windows.h>
-
 void _system_err(unsigned short LINE, const char* FILE, const char* fmt, ...)
 {
     printf("\x1b[1;31mError:\n");
