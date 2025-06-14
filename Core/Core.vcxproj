@@ -164,13 +164,16 @@
     <ClInclude Include="include\System.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\standard.h" />
+    <ClCompile Include="include\standard.h">
+      <DeploymentContent>false</DeploymentContent>
+    </ClCompile>
     <ClCompile Include="include\Window.h" />
     <ClCompile Include="include\ECS.h" />
     <ClCompile Include="src\Component.cpp" />
     <ClCompile Include="src\DefaultGameSettings.cpp" />
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Rendering.cpp" />
     <ClCompile Include="src\Runtime.cpp" />
     <ClCompile Include="src\System.c" />

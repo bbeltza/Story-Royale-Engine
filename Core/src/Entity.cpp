@@ -48,3 +48,4 @@ void Game::Entity::removeComponent(void* address)
         }
     }
 }
+

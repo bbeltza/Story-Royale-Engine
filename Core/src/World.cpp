@@ -50,3 +50,4 @@ void Game::World::Update(float dt)
         entity->Update(dt);
     }
 }
+

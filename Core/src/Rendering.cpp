@@ -64,19 +64,23 @@ void Game::Entity::render()
     struct World::v2 rPt = m_world->worldToScreenSpace(this->x, this->y);
 
 #ifdef _DEBUG
-    if (this->m_Components.empty())
-    {
-
-        SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, 255, 64, 0, 255);
-        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x - 5, rPt.y, rPt.x + 5, rPt.y);
-        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x, rPt.y - 5, rPt.x, rPt.y + 5);
-    }
-    else
-    {
+#if !ENTITY_DRAWCENTERDBG
+    if (!this->m_Components.empty())
 #endif
+    {
 
         for (Component* component : this->m_Components)
             component->render(rPt.x, rPt.y);
+    }
+#if !ENTITY_DRAWCENTERDBG
+    else
+#endif
+    {
+#endif
+        SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, 255, 64, 0, 255);
+        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x - 5, rPt.y, rPt.x + 5, rPt.y);
+        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x, rPt.y - 5, rPt.x, rPt.y + 5);
+        
 #ifdef _DEBUG
     }
 #endif
@@ -86,13 +90,14 @@ void Game::Component::render(int x, int y)
 {
     if (this->m_type == SHAPE)
     {
+        if (!(this->ShapeComponent.Flags & FLAG_ShapeFlags::VISIBLE)) return;
         Color4& c = ShapeComponent.Color;
-        SDL_Rect r{ x + ShapeComponent.xOffset, y + ShapeComponent.yOffset, ShapeComponent.Width, ShapeComponent.Height };
+        SDL_FRect r{ x + ShapeComponent.xOffset, y + ShapeComponent.yOffset, ShapeComponent.Width, ShapeComponent.Height };
         r.x -= r.w / 2;
         r.y -= r.h / 2;
 
         SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, c.r, c.b, c.g, c.a);
-        SDL_RenderFillRect(Engine::Window::sdl_Renderer, &r);
+        SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &r);
     }
 
 }

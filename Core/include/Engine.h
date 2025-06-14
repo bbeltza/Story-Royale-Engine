@@ -1,4 +1,5 @@
 #pragma once
+
 #include "SDL.hpp"
 
 namespace Engine
@@ -18,7 +19,8 @@ namespace Engine
 - Window running; !!
 - Window updating/filling the background with a color; !!
 - Instancing/Scenes; !!
-- Linking with ImGui (maybe before uhhh);
+- Collision detection;
+- Linking with ImGui (maybe before uhhh); *maybe after
 - Rendering instances/entities; !
 - Input handling; !!
 - Components; !

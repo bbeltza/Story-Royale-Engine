@@ -25,6 +25,13 @@ enum ENUM_Shape : char
     RECTANGLE,
 };
 
+enum FLAG_ShapeFlags : char
+{
+    VISIBLE = (1 << 0),
+    CAN_TOUCH = (1 << 1),
+    CAN_COLLIDE = (1 << 2),
+};
+
 struct GameInstance
 {
     virtual void Update(float dt) {}
@@ -62,6 +69,9 @@ namespace Game
     public:
         Component(ENUM_ComponentType type);
         inline void render(int x, int y);
+        inline void pProcess(float dt);
+
+        inline Entity* getParent() const { return parent; }
 
         union
         {
@@ -77,6 +87,8 @@ namespace Game
 
             } EntityContainerComponent;
         };
+
+        std::vector<Component*> collided;
     private:
 
         void initComponent();
@@ -100,6 +112,7 @@ namespace Game
         World* getWorld() { return m_world; }
 
         inline void render();
+        inline void pProcess(float dt);
 
     private:
         friend Component::Component(ENUM_ComponentType type);
@@ -143,6 +156,7 @@ namespace Game
         struct v2 worldToScreenSpace(float x, float y);
 
         void Update(float dt);
+        void pUpdate(float dt);
         void render();
         virtual void OnUpdate(float dt) {}
 

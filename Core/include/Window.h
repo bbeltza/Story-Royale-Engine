@@ -1,6 +1,8 @@
 #pragma once
 #include <SDL.hpp>
 
+#define ENTITY_DRAWCENTERDBG 1
+
 namespace Engine
 {
     namespace Window

@@ -64,6 +64,7 @@ void EngineRun()
         float dt = delta.count();
 
         Game::currentWorld->Update(dt);
+        Game::currentWorld->pUpdate(dt);
         Engine::Window::render();
 
         if (targetFrameTime > zero)
