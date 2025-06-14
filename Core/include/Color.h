@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COLOR_H
+#define COLOR_H
 #include <stdint.h>
 
 #if __cplusplus
@@ -19,3 +20,5 @@ extern "C"
 #if __cplusplus
 }
 #endif
+
+#endif // COLOR_H

@@ -161,6 +161,7 @@
     <ClInclude Include="include\GameSettings.h" />
     <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\SDL.hpp" />
+    <ClInclude Include="include\System.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\standard.h" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Rendering.cpp" />
     <ClCompile Include="src\Runtime.cpp" />
+    <ClCompile Include="src\System.c" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,11 +1,15 @@
 #include "ECS.h"
 #include "Input.h"
+#include "System.h"
+
 
 class MyCharacter: public Game::Entity
 {
 public:
     MyCharacter()
     {
+        //sys_Error("Passed value is not a function!");
+
         Game::Component* Rect = pushComponent(SHAPE);
         std::cout << this << "\n";
     }
