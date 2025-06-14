@@ -1,4 +1,4 @@
-#include <iostream>
+#include <standard.h>
 #include "ECS.h"
 #include "Window.h"
 
@@ -40,5 +40,13 @@ void Game::World::removeEntity(void* address)
             break;
         }
             
+    }
+}
+
+void Game::World::Update(float dt)
+{
+    for (Entity* entity : m_Entities)
+    {
+        entity->Update(dt);
     }
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <standard.h>
 
 #include "Window.h"
 #include "ECS.h"

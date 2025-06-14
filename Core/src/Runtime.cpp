@@ -1,4 +1,4 @@
-#include <iostream>
+#include <standard.h>
 
 #include "Engine.h"
 #include "Window.h"
@@ -12,6 +12,10 @@ static void EngineRun();
 static void EngineClose();
 static bool WindowPollEvents();
 static SDL_Event sdl_event;
+
+static std::chrono::steady_clock frametime_clock;
+static std::chrono::duration<double> targetFrameTime;
+const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
 
 static char Keys[512];
 
@@ -28,12 +32,17 @@ void Engine::Init()
 
     Game_SetWorld(EntryWorld)
 
-    Window::sdl_Window = SDL_CreateWindow(GameSettings::Title, WCENTERED, WCENTERED, GameSettings::StartResolution::width, GameSettings::StartResolution::height, SDL_WINDOW_RESIZABLE);
-    Window::sdl_Renderer = SDL_CreateRenderer(Window::sdl_Window, -1, SDL_RENDERER_PRESENTVSYNC);
+    Window::sdl_Window = SDL_CreateWindow(GameSettings::Title, WCENTERED, WCENTERED, GameSettings::StartResolution.width, GameSettings::StartResolution.height, SDL_WINDOW_RESIZABLE);
+    Window::sdl_Renderer = SDL_CreateRenderer(Window::sdl_Window, -1, 0);
     SDL_SetRenderDrawBlendMode(Window::sdl_Renderer, SDL_BLENDMODE_BLEND);
 
     EngineRun();
     EngineClose();
+}
+
+void Engine::setTargetFPS(unsigned short fps)
+{
+    targetFrameTime = std::chrono::duration<double>(GameSettings::targetFPS > 0 ? (1.0f / GameSettings::targetFPS) : 0);
 }
 
 void EngineRun()
@@ -43,11 +52,28 @@ void EngineRun()
 
     wasRun = 1;
 
-    std::cout << "!\n";
+    auto start = frametime_clock.now();
+    std::chrono::duration<double> delta;
+
+    Engine::setTargetFPS(GameSettings::targetFPS);
 
     while (WindowPollEvents())
     {
+        delta = frametime_clock.now() - start;
+        start = frametime_clock.now();
+        float dt = delta.count();
+
+        Game::currentWorld->Update(dt);
         Engine::Window::render();
+
+        if (targetFrameTime > zero)
+        {
+            std::chrono::duration<double> frametime = std::chrono::steady_clock::now() - start;
+
+            auto sleeptime = targetFrameTime - frametime;
+            std::this_thread::sleep_for(sleeptime);
+        }
+        
     }
 
 }

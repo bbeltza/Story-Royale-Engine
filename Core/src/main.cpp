@@ -8,7 +8,6 @@
 #endif
 
 #include <iostream>
-#include "SDL.hpp"
 #include "Engine.h"
 
 int main()

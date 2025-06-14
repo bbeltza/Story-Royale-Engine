@@ -1,15 +1,18 @@
 #pragma once
+#include <stdint.h>
 
 namespace GameSettings
 {
     extern const char* Title;
-    namespace StartResolution
+    extern struct t2
     {
-        extern unsigned int width;
-        extern unsigned int height;
-    }
-    extern unsigned short targetFPS;
+        unsigned int width;
+        unsigned int height;
+    } StartResolution;
 
+    extern uint16_t targetFPS;
+    extern uint8_t windowFlags;
+    extern uint8_t renderMode;
 
-    void onSet();
+    extern void onSet();
 }

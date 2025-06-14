@@ -163,6 +163,7 @@
     <ClInclude Include="include\SDL.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\standard.h" />
     <ClCompile Include="include\Window.h" />
     <ClCompile Include="include\ECS.h" />
     <ClCompile Include="src\Component.cpp" />
