@@ -88,10 +88,14 @@ void Game::World::pUpdate(float dt)
                     float mg = dstncx * dstncx + dstncy * dstncy;
                     mg = sqrt(mg);
 
-                    if (mg < targetmg)
+                    if (mg <= targetmg)
                     {
-                        c1_ent->x += dstncx / (mg);
-                        c1_ent->y += dstncy / (mg);
+
+
+                        c1_ent->x += dstncx / mg * targetmg - dstncx;
+                        c1_ent->y += dstncy / mg * targetmg - dstncy;
+
+                        //printf("%f, %f\n", , dstncy/mg*targetmg);
                     }
 
                     break;
