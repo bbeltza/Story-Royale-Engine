@@ -12,6 +12,8 @@ public:
         //sys_error("Passed value is not a function!");
         Game::Component* Rect = pushComponent(SHAPE);
         Rect->ShapeComponent.Flags |= CAN_COLLIDE;
+        Rect->ShapeComponent.Shape = CIRCLE;
+        pushComponent(VELOCITY);
         std::cout << this << "\n";
     }
     void Update(float dt) override;
@@ -25,12 +27,14 @@ class BlockThing : public Game::Entity
 public:
     BlockThing()
     {
+        this->pushComponent(VELOCITY);
         {
             auto c = this->pushComponent(SHAPE);
             c->ShapeComponent.Color = { 40, 20, 70, 255 };
             c->ShapeComponent.xOffset = 50;
             c->ShapeComponent.yOffset = 10;
             c->ShapeComponent.Flags |= CAN_COLLIDE;
+            c->ShapeComponent.Shape = CIRCLE;
         }
         {
             auto c = this->pushComponent(SHAPE);
@@ -41,17 +45,18 @@ public:
         }
     }
 
-    void Update(float dt)
+    /*void Update(float dt)
     {
+        velocityComp->VelocityComponent = { 0, 0 };
         if (Engine::Input::isKeyPressed(SDL_SCANCODE_A))
-            x -= v * dt;
+            velocityComp->VelocityComponent.x -= v;
         if (Engine::Input::isKeyPressed(SDL_SCANCODE_D))
-            x += v * dt;
+            velocityComp->VelocityComponent.x += v;
         if (Engine::Input::isKeyPressed(SDL_SCANCODE_W))
-            y -= v * dt;
+            velocityComp->VelocityComponent.y -= v;
         if (Engine::Input::isKeyPressed(SDL_SCANCODE_S))
-            y += v * dt;
-    }
+            velocityComp->VelocityComponent.y += v;
+    }*/
 
 private:
     int v = 100;
@@ -68,17 +73,18 @@ EntryWorld::EntryWorld()
 
 void MyCharacter::Update(float dt)
 {
+    velocityComp->VelocityComponent = { 0, 0 };
     if (Engine::Input::isKeyPressed(SDL_SCANCODE_LEFT))
-        x -= v * dt;
+        velocityComp->VelocityComponent.x -= v;
     if (Engine::Input::isKeyPressed(SDL_SCANCODE_RIGHT))
-        x += v * dt;
+        velocityComp->VelocityComponent.x += v;
     if (Engine::Input::isKeyPressed(SDL_SCANCODE_UP))
-        y -= v * dt;
+        velocityComp->VelocityComponent.y -= v;
     if (Engine::Input::isKeyPressed(SDL_SCANCODE_DOWN))
-        y += v * dt;
+        velocityComp->VelocityComponent.y += v;
 
     //getWorld()->CurrentCamera.x = x;
     //getWorld()->CurrentCamera.y = y;
 
-    //std::cout << 1/dt << "\n";
+    std::cout << 1/dt << "\n";
 }

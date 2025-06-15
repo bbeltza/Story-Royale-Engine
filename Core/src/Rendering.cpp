@@ -28,7 +28,7 @@ void Engine::Window::render()
     //// Clearing the screen with the background color
     SDL_SetRenderDrawColor(sdl_Renderer, bg.r, bg.g, bg.b, 255);
     SDL_RenderClear(sdl_Renderer);
-    
+
     //// Drawing all the entities (doesn't run if the foreground is full opaque)
     if (fg.a < 255)
     {
@@ -68,9 +68,9 @@ void Game::Entity::render()
     if (!this->m_Components.empty())
 #endif
     {
+       for (Component* component : this->m_Components)
+           component->render(rPt.x, rPt.y);
 
-        for (Component* component : this->m_Components)
-            component->render(rPt.x, rPt.y);
     }
 #if !ENTITY_DRAWCENTERDBG
     else
@@ -80,7 +80,7 @@ void Game::Entity::render()
         SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, 255, 64, 0, 255);
         SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x - 5, rPt.y, rPt.x + 5, rPt.y);
         SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x, rPt.y - 5, rPt.x, rPt.y + 5);
-        
+
 #ifdef _DEBUG
     }
 #endif
@@ -92,12 +92,24 @@ void Game::Component::render(int x, int y)
     {
         if (!(this->ShapeComponent.Flags & FLAG_ShapeFlags::VISIBLE)) return;
         Color4& c = ShapeComponent.Color;
-        SDL_FRect r{ x + ShapeComponent.xOffset, y + ShapeComponent.yOffset, ShapeComponent.Width, ShapeComponent.Height };
-        r.x -= r.w / 2;
-        r.y -= r.h / 2;
-
         SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, c.r, c.b, c.g, c.a);
-        SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &r);
+
+        const float cx = x + ShapeComponent.xOffset;
+        const float cy = y + ShapeComponent.yOffset;
+
+        if (ShapeComponent.Shape == CIRCLE)
+        {
+            SDL_RenderFillCircle(Engine::Window::sdl_Renderer, cx, cy, ShapeComponent.Width/2);
+        }
+        else
+        {
+            SDL_FRect r{cx , cy, ShapeComponent.Width, ShapeComponent.Height };
+            r.x -= r.w / 2;
+            r.y -= r.h / 2;
+
+            SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &r);
+        }
+        
     }
 
 }

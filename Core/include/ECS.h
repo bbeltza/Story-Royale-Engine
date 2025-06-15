@@ -17,12 +17,14 @@ enum ENUM_ScaleType : char
 enum ENUM_ComponentType : char
 {
     SHAPE,
+    VELOCITY,
     ENTITY_CONTAINER
 };
 
 enum ENUM_Shape : char
 {
     RECTANGLE,
+    CIRCLE,
 };
 
 enum FLAG_ShapeFlags : char
@@ -69,7 +71,8 @@ namespace Game
     public:
         Component(ENUM_ComponentType type);
         inline void render(int x, int y);
-        inline void pProcess(float dt);
+        inline void procesCollider();
+        inline void procesCollision();
 
         inline Entity* getParent() const { return parent; }
 
@@ -84,11 +87,14 @@ namespace Game
             } ShapeComponent;
             struct
             {
+                float x, y;
+            } VelocityComponent;
+            struct
+            {
 
             } EntityContainerComponent;
         };
 
-        std::vector<Component*> collided;
     private:
 
         void initComponent();
@@ -113,6 +119,9 @@ namespace Game
 
         inline void render();
         inline void pProcess(float dt);
+
+    protected:
+        Component* velocityComp = nullptr;
 
     private:
         friend Component::Component(ENUM_ComponentType type);
