@@ -4,35 +4,10 @@
 #include "Color.h"
 #include "Window.h"
 
-enum ENUM_ParentType : char
-{
-    WORLD,
-    COMPONENT
-};
-enum ENUM_ScaleType : char
-{
-    XY,
-    XX
-};
-enum ENUM_ComponentType : char
-{
-    SHAPE,
-    VELOCITY,
-    ENTITY_CONTAINER
-};
+#include "Enums.h"
+#include "Flags.h"
 
-enum ENUM_Shape : char
-{
-    RECTANGLE,
-    CIRCLE,
-};
-
-enum FLAG_ShapeFlags : char
-{
-    VISIBLE = (1 << 0),
-    CAN_TOUCH = (1 << 1),
-    CAN_COLLIDE = (1 << 2),
-};
+#define pushComponentPtr(type, ptr) pushComponent(type, (void**)&ptr)
 
 struct GameInstance
 {
@@ -48,6 +23,11 @@ namespace Game
     class World;
     class Entity;
     class Component;
+
+    namespace Components
+    {
+        class Velocity;
+    }
 
     class Camera
     {
@@ -69,37 +49,17 @@ namespace Game
     class Component
     {
     public:
-        Component(ENUM_ComponentType type);
-        inline void render(int x, int y);
-        inline void procesCollider();
-        inline void procesCollision();
+        Component();
+        virtual ~Component();
+        virtual inline void render(int x, int y) {};
 
-        inline Entity* getParent() const { return parent; }
-
-        union
-        {
-            struct
-            {
-                int xOffset, yOffset, Width, Height;
-                Color4 Color;
-                char Shape;
-                char Flags;
-            } ShapeComponent;
-            struct
-            {
-                float x, y;
-            } VelocityComponent;
-            struct
-            {
-
-            } EntityContainerComponent;
-        };
+        inline Entity* getParent() const { return m_parent; }
+        inline ENUM_ComponentType getType() const { return m_type; }
 
     private:
 
-        void initComponent();
         const ENUM_ComponentType m_type;
-        Entity* parent;
+        Entity* const m_parent;
     };
 
     class Entity : public GameInstance
@@ -110,21 +70,24 @@ namespace Game
         Entity();
         virtual ~Entity();
 
-        Component* pushComponent(ENUM_ComponentType type);
+
+        World* getWorld() { return m_world; }
+
+        inline void _debugDraw();
+        inline void render();
+        inline void pProcess(float dt);
+
+        Components::Velocity* velocityComp = nullptr;
+
+    protected:
+
+        void* pushComponent(ENUM_ComponentType type, void **ptr=nullptr);
         void popComponent();
         void removeComponent(unsigned int index);
         void removeComponent(void* address);
 
-        World* getWorld() { return m_world; }
-
-        inline void render();
-        inline void pProcess(float dt);
-
-    protected:
-        Component* velocityComp = nullptr;
-
     private:
-        friend Component::Component(ENUM_ComponentType type);
+        friend Component::Component();
         ENUM_ParentType m_ParentType = WORLD;
         union
         {
@@ -134,6 +97,7 @@ namespace Game
 
         std::vector<Component*> m_Components;
         static Entity* s_targetEntityComponent;
+        static unsigned char s_targetComponentType;
 
     };
 

@@ -1,7 +1,10 @@
 #include "ECS.h"
+#include "Components.h"
 #include "Window.h"
+#include "System.h"
 
 Game::Entity* Game::Entity::s_targetEntityComponent = nullptr;
+unsigned char Game::Entity::s_targetComponentType = NULLCOMPONENT;
 
 Game::Entity::Entity()
 {
@@ -17,11 +20,33 @@ Game::Entity::~Entity()
         this->popComponent();
 }
 
-Game::Component* Game::Entity::pushComponent(ENUM_ComponentType type)
+void* Game::Entity::pushComponent(ENUM_ComponentType type, void **ptr)
 {
     this->s_targetEntityComponent = this;
-    Component* newComp = new Component(type);
+    this->s_targetComponentType = type;
+    
+    void* newComp = nullptr;
+
+    switch (type)
+    {
+    case SHAPE:
+        newComp = new Components::Shape();
+        break;
+    case VELOCITY:
+        newComp = new Components::Velocity();
+        break;
+    case ENTITY_CONTAINER:
+        break;
+    default:
+        this->s_targetEntityComponent = nullptr;
+        sys_errorf("Couldn't create component, type doesn't exist: %u", type);
+        break;
+    }
+
     this->s_targetEntityComponent = nullptr;
+    this->s_targetComponentType = NULLCOMPONENT;
+
+    if (ptr) *ptr = newComp;
     return newComp;
 }
 

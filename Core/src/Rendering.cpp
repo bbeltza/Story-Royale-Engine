@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "ECS.h"
+#include "Components.h"
 
 static SDL_Rect Viewport;
 
@@ -56,62 +57,53 @@ void Game::World::render()
         entity->postRender();
     }
 
+#ifdef _DEBUG
+    for (Entity* entity : this->m_Entities) entity->_debugDraw();
+#endif
 }
 
 void Game::Entity::render()
 {
-    unsigned int& cx = m_world->center[0], cy = m_world->center[1];
     struct World::v2 rPt = m_world->worldToScreenSpace(this->x, this->y);
 
-#ifdef _DEBUG
-#if !ENTITY_DRAWCENTERDBG
-    if (!this->m_Components.empty())
-#endif
-    {
-       for (Component* component : this->m_Components)
-           component->render(rPt.x, rPt.y);
+    for (Component* component : this->m_Components)
+        component->render(rPt.x, rPt.y);
+}
 
-    }
+void Game::Entity::_debugDraw()
+{
+    struct World::v2 rPt = m_world->worldToScreenSpace(this->x, this->y);
 #if !ENTITY_DRAWCENTERDBG
-    else
-#endif
+    if (this->m_Components.empty())
+#endif // !1
     {
-#endif
         SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, 255, 64, 0, 255);
         SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x - 5, rPt.y, rPt.x + 5, rPt.y);
         SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x, rPt.y - 5, rPt.x, rPt.y + 5);
-
-#ifdef _DEBUG
     }
-#endif
 }
 
-void Game::Component::render(int x, int y)
+void Game::Components::Shape::render(int x, int y)
 {
-    if (this->m_type == SHAPE)
+    if (!(this->flags & FLAG_ShapeFlags::VISIBLE)) return;
+
+    SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, Color.r, Color.b, Color.g, Color.a);
+
+    const float cx = x + xOffset;
+    const float cy = y + yOffset;
+
+    if (shape == CIRCLE)
     {
-        if (!(this->ShapeComponent.Flags & FLAG_ShapeFlags::VISIBLE)) return;
-        Color4& c = ShapeComponent.Color;
-        SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, c.r, c.b, c.g, c.a);
-
-        const float cx = x + ShapeComponent.xOffset;
-        const float cy = y + ShapeComponent.yOffset;
-
-        if (ShapeComponent.Shape == CIRCLE)
-        {
-            SDL_RenderFillCircle(Engine::Window::sdl_Renderer, cx, cy, ShapeComponent.Width/2);
-        }
-        else
-        {
-            SDL_FRect r{cx , cy, ShapeComponent.Width, ShapeComponent.Height };
-            r.x -= r.w / 2;
-            r.y -= r.h / 2;
-
-            SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &r);
-        }
-        
+        SDL_RenderFillCircle(Engine::Window::sdl_Renderer, cx, cy, Width / 2);
     }
+    else
+    {
+        SDL_FRect r{ cx , cy, Width, Height };
+        r.x -= r.w / 2;
+        r.y -= r.h / 2;
 
+        SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &r);
+    }
 }
 
 struct Game::World::v2 Game::World::screenToWorldSpace(int x, int y)

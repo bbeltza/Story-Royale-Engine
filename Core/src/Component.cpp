@@ -1,43 +1,25 @@
 #include "System.h"
 #include "ECS.h"
 
-Game::Component::Component(ENUM_ComponentType type) : m_type(type)
+Game::Component::Component() : m_type((ENUM_ComponentType)Entity::s_targetComponentType), m_parent(Entity::s_targetEntityComponent)
 {
-    this->parent = Entity::s_targetEntityComponent;
-    this->parent->m_Components.push_back(this);
+    if (!m_type)
+    {
+        sys_error("Attempt at creating component without a type, please speficy a proper type");
+        delete this;
+    }
 
-    this->initComponent();
+    this->m_parent->m_Components.push_back(this);
 
     if (this->m_type == VELOCITY)
     {
-        if (parent->velocityComp)
+        if (m_parent->velocityComp)
         {
+            m_parent->popComponent();
             sys_error("Entity already has velocity component");
-            parent->popComponent();
-        }
-        else
-        {
-            parent->velocityComp = this;
-            std::cout << parent->velocityComp << "\n";
         }
     }
 
 }
 
-void Game::Component::initComponent()
-{
-    switch (this->m_type)
-    {
-    case ENUM_ComponentType::SHAPE:
-        this->ShapeComponent = { 0, 0, 40, 40, {200, 200, 200, 255}, 0, VISIBLE };
-        break;
-    case ENUM_ComponentType::VELOCITY:
-        this->VelocityComponent = { 0, 0 };
-        break;
-    case ENUM_ComponentType::ENTITY_CONTAINER:
-        break;
-    default:
-        break;
-    }
-}
-
+Game::Component::~Component() {}

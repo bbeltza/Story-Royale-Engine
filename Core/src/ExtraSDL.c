@@ -1,45 +1,26 @@
 #include "ExtraSDL.h"
 
-int SDL_RenderFillCircle(SDL_Renderer* renderer, int x, int y, int radius)
+int SDL_RenderFillCircle(SDL_Renderer* renderer, int x0, int y0, int radius)
 {
-    int offsetx, offsety, d;
-    int status;
+    SDL_Rect v;
+    SDL_RenderGetViewport(renderer, &v);
 
-    offsetx = 0;
-    offsety = radius;
-    d = radius - 1;
-    status = 0;
+   if (x0 + radius < 0 || y0 + radius < 0 || x0 - radius > v.w || y0 - radius > v.h) return;
 
-    while (offsety >= offsetx) {
-
-        status += SDL_RenderDrawLine(renderer, x - offsety, y + offsetx,
-            x + offsety, y + offsetx);
-        status += SDL_RenderDrawLine(renderer, x - offsetx, y + offsety,
-            x + offsetx, y + offsety);
-        status += SDL_RenderDrawLine(renderer, x - offsetx, y - offsety,
-            x + offsetx, y - offsety);
-        status += SDL_RenderDrawLine(renderer, x - offsety, y - offsetx,
-            x + offsety, y - offsetx);
-
-        if (status < 0) {
-            status = -1;
-            break;
-        }
-
-        if (d >= 2 * offsetx) {
-            d -= 2 * offsetx + 1;
-            offsetx += 1;
-        }
-        else if (d < 2 * (radius - offsety)) {
-            d += 2 * offsety - 1;
-            offsety -= 1;
-        }
+    int x = radius;
+    int y = 0;
+    int radiusError = 1 - x;
+    while (x >= y) {
+        SDL_RenderDrawLine(renderer, x + x0, y + y0, -x + x0, y + y0);
+        SDL_RenderDrawLine(renderer, y + x0, x + y0, -y + x0, x + y0);
+        SDL_RenderDrawLine(renderer, -x + x0, -y + y0, x + x0, -y + y0);
+        SDL_RenderDrawLine(renderer, -y + x0, -x + y0, y + x0, -x + y0);
+        y++;
+        if (radiusError < 0)
+            radiusError += 2 * y + 1;
         else {
-            d += 2 * (offsety - offsetx - 1);
-            offsety -= 1;
-            offsetx += 1;
+            x--;
+            radiusError += 2 * (y - x + 1);
         }
     }
-
-    return status;
 }

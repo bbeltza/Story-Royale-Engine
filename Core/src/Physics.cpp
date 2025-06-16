@@ -1,26 +1,96 @@
 #include <standard.h>
 #include "ECS.h"
+#include "Components.h"
 
-static std::vector<Game::Component*> CollisionStack;
-static std::vector<Game::Component*> ColliderStack;
+static std::vector<Game::Components::Shape*> CollisionStack;
+static std::vector<Game::Components::Shape*> ColliderStack;
 
 void Game::Entity::pProcess(float dt)
 {
     if (m_Components.empty()) return;
-    if (!velocityComp || velocityComp->VelocityComponent.x == 0 && velocityComp->VelocityComponent.y == 0);
+
+    Components::Velocity* vComp = (Components::Velocity*)velocityComp;
+    if (!velocityComp || vComp->x_direction == 0 && vComp->y_direction == 0);
     else
     {
-        this->x += velocityComp->VelocityComponent.x * dt;
-        this->y += velocityComp->VelocityComponent.y * dt;
+        vComp->move(dt);
 
         for (auto c : m_Components)
-            c->procesCollider();
+        {
+            if (c->getType() == SHAPE)
+            {
+                auto shape = (Game::Components::Shape*)c;
+                shape->processCollider();
+            }
+                
+        }
+            
     }
     for (auto c : m_Components)
-        c->procesCollision();
+    {
+        if (c->getType() == SHAPE)
+        {
+            auto shape = (Game::Components::Shape*)c;
+            shape->processCollision();
+        }
+    }
+        
 
 
 }
+
+static float c1x, c1y, c2x, c2y;
+static Game::Entity* c1_ent, *c2_ent;
+
+static void collideCircle(Game::Components::Shape* comp, float x, float y, float r)
+{
+    const float c1r = comp->Width / 2;
+    const float targetmg = c1r + r;
+
+    const float dstncx = c1x - x;
+    const float dstncy = c1y - y;
+    float mg = dstncx * dstncx + dstncy * dstncy;
+    mg = sqrt(mg);
+
+    if (mg <= targetmg)
+    {
+        c1_ent->x += dstncx / mg * targetmg - dstncx;
+        c1_ent->y += dstncy / mg * targetmg - dstncy;
+    }
+}
+
+static inline bool collideRectX(const SDL_FRect& res)
+{
+    if (res.h > res.w)
+    {
+        c1_ent->x -= res.w * sign(c2x - c1x);
+        return 1;
+    }
+    return 0;
+}
+
+static inline void collideRectY(const SDL_FRect& res)
+{
+    if (res.h < res.w)
+    {
+        c1_ent->y -= res.h * sign(c2y - c1y);
+    }
+}
+
+static inline void collideCircleRect(Game::Components::Shape* comp, const SDL_FRect& res, const SDL_FRect& r1, const SDL_FRect& r2)
+{
+    if (abs(c2y - c1y) < r2.h / 2) collideRectX(res);
+    else if (abs(c2x - c1x) < r2.w / 2) collideRectY(res);
+    else
+    {
+        collideCircle(comp,
+            c2x + r2.w / 2 * sign(r1.x - r2.x),
+            c2y + r2.w / 2 * sign(r1.y - r2.y),
+            0
+        );
+    }
+}
+
 
 void Game::World::pUpdate(float dt)
 {
@@ -31,25 +101,27 @@ void Game::World::pUpdate(float dt)
         entity->pProcess(dt);
         entity->pUpdate(dt);
     }
-    for (auto c1 : ColliderStack)
+    while (!ColliderStack.empty())
     {
+        Components::Shape* c1 = ColliderStack.back();
+        ColliderStack.pop_back();
         for (auto c2 : CollisionStack)
         {
             if (c1 == c2) continue;
 
-            Entity* c1_ent = c1->getParent();
-            Entity* c2_ent = c2->getParent();
+            c1_ent = c1->getParent();
+            c2_ent = c2->getParent();
 
-            float c1x = c1_ent->x + c1->ShapeComponent.xOffset;
-            float c1y = c1_ent->y + c1->ShapeComponent.yOffset;
-            float c2x = c2_ent->x + c2->ShapeComponent.xOffset;
-            float c2y = c2_ent->y + c2->ShapeComponent.yOffset;
+            c1x = c1_ent->x + c1->xOffset;
+            c1y = c1_ent->y + c1->yOffset;
+            c2x = c2_ent->x + c2->xOffset;
+            c2y = c2_ent->y + c2->yOffset;
 
             SDL_FRect r1{
                 c1x,
                 c1y,
-                c1->ShapeComponent.Width,
-                c1->ShapeComponent.Height
+                c1->Width,
+                c1->Height
             };
             r1.x -= r1.w / 2;
             r1.y -= r1.h / 2;
@@ -57,8 +129,8 @@ void Game::World::pUpdate(float dt)
             SDL_FRect r2{
                 c2x,
                 c2y,
-                c2->ShapeComponent.Width,
-                c2->ShapeComponent.Height
+                c2->Width,
+                c2->Height
             };
             r2.x -= r2.w / 2;
             r2.y -= r2.h / 2;
@@ -67,77 +139,38 @@ void Game::World::pUpdate(float dt)
             if (!SDL_IntersectFRect(&r1, &r2, &res)) continue;
 
             //printf("res: { %f, %f, %f, %f }\n", res.x, res.y, res.h, res.w);
-            switch (c1->ShapeComponent.Shape)
+
+            if (c1->shape == CIRCLE && c2->shape == CIRCLE)
+                collideCircle(c1, c2x, c2y, c2->Width / 2);
+            else if (c1->shape == RECTANGLE && c2->shape == RECTANGLE)
             {
-            case CIRCLE:
-
-                switch (c2->ShapeComponent.Shape)
-                {
-
-
-                case RECTANGLE:
-
-                    break;
-                default:
-                    const float c1r = c1->ShapeComponent.Width / 2;
-                    const float c2r = c2->ShapeComponent.Width / 2;
-                    const float targetmg = c1r + c2r;
-
-                    const float dstncx = c1x - c2x;
-                    const float dstncy = c1y - c2y;
-                    float mg = dstncx * dstncx + dstncy * dstncy;
-                    mg = sqrt(mg);
-
-                    if (mg <= targetmg)
-                    {
-
-
-                        c1_ent->x += dstncx / mg * targetmg - dstncx;
-                        c1_ent->y += dstncy / mg * targetmg - dstncy;
-
-                        //printf("%f, %f\n", , dstncy/mg*targetmg);
-                    }
-
-                    break;
-                }
-               break;
-            default:
-                if (res.h > res.w)
-                {
-
-                    c1_ent->x -= res.w * sign(r2.x - r1.x);
-                }
-                else if (res.h < res.w)
-                {
-                    c1_ent->y -= res.h * sign(r2.y - r1.y);
-                }
-               break;
+                if (!collideRectX(res)) collideRectY(res);
             }
+            else
+                collideCircleRect(c1, res, r1, r2);
 
         }
     }
+    c1_ent = nullptr;
+    c2_ent = nullptr;
+
 }
 
-void Game::Component::procesCollision()
+
+void Game::Components::Shape::processCollision()
 {
-    if (this->m_type == SHAPE)
+    if (flags & (CAN_COLLIDE | CAN_TOUCH))
     {
-        if (ShapeComponent.Flags & (CAN_COLLIDE | CAN_TOUCH))
-        {
             CollisionStack.push_back(this);
             //std::cout << this << "\n";
-        }
     }
 }
 
-void Game::Component::procesCollider()
+void Game::Components::Shape::processCollider()
 {
-    if (this->m_type == SHAPE)
+    if (this->flags & (CAN_COLLIDE | CAN_TOUCH))
     {
-        if (ShapeComponent.Flags & (CAN_COLLIDE | CAN_TOUCH))
-        {
             ColliderStack.push_back(this);
             //std::cout << this << "\n";
-        }
     }
 }
