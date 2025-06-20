@@ -8,12 +8,14 @@
 class MyCharacter: public Game::Entity
 {
 public:
+    Game::Components::Shape* Rect;
+
     MyCharacter()
     {
         //sys_error("Passed value is not a function!");
-        auto Rect = (Game::Components::Shape*)pushComponent(SHAPE);
+        pushComponentPtr(SHAPE, Rect);
         Rect->flags |= CAN_COLLIDE;
-        Rect->shape = RECTANGLE;
+        Rect->shape = CIRCLE;
         pushComponent(VELOCITY);
         velocityComp->velocity = 200;
         std::cout << this << "\n";
@@ -44,6 +46,18 @@ EntryWorld::EntryWorld()
 
 void MyCharacter::Update(float dt)
 {
+
+    Vector2i mpos = Engine::Input::getMouseScreenPosition();
+    
+    if (Rect->isInScreenPoint(mpos))
+    {
+        Rect->Color = { 128, 128, 128, 255 };
+    }
+    else
+    {
+        Rect->Color = { 255, 255, 255, 255 };
+    }
+
     velocityComp->x_direction = 0;
     velocityComp->y_direction = 0;
 

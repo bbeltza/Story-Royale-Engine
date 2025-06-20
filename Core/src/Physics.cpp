@@ -1,11 +1,13 @@
 #include <standard.h>
+#include <SDL.hpp>
+
 #include "ECS.h"
 #include "Components.h"
 
 static std::vector<Game::Components::Shape*> CollisionStack;
 static std::vector<Game::Components::Shape*> ColliderStack;
 
-void Game::Entity::pProcess(float dt)
+void Game::Entity::_pProcess(float dt)
 {
     if (m_Components.empty()) return;
 
@@ -98,7 +100,7 @@ void Game::World::pUpdate(float dt)
     ColliderStack.clear();
     for (Entity* entity : m_Entities)
     {
-        entity->pProcess(dt);
+        entity->_pProcess(dt);
         entity->pUpdate(dt);
     }
     while (!ColliderStack.empty())

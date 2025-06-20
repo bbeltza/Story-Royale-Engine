@@ -1,8 +1,7 @@
 #pragma once
 #include <standard.h>
 
-#include "Color.h"
-#include "Window.h"
+#include "Datatypes.h"
 
 #include "Enums.h"
 #include "Flags.h"
@@ -71,11 +70,7 @@ namespace Game
         virtual ~Entity();
 
 
-        World* getWorld() { return m_world; }
-
-        inline void _debugDraw();
-        inline void render();
-        inline void pProcess(float dt);
+        World* getWorld() const { return m_world; }
 
         Components::Velocity* velocityComp = nullptr;
 
@@ -87,6 +82,7 @@ namespace Game
         void removeComponent(void* address);
 
     private:
+        friend class World;
         friend Component::Component();
         ENUM_ParentType m_ParentType = WORLD;
         union
@@ -96,6 +92,11 @@ namespace Game
         };
 
         std::vector<Component*> m_Components;
+
+        void _debugDraw();
+        void _render();
+        inline void _pProcess(float dt);
+
         static Entity* s_targetEntityComponent;
         static unsigned char s_targetComponentType;
 
@@ -116,7 +117,16 @@ namespace Game
         {
             this->s_TargetEntityWorld = this;
             T* newEntity = new T;
-
+            this->s_TargetEntityWorld = nullptr;
+            return newEntity;
+        }
+        template <class T>
+        inline T* addEntity(float x, float y)
+        {
+            this->s_TargetEntityWorld = this;
+            T* newEntity = new T;
+            newEntity->x = x;
+            newEntity->y = y;
             this->s_TargetEntityWorld = nullptr;
             return newEntity;
         }
@@ -124,9 +134,8 @@ namespace Game
         void removeEntity(unsigned int index);
         void removeEntity(void* address);
 
-        struct v2 { int x, y; };
-        struct v2 screenToWorldSpace(int x, int y);
-        struct v2 worldToScreenSpace(float x, float y);
+        Vector2f screenToWorldSpace(int x, int y);
+        Vector2i worldToScreenSpace(float x, float y);
 
         void Update(float dt);
         void pUpdate(float dt);
@@ -137,12 +146,19 @@ namespace Game
         static unsigned int center[2];
         static World* s_TargetEntityWorld;
         std::vector<Entity*> m_Entities;
-        friend Entity::Entity();
-        friend void Entity::render();
+
+        friend class Entity;
     };
 
     extern World* currentWorld;
 
+    template <typename T>
+    inline World* setWorld()
+    {
+        if (currentWorld) delete currentWorld;
+        currentWorld = new T;
+        return currentWorld;
+    }
 }
 
 class EntryWorld : public Game::World
@@ -150,5 +166,3 @@ class EntryWorld : public Game::World
 public:
     EntryWorld();
 };
-
-#define Game_SetWorld(T) { if (Game::currentWorld) delete Game::currentWorld; Game::currentWorld = new T; }

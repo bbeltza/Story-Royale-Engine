@@ -2,6 +2,7 @@
 #include <SDL.hpp>
 
 #define ENTITY_DRAWCENTERDBG 1
+#define ENTITY_DBGLINESIZE 3
 
 namespace Engine
 {
@@ -13,5 +14,6 @@ namespace Engine
         void getScreenCenter(unsigned int* x, unsigned int* y);
 
         void render();
+        void processGui();
     }
 }

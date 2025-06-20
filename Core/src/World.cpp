@@ -45,9 +45,24 @@ void Game::World::removeEntity(void* address)
 
 void Game::World::Update(float dt)
 {
-    for (Entity* entity : m_Entities)
+    std::vector<Entity*> c_Entities = m_Entities;
+    for (Entity* entity : c_Entities)
     {
         entity->Update(dt);
     }
 }
 
+void Game::World::render()
+{
+    Engine::Window::getScreenCenter(this->center, this->center + 1);
+    for (Entity* entity : this->m_Entities)
+    {
+        entity->preRender();
+        entity->_render();
+        entity->postRender();
+    }
+
+#ifdef _DEBUG
+    for (Entity* entity : this->m_Entities) entity->_debugDraw();
+#endif
+}

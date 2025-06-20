@@ -74,3 +74,23 @@ void Game::Entity::removeComponent(void* address)
     }
 }
 
+void Game::Entity::_render()
+{
+    Vector2i rPt = m_world->worldToScreenSpace(this->x, this->y);
+
+    for (Component* component : this->m_Components)
+        component->render(rPt.X, rPt.Y);
+}
+
+void Game::Entity::_debugDraw()
+{
+    Vector2i rPt = m_world->worldToScreenSpace(this->x, this->y);
+#if !ENTITY_DRAWCENTERDBG
+    if (this->m_Components.empty())
+#endif // !1
+    {
+        SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, 255, 64, 0, 255);
+        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.X - ENTITY_DBGLINESIZE, rPt.Y, rPt.X + ENTITY_DBGLINESIZE, rPt.Y);
+        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.X, rPt.Y - ENTITY_DBGLINESIZE, rPt.X, rPt.Y + ENTITY_DBGLINESIZE);
+    }
+}

@@ -23,4 +23,6 @@ int SDL_RenderFillCircle(SDL_Renderer* renderer, int x0, int y0, int radius)
             radiusError += 2 * (y - x + 1);
         }
     }
+
+    return 1;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL.hpp>
 #include "ECS.h"
 
 namespace Game
@@ -21,10 +22,14 @@ namespace Game
             char flags;
 
             void render(int x, int y) override;
+
+            bool isInScreenPoint(Vector2i pt);
         private:
-            friend void Game::Entity::pProcess(float dt);
+            friend class Entity;
             void processCollision();
             void processCollider();
+            
+            SDL_FRect m_renderRect;
         };
 
         class Velocity : public Component

@@ -19,13 +19,16 @@ namespace Engine
 - Window running; !!
 - Window updating/filling the background with a color; !!
 - Instancing/Scenes; !!
-- Collision detection;
+- Collision detection; !!
 - Linking with ImGui (maybe before uhhh); *maybe after
-- Rendering instances/entities; !
+- Rendering instances/entities; !!
 - Input handling; !!
-- Components; !
+- Components; !!
 
-- User interface layers;
+- User interface layers; !
+
+- Rendering text;
+- Rendering textures;
 
 - Audio;
 

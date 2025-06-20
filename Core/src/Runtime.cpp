@@ -4,20 +4,31 @@
 #include "Window.h"
 #include "Input.h"
 #include "ECS.h"
+#include "GuiLayer.h"
+#include "GuiComponents.h"
+
 #include "GameSettings.h"
 
 #define WCENTERED SDL_WINDOWPOS_CENTERED
+
+struct _mState
+{
+    int x, y;
+    Uint32 state;
+};
 
 static void EngineRun();
 static void EngineClose();
 static bool WindowPollEvents();
 static SDL_Event sdl_event;
 
+
 static std::chrono::steady_clock frametime_clock;
 static std::chrono::duration<double> targetFrameTime;
 const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
 
 static char Keys[512];
+static _mState mState;
 
 SDL_Window* Engine::Window::sdl_Window;
 SDL_Renderer* Engine::Window::sdl_Renderer;
@@ -27,10 +38,12 @@ void Engine::Init()
     if (SDL_WasInit(0)) return;
 
     SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
 
     GameSettings::onSet();
 
-    Game_SetWorld(EntryWorld)
+    Game::setWorld<EntryWorld>();
+    Game::setGuiLayer<EntryGuiLayer>();
 
     Window::sdl_Window = SDL_CreateWindow(GameSettings::Title, WCENTERED, WCENTERED, GameSettings::StartResolution.width, GameSettings::StartResolution.height, SDL_WINDOW_RESIZABLE);
     Window::sdl_Renderer = SDL_CreateRenderer(Window::sdl_Window, -1, 0);
@@ -65,7 +78,11 @@ void EngineRun()
 
         Game::currentWorld->Update(dt);
         Game::currentWorld->pUpdate(dt);
+
+        Engine::Window::processGui();
         Engine::Window::render();
+
+        Game::currentGuiLayer->_callUpdate(dt);
 
         if (targetFrameTime > zero)
         {
@@ -74,7 +91,6 @@ void EngineRun()
             auto sleeptime = targetFrameTime - frametime;
             std::this_thread::sleep_for(sleeptime);
         }
-        
     }
 
 }
@@ -83,6 +99,9 @@ void EngineClose()
 {
     if (Game::currentWorld)
         delete Game::currentWorld;
+    if (Game::currentGuiLayer)
+        delete Game::currentGuiLayer;
+    TTF_Quit();
     SDL_Quit();
 }
 
@@ -114,10 +133,14 @@ bool WindowPollEvents()
                 Keys[sdl_event.key.keysym.sym] &= ~2;
             }
             break;
+        case SDL_MOUSEBUTTONDOWN:
+            break;
         default:
             break;
         }
     }
+
+    mState.state = SDL_GetMouseState(&mState.x, &mState.y);
 
     return 1;
 }
@@ -130,4 +153,20 @@ bool Engine::Input::isKeyPressed(SDL_KeyCode keycode)
 bool Engine::Input::isKeyPressed(SDL_Scancode scancode)
 {
     return Keys[scancode] & 1;
+}
+
+bool Engine::Input::isMouseButtonPressed(ENUM_MouseButton button)
+{
+
+    return mState.state & SDL_BUTTON(button);
+}
+
+Vector2i Engine::Input::getMouseScreenPosition()
+{
+    return Vector2i(mState.x, mState.y);
+}
+
+Vector2f Engine::Input::getMouseWorldPosition()
+{
+    return Game::currentWorld->screenToWorldSpace(mState.x, mState.y);
 }

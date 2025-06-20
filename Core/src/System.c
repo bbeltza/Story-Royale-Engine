@@ -55,7 +55,7 @@ void _system_err(unsigned short LINE, const char* FILE, const char* fmt, ...)
     }
     va_end(args);
 
-    printf("\033[0m\n");
+    printf("\033[0m\n\7");
 
 #ifdef _DEBUG
     printf("The execution has been paused. ");

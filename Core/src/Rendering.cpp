@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "ECS.h"
+#include "GuiLayer.h"
 #include "Components.h"
 
 static SDL_Rect Viewport;
@@ -16,15 +17,11 @@ void Engine::Window::getScreenCenter(unsigned int* x, unsigned int* y)
 
 void Engine::Window::render()
 {
-    // Updating the viewport rect
-    SDL_GetWindowSizeInPixels(sdl_Window, &Viewport.w, &Viewport.h);
-    Viewport.x = Viewport.w / 2;
-    Viewport.y = Viewport.h / 2;
-
     // Render current world
     //// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
     Color3& bg = Game::currentWorld->Background;
     Color4& fg = Game::currentWorld->Foreground;
+    Color4& uifg = Game::currentGuiLayer->Foreground;
 
     //// Clearing the screen with the background color
     SDL_SetRenderDrawColor(sdl_Renderer, bg.r, bg.g, bg.b, 255);
@@ -44,43 +41,21 @@ void Engine::Window::render()
         SDL_RenderFillRect(sdl_Renderer, NULL);
     }
 
+    // Drawing the Gui layer
+
+    if (uifg.a < 255)
+    {
+        Game::currentGuiLayer->_render();
+    }
+    if (uifg.a)
+    {
+        SDL_SetRenderDrawColor(sdl_Renderer, uifg.r, uifg.g, uifg.b, uifg.a);
+        SDL_RenderFillRect(sdl_Renderer, NULL);
+    }
+
+
+    // Present the screen
     SDL_RenderPresent(sdl_Renderer);
-}
-
-void Game::World::render()
-{
-    Engine::Window::getScreenCenter(this->center, this->center + 1);
-    for (Entity* entity : this->m_Entities)
-    {
-        entity->preRender();
-        entity->render();
-        entity->postRender();
-    }
-
-#ifdef _DEBUG
-    for (Entity* entity : this->m_Entities) entity->_debugDraw();
-#endif
-}
-
-void Game::Entity::render()
-{
-    struct World::v2 rPt = m_world->worldToScreenSpace(this->x, this->y);
-
-    for (Component* component : this->m_Components)
-        component->render(rPt.x, rPt.y);
-}
-
-void Game::Entity::_debugDraw()
-{
-    struct World::v2 rPt = m_world->worldToScreenSpace(this->x, this->y);
-#if !ENTITY_DRAWCENTERDBG
-    if (this->m_Components.empty())
-#endif // !1
-    {
-        SDL_SetRenderDrawColor(Engine::Window::sdl_Renderer, 255, 64, 0, 255);
-        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x - 5, rPt.y, rPt.x + 5, rPt.y);
-        SDL_RenderDrawLineF(Engine::Window::sdl_Renderer, rPt.x, rPt.y - 5, rPt.x, rPt.y + 5);
-    }
 }
 
 void Game::Components::Shape::render(int x, int y)
@@ -98,22 +73,36 @@ void Game::Components::Shape::render(int x, int y)
     }
     else
     {
-        SDL_FRect r{ cx , cy, Width, Height };
-        r.x -= r.w / 2;
-        r.y -= r.h / 2;
+        m_renderRect.w = Width;
+        m_renderRect.h = Height;
+        m_renderRect.x = cx - m_renderRect.w / 2;
+        m_renderRect.y = cy - m_renderRect.h / 2;
 
-        SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &r);
+        SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &m_renderRect);
     }
 }
 
-struct Game::World::v2 Game::World::screenToWorldSpace(int x, int y)
+Vector2f Game::World::screenToWorldSpace(int x, int y)
 {
     unsigned int& cx = this->center[0], cy = this->center[1];
-    return { x - (int)cx + (int)CurrentCamera.x, y - (int)cy + (int)CurrentCamera.y };
+    return { x - (int)cx + CurrentCamera.x, y - (int)cy + CurrentCamera.y };
 }
 
-struct Game::World::v2 Game::World::worldToScreenSpace(float x, float y)
+Vector2i Game::World::worldToScreenSpace(float x, float y)
 {
     unsigned int& cx = this->center[0], cy = this->center[1];
     return { (int)x + (int)cx - (int)CurrentCamera.x, (int)y + (int)cy - (int)CurrentCamera.y };
+}
+
+void Engine::Window::processGui()
+{
+    // Updating the viewport rect
+    SDL_GetWindowSizeInPixels(sdl_Window, &Viewport.w, &Viewport.h);
+    Viewport.x = Viewport.w / 2;
+    Viewport.y = Viewport.h / 2;
+
+    Game::currentGuiLayer->p_absolute.w = (float)Viewport.w;
+    Game::currentGuiLayer->p_absolute.h = (float)Viewport.h;
+
+    Game::currentGuiLayer->_processchildren();
 }
