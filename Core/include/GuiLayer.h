@@ -37,7 +37,7 @@ namespace Game
 
         virtual void Update(float dt) { }
 
-        inline virtual void _callUpdate(float dt) { Update(dt); }
+        void _callUpdate(float dt);
 
         GuiContainer* getParent() const { return p_parent; }
 
@@ -84,7 +84,7 @@ namespace Game
         GuiLayer() {}
         ~GuiLayer() {}
 
-        void _callUpdate(float dt) override;
+        //void _callUpdate(float dt) override;
 
         bool isGuiLayer() const override { return 1; }
 

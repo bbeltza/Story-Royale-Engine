@@ -11,6 +11,8 @@
 
 #define WCENTERED SDL_WINDOWPOS_CENTERED
 
+static std::vector<Key> inputSignalQueue;
+
 struct _mState
 {
     int x, y;
@@ -32,6 +34,8 @@ static _mState mState;
 
 SDL_Window* Engine::Window::sdl_Window;
 SDL_Renderer* Engine::Window::sdl_Renderer;
+
+Signal Engine::Input::keyEvent;
 
 void Engine::Init()
 {
@@ -76,6 +80,13 @@ void EngineRun()
         start = frametime_clock.now();
         float dt = delta.count();
 
+        while (!inputSignalQueue.empty())
+        {
+
+            Engine::Input::keyEvent.Fire(&inputSignalQueue.back());
+            inputSignalQueue.pop_back();
+        }
+
         Game::currentWorld->Update(dt);
         Game::currentWorld->pUpdate(dt);
 
@@ -109,6 +120,13 @@ bool WindowPollEvents()
 {
     while (SDL_PollEvent(&sdl_event) != 0)
     {
+        Key key_ev{
+                (bool)sdl_event.key.state,
+                sdl_event.key.keysym.sym,
+                sdl_event.key.keysym.scancode,
+                sdl_event.key.keysym.mod,
+                sdl_event.key.repeat
+        };
         switch (sdl_event.type)
         {
         case SDL_QUIT:
@@ -121,8 +139,8 @@ bool WindowPollEvents()
                 Keys[sdl_event.key.keysym.scancode] |= 1;
                 Keys[sdl_event.key.keysym.sym] |= 2;
             }
-                
             
+            inputSignalQueue.emplace_back(key_ev);
             break;
         case SDL_KEYUP:
             if (sdl_event.key.keysym.sym > 512)
@@ -132,6 +150,7 @@ bool WindowPollEvents()
                 Keys[sdl_event.key.keysym.scancode] &= ~1;
                 Keys[sdl_event.key.keysym.sym] &= ~2;
             }
+            inputSignalQueue.emplace_back(key_ev);
             break;
         case SDL_MOUSEBUTTONDOWN:
             break;
@@ -157,7 +176,6 @@ bool Engine::Input::isKeyPressed(SDL_Scancode scancode)
 
 bool Engine::Input::isMouseButtonPressed(ENUM_MouseButton button)
 {
-
     return mState.state & SDL_BUTTON(button);
 }
 

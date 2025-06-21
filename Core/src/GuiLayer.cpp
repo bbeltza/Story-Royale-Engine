@@ -77,7 +77,7 @@ void Game::GuiObject::_render()
     }
 }
 
-void Game::GuiLayer::_callUpdate(float dt)
+void Game::GuiContainer::_callUpdate(float dt)
 {
     Update(dt);
 

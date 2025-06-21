@@ -1,0 +1,8 @@
+[submodule "Core/3rdparty/SDL"]
+	path = Core/3rdparty/SDL
+	url = https://github.com/libsdl-org/SDL.git
+	branch = release-2.32.x
+[submodule "Core/3rdparty/SDL_ttf"]
+	path = Core/3rdparty/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf.git
+	branch = release-2.24.x

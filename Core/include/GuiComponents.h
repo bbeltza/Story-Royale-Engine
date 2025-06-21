@@ -52,10 +52,12 @@ namespace Game
             UIText();
             ~UIText();
 
-            const char* text = "Display text!";
+            char text[50] = "Display Text!";
             const char* font = "res://fonts/calibri/calibri-regular.ttf";
 
             unsigned int scale = 0;
+
+            int count = 2;
             
             Color3 color = {0, 0, 0};
 

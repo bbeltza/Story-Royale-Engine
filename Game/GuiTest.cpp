@@ -1,6 +1,17 @@
 #include <GuiLayer.h>
 #include <GuiComponents.h>
 
+#include <Input.h>
+
+#include <datatypes/Signal.h>
+
+struct testdata
+{
+    static int count;
+};
+
+int testdata::count = 0;
+
 struct TopFrame : public Game::GuiObject
 {
     TopFrame()
@@ -10,8 +21,23 @@ struct TopFrame : public Game::GuiObject
         size = UDim2(1, 0, 0, 30);
         anchor.X = 0;
         anchor.Y = 0;
+
+        Engine::Input::keyEvent.Connect(onpress);
     }
 
+    void Update(float dt) override
+    {
+        //std::cout << dt << "\n";            
+    }
+
+    EVENT_CALLBACK(onpress, Key, data,
+        {
+            if (data->pressed) return;
+            printf("%i\n", SDL_SCANCODE_TO_KEYCODE(data->keyCode) == data->scanCode);
+
+        })
+
+    bool mAlreadyPressed = 0;
     Game::GuiComponents::UIText* text = pushGuiComponent<Game::GuiComponents::UIText>();
 };
 
@@ -24,7 +50,7 @@ struct TestFrame : public Game::GuiObject
         position.Y.Scale = 0.5;
         anchor.X = 0.5;
         anchor.Y = 0.5;
-        size = UDim2(0, 100, 0, 100);
+        size = UDim2(0, 200, 0, 150);
 
         stroke->color = { 255, 255, 255, 255 };
     }

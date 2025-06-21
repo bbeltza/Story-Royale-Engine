@@ -22,5 +22,7 @@ namespace Engine
         bool isMouseButtonPressed(ENUM_MouseButton button);
         Vector2i getMouseScreenPosition();
         Vector2f getMouseWorldPosition();
+
+        extern Signal keyEvent;
     }
 }

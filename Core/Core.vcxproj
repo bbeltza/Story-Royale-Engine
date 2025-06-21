@@ -166,6 +166,8 @@
   <ItemGroup>
     <ClInclude Include="include\datatypes\Color.h" />
     <ClInclude Include="include\Components.h" />
+    <ClInclude Include="include\datatypes\Key.h" />
+    <ClInclude Include="include\datatypes\Signal.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Enums.h" />
     <ClInclude Include="include\ExtraSDL.h" />
@@ -271,6 +273,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
     </ClCompile>
+    <ClCompile Include="src\Signal.cpp" />
     <ClCompile Include="src\System.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>

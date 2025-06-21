@@ -1,3 +1,5 @@
 #include "datatypes/Color.h"
 #include "datatypes/UDim.h"
 #include "datatypes/Vector.h"
+#include "datatypes/Signal.h"
+#include "datatypes/Key.h"
