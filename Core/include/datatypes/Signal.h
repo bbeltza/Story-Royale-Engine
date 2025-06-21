@@ -1,8 +1,9 @@
 #pragma once
 
-#define EVENT_CALLBACK(name, type, identifier, CODE) static void name(void* _userdata)\
+#define EVENT_CALLBACK_DECLARE(name) void name(void* _userdata)
+#define EVENT_CALLBACK(name, type, identifier, ...) void name(void* _userdata)\
 { type* identifier = (type*)_userdata; \
-CODE \
+__VA_ARGS__ \
 }
 
 struct Signal;
@@ -25,10 +26,16 @@ private:
 
 struct Connection
 {
-    Connection(Signal* signal, void (*fn)(void*))
-        :m_signal(signal), m_fn(fn), m_connected(1), m_next(nullptr)
-    {
-    }
+    Connection(Signal* signal, void (*fn)(void*), void* self):
+        m_signal(signal),
+        m_fn(fn),
+        m_connected(1),
+        m_next(nullptr),
+        m_class(self)
+    {}
+    Connection(Signal* signal, void (*fn)(void*)) :
+        Connection(signal, fn, nullptr)
+    {}
     Connection(Connection& other) = delete;
     void Disconnect() { m_connected = 0; }
 
@@ -37,6 +44,7 @@ private:
     ~Connection() {}
 
     void (*m_fn)(void*);
+    void* m_class;
     const Signal* m_signal;
     Connection* m_next;
 

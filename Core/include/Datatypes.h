@@ -3,3 +3,4 @@
 #include "datatypes/Vector.h"
 #include "datatypes/Signal.h"
 #include "datatypes/Key.h"
+#include "datatypes/Mouse.h"

@@ -11,7 +11,10 @@
 
 #define WCENTERED SDL_WINDOWPOS_CENTERED
 
-static std::vector<Key> inputSignalQueue;
+static std::vector<Key> keySignalQueue;
+static std::vector<MouseButton> m_ButtonSignalQueue;
+static std::vector<MouseMove> m_MoveSignalQueue;
+static std::vector<MouseWheel> m_WheelSignalQueue;
 
 struct _mState
 {
@@ -21,6 +24,7 @@ struct _mState
 
 static void EngineRun();
 static void EngineClose();
+static void ProcessInput();
 static bool WindowPollEvents();
 static SDL_Event sdl_event;
 
@@ -36,6 +40,9 @@ SDL_Window* Engine::Window::sdl_Window;
 SDL_Renderer* Engine::Window::sdl_Renderer;
 
 Signal Engine::Input::keyEvent;
+Signal Engine::Input::mouseButton;
+Signal Engine::Input::mouseWheel;
+Signal Engine::Input::mouseMove;
 
 void Engine::Init()
 {
@@ -80,12 +87,7 @@ void EngineRun()
         start = frametime_clock.now();
         float dt = delta.count();
 
-        while (!inputSignalQueue.empty())
-        {
-
-            Engine::Input::keyEvent.Fire(&inputSignalQueue.back());
-            inputSignalQueue.pop_back();
-        }
+        ProcessInput();
 
         Game::currentWorld->Update(dt);
         Game::currentWorld->pUpdate(dt);
@@ -116,21 +118,39 @@ void EngineClose()
     SDL_Quit();
 }
 
+#define processEventQueue(queue, ev) while (!queue.empty()) {\
+ev.Fire(&queue.back());\
+queue.pop_back();\
+}
+
+void ProcessInput()
+{
+    processEventQueue(keySignalQueue, Engine::Input::keyEvent)
+    processEventQueue(m_ButtonSignalQueue, Engine::Input::mouseButton)
+    processEventQueue(m_MoveSignalQueue, Engine::Input::mouseMove)
+    processEventQueue(m_WheelSignalQueue, Engine::Input::mouseWheel)
+}
+
 bool WindowPollEvents()
 {
     while (SDL_PollEvent(&sdl_event) != 0)
     {
-        Key key_ev{
-                (bool)sdl_event.key.state,
-                sdl_event.key.keysym.sym,
-                sdl_event.key.keysym.scancode,
-                sdl_event.key.keysym.mod,
-                sdl_event.key.repeat
-        };
         switch (sdl_event.type)
         {
         case SDL_QUIT:
             return 0;
+        case SDL_MOUSEMOTION:
+            m_MoveSignalQueue.emplace_back(&sdl_event.motion);
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            m_ButtonSignalQueue.emplace_back(&sdl_event.button);
+            break;
+        case SDL_MOUSEBUTTONUP:
+            m_ButtonSignalQueue.emplace_back(&sdl_event.button);
+            break;
+        case SDL_MOUSEWHEEL:
+            m_WheelSignalQueue.emplace_back(&sdl_event.wheel);
+            break;
         case SDL_KEYDOWN:
             if (sdl_event.key.keysym.sym > 512)
                 Keys[sdl_event.key.keysym.scancode] |= 3;
@@ -140,7 +160,7 @@ bool WindowPollEvents()
                 Keys[sdl_event.key.keysym.sym] |= 2;
             }
             
-            inputSignalQueue.emplace_back(key_ev);
+            keySignalQueue.emplace_back(&sdl_event.key);
             break;
         case SDL_KEYUP:
             if (sdl_event.key.keysym.sym > 512)
@@ -150,9 +170,7 @@ bool WindowPollEvents()
                 Keys[sdl_event.key.keysym.scancode] &= ~1;
                 Keys[sdl_event.key.keysym.sym] &= ~2;
             }
-            inputSignalQueue.emplace_back(key_ev);
-            break;
-        case SDL_MOUSEBUTTONDOWN:
+            keySignalQueue.emplace_back(&sdl_event.key);
             break;
         default:
             break;

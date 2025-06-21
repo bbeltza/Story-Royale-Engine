@@ -167,6 +167,7 @@
     <ClInclude Include="include\datatypes\Color.h" />
     <ClInclude Include="include\Components.h" />
     <ClInclude Include="include\datatypes\Key.h" />
+    <ClInclude Include="include\datatypes\Mouse.h" />
     <ClInclude Include="include\datatypes\Signal.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Enums.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="include\Flags.h" />
     <ClInclude Include="include\GameSettings.h" />
     <ClInclude Include="include\GuiComponents.h" />
+    <ClInclude Include="include\GuiPresets.h" />
     <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\SDL.hpp" />
     <ClInclude Include="include\System.h" />

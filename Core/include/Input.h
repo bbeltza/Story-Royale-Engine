@@ -24,5 +24,8 @@ namespace Engine
         Vector2f getMouseWorldPosition();
 
         extern Signal keyEvent;
+        extern Signal mouseButton;
+        extern Signal mouseWheel;
+        extern Signal mouseMove;
     }
 }

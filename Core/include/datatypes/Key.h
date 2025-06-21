@@ -3,18 +3,18 @@
 
 struct Key
 {
-    Key(bool p, int kc, int sc, int km, Uint8 r):
-        pressed(p),
-        keyCode((SDL_KeyCode)kc),
-        scanCode((SDL_Scancode)sc),
-        keyModifiers((SDL_Keymod)km),
-        repeat(r)
+    Key(const SDL_KeyboardEvent* ev):
+        pressed(ev->state),
+        keyCode((SDL_KeyCode)ev->keysym.sym),
+        scanCode((SDL_Scancode)ev->keysym.scancode),
+        keyModifiers((SDL_Keymod)ev->keysym.mod),
+        repeat(ev->repeat)
     {}
 
-    bool pressed;
-    SDL_KeyCode keyCode;
-    SDL_Scancode scanCode;
+    const bool pressed;
+    const SDL_KeyCode keyCode;
+    const SDL_Scancode scanCode;
 
-    SDL_Keymod keyModifiers;
-    Uint8 repeat;
+    const SDL_Keymod keyModifiers;
+    const Uint8 repeat;
 };

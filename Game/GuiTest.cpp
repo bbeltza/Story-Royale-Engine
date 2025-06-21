@@ -22,7 +22,7 @@ struct TopFrame : public Game::GuiObject
         anchor.X = 0;
         anchor.Y = 0;
 
-        Engine::Input::keyEvent.Connect(onpress);
+        Engine::Input::mouseWheel.Connect(onmove);
     }
 
     void Update(float dt) override
@@ -30,11 +30,9 @@ struct TopFrame : public Game::GuiObject
         //std::cout << dt << "\n";            
     }
 
-    EVENT_CALLBACK(onpress, Key, data,
+    EVENT_CALLBACK(onmove, MouseWheel, data,
         {
-            if (data->pressed) return;
-            printf("%i\n", SDL_SCANCODE_TO_KEYCODE(data->keyCode) == data->scanCode);
-
+            printf("%i, %i\n", data->amount.X, data->amount.Y );
         })
 
     bool mAlreadyPressed = 0;

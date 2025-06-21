@@ -70,6 +70,12 @@
     <ClInclude Include="include\datatypes\Key.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\datatypes\Mouse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GuiPresets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
