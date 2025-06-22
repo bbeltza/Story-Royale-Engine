@@ -42,6 +42,10 @@ namespace Game
         GuiContainer* getParent() const { return p_parent; }
 
         inline virtual void _render() { _renderchildren(); };
+
+        GuiObject* _query();
+        bool canQuery = true;
+
     protected:
         SDL_FRect p_absolute{ 0, 0, 0, 0 };
 
@@ -102,6 +106,7 @@ namespace Game
         
         void _render() override;
         bool isGuiLayer() const override { return 0; }
+        bool isHovering() const;
 
     private:
         friend class GuiContainer;

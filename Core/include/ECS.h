@@ -74,6 +74,7 @@ namespace Game
 
         Components::Velocity* velocityComp = nullptr;
 
+
     protected:
 
         void* pushComponent(ENUM_ComponentType type, void **ptr=nullptr);
@@ -141,6 +142,8 @@ namespace Game
         void pUpdate(float dt);
         void render();
         virtual void OnUpdate(float dt) {}
+
+        Entity* _query();
 
     private:
         static unsigned int center[2];

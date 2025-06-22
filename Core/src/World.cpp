@@ -2,6 +2,8 @@
 #include "ECS.h"
 #include "Window.h"
 
+#include "Components.h"
+
 Game::World* Game::currentWorld = nullptr;
 Game::World* Game::World::s_TargetEntityWorld = nullptr;
 unsigned int Game::World::center[2];

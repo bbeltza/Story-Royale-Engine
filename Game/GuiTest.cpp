@@ -22,24 +22,56 @@ struct TopFrame : public Game::GuiObject
         anchor.X = 0;
         anchor.Y = 0;
 
-        Engine::Input::mouseWheel.Connect(onmove);
+        Engine::Input::mouseButton.Connect(onclick);
+        Engine::Input::mouseMove.Connect(onmove);
+
     }
 
     void Update(float dt) override
     {
-        //std::cout << dt << "\n";            
+
     }
 
-    EVENT_CALLBACK(onmove, MouseWheel, data,
-        {
-            printf("%i, %i\n", data->amount.X, data->amount.Y );
-        })
 
-    bool mAlreadyPressed = 0;
+
+    static EVENT_CALLBACK_DECLARE(onmove);
+    static EVENT_CALLBACK_DECLARE(onclick);
+
     Game::GuiComponents::UIText* text = pushGuiComponent<Game::GuiComponents::UIText>();
+
+private:
+    bool drag = false;
+    GuiObject* parent = (GuiObject*)p_parent;
 };
 
-struct TestFrame : public Game::GuiObject
+TopFrame* topFrame;
+
+EVENT_CALLBACK(TopFrame::onmove, MouseMove, data, {
+
+        if (!topFrame || !topFrame->drag) return;
+
+topFrame->parent->position.X.Offset += data->delta.X;
+topFrame->parent->position.Y.Offset += data->delta.Y;
+
+    })
+
+    EVENT_CALLBACK(TopFrame::onclick, MouseButton, data,
+        {
+            if (!topFrame) return;
+
+            if (!data->pressed)
+            {
+                topFrame->drag = false;
+                return;
+            }
+            else if (topFrame->isHovering())
+            {
+                topFrame->drag = true;
+            }
+
+        })
+
+    struct TestFrame : public Game::GuiObject
 {
     TestFrame()
     {
@@ -51,14 +83,19 @@ struct TestFrame : public Game::GuiObject
         size = UDim2(0, 200, 0, 150);
 
         stroke->color = { 255, 255, 255, 255 };
+
+        topFrame = pushGuiObject<TopFrame>();
+    }
+    ~TestFrame()
+    {
+        topFrame = nullptr;
     }
 
     void Update(float dt) override
     {
-        
+        //std::cout << isHovering() << "\n";
     }
 
-    TopFrame* top = pushGuiObject<TopFrame>();
     Game::GuiComponents::UIStroke* stroke = pushGuiComponent<Game::GuiComponents::UIStroke>();
 };
 
@@ -76,5 +113,5 @@ EntryGuiLayer::~EntryGuiLayer()
 
 void EntryGuiLayer::Update(float dt)
 {
-    
+
 }

@@ -5,6 +5,7 @@ enum FLAG_ShapeFlags : char
     VISIBLE = (1 << 1),
     CAN_TOUCH = (1 << 2),
     CAN_COLLIDE = (1 << 3),
+    CAN_QUERY = (1 << 4),
 };
 
 enum FLAG_GuiComponentUpdateFlags : unsigned char

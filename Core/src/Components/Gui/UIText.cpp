@@ -44,6 +44,7 @@ Game::GuiComponents::UIText::~UIText()
 
 void Game::GuiComponents::UIText::render()
 {
+
     unsigned int s = scale + 1;
     int w, h;
     char oldchar = 0;
@@ -55,6 +56,7 @@ void Game::GuiComponents::UIText::render()
     }
 
     SDL_FRect* absolute = getParentAbs();
+    SDL_FRect oldAbs = *absolute;
 
     SDL_Surface* textSurface = TTF_RenderUTF8_Solid_Wrapped(m_font, text, {color.r, color.g, color.b}, absolute->w/s);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(Engine::Window::sdl_Renderer, textSurface);
@@ -71,6 +73,7 @@ void Game::GuiComponents::UIText::render()
 
     SDL_RenderCopy(Engine::Window::sdl_Renderer, textTexture, NULL, &iAbs);
 
+    *absolute = oldAbs;
     SDL_DestroyTexture(textTexture);
     SDL_FreeSurface(textSurface);
     if (oldchar) text[count] = oldchar;
