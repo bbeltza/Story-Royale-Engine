@@ -8,9 +8,9 @@
 
 #include "Datatypes.h"
 
-#define __push_gui_vec(s_target, vec) {\
+#define __push_gui_vec(s_target, vec, target_type) {\
 s_target = this;\
-vec.push_back(new T);\
+vec.push_back((target_type*)(new T));\
 s_target = nullptr;\
 \
 return (T*)vec.back(); }
@@ -47,19 +47,20 @@ namespace Game
         bool canQuery = true;
 
     protected:
+        Color4 p_modulate = { 255, 255, 255, 255 };
         SDL_FRect p_absolute{ 0, 0, 0, 0 };
 
         void _processchildren();
 
         template <typename T>
-        inline T* pushGuiObject() __push_gui_vec(s_targetParentContainer, p_children)
+        inline T* pushGuiObject() __push_gui_vec(s_targetParentContainer, p_children, GuiContainer)
         template <typename T>
-        inline T* pushGuiComponent() __push_gui_vec(GuiComponent::s_targetComponentParent, p_components)
+        inline T* pushGuiComponent() __push_gui_vec(GuiComponent::s_targetComponentParent, p_components, GuiComponent)
             
         inline void popGuiObject() __pop_gui_vec(p_children)
         inline void popGuiComponent() __pop_gui_vec(p_components)
 
-        GuiContainer* p_parent;
+        GuiContainer* p_parent = nullptr;
         std::vector<GuiContainer*> p_children;
         std::vector<GuiComponent*> p_components;
         
@@ -72,12 +73,26 @@ namespace Game
 
         inline void _renderchildren()
         {
+            _prerender_components();
+            _render_components();
+
             for (GuiContainer* obj : p_children)
             {
+                if (!obj->visible) continue;
+
+                obj->_prerender_components();
                 obj->_render();
+                obj->_render_components();
                 obj->_renderchildren();
             }
         }
+
+        void _prerender_components();
+        void _render_components();
+        void _procpos_components();
+        void _procsize_components();
+        void _proc_children_components();
+        
     };
 
     class GuiLayer: public GuiContainer
@@ -138,7 +153,8 @@ namespace Game
         unsigned char p_flags = 0;
         GuiContainer* p_parent;
 
-        SDL_FRect* getParentAbs() { return &p_parent->p_absolute; };
+        SDL_FRect* getParentAbs() { return &p_parent->p_absolute; }
+        Color4* getParentMod() { return &p_parent->p_modulate; }
 
     private:
         friend class GuiContainer;

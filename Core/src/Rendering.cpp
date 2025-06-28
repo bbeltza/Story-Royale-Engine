@@ -101,7 +101,7 @@ void Engine::Window::processGui()
     Viewport.x = Viewport.w / 2;
     Viewport.y = Viewport.h / 2;
 
-    Game::currentGuiLayer->p_absolute.w = (float)Viewport.w;
+    Game::currentGuiLayer->p_absolute.w = (float)Viewport.w; // Apparently, uhh this is modifying the x value instead of the width value
     Game::currentGuiLayer->p_absolute.h = (float)Viewport.h;
 
     Game::currentGuiLayer->_processchildren();

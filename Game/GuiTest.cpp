@@ -5,6 +5,8 @@
 
 #include <datatypes/Signal.h>
 
+#include <GuiPresets.h>
+
 struct testdata
 {
     static int count;
@@ -64,12 +66,32 @@ topFrame->parent->position.Y.Offset += data->delta.Y;
                 topFrame->drag = false;
                 return;
             }
-            else if (topFrame->isHovering())
+            else if (topFrame->isHovering() && data->button == SDL_BUTTON_LEFT)
             {
                 topFrame->drag = true;
             }
 
         })
+
+    static Game::GuiComponents::UIModulate* mod = nullptr;
+
+    struct TestButton : public Game::GuiPresets::GuiButton
+{
+    TestButton()
+    {
+        size = UDim2(0, 30, 0, 30);
+        anchor.Y = 0.5;
+        position.Y.Scale = 0.5;
+    }
+
+    void ButtonClick(MouseButton* Event)
+    {
+        printf("%d\n", Event->button);
+        mod->Value.r -= 10;
+        mod->Value.g -= 10;
+        mod->Value.b -= 10;
+    }
+};
 
     struct TestFrame : public Game::GuiObject
 {
@@ -85,6 +107,9 @@ topFrame->parent->position.Y.Offset += data->delta.Y;
         stroke->color = { 255, 255, 255, 255 };
 
         topFrame = pushGuiObject<TopFrame>();
+        pushGuiObject<TestButton>();
+
+        mod = pushGuiComponent<Game::GuiComponents::UIModulate>();
     }
     ~TestFrame()
     {

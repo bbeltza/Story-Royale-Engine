@@ -16,7 +16,6 @@ extern "C"
     {
         uint8_t r, g, b, a;
     } Color4;
-
 #if __cplusplus
 }
 #endif

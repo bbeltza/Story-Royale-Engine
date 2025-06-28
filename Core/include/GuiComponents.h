@@ -6,11 +6,24 @@ namespace Game
 {
     namespace GuiComponents
     {
-        class AspectRatio: public GuiComponent
+        class AspectRatio;
+        class UIPadding;
+        class UIStroke;
+        class UIText;
+        class UIModulate;
+
+    }
+}
+
+namespace Game
+{
+    namespace GuiComponents
+    {
+        class AspectRatio : public GuiComponent
         {
         public:
             AspectRatio() { p_flags = PROCESS_SIZE; }
-            
+
             float ratio = 1;
 
             void process_size() override;
@@ -41,7 +54,7 @@ namespace Game
             UIStroke() { p_flags = RENDER; }
 
             unsigned int size = 1;
-            Color4 color{0, 0, 0, 255};
+            Color4 color{ 0, 0, 0, 255 };
 
             void render() override;
 
@@ -58,15 +71,21 @@ namespace Game
             unsigned int scale = 0;
 
             int count = 2;
-            
-            Color3 color = {0, 0, 0};
+
+            Color3 color = { 0, 0, 0 };
 
             void render() override;
-        
+
         private:
             TTF_Font* m_font;
         };
-            
+        class UIModulate : public GuiComponent
+        {
+        public:
+            UIModulate() { p_flags = PRE_RENDER; }
+            void pre_render() override;
 
+            Color4 Value = { 255, 255, 255, 255 };
+        };
     }
 }

@@ -76,6 +76,9 @@
     <ClInclude Include="include\GuiPresets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\ColorFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -136,6 +139,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Signal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GuiButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Components\Gui\UIModulate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

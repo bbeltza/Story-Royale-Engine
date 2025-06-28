@@ -2,20 +2,24 @@
 
 #include "GuiLayer.h"
 
-class GuiButton
-{
-public:
-    GuiButton();
-    ~GuiButton();
+namespace Game{
+    namespace GuiPresets
+    {
+        class GuiButton: protected GuiObject
+        {
+        public:
+            GuiButton();
+            ~GuiButton();
 
-private:
+            virtual void ButtonClick(MouseButton* Event) {}
+        private:
+            static std::vector<GuiButton*> s_buttons;
+            static EVENT_CALLBACK_DECLARE(clickevent);
+            static Connection* s_clickconnection;
 
-};
+            void Update(float dt) override;
 
-GuiButton::GuiButton()
-{
-}
-
-GuiButton::~GuiButton()
-{
+            bool m_hover = 0;
+        };
+    }
 }

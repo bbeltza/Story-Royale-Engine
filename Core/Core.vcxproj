@@ -164,6 +164,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\ColorFunctions.h" />
     <ClInclude Include="include\datatypes\Color.h" />
     <ClInclude Include="include\Components.h" />
     <ClInclude Include="include\datatypes\Key.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="include\Window.h" />
     <ClInclude Include="include\ECS.h" />
     <ClCompile Include="include\Datatypes.h" />
+    <ClCompile Include="src\Color.c" />
     <ClCompile Include="src\Component.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
@@ -208,6 +210,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
     </ClCompile>
     <ClCompile Include="src\Components\Gui\AspectRatio.cpp" />
+    <ClCompile Include="src\Components\Gui\UIModulate.cpp" />
     <ClCompile Include="src\Components\Gui\UIPadding.cpp" />
     <ClCompile Include="src\Components\Gui\UIStroke.cpp" />
     <ClCompile Include="src\Components\Gui\UIText.cpp" />
@@ -234,6 +237,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
     </ClCompile>
+    <ClCompile Include="src\GuiButton.cpp" />
     <ClCompile Include="src\GuiLayer.cpp" />
     <ClCompile Include="src\main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
