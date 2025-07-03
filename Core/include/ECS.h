@@ -8,14 +8,6 @@
 
 #define pushComponentPtr(type, ptr) pushComponent(type, (void**)&ptr)
 
-struct GameInstance
-{
-    virtual void Update(float dt) {}
-    virtual void pUpdate(float dt) {}
-    virtual void preRender() {}
-    virtual void postRender() {}
-};
-
 
 namespace Game
 {
@@ -65,6 +57,7 @@ namespace Game
     {
     public:
         float x = 0, y = 0;
+        int zIndex = 0;
 
         Entity();
         virtual ~Entity();
@@ -79,12 +72,11 @@ namespace Game
 
         void* pushComponent(ENUM_ComponentType type, void **ptr=nullptr);
         void popComponent();
-        void removeComponent(unsigned int index);
-        void removeComponent(void* address);
 
     private:
         friend class World;
-        friend Component::Component();
+        friend class Component;
+
         ENUM_ParentType m_ParentType = WORLD;
         union
         {
@@ -92,7 +84,7 @@ namespace Game
             Component* m_cParent;
         };
 
-        std::vector<Component*> m_Components;
+        std::list<Component*> m_Components;
 
         void _debugDraw();
         void _render();
@@ -131,9 +123,7 @@ namespace Game
             this->s_TargetEntityWorld = nullptr;
             return newEntity;
         }
-        void popEntity();
-        void removeEntity(unsigned int index);
-        void removeEntity(void* address);
+        void popEntity() { delete m_Entities.back(); }
 
         Vector2f screenToWorldSpace(int x, int y);
         Vector2i worldToScreenSpace(float x, float y);
@@ -148,9 +138,11 @@ namespace Game
     private:
         static unsigned int center[2];
         static World* s_TargetEntityWorld;
-        std::vector<Entity*> m_Entities;
+        std::list<Entity*> m_Entities;
 
         friend class Entity;
+
+        static bool re_order(const Entity* first, const Entity* second) { return first->zIndex < second->zIndex; }
     };
 
     extern World* currentWorld;

@@ -65,12 +65,12 @@ namespace Game
             UIText();
             ~UIText();
 
-            char text[50] = "Display Text!";
+            std::string text = "Display text!";
             const char* font = "res://fonts/calibri/calibri-regular.ttf";
 
             unsigned int scale = 0;
 
-            int count = 2;
+            int count = -1;
 
             Color3 color = { 0, 0, 0 };
 
@@ -78,6 +78,12 @@ namespace Game
 
         private:
             TTF_Font* m_font;
+            SDL_Texture* m_cacheTexture = nullptr;
+            
+            SDL_FRect m_cache_Abs;
+            std::string m_cacheText;
+
+            char process_text();
         };
         class UIModulate : public GuiComponent
         {

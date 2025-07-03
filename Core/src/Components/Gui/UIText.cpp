@@ -38,43 +38,22 @@ Game::GuiComponents::UIText::~UIText()
 {
     if (m_font)
         TTF_CloseFont(m_font);
+    if (m_cacheTexture)
+        SDL_DestroyTexture(m_cacheTexture);
 }
 
-
-
-void Game::GuiComponents::UIText::render()
+char Game::GuiComponents::UIText::process_text()
 {
-
-    unsigned int s = scale + 1;
-    int w, h;
     char oldchar = 0;
-    if (count >= 0)
+
+    if (count >= text.length()) count = -1;
+    else if (count >= 0)
     {
-        oldchar = text[count];
-        text[count] = '\0';
+        auto it = text.begin() + count;
+        oldchar = *it;
+        text[count] = 0;
         if (!oldchar) count = -1;
     }
 
-    SDL_FRect* absolute = getParentAbs();
-    SDL_FRect oldAbs = *absolute;
-
-    SDL_Surface* textSurface = TTF_RenderUTF8_Solid_Wrapped(m_font, text, {color.r, color.g, color.b}, absolute->w/s);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(Engine::Window::sdl_Renderer, textSurface);
-
-    SDL_QueryTexture(textTexture, NULL, NULL, &w, &h);
-    absolute->w = w * s;
-    absolute->h = h * s;
-    SDL_Rect iAbs = { absolute->x, absolute->y, absolute->w, absolute->h };
-
-
-    //printf("%d, %d | %f, %f\n", w, h, getParentAbs()->w, getParentAbs()->h);
-
-    putchar(8);
-
-    SDL_RenderCopy(Engine::Window::sdl_Renderer, textTexture, NULL, &iAbs);
-
-    *absolute = oldAbs;
-    SDL_DestroyTexture(textTexture);
-    SDL_FreeSurface(textSurface);
-    if (oldchar) text[count] = oldchar;
+    return oldchar;
 }

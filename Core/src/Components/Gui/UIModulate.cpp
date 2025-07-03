@@ -2,6 +2,8 @@
 
 void Game::GuiComponents::UIModulate::pre_render()
 {
+    if (*(Uint32*)&Value == UINT32_MAX) return;
+
     Color4* _mod = getParentMod();
 
     _mod->r *= Value.r / 255.0f;

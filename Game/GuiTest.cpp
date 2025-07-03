@@ -1,11 +1,10 @@
 #include <GuiLayer.h>
 #include <GuiComponents.h>
 
-#include <Input.h>
-
+#include <Engine.h>
 #include <datatypes/Signal.h>
-
 #include <GuiPresets.h>
+
 
 struct testdata
 {
@@ -24,8 +23,11 @@ struct TopFrame : public Game::GuiObject
         anchor.X = 0;
         anchor.Y = 0;
 
-        Engine::Input::mouseButton.Connect(onclick);
-        Engine::Input::mouseMove.Connect(onmove);
+        text->count = 0;
+        text->text.assign("Example text");
+
+        Engine->Input.mouseButton.Connect(onclick);
+        Engine->Input.mouseMove.Connect(onmove);
 
     }
 
@@ -87,10 +89,10 @@ topFrame->parent->position.Y.Offset += data->delta.Y;
     void ButtonClick(MouseButton* Event)
     {
         printf("%d\n", Event->button);
-        mod->Value.r -= 10;
-        mod->Value.g -= 10;
-        mod->Value.b -= 10;
+        topFrame->text->count = ++count;
     }
+
+    int count = 0;
 };
 
     struct TestFrame : public Game::GuiObject
@@ -124,11 +126,36 @@ topFrame->parent->position.Y.Offset += data->delta.Y;
     Game::GuiComponents::UIStroke* stroke = pushGuiComponent<Game::GuiComponents::UIStroke>();
 };
 
+    struct FpsLabel : public Game::GuiObject
+    {
+        FpsLabel(): text(pushGuiComponent<Game::GuiComponents::UIText>())
+        {
+            anchor = { 0, 0 };
+            position.X = { 0, 10 };
+            position.Y = { 0, 10 };
+            size.X = {0, 0};
+            size.Y = {0, 0};
+
+            text->color = { 255, 255, 255 };
+            text->scale = 1;
+        }
+
+        void Update(float delta)
+        {
+            text->text.assign(fmt::format(format_str, 1 / delta));
+        }
+
+        std::string format_str = "FPS: {}";
+        Game::GuiComponents::UIText* text;
+
+};
+
 
 
 EntryGuiLayer::EntryGuiLayer()
 {
-    TestFrame* myFrame = this->pushGuiObject<TestFrame>();
+    auto myFrame = pushGuiObject<TestFrame>();
+    auto fpsLabel = pushGuiObject<FpsLabel>();
 }
 
 EntryGuiLayer::~EntryGuiLayer()

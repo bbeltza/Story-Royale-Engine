@@ -12,5 +12,6 @@
 
 int main()
 {
-    Engine::Init();
+    EngineClass e;
+    Engine->Run();
 }

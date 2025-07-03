@@ -6,14 +6,18 @@ Game::GuiLayer* Game::currentGuiLayer = nullptr;
 Game::GuiContainer* Game::GuiContainer::s_targetParentContainer = nullptr;
 Game::GuiContainer* Game::GuiComponent::s_targetComponentParent = nullptr;
 
-Game::GuiContainer::GuiContainer() : p_parent(s_targetParentContainer), p_absolute{ 0, 0, 0, 0 }
-{
-}
+Game::GuiContainer::GuiContainer() : 
+    p_parent(s_targetParentContainer),
+    p_absolute{ 0, 0, 0, 0 }
+{}
 
 Game::GuiContainer::~GuiContainer()
 {
     while (!p_children.empty()) popGuiObject();
     while (!p_components.empty()) popGuiComponent();
+
+    if (p_parent)
+        p_parent->p_children.remove(this);
 }
 
 void Game::GuiContainer::_processchildren()
@@ -32,6 +36,11 @@ void Game::GuiContainer::_processchildren()
         obj->_process();
         obj->_processchildren();
     }
+}
+
+void Game::GuiContainer::popGuiComponent()
+{
+    delete p_components.front();
 }
 
 
@@ -53,12 +62,6 @@ void Game::GuiObject::_process()
     p_absolute.y = p_parent->p_absolute.y + position.Y.toAbsolute(p_parent->p_absolute.h) - p_absolute.h * anchor.Y;
 }
 
-void Game::GuiObject::_render()
-{
-    SDL_SetRenderDrawColorMod(Engine::Window::sdl_Renderer, &color, &p_modulate);
-    SDL_RenderFillRectF(Engine::Window::sdl_Renderer, &p_absolute);
-}
-
 void Game::GuiContainer::_callUpdate(float dt)
 {
     Update(dt);
@@ -75,6 +78,11 @@ Game::GuiComponent::GuiComponent() :
     p_parent(s_targetComponentParent) {
 }
 
+Game::GuiComponent::~GuiComponent()
+{
+    p_parent->p_components.remove(this);
+}
+
 
 
 void Game::GuiContainer::_prerender_components()
@@ -84,7 +92,7 @@ void Game::GuiContainer::_prerender_components()
 
     for (GuiComponent* comp : p_components)
     {
-        if (comp->hasFlag(PRE_RENDER))
+        if (comp->hasFlag(PRE_RENDER) && comp->enabled)
             comp->pre_render();
     }
 }
@@ -93,7 +101,7 @@ void Game::GuiContainer::_render_components()
 {
     for (GuiComponent* comp : p_components)
     {
-        if (comp->hasFlag(RENDER))
+        if (comp->hasFlag(RENDER) && comp->enabled)
             comp->render();
     }
 }
@@ -103,7 +111,7 @@ void Game::GuiContainer::_procpos_components()
 {
     for (GuiComponent* comp : p_components)
     {
-        if (comp->hasFlag(PROCESS_POSITION))
+        if (comp->hasFlag(PROCESS_POSITION) && comp->enabled)
             comp->process_position();
     }
 }
@@ -112,7 +120,7 @@ void Game::GuiContainer::_procsize_components()
 {
     for (GuiComponent* comp : p_components)
     {
-        if (comp->hasFlag(PROCESS_SIZE))
+        if (comp->hasFlag(PROCESS_SIZE) && comp->enabled)
             comp->process_size();
     }
 }
@@ -120,6 +128,6 @@ void Game::GuiContainer::_procsize_components()
 void Game::GuiContainer::_proc_children_components()
 {
     for (GuiComponent* comp : p_parent->p_components)
-        if (comp->hasFlag(PROCESS_CHILDREN))
+        if (comp->hasFlag(PROCESS_CHILDREN) && comp->enabled)
             comp->process_children((GuiObject*)this);
 }

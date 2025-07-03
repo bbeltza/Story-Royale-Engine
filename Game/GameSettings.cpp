@@ -4,5 +4,5 @@ void GameSettings::onSet()
 {
     GameSettings::StartResolution.width = 480 / 9 * 16;
     GameSettings::Title = "My Engine!";
-    GameSettings::targetFPS = 60;
+    GameSettings::targetFPS = 40;
 }

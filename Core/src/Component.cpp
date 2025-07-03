@@ -22,4 +22,7 @@ Game::Component::Component() : m_type((ENUM_ComponentType)Entity::s_targetCompon
 
 }
 
-Game::Component::~Component() {}
+Game::Component::~Component()
+{
+    this->m_parent->m_Components.remove(this);
+}

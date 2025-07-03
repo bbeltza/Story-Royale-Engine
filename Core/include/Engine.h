@@ -1,13 +1,37 @@
 #pragma once
 
+#include <fmt/format.h>
 #include "SDL.hpp"
 
-namespace Engine
-{
-    void Init();
-    void setTargetFPS(unsigned short fps);
+#include "Window.h"
+#include "Input.h"
 
-}
+class EngineClass
+{
+public:
+
+
+    // Engine namespaces
+    WindowClass Window;
+    InputClass Input;
+private:
+    // Friend int main so that the entry point runs void Run()
+    friend int main();
+
+    // Constructors
+    EngineClass();
+    ~EngineClass();
+
+    // Private use functions
+    void Run();
+
+    bool pollWindowEvents();
+
+    // Private members
+    bool m_wasRun = 0;
+};
+
+extern EngineClass* Engine;
 
 // TODO:
 /*
@@ -27,7 +51,7 @@ namespace Engine
 
 - User interface layers; !
 
-- Rendering text;
+- Rendering text; !
 - Rendering textures;
 
 - Audio;

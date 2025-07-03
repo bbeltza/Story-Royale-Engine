@@ -1,6 +1,6 @@
 #include <standard.h>
 #include "ECS.h"
-#include "Window.h"
+#include "Engine.h"
 
 #include "Components.h"
 
@@ -20,35 +20,9 @@ Game::World::~World()
         this->popEntity();
 }
 
-
-void Game::World::popEntity()
-{
-    delete this->m_Entities.back();
-    this->m_Entities.pop_back();
-}
-
-void Game::World::removeEntity(unsigned int index)
-{
-    delete this->m_Entities[index];
-    this->m_Entities.erase(m_Entities.begin() + index);
-}
-void Game::World::removeEntity(void* address)
-{
-    for (auto i = 0; i < this->m_Entities.size(); i++)
-    {
-        if (this->m_Entities[i] == address)
-        {
-            this->removeEntity(i);
-            break;
-        }
-            
-    }
-}
-
 void Game::World::Update(float dt)
 {
-    std::vector<Entity*> c_Entities = m_Entities;
-    for (Entity* entity : c_Entities)
+    for (Entity* entity : m_Entities)
     {
         entity->Update(dt);
     }
@@ -56,7 +30,8 @@ void Game::World::Update(float dt)
 
 void Game::World::render()
 {
-    Engine::Window::getScreenCenter(this->center, this->center + 1);
+    m_Entities.sort(re_order);
+    Engine->Window.getScreenCenter(this->center, this->center + 1);
     for (Entity* entity : this->m_Entities)
     {
         entity->preRender();

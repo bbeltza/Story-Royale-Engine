@@ -1,6 +1,6 @@
 #include "ECS.h"
 #include "Components.h"
-#include "Input.h"
+#include "Engine.h"
 #include "System.h"
 
 #include <assert.h>
@@ -17,9 +17,11 @@ public:
 
 MyCharacter::MyCharacter()
 {
+    zIndex = -1;
     //sys_error("Passed value is not a function!");
     pushComponentPtr(SHAPE, Rect);
-    Rect->flags |= CAN_COLLIDE;
+    Rect->Color = { 0, 0, 0, 255 };
+    //Rect->flags |= CAN_COLLIDE;
     Rect->shape = CIRCLE;
     pushComponent(VELOCITY);
     velocityComp->velocity = 200;
@@ -52,13 +54,13 @@ void MyCharacter::Update(float dt)
     velocityComp->x_direction = 0;
     velocityComp->y_direction = 0;
 
-    if (Engine::Input::isKeyPressed(SDL_SCANCODE_LEFT))
+    if (Engine->Input.isKeyPressed(SDL_SCANCODE_LEFT))
         velocityComp->x_direction -= 1;
-    if (Engine::Input::isKeyPressed(SDL_SCANCODE_RIGHT))
+    if (Engine->Input.isKeyPressed(SDL_SCANCODE_RIGHT))
         velocityComp->x_direction += 1;
-    if (Engine::Input::isKeyPressed(SDL_SCANCODE_UP))
+    if (Engine->Input.isKeyPressed(SDL_SCANCODE_UP))
         velocityComp->y_direction -= 1;
-    if (Engine::Input::isKeyPressed(SDL_SCANCODE_DOWN))
+    if (Engine->Input.isKeyPressed(SDL_SCANCODE_DOWN))
         velocityComp->y_direction += 1;
 
     //getWorld()->CurrentCamera.x = x;

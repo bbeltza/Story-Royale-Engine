@@ -8,16 +8,12 @@
 
 #include "Datatypes.h"
 
-#define __push_gui_vec(s_target, vec, target_type) {\
+#define __push_gui_list(s_target, list, target_type) {\
 s_target = this;\
-vec.push_back((target_type*)(new T));\
+list.push_front((target_type*)(new T));\
 s_target = nullptr;\
 \
-return (T*)vec.back(); }
-
-#define __pop_gui_vec(vec) {\
-delete vec.back();\
-vec.pop_back(); }
+return (T*)list.front(); }
 
 namespace Game
 {
@@ -25,7 +21,7 @@ namespace Game
     class GuiObject;
     class GuiComponent;
     
-    class GuiContainer
+    class GuiContainer: public GameInstance
     {
     public:
         bool visible = 1;
@@ -35,7 +31,7 @@ namespace Game
 
         inline virtual bool isGuiLayer() const = 0;
 
-        virtual void Update(float dt) { }
+        //void Update(float dt) override { }
 
         void _callUpdate(float dt);
 
@@ -53,19 +49,19 @@ namespace Game
         void _processchildren();
 
         template <typename T>
-        inline T* pushGuiObject() __push_gui_vec(s_targetParentContainer, p_children, GuiContainer)
+        inline T* pushGuiObject() __push_gui_list(s_targetParentContainer, p_children, GuiContainer)
         template <typename T>
-        inline T* pushGuiComponent() __push_gui_vec(GuiComponent::s_targetComponentParent, p_components, GuiComponent)
+        inline T* pushGuiComponent() __push_gui_list(GuiComponent::s_targetComponentParent, p_components, GuiComponent)
             
-        inline void popGuiObject() __pop_gui_vec(p_children)
-        inline void popGuiComponent() __pop_gui_vec(p_components)
+        inline void popGuiObject() { delete p_children.front(); }
+        void popGuiComponent();
 
         GuiContainer* p_parent = nullptr;
-        std::vector<GuiContainer*> p_children;
-        std::vector<GuiComponent*> p_components;
+        std::list<GuiContainer*> p_children;
+        std::list<GuiComponent*> p_components;
         
     private:
-        friend void Engine::Window::processGui();
+        friend class WindowClass;
         friend class GuiObject;
         friend class GuiComponent;
 
@@ -133,9 +129,9 @@ namespace Game
     {
     public:
         GuiComponent();
-        virtual ~GuiComponent() {}
+        virtual ~GuiComponent();
 
-        bool enabled = false;
+        bool enabled = true;
 
         inline const FLAG_GuiComponentUpdateFlags getUpdateFlags() const { return (FLAG_GuiComponentUpdateFlags)p_flags; }
         inline bool hasFlag(FLAG_GuiComponentUpdateFlags flag) const

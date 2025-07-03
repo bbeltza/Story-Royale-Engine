@@ -72,22 +72,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL_image;$(SolutionDir)Core\3rdparty\SDL\include;$(SolutionDir)Core\3rdparty\fmt\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)out\intermediate\$(TargetName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL_image;$(SolutionDir)Core\3rdparty\SDL\include;$(SolutionDir)Core\3rdparty\fmt\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)out\intermediate\$(TargetName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL_image;$(SolutionDir)Core\3rdparty\SDL\include;$(SolutionDir)Core\3rdparty\fmt\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)out\intermediate\$(TargetName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL_image;$(SolutionDir)Core\3rdparty\SDL\include;$(SolutionDir)Core\3rdparty\fmt\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)out\intermediate\$(TargetName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -97,6 +97,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -119,6 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +141,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -161,6 +164,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

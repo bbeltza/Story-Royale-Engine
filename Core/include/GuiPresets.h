@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GuiLayer.h"
+#include "GuiComponents.h"
 
 namespace Game{
     namespace GuiPresets
@@ -12,14 +13,16 @@ namespace Game{
             ~GuiButton();
 
             virtual void ButtonClick(MouseButton* Event) {}
+            virtual void MouseHover(bool hovered) {}
         private:
-            static std::vector<GuiButton*> s_buttons;
+            static std::list<GuiButton*> s_buttons;
             static EVENT_CALLBACK_DECLARE(clickevent);
             static Connection* s_clickconnection;
 
             void Update(float dt) override;
 
             bool m_hover = 0;
+            GuiComponents::UIModulate* m_mod = pushGuiComponent<GuiComponents::UIModulate>();
         };
     }
 }
