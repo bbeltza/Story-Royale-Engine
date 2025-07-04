@@ -80,6 +80,7 @@
     <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL_image;$(SolutionDir)Core\3rdparty\SDL\include;$(SolutionDir)Core\3rdparty\fmt\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)out\intermediate\$(TargetName)\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL_image;$(SolutionDir)Core\3rdparty\SDL\include;$(SolutionDir)Core\3rdparty\fmt\include;$(IncludePath)</IncludePath>
@@ -90,6 +91,7 @@
     <IncludePath>$(SolutionDir)Core\include;$(SolutionDir)Core\3rdparty\SDL_ttf;$(SolutionDir)Core\3rdparty\SDL_image;$(SolutionDir)Core\3rdparty\SDL\include;$(SolutionDir)Core\3rdparty\fmt\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)out\intermediate\$(TargetName)\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,6 +100,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -107,6 +110,8 @@
       </ForceFileOutput>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <LinkStatus>true</LinkStatus>
+      <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -121,6 +126,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +136,8 @@
       </ForceFileOutput>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <LinkStatus>true</LinkStatus>
+      <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -142,6 +150,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +160,8 @@
       </ForceFileOutput>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <LinkStatus>true</LinkStatus>
+      <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -165,6 +176,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,6 +186,8 @@
       </ForceFileOutput>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <LinkStatus>true</LinkStatus>
+      <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

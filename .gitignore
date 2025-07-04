@@ -1,6 +1,8 @@
 .vs
 .editorconfig
 
+MinSizeRel
+RelWithDebInfo
 Debug
 Release
 Win32
