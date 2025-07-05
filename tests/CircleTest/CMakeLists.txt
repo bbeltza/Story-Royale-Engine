@@ -1,5 +1,5 @@
 message(${CMAKE_MODULE_PATH})
-include(StoryRoyaleEngine)
+include(srEngineResources)
 
 project(CircleTest)
 
