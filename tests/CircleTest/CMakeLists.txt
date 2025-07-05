@@ -1,3 +1,6 @@
+message(${CMAKE_MODULE_PATH})
+include(StoryRoyaleEngine)
+
 project(CircleTest)
 
 add_executable(CircleTest
@@ -13,3 +16,5 @@ target_include_directories(CircleTest PRIVATE ../../3rdparty/SDL_image)
 target_include_directories(CircleTest PRIVATE ../../3rdparty/fmt/include)
 
 target_link_libraries(CircleTest StoryRoyaleEngine)
+
+srEngine_set_resource_file(CircleTest res)

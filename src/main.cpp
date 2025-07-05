@@ -1,4 +1,4 @@
-#ifdef _MSVC_LANG
+#if defined(_MSVC_LANG) && !defined(_CMAKE)
 
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "Setupapi.lib")
