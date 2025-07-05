@@ -28,4 +28,7 @@ target_link_libraries(StoryRoyaleEngine SDL2_ttf::SDL2_ttf-static)
 target_link_libraries(StoryRoyaleEngine SDL2_image::SDL2_image-static)
 target_link_libraries(StoryRoyaleEngine fmt::fmt)
 
-add_subdirectory(tests/CircleTest)
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    add_subdirectory(tests/CircleTest)
+endif()
+
