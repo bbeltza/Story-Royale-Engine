@@ -1,5 +1,5 @@
 #pragma once
-#include <standard.h>
+#include <math.h>
 
 #define DefineVec2Operator(c, op)\
 c operator op(const c &other)\

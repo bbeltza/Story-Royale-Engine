@@ -20,9 +20,11 @@ namespace Game
     class GuiLayer;
     class GuiObject;
     class GuiComponent;
-    
+
     class GuiContainer: public GameInstance
     {
+        friend class GuiObject;
+        friend class GuiComponent;
     public:
         bool visible = 1;
 
@@ -43,6 +45,8 @@ namespace Game
         bool canQuery = true;
 
     protected:
+        friend class ::WindowClass;
+
         Color4 p_modulate = { 255, 255, 255, 255 };
         SDL_FRect p_absolute{ 0, 0, 0, 0 };
 
@@ -51,7 +55,7 @@ namespace Game
         template <typename T>
         inline T* pushGuiObject() __push_gui_list(s_targetParentContainer, p_children, GuiContainer)
         template <typename T>
-        inline T* pushGuiComponent() __push_gui_list(GuiComponent::s_targetComponentParent, p_components, GuiComponent)
+        inline T* pushGuiComponent() __push_gui_list(s_targetComponentParent, p_components, GuiComponent)
             
         inline void popGuiObject() { delete p_children.front(); }
         void popGuiComponent();
@@ -61,11 +65,8 @@ namespace Game
         std::list<GuiComponent*> p_components;
         
     private:
-        friend class WindowClass;
-        friend class GuiObject;
-        friend class GuiComponent;
-
         static GuiContainer* s_targetParentContainer;
+        static GuiContainer* s_targetComponentParent;
 
         inline void _renderchildren()
         {
@@ -89,6 +90,38 @@ namespace Game
         void _procsize_components();
         void _proc_children_components();
         
+    };
+
+    class GuiComponent
+    {
+    public:
+        GuiComponent();
+        virtual ~GuiComponent();
+
+        bool enabled = true;
+
+        inline const FLAG_GuiComponentUpdateFlags getUpdateFlags() const { return (FLAG_GuiComponentUpdateFlags)p_flags; }
+        inline bool hasFlag(FLAG_GuiComponentUpdateFlags flag) const
+        {
+            return p_flags & flag;
+        }
+
+        virtual void render() {};
+        virtual void pre_render() {};
+        virtual void process_size() {};
+        virtual void process_position() {};
+        virtual void process_children(GuiObject* Object) {};
+
+    protected:
+        unsigned char p_flags = 0;
+        GuiContainer* p_parent;
+
+        SDL_FRect* getParentAbs() { return &p_parent->p_absolute; }
+        Color4* getParentMod() { return &p_parent->p_modulate; }
+
+    private:
+        friend class GuiContainer;
+
     };
 
     class GuiLayer: public GuiContainer
@@ -123,39 +156,6 @@ namespace Game
         friend class GuiContainer;
 
         void _process();
-    };
-
-    class GuiComponent
-    {
-    public:
-        GuiComponent();
-        virtual ~GuiComponent();
-
-        bool enabled = true;
-
-        inline const FLAG_GuiComponentUpdateFlags getUpdateFlags() const { return (FLAG_GuiComponentUpdateFlags)p_flags; }
-        inline bool hasFlag(FLAG_GuiComponentUpdateFlags flag) const
-        {
-            return p_flags & flag;
-        }
-
-        virtual void render() {};
-        virtual void pre_render() {};
-        virtual void process_size() {};
-        virtual void process_position() {};
-        virtual void process_children(GuiObject* Object) {};
-
-    protected:
-        unsigned char p_flags = 0;
-        GuiContainer* p_parent;
-
-        SDL_FRect* getParentAbs() { return &p_parent->p_absolute; }
-        Color4* getParentMod() { return &p_parent->p_modulate; }
-
-    private:
-        friend class GuiContainer;
-        static GuiContainer* s_targetComponentParent;
-
     };
 
     extern GuiLayer* currentGuiLayer;

@@ -25,9 +25,7 @@ namespace Game
 
             bool isInScreenPoint(Vector2i pt);
         private:
-            friend class Entity;
-            void processCollision();
-            void processCollider();
+            friend class ::Game::Entity;
             
             SDL_FRect m_renderRect;
         };

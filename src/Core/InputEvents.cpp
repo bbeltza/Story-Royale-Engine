@@ -1,3 +1,4 @@
+#include <standard.h>
 #include "Input.h"
 
 #define processEventQueue(queue, ev) while (!queue.empty()) { ev.Fire(&queue.back()); queue.pop_back(); }

@@ -5,7 +5,7 @@ int SDL_RenderFillCircle(SDL_Renderer* renderer, int x0, int y0, int radius)
     SDL_Rect v;
     SDL_RenderGetViewport(renderer, &v);
 
-   if (x0 + radius < 0 || y0 + radius < 0 || x0 - radius > v.w || y0 - radius > v.h) return;
+   if (x0 + radius < 0 || y0 + radius < 0 || x0 - radius > v.w || y0 - radius > v.h) return 1;
 
     int x = radius;
     int y = 0;

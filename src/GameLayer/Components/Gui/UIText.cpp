@@ -3,6 +3,11 @@
 
 #include "GuiComponents.h"
 
+#ifdef __GNUC__
+#define strcpy_s(dest, n, src) strncpy(dest, src, n)
+#define strcat_s(dest, n, src) strncat(dest, src, n)
+#endif
+
 Game::GuiComponents::UIText::UIText()
 {
     p_flags = RENDER;
@@ -19,6 +24,7 @@ Game::GuiComponents::UIText::UIText()
         char* REAL_path = new char[s];
         strcpy_s(REAL_path, 5, "res/");
         strcat_s(REAL_path, s, font + 6);
+
 
         printf("%s\n", REAL_path);
 

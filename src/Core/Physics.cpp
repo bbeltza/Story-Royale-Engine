@@ -7,6 +7,23 @@
 static std::vector<Game::Components::Shape*> CollisionStack;
 static std::vector<Game::Components::Shape*> ColliderStack;
 
+static void processCollider(Game::Components::Shape* shape)
+{
+    if (shape->flags & (CAN_COLLIDE | CAN_TOUCH))
+    {
+            ColliderStack.push_back(shape);
+            //std::cout << this << "\n";
+    }
+}
+static void processCollision(Game::Components::Shape* shape)
+{
+    if (shape->flags & (CAN_COLLIDE | CAN_TOUCH))
+    {
+            CollisionStack.push_back(shape);
+            //std::cout << this << "\n";
+    }
+}
+
 void Game::Entity::_pProcess(float dt)
 {
     if (m_Components.empty()) return;
@@ -20,10 +37,7 @@ void Game::Entity::_pProcess(float dt)
         for (auto c : m_Components)
         {
             if (c->getType() == SHAPE)
-            {
-                auto shape = (Game::Components::Shape*)c;
-                shape->processCollider();
-            }
+                processCollider((Components::Shape*)c);
                 
         }
             
@@ -31,10 +45,7 @@ void Game::Entity::_pProcess(float dt)
     for (auto c : m_Components)
     {
         if (c->getType() == SHAPE)
-        {
-            auto shape = (Game::Components::Shape*)c;
-            shape->processCollision();
-        }
+            processCollision((Components::Shape*)c);
     }
         
 
@@ -156,23 +167,4 @@ void Game::World::pUpdate(float dt)
     c1_ent = nullptr;
     c2_ent = nullptr;
 
-}
-
-
-void Game::Components::Shape::processCollision()
-{
-    if (flags & (CAN_COLLIDE | CAN_TOUCH))
-    {
-            CollisionStack.push_back(this);
-            //std::cout << this << "\n";
-    }
-}
-
-void Game::Components::Shape::processCollider()
-{
-    if (this->flags & (CAN_COLLIDE | CAN_TOUCH))
-    {
-            ColliderStack.push_back(this);
-            //std::cout << this << "\n";
-    }
 }

@@ -4,7 +4,7 @@
 
 Game::GuiLayer* Game::currentGuiLayer = nullptr;
 Game::GuiContainer* Game::GuiContainer::s_targetParentContainer = nullptr;
-Game::GuiContainer* Game::GuiComponent::s_targetComponentParent = nullptr;
+Game::GuiContainer* Game::GuiContainer::s_targetComponentParent = nullptr;
 
 Game::GuiContainer::GuiContainer() : 
     p_parent(s_targetParentContainer),
@@ -75,7 +75,7 @@ void Game::GuiContainer::_callUpdate(float dt)
 }
 
 Game::GuiComponent::GuiComponent() :
-    p_parent(s_targetComponentParent) {
+    p_parent(Game::GuiContainer::s_targetComponentParent) {
 }
 
 Game::GuiComponent::~GuiComponent()
