@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set(SRENGINE_CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+set(CMAKE_MODULE_PATH ${SRENGINE_CMAKE_MODULE_PATH})
 set(BUILD_SHARED_LIBS OFF)
 set(CXX_STANDARD C++14)
 
@@ -19,16 +21,28 @@ project(StoryRoyaleEngine)
 
 add_subdirectory(src)
 
-target_include_directories(StoryRoyaleEngine PRIVATE "include/")
+set(3RDPARTYLIBS
+SDL2::SDL2-static
+SDL2_ttf::SDL2_ttf-static
+SDL2_image::SDL2_image-static
 
-target_include_directories(StoryRoyaleEngine PUBLIC 3rdparty/fmt/include)
+fmt::fmt
+)
+set(SRENGINE_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 
-target_link_libraries(StoryRoyaleEngine SDL2::SDL2-static)
-target_link_libraries(StoryRoyaleEngine SDL2_ttf::SDL2_ttf-static)
-target_link_libraries(StoryRoyaleEngine SDL2_image::SDL2_image-static)
-target_link_libraries(StoryRoyaleEngine fmt::fmt)
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_ttf
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_image
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
+)
+
+foreach(include_dir ${SRENGINE_INCLUDE_DIRS})
+    target_include_directories(StoryRoyaleEngine PRIVATE ${include_dir})
+endforeach()
+
+target_link_libraries(StoryRoyaleEngine ${3RDPARTYLIBS})
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     add_subdirectory(tests/CircleTest)
 endif()
-
