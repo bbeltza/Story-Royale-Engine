@@ -24,6 +24,12 @@ namespace Game
             void render(int x, int y) override;
 
             bool isInScreenPoint(Vector2i pt);
+
+            // Get the current rect values, in world coordinates.
+            inline SDL_FRect getRect();
+
+            // Get the current rect values, in screen coordinates.
+            inline SDL_FRect getScreenRect();
         private:
             friend class ::Game::Entity;
             
@@ -43,6 +49,8 @@ namespace Game
 
         private:
             void normalize();
+
+            float m_xNormalized, m_yNormalized;
         };
     }
 }

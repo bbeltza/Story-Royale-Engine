@@ -154,10 +154,6 @@ namespace Game
         currentWorld = new T;
         return currentWorld;
     }
-}
 
-class EntryWorld : public Game::World
-{
-public:
-    EntryWorld();
-};
+    void Initialize();
+}

@@ -2,7 +2,7 @@
 #include "GuiPresets.h"
 
 std::list<Game::GuiPresets::GuiButton*> Game::GuiPresets::GuiButton::s_buttons;
-EVENT_CALLBACK(Game::GuiPresets::GuiButton::clickevent, MouseButton, buttonData,
+EVENT_CALLBACK(Game::GuiPresets::GuiButton::clickevent, MouseButton, buttonData)
     if (!buttonData->pressed) return;
     for (auto button : s_buttons)
     {
@@ -13,7 +13,7 @@ EVENT_CALLBACK(Game::GuiPresets::GuiButton::clickevent, MouseButton, buttonData,
             break;
         }
     }
-)
+}
 
 Connection* Game::GuiPresets::GuiButton::s_clickconnection = nullptr;
 

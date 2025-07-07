@@ -13,6 +13,4 @@ namespace GameSettings
     extern uint16_t targetFPS;
     extern uint8_t windowFlags;
     extern uint8_t renderMode;
-
-    extern void onSet();
 }

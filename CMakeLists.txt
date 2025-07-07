@@ -1,19 +1,17 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(SRENGINE_CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
-
+set(SRENGINE_CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${SRENGINE_CMAKE_MODULE_PATH})
+include(StoryRoyaleEngine)
+
 set(BUILD_SHARED_LIBS OFF)
 set(CXX_STANDARD C++14)
 
-cmake_policy(SET CMP0079 NEW)
-cmake_policy(SET CMP0091 NEW)
+srEngine_policy()
 if(MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif()
-
-add_compile_definitions(_CMAKE)
 
 add_subdirectory(3rdparty)
 
@@ -26,8 +24,7 @@ SDL2::SDL2-static
 SDL2_ttf::SDL2_ttf-static
 SDL2_image::SDL2_image-static
 
-fmt::fmt
-)
+fmt::fmt)
 set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 
@@ -37,12 +34,12 @@ set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
 )
 
-foreach(include_dir ${SRENGINE_INCLUDE_DIRS})
-    target_include_directories(StoryRoyaleEngine PRIVATE ${include_dir})
-endforeach()
-
+srEngine_include_directories(StoryRoyaleEngine)
 target_link_libraries(StoryRoyaleEngine ${3RDPARTYLIBS})
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    add_subdirectory(tests/CircleTest)
+    add_subdirectory(tests/Rects)
+else()
+    set(SRENGINE_INCLUDE_DIRS ${SRENGINE_INCLUDE_DIRS} PARENT_SCOPE)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRENGINE_CMAKE_MODULE_PATH} PARENT_SCOPE)
 endif()

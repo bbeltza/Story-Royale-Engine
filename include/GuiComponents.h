@@ -65,8 +65,9 @@ namespace Game
             UIText();
             ~UIText();
 
+            void LoadFontPath(const char* path);
+
             std::string text = "Display text!";
-            const char* font = "res://fonts/calibri/calibri-regular.ttf";
 
             unsigned int scale = 0;
 

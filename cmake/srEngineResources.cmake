@@ -1,6 +1,4 @@
 macro(srEngine_set_resource_file PROJECT SRC)
-    message("-- " ${PROJECT})
-    message("-- " ${CMAKE_CURRENT_BINARY_DIR}/${SRC})
     add_custom_target(
         copy ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory

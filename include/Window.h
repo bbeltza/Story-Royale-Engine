@@ -17,14 +17,11 @@ private:
     WindowClass() {}
 
     SDL_Window* sdl_window;
-    SDL_Renderer* sdl_renderer;
 
     SDL_Event sdl_event;
 
     SDL_Rect m_viewport;
 
     bool pollEvents();
-    void processGui();
-    void render();
-    void target_render();
+    void processViewport();
 };

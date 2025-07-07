@@ -1,10 +1,9 @@
 #pragma once
 
 #define EVENT_CALLBACK_DECLARE(name) void name(void* _userdata)
-#define EVENT_CALLBACK(name, type, identifier, ...) void name(void* _userdata)\
+#define EVENT_CALLBACK(name, type, identifier) void name(void* _userdata)\
 { type* identifier = (type*)_userdata; \
-__VA_ARGS__ \
-}
+
 
 struct Signal;
 struct Connection;

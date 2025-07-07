@@ -11,19 +11,22 @@
 Game::GuiComponents::UIText::UIText()
 {
     p_flags = RENDER;
+}
 
+void Game::GuiComponents::UIText::LoadFontPath(const char* path)
+{
     int rescmp;
-    if (strlen(font) < 6)
+    if (strlen(path) < 6)
         rescmp = -1;
     else
-        rescmp = strncmp(RES_PREFIX, font, 6);
+        rescmp = strncmp(RES_PREFIX, path, 6);
 
     if (!rescmp)
     {
-        unsigned int s = strlen(font + 6) + 5;
+        unsigned int s = strlen(path + 6) + 5;
         char* REAL_path = new char[s];
         strcpy_s(REAL_path, 5, "res/");
-        strcat_s(REAL_path, s, font + 6);
+        strcat_s(REAL_path, s, path + 6);
 
 
         printf("%s\n", REAL_path);
@@ -31,13 +34,11 @@ Game::GuiComponents::UIText::UIText()
         m_font = TTF_OpenFont(REAL_path, 12);
         delete[] REAL_path;
     }
-    else m_font = TTF_OpenFont(font, 12);
+    else m_font = TTF_OpenFont(path, 12);
         
     if (!m_font) sys_errorf("SDL_TTF Error : %s", TTF_GetError());
 
-
-    printf("%s\n", font);
-
+    printf("%s\n", path);
 }
 
 Game::GuiComponents::UIText::~UIText()

@@ -3,9 +3,12 @@
 #include "Components.h"
 #include "GuiComponents.h"
 
-static SDL_Renderer* target_renderer;
+SDL_Renderer* target_renderer;
 
-void WindowClass::target_render() { target_renderer = this->sdl_renderer; }
+void DrawingDevice::tr()
+{
+    target_renderer = sdl_renderer;
+}
 
 void Game::GuiObject::_render()
 {

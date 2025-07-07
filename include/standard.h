@@ -3,6 +3,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <cstring>
 
 #include <vector>
 #include <list>

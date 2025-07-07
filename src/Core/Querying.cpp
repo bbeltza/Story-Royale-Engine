@@ -15,9 +15,9 @@ void InputClass::queryObjects()
     queryEntity = nullptr;
     queryObject = nullptr;
 
-    queryObject = Game::currentGuiLayer->_query();
+    queryObject = Game::currentGuiLayer ? Game::currentGuiLayer->_query() : 0;
     if (queryObject) return;
-    queryEntity = Game::currentWorld->_query();
+    queryEntity = Game::currentWorld ? Game::currentWorld->_query() : 0;
 }
 
 bool Game::GuiObject::isHovering() const

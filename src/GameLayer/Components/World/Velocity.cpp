@@ -14,10 +14,13 @@ void Game::Components::Velocity::normalize()
 {
     const float mg = magnitude();
 
+    m_xNormalized = x_direction;
+    m_yNormalized = y_direction;
+
     if (mg == 1) return;
 
-    x_direction /= mg;
-    y_direction /= mg;
+    m_xNormalized /= mg;
+    m_yNormalized /= mg;
 }
 
 void Game::Components::Velocity::move(float dt)
@@ -26,8 +29,8 @@ void Game::Components::Velocity::move(float dt)
 
     normalize();
 
-    e->x += velocity * x_direction * dt;
-    e->y += velocity * y_direction * dt;
+    e->x += velocity * m_xNormalized * dt;
+    e->y += velocity * m_yNormalized * dt;
 }
 
 const float Game::Components::Velocity::magnitude()

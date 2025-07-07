@@ -32,15 +32,13 @@ EngineClass::EngineClass()
 
     DEF_BASE(Window)
     DEF_BASE(Input)
+    DEF_BASE(DrawingContext)
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
 
-    GameSettings::onSet();
-
-    Game::setWorld<EntryWorld>();
-    Game::setGuiLayer<EntryGuiLayer>();
+    Game::Initialize();
 
     Window.sdl_window = SDL_CreateWindow(
         GameSettings::Title,
@@ -51,8 +49,8 @@ EngineClass::EngineClass()
         SDL_WINDOW_RESIZABLE
         );
 
-    Window.sdl_renderer = SDL_CreateRenderer(Window.sdl_window, -1, 0);
-    SDL_SetRenderDrawBlendMode(Window.sdl_renderer, SDL_BLENDMODE_BLEND);
+    DrawingContext.sdl_renderer = SDL_CreateRenderer(Window.sdl_window, -1, 0);
+    SDL_SetRenderDrawBlendMode(DrawingContext.sdl_renderer, SDL_BLENDMODE_BLEND);
 }
 
 EngineClass::~EngineClass()
@@ -93,13 +91,17 @@ void EngineClass::Run()
         Input.processEvents();
         Input.queryObjects();
 
-        Game::currentWorld->Update(dt);
-        Game::currentWorld->pUpdate(dt);
+        if (Game::currentWorld)
+        {
+            Game::currentWorld->Update(dt);
+            Game::currentWorld->pUpdate(dt);
+        }
         
-        Window.processGui();
-        Window.render();
+        Window.processViewport();
+        DrawingContext.render();
 
-        Game::currentGuiLayer->_callUpdate(dt);
+        if (Game::currentGuiLayer)
+            Game::currentGuiLayer->_callUpdate(dt);
 
         if (targetFrameTime > zero)
         {

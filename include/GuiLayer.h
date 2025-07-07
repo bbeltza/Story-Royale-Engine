@@ -44,6 +44,11 @@ namespace Game
         GuiObject* _query();
         bool canQuery = true;
 
+        template <typename T>
+        inline T* pushGuiObject() __push_gui_list(s_targetParentContainer, p_children, GuiContainer)
+        template <typename T>
+        inline T* pushGuiComponent() __push_gui_list(s_targetComponentParent, p_components, GuiComponent)
+
     protected:
         friend class ::WindowClass;
 
@@ -51,11 +56,6 @@ namespace Game
         SDL_FRect p_absolute{ 0, 0, 0, 0 };
 
         void _processchildren();
-
-        template <typename T>
-        inline T* pushGuiObject() __push_gui_list(s_targetParentContainer, p_children, GuiContainer)
-        template <typename T>
-        inline T* pushGuiComponent() __push_gui_list(s_targetComponentParent, p_components, GuiComponent)
             
         inline void popGuiObject() { delete p_children.front(); }
         void popGuiComponent();
@@ -168,15 +168,6 @@ namespace Game
         return currentGuiLayer;
     }
 }
-
-class EntryGuiLayer : public Game::GuiLayer
-{
-public:
-    EntryGuiLayer();
-    ~EntryGuiLayer();
-
-    void Update(float dt) override;
-};
 
 #undef __push_gui_vec
 #undef __pop_gui_vec
