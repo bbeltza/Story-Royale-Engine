@@ -164,16 +164,20 @@ void DrawingDevice::renderCurrentUI()
 
 //
 
-Vector2f Game::World::screenToWorld(int x, int y, Camera& cam)
+static Game::Camera zeroCam;
+
+Vector2f Game::World::screenToWorld(int x, int y, Camera* cam)
 {
+    if (!cam) return screenToWorld(x, y, &zeroCam);
     int &cx = center[0], cy = center[1];
-    return Vector2f(x - cx + cam.x, y - cy + cam.y);
+    return Vector2f(x - cx + cam->x, y - cy + cam->y);
 }
 
-Vector2i Game::World::worldToScreen(float x, float y, Camera& cam)
+Vector2i Game::World::worldToScreen(float x, float y, Camera* cam)
 {
+    if (!cam) return worldToScreen(x, y, &zeroCam);
     int &cx = center[0], cy = center[1];
-    return Vector2i(x + cx - cam.x, y + cy - cam.y);
+    return Vector2i(x + cx - cam->x, y + cy - cam->y);
 }
 
 void DrawingDevice::processViewport()

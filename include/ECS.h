@@ -8,7 +8,6 @@
 
 #define pushComponentPtr(type, ptr) pushComponent(type, (void**)&ptr)
 
-
 namespace Game
 {
     class World;
@@ -125,11 +124,11 @@ namespace Game
         }
         void popEntity() { delete m_Entities.back(); }
         
-        inline Vector2f screenToWorldSpace(const int x, const int y) {return screenToWorld(x, y, CurrentCamera);}
-        inline Vector2i worldToScreenSpace(const float x, const float y) {return worldToScreen(x, y, CurrentCamera);}
+        inline Vector2f screenToWorldSpace(const int x, const int y) {return screenToWorld(x, y, &CurrentCamera);}
+        inline Vector2i worldToScreenSpace(const float x, const float y) {return worldToScreen(x, y, &CurrentCamera);}
 
-        static Vector2i worldToScreen(const float x, const float y, Camera& cam=Camera());
-        static Vector2f screenToWorld(const int x, const int y, Camera& cam=Camera());
+        static Vector2i worldToScreen(const float x, const float y, Camera* cam=nullptr);
+        static Vector2f screenToWorld(const int x, const int y, Camera* cam=nullptr);
 
         void Update(float dt);
         void pUpdate(float dt);
