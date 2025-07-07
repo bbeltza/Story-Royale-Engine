@@ -27,5 +27,7 @@ const Vector2i InputClass::getMouseScreenPosition() const
 
 const Vector2f InputClass::getMouseWorldPosition() const
 {
+    if (!Game::currentWorld)
+        return Game::currentWorld->screenToWorld(m_mouseState.x, m_mouseState.y);
     return Game::currentWorld->screenToWorldSpace(m_mouseState.x, m_mouseState.y);
 }

@@ -4,19 +4,20 @@
 #include <GuiLayer.h>
 #include <GuiComponents.h>
 
+static double rot = 0;
+
 struct DisplayText: public Game::GuiLayer
 {
     DisplayText()
     {
         auto label = pushGuiObject<Game::GuiObject>();
         label->anchor = Vector2f(0.5, 0);
-        label->position = UDim2(0, 300, 0, 50);
+        label->position = UDim2(0.5, 0, 0, 50);
         label->color = {0, 0, 0, 0};
         
         auto text = label->pushGuiComponent<Game::GuiComponents::UIText>();
-        text->scale = 1;
         text->color = {255, 255, 255};
-        text->text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!");
+        text->text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
         #if defined(WIN32)
         text->LoadFontPath("C:/Windows/Fonts/calibri.ttf");
         #elif defined(__linux__)
@@ -25,10 +26,15 @@ struct DisplayText: public Game::GuiLayer
     }
 
     void postRender();
+    void Update(float delta) { rot += delta * 80; }
 };
 
-RectI mouseRect(0, 0, 100, 100);
-RectI staticRect(300, 300, 250, 102);
+RectI mouseRect(0, 0, 100, 50);
+RectI staticRect(0, 20, 250, 90);
+
+EVENT_CALLBACK(mousewheel, MouseWheel, event)
+    mouseRect.Size = mouseRect.Size + event->amount * 10;
+}
 
 void DisplayText::postRender()
 {
@@ -38,16 +44,23 @@ void DisplayText::postRender()
     else
         col = {255, 0, 0, 255}; // Red
 
-    Vector2i mPos = Engine->Input.getMouseScreenPosition();
+    Vector2f mPos = Engine->Input.getMouseWorldPosition();
     mouseRect.Position.X = mPos.X;
-    mouseRect.Position.Y = mPos.Y;    
-    Engine->DrawingContext.DrawRectangle(staticRect, {255, 255, 255, 255});
-    Engine->DrawingContext.DrawRectangle(mouseRect, col);
+    mouseRect.Position.Y = mPos.Y;
+    Engine->DrawingContext.DrawRectangleAtWorld(staticRect, {255, 255, 255, 255});
+    Engine->DrawingContext.DrawRectangleAtWorld(mouseRect, col);
+    Engine->DrawingContext.DrawDebug(mouseRect.getTopLeft());
+    Engine->DrawingContext.DrawDebug(mouseRect.getTopRight());
+    Engine->DrawingContext.DrawDebug(mouseRect.getBottomLeft());
+    Engine->DrawingContext.DrawDebug(mouseRect.getBottomRight());
 }
 
 void Game::Initialize()
 {
+    GameSettings::targetFPS = 40;
     GameSettings::Title = "Rectangle Test";
 
     Game::setGuiLayer<DisplayText>();
+
+    Engine->Input.mouseWheel.Connect(mousewheel);
 }

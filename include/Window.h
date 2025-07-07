@@ -10,7 +10,6 @@ class WindowClass
     ENGINE_BASE
     friend class GuiContainer;
 public:
-    void getScreenCenter(uint32_t* x, uint32_t* y);
     void setTargetFPS(unsigned short fps);
 private:
 

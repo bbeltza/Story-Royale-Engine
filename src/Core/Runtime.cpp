@@ -51,6 +51,12 @@ EngineClass::EngineClass()
 
     DrawingContext.sdl_renderer = SDL_CreateRenderer(Window.sdl_window, -1, 0);
     SDL_SetRenderDrawBlendMode(DrawingContext.sdl_renderer, SDL_BLENDMODE_BLEND);
+    
+    DrawingContext.sdl_rectTexture = SDL_CreateTexture(DrawingContext.sdl_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+    {
+        uint64_t WHITE = UINT64_MAX;
+        SDL_UpdateTexture(DrawingContext.sdl_rectTexture, NULL, &WHITE, 4);
+    }
 }
 
 EngineClass::~EngineClass()
@@ -97,7 +103,7 @@ void EngineClass::Run()
             Game::currentWorld->pUpdate(dt);
         }
         
-        Window.processViewport();
+        DrawingContext.processViewport();
         DrawingContext.render();
 
         if (Game::currentGuiLayer)

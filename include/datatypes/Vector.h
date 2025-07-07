@@ -1,34 +1,43 @@
 #pragma once
 #include <math.h>
 
-#define DefineVec2Operator(c, op)\
-c operator op(const c &other)\
-{ return c(this->X op other.X, this->Y op other.Y); }\
+template <class _Num>
+struct Vector2
+{
+    Vector2(const _Num x, const _Num y): X(x), Y(y) {}
+    Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
+    Vector2(): Vector2(0, 0) {}
 
-#define DefineVec2OperatortoNum(c, t,op)\
-c operator op(const t &num)\
-{ return c(this->X op num, this->Y op num); }\
+    template <class _Num2> Vector2(const _Num2 x, const _Num2 y): X(x), Y(y) {}
+    template <class _Num2> Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
-#define DefineVec2Type(classname, type) \
-class classname\
-{\
-public:\
-    classname(): X(0), Y(0) {}\
-    classname(const type X, const type Y): X(X), Y(Y) {}\
-    type X, Y;\
-    DefineVec2Operator(classname, +)\
-    DefineVec2Operator(classname, -)\
-    DefineVec2Operator(classname, *)\
-    DefineVec2Operator(classname, /)\
-    \
-    inline double getMagnitude() {return sqrt(X*X + Y*Y);}\
-    \
-    DefineVec2OperatortoNum(classname, type, +)\
-    DefineVec2OperatortoNum(classname, type, -)\
-    DefineVec2OperatortoNum(classname, type, *)\
-    DefineVec2OperatortoNum(classname, type, /)\
-};\
+    inline void Print() {std::cout << "{ " << X << ", " << Y << " }\n";}
 
-DefineVec2Type(Vector2i, int)
-DefineVec2Type(Vector2f, float)
-DefineVec2Type(Vector2d, double)
+    inline double getMagnitude() {return sqrt(X*X + Y*Y);}
+
+    _Num X, Y;
+};
+
+#define vec2op(op) { return {first.X op other.X, first.Y op other.Y}; }
+#define vec2op_num(op) { return {first.X op other, first.Y op other}; }
+#define vec2 Vector2<_Num>
+#define _t template <class _Num>
+
+_t inline vec2 operator +(const vec2& first, const vec2& other) vec2op(+)
+_t inline vec2 operator -(const vec2& first, const vec2& other) vec2op(-)
+_t inline vec2 operator *(const vec2& first, const vec2& other) vec2op(*)
+_t inline vec2 operator /(const vec2& first, const vec2& other) vec2op(/)
+
+_t inline vec2 operator +(const vec2& first, const _Num& other) vec2op_num(+)
+_t inline vec2 operator -(const vec2& first, const _Num& other) vec2op_num(-)
+_t inline vec2 operator *(const vec2& first, const _Num& other) vec2op_num(*)
+_t inline vec2 operator /(const vec2& first, const _Num& other) vec2op_num(/)
+
+#undef vec2op
+#undef vec2op_num
+#undef vec2
+#undef _t
+
+typedef Vector2<int> Vector2i;
+typedef Vector2<float> Vector2f;
+typedef Vector2<double> Vector2d;

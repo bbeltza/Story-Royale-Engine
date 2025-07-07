@@ -2,7 +2,7 @@
 #include <standard.h>
 #include <SDL.hpp>
 
-#include "Window.h"
+#include "DrawingContext.h"
 
 #include "Flags.h"
 
@@ -50,7 +50,7 @@ namespace Game
         inline T* pushGuiComponent() __push_gui_list(s_targetComponentParent, p_components, GuiComponent)
 
     protected:
-        friend class ::WindowClass;
+        friend class ::DrawingDevice;
 
         Color4 p_modulate = { 255, 255, 255, 255 };
         SDL_FRect p_absolute{ 0, 0, 0, 0 };

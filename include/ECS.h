@@ -124,19 +124,22 @@ namespace Game
             return newEntity;
         }
         void popEntity() { delete m_Entities.back(); }
+        
+        inline Vector2f screenToWorldSpace(const int x, const int y) {return screenToWorld(x, y, CurrentCamera);}
+        inline Vector2i worldToScreenSpace(const float x, const float y) {return worldToScreen(x, y, CurrentCamera);}
 
-        Vector2f screenToWorldSpace(int x, int y);
-        Vector2i worldToScreenSpace(float x, float y);
+        static Vector2i worldToScreen(const float x, const float y, Camera& cam=Camera());
+        static Vector2f screenToWorld(const int x, const int y, Camera& cam=Camera());
 
         void Update(float dt);
         void pUpdate(float dt);
-        void render();
+        static void render();
         virtual void OnUpdate(float dt) {}
 
         Entity* _query();
 
     private:
-        static unsigned int center[2];
+        static int center[2];
         static World* s_TargetEntityWorld;
         std::list<Entity*> m_Entities;
 

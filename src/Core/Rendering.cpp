@@ -6,13 +6,90 @@
 #include "GuiLayer.h"
 #include "Components.h"
 #include "GuiComponents.h"
+#include "DrawingContext.h"
 
-void WindowClass::getScreenCenter(unsigned int* x, unsigned int* y)
+void DrawingDevice::getScreenCenter(unsigned int *x, unsigned int *y)
 {
     if (x)
         *x = m_viewport.x;
     if (y)
         *y = m_viewport.y;
+}
+
+#define CHECK_LOCK \
+    if (m_Locked)  \
+        return;
+
+void DrawingDevice::DrawRectangle(const Rect<int> &_Rectangle, const Color4 &_Col)
+{
+    CHECK_LOCK
+    SDL_Rect r{
+        _Rectangle.Position.X - _Rectangle.Size.X / 2,
+        _Rectangle.Position.Y - _Rectangle.Size.Y / 2,
+        _Rectangle.Size.X,
+        _Rectangle.Size.Y};
+
+    SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
+    SDL_RenderFillRect(sdl_renderer, &r);
+};
+
+void DrawingDevice::DrawRectangleAtWorld(const RectI& _Rectangle, const Color4& _Col)
+{
+    CHECK_LOCK
+    Vector2i target_pos = _Rectangle.getTopLeft();
+    if (Game::currentWorld)
+        target_pos = Game::currentWorld->worldToScreenSpace(target_pos.X, target_pos.Y);
+    else
+        target_pos = Game::currentWorld->worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, using a static function so it shouldn't crash
+    
+    SDL_Rect r{
+        target_pos.X,
+        target_pos.Y,
+        _Rectangle.Size.X,
+        _Rectangle.Size.Y};
+
+    SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
+    SDL_RenderFillRect(sdl_renderer, &r);
+}
+
+void DrawingDevice::DrawRotatedRectangle(const RectI& _Rectangle, const double _angle, const Color4& _Col)
+{
+    CHECK_LOCK
+    if (_angle == 0) return DrawRectangle(_Rectangle, _Col);    
+
+    SDL_Rect r{
+        _Rectangle.Position.X - _Rectangle.Size.X / 2,
+        _Rectangle.Position.Y - _Rectangle.Size.Y / 2,
+        _Rectangle.Size.X,
+        _Rectangle.Size.Y};
+    
+    SDL_SetTextureColorMod(sdl_rectTexture, _Col.r, _Col.g, _Col.b);
+    SDL_SetTextureAlphaMod(sdl_rectTexture, _Col.a);
+    SDL_RenderCopyEx(sdl_renderer, sdl_rectTexture, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
+}
+
+void DrawingDevice::DrawRotatedRectangleAtWorld(const RectI& _Rectangle, const double _angle, const Color4& _Col)
+{
+    CHECK_LOCK
+    Vector2i target_pos(_Rectangle.Position);
+    if (Game::currentWorld)
+        target_pos = Game::currentWorld->worldToScreenSpace(target_pos.X, target_pos.Y);
+    else
+        target_pos = Game::currentWorld->worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, using a static function so it shouldn't crash
+
+    return DrawRotatedRectangle(RectI(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col);
+}
+
+void DrawingDevice::DrawDebug(Vector2i pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into world coordinates
+{
+    if (Game::currentWorld)
+        pos = Game::currentWorld->worldToScreenSpace(pos.X, pos.Y);
+    else
+        pos = Game::currentWorld->worldToScreen(pos.X, pos.Y);
+
+    SDL_SetRenderDrawColor(sdl_renderer, 255, 64, 0, 255);
+    SDL_RenderDrawLineF(sdl_renderer, pos.X - ENTITY_DBGLINESIZE, pos.Y, pos.X + ENTITY_DBGLINESIZE, pos.Y);
+    SDL_RenderDrawLineF(sdl_renderer, pos.X, pos.Y - ENTITY_DBGLINESIZE, pos.X, pos.Y + ENTITY_DBGLINESIZE);
 }
 
 void DrawingDevice::render()
@@ -21,9 +98,11 @@ void DrawingDevice::render()
     tr();
 
     // Render current world
-    if (Game::currentWorld) renderCurrentWorld();
+    if (Game::currentWorld)
+        renderCurrentWorld();
     else
     {
+        Game::currentWorld->render();
         SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, 0);
         SDL_RenderClear(sdl_renderer);
     }
@@ -31,8 +110,9 @@ void DrawingDevice::render()
     m_Engine->BeforeRender.Fire(0);
 
     // Drawing the Gui layer
-    if (Game::currentGuiLayer) renderCurrentUI();
-    
+    if (Game::currentGuiLayer)
+        renderCurrentUI();
+
     m_Engine->AfterRender.Fire(0);
 
     // Present the screen
@@ -41,10 +121,10 @@ void DrawingDevice::render()
 }
 
 void DrawingDevice::renderCurrentWorld()
-{    
+{
     //// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
-    Color3& bg = Game::currentWorld->Background;
-    Color4& fg = Game::currentWorld->Foreground;
+    Color3 &bg = Game::currentWorld->Background;
+    Color4 &fg = Game::currentWorld->Foreground;
 
     //// Clearing the screen with the background color
     SDL_SetRenderDrawColor(sdl_renderer, bg.r, bg.g, bg.b, 255);
@@ -57,7 +137,7 @@ void DrawingDevice::renderCurrentWorld()
     }
 
     //// Finally, filling the foreground (doesn't run if the foreground is invisible)
-    //printf("%u, %u, %u, %u / %u, %u, %u\n", fg.r, fg.g, fg.b, fg.a, bg.r, bg.g, bg.b);
+    // printf("%u, %u, %u, %u / %u, %u, %u\n", fg.r, fg.g, fg.b, fg.a, bg.r, bg.g, bg.b);
     if (fg.a)
     {
         SDL_SetRenderDrawColor(sdl_renderer, fg.r, fg.g, fg.b, fg.a);
@@ -67,7 +147,7 @@ void DrawingDevice::renderCurrentWorld()
 
 void DrawingDevice::renderCurrentUI()
 {
-    Color4& uifg = Game::currentGuiLayer->Foreground;
+    Color4 &uifg = Game::currentGuiLayer->Foreground;
 
     if (uifg.a < 255)
     {
@@ -84,26 +164,27 @@ void DrawingDevice::renderCurrentUI()
 
 //
 
-Vector2f Game::World::screenToWorldSpace(int x, int y)
+Vector2f Game::World::screenToWorld(int x, int y, Camera& cam)
 {
-    unsigned int& cx = this->center[0], cy = this->center[1];
-    return { x - (int)cx + CurrentCamera.x, y - (int)cy + CurrentCamera.y };
+    int &cx = center[0], cy = center[1];
+    return Vector2f(x - cx + cam.x, y - cy + cam.y);
 }
 
-Vector2i Game::World::worldToScreenSpace(float x, float y)
+Vector2i Game::World::worldToScreen(float x, float y, Camera& cam)
 {
-    unsigned int& cx = this->center[0], cy = this->center[1];
-    return { (int)x + (int)cx - (int)CurrentCamera.x, (int)y + (int)cy - (int)CurrentCamera.y };
+    int &cx = center[0], cy = center[1];
+    return Vector2i(x + cx - cam.x, y + cy - cam.y);
 }
 
-void WindowClass::processViewport()
+void DrawingDevice::processViewport()
 {
     // Updating the viewport rect
-    SDL_GetWindowSizeInPixels(sdl_window, &m_viewport.w, &m_viewport.h);
+    SDL_RenderGetViewport(sdl_renderer, &m_viewport);
     m_viewport.x = m_viewport.w / 2;
     m_viewport.y = m_viewport.h / 2;
 
-    if (!Game::currentGuiLayer) return;    
+    if (!Game::currentGuiLayer)
+        return;
     Game::currentGuiLayer->p_absolute.w = (float)m_viewport.w;
     Game::currentGuiLayer->p_absolute.h = (float)m_viewport.h;
 

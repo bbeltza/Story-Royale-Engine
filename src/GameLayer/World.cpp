@@ -6,7 +6,7 @@
 
 Game::World* Game::currentWorld = nullptr;
 Game::World* Game::World::s_TargetEntityWorld = nullptr;
-unsigned int Game::World::center[2];
+int Game::World::center[2];
 
 Game::World::World()
 {
@@ -30,9 +30,12 @@ void Game::World::Update(float dt)
 
 void Game::World::render()
 {
-    m_Entities.sort(re_order);
-    Engine->Window.getScreenCenter(this->center, this->center + 1);
-    for (Entity* entity : this->m_Entities)
+    Engine->DrawingContext.getScreenCenter((unsigned int*)center, (unsigned int*)center + 1);
+
+    if (!Game::currentWorld) return;
+
+    Game::currentWorld->m_Entities.sort(re_order);
+    for (Entity* entity : Game::currentWorld->m_Entities)
     {
         entity->preRender();
         entity->_render();
@@ -40,6 +43,6 @@ void Game::World::render()
     }
 
 #ifdef _DEBUG
-    for (Entity* entity : this->m_Entities) entity->_debugDraw();
+    for (Entity* entity : Game::currentWorld->m_Entities) entity->_debugDraw();
 #endif
 }
