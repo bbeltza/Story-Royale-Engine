@@ -46,5 +46,5 @@ private:
 
     // Private states
     _mState m_mouseState;
-    uint8_t m_keyboardState[SDL_NUM_SCANCODES];
+    uint8_t m_keyboardState[SDL_NUM_SCANCODES] = {0};
 };

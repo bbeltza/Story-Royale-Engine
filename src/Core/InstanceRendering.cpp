@@ -35,21 +35,15 @@ void Game::Components::Shape::render(int x, int y)
 
     SDL_SetRenderDrawColor(target_renderer, Color.r, Color.b, Color.g, Color.a);
 
-    const float cx = x + xOffset;
-    const float cy = y + yOffset;
+    const RectI render_rect = getRealRect();
 
     if (shape == CIRCLE)
     {
-        SDL_RenderFillCircle(target_renderer, cx, cy, Width / 2);
+        SDL_RenderFillCircle(target_renderer, x + Rect.Position.X, y + Rect.Position.Y, Rect.Size.X / 2);
     }
     else
     {
-        m_renderRect.w = Width;
-        m_renderRect.h = Height;
-        m_renderRect.x = cx - m_renderRect.w / 2;
-        m_renderRect.y = cy - m_renderRect.h / 2;
-
-        SDL_RenderFillRectF(target_renderer, &m_renderRect);
+        Engine->DrawingContext.DrawRectangleAtWorld(render_rect, Color);
     }
 }
 void Game::GuiComponents::UIStroke::render()
@@ -102,4 +96,23 @@ void Game::GuiComponents::UIText::render()
 
     //*absolute = oldAbs;
     if (oldchar) text[count] = oldchar;
+}
+
+void Game::Components::Sprite::render(int x, int y)
+{
+    if (textures.empty()) return;
+    auto frame = std::min(current_frame, textures.size() - 1);
+    current_frame = frame;
+    File& texture = textures[frame];
+
+    SDL_Rect render_rect;
+    if (!Engine->DrawingContext.LoadFileTexture(texture)) return;
+    SDL_QueryTexture((SDL_Texture*)texture.GetUserData(), NULL, NULL, (int*)&render_rect + 2, (int*)&render_rect + 3);
+
+    render_rect.w *= Scale.X;
+    render_rect.h *= Scale.Y;
+    render_rect.x = x + Offset.X;
+    render_rect.y = y + Offset.Y;
+
+    Engine->DrawingContext.DrawTexture(*(RectI*)&render_rect, texture);
 }

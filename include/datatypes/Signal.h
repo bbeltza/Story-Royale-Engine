@@ -1,9 +1,8 @@
 #pragma once
 
-#define EVENT_CALLBACK_DECLARE(name) void name(void* _userdata)
-#define EVENT_CALLBACK(name, type, identifier) void name(void* _userdata)\
-{ type* identifier = (type*)_userdata; \
+typedef void (*EventFunction)(void*);
 
+#define event_callback(fn) (EventFunction)fn
 
 struct Signal;
 struct Connection;
@@ -15,7 +14,7 @@ struct Signal
     Signal(Signal& other) = delete;
     ~Signal();
 
-    Connection* Connect(void(*fn)(void*));
+    Connection* Connect(EventFunction fn);
 
     void Fire(void* userdata);
 
@@ -25,14 +24,14 @@ private:
 
 struct Connection
 {
-    Connection(Signal* signal, void (*fn)(void*), void* self):
+    Connection(Signal* signal, EventFunction fn, void* self):
         m_signal(signal),
         m_fn(fn),
         m_connected(1),
         m_next(nullptr),
         m_class(self)
     {}
-    Connection(Signal* signal, void (*fn)(void*)) :
+    Connection(Signal* signal, EventFunction fn) :
         Connection(signal, fn, nullptr)
     {}
     Connection(Connection& other) = delete;
@@ -42,7 +41,7 @@ private:
     friend struct Signal;
     ~Connection() {}
 
-    void (*m_fn)(void*);
+    EventFunction m_fn;
     void* m_class;
     const Signal* m_signal;
     Connection* m_next;

@@ -66,9 +66,6 @@ namespace Game
 
         Components::Velocity* velocityComp = nullptr;
 
-
-    protected:
-
         void* pushComponent(ENUM_ComponentType type, void **ptr=nullptr);
         void popComponent();
 
@@ -94,7 +91,7 @@ namespace Game
 
     };
 
-    class World
+    class World: public GameInstance
     {
     public:
         World();
@@ -152,7 +149,7 @@ namespace Game
     template <typename T>
     inline World* setWorld()
     {
-        if (currentWorld) delete currentWorld;
+        if (currentWorld) currentWorld->Destroy();
         currentWorld = new T;
         return currentWorld;
     }

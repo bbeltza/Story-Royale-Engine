@@ -14,6 +14,7 @@ enum ENUM_ComponentType : unsigned char
 {
     NULLCOMPONENT = 0,
     SHAPE,
+    SPRITE,
     VELOCITY,
     ENTITY_CONTAINER
 };
@@ -22,4 +23,13 @@ enum ENUM_Shape : char
 {
     RECTANGLE,
     CIRCLE,
+};
+
+enum ENUM_FileType : unsigned char
+{
+    UNINITIALIZED = 0,
+    TEXT,
+    IMAGE,
+    FONT,
+    UNKNOWN
 };

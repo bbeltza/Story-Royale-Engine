@@ -8,11 +8,11 @@ struct Vector2
     Vector2(const _Num x, const _Num y): X(x), Y(y) {}
     Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
     Vector2(): Vector2(0, 0) {}
-
+    
     template <class _Num2> Vector2(const _Num2 x, const _Num2 y): X(x), Y(y) {}
     template <class _Num2> Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
-    inline void Print() {std::cout << "{ " << X << ", " << Y << " }\n";}
+    inline void Print() const {std::cout << "{ " << X << ", " << Y << " }\n";}
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
 

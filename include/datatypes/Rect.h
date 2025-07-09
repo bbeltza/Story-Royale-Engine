@@ -1,7 +1,7 @@
 #pragma once
 #include "Vector.h"
 
-constexpr double pi = M_PI;
+extern const double pi;
 
 template <typename _Num> inline _Num _abs(_Num x) {return x < 0 ? -x : x;}
 template <typename _Num> inline double _rad(_Num x) {return (x * (pi / 180));}
@@ -14,6 +14,7 @@ struct Rect
     Rect(): Position(0, 0), Size(50, 50) {}
     Rect(const _Num x, const _Num y, const _Num width, const _Num height): Position(x, y), Size(width, height) {}
     Rect(const _Num xy, const _Num wh): Position(xy, xy), Size(wh, wh) {}
+    Rect(const Vector2<_Num> &position, const Vector2<_Num> &size): Position(position), Size(size) {}
     Rect(const Rect& other): Position(other.Position), Size(other.Size) {}
     template <class _OtherNum> Rect(const Rect<_OtherNum>& other): Position(other.Position), Size(other.Size) {}
 

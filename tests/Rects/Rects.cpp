@@ -32,7 +32,8 @@ struct DisplayText: public Game::GuiLayer
 RectI mouseRect(0, 0, 100, 50);
 RectI staticRect(0, 20, 250, 90);
 
-EVENT_CALLBACK(mousewheel, MouseWheel, event)
+void mousewheel(MouseWheel* event)
+{
     mouseRect.Size = mouseRect.Size + event->amount * 10;
 }
 
@@ -62,5 +63,5 @@ void Game::Initialize()
 
     Game::setGuiLayer<DisplayText>();
 
-    Engine->Input.mouseWheel.Connect(mousewheel);
+    Engine->Input.mouseWheel.Connect(event_callback(mousewheel));
 }

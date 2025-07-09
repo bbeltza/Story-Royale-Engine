@@ -34,6 +34,9 @@ void* Game::Entity::pushComponent(ENUM_ComponentType type, void **ptr)
     case SHAPE:
         newComp = new Components::Shape();
         break;
+    case SPRITE:
+        newComp = new Components::Sprite();
+        break;
     case VELOCITY:
         newComp = new Components::Velocity();
         break;
@@ -42,7 +45,7 @@ void* Game::Entity::pushComponent(ENUM_ComponentType type, void **ptr)
     default:
         this->s_targetEntityComponent = nullptr;
         sys_errorf("Couldn't create component, type doesn't exist: %u", type);
-        break;
+        return nullptr;
     }
 
     this->s_targetEntityComponent = nullptr;

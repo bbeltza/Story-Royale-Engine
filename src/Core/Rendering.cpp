@@ -33,7 +33,7 @@ void DrawingDevice::DrawRectangle(const Rect<int> &_Rectangle, const Color4 &_Co
     SDL_RenderFillRect(sdl_renderer, &r);
 };
 
-void DrawingDevice::DrawRectangleAtWorld(const RectI& _Rectangle, const Color4& _Col)
+void DrawingDevice::DrawRectangleAtWorld(const RectI &_Rectangle, const Color4 &_Col)
 {
     CHECK_LOCK
     Vector2i target_pos = _Rectangle.getTopLeft();
@@ -41,7 +41,7 @@ void DrawingDevice::DrawRectangleAtWorld(const RectI& _Rectangle, const Color4& 
         target_pos = Game::currentWorld->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
         target_pos = Game::currentWorld->worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, using a static function so it shouldn't crash
-    
+
     SDL_Rect r{
         target_pos.X,
         target_pos.Y,
@@ -52,23 +52,24 @@ void DrawingDevice::DrawRectangleAtWorld(const RectI& _Rectangle, const Color4& 
     SDL_RenderFillRect(sdl_renderer, &r);
 }
 
-void DrawingDevice::DrawRotatedRectangle(const RectI& _Rectangle, const double _angle, const Color4& _Col)
+void DrawingDevice::DrawRotatedRectangle(const RectI &_Rectangle, const double _angle, const Color4 &_Col)
 {
     CHECK_LOCK
-    if (_angle == 0) return DrawRectangle(_Rectangle, _Col);    
+    if (_angle == 0)
+        return DrawRectangle(_Rectangle, _Col);
 
     SDL_Rect r{
         _Rectangle.Position.X - _Rectangle.Size.X / 2,
         _Rectangle.Position.Y - _Rectangle.Size.Y / 2,
         _Rectangle.Size.X,
         _Rectangle.Size.Y};
-    
+
     SDL_SetTextureColorMod(sdl_rectTexture, _Col.r, _Col.g, _Col.b);
     SDL_SetTextureAlphaMod(sdl_rectTexture, _Col.a);
     SDL_RenderCopyEx(sdl_renderer, sdl_rectTexture, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
 }
 
-void DrawingDevice::DrawRotatedRectangleAtWorld(const RectI& _Rectangle, const double _angle, const Color4& _Col)
+void DrawingDevice::DrawRotatedRectangleAtWorld(const RectI &_Rectangle, const double _angle, const Color4 &_Col)
 {
     CHECK_LOCK
     Vector2i target_pos(_Rectangle.Position);
@@ -162,20 +163,65 @@ void DrawingDevice::renderCurrentUI()
     }
 }
 
+void DrawingDevice::DrawTexture(const RectI &_Rectangle, File &_File)
+{
+    if (!LoadFileTexture(_File))
+        return;
+
+    SDL_Rect render_rect{_Rectangle.getLeft(), _Rectangle.getTop(), _Rectangle.Size.X, _Rectangle.Size.Y};
+    SDL_RenderCopy(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect);
+}
+
+bool DrawingDevice::LoadFileTexture(File &_File)
+{
+    //printf("%p\n", _File.m_userdata);
+    if (_File.m_userdata) return true;
+
+    if (_File.m_type != IMAGE)
+    {
+        printf("Invalid type, type must be IMAGE, current type is %d\n", _File.m_type);
+        return false;
+    }
+
+    if (SDL_Texture *target_texture = m_LoadedTextures[_File.m_filepath])
+        _File.m_userdata = target_texture;
+    else
+    {
+        
+        if (SDL_Surface *temp_surf = IMG_Load(_File.m_filepath))
+        {
+             m_LoadedTextures[_File.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
+             _File.m_userdata = m_LoadedTextures[_File.m_filepath];
+
+            SDL_FreeSurface(temp_surf);
+        }
+        else
+        {
+            printf("%s\n", SDL_GetError());
+            return false;
+        }
+    }
+    return true;
+}
+
+//
+
 //
 
 static Game::Camera zeroCam;
 
-Vector2f Game::World::screenToWorld(int x, int y, Camera* cam)
+Vector2f Game::World::screenToWorld(int x, int y, Camera *cam)
 {
-    if (!cam) return screenToWorld(x, y, &zeroCam);
+    if (!cam)
+        return screenToWorld(x, y, &zeroCam);
     int &cx = center[0], cy = center[1];
     return Vector2f(x - cx + cam->x, y - cy + cam->y);
 }
 
-Vector2i Game::World::worldToScreen(float x, float y, Camera* cam)
+Vector2i Game::World::worldToScreen(float x, float y, Camera *cam)
 {
-    if (!cam) return worldToScreen(x, y, &zeroCam);
+    if (!cam)
+        return worldToScreen(x, y, &zeroCam);
     int &cx = center[0], cy = center[1];
     return Vector2i(x + cx - cam->x, y + cy - cam->y);
 }

@@ -4,6 +4,7 @@ set(SOURCES
 "DefaultGameSettings.cpp"
 "ExtraSDL.c"
 "System.c"
+"File.cpp"
 
 )
 
@@ -41,6 +42,7 @@ set(LAYER_SOURCES
 
 "Components/World/Shape.cpp"
 "Components/World/Velocity.cpp"
+"Components/World/Sprite.cpp"
 
 "Presets/Gui/GuiButton.cpp"
 

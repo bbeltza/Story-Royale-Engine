@@ -1,10 +1,7 @@
 #include "Components.h"
 
 Game::Components::Shape::Shape() :
-    xOffset(0),
-    yOffset(0),
-    Width(50),
-    Height(50),
+    Rect(),
     shape(RECTANGLE),
     flags(VISIBLE)
 {
@@ -17,16 +14,25 @@ bool Game::Components::Shape::isInScreenPoint(Vector2i pt)
     World* w = p->getWorld();
 
     static SDL_FPoint fpt;
+    static SDL_FRect r;
     fpt.x = pt.X;
     fpt.y = pt.Y;
+
+    static Vector2i screenSpace;
 
     switch (shape)
     {
     case RECTANGLE:
-        return SDL_PointInFRect(&fpt, &m_renderRect);
+        screenSpace = w->worldToScreenSpace(p->x + Rect.getLeft(), p->y + Rect.getTop());
+        r.x = screenSpace.X;
+        r.y = screenSpace.Y;
+        r.w = Rect.Size.X;
+        r.h = Rect.Size.Y;
+        return SDL_PointInFRect(&fpt, &r);
         break;
     case CIRCLE:
-        return (w->worldToScreenSpace(p->x + xOffset, p->y + yOffset) - pt).getMagnitude() <= Width/2;
+        screenSpace = w->worldToScreenSpace(p->x + Rect.Position.X, p->y + Rect.Position.Y);
+        return (screenSpace - pt).getMagnitude() <= Rect.Size.X/2;
         break;
     default:
         return 0;

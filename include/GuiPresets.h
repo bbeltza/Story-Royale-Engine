@@ -16,7 +16,7 @@ namespace Game{
             virtual void MouseHover(bool hovered) {}
         private:
             static std::list<GuiButton*> s_buttons;
-            static EVENT_CALLBACK_DECLARE(clickevent);
+            static void clickevent(MouseButton* buttonData);
             static Connection* s_clickconnection;
 
             void Update(float dt) override;
