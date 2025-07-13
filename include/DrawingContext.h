@@ -11,10 +11,16 @@ class DrawingDevice
     ENGINE_BASE
 
 public:
+    enum DrawingMode
+    {
+        dm_Stroke,
+        dm_Fill
+    };
+
     void getScreenCenter(unsigned int* x, unsigned int* y);
 
-    void DrawRectangle(const RectI& _Rectangle, const Color4& _Col);
-    void DrawRectangleAtWorld(const Rect<int>& _Rectangle, const Color4& _Col);
+    void DrawRectangle(const RectI& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
+    void DrawRectangleAtWorld(const Rect<int>& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
 
     void DrawRotatedRectangle(const RectI& _Rectangle, const double _angle, const Color4& _Col);
     void DrawRotatedRectangleAtWorld(const RectI& _Rectangle, const double _angle, const Color4& _Col);
@@ -30,7 +36,7 @@ private:
     
     SDL_Rect m_viewport;
 
-    std::unordered_map<const char*, SDL_Texture*> m_LoadedTextures;
+    std::unordered_map<std::string, SDL_Texture*> m_LoadedTextures;
 
     void processViewport();
     void render();

@@ -16,6 +16,8 @@ endif()
 add_subdirectory(3rdparty)
 
 project(StoryRoyaleEngine)
+project(no_bind)
+add_library(no_bind ${CMAKE_MODULE_PATH}/empty_res.c)
 
 add_subdirectory(src)
 
@@ -38,8 +40,10 @@ srEngine_include_directories(StoryRoyaleEngine)
 target_link_libraries(StoryRoyaleEngine ${3RDPARTYLIBS})
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    set(BUILD_TESTS)
     add_subdirectory(tests/Rects)
     add_subdirectory(tests/ImageTest)
+    add_subdirectory(tests/FileTest)
 else()
     set(SRENGINE_INCLUDE_DIRS ${SRENGINE_INCLUDE_DIRS} PARENT_SCOPE)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRENGINE_CMAKE_MODULE_PATH} PARENT_SCOPE)

@@ -20,7 +20,7 @@ void DrawingDevice::getScreenCenter(unsigned int *x, unsigned int *y)
     if (m_Locked)  \
         return;
 
-void DrawingDevice::DrawRectangle(const Rect<int> &_Rectangle, const Color4 &_Col)
+void DrawingDevice::DrawRectangle(const Rect<int> &_Rectangle, const Color4 &_Col, DrawingMode _mode)
 {
     CHECK_LOCK
     SDL_Rect r{
@@ -30,10 +30,13 @@ void DrawingDevice::DrawRectangle(const Rect<int> &_Rectangle, const Color4 &_Co
         _Rectangle.Size.Y};
 
     SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
-    SDL_RenderFillRect(sdl_renderer, &r);
+    if (_mode == dm_Stroke)
+        SDL_RenderDrawRect(sdl_renderer, &r);
+    else
+        SDL_RenderFillRect(sdl_renderer, &r);
 };
 
-void DrawingDevice::DrawRectangleAtWorld(const RectI &_Rectangle, const Color4 &_Col)
+void DrawingDevice::DrawRectangleAtWorld(const RectI &_Rectangle, const Color4 &_Col, DrawingMode _mode)
 {
     CHECK_LOCK
     Vector2i target_pos = _Rectangle.getTopLeft();
@@ -49,7 +52,10 @@ void DrawingDevice::DrawRectangleAtWorld(const RectI &_Rectangle, const Color4 &
         _Rectangle.Size.Y};
 
     SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
-    SDL_RenderFillRect(sdl_renderer, &r);
+    if (_mode == dm_Stroke)
+        SDL_RenderDrawRect(sdl_renderer, &r);
+    else
+        SDL_RenderFillRect(sdl_renderer, &r);
 }
 
 void DrawingDevice::DrawRotatedRectangle(const RectI &_Rectangle, const double _angle, const Color4 &_Col)
@@ -59,8 +65,8 @@ void DrawingDevice::DrawRotatedRectangle(const RectI &_Rectangle, const double _
         return DrawRectangle(_Rectangle, _Col);
 
     SDL_Rect r{
-        _Rectangle.Position.X - _Rectangle.Size.X / 2,
-        _Rectangle.Position.Y - _Rectangle.Size.Y / 2,
+        _Rectangle.getLeft(),
+        _Rectangle.getTop(),
         _Rectangle.Size.X,
         _Rectangle.Size.Y};
 
@@ -177,31 +183,30 @@ bool DrawingDevice::LoadFileTexture(File &_File)
     //printf("%p\n", _File.m_userdata);
     if (_File.m_userdata) return true;
 
-    if (_File.m_type != IMAGE)
+    if (_File.m_type != File::Type::Image)
     {
         printf("Invalid type, type must be IMAGE, current type is %d\n", _File.m_type);
         return false;
     }
 
     if (SDL_Texture *target_texture = m_LoadedTextures[_File.m_filepath])
+    {
         _File.m_userdata = target_texture;
+        return true;
+    }
     else
     {
-        
-        if (SDL_Surface *temp_surf = IMG_Load(_File.m_filepath))
-        {
-             m_LoadedTextures[_File.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
-             _File.m_userdata = m_LoadedTextures[_File.m_filepath];
-
-            SDL_FreeSurface(temp_surf);
-        }
-        else
-        {
-            printf("%s\n", SDL_GetError());
-            return false;
-        }
+        SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.m_info.data, _File.m_info.size);
+        if (!temp_rw) goto err;
+        m_LoadedTextures[_File.m_filepath] = IMG_LoadTexture_RW(sdl_renderer, temp_rw, 1);
+        if (!m_LoadedTextures[_File.m_filepath]) goto err;
+        _File.m_userdata = m_LoadedTextures[_File.m_filepath];
+        return true;      
     }
-    return true;
+
+    err:
+    printf("%s\n", SDL_GetError());
+    return false;
 }
 
 //

@@ -61,6 +61,8 @@ EngineClass::EngineClass()
 
 EngineClass::~EngineClass()
 {
+    Game::Component::ClearComponents();
+
     if (Game::currentWorld)
         delete Game::currentWorld;
     if (Game::currentGuiLayer)

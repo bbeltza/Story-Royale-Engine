@@ -24,12 +24,3 @@ enum ENUM_Shape : char
     RECTANGLE,
     CIRCLE,
 };
-
-enum ENUM_FileType : unsigned char
-{
-    UNINITIALIZED = 0,
-    TEXT,
-    IMAGE,
-    FONT,
-    UNKNOWN
-};

@@ -5,9 +5,6 @@ Game::Components::Velocity::Velocity():
     x_direction(0),
     y_direction(0)
 {
-    Game::Entity* e = getParent();
-
-    if (!e->velocityComp) e->velocityComp = this;
 }
 
 void Game::Components::Velocity::normalize()
@@ -23,10 +20,8 @@ void Game::Components::Velocity::normalize()
     m_yNormalized /= mg;
 }
 
-void Game::Components::Velocity::move(float dt)
+void Game::Components::Velocity::move(Entity* e, float dt)
 {
-    auto e = getParent();
-
     normalize();
 
     e->x += velocity * m_xNormalized * dt;

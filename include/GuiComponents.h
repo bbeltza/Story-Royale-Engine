@@ -79,6 +79,7 @@ namespace Game
 
         private:
             TTF_Font* m_font;
+            File m_file;
             SDL_Texture* m_cacheTexture = nullptr;
             
             SDL_FRect m_cache_Abs;

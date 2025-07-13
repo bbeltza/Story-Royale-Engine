@@ -76,11 +76,10 @@ Game::Entity* Game::World::_query()
 
             auto entity = *i;
 
-            for (auto _component : entity->m_Components)
+            for (auto component : entity->m_Components)
             {
-                if (!_component->getType() == SHAPE) continue;
-                auto component = (Components::Shape*)_component;
-                if (component->isInScreenPoint({ mState->x, mState->y }))
+                if (!component->getProcessFlags() & Component::p_Query) continue;
+                if (component->Query(entity))
                 {
                     target_returnEntity = entity;
                     break;
@@ -93,4 +92,9 @@ Game::Entity* Game::World::_query()
     }
 
     return target_returnEntity;
+}
+
+bool Game::Components::Shape::Query(Entity* _entity)
+{
+    return isInScreenPoint(_entity, {mState->x, mState->y});
 }

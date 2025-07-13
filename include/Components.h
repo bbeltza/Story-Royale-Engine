@@ -19,13 +19,15 @@ namespace Game
             char shape;
             char flags;
 
-            void render(int x, int y) override;
+            void Render(Entity* _entity) override;
+            //void pUpdate(Entity* _entity, float delta) override;
+            bool Query(Entity* _entity) override;
 
-            bool isInScreenPoint(Vector2i pt);
+            bool isInScreenPoint(Entity*, Vector2i);
 
 
-            inline RectF getRealRect() const { auto parent = getParent(); return {parent->x + Rect.Position.X, parent->y + Rect.Position.Y, Rect.Size.X, Rect.Size.Y}; }
-            inline bool collidesWith(const Shape* other_shape) const {return getRealRect().Intersects(other_shape->getRealRect());}
+            inline RectF getRealRect(Entity* parent) const { return {parent->x + Rect.Position.X, parent->y + Rect.Position.Y, Rect.Size.X, Rect.Size.Y}; }
+            inline bool collidesWith(Entity* parent, const RectF& other_Rect) const {return getRealRect(parent).Intersects(other_Rect);}
 
         private:
             friend class ::Game::Entity;
@@ -33,13 +35,14 @@ namespace Game
 
         class Velocity : public Component
         {
-        public:
-            Velocity();
+            friend Velocity* Entity::addVelocityComponent();
+            Velocity(); // To assure it doesn't get constructed by addComponent()
+           public:
             unsigned int velocity;
             float x_direction;
             float y_direction;
 
-            void move(float dt);
+            void move(Entity* e, float dt);
             const float magnitude();
 
         private:
@@ -62,7 +65,7 @@ namespace Game
             const char* spritePath = nullptr;
 
             File& LoadFile(const char* path);
-            void render(int x, int y) override;
+            void Render(Entity* _entity) override;
         private:
             std::vector<File> textures;
         };

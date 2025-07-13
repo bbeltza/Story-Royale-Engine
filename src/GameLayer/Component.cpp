@@ -1,28 +1,21 @@
 #include "System.h"
 #include "ECS.h"
 
-Game::Component::Component() : m_type((ENUM_ComponentType)Entity::s_targetComponentType), m_parent(Entity::s_targetEntityComponent)
+static std::vector<Game::Component*> allocated_components;
+
+Game::Component::Component()
 {
-    if (!m_type)
-    {
-        sys_error("Attempt at creating component without a type, please speficy a proper type");
-        delete this;
-    }
-
-    this->m_parent->m_Components.push_back(this);
-
-    if (this->m_type == VELOCITY)
-    {
-        if (m_parent->velocityComp)
-        {
-            m_parent->popComponent();
-            sys_error("Entity already has velocity component");
-        }
-    }
-
+    allocated_components.push_back(this);
 }
 
 Game::Component::~Component()
+{}
+
+void Game::Component::ClearComponents()
 {
-    this->m_parent->m_Components.remove(this);
+    while (!allocated_components.empty())
+    {
+        delete allocated_components.back();
+        allocated_components.pop_back();
+    }
 }

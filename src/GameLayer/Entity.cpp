@@ -3,9 +3,6 @@
 #include "Window.h"
 #include "System.h"
 
-Game::Entity* Game::Entity::s_targetEntityComponent = nullptr;
-unsigned char Game::Entity::s_targetComponentType = NULLCOMPONENT;
-
 Game::Entity::Entity()
 {
     this->m_ParentType = WORLD;
@@ -22,48 +19,37 @@ Game::Entity::~Entity()
         this->popComponent();
 }
 
-void* Game::Entity::pushComponent(ENUM_ComponentType type, void **ptr)
+Game::Components::Velocity* Game::Entity::addVelocityComponent()
 {
-    this->s_targetEntityComponent = this;
-    this->s_targetComponentType = type;
-    
-    void* newComp = nullptr;
-
-    switch (type)
+    if (velocityComp)
     {
-    case SHAPE:
-        newComp = new Components::Shape();
-        break;
-    case SPRITE:
-        newComp = new Components::Sprite();
-        break;
-    case VELOCITY:
-        newComp = new Components::Velocity();
-        break;
-    case ENTITY_CONTAINER:
-        break;
-    default:
-        this->s_targetEntityComponent = nullptr;
-        sys_errorf("Couldn't create component, type doesn't exist: %u", type);
+        printf("Entity already has a Velocity component\n");
         return nullptr;
     }
 
-    this->s_targetEntityComponent = nullptr;
-    this->s_targetComponentType = NULLCOMPONENT;
+    velocityComp = new Components::Velocity;
+    m_Components.push_back(velocityComp);
 
-    if (ptr) *ptr = newComp;
-    return newComp;
+    return velocityComp;
 }
 
 void Game::Entity::popComponent()
 {
-    delete this->m_Components.back();
+    this->m_Components.pop_back();
+}
+
+void Game::Entity::reParent(World* const _world)
+{
+    m_world->m_Entities.remove(this);
+    _world->m_Entities.push_back(this);
+    m_world = _world;
 }
 
 void Game::Entity::_render()
 {
-    Vector2i rPt = m_world->worldToScreenSpace(this->x, this->y);
-
-    for (Component* component : this->m_Components)
-        component->render(rPt.X, rPt.Y);
+    for (Component *component : this->m_Components)
+    {
+        if (component->getProcessFlags() & Component::p_Render)
+            component->Render(this);
+    }
 }

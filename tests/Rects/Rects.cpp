@@ -18,11 +18,7 @@ struct DisplayText: public Game::GuiLayer
         auto text = label->pushGuiComponent<Game::GuiComponents::UIText>();
         text->color = {255, 255, 255};
         text->text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
-        #if defined(WIN32)
-        text->LoadFontPath("C:/Windows/Fonts/calibri.ttf");
-        #elif defined(__linux__)
-        text->LoadFontPath("/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf");
-        #endif
+        text->LoadFontPath("res://fonts/OpenSans-Regular.ttf");
     }
 
     void postRender();
@@ -56,8 +52,11 @@ void DisplayText::postRender()
     Engine->DrawingContext.DrawDebug(mouseRect.getBottomRight());
 }
 
+#include <File.h>
+
 void Game::Initialize()
 {
+    printf("%s\n", _game_res);
     GameSettings::targetFPS = 40;
     GameSettings::Title = "Rectangle Test";
 

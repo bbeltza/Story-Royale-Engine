@@ -5,12 +5,11 @@ Game::Components::Shape::Shape() :
     shape(RECTANGLE),
     flags(VISIBLE)
 {
-
+    p_flags = (ProcessFlags)(p_Render | p_pUpdate);
 }
 
-bool Game::Components::Shape::isInScreenPoint(Vector2i pt)
+bool Game::Components::Shape::isInScreenPoint(Entity* p, Vector2i pt)
 {
-    Entity* p = getParent();
     World* w = p->getWorld();
 
     static SDL_FPoint fpt;

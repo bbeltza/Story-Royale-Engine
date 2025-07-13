@@ -3,7 +3,7 @@
 
 Game::Components::Sprite::Sprite(): Scale(1, 1), Offset(0, 0)
 {
-
+    p_flags = p_Render;
 }
 Game::Components::Sprite::~Sprite()
 {

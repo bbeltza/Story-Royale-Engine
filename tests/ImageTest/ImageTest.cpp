@@ -34,15 +34,14 @@ struct Texture : public Game::Entity
 {
     Texture()
     {
-        pushComponentPtr(SPRITE, sprite);
         sprite->LoadFile("res://test_texture.png");
         sprite->LoadFile("res://test_texture2.png");
-        sprite->Scale = { 3, 3 };
+        sprite->Scale = { 4, 4 };
     }
 
     void preRender() override
     {
         sprite->current_frame = frame;
     }
-    Game::Components::Sprite* sprite;
+    Game::Components::Sprite* sprite = addComponent<Game::Components::Sprite>();
 };
