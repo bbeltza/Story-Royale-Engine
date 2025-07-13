@@ -17,3 +17,4 @@
 #define strcpy_s(dest, n, src) strncpy(dest, src, n)
 #define strcat_s(dest, n, src) strncat(dest, src, n)
 #endif
+

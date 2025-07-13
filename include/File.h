@@ -22,6 +22,9 @@ public:
 
 public:
     File();
+    File(File&& moved);
+    File(const File& other) = delete;
+    
     ~File();
 
     void Load(const char* path);
@@ -40,7 +43,7 @@ private:
 
     struct FileInfo
     {
-        ~FileInfo() {if (!File::areResourcesBound()) delete[] data;}
+        ~FileInfo() {if (data && !File::areResourcesBound()) delete[] data;}
         size_t size;
         void* handle;
         unsigned char* data = nullptr;

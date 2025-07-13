@@ -5,6 +5,7 @@
 
 #include "Enums.h"
 #include "Flags.h"
+#include "Engine.h"
 
 #define pushComponentPtr(type, ptr) pushComponent(type, (void **)&ptr)
 
@@ -60,7 +61,7 @@ namespace Game
     protected:
         ProcessFlags p_flags;
     private:
-    friend class EngineClass;
+    friend class ::EngineClass;
     static void ClearComponents();
     };
 

@@ -24,6 +24,13 @@ File::File() : m_type(Type::Uninitialized)
 {
 }
 
+File::File(File&& moved)
+    : m_type(moved.m_type), m_info(moved.m_info), m_userdata(moved.m_userdata), m_filepath(moved.m_filepath)
+{
+    moved.m_info.handle = nullptr;
+    moved.m_info.data = nullptr; // Remove ownership from the moving class so that it doesn't delete the file pointers 
+}
+
 File::~File()
 {
     if (!areResourcesBound() && m_info.handle)
@@ -112,6 +119,7 @@ void File::Load(const char *path)
     }
     else
     {
+        printf("%s\n", path);
         m_filepath = path;
 
         m_info.handle = fopen(path, "rb");
