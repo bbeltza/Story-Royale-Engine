@@ -1,3 +1,35 @@
+# TODO:
+#[[
+
+!!: Done!
+!: Working on!
+
+
+- Window running; !!
+- Window updating/filling the background with a color; !!
+- Instancing/Scenes; !!
+- Collision detection; !!
+- Rendering instances/entities; !!
+- Input handling; !!
+- Components; !!
+
+- User interface layers; !!
+
+- Rendering text; !!
+- Rendering textures; !!
+- Resource binder; !!
+
+- Additional structs:
+    - Timers;
+    - Tweens
+
+- Linking with ImGui (maybe before uhhh); *maybe after
+- Audio;
+
+- Work on the game!;
+
+]]
+
 cmake_minimum_required(VERSION 3.12)
 
 set(SRENGINE_CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
