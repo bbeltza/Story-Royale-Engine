@@ -34,18 +34,25 @@ EngineClass::EngineClass()
     DEF_BASE(Input)
     DEF_BASE(DrawingContext)
 
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
+    Mix_Init(MIX_INIT_OGG);
 
     Game::Initialize();
+
+    if (GameSettings::ScalingResolution)
+    {
+        Vector2i s = GameSettings::StartResolution / GameSettings::ScalingResolution;
+        DrawingContext.scale = s.getMin();
+    }
 
     Window.sdl_window = SDL_CreateWindow(
         GameSettings::Title,
         WCENTERED,
         WCENTERED,
-        GameSettings::StartResolution.width,
-        GameSettings::StartResolution.height,
+        GameSettings::StartResolution.X,
+        GameSettings::StartResolution.Y,
         SDL_WINDOW_RESIZABLE
         );
 
@@ -67,6 +74,7 @@ EngineClass::~EngineClass()
         delete Game::currentWorld;
     if (Game::currentGuiLayer)
         delete Game::currentGuiLayer;
+    Mix_Quit();
     IMG_Quit();
     TTF_Quit();
     SDL_Quit();

@@ -144,11 +144,11 @@ namespace Game
         }
         void popEntity() { delete m_Entities.back(); }
 
-        inline Vector2f screenToWorldSpace(const int x, const int y) { return screenToWorld(x, y, &CurrentCamera); }
-        inline Vector2i worldToScreenSpace(const float x, const float y) { return worldToScreen(x, y, &CurrentCamera); }
+        inline Vector2f screenToWorldSpace(const float x, const float y) { return screenToWorld(x, y, &CurrentCamera); }
+        inline Vector2f worldToScreenSpace(const float x, const float y) { return worldToScreen(x, y, &CurrentCamera); }
 
-        static Vector2i worldToScreen(const float x, const float y, Camera *cam = nullptr);
-        static Vector2f screenToWorld(const int x, const int y, Camera *cam = nullptr);
+        static Vector2f worldToScreen(const float x, const float y, Camera *cam = nullptr);
+        static Vector2f screenToWorld(const float x, const float y, Camera *cam = nullptr);
 
         void Update(float dt);
         void pUpdate(float dt);

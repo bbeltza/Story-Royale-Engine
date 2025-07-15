@@ -2,7 +2,8 @@
 
 const char* GameSettings::Title = "My Game";
 
-GameSettings::t2 GameSettings::StartResolution = { 640, 480 };
+Vector2u GameSettings::StartResolution = { 640, 480 };
+Vector2u GameSettings::ScalingResolution = {0, 0};
 
 uint16_t GameSettings::targetFPS = 60;
 uint8_t GameSettings::windowFlags = 0;

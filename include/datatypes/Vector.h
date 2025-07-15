@@ -15,6 +15,10 @@ struct Vector2
     inline void Print() const {std::cout << "{ " << X << ", " << Y << " }\n";}
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
+    inline _Num getMin() const {return X < Y ? X : Y;}
+    inline _Num getMax() const {return X > Y ? X : Y;}
+
+    inline operator bool() const {return X && Y;}
 
     _Num X, Y;
 };
@@ -42,3 +46,5 @@ _t inline vec2 operator /(const vec2& first, const _Num& other) vec2op_num(/)
 typedef Vector2<int> Vector2i;
 typedef Vector2<float> Vector2f;
 typedef Vector2<double> Vector2d;
+
+typedef Vector2<unsigned int> Vector2u;

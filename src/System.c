@@ -1,6 +1,6 @@
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "System.h"
 
 void _system_err(unsigned short LINE, const char* FILE, const char* fmt, ...)
 {

@@ -18,16 +18,20 @@ public:
     };
 
     void getScreenCenter(unsigned int* x, unsigned int* y);
+    Vector2i getScreenSize() {SDL_Rect r; SDL_RenderGetViewport(sdl_renderer, &r); return {r.w, r.h};};
+    Vector2i getScreenAbsoluteSize() {int x, y; SDL_GetRendererOutputSize(sdl_renderer, &x, &y); return {x, y};};
 
-    void DrawRectangle(const RectI& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
-    void DrawRectangleAtWorld(const Rect<int>& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
+    void DrawRectangle(const RectF& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
+    void DrawRectangleAtWorld(const RectF& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
 
-    void DrawRotatedRectangle(const RectI& _Rectangle, const double _angle, const Color4& _Col);
-    void DrawRotatedRectangleAtWorld(const RectI& _Rectangle, const double _angle, const Color4& _Col);
+    void DrawRotatedRectangle(const RectF& _Rectangle, const double _angle, const Color4& _Col);
+    void DrawRotatedRectangleAtWorld(const RectF& _Rectangle, const double _angle, const Color4& _Col);
 
-    void DrawDebug(Vector2i pos);
+    void DrawDebug(Vector2f pos);
 
-    void DrawTexture(const RectI& _Rectangle, File& _File);
+    void DrawTexture(const RectF& _Rectangle, File& _File);
+    void DrawFont(const SDL_Rect* _Bounds, File& _FontFile, const char* text, int count, uint8_t alignment);
+
     bool LoadFileTexture(File& _File);
 private:
     bool m_Locked = true;
@@ -37,6 +41,7 @@ private:
     SDL_Rect m_viewport;
 
     std::unordered_map<std::string, SDL_Texture*> m_LoadedTextures;
+    std::unordered_map<std::string, TTF_Font*> m_LoadedFonts;
 
     void processViewport();
     void render();
@@ -45,4 +50,6 @@ private:
 
     inline void m_switchLock() {m_Locked = !m_Locked;}
     void tr();
+
+    unsigned int scale = 0;
 };

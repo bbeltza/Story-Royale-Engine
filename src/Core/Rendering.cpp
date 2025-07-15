@@ -7,6 +7,7 @@
 #include "Components.h"
 #include "GuiComponents.h"
 #include "DrawingContext.h"
+#include "GameSettings.h"
 
 void DrawingDevice::getScreenCenter(unsigned int *x, unsigned int *y)
 {
@@ -20,32 +21,32 @@ void DrawingDevice::getScreenCenter(unsigned int *x, unsigned int *y)
     if (m_Locked)  \
         return;
 
-void DrawingDevice::DrawRectangle(const Rect<int> &_Rectangle, const Color4 &_Col, DrawingMode _mode)
+void DrawingDevice::DrawRectangle(const Rect<float> &_Rectangle, const Color4 &_Col, DrawingMode _mode)
 {
     CHECK_LOCK
-    SDL_Rect r{
-        _Rectangle.Position.X - _Rectangle.Size.X / 2,
-        _Rectangle.Position.Y - _Rectangle.Size.Y / 2,
+    SDL_FRect r{
+        _Rectangle.getLeft(),
+        _Rectangle.getTop(),
         _Rectangle.Size.X,
         _Rectangle.Size.Y};
 
     SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
     if (_mode == dm_Stroke)
-        SDL_RenderDrawRect(sdl_renderer, &r);
+        SDL_RenderDrawRectF(sdl_renderer, &r);
     else
-        SDL_RenderFillRect(sdl_renderer, &r);
+        SDL_RenderFillRectF(sdl_renderer, &r);
 };
 
-void DrawingDevice::DrawRectangleAtWorld(const RectI &_Rectangle, const Color4 &_Col, DrawingMode _mode)
+void DrawingDevice::DrawRectangleAtWorld(const RectF &_Rectangle, const Color4 &_Col, DrawingMode _mode)
 {
     CHECK_LOCK
-    Vector2i target_pos = _Rectangle.getTopLeft();
+    Vector2f target_pos = _Rectangle.getTopLeft();
     if (Game::currentWorld)
         target_pos = Game::currentWorld->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
         target_pos = Game::currentWorld->worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, using a static function so it shouldn't crash
 
-    SDL_Rect r{
+    SDL_FRect r{
         target_pos.X,
         target_pos.Y,
         _Rectangle.Size.X,
@@ -53,18 +54,18 @@ void DrawingDevice::DrawRectangleAtWorld(const RectI &_Rectangle, const Color4 &
 
     SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
     if (_mode == dm_Stroke)
-        SDL_RenderDrawRect(sdl_renderer, &r);
+        SDL_RenderDrawRectF(sdl_renderer, &r);
     else
-        SDL_RenderFillRect(sdl_renderer, &r);
+        SDL_RenderFillRectF(sdl_renderer, &r);
 }
 
-void DrawingDevice::DrawRotatedRectangle(const RectI &_Rectangle, const double _angle, const Color4 &_Col)
+void DrawingDevice::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle, const Color4 &_Col)
 {
     CHECK_LOCK
     if (_angle == 0)
         return DrawRectangle(_Rectangle, _Col);
 
-    SDL_Rect r{
+    SDL_FRect r{
         _Rectangle.getLeft(),
         _Rectangle.getTop(),
         _Rectangle.Size.X,
@@ -72,22 +73,22 @@ void DrawingDevice::DrawRotatedRectangle(const RectI &_Rectangle, const double _
 
     SDL_SetTextureColorMod(sdl_rectTexture, _Col.r, _Col.g, _Col.b);
     SDL_SetTextureAlphaMod(sdl_rectTexture, _Col.a);
-    SDL_RenderCopyEx(sdl_renderer, sdl_rectTexture, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyExF(sdl_renderer, sdl_rectTexture, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
 }
 
-void DrawingDevice::DrawRotatedRectangleAtWorld(const RectI &_Rectangle, const double _angle, const Color4 &_Col)
+void DrawingDevice::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const double _angle, const Color4 &_Col)
 {
     CHECK_LOCK
-    Vector2i target_pos(_Rectangle.Position);
+    Vector2f target_pos(_Rectangle.Position);
     if (Game::currentWorld)
         target_pos = Game::currentWorld->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
         target_pos = Game::currentWorld->worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, using a static function so it shouldn't crash
 
-    return DrawRotatedRectangle(RectI(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col);
+    return DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col);
 }
 
-void DrawingDevice::DrawDebug(Vector2i pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into world coordinates
+void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into world coordinates
 {
     if (Game::currentWorld)
         pos = Game::currentWorld->worldToScreenSpace(pos.X, pos.Y);
@@ -169,13 +170,143 @@ void DrawingDevice::renderCurrentUI()
     }
 }
 
-void DrawingDevice::DrawTexture(const RectI &_Rectangle, File &_File)
+void DrawingDevice::DrawTexture(const RectF &_Rectangle, File &_File)
 {
     if (!LoadFileTexture(_File))
         return;
 
-    SDL_Rect render_rect{_Rectangle.getLeft(), _Rectangle.getTop(), _Rectangle.Size.X, _Rectangle.Size.Y};
-    SDL_RenderCopy(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect);
+    SDL_FRect render_rect{_Rectangle.getLeft(), _Rectangle.getTop(), _Rectangle.Size.X, _Rectangle.Size.Y};
+    SDL_RenderCopyF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect);
+}
+
+void DrawingDevice::DrawFont(const SDL_Rect* _Bounds, File &_FontFile, const char* text, int count, uint8_t alignment)
+{
+    static char font_characters[96];
+    if (!font_characters[0])
+    {
+        for (char i = 32; i < 127; i++)
+        {
+            font_characters[i-32] = i;
+        }
+        font_characters[95] = 0;
+    }
+
+    if (_FontFile.m_type != File::Type::Font) return;
+
+    if (TTF_Font *target_font = m_LoadedFonts[_FontFile.m_filepath])
+    {
+        _FontFile.m_userdata = target_font;
+    }
+    else
+    {
+        SDL_RWops *temp_rw = SDL_RWFromConstMem(_FontFile.m_info.data, _FontFile.m_info.size);
+        m_LoadedFonts[_FontFile.m_filepath] = TTF_OpenFontRW(temp_rw, 1, 12);
+
+        SDL_Surface* temp_surf = TTF_RenderText_Solid(m_LoadedFonts[_FontFile.m_filepath],
+            font_characters, {255, 255, 255}
+        );
+        m_LoadedTextures[_FontFile.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
+        SDL_FreeSurface(temp_surf);
+        _FontFile.m_userdata = m_LoadedFonts[_FontFile.m_filepath];
+    }
+    int h, max_w;
+    SDL_QueryTexture(m_LoadedTextures[_FontFile.m_filepath], NULL, NULL, &max_w, &h);
+
+    int max_count, linelength;
+    TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], text, _Bounds->w, &linelength, &max_count);
+    while (true)
+    {
+        if (!max_count)
+        {
+            max_count = strlen(text);
+            break;
+        }
+        max_count--;
+        if (text[max_count] == ' ') break;
+    }
+
+    char* linetest = new char[linelength];
+
+    strncpy(linetest, text, max_count);
+    linetest[max_count] = 0;
+    TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
+
+    int x = 0;
+    int y = 0;
+    int i = 0;
+    char constchar[2] = {0, 0};
+
+    unsigned int c = count;
+    while (text[i] && i < c)
+    {
+        const char& character = text[i];
+        if (i > max_count)
+        {
+            x = 0;
+            y += h;
+
+            TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], text+i, _Bounds->w, NULL, &max_count);
+            strncpy(linetest, text+i, max_count);
+            linetest[max_count] = 0;
+            max_count += i-1;
+            TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
+            continue;
+        }
+        switch (character)
+        {
+            case ' ':
+                x += 3;
+                i++;
+                continue;
+            case '\n':
+                x = 0;
+                y += h;
+                i++;
+                continue;
+            default:
+            break;
+        };
+        SDL_Rect src = {0, 0, 0, 0}, dest = {0, 0, 0, 0};
+        src.h = h;
+        dest.h = h;
+
+        
+        constchar[0] = character;
+        TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], constchar, max_w, &src.w, NULL);
+        if (!src.w) continue;
+
+        font_characters[character-32] = 0;
+        TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], font_characters, max_w, &src.x, NULL);
+        font_characters[character-32] = character;
+        
+        if (character == 'i') --src.w;
+        dest.w = src.w;
+
+        dest.x = _Bounds->x + x;
+        switch (alignment)
+        {
+            case Game::GuiComponents::UIText::AlCentered:
+                dest.x += (_Bounds->w - linelength) / 2;
+                break;
+            case Game::GuiComponents::UIText::AlRight:
+                dest.x += (_Bounds->w - linelength);
+                break;
+            default:
+                break;
+
+        }
+        dest.y = _Bounds->y + y;
+        
+        SDL_RenderCopy(sdl_renderer, m_LoadedTextures[_FontFile.m_filepath], &src, &dest);
+
+        SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, 255);
+        
+        x += src.w;
+        i++;
+    }
+
+    delete[] linetest;
+
 }
 
 bool DrawingDevice::LoadFileTexture(File &_File)
@@ -215,7 +346,7 @@ bool DrawingDevice::LoadFileTexture(File &_File)
 
 static Game::Camera zeroCam;
 
-Vector2f Game::World::screenToWorld(int x, int y, Camera *cam)
+Vector2f Game::World::screenToWorld(float x, float y, Camera *cam)
 {
     if (!cam)
         return screenToWorld(x, y, &zeroCam);
@@ -223,12 +354,12 @@ Vector2f Game::World::screenToWorld(int x, int y, Camera *cam)
     return Vector2f(x - cx + cam->x, y - cy + cam->y);
 }
 
-Vector2i Game::World::worldToScreen(float x, float y, Camera *cam)
+Vector2f Game::World::worldToScreen(float x, float y, Camera *cam)
 {
     if (!cam)
         return worldToScreen(x, y, &zeroCam);
     int &cx = center[0], cy = center[1];
-    return Vector2i(x + cx - cam->x, y + cy - cam->y);
+    return Vector2f(x + cx - cam->x, y + cy - cam->y);
 }
 
 void DrawingDevice::processViewport()
@@ -237,6 +368,15 @@ void DrawingDevice::processViewport()
     SDL_RenderGetViewport(sdl_renderer, &m_viewport);
     m_viewport.x = m_viewport.w / 2;
     m_viewport.y = m_viewport.h / 2;
+
+    Vector2u viewportsize;
+    SDL_GetRendererOutputSize(sdl_renderer, (int*)&viewportsize.X, (int*)&viewportsize.Y);
+
+    if (scale)
+    {
+        scale = (viewportsize / GameSettings::ScalingResolution).getMin();
+        SDL_RenderSetScale(sdl_renderer, scale, scale);
+    }
 
     if (!Game::currentGuiLayer)
         return;

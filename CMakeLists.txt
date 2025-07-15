@@ -41,9 +41,14 @@ set(CXX_STANDARD C++14)
 
 srEngine_policy()
 if(MSVC)
+    set(NO_CONSOLE_OPTIONS "/SUBSYSTEM:WINDOWS")
+
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+else()
+    set(NO_CONSOLE_OPTIONS "-mwindows")
 endif()
+
 
 add_subdirectory(3rdparty)
 
@@ -51,12 +56,14 @@ project(StoryRoyaleEngine)
 project(no_bind)
 add_library(no_bind ${CMAKE_MODULE_PATH}/empty_res.c)
 
+
 add_subdirectory(src)
 
 set(3RDPARTYLIBS
 SDL2::SDL2-static
 SDL2_ttf::SDL2_ttf-static
 SDL2_image::SDL2_image-static
+SDL2_mixer::SDL2_mixer-static
 
 fmt::fmt)
 set(SRENGINE_INCLUDE_DIRS
@@ -65,6 +72,7 @@ set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_ttf
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_image
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_mixer
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
 )
 
@@ -76,7 +84,9 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     add_subdirectory(tests/Rects)
     add_subdirectory(tests/ImageTest)
     add_subdirectory(tests/FileTest)
+    add_subdirectory(tests/ScalingTest)
 else()
+    set(NO_CONSOLE_OPTIONS ${NO_CONSOLE_OPTIONS} PARENT_SCOPE)
     set(SRENGINE_INCLUDE_DIRS ${SRENGINE_INCLUDE_DIRS} PARENT_SCOPE)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRENGINE_CMAKE_MODULE_PATH} PARENT_SCOPE)
 endif()

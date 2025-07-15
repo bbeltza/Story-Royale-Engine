@@ -1,20 +1,41 @@
-#ifndef SYSTEM_H
-#define SYSTEM_H
+#pragma once
+#include <string>
+#include <setjmp.h>
+#include <fmt/format.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <stdarg.h>
-
-    void _system_err(unsigned short LINE, const char* FILE, const char* fmt, ...);
+struct System
+{
     
-#define sys_errorf(fmt, ...) _system_err(__LINE__, __FILE__, fmt, __VA_ARGS__)
-#define sys_error(fmt) _system_err(__LINE__, __FILE__, fmt)
-#define sys_assertf(expr, fmsg, ...) if (!expr) sys_error(fmsg, __VA_ARGS__)
-#define sys_assert(expr, fmsg) if (!expr) sys_error(fmsg)
+    enum ErrorId: unsigned char
+    {
+        NO_ERROR = 0,
+        FILE_NOT_FOUND
+    };
+    
+    template <class... T> static void Log(const char* fmtstr, const T&... args) {fmt::print(fmtstr, args...);}
+    template <class... T> static inline void Error(ErrorId id, const T&... args)
+    {
+        last_err.assign("ERROR:\n\n");
 
-#ifdef __cplusplus
-}
-#endif
+        switch (id)
+        {
+        case FILE_NOT_FOUND:
+            last_err.append(fmt::format("Couldn't find '{}', no such directory", args...));
+            break;
+        default:
+            last_err.append(fmt::format("An error has occurred!"));
+            break;
+        }
 
-#endif // SYSTEM_H
+        last_err.append(fmt::format("\n(Code: {})", (int)id));
+        
+        longjmp(err, id);
+    }
+    
+private:
+    System() {};
+    friend int main(void);
+
+    static jmp_buf err;
+    static std::string last_err;
+};

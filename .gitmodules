@@ -10,6 +10,9 @@
 	path = 3rdparty/SDL_image
 	url = https://github.com/libsdl-org/SDL_image.git
 	branch = release-2.6.x
+[submodule "3rdparty/SDL_mixer"]
+	path = 3rdparty/SDL_mixer
+	url = https://github.com/libsdl-org/SDL_mixer.git
 [submodule "3rdparty/fmt"]
 	path = 3rdparty/fmt
 	url = https://github.com/fmtlib/fmt.git

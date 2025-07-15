@@ -37,6 +37,8 @@ function(srEngine_link_resource PROJECT)
         COMMENT "--- Binding source resources"
         )
 
+        file(WRITE ${OUTPUT}/_res.c)
+        
         add_dependencies(${PROJECT} bind_${PROJECT})
 
         project(${PROJECT}_res)
@@ -66,10 +68,13 @@ function(srEngine_link_resource PROJECT)
 endfunction()
 
 function(srEngine_link_target target)
+    if (${ARGN} MATCHES NO_CONSOLE)
+        target_link_options(${target} PRIVATE ${NO_CONSOLE_OPTIONS})
+    endif()
     target_link_libraries(${target} StoryRoyaleEngine)
     srEngine_link_resource(${target})
     if (NOT TARGET ${target}_res)
-        message("NOT linking with resources bound")
+        message("NOT BINDING RESOURCES")
         target_link_libraries(${target} no_bind)
     endif()
 endfunction()

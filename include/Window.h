@@ -13,7 +13,7 @@ public:
     void setTargetFPS(unsigned short fps);
 private:
 
-    WindowClass() {}
+    WindowClass(): sdl_window(nullptr) {}
 
     SDL_Window* sdl_window;
 

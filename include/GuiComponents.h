@@ -62,6 +62,13 @@ namespace Game
         class UIText : public GuiComponent
         {
         public:
+            enum AlignMode
+            {
+                AlCentered = TTF_WRAPPED_ALIGN_CENTER,
+                AlLeft = TTF_WRAPPED_ALIGN_LEFT,
+                AlRight = TTF_WRAPPED_ALIGN_RIGHT
+            } Alignment;
+
             UIText();
             ~UIText();
 

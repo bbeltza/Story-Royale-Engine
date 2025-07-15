@@ -1,5 +1,5 @@
 #include <standard.h>
-#include "Input.h"
+#include "Engine.h"
 
 #define processEventQueue(queue, ev) while (!queue.empty()) { ev.Fire(&queue.back()); queue.pop_back(); }
 
@@ -10,7 +10,12 @@ static std::vector<MouseWheel> mWheelSignalQueue;
 
 void InputClass::processEvents()
 {
-    m_mouseState.state = SDL_GetMouseState(&m_mouseState.x, &m_mouseState.y);
+    int x, y;
+    m_mouseState.state = SDL_GetMouseState(&x, &y);
+    
+    Vector2i ratio = m_Engine->DrawingContext.getScreenAbsoluteSize() / m_Engine->DrawingContext.getScreenSize();
+    m_mouseState.x = (float)x / ratio.X;
+    m_mouseState.y = (float)y / ratio.Y;
 
     processEventQueue(keySignalQueue, keyEvent)
     processEventQueue(mButtonSignalQueue, mouseButton)

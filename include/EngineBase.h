@@ -2,4 +2,4 @@
 
 class EngineClass;
 
-#define ENGINE_BASE friend class EngineClass; EngineClass* m_Engine;
+#define ENGINE_BASE friend class EngineClass; friend int main(void); EngineClass* m_Engine;

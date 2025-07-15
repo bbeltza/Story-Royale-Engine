@@ -4,7 +4,13 @@
 #include "Datatypes.h"
 #include "EngineBase.h"
 
-enum ENUM_MouseButton : Uint8
+class InputClass
+{
+    ENGINE_BASE
+public:
+    // Mouse button enum
+
+    enum MouseButton : Uint8
 {
     mbLeft = SDL_BUTTON_LEFT,
     mbMiddle = SDL_BUTTON_MIDDLE,
@@ -16,17 +22,13 @@ enum ENUM_MouseButton : Uint8
     mbANY = UINT8_MAX
 };
 
-class InputClass
-{
-    ENGINE_BASE
-public:
     // Keyboard functions
     bool isKeyPressed(SDL_KeyCode keycode) const;
     bool isKeyPressed(SDL_Scancode scancode) const;
 
     // Mouse functions
-    bool isMouseButtonPressed(ENUM_MouseButton button = mbANY) const;
-    const Vector2i getMouseScreenPosition() const;
+    bool isMouseButtonPressed(MouseButton button = mbANY) const;
+    const Vector2f getMouseScreenPosition() const { return Vector2f(m_mouseState.x, m_mouseState.y); }
     const Vector2f getMouseWorldPosition() const;
 
     // Input events
@@ -36,7 +38,7 @@ public:
     Signal mouseMove;
 
     //
-    struct _mState { int x, y; uint32_t state; };
+    struct _mState { float x, y; uint32_t state; };
 private:
     InputClass() {}
 
