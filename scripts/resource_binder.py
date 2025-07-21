@@ -45,11 +45,9 @@ def write_dirs(_tree:list, prefix:str="", arr:list=[]):
                write_dirs(filename, prefix + pop, arr)
     return arr
     
-
-if build_mode == 0:    
-    shutil.copytree(resDir, output_folder + "/res")
-else:
-    with open(output_folder + "/_res.c", "wb") as output_file:
+def buildresource():
+     global out_string
+     with open(output_folder + "/_res.c", "wb") as output_file:
         tree = getTree(resDir)
 
         out_string = ""
@@ -66,6 +64,7 @@ else:
                   sizechars = filesize.to_bytes(4)
                   print(sizechars)
                   pos = len(out_string)
+                  print(f"File position is {pos}")
                   file_size_id = filename[1]
 
                   out_string += sizechars
@@ -91,4 +90,20 @@ else:
         output_file.close()
 
         logfile.close()
+
+if build_mode == 0:    
+    shutil.copytree(resDir, output_folder + "/res")
+else:
+    success = False
+    i = 0
+    while not success:
+        i += 1
+        try:
+           buildresource()
+           success = True
+        except PermissionError as p:
+            pass
+    print(i)
+         
+    
 

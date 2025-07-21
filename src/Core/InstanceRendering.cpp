@@ -67,12 +67,15 @@ void Game::GuiComponents::UIText::render()
     Engine->DrawingContext.DrawFont(&ir, this->m_file, text.c_str(), count, Alignment);
 }
 
+// 014FF2F0 018EA550 A long time ago, two powerful men ruled the world -1 1
+// 014FF2F0 056A7890 A long time ago, two powerful men ruled the world -1 1
+
 void Game::Components::Sprite::Render(Entity* _entity)
 {
     if (textures.empty()) return;
     auto frame = std::min(current_frame, textures.size() - 1);
     current_frame = frame;
-    File& texture = textures[frame];
+    File& texture = *textures[frame];
     SDL_Rect render_rect;
     if (!Engine->DrawingContext.LoadFileTexture(texture)) return;
 

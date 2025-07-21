@@ -2,10 +2,13 @@ set(SOURCES
 
 "main.cpp"
 "DefaultGameSettings.cpp"
-"ExtraSDL.c"
-"System.c"
+"System.cpp"
 "File.cpp"
+"Music.cpp"
+"Sound.cpp"
 
+"Extras/ExtraSDL.c"
+"Extras/ExtraString.c"
 )
 
 set(CORE_SOURCES 
@@ -17,6 +20,8 @@ set(CORE_SOURCES
 "Querying.cpp"
 "Rendering.cpp"
 "Runtime.cpp"
+"Timer.cpp"
+"Tween.cpp"
 
 )
 
@@ -48,6 +53,14 @@ set(LAYER_SOURCES
 
 )
 
+set(WINDOWS_SOURCES
+"Windows.cpp"
+)
+
+if(WIN32)
+    set(SYSTEMDEP_SOURCES ${WINDOWS_SOURCES})
+endif()
+
 foreach(src ${CORE_SOURCES})
 set(SOURCES ${SOURCES} "Core/${src}")
 endforeach()
@@ -57,6 +70,10 @@ endforeach()
 foreach(src ${LAYER_SOURCES})
 set(SOURCES ${SOURCES} "GameLayer/${src}")
 endforeach()
+foreach(src ${SYSTEMDEP_SOURCES})
+set(SOURCES ${SOURCES} "SystemDependent/${src}")
+endforeach()
+
 
 add_library(StoryRoyaleEngine
 ${SOURCES}

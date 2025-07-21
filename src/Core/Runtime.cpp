@@ -10,6 +10,9 @@
 
 #include "GameSettings.h"
 
+#include "Timer.h"
+#include "Tween.h"
+
 #define WCENTERED SDL_WINDOWPOS_CENTERED
 
 #define DEF_BASE(Base) Base.m_Engine = this;
@@ -18,7 +21,6 @@ static std::vector<GameInstance*> destroyQueue;
 
 static void queueDestroyingInstances();
 
-static std::chrono::steady_clock frametime_clock;
 static std::chrono::duration<double> targetFrameTime;
 const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
 
@@ -33,11 +35,14 @@ EngineClass::EngineClass()
     DEF_BASE(Window)
     DEF_BASE(Input)
     DEF_BASE(DrawingContext)
+    DEF_BASE(Audio)
 
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
     Mix_Init(MIX_INIT_OGG);
+
+    Mix_OpenAudio(32000, AUDIO_S16, 2, 2048);
 
     Game::Initialize();
 
@@ -74,6 +79,7 @@ EngineClass::~EngineClass()
         delete Game::currentWorld;
     if (Game::currentGuiLayer)
         delete Game::currentGuiLayer;
+    Mix_CloseAudio();
     Mix_Quit();
     IMG_Quit();
     TTF_Quit();
@@ -85,22 +91,38 @@ void WindowClass::setTargetFPS(unsigned short fps)
     targetFrameTime = std::chrono::duration<double>(GameSettings::targetFPS > 0 ? (1.0f / GameSettings::targetFPS) : 0);
 }
 
+void WindowClass::toggleFullscreen()
+{
+    static int oW, oH; // Old width and height for the window
+    fullscreen = !fullscreen;
+    if (fullscreen)
+    {
+        SDL_DisplayMode d;
+        SDL_GetDesktopDisplayMode(0, &d);
+        SDL_SetWindowDisplayMode(sdl_window, &d); 
+    }
+
+    if (fullscreen)
+        SDL_GetWindowSize(sdl_window, &oW, &oH);
+    
+
+    SDL_MaximizeWindow(sdl_window);
+    SDL_SetWindowFullscreen(sdl_window, fullscreen * SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
+
 void EngineClass::Run()
 {
     if (m_wasRun) return;
 
     m_wasRun = 1;
 
-    auto start = frametime_clock.now();
-    std::chrono::duration<double> delta;
-
     Window.setTargetFPS(GameSettings::targetFPS);
 
     while (pollWindowEvents())
     {
-        delta = frametime_clock.now() - start;
-        start = frametime_clock.now();
-        float dt = delta.count();
+        auto start = std::chrono::steady_clock::now();
+        float dt = Timer::global_update();
+        Tween::global_update(dt);
 
         queueDestroyingInstances();
 
@@ -151,6 +173,8 @@ void queueDestroyingInstances()
 {
     while (!destroyQueue.empty())
     {
+        if (destroyQueue.back() == Game::currentGuiLayer) Game::currentGuiLayer = nullptr;
+        if (destroyQueue.back() == Game::currentWorld) Game::currentWorld = nullptr;
         delete destroyQueue.back();
         destroyQueue.pop_back();
     }
@@ -160,8 +184,6 @@ void GameInstance::Destroy()
 {
     destroyQueue.push_back(this);
 }
-
-// Check whatever instance the mouse is actually hovering in
 
 
 

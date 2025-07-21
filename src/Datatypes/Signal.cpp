@@ -1,4 +1,5 @@
 #include "datatypes/Signal.h"
+#include "Signal.h"
 
 Signal::~Signal()
 {
@@ -10,6 +11,18 @@ Signal::~Signal()
         item = m_handlerListHead;
     }
 }
+
+void Signal::DisconnectAll()
+{
+    Connection* item = m_handlerListHead;
+    while (this->m_handlerListHead)
+    {
+        m_handlerListHead = item->m_next;
+        item->m_connected = false;
+        item = m_handlerListHead;
+    }
+}
+
 
 Connection* Signal::Connect(void(*fn)(void*))
 {
@@ -29,6 +42,7 @@ void Signal::Fire(void* userdata)
     {
         if (item->m_connected)
             item->m_fn(userdata);
+        
         item = item->m_next;
     }
 }

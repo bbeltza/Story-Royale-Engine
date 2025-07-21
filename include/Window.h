@@ -11,6 +11,7 @@ class WindowClass
     friend class GuiContainer;
 public:
     void setTargetFPS(unsigned short fps);
+    void toggleFullscreen();
 private:
 
     WindowClass(): sdl_window(nullptr) {}
@@ -23,4 +24,6 @@ private:
 
     bool pollEvents();
     void processViewport();
+
+    bool fullscreen = false;
 };

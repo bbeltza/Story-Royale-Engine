@@ -85,12 +85,7 @@ namespace Game
             void render() override;
 
         private:
-            TTF_Font* m_font;
             File m_file;
-            SDL_Texture* m_cacheTexture = nullptr;
-            
-            SDL_FRect m_cache_Abs;
-            std::string m_cacheText;
 
             char process_text();
         };

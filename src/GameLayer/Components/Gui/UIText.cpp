@@ -13,17 +13,13 @@ Game::GuiComponents::UIText::UIText()
 void Game::GuiComponents::UIText::LoadFontPath(const char* path)
 {
     m_file.Load(path);
-    SDL_RWops* temp_rw = SDL_RWFromConstMem(m_file.getRawData(), m_file.getSize());
-    m_font = TTF_OpenFontRW(temp_rw, 1, 12);
 }
 
 Game::GuiComponents::UIText::~UIText()
 {
-    if (m_font)
-        TTF_CloseFont(m_font);
-    if (m_cacheTexture)
-        SDL_DestroyTexture(m_cacheTexture);
 }
+
+
 
 char Game::GuiComponents::UIText::process_text()
 {

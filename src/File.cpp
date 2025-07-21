@@ -2,6 +2,8 @@
 #include "File.h"
 #include "SDL.hpp"
 
+#include "System.h"
+
 #define f (FILE *)
 
 const char *IMAGE_TYPES[] = {
@@ -17,24 +19,32 @@ const char *FONT_TYPES[] = {
     "ttf",
     NULL};
 
+const char *SOUND_TYPES[] = {
+    "mp3",
+    "wav",
+    "ogg",
+    "flac",
+    NULL
+};
+
 const bool File::s_resbind = _game_res != nullptr;
+std::unordered_map<std::string, File::FileInfo> File::s_loadedfiles;
 const char res_prefix[] = "_res/";
 
 File::File() : m_type(Type::Uninitialized)
 {
 }
 
-File::File(File&& moved)
-    : m_type(moved.m_type), m_info(moved.m_info), m_userdata(moved.m_userdata), m_filepath(moved.m_filepath)
+File::File(File &&moved)
+    : m_type(moved.m_type), m_userdata(moved.m_userdata), m_filepath(moved.m_filepath)
 {
-    moved.m_info.handle = nullptr;
-    moved.m_info.data = nullptr; // Remove ownership from the moving class so that it doesn't delete the file pointers 
 }
 
 File::~File()
 {
-    if (!areResourcesBound() && m_info.handle)
-        fclose(f m_info.handle);
+    if (m_type == Type::Unknown) return;
+    if (!getInfo().resbind && getInfo().handle)
+        fclose(f getInfo().handle);
 }
 
 static bool checkType(const char *ext, const char *_array[], File::Type _target, File::Type *_type)
@@ -63,47 +73,55 @@ void File::Load(const char *path)
 
     if (!rescmp)
     {
-        //for (int i = 0; i < 1092; i++)
-            //printf("%d ", _game_res[i]);
+        // for (int i = 0; i < 1092; i++)
+        // printf("%d ", _game_res[i]);
         char *REAL_path;
         if (areResourcesBound())
         {
             REAL_path = (char *)(path + strlen(RES_PREFIX));
             m_filepath = REAL_path;
-            unsigned int l = strlen(REAL_path);
 
-            const unsigned char *resptr = _game_res;
-            while (*resptr != '\n')
+            FileInfo &info = m_info();
+
+            if (!info.resbind)
             {
-                int cmp = strcmp((const char*)resptr, REAL_path);
-                if (!cmp)
+                info.resbind = true;
+
+                unsigned int l = strlen(REAL_path);
+
+                const unsigned char *resptr = _game_res;
+                while (*resptr != '\n')
                 {
-                    printf("COMPARED\n");
-                    m_info.handle = (void *)resptr;
-                    printf("l: %d\n", l);
-                    resptr += l + 1;
-                    int32_t datapos = 0;
-                    for (int i = 0; i <= 3; i++)
-                    datapos |= (resptr[3 - i] << 8 * i);
-                    printf("%d\n", datapos);
-                    printf("datapos: %d\n", datapos);
-                    
-                    m_info.data = (unsigned char *)(_game_res + datapos);
-                    printf("%d %d %d %d\n", m_info.data[0], m_info.data[1], m_info.data[2], m_info.data[3]);
-                    m_info.size = m_info.data[3];
-                    for (int i = 0; i <= 3; i++)
-                        m_info.size |= (m_info.data[3 - i] << 8 * i);
-                    printf("%zd\n", m_info.size);
-                    m_info.data += 4;
+                    int cmp = strcmp((const char *)resptr, REAL_path);
+                    if (!cmp)
+                    {
+                        printf("COMPARED\n");
+                        info.handle = (void *)resptr;
+                        printf("l: %d\n", l);
+                        resptr += l + 1;
+                        int32_t datapos = 0;
+                        for (int i = 0; i <= 3; i++)
+                            datapos |= (resptr[3 - i] << 8 * i);
+                        printf("%d\n", datapos);
+                        printf("datapos: %d\n", datapos);
 
-                    break;
+                        info.data = (unsigned char *)(_game_res + datapos);
+                        printf("%d %d %d %d\n", info.data[0], info.data[1], info.data[2], info.data[3]);
+                        info.size = info.data[3];
+                        for (int i = 0; i <= 3; i++)
+                            info.size |= (info.data[3 - i] << 8 * i);
+                        printf("%zd\n", info.size);
+                        info.data += 4;
+
+                        break;
+                    }
+                    resptr += l + 5;
                 }
-                resptr += l + 4;
-            }
-            if (*resptr == '\n')
-            {
-                m_type = Type::Unknown;
-                return (void)printf("Couldn't find file '%s', no such directory\n", path);
+                if (*resptr == '\n')
+                {
+                    m_type = Type::Unknown;
+                    return (void)System::Error(System::FILE_NOT_FOUND, path);
+                }
             }
         }
         else
@@ -121,40 +139,46 @@ void File::Load(const char *path)
     {
         printf("%s\n", path);
         m_filepath = path;
-
-        m_info.handle = fopen(path, "rb");
-        if (!m_info.handle)
+        FILE* fstream = fopen(path, "rb");
+        if (!fstream)
         {
             m_type = Type::Unknown;
-            return (void)printf("Couldn't find file '%s', no such directory\n", path);
+            return System::Error(System::FILE_NOT_FOUND, path);
         }
 
-        fseek(f m_info.handle, 0, SEEK_END);
-        m_info.size = ftell(f m_info.handle);
-        m_info.data = new unsigned char[m_info.size];
-        fseek(f m_info.handle, 0, SEEK_SET);
-        fread(m_info.data, 1, m_info.size, f m_info.handle);
-        printf("%zd\n", m_info.size);
-        for (size_t i = 0; i < m_info.size; i++)
+        FileInfo &info = m_info();
+
+        info.resbind = false;
+        info.handle = fstream;
+
+        fseek(f info.handle, 0, SEEK_END);
+        info.size = ftell(f info.handle);
+        info.data = new unsigned char[info.size];
+        fseek(f info.handle, 0, SEEK_SET);
+        fread(info.data, 1, info.size, f info.handle);
+        printf("%zd\n", info.size);
+        for (size_t i = 0; i < info.size; i++)
         {
-            //putchar(m_info.data[i]);
+            // putchar(m_info.data[i]);
         }
     }
 
     const char *rchr = strrchr(path, '.');
-        if (!rchr)
-            m_type = Type::Text;
+    if (!rchr)
+        m_type = Type::Text;
+    else
+    {
+        if (!(*++rchr))
+            m_type = Type::Text; // If it finds a null terminator right after the point, assume a text type
         else
         {
-            if (!(*++rchr))
-                m_type = Type::Text; // If it finds a null terminator right after the point, assume a text type
-            else
-            {
-                if (checkType(rchr, IMAGE_TYPES, Type::Image, &m_type))
-                    return;
-                if (checkType(rchr, FONT_TYPES, Type::Font, &m_type))
-                    return;
-                m_type = Type::Text;
-            }
+            if (checkType(rchr, IMAGE_TYPES, Type::Image, &m_type))
+                return;
+            if (checkType(rchr, FONT_TYPES, Type::Font, &m_type))
+                return;
+            if (checkType(rchr, SOUND_TYPES, Type::Sound, &m_type))
+                return;
+            m_type = Type::Text;
         }
+    }
 }

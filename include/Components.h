@@ -67,7 +67,7 @@ namespace Game
             File& LoadFile(const char* path);
             void Render(Entity* _entity) override;
         private:
-            std::vector<File> textures;
+            std::vector<File*> textures;
         };
     }
 }

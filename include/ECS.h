@@ -119,8 +119,8 @@ namespace Game
     public:
         World();
         ~World();
-        Color3 Background = {255, 149, 236};
-        Color4 Foreground = {0};
+        static Color3 Background;
+        static Color4 Foreground;
 
         Camera CurrentCamera;
 

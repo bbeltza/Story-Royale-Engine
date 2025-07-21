@@ -40,8 +40,8 @@ int main()
     if (result)
     {
         err_msg_data.title = GameSettings::Title;
-        if (Engine && Engine->Window.sdl_window)
-            err_msg_data.window = Engine->Window.sdl_window;
+        //if (Engine && Engine->Window.sdl_window)
+            //err_msg_data.window = Engine->Window.sdl_window;
         
         err_msg_data.message = System::last_err.c_str();
 

@@ -30,7 +30,7 @@ function(srEngine_link_resource PROJECT)
     if (PYTHON_FOUND AND WANT_BINDING)
         add_custom_target(
         bind_${PROJECT} ALL
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/resource_binder.py
+        COMMAND ${PYTHON_EXECUTABLE} ${SRENGINE_DIR}/scripts/resource_binder.py
         ${INPUT} 1
         ${OUTPUT}
         OUTPUT ${OUTPUT}/_res.c

@@ -10,11 +10,13 @@
 #include <unordered_map>
 #include <array>
 
+#include "extra_string.h"
+
 #define sign(x) ((0 < x) - (x < 0))
+#define lerp(a, b, t) (a + (b - a) * t)
 #define RES_PREFIX "res://"
 
-#ifdef __GNUC__
+#ifndef _MSC_VER
 #define strcpy_s(dest, n, src) strncpy(dest, src, n)
 #define strcat_s(dest, n, src) strncat(dest, src, n)
 #endif
-

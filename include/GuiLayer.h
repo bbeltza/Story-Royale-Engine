@@ -23,6 +23,7 @@ namespace Game
 
     class GuiContainer: public GameInstance
     {
+        friend class ::DrawingDevice;
         friend class GuiObject;
         friend class GuiComponent;
     public:
@@ -50,7 +51,6 @@ namespace Game
         inline T* pushGuiComponent() __push_gui_list(s_targetComponentParent, p_components, GuiComponent)
 
     protected:
-        friend class ::DrawingDevice;
 
         Color4 p_modulate = { 255, 255, 255, 255 };
         SDL_FRect p_absolute{ 0, 0, 0, 0 };
@@ -127,7 +127,7 @@ namespace Game
     class GuiLayer: public GuiContainer
     {
     public:
-        Color4 Foreground{0, 0, 0, 0};
+        static Color4 Foreground;
 
         GuiLayer() {}
         ~GuiLayer() {}
@@ -163,7 +163,7 @@ namespace Game
     template <typename T>
     inline GuiLayer* setGuiLayer()
     {
-        if (currentGuiLayer) delete currentGuiLayer;
+        if (currentGuiLayer) currentGuiLayer->Destroy();
         currentGuiLayer = new T;
         return currentGuiLayer;
     }

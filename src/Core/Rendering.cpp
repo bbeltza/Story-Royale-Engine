@@ -179,140 +179,131 @@ void DrawingDevice::DrawTexture(const RectF &_Rectangle, File &_File)
     SDL_RenderCopyF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect);
 }
 
-void DrawingDevice::DrawFont(const SDL_Rect* _Bounds, File &_FontFile, const char* text, int count, uint8_t alignment)
+void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const char *text, int count, uint8_t alignment)
 {
     static char font_characters[96];
     if (!font_characters[0])
     {
         for (char i = 32; i < 127; i++)
         {
-            font_characters[i-32] = i;
+            font_characters[i - 32] = i;
         }
         font_characters[95] = 0;
     }
-
-    if (_FontFile.m_type != File::Type::Font) return;
-
+    
+    if (_FontFile.m_type != File::Type::Font)
+    return;
+    
     if (TTF_Font *target_font = m_LoadedFonts[_FontFile.m_filepath])
     {
         _FontFile.m_userdata = target_font;
     }
     else
     {
-        SDL_RWops *temp_rw = SDL_RWFromConstMem(_FontFile.m_info.data, _FontFile.m_info.size);
+        SDL_RWops *temp_rw = SDL_RWFromConstMem(_FontFile.getInfo().data, _FontFile.getInfo().size);
         m_LoadedFonts[_FontFile.m_filepath] = TTF_OpenFontRW(temp_rw, 1, 12);
-
-        SDL_Surface* temp_surf = TTF_RenderText_Solid(m_LoadedFonts[_FontFile.m_filepath],
-            font_characters, {255, 255, 255}
-        );
-        m_LoadedTextures[_FontFile.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
-        SDL_FreeSurface(temp_surf);
-        _FontFile.m_userdata = m_LoadedFonts[_FontFile.m_filepath];
-    }
-    int h, max_w;
-    SDL_QueryTexture(m_LoadedTextures[_FontFile.m_filepath], NULL, NULL, &max_w, &h);
-
-    int max_count, linelength;
-    TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], text, _Bounds->w, &linelength, &max_count);
-    while (true)
-    {
-        if (!max_count)
-        {
-            max_count = strlen(text);
-            break;
+        
+        SDL_Surface *temp_surf = TTF_RenderText_Solid(m_LoadedFonts[_FontFile.m_filepath],
+            font_characters, {255, 255, 255});
+            m_LoadedTextures[_FontFile.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
+            SDL_FreeSurface(temp_surf);
+            _FontFile.m_userdata = m_LoadedFonts[_FontFile.m_filepath];
         }
-        max_count--;
-        if (text[max_count] == ' ') break;
-    }
-
-    char* linetest = new char[linelength];
-
-    strncpy(linetest, text, max_count);
-    linetest[max_count] = 0;
-    TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
-
-    int x = 0;
-    int y = 0;
-    int i = 0;
-    char constchar[2] = {0, 0};
-
-    unsigned int c = count;
-    while (text[i] && i < c)
-    {
-        const char& character = text[i];
-        if (i > max_count)
+        int h, max_w;
+        SDL_QueryTexture(m_LoadedTextures[_FontFile.m_filepath], NULL, NULL, &max_w, &h);
+        
+        int max_count, linelength;
+        TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text, _Bounds->w, &linelength, &max_count);
+        
+        char *linetest = new char[strlen(text)+1];
+        
+        strncpy(linetest, text, max_count);
+        linetest[max_count] = 0;
+        TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
+        
+        int x = 0;
+        int y = 0;
+        int i = 0;
+        char constchar[2] = {0, 0};
+        
+        unsigned int c = count;
+        while (text[i] && i < c)
         {
-            x = 0;
-            y += h;
-
-            TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], text+i, _Bounds->w, NULL, &max_count);
-            strncpy(linetest, text+i, max_count);
+            const char &character = text[i];
+            if (i > max_count)
+            {
+                new_line:
+                x = 0;
+                y += h;
+                
+                TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text + i, _Bounds->w, NULL, &max_count);
+                
+            strncpy(linetest, text + i, max_count);
             linetest[max_count] = 0;
-            max_count += i-1;
-            TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
+            TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, &max_count);
+            max_count += i - 1;
             continue;
         }
         switch (character)
         {
-            case ' ':
-                x += 3;
-                i++;
-                continue;
-            case '\n':
-                x = 0;
-                y += h;
-                i++;
-                continue;
-            default:
+        case ' ':
+            x += 3;
+            i++;
+            continue;
+        case '\n':
+            i++;
+            goto new_line;
+            continue;
+        default:
             break;
         };
         SDL_Rect src = {0, 0, 0, 0}, dest = {0, 0, 0, 0};
         src.h = h;
         dest.h = h;
 
-        
         constchar[0] = character;
-        TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], constchar, max_w, &src.w, NULL);
-        if (!src.w) continue;
+        TTF_MeasureText(m_LoadedFonts[_FontFile.m_filepath], constchar, max_w, &src.w, NULL);
+        if (!src.w)
+            continue;
 
-        font_characters[character-32] = 0;
-        TTF_MeasureUTF8(m_LoadedFonts[_FontFile.m_filepath], font_characters, max_w, &src.x, NULL);
-        font_characters[character-32] = character;
-        
-        if (character == 'i') --src.w;
+        font_characters[character - 32] = 0;
+        TTF_MeasureText(m_LoadedFonts[_FontFile.m_filepath], font_characters, max_w, &src.x, NULL);
+        font_characters[character - 32] = character;
+
+        if (character == 'i' || character == 'n')
+            --src.w;
         dest.w = src.w;
 
         dest.x = _Bounds->x + x;
         switch (alignment)
         {
-            case Game::GuiComponents::UIText::AlCentered:
-                dest.x += (_Bounds->w - linelength) / 2;
-                break;
-            case Game::GuiComponents::UIText::AlRight:
-                dest.x += (_Bounds->w - linelength);
-                break;
-            default:
-                break;
-
+        case Game::GuiComponents::UIText::AlCentered:
+            dest.x += (_Bounds->w - linelength) / 2;
+            break;
+        case Game::GuiComponents::UIText::AlRight:
+            dest.x += (_Bounds->w - linelength);
+            break;
+        default:
+            break;
         }
         dest.y = _Bounds->y + y;
-        
+
         SDL_RenderCopy(sdl_renderer, m_LoadedTextures[_FontFile.m_filepath], &src, &dest);
 
         SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, 255);
-        
+
         x += src.w;
         i++;
     }
 
     delete[] linetest;
-
 }
 
 bool DrawingDevice::LoadFileTexture(File &_File)
 {
-    //printf("%p\n", _File.m_userdata);
-    if (_File.m_userdata) return true;
+    // printf("%p\n", _File.m_userdata);
+    if (_File.m_userdata)
+        return true;
 
     if (_File.m_type != File::Type::Image)
     {
@@ -327,15 +318,17 @@ bool DrawingDevice::LoadFileTexture(File &_File)
     }
     else
     {
-        SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.m_info.data, _File.m_info.size);
-        if (!temp_rw) goto err;
+        SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.getInfo().data, _File.getInfo().size);
+        if (!temp_rw)
+            goto err;
         m_LoadedTextures[_File.m_filepath] = IMG_LoadTexture_RW(sdl_renderer, temp_rw, 1);
-        if (!m_LoadedTextures[_File.m_filepath]) goto err;
+        if (!m_LoadedTextures[_File.m_filepath])
+            goto err;
         _File.m_userdata = m_LoadedTextures[_File.m_filepath];
-        return true;      
+        return true;
     }
 
-    err:
+err:
     printf("%s\n", SDL_GetError());
     return false;
 }
@@ -370,13 +363,12 @@ void DrawingDevice::processViewport()
     m_viewport.y = m_viewport.h / 2;
 
     Vector2u viewportsize;
-    SDL_GetRendererOutputSize(sdl_renderer, (int*)&viewportsize.X, (int*)&viewportsize.Y);
+    SDL_GetRendererOutputSize(sdl_renderer, (int *)&viewportsize.X, (int *)&viewportsize.Y);
 
-    if (scale)
-    {
+    if (GameSettings::ScalingResolution)
         scale = (viewportsize / GameSettings::ScalingResolution).getMin();
-        SDL_RenderSetScale(sdl_renderer, scale, scale);
-    }
+    scale = scale ? scale : 1;
+    SDL_RenderSetScale(sdl_renderer, scale, scale);
 
     if (!Game::currentGuiLayer)
         return;

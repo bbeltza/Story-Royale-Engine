@@ -4,6 +4,8 @@
 
 #include "Components.h"
 
+Color3 Game::World::Background = {255, 149, 236};
+Color4 Game::World::Foreground = {0};
 Game::World* Game::currentWorld = nullptr;
 Game::World* Game::World::s_TargetEntityWorld = nullptr;
 int Game::World::center[2];

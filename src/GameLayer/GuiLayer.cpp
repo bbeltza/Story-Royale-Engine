@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "ColorFunctions.h"
 
+Color4 Game::GuiLayer::Foreground = {0};
 Game::GuiLayer* Game::currentGuiLayer = nullptr;
 Game::GuiContainer* Game::GuiContainer::s_targetParentContainer = nullptr;
 Game::GuiContainer* Game::GuiContainer::s_targetComponentParent = nullptr;

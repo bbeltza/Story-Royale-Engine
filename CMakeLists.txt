@@ -26,13 +26,14 @@
 - Linking with ImGui (maybe before uhhh); *maybe after
 - Audio;
 
-- Work on the game!;
+- Work on the game!; !
 
 ]]
 
 cmake_minimum_required(VERSION 3.12)
 
 set(SRENGINE_CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(SRENGINE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_MODULE_PATH ${SRENGINE_CMAKE_MODULE_PATH})
 include(StoryRoyaleEngine)
 
@@ -87,6 +88,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     add_subdirectory(tests/ScalingTest)
 else()
     set(NO_CONSOLE_OPTIONS ${NO_CONSOLE_OPTIONS} PARENT_SCOPE)
+    set(SRENGINE_DIR ${SRENGINE_DIR} PARENT_SCOPE)
     set(SRENGINE_INCLUDE_DIRS ${SRENGINE_INCLUDE_DIRS} PARENT_SCOPE)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRENGINE_CMAKE_MODULE_PATH} PARENT_SCOPE)
 endif()

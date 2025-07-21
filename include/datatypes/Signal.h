@@ -15,8 +15,10 @@ struct Signal
     ~Signal();
 
     Connection* Connect(EventFunction fn);
+    Connection* Once(EventFunction fn);
 
     void Fire(void* userdata);
+    void DisconnectAll();
 
 private:
     Connection* m_handlerListHead = nullptr;
