@@ -31,6 +31,8 @@ public:
     const Vector2f getMouseScreenPosition() const { return Vector2f(m_mouseState.x, m_mouseState.y); }
     const Vector2f getMouseWorldPosition() const;
 
+    inline uint8_t getScaleRatio() const {return m_scaleratio;}
+
     // Input events
     Signal keyEvent;
     Signal mouseButton;
@@ -49,4 +51,6 @@ private:
     // Private states
     _mState m_mouseState;
     uint8_t m_keyboardState[SDL_NUM_SCANCODES] = {0};
+
+    uint8_t m_scaleratio;
 };

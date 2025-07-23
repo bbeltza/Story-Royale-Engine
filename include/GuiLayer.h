@@ -10,10 +10,10 @@
 
 #define __push_gui_list(s_target, list, target_type) {\
 s_target = this;\
-list.push_front((target_type*)(new T));\
+list.push_back((target_type*)(new T));\
 s_target = nullptr;\
 \
-return (T*)list.front(); }
+return (T*)list.back(); }
 
 namespace Game
 {
@@ -39,6 +39,7 @@ namespace Game
         void _callUpdate(float dt);
 
         GuiContainer* getParent() const { return p_parent; }
+        GuiContainer* getChildAt(size_t index) const { size_t i = 0; for (auto obj : p_children) if (i++ >= index) return obj; }
 
         inline virtual void _render() { _renderchildren(); };
 
@@ -88,7 +89,7 @@ namespace Game
         void _render_components();
         void _procpos_components();
         void _procsize_components();
-        void _proc_children_components();
+        void _proc_children_components(uint32_t index);
         
     };
 
@@ -110,13 +111,14 @@ namespace Game
         virtual void pre_render() {};
         virtual void process_size() {};
         virtual void process_position() {};
-        virtual void process_children(GuiObject* Object) {};
+        virtual void process_children(GuiObject* Object, uint32_t index) {};
 
     protected:
         unsigned char p_flags = 0;
         GuiContainer* p_parent;
 
-        SDL_FRect* getParentAbs() { return &p_parent->p_absolute; }
+        SDL_FRect* getAbsolute(GuiContainer* obj) { return &obj->p_absolute; }
+        SDL_FRect* getParentAbs() { return getAbsolute(p_parent); }
         Color4* getParentMod() { return &p_parent->p_modulate; }
 
     private:

@@ -23,12 +23,7 @@ Game::GuiContainer::~GuiContainer()
 
 void Game::GuiContainer::_processchildren()
 {
-    if (!this->isGuiLayer())
-    {
-        _procpos_components();
-        _proc_children_components();
-    }
-
+    uint32_t i = 0;
     for (GuiContainer* _cont : p_children)
     {
         auto obj = (GuiObject*)_cont;
@@ -36,6 +31,8 @@ void Game::GuiContainer::_processchildren()
 
         obj->_process();
         obj->_processchildren();
+        obj->_procpos_components();
+        obj->_proc_children_components(i++);
     }
 }
 
@@ -50,8 +47,8 @@ void Game::GuiObject::_process()
 {
     // Process the size of the UI objects first
 
-    p_absolute.w = size.X.toAbsolute(p_parent->p_absolute.w);
-    p_absolute.h = size.Y.toAbsolute(p_parent->p_absolute.h);
+    p_absolute.w = size.X.toAbsolute((int)p_parent->p_absolute.w);
+    p_absolute.h = size.Y.toAbsolute((int)p_parent->p_absolute.h);
 
     // Then transforming it with any components
 
@@ -126,9 +123,9 @@ void Game::GuiContainer::_procsize_components()
     }
 }
 
-void Game::GuiContainer::_proc_children_components()
+void Game::GuiContainer::_proc_children_components(uint32_t index)
 {
     for (GuiComponent* comp : p_parent->p_components)
         if (comp->hasFlag(PROCESS_CHILDREN) && comp->enabled)
-            comp->process_children((GuiObject*)this);
+            comp->process_children((GuiObject*)this, index);
 }

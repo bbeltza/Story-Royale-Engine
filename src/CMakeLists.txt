@@ -44,10 +44,12 @@ set(LAYER_SOURCES
 "Components/Gui/UIModulate.cpp"
 "Components/Gui/UIPadding.cpp"
 "Components/Gui/UIText.cpp"
+"Components/Gui/UIList.cpp"
 
 "Components/World/Shape.cpp"
 "Components/World/Velocity.cpp"
 "Components/World/Sprite.cpp"
+"Components/World/CustomTexture.cpp"
 
 "Presets/Gui/GuiButton.cpp"
 

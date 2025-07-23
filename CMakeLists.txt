@@ -20,11 +20,11 @@
 - Resource binder; !!
 
 - Additional structs:
-    - Timers;
-    - Tweens
+    - Timers; !!
+    - Tweens !!
 
 - Linking with ImGui (maybe before uhhh); *maybe after
-- Audio;
+- Audio; !!
 
 - Work on the game!; !
 

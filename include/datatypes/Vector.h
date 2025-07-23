@@ -9,12 +9,15 @@ struct Vector2
     Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
     Vector2(): Vector2(0, 0) {}
     
-    template <class _Num2> Vector2(const _Num2 x, const _Num2 y): X(x), Y(y) {}
+    template <class _Num2> Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
     template <class _Num2> Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
     inline void Print() const {std::cout << "{ " << X << ", " << Y << " }\n";}
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
+
+    inline Vector2 Lerp(const Vector2& other, float alpha) {return *this + (other - *this) * alpha;}
+
     inline _Num getMin() const {return X < Y ? X : Y;}
     inline _Num getMax() const {return X > Y ? X : Y;}
 

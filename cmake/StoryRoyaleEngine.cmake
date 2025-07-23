@@ -45,6 +45,7 @@ function(srEngine_link_resource PROJECT)
         add_library(${PROJECT}_res ${CMAKE_CURRENT_BINARY_DIR}/_res.c)
         target_link_libraries(${PROJECT} ${PROJECT}_res)
     else()
+        
         add_custom_target(
             copy_${PROJECT} ALL
             COMMAND ${CMAKE_COMMAND} -E copy_directory

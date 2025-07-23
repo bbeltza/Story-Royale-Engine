@@ -97,5 +97,24 @@ namespace Game
 
             Color4 Value = { 255, 255, 255, 255 };
         };
+
+        class UIList : public GuiComponent
+        {
+            public:
+            UIList() { p_flags = PROCESS_CHILDREN; }
+            void process_children(GuiObject* child, uint32_t index) override;
+
+            enum Direction
+            {
+                dir_horizontal,
+                dir_vertical
+            } direction;
+
+            UDim Padding = UDIM_ZERO;
+
+            private:
+
+            float m_lastsize;
+        };
     }
 }

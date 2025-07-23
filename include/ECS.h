@@ -24,6 +24,7 @@ namespace Game
     {
     public:
         float x = 0, y = 0;
+        RectF clamp = {0, 0, 0, 0};
         ENUM_ScaleType scalingType = XY;
 
         union

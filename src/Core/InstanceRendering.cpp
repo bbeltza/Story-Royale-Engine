@@ -49,7 +49,7 @@ void Game::GuiComponents::UIStroke::render()
 {
     SDL_SetRenderDrawColorMod(target_renderer, &color, getParentMod());
 
-    for (int i = 0; i < size; i++)
+    for (unsigned int i = 0; i < size; i++)
     {
         SDL_FRect r = *getParentAbs();
         r.h -= i * 2;
@@ -63,7 +63,7 @@ void Game::GuiComponents::UIStroke::render()
 void Game::GuiComponents::UIText::render()
 {
     SDL_FRect* r = getParentAbs();
-    SDL_Rect ir{r->x, r->y, r->w, r->h};
+    SDL_Rect ir{(int)r->x, (int)r->y, (int)r->w, (int)r->h};
     Engine->DrawingContext.DrawFont(&ir, this->m_file, text.c_str(), count, Alignment);
 }
 

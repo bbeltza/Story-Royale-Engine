@@ -6,10 +6,17 @@
 #include "datatypes/Vector.h"
 #include "File.h"
 
+namespace Game
+{
+    namespace Components
+    {
+        class CustomTexture;
+    }
+}
 class DrawingDevice
 {
     ENGINE_BASE
-
+    friend class Game::Components::CustomTexture;
 public:
     enum DrawingMode
     {

@@ -38,6 +38,7 @@ struct Connection
     {}
     Connection(Connection& other) = delete;
     void Disconnect() { m_connected = 0; }
+    void Reconnect() { m_connected = 1; }
 
 private:
     friend struct Signal;

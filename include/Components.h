@@ -69,5 +69,28 @@ namespace Game
         private:
             std::vector<File*> textures;
         };
+        
+        class CustomTexture: public Component
+        {
+            
+            public:
+            CustomTexture();
+            ~CustomTexture();
+
+            void AddFile(const char* path, std::list<Vector2f>& Offsets);
+
+            Vector2i getEntireSize();
+
+            void Render(Entity *_entity) override;
+            private:
+
+            struct final_texturedata
+            {
+                SDL_Texture* texture;
+                Vector2f offset;
+                final_texturedata(SDL_Texture* t, float x, float y):texture(t), offset(x, y) {}
+            };
+            std::list<final_texturedata> m_FinalTextures;            
+        };
     }
 }
