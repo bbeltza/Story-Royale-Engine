@@ -1,5 +1,6 @@
 #pragma once
 #include "Game/GuiContainer.h"
+#include "Game/GuiObject.h"
 
 #include "Datatypes/Flags.h"
 
@@ -36,10 +37,10 @@ namespace Game
         virtual void process_position(GuiContainer*) {};
         virtual void process_children(GuiObject* Object, uint32_t index) {};
 
-        inline RectF* getAbsolute(GuiContainer* container) { return container->m_absolute; }
-        inline Color4* getModulate(GuiContainer* container) { return container->m_modulate; }
-        inline RectF* getAbsolute(GuiObject* container) { return container->m_absolute; }
-        inline Color4* getModulate(GuiObject* container) { return container->m_modulate; }
+        inline RectF* getAbsolute(GuiContainer* container) { return &container->m_absolute; }
+        inline Color4* getModulate(GuiContainer* container) { return &container->m_modulate; }
+        inline RectF* getAbsolute(GuiObject* container) { return &container->m_absolute; }
+        inline Color4* getModulate(GuiObject* container) { return &container->m_modulate; }
     private:
         friend class GuiContainer;
     };

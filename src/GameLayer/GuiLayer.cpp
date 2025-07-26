@@ -1,32 +1,36 @@
+#include "Engine.h"
+
 #include "Game/GuiLayer.h"
 #include "Game/GuiObject.h"
 #include "Game/GuiComponent.h"
 
 Color4 Game::GuiLayer::Foreground = {0, 0, 0, 0};
-Game::GuiLayer* Game::GuiLayer::Current = nullptr;
+Game::GuiLayer *Game::GuiLayer::Current = nullptr;
 
-Game::GuiContainer* Game::GuiContainer::s_targetParentContainer = nullptr;
+Game::GuiContainer *Game::GuiContainer::s_targetParentContainer = nullptr;
 
-Game::GuiContainer::GuiContainer() : 
-    m_parent(s_targetParentContainer),
-    m_absolute{ 0, 0, 0, 0 }
-{}
+Game::GuiContainer::GuiContainer() : m_parent(s_targetParentContainer),
+                                     m_absolute{0, 0, 0, 0}
+{
+}
 
 Game::GuiContainer::~GuiContainer()
 {
-    while (!m_children.empty()) popChild();
-    while (!m_components.empty()) m_components.pop_back();
+    printf("%d\n", m_children.size());
+    while (!m_children.empty())
+        popChild();
 
     if (m_parent)
-        m_parent->m_children.remove(reinterpret_cast<GuiObject*>(this));
+        m_parent->m_children.remove(reinterpret_cast<GuiObject *>(this));
 }
 
 void Game::GuiContainer::_processchildren()
 {
     uint32_t i = 0;
-    for (GuiObject* obj : m_children)
+    for (GuiObject *obj : m_children)
     {
-        if (!obj->visible) continue;
+        if (!obj->visible)
+            continue;
 
         obj->_process();
         obj->_processchildren();
@@ -48,8 +52,24 @@ void Game::GuiObject::_process()
 
     // And finally process the positions with the transformed size
 
-    m_absolute.Position.X = m_parent->m_absolute.Position.X + position.X.toAbsolute(m_parent->m_absolute.Size.X) - m_absolute.Size.X * (anchor.X - 0.5f);
-    m_absolute.Position.Y = m_parent->m_absolute.Position.Y + position.Y.toAbsolute(m_parent->m_absolute.Size.Y) - m_absolute.Size.Y * (anchor.Y - 0.5f);
+    m_absolute.Position.X = m_parent->m_absolute.Position.X + position.X.toAbsolute(m_parent->m_absolute.Size.X) - m_absolute.Size.X * anchor.X;
+    m_absolute.Position.Y = m_parent->m_absolute.Position.Y + position.Y.toAbsolute(m_parent->m_absolute.Size.Y) - m_absolute.Size.Y * anchor.Y;
+}
+
+void Game::GuiContainer::_renderchildren()
+{
+    _prerender_components();
+    _render_components();
+
+    for (GuiContainer *obj : m_children)
+    {
+        if (!obj->visible)
+            continue;
+
+        obj->_prerender_components();
+        obj->_render_components();
+        obj->_renderchildren();
+    }
 }
 
 void Game::GuiContainer::_callUpdate(float dt)
@@ -69,10 +89,12 @@ Game::GuiComponent::~GuiComponent() {}
 
 void Game::GuiContainer::_prerender_components()
 {
-    if (m_parent) m_modulate = m_parent->m_modulate;
-    else m_modulate = { 255, 255, 255, 255 };
+    if (m_parent)
+        m_modulate = m_parent->m_modulate;
+    else
+        m_modulate = {255, 255, 255, 255};
 
-    for (GuiComponent* comp : m_components)
+    for (GuiComponent *comp : m_components)
     {
         if (comp->hasFlag(GuiComponent::PRE_RENDER) && comp->enabled)
             comp->pre_render(this);
@@ -81,17 +103,16 @@ void Game::GuiContainer::_prerender_components()
 
 void Game::GuiContainer::_render_components()
 {
-    for (GuiComponent* comp : m_components)
+    for (GuiComponent *comp : m_components)
     {
         if (comp->hasFlag(GuiComponent::RENDER) && comp->enabled)
             comp->render(this);
     }
 }
 
-
 void Game::GuiContainer::_procpos_components()
 {
-    for (GuiComponent* comp : m_components)
+    for (GuiComponent *comp : m_components)
     {
         if (comp->hasFlag(GuiComponent::PROCESS_POSITION) && comp->enabled)
             comp->process_position(this);
@@ -100,7 +121,7 @@ void Game::GuiContainer::_procpos_components()
 
 void Game::GuiContainer::_procsize_components()
 {
-    for (GuiComponent* comp : m_components)
+    for (GuiComponent *comp : m_components)
     {
         if (comp->hasFlag(GuiComponent::PROCESS_SIZE) && comp->enabled)
             comp->process_size(this);
@@ -109,7 +130,7 @@ void Game::GuiContainer::_procsize_components()
 
 void Game::GuiContainer::_proc_children_components(uint32_t index)
 {
-    for (GuiComponent* comp : m_parent->m_components)
+    for (GuiComponent *comp : m_parent->m_components)
         if (comp->hasFlag(GuiComponent::PROCESS_CHILDREN) && comp->enabled)
-            comp->process_children((GuiObject*)this, index);
+            comp->process_children((GuiObject *)this, index);
 }

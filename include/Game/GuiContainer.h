@@ -7,6 +7,7 @@
 
 class DrawingDevice;
 class InputClass;
+class EngineClass;
 
 namespace Game
 {
@@ -23,7 +24,10 @@ namespace Game
         inline GuiContainer *getParent() const { return m_parent; }
         inline const std::list<GuiObject*>& getChildren() const { return m_children; }
 
-        inline void popChild() {delete m_children.back(); m_children.pop_back();}
+        inline Vector2f getAbsolutePosition() const { return m_absolute.Position; }
+        inline Vector2f getAbsoluteSize() const { return m_absolute.Size; }
+
+        void popChild() { delete m_children.back(); }
         template <class obj_type> inline obj_type* addChild()
         {
             s_targetParentContainer = this;

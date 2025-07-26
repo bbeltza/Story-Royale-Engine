@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <SDL.h>
 #include "C/ExtraSDL.h"
-#include "C/Color.h"
 
-int SDL_SetRenderDrawColorMod(SDL_Renderer* renderer, Color4* color, Color4* mod)
+int SDL_SetRenderDrawColorMod(SDL_Renderer* renderer, SDL_Color* color, SDL_Color* mod)
 {
     if (*(Uint32*)mod == UINT32_MAX)
         return SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);

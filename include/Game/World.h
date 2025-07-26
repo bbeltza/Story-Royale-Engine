@@ -7,15 +7,22 @@
 #include "Datatypes/Color.h"
 #include "Datatypes/Vector.h"
 
+class InputClass;
+class DrawingDevice;
+class EngineClass;
+
 namespace Game
 {
-    class World: public WorldInstance
+    class Entity;
+
+    class World : public WorldInstance
     {
+    protected:
         World();
+
+    public:
         ~World();
 
-        public:
-        
         // Static
 
         /// @brief The background color that the game will have when there's a world
@@ -25,28 +32,40 @@ namespace Game
         static Color4 Foreground;
 
         /// The current world that will be updated and rendered
-        static World* Current;
+        static World *Current;
+        template <class w_type>
+        static inline w_type *setCurrent()
+        {
+            if (Current)
+                delete Current;
+
+            auto new_current = new w_type;
+            Current = reinterpret_cast<World *>(new_current);
+            return new_current;
+        }
 
         // Member
 
         Camera CurrentCamera;
 
-        public:
+    public:
         // Entity Handling
 
         // Adds an entity to the world, templated by a derived class of your choice.
         // But make sure it inherits correctly from the class Entity because the engine will have to call Update() on them
-        template <class _entity> inline _entity* addEntity()
+        template <class _entity>
+        inline _entity *addEntity()
         {
-            s_TargetEntityWorld = this;
+            Entity::s_TargetWorld = this;
             auto newEntity = new _entity;
-            s_TargetEntityWorld = nullptr;
+            Entity::s_TargetWorld = nullptr;
             return newEntity;
         }
         // Gets the list of entities that the world has, templated by a derived class of your choice.
-        template <class _entity> inline const std::list<_entity*>& getEntities() const
+        template <class _entity>
+        inline const std::list<_entity *> &getEntities() const
         {
-            return *reinterpret_cast<std::list<_entity*> *>(&m_Entities);
+            return *(std::list<_entity *> *)(&m_Entities);
         }
 
         // Coordinate converting
@@ -66,10 +85,10 @@ namespace Game
         void Update(delta_model) override;
         void pUpdate(delta_model) override;
 
-        private:
-        Entity* _query();
+    private:
+        Entity *_query();
         // The container that holds all of its entities
-        std::list<Entity*> m_Entities;
+        std::list<Entity *> m_Entities;
 
         static Vector2f center;
 

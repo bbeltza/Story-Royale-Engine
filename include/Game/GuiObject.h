@@ -8,8 +8,6 @@ namespace Game
     class GuiObject : public GuiContainer
     {
     public:
-        GuiObject();
-
         UDim2 position, size;
         Vector2f anchor;
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "Game/Component.h"
+#include "Game/Entity.h"
 
 #include "Datatypes/Rect.h"
 #include "C/Color.h"
@@ -37,7 +38,7 @@ namespace Components
 
         bool isInScreenPoint(::Game::Entity*, Vector2f);
 
-        inline RectF getRealRect(::Game::Entity* parent) const;
+        inline RectF getRealRect(::Game::Entity* parent) const { return {parent->Position + Rect.Position, Rect.Size}; }
         inline bool collidesWith(::Game::Entity* parent, const RectF& other_Rect) const {return getRealRect(parent).Intersects(other_Rect);}
     };
 }

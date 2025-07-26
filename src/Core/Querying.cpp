@@ -41,19 +41,18 @@ Game::GuiObject *Game::GuiContainer::_query()
     for (auto it = m_children.rbegin(); it != m_children.rend(); it++)
     {
         auto obj = *it;
-        if (!obj)
-            continue;
         if (!obj->canQuery)
             continue;
         target_return = obj->_query();
+        if (target_return) break;
     }
 
     if (!target_return && !isGuiLayer())
     {
         SDL_FPoint mousePoint = {mState->x, mState->y};
-        SDL_FRect r{m_absolute.getLeft(), m_absolute.getTop(), m_absolute.Size.X, m_absolute.Size.Y};
+        SDL_FRect r{m_absolute.Position.X, m_absolute.Position.Y, m_absolute.Size.X, m_absolute.Size.Y};
         if (SDL_PointInFRect(&mousePoint, &r))
-            target_return = (GuiObject*)this;
+            target_return = (GuiObject *)this;
     }
 
     return target_return;
@@ -63,20 +62,17 @@ Game::Entity *Game::World::_query()
 {
     Entity *target_returnEntity = nullptr;
 
-    if (!m_Entities.empty())
+    for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); it++)
     {
-        for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); it++)
+        auto entity = reinterpret_cast<Entity *>(*it);
+        for (auto component : entity->m_Components)
         {
-            auto entity = reinterpret_cast<Entity*>(*it);
-            for (auto component : entity->m_Components)
+            if (!component->hasProcessFlag(component->p_Query))
+                continue;
+            if (component->Query(entity))
             {
-                if (!component->hasProcessFlag(component->p_Query))
-                    continue;
-                if (component->Query(entity))
-                {
-                    target_returnEntity = entity;
-                    break;
-                }
+                target_returnEntity = entity;
+                break;
             }
         }
     }

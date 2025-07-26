@@ -20,12 +20,7 @@ void DrawingDevice::tr()
 void GuiComponents::Fill::render(Game::GuiContainer* obj)
 {
     auto absolute = getAbsolute(obj);
-    SDL_FRect r{
-        absolute->getLeft(),
-        absolute->getTop(),
-        absolute->Size.X,
-        absolute->Size.Y
-    };
+    SDL_FRect r = *(SDL_FRect*)absolute;
 
     SDL_SetRenderDrawColorMod(target_renderer, reinterpret_cast<SDL_Color*>(&color), reinterpret_cast<SDL_Color*>(getModulate(obj)));
     SDL_RenderFillRectF(target_renderer, &r);
@@ -69,13 +64,7 @@ void GuiComponents::Stroke::render(Game::GuiContainer* obj)
     RectF* absolute = getAbsolute(obj);
     for (unsigned int i = 0; i < size; i++)
     {
-        SDL_FRect r
-        {
-            absolute->getLeft(),
-            absolute->getTop(),
-            absolute->Size.X,
-            absolute->Size.Y
-        };
+        SDL_FRect r = *(SDL_FRect*)absolute;
         r.h -= i * 2;
         r.w -= i * 2;
         r.x += i;
@@ -87,7 +76,7 @@ void GuiComponents::Stroke::render(Game::GuiContainer* obj)
 void GuiComponents::Text::render(Game::GuiContainer* obj)
 {
     RectF* r = getAbsolute(obj);
-    SDL_Rect ir{(int)r->getLeft(), (int)r->getTop(), (int)r->Size.X, (int)r->Size.Y};
+    SDL_Rect ir{(int)r->Position.X, (int)r->Position.Y, (int)r->Size.X, (int)r->Size.Y};
     Engine->DrawingContext.DrawFont(&ir, this->m_file, text.c_str(), count, Alignment);
 }
 

@@ -12,6 +12,8 @@ namespace Game
 
     class Entity:public WorldInstance
     {
+        Entity();
+        ~Entity();
         public:
         
         enum ParentType: uint8_t
@@ -25,8 +27,8 @@ namespace Game
         Vector2f Position;
         int zIndex = 0;
 
-        template <class w_Type> inline w_Type* getWorld() const { return reinterpret_cast<w_Type*>m_world; }
-        inline void addComponent(void* const component) {/**/}
+        template <class w_Type> inline w_Type* getWorld() const { return reinterpret_cast<w_Type*>(m_world); }
+        inline void addComponent(Component* const component) { m_Components.push_back(component); }
         void reParent(World* const _world);
 
         private:
