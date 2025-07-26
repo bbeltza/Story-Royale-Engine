@@ -12,8 +12,6 @@
 
 extern "C" {
 
-#include "ExtraSDL.h"
+#include "C/ExtraSDL.h"
 
 }
-
-

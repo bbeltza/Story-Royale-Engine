@@ -1,5 +1,5 @@
 #include <standard.h>
-#include "File.h"
+#include "Classes/File.h"
 #include "SDL.hpp"
 
 #include "System.h"
@@ -42,7 +42,7 @@ File::File(File &&moved)
 
 File::~File()
 {
-    if (m_type == Type::Unknown) return;
+    if (m_type == Type::Unknown || m_type == Type::Uninitialized) return;
     if (!getInfo().resbind && getInfo().handle)
         fclose(f getInfo().handle);
 }
@@ -115,7 +115,7 @@ void File::Load(const char *path)
 
                         break;
                     }
-                    resptr += l + 5;
+                    resptr += strlen((const char*)resptr) + 5;
                 }
                 if (*resptr == '\n')
                 {
@@ -159,7 +159,7 @@ void File::Load(const char *path)
         printf("%zd\n", info.size);
         for (size_t i = 0; i < info.size; i++)
         {
-            // putchar(m_info.data[i]);
+            //putchar(m_info().data[i]);
         }
     }
 

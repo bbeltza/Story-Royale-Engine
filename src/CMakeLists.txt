@@ -35,21 +35,20 @@ set(DATATYPES_SOURCES
 
 set(LAYER_SOURCES
 
-"Component.cpp"
 "Entity.cpp"
 "GuiLayer.cpp"
 "World.cpp"
 
 "Components/Gui/AspectRatio.cpp"
-"Components/Gui/UIModulate.cpp"
-"Components/Gui/UIPadding.cpp"
-"Components/Gui/UIText.cpp"
-"Components/Gui/UIList.cpp"
+"Components/Gui/Modulate.cpp"
+"Components/Gui/Padding.cpp"
+"Components/Gui/Text.cpp"
+"Components/Gui/List.cpp"
 
 "Components/World/Shape.cpp"
 "Components/World/Velocity.cpp"
 "Components/World/Sprite.cpp"
-"Components/World/CustomTexture.cpp"
+"Components/World/StaticTexture.cpp"
 
 "Presets/Gui/GuiButton.cpp"
 

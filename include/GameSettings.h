@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "datatypes/Vector.h"
+#include "Datatypes/Vector.h"
 
 namespace GameSettings
 {

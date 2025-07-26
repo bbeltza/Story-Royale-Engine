@@ -1,27 +1,25 @@
 #include <standard.h>
 
-#include "ColorFunctions.h"
 #include "Engine.h"
-#include "ECS.h"
-#include "GuiLayer.h"
-#include "Components.h"
-#include "GuiComponents.h"
-#include "DrawingContext.h"
+#include "Game/Camera.h"
+#include "Game/World.h"
+#include "Game/GuiLayer.h"
+#include "Game/GuiComponent.h"
+
+#include "Game/GuiComponents/Text.h"
+
 #include "GameSettings.h"
 
-void DrawingDevice::getScreenCenter(unsigned int *x, unsigned int *y)
+Vector2f DrawingDevice::getScreenCenter()
 {
-    if (x)
-        *x = m_viewport.x;
-    if (y)
-        *y = m_viewport.y;
+    return {m_viewport.w / 2.0f, m_viewport.h / 2.0f};
 }
 
 #define CHECK_LOCK \
     if (m_Locked)  \
         return;
 
-void DrawingDevice::DrawRectangle(const Rect<float> &_Rectangle, const Color4 &_Col, DrawingMode _mode)
+void DrawingDevice::DrawRectangle(const RectF &_Rectangle, const Color4 &_Col, DrawingMode _mode)
 {
     CHECK_LOCK
     SDL_FRect r{
@@ -41,10 +39,10 @@ void DrawingDevice::DrawRectangleAtWorld(const RectF &_Rectangle, const Color4 &
 {
     CHECK_LOCK
     Vector2f target_pos = _Rectangle.getTopLeft();
-    if (Game::currentWorld)
-        target_pos = Game::currentWorld->worldToScreenSpace(target_pos.X, target_pos.Y);
+    if (Game::World::Current)
+        target_pos = Game::World::Current->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
-        target_pos = Game::currentWorld->worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, using a static function so it shouldn't crash
+        target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, this function is static
 
     SDL_FRect r{
         target_pos.X,
@@ -80,20 +78,21 @@ void DrawingDevice::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const d
 {
     CHECK_LOCK
     Vector2f target_pos(_Rectangle.Position);
-    if (Game::currentWorld)
-        target_pos = Game::currentWorld->worldToScreenSpace(target_pos.X, target_pos.Y);
+    if (Game::World::Current)
+        target_pos = Game::World::Current->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
-        target_pos = Game::currentWorld->worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, using a static function so it shouldn't crash
+        target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y);
 
     return DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col);
 }
 
 void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into world coordinates
 {
-    if (Game::currentWorld)
-        pos = Game::currentWorld->worldToScreenSpace(pos.X, pos.Y);
+    CHECK_LOCK
+    if (Game::World::Current)
+        pos = Game::World::Current->worldToScreenSpace(pos.X, pos.Y);
     else
-        pos = Game::currentWorld->worldToScreen(pos.X, pos.Y);
+        pos = Game::World::worldToScreen(pos.X, pos.Y);
 
     SDL_SetRenderDrawColor(sdl_renderer, 255, 64, 0, 255);
     SDL_RenderDrawLineF(sdl_renderer, pos.X - ENTITY_DBGLINESIZE, pos.Y, pos.X + ENTITY_DBGLINESIZE, pos.Y);
@@ -106,11 +105,11 @@ void DrawingDevice::render()
     tr();
 
     // Render current world
-    if (Game::currentWorld)
+    if (Game::World::Current)
         renderCurrentWorld();
     else
     {
-        Game::currentWorld->render();
+        Game::World::call_render();
         SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, 0);
         SDL_RenderClear(sdl_renderer);
     }
@@ -118,7 +117,7 @@ void DrawingDevice::render()
     m_Engine->BeforeRender.Fire(0);
 
     // Drawing the Gui layer
-    if (Game::currentGuiLayer)
+    if (Game::GuiLayer::Current)
         renderCurrentUI();
 
     m_Engine->AfterRender.Fire(0);
@@ -130,9 +129,11 @@ void DrawingDevice::render()
 
 void DrawingDevice::renderCurrentWorld()
 {
+    auto world = Game::World::Current;
+
     //// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
-    Color3 &bg = Game::currentWorld->Background;
-    Color4 &fg = Game::currentWorld->Foreground;
+    Color3 &bg = world->Background;
+    Color4 &fg = world->Foreground;
 
     //// Clearing the screen with the background color
     SDL_SetRenderDrawColor(sdl_renderer, bg.r, bg.g, bg.b, 255);
@@ -141,7 +142,7 @@ void DrawingDevice::renderCurrentWorld()
     //// Drawing all the entities (doesn't run if the foreground is full opaque)
     if (fg.a < 255)
     {
-        Game::currentWorld->render();
+        world->call_render();
     }
 
     //// Finally, filling the foreground (doesn't run if the foreground is invisible)
@@ -155,13 +156,15 @@ void DrawingDevice::renderCurrentWorld()
 
 void DrawingDevice::renderCurrentUI()
 {
-    Color4 &uifg = Game::currentGuiLayer->Foreground;
+    auto layer = Game::GuiLayer::Current;
+
+    Color4 &uifg = layer->Foreground;
 
     if (uifg.a < 255)
     {
-        Game::currentGuiLayer->preRender();
-        Game::currentGuiLayer->_render();
-        Game::currentGuiLayer->postRender();
+        layer->preRender();
+        layer->_renderchildren();
+        layer->postRender();
     }
     if (uifg.a)
     {
@@ -190,10 +193,10 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
         }
         font_characters[95] = 0;
     }
-    
+
     if (_FontFile.m_type != File::Type::Font)
-    return;
-    
+        return;
+
     if (TTF_Font *target_font = m_LoadedFonts[_FontFile.m_filepath])
     {
         _FontFile.m_userdata = target_font;
@@ -202,42 +205,43 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
     {
         SDL_RWops *temp_rw = SDL_RWFromConstMem(_FontFile.getInfo().data, _FontFile.getInfo().size);
         m_LoadedFonts[_FontFile.m_filepath] = TTF_OpenFontRW(temp_rw, 1, 12);
-        
+
         SDL_Surface *temp_surf = TTF_RenderText_Solid(m_LoadedFonts[_FontFile.m_filepath],
-            font_characters, {255, 255, 255});
-            m_LoadedTextures[_FontFile.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
-            SDL_FreeSurface(temp_surf);
-            _FontFile.m_userdata = m_LoadedFonts[_FontFile.m_filepath];
-        }
-        int h, max_w;
-        SDL_QueryTexture(m_LoadedTextures[_FontFile.m_filepath], NULL, NULL, &max_w, &h);
-        
-        int max_count, linelength;
-        TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text, _Bounds->w, &linelength, &max_count);
-        
-        char *linetest = new char[strlen(text)+1];
-        
-        strncpy(linetest, text, max_count);
-        linetest[max_count] = 0;
-        TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
-        
-        int x = 0;
-        int y = 0;
-        int i = 0;
-        char constchar[2] = {0, 0};
-        
-        unsigned int c = count;
-        while (text[i] && i < c)
+                                                      font_characters, {255, 255, 255});
+        m_LoadedTextures[_FontFile.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
+        SDL_FreeSurface(temp_surf);
+        _FontFile.m_userdata = m_LoadedFonts[_FontFile.m_filepath];
+    }
+    
+    int h, max_w;
+    SDL_QueryTexture(m_LoadedTextures[_FontFile.m_filepath], NULL, NULL, &max_w, &h);
+
+    int max_count, linelength;
+    TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text, _Bounds->w, &linelength, &max_count);
+
+    char *linetest = new char[strlen(text) + 1];
+
+    strncpy(linetest, text, max_count);
+    linetest[max_count] = 0;
+    TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
+
+    int x = 0;
+    int y = 0;
+    char constchar[2] = {0, 0};
+
+    unsigned int i = 0;
+    unsigned int c = count;
+    while (text[i] && (i < c))
+    {
+        const char &character = text[i];
+        if (i > unsigned(max_count))
         {
-            const char &character = text[i];
-            if (i > max_count)
-            {
-                new_line:
-                x = 0;
-                y += h;
-                
-                TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text + i, _Bounds->w, NULL, &max_count);
-                
+        new_line:
+            x = 0;
+            y += h;
+
+            TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text + i, _Bounds->w, NULL, &max_count);
+
             strncpy(linetest, text + i, max_count);
             linetest[max_count] = 0;
             TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, &max_count);
@@ -277,10 +281,10 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
         dest.x = _Bounds->x + x;
         switch (alignment)
         {
-        case Game::GuiComponents::UIText::AlCentered:
+        case GuiComponents::Text::AlCentered:
             dest.x += (_Bounds->w - linelength) / 2;
             break;
-        case Game::GuiComponents::UIText::AlRight:
+        case GuiComponents::Text::AlRight:
             dest.x += (_Bounds->w - linelength);
             break;
         default:
@@ -348,24 +352,20 @@ Vector2f Game::World::screenToWorld(float x, float y, Camera *cam)
         cam->x = SDL_clamp(cam->x, cam->clamp.getLeft(), cam->clamp.getRight());
         cam->y = SDL_clamp(cam->y, cam->clamp.getTop(), cam->clamp.getBottom());
     }
-    int &cx = center[0], cy = center[1];
-    return Vector2f(x - cx + cam->x, y - cy + cam->y);
+    return Vector2f(x - center.X + cam->x, y - center.Y + cam->y);
 }
 
 Vector2f Game::World::worldToScreen(float x, float y, Camera *cam)
 {
     if (!cam)
         return worldToScreen(x, y, &zeroCam);
-    int &cx = center[0], cy = center[1];
-    return Vector2f(x + cx - cam->x, y + cy - cam->y);
+    return Vector2f(x + center.X - cam->x, y + center.Y - cam->y);
 }
 
 void DrawingDevice::processViewport()
 {
     // Updating the viewport rect
     SDL_RenderGetViewport(sdl_renderer, &m_viewport);
-    m_viewport.x = m_viewport.w / 2;
-    m_viewport.y = m_viewport.h / 2;
 
     Vector2u viewportsize;
     SDL_GetRendererOutputSize(sdl_renderer, (int *)&viewportsize.X, (int *)&viewportsize.Y);
@@ -373,12 +373,14 @@ void DrawingDevice::processViewport()
     if (GameSettings::ScalingResolution)
         scale = (viewportsize / GameSettings::ScalingResolution).getMin();
     scale = scale ? scale : 1;
-    SDL_RenderSetScale(sdl_renderer, scale, scale);
+    SDL_RenderSetScale(sdl_renderer, (float)scale, (float)scale);
 
-    if (!Game::currentGuiLayer)
-        return;
-    Game::currentGuiLayer->p_absolute.w = (float)m_viewport.w;
-    Game::currentGuiLayer->p_absolute.h = (float)m_viewport.h;
+    if (!Game::GuiLayer::Current) return;
 
-    Game::currentGuiLayer->_processchildren();
+    auto layer = Game::GuiLayer::Current;
+    
+    layer->m_absolute.Size.X = (float)m_viewport.w;
+    layer->m_absolute.Size.Y = (float)m_viewport.h;
+
+    layer->_processchildren();
 }

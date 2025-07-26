@@ -1,4 +1,4 @@
-#include "Tween.h"
+#include "Classes/Tween.h"
 
 std::list<Tween*>* Tween::s_tweens = nullptr;
 void Tween::global_update(float delta)
@@ -100,28 +100,28 @@ void Tween::Update(float delta)
     switch (m_type)
     {
     case TT_uint8:
-        *m_target.u8 = lerp(*m_start.u8, *m_src.u8, alpha);
+        *m_target.u8 = (uint8_t)lerp(*m_start.u8, *m_src.u8, alpha);
         break;
     case TT_int8:
-        *m_target.i8 = lerp(*m_start.i8, *m_src.i8, alpha);
+        *m_target.i8 = (int8_t)lerp(*m_start.i8, *m_src.i8, alpha);
         break;
     case TT_uint16:
-        *m_target.u16 = lerp(*m_start.u16, *m_src.u16, alpha);
+        *m_target.u16 = (uint16_t)lerp(*m_start.u16, *m_src.u16, alpha);
         break;
     case TT_int16:
-        *m_target.i16 = lerp(*m_start.i16, *m_src.i16, alpha);
+        *m_target.i16 = (int16_t)lerp(*m_start.i16, *m_src.i16, alpha);
         break;
     case TT_uint32:
-        *m_target.u32 = lerp(*m_start.u32, *m_src.u32, alpha);
+        *m_target.u32 = (uint32_t)lerp(*m_start.u32, *m_src.u32, alpha);
         break;
     case TT_int32:
-        *m_target.i32 = lerp(*m_start.i32, *m_src.i32, alpha);
+        *m_target.i32 = (int32_t)lerp(*m_start.i32, *m_src.i32, alpha);
         break;
     case TT_uint64:
-        *m_target.u64 = lerp(*m_start.u64, *m_src.u64, alpha);
+        *m_target.u64 = (uint64_t)lerp(*m_start.u64, *m_src.u64, alpha);
         break;
     case TT_int64:
-        *m_target.i64 = lerp(*m_start.i64, *m_src.i64, alpha);
+        *m_target.i64 = (int64_t)lerp(*m_start.i64, *m_src.i64, alpha);
         break;
     case TT_float:
         *m_target.float_ = lerp(*m_start.float_, *m_src.float_, alpha);

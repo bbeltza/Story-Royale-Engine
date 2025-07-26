@@ -10,7 +10,11 @@
 #include <unordered_map>
 #include <array>
 
-#include "extra_string.h"
+extern "C"
+{
+    #include "C/extra_string.h"
+    #include "C/delta_model.h"
+}
 
 #define sign(x) ((0 < x) - (x < 0))
 #define lerp(a, b, t) (a + (b - a) * t)

@@ -1,36 +1,40 @@
-#include "Components.h"
+#include "SDL.hpp"
+#include "Game/Components/Shape.h"
 
-Game::Components::Shape::Shape() :
+#include "Game/Entity.h"
+#include "Game/World.h"
+
+Components::Shape::Shape() :
     Rect(),
-    shape(RECTANGLE),
-    flags(VISIBLE)
+    shape(RectangleShape),
+    flags(VisibleFlag)
 {
     p_flags = (ProcessFlags)(p_Render | p_pUpdate);
 }
 
-bool Game::Components::Shape::isInScreenPoint(Entity* p, Vector2i pt)
+bool Components::Shape::isInScreenPoint(Game::Entity* p, Vector2f pt)
 {
-    World* w = p->getWorld();
+    auto w = p->getWorld<Game::World>();
 
     static SDL_FPoint fpt;
     static SDL_FRect r;
     fpt.x = pt.X;
     fpt.y = pt.Y;
 
-    static Vector2i screenSpace;
+    static Vector2f screenSpace;
 
     switch (shape)
     {
-    case RECTANGLE:
-        screenSpace = w->worldToScreenSpace(p->x + Rect.getLeft(), p->y + Rect.getTop());
+    case RectangleShape:
+        screenSpace = w->worldToScreenSpace(p->Position.X + Rect.getLeft(), p->Position.Y + Rect.getTop());
         r.x = screenSpace.X;
         r.y = screenSpace.Y;
         r.w = Rect.Size.X;
         r.h = Rect.Size.Y;
         return SDL_PointInFRect(&fpt, &r);
         break;
-    case CIRCLE:
-        screenSpace = w->worldToScreenSpace(p->x + Rect.Position.X, p->y + Rect.Position.Y);
+    case CircleShape:
+        screenSpace = w->worldToScreenSpace(p->Position.X + Rect.Position.X, p->Position.Y + Rect.Position.Y);
         return (screenSpace - pt).getMagnitude() <= Rect.Size.X/2;
         break;
     default:

@@ -1,17 +1,15 @@
 #include <standard.h>
 
 #include "Engine.h"
-#include "Window.h"
-#include "Input.h"
-#include "ECS.h"
-#include "GuiLayer.h"
-#include "GuiComponents.h"
-#include "Components.h"
+
+#include "Game/World.h"
+#include "Game/Component.h"
+#include "Game/GuiLayer.h"
 
 #include "GameSettings.h"
 
-#include "Timer.h"
-#include "Tween.h"
+#include "Classes/Timer.h"
+#include "Classes/Tween.h"
 
 #define WCENTERED SDL_WINDOWPOS_CENTERED
 
@@ -73,12 +71,10 @@ EngineClass::EngineClass()
 
 EngineClass::~EngineClass()
 {
-    Game::Component::ClearComponents();
-
-    if (Game::currentWorld)
-        delete Game::currentWorld;
-    if (Game::currentGuiLayer)
-        delete Game::currentGuiLayer;
+    if (Game::World::Current)
+        delete Game::World::Current;
+    if (Game::GuiLayer::Current)
+        delete Game::GuiLayer::Current;
     Mix_CloseAudio();
     Mix_Quit();
     IMG_Quit();
@@ -121,7 +117,7 @@ void EngineClass::Run()
     while (pollWindowEvents())
     {
         auto start = std::chrono::steady_clock::now();
-        float dt = Timer::global_update();
+        delta_model dt = Timer::global_update();
         Tween::global_update(dt);
 
         queueDestroyingInstances();
@@ -129,17 +125,16 @@ void EngineClass::Run()
         Input.processEvents();
         Input.queryObjects();
 
-        if (Game::currentWorld)
+        if (Game::World::Current)
         {
-            Game::currentWorld->Update(dt);
-            Game::currentWorld->pUpdate(dt);
+            Game::World::Current->Update(dt);
+            Game::World::Current->pUpdate(dt);
         }
         
+        if (Game::GuiLayer::Current)
+            Game::GuiLayer::Current->_callUpdate(dt);
         DrawingContext.processViewport();
         DrawingContext.render();
-
-        if (Game::currentGuiLayer)
-            Game::currentGuiLayer->_callUpdate(dt);
 
         if (targetFrameTime > zero)
         {
@@ -173,8 +168,6 @@ void queueDestroyingInstances()
 {
     while (!destroyQueue.empty())
     {
-        if (destroyQueue.back() == Game::currentGuiLayer) Game::currentGuiLayer = nullptr;
-        if (destroyQueue.back() == Game::currentWorld) Game::currentWorld = nullptr;
         delete destroyQueue.back();
         destroyQueue.pop_back();
     }

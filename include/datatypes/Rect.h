@@ -25,28 +25,28 @@ struct Rect
         _abs(this->Position.Y - other.Position.Y) < this->Size.Y/2 + other.Size.Y/2;
     }
 
-    inline _Num getTop() const {return this->Position.Y - this->Size.Y/2;}
-    inline _Num getBottom() const {return this->Position.Y + this->Size.Y/2;}
-    inline _Num getLeft() const {return this->Position.X - this->Size.X/2;}
-    inline _Num getRight() const {return this->Position.X + this->Size.X/2;}
+    inline constexpr _Num getTop() const {return this->Position.Y - this->Size.Y/2;}
+    inline constexpr _Num getBottom() const {return this->Position.Y + this->Size.Y/2;}
+    inline constexpr _Num getLeft() const {return this->Position.X - this->Size.X/2;}
+    inline constexpr _Num getRight() const {return this->Position.X + this->Size.X/2;}
 
-    inline vec2 getTopLeft() const {return {this->getLeft(), this->getTop()};}
-    inline vec2 getTopRight() const {return {this->getRight(), this->getTop()};}
-    inline vec2 getBottomLeft() const {return {this->getLeft(), this->getBottom()};}
-    inline vec2 getBottomRight() const {return {this->getRight(), this->getBottom()};}
+    inline constexpr vec2 getTopLeft() const {return {this->getLeft(), this->getTop()};}
+    inline constexpr vec2 getTopRight() const {return {this->getRight(), this->getTop()};}
+    inline constexpr vec2 getBottomLeft() const {return {this->getLeft(), this->getBottom()};}
+    inline constexpr vec2 getBottomRight() const {return {this->getRight(), this->getBottom()};}
 
-    inline vec2 getXRotatedOffset(double angle) const {return {this->Size.X/2 * cos(_rad(angle)), this->Size.X/2 * sin(_rad(angle))};}
-    inline vec2 getYRotatedOffset(double angle) const {return {this->Size.Y/2 * cos(_rad(angle + 90)), this->Size.Y/2 * sin(_rad(angle + 90))};}
+    inline constexpr vec2 getXRotatedOffset(double angle) const {return {this->Size.X/2 * cos(_rad(angle)), this->Size.X/2 * sin(_rad(angle))};}
+    inline constexpr vec2 getYRotatedOffset(double angle) const {return {this->Size.Y/2 * cos(_rad(angle + 90)), this->Size.Y/2 * sin(_rad(angle + 90))};}
 
-    inline vec2 getLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle);}
-    inline vec2 getRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle);}
-    inline vec2 getTopRotated(double angle) const {return this->Position - getYRotatedOffset(angle);}
-    inline vec2 getBottomRotated(double angle) const {return this->Position + getYRotatedOffset(angle);}
+    inline constexpr vec2 getLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle);}
+    inline constexpr vec2 getRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle);}
+    inline constexpr vec2 getTopRotated(double angle) const {return this->Position - getYRotatedOffset(angle);}
+    inline constexpr vec2 getBottomRotated(double angle) const {return this->Position + getYRotatedOffset(angle);}
 
-    inline vec2 getTopLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle) - getYRotatedOffset(angle);}
-    inline vec2 getTopRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle) - getYRotatedOffset(angle);}
-    inline vec2 getBottomLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle) + getYRotatedOffset(angle);}
-    inline vec2 getBottomRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle) + getYRotatedOffset(angle);}
+    inline constexpr vec2 getTopLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle) - getYRotatedOffset(angle);}
+    inline constexpr vec2 getTopRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle) - getYRotatedOffset(angle);}
+    inline constexpr vec2 getBottomLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle) + getYRotatedOffset(angle);}
+    inline constexpr vec2 getBottomRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle) + getYRotatedOffset(angle);}
 
 };
 

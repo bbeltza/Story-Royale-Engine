@@ -32,6 +32,8 @@ struct System
         }
 
         last_err.append(fmt::format("\n(Code: {})", (int)id));
+
+        //__debugbreak();
         
         longjmp(err, id);
     }

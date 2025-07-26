@@ -1,5 +1,5 @@
 #include <SDL.hpp>
-#include "Sound.h"
+#include "Classes/Sound.h"
 
 #define get_chunk Mix_Chunk* chunk_dat = (Mix_Chunk*)m_file.GetUserData()
 
@@ -25,5 +25,6 @@ void Sound::Play()
 void Sound::Stop()
 {
     if (channel_playing > -1)
-        ;
+        Mix_HaltChannel(channel_playing);
+    channel_playing = -1;
 }

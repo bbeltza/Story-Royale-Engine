@@ -1,7 +1,14 @@
 #include "Engine.h"
-#include "ColorFunctions.h"
-#include "Components.h"
-#include "GuiComponents.h"
+#include "Game/World.h"
+#include "Game/Entity.h"
+#include "Game/GuiObject.h"
+#include "Game/GuiComponent.h"
+
+#include "Game/Components/Shape.h"
+#include "Game/Components/Sprite.h"
+#include "Game/GuiComponents/Fill.h"
+#include "Game/GuiComponents/Stroke.h"
+#include "Game/GuiComponents/Text.h"
 
 SDL_Renderer* target_renderer;
 
@@ -10,10 +17,18 @@ void DrawingDevice::tr()
     target_renderer = sdl_renderer;
 }
 
-void Game::GuiObject::_render()
+void GuiComponents::Fill::render(Game::GuiContainer* obj)
 {
-    SDL_SetRenderDrawColorMod(target_renderer, &color, &p_modulate);
-    SDL_RenderFillRectF(target_renderer, &p_absolute);
+    auto absolute = getAbsolute(obj);
+    SDL_FRect r{
+        absolute->getLeft(),
+        absolute->getTop(),
+        absolute->Size.X,
+        absolute->Size.Y
+    };
+
+    SDL_SetRenderDrawColorMod(target_renderer, reinterpret_cast<SDL_Color*>(&color), reinterpret_cast<SDL_Color*>(getModulate(obj)));
+    SDL_RenderFillRectF(target_renderer, &r);
 }
 
 void Game::Entity::_debugDraw()
@@ -22,21 +37,22 @@ void Game::Entity::_debugDraw()
     if (this->m_Components.empty())
 #endif // !1
     {
-        Engine->DrawingContext.DrawDebug({this->x, this->y});
+        Engine->DrawingContext.DrawDebug(Position);
     }
 }
 
-void Game::Components::Shape::Render(Entity* _entity)
+void Components::Shape::Render(Game::Entity* _entity)
 {
+    if (!(this->flags.Has(VisibleFlag))) return;
+
     const RectF render_rect = getRealRect(_entity);
     //Engine->DrawingContext.DrawRectangleAtWorld(render_rect, {255, 0, 0, 255}, DrawingDevice::dm_Stroke);
-    if (!(this->flags & FLAG_ShapeFlags::VISIBLE)) return;
-    Vector2f pos = _entity->getWorld()->worldToScreenSpace(_entity->x, _entity->y);
+    Vector2f pos = _entity->getWorld<Game::World>()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
 
 
     SDL_SetRenderDrawColor(target_renderer, Color.r, Color.b, Color.g, Color.a);
 
-    if (shape == CIRCLE)
+    if (shape == CircleShape)
     {
         SDL_RenderFillCircle(target_renderer, pos.X + Rect.Position.X, pos.Y + Rect.Position.Y, Rect.Size.X / 2);
     }
@@ -45,13 +61,21 @@ void Game::Components::Shape::Render(Entity* _entity)
         Engine->DrawingContext.DrawRectangleAtWorld(render_rect, Color);
     }
 }
-void Game::GuiComponents::UIStroke::render()
-{
-    SDL_SetRenderDrawColorMod(target_renderer, &color, getParentMod());
 
+void GuiComponents::Stroke::render(Game::GuiContainer* obj)
+{
+    SDL_SetRenderDrawColorMod(target_renderer, reinterpret_cast<SDL_Color*>(&color), reinterpret_cast<SDL_Color*>(getModulate(obj)));
+
+    RectF* absolute = getAbsolute(obj);
     for (unsigned int i = 0; i < size; i++)
     {
-        SDL_FRect r = *getParentAbs();
+        SDL_FRect r
+        {
+            absolute->getLeft(),
+            absolute->getTop(),
+            absolute->Size.X,
+            absolute->Size.Y
+        };
         r.h -= i * 2;
         r.w -= i * 2;
         r.x += i;
@@ -60,33 +84,28 @@ void Game::GuiComponents::UIStroke::render()
         SDL_RenderDrawRectF(target_renderer, &r);
     }
 }
-void Game::GuiComponents::UIText::render()
+void GuiComponents::Text::render(Game::GuiContainer* obj)
 {
-    SDL_FRect* r = getParentAbs();
-    SDL_Rect ir{(int)r->x, (int)r->y, (int)r->w, (int)r->h};
+    RectF* r = getAbsolute(obj);
+    SDL_Rect ir{(int)r->getLeft(), (int)r->getTop(), (int)r->Size.X, (int)r->Size.Y};
     Engine->DrawingContext.DrawFont(&ir, this->m_file, text.c_str(), count, Alignment);
 }
 
-// 014FF2F0 018EA550 A long time ago, two powerful men ruled the world -1 1
-// 014FF2F0 056A7890 A long time ago, two powerful men ruled the world -1 1
-
-void Game::Components::Sprite::Render(Entity* _entity)
+void Components::Sprite::Render(Game::Entity* _entity)
 {
     if (textures.empty()) return;
     auto frame = std::min(current_frame, textures.size() - 1);
     current_frame = frame;
     File& texture = *textures[frame];
-    SDL_Rect render_rect;
     if (!Engine->DrawingContext.LoadFileTexture(texture)) return;
+    
+    int w, h;
+    SDL_QueryTexture((SDL_Texture*)texture.GetUserData(), NULL, NULL, &w, &h);
 
-    SDL_QueryTexture((SDL_Texture*)texture.GetUserData(), NULL, NULL, (int*)&render_rect + 2, (int*)&render_rect + 3);
+    RectF render_rect(_entity->getWorld<Game::World>()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y), {w, h});
 
-    Vector2i pos = _entity->getWorld()->worldToScreenSpace(_entity->x, _entity->y);
+    render_rect.Size *= Scale;
+    render_rect.Position += Offset;
 
-    render_rect.w *= Scale.X;
-    render_rect.h *= Scale.Y;
-    render_rect.x = pos.X + Offset.X;
-    render_rect.y = pos.Y + Offset.Y;
-
-    Engine->DrawingContext.DrawTexture(*(RectI*)&render_rect, texture);
+    Engine->DrawingContext.DrawTexture(render_rect, texture);
 }

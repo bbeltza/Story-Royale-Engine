@@ -1,5 +1,5 @@
-#include "Input.h"
-#include "ECS.h"
+#include "Base/Input.h"
+#include "Game/World.h"
 
 
 // Input functions
@@ -22,7 +22,7 @@ bool InputClass::isMouseButtonPressed(MouseButton button) const
 
 const Vector2f InputClass::getMouseWorldPosition() const
 {
-    if (!Game::currentWorld)
-        return Game::currentWorld->screenToWorld(m_mouseState.x, m_mouseState.y);
-    return Game::currentWorld->screenToWorldSpace(m_mouseState.x, m_mouseState.y);
+    if (!Game::World::Current)
+        return Game::World::screenToWorld(m_mouseState.x, m_mouseState.y);
+    return Game::World::Current->screenToWorldSpace(m_mouseState.x, m_mouseState.y);
 }

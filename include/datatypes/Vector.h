@@ -26,8 +26,11 @@ struct Vector2
     _Num X, Y;
 };
 
+// Built-in operators
+
 #define vec2op(op) { return {first.X op other.X, first.Y op other.Y}; }
 #define vec2op_num(op) { return {first.X op other, first.Y op other}; }
+#define vec2aop(op) { first.X op= other.X; first.Y op= other.Y; return first; }
 #define vec2 Vector2<_Num>
 #define _t template <class _Num>
 
@@ -41,10 +44,17 @@ _t inline vec2 operator -(const vec2& first, const _Num& other) vec2op_num(-)
 _t inline vec2 operator *(const vec2& first, const _Num& other) vec2op_num(*)
 _t inline vec2 operator /(const vec2& first, const _Num& other) vec2op_num(/)
 
+_t inline vec2& operator +=(vec2& first, const vec2& other) { first.X += other.X; first.Y += other.Y; return first; }
+_t inline vec2& operator -=(vec2& first, const vec2& other) { first.X -= other.X; first.Y -= other.Y; return first; }
+_t inline vec2& operator *=(vec2& first, const vec2& other) { first.X *= other.X; first.Y *= other.Y; return first; }
+_t inline vec2& operator /=(vec2& first, const vec2& other) { first.X /= other.X; first.Y /= other.Y; return first; }
+
 #undef vec2op
 #undef vec2op_num
 #undef vec2
 #undef _t
+
+// Template type definitions
 
 typedef Vector2<int> Vector2i;
 typedef Vector2<float> Vector2f;

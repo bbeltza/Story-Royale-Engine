@@ -1,5 +1,5 @@
 #include <SDL.hpp>
-#include "Music.h"
+#include "Classes/Music.h"
 #include "System.h"
 
 #define get_music Mix_Music* music_dat = (Mix_Music*)this->m_file.GetUserData()

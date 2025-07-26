@@ -1,5 +1,4 @@
-#include "datatypes/Signal.h"
-#include "Signal.h"
+#include "Classes/Signal.h"
 
 Signal::~Signal()
 {

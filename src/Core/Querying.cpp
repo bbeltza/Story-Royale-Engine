@@ -1,12 +1,18 @@
-#include "Input.h"
-#include "ECS.h"
-#include "GuiLayer.h"
-#include "Components.h"
+#include "Base/Input.h"
 
-static Game::GuiObject* queryObject = nullptr;
-static Game::Entity* queryEntity = nullptr;
+#include "Game/World.h"
+#include "Game/Entity.h"
+#include "Game/Component.h"
 
-static InputClass::_mState* mState;
+#include "Game/GuiLayer.h"
+#include "Game/GuiObject.h"
+
+#include "Game/Components/Shape.h"
+
+static Game::GuiObject *queryObject = nullptr;
+static Game::Entity *queryEntity = nullptr;
+
+static InputClass::_mState *mState;
 
 void InputClass::queryObjects()
 {
@@ -15,9 +21,10 @@ void InputClass::queryObjects()
     queryEntity = nullptr;
     queryObject = nullptr;
 
-    queryObject = Game::currentGuiLayer ? Game::currentGuiLayer->_query() : 0;
-    if (queryObject) return;
-    queryEntity = Game::currentWorld ? Game::currentWorld->_query() : 0;
+    queryObject = Game::GuiLayer::Current ? Game::GuiLayer::Current->_query() : 0;
+    if (queryObject)
+        return;
+    queryEntity = Game::World::Current ? Game::World::Current->_query() : 0;
 }
 
 bool Game::GuiObject::isHovering() const
@@ -27,74 +34,57 @@ bool Game::GuiObject::isHovering() const
 
 // _query() functions for both UI and World bases
 
-Game::GuiObject* Game::GuiContainer::_query()
+Game::GuiObject *Game::GuiContainer::_query()
 {
-    GuiObject* target_return = nullptr;
+    GuiObject *target_return = nullptr;
 
-    if (!p_children.empty())
+    for (auto it = m_children.rbegin(); it != m_children.rend(); it++)
     {
-        auto i = p_children.end();
-        i--;
-
-        bool done = 0;
-        while (!target_return)
-        {
-            if (i == p_children.begin()) done = 1;
-
-            auto obj = *i;
-            if (!obj) continue;
-            if (!obj->canQuery) continue;
-            target_return = obj->_query();
-
-            if (done) break;
-            i--;
-        }
+        auto obj = *it;
+        if (!obj)
+            continue;
+        if (!obj->canQuery)
+            continue;
+        target_return = obj->_query();
     }
 
     if (!target_return && !isGuiLayer())
     {
-        SDL_FPoint mousePoint = { mState->x, mState->y };
-        if (SDL_PointInFRect(&mousePoint, &p_absolute)) target_return = (GuiObject*)this;
+        SDL_FPoint mousePoint = {mState->x, mState->y};
+        SDL_FRect r{m_absolute.getLeft(), m_absolute.getTop(), m_absolute.Size.X, m_absolute.Size.Y};
+        if (SDL_PointInFRect(&mousePoint, &r))
+            target_return = (GuiObject*)this;
     }
 
     return target_return;
 }
 
-Game::Entity* Game::World::_query()
+Game::Entity *Game::World::_query()
 {
-    Entity* target_returnEntity = nullptr;
+    Entity *target_returnEntity = nullptr;
 
     if (!m_Entities.empty())
     {
-        auto i = m_Entities.end();
-        i--;
-
-        bool done = 0;
-        while (!target_returnEntity)
+        for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); it++)
         {
-            if (i == m_Entities.begin()) done = 1;
-
-            auto entity = *i;
-
+            auto entity = reinterpret_cast<Entity*>(*it);
             for (auto component : entity->m_Components)
             {
-                if (!component->getProcessFlags() & Component::p_Query) continue;
+                if (!component->hasProcessFlag(component->p_Query))
+                    continue;
                 if (component->Query(entity))
                 {
                     target_returnEntity = entity;
                     break;
                 }
             }
-
-            if (done) break;
-            i--;
         }
     }
 
     return target_returnEntity;
 }
 
-bool Game::Components::Shape::Query(Entity* _entity)
+bool Components::Shape::Query(Game::Entity *_entity)
 {
     return isInScreenPoint(_entity, {mState->x, mState->y});
 }

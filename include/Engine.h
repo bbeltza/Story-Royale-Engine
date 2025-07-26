@@ -1,18 +1,17 @@
 #pragma once
 
+//
 #include <fmt/format.h>
 #include "SDL.hpp"
 
-#include "Window.h"
-#include "Input.h"
-#include "DrawingContext.h"
-#include "AudioDevice.h"
+#include "Base/Window.h"
+#include "Base/Input.h"
+#include "Base/DrawingContext.h"
+#include "Base/AudioDevice.h"
 
 class EngineClass
 {
 public:
-
-
     // Engine namespaces
     WindowClass Window;
     InputClass Input;
@@ -42,4 +41,3 @@ private:
 };
 
 extern EngineClass* Engine;
-

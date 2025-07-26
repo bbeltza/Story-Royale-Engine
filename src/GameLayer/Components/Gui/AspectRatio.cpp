@@ -1,6 +1,6 @@
-#include "GuiComponents.h"
+#include "Game/GuiComponents/AspectRatio.h"
 
-void Game::GuiComponents::AspectRatio::process_size()
+void GuiComponents::AspectRatio::process_size(Game::GuiContainer* obj)
 {
-    getParentAbs()->w = getParentAbs()->h * ratio;
+    getAbsolute(obj)->Size.X = getAbsolute(obj)->Size.Y * ratio;
 }

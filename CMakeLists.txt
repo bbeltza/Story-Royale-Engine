@@ -23,8 +23,9 @@
     - Timers; !!
     - Tweens !!
 
-- Linking with ImGui (maybe before uhhh); *maybe after
 - Audio; !!
+
+- Linking with ImGui (maybe before uhhh); *maybe after
 
 - Work on the game!; !
 
@@ -59,6 +60,8 @@ add_library(no_bind ${CMAKE_MODULE_PATH}/empty_res.c)
 
 
 add_subdirectory(src)
+
+target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
 
 set(3RDPARTYLIBS
 SDL2::SDL2-static

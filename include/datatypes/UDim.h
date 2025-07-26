@@ -6,7 +6,8 @@ struct UDim
     UDim(const float Scale, const int Offset);
     UDim(const UDim& other);
 
-    inline float toAbsolute(int relative) const { return relative * Scale + Offset; };
+    inline constexpr float toAbsolute(int relative) const { return relative * Scale + Offset; };
+    inline constexpr float toAbsolute(float relative) const { return relative * Scale + Offset; };
 
     float Scale;
     int Offset;
