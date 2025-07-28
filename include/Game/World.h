@@ -19,9 +19,9 @@ namespace Game
     {
     protected:
         World();
+        ~World();
 
     public:
-        ~World();
 
         // Static
 
@@ -56,9 +56,9 @@ namespace Game
         template <class _entity>
         inline _entity *addEntity()
         {
-            Entity::s_TargetWorld = this;
+            s_TargetWorld = this;
             auto newEntity = new _entity;
-            Entity::s_TargetWorld = nullptr;
+            s_TargetWorld = nullptr;
             return newEntity;
         }
         // Gets the list of entities that the world has, templated by a derived class of your choice.
@@ -91,6 +91,8 @@ namespace Game
         std::list<Entity *> m_Entities;
 
         static Vector2f center;
+        // Static member that tells an entity which world to be in, set to this when world->addEntity() is called
+        static World* s_TargetWorld;
 
         static void call_render();
 

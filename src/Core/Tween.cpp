@@ -3,6 +3,7 @@
 std::list<Tween*>* Tween::s_tweens = nullptr;
 void Tween::global_update(float delta)
 {
+    if (!s_tweens) return;
     for (Tween* tween : *s_tweens)
     {
         if (tween->m_Playing)
@@ -89,7 +90,7 @@ void Tween::Update(float delta)
 {
     float alpha;
     m_elapsed += delta;
-    if (m_elapsed >= m_info->Duration)
+    if (m_elapsed >= m_info->duration)
     {
         alpha = 1;
         m_elapsed = 0;

@@ -43,8 +43,6 @@ File::File(File &&moved)
 File::~File()
 {
     if (m_type == Type::Unknown || m_type == Type::Uninitialized) return;
-    if (!getInfo().resbind && getInfo().handle)
-        fclose(f getInfo().handle);
 }
 
 static bool checkType(const char *ext, const char *_array[], File::Type _target, File::Type *_type)

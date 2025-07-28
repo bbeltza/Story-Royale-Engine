@@ -39,7 +39,9 @@ set(CMAKE_MODULE_PATH ${SRENGINE_CMAKE_MODULE_PATH})
 include(StoryRoyaleEngine)
 
 set(BUILD_SHARED_LIBS OFF)
-set(CXX_STANDARD C++14)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 srEngine_policy()
 if(MSVC)
@@ -57,7 +59,6 @@ add_subdirectory(3rdparty)
 project(StoryRoyaleEngine)
 project(no_bind)
 add_library(no_bind ${CMAKE_MODULE_PATH}/empty_res.c)
-
 
 add_subdirectory(src)
 

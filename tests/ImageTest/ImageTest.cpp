@@ -1,6 +1,7 @@
 #include <Engine.h>
 #include <ECS.h>
-#include <Components.h>
+#include <Game/Components/Sprite.h>
+#include <Events/Mouse.h>
 
 struct TexturePalace;
 struct Texture;
@@ -17,7 +18,7 @@ void Game::Initialize()
 {
     printf("Hello world\n");
 
-    Game::setWorld<TexturePalace>();
+    Game::World::setCurrent<TexturePalace>();
 
     Engine->Input.mouseButton.Connect(event_callback(mouse));
 }
@@ -34,14 +35,15 @@ struct Texture : public Game::Entity
 {
     Texture()
     {
-        sprite->LoadFile("res://test_texture.png");
-        sprite->LoadFile("res://test_texture2.png");
-        sprite->Scale = { 4, 4 };
+        sprite.LoadFile("res://test_texture.png");
+        sprite.LoadFile("res://test_texture2.png");
+        sprite.Scale = { 4, 4 };
+        addComponent(&sprite);
     }
 
     void preRender() override
     {
-        sprite->current_frame = frame;
+        sprite.current_frame = frame;
     }
-    Game::Components::Sprite* sprite = addComponent<Game::Components::Sprite>();
+    Components::Sprite sprite;
 };

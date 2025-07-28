@@ -27,7 +27,6 @@ namespace Game
         inline Vector2f getAbsolutePosition() const { return m_absolute.Position; }
         inline Vector2f getAbsoluteSize() const { return m_absolute.Size; }
 
-        void popChild() { delete m_children.back(); }
         template <class obj_type> inline obj_type* addChild()
         {
             s_targetParentContainer = this;

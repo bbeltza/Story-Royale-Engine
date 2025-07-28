@@ -9,6 +9,7 @@ Vector2f Game::World::center;
 Color3 Game::World::Background = {255, 149, 236};
 Color4 Game::World::Foreground = {0};
 Game::World* Game::World::Current = nullptr;
+Game::World* Game::World::s_TargetWorld = nullptr;
 
 static inline bool entity_re_order(const Game::Entity *first, const Game::Entity *second) { return first->zIndex < second->zIndex; }
 
@@ -20,7 +21,6 @@ Game::World::~World()
     while (!m_Entities.empty())
     {
         delete m_Entities.back();
-        m_Entities.pop_back();
     }
 }
 

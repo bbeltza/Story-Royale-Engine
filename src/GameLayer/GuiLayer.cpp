@@ -17,11 +17,11 @@ Game::GuiContainer::GuiContainer() : m_parent(s_targetParentContainer),
 Game::GuiContainer::~GuiContainer()
 {
     printf("%d\n", m_children.size());
-    while (!m_children.empty())
-        popChild();
-
     if (m_parent)
         m_parent->m_children.remove(reinterpret_cast<GuiObject *>(this));
+    
+    while (!m_children.empty())
+        delete m_children.back();
 }
 
 void Game::GuiContainer::_processchildren()

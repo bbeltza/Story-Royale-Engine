@@ -8,8 +8,6 @@
 
 using namespace Components;
 
-constexpr double pi = M_PI;
-
 // Physics are temporarely unavaiable! Working on them...
 
 void Game::Entity::_pProcess(delta_model dt)

@@ -2,6 +2,7 @@ macro(srEngine_policy)
 
     cmake_policy(SET CMP0079 NEW)
     cmake_policy(SET CMP0091 NEW)
+    cmake_policy(SET CMP0025 NEW)
 
 endmacro()
 
@@ -41,9 +42,7 @@ function(srEngine_link_resource PROJECT)
         
         add_dependencies(${PROJECT} bind_${PROJECT})
 
-        project(${PROJECT}_res)
-        add_library(${PROJECT}_res ${CMAKE_CURRENT_BINARY_DIR}/_res.c)
-        target_link_libraries(${PROJECT} ${PROJECT}_res)
+        target_sources(${PROJECT} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_res.c)
     else()
         
         add_custom_target(
@@ -69,12 +68,13 @@ function(srEngine_link_resource PROJECT)
 endfunction()
 
 function(srEngine_link_target target)
+    get_target_property(BIND_RESOURCES ${target} WANT_BINDING)
     if (${ARGN} MATCHES NO_CONSOLE)
         target_link_options(${target} PRIVATE ${NO_CONSOLE_OPTIONS})
     endif()
     target_link_libraries(${target} StoryRoyaleEngine)
     srEngine_link_resource(${target})
-    if (NOT TARGET ${target}_res)
+    if (NOT BIND_RESOURCES)
         message("NOT BINDING RESOURCES")
         target_link_libraries(${target} no_bind)
     endif()

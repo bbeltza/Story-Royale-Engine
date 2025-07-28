@@ -24,19 +24,19 @@ public:
 private:
     // Friend int main so that the entry point runs void Run()
     friend int main();
-    // And friend throw_error(int) to handle errors
-    friend void throw_error(int);
 
     // Constructors
     EngineClass();
     ~EngineClass();
 
     // Private use functions
+
     void Run();
 
     bool pollWindowEvents();
 
     // Private members
+
     bool m_wasRun = 0;
 };
 

@@ -4,11 +4,9 @@
 #include "Base/Window.h"
 #include "System.h"
 
-Game::World* Game::Entity::s_TargetWorld = nullptr;
 
-Game::Entity::Entity(): m_ParentType(WorldParent)
+Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)
 {
-    this->m_world = s_TargetWorld;
     this->m_world->m_Entities.push_back(this);
 }
 

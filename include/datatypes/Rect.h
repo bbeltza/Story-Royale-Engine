@@ -1,10 +1,10 @@
 #pragma once
 #include "Vector.h"
 
-extern const double pi;
+#define r_pi M_PI
 
 template <typename _Num> inline _Num _abs(_Num x) {return x < 0 ? -x : x;}
-template <typename _Num> inline double _rad(_Num x) {return (x * (pi / 180));}
+template <typename _Num> inline double _rad(_Num x) {return (x * (r_pi / 180));}
 
 #define vec2 Vector2<_Num>
 

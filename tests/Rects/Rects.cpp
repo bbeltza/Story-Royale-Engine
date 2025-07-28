@@ -1,8 +1,10 @@
 #include <GameSettings.h>
 #include <Engine.h>
 #include <ECS.h>
-#include <GuiLayer.h>
-#include <GuiComponents.h>
+#include <GUI.h>
+
+#include <Events/Mouse.h>
+#include <Game/GuiComponents/Text.h>
 
 static double rot = 0;
 
@@ -10,16 +12,18 @@ struct DisplayText: public Game::GuiLayer
 {
     DisplayText()
     {
-        auto label = pushGuiObject<Game::GuiObject>();
+        auto label = addChild<Game::GuiObject>();
         label->anchor = Vector2f(0.5, 0);
         label->position = UDim2(0.5, 0, 0, 10);
-        label->color = {0, 0, 0, 0};
         
-        auto text = label->pushGuiComponent<Game::GuiComponents::UIText>();
-        text->color = {255, 255, 255};
-        text->text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
-        text->LoadFontPath("res://fonts/OpenSans-Regular.ttf");
+        text.color = {255, 255, 255};
+        text.text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
+        text.LoadFont("res://fonts/OpenSans-Regular.ttf");
+
+        label->addComponent(&text);
     }
+
+    GuiComponents::Text text;
 
     void postRender();
     void Update(float delta) { rot += delta * 80; }
@@ -53,8 +57,6 @@ void DisplayText::postRender()
     Engine->DrawingContext.DrawDebug(mouseRect.getBottomRight());
 }
 
-#include <File.h>
-
 void Game::Initialize()
 {
     printf("%s\n", _game_res);
@@ -62,7 +64,7 @@ void Game::Initialize()
     GameSettings::targetFPS = 40;
     GameSettings::Title = "Rectangle Test";
 
-    Game::setGuiLayer<DisplayText>();
+    Game::GuiLayer::setCurrent<DisplayText>();
 
     Engine->Input.mouseWheel.Connect(event_callback(mousewheel));
 }

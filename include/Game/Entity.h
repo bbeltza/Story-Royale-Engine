@@ -12,6 +12,7 @@ namespace Game
 
     class Entity:public WorldInstance
     {
+        protected:
         Entity();
         ~Entity();
         public:
@@ -52,7 +53,5 @@ namespace Game
         };
 
         friend class World;
-        // Static member that tells an entity which world to be in, set to this when world->addEntity() is called
-        static World* s_TargetWorld;
     };
 }

@@ -35,13 +35,13 @@ enum TargetType
 
 struct Info
     {
-        float Duration;
-        EasingStyle EasingStyle;
-        EasingDirection EasingDirection;
+        float duration;
+        EasingStyle easingStyle;
+        EasingDirection esingDirection;
 
-        float Delay;
-        int Repeat;
-        bool Reverse;
+        float delay;
+        int repeat;
+        bool reverse;
     };
 public:
     Tween(Info* info, void* target, const void* src, TargetType type);
@@ -55,7 +55,7 @@ public:
 
     Signal Completed;
 
-    inline float GetAlpha() {return m_info->Duration ? m_elapsed/m_info->Duration : 1;}
+    inline float GetAlpha() {return m_info->duration ? m_elapsed/m_info->duration : 1;}
 private:
     Info* m_info;
     union TypePointers
