@@ -16,8 +16,13 @@ extern "C"
     #include "C/delta_model.h"
 }
 
-#define sign(x) ((0 < x) - (x < 0))
+#ifndef sign
+//#define sign(x) ((0 < x) - (x < 0))
+#endif
+#ifndef lerp
 #define lerp(a, b, t) (a + (b - a) * t)
+#endif
+
 #define RES_PREFIX "res://"
 
 #ifndef _MSC_VER
