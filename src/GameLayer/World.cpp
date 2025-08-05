@@ -11,20 +11,25 @@ Color4 Game::World::Foreground = {0};
 Game::World* Game::World::Current = nullptr;
 Game::World* Game::World::s_TargetWorld = nullptr;
 
-static inline bool entity_re_order(const Game::Entity *first, const Game::Entity *second) { return first->zIndex < second->zIndex; }
+bool Game::World::cmp(const Entity* first, const Entity* second)
+{
+    bool res = first->zIndex < second->zIndex;
+    return res;
+}
 
 Game::World::World() {}
 
 Game::World::~World()
 {
     if (Current == this) Current = nullptr;
+    
     while (!m_Entities.empty())
     {
         delete m_Entities.back();
     }
 }
 
-void Game::World::Update(float dt)
+void Game::World::Update(delta_model dt)
 {
     for (Entity* entity : getEntities<Entity>())
     {
@@ -38,8 +43,8 @@ void Game::World::call_render()
 
     if (!Current) return;
 
-    Current->m_Entities.sort(entity_re_order);
-    for (Entity* entity : Current->getEntities<Entity>())
+    Current->m_Entities.sort(cmp);
+    for (Entity* entity : Current->m_Entities)
     {
         entity->preRender();
         entity->call_render();

@@ -81,7 +81,8 @@ set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
 )
 
-srEngine_include_directories(StoryRoyaleEngine)
+target_include_directories(StoryRoyaleEngine PUBLIC ${SRENGINE_INCLUDE_DIRS})
+#srEngine_include_directories(StoryRoyaleEngine)
 target_link_libraries(StoryRoyaleEngine ${3RDPARTYLIBS})
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})

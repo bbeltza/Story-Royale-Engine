@@ -32,6 +32,8 @@ void Music::LoadUserData(void* temp_rw)
 
 Music::~Music()
 {
+    if (m_sound_freed) return;
+
     get_music;
     Mix_FreeMusic(music_dat);
 }

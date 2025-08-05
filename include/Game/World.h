@@ -95,6 +95,7 @@ namespace Game
         static World* s_TargetWorld;
 
         static void call_render();
+        static bool cmp(const Entity*, const Entity*);
 
         friend class Entity;
         friend class ::InputClass;

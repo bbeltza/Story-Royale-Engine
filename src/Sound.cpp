@@ -9,6 +9,8 @@ Sound::~Sound()
 {
     get_chunk;
     Mix_FreeChunk(chunk_dat);
+
+    m_sound_freed = true;
 }
 
 void Sound::LoadUserData(void* temp_rw)

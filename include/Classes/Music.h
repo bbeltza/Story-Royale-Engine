@@ -26,8 +26,7 @@ class Music
     Info* m_info = 0;
     File m_file;
     bool m_loaded = false;
+    bool m_sound_freed = false;
 
     virtual void LoadUserData(void* temp_rw);
-
-    private:
 };

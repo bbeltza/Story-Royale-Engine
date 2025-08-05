@@ -7,7 +7,7 @@
 
 Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)
 {
-    this->m_world->m_Entities.push_back(this);
+    m_world->m_Entities.push_back(this);
 }
 
 Game::Entity::~Entity()

@@ -6,14 +6,9 @@ macro(srEngine_policy)
 
 endmacro()
 
-function(srEngine_include_directories target)
-    if(!SRENGINE_INCLUDE_DIRS)
-        message(SEND_ERROR "ERROR: No include directories found")
-    endif()
-    foreach(include_dir ${SRENGINE_INCLUDE_DIRS})
-        target_include_directories(${target} PRIVATE ${include_dir})
-    endforeach()
-endfunction()
+macro(srEngine_include_directories target)
+    target_include_directories(${target} PRIVATE StoryRoyaleEngine)
+endmacro()
 
 function(srEngine_link_resource PROJECT)
     get_target_property(INPUT ${PROJECT} INPUT)

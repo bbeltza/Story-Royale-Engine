@@ -7,8 +7,10 @@
 
 #include <vector>
 #include <list>
-#include <unordered_map>
 #include <array>
+
+#include <set>
+#include <unordered_map>
 
 extern "C"
 {
@@ -17,7 +19,7 @@ extern "C"
 }
 
 #ifndef sign
-//#define sign(x) ((0 < x) - (x < 0))
+#define sign(x) ((0 < x) - (x < 0))
 #endif
 #ifndef lerp
 #define lerp(a, b, t) (a + (b - a) * t)
