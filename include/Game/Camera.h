@@ -1,10 +1,15 @@
 #pragma once
 #include "Datatypes/Rect.h"
 
+#include "Game/CameraController.h"
+
 namespace Game
 {
     struct Camera
     {
+        friend class World;
+        friend class CameraController;
+
         enum ScalingType
         {
             Single,
@@ -23,5 +28,12 @@ namespace Game
                 float ScaleX, ScaleY;
             };
         };
+
+        inline CameraController* getCameraController() const { return m_Controller; }
+
+        private:
+        CameraController* m_Controller;
+
+        void Update(TimeStamp);
     };
 }
