@@ -31,17 +31,19 @@ namespace Game
         /// This acts also as the background of the GUI Layer
         static Color4 Foreground;
 
-        /// The current world that will be updated and rendered
-        static World *Current;
         template <class w_type>
         static inline w_type *setCurrent()
         {
-            if (Current)
-                delete Current;
+            if (m_Current)
+                delete m_Current;
 
             auto new_current = new w_type;
-            Current = reinterpret_cast<World *>(new_current);
-            return new_current;
+            if (checkCurrent(reinterpret_cast<World *>(new_current)))
+                return new_current;
+            delete new_current;
+            err();
+            
+            return nullptr;
         }
 
         // Member
@@ -61,6 +63,8 @@ namespace Game
             s_TargetWorld = nullptr;
             return newEntity;
         }
+        // Adds a Base Entity to the world, it's just an alias for addEntity<Entity>();
+        Entity *addEntity();
         // Gets the list of entities that the world has, templated by a derived class of your choice.
         template <class _entity>
         inline const std::list<_entity *> &getEntities() const
@@ -80,13 +84,27 @@ namespace Game
         static Vector2f worldToScreen(const float x, const float y, Camera *cam = nullptr);
         static Vector2f screenToWorld(const float x, const float y, Camera *cam = nullptr);
 
+        // Gets the current world.
+        /// The world that will be updated and rendered.
+        template <class _wType> static _wType* Current() {return reinterpret_cast<_wType>(m_Current);}
+        // Casts the world to a derivate
+        /// Use it with precaution
+        template <class _wType> _wType* cast() const {return reinterpret_cast<_wType>(this);}
+
         // Override methods
 
-        void Update(delta_model) override;
-        void pUpdate(delta_model) override;
+        void Update(TimeStamp) override;
+        void pUpdate(TimeStamp) override;
 
     private:
         Entity *_query();
+
+        // Used to check whether a world is really a world, it points at a static variable in World.cpp
+        const char* const m_worldTag;
+
+        static World* checkCurrent(World*);
+        static void err();
+
         // The container that holds all of its entities
         std::list<Entity *> m_Entities;
 
@@ -101,6 +119,8 @@ namespace Game
         friend class ::InputClass;
         friend class ::DrawingDevice;
         friend class ::EngineClass;
+
+        static World *m_Current;
     };
 
     // The method to be defined by the game using the engine

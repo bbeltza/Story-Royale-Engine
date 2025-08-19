@@ -22,7 +22,7 @@ bool InputClass::isMouseButtonPressed(MouseButton button) const
 
 const Vector2f InputClass::getMouseWorldPosition() const
 {
-    if (!Game::World::Current)
+    if (!Game::World::m_Current)
         return Game::World::screenToWorld(m_mouseState.x, m_mouseState.y);
-    return Game::World::Current->screenToWorldSpace(m_mouseState.x, m_mouseState.y);
+    return Game::World::m_Current->screenToWorldSpace(m_mouseState.x, m_mouseState.y);
 }

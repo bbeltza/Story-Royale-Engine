@@ -4,6 +4,7 @@
 
 #include "C/Color.h"
 #include "Datatypes/Rect.h"
+#include "Datatypes/TimeStamp.h"
 
 class DrawingDevice;
 class InputClass;
@@ -41,7 +42,7 @@ namespace Game
 
         bool visible = true, canQuery = true;
     private:
-        void _callUpdate(delta_model);
+        void _callUpdate(TimeStamp);
         void _processchildren();
         void _renderchildren();
         void _prerender_components();

@@ -2,10 +2,10 @@
 
 std::vector<Timer*> *Timer::s_timers = nullptr;
 std::chrono::steady_clock Timer::s_global_clock;
-static std::chrono::duration<float> helper_float_duration;
+static std::chrono::duration<TimeStamp> helper_ts_duration;
 
 
-Timer::Timer(float duration, bool looped): m_Duration(duration), Looped(looped)
+Timer::Timer(TimeStamp duration, bool looped): m_Duration(duration), Looped(looped)
 {
     if (!s_timers) s_timers = new std::vector<Timer*>; // Heap allocating it because it automatically empties itself when stack allocating
     s_timers->push_back(this);
@@ -62,12 +62,12 @@ void Timer::_hit()
 
 }
 
-float Timer::global_update()
+TimeStamp Timer::global_update()
 {
-    static std::chrono::duration<float> last_frame_time = s_global_clock.now().time_since_epoch();
-    helper_float_duration = s_global_clock.now().time_since_epoch() - last_frame_time;
+    static std::chrono::duration<TimeStamp> last_frame_time = s_global_clock.now().time_since_epoch();
+    helper_ts_duration = s_global_clock.now().time_since_epoch() - last_frame_time;
     last_frame_time = s_global_clock.now().time_since_epoch();
-    float delta = helper_float_duration.count();
+    TimeStamp delta = helper_ts_duration.count();
 
     if (!s_timers) goto ret;
     for (auto timer : *s_timers)

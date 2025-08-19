@@ -1,7 +1,6 @@
 import os
 import sys
 import shutil
-import string
 
 # This script should take 3 extra arguments:
     # The resource folder to bind
@@ -77,9 +76,10 @@ def buildresource():
                   file.close()
 
         
-        logfile = open(output_folder + "/_reslogs", "wb")
-        logfile.write(out_string)
-        logfile.seek(0, os.SEEK_SET)
+        with open(output_folder + "/_reslogs", "wb") as logfile:
+            logfile.write(out_string)
+            logfile.seek(0, os.SEEK_SET)
+        
         output_file.write(b"static const char s_game_res[] = {")
         for byte in out_string:
             output_file.write(str(byte).encode())
@@ -87,9 +87,6 @@ def buildresource():
         
         output_file.seek(-1, os.SEEK_CUR)
         output_file.write(b"}; const char* _game_res = s_game_res;")
-        output_file.close()
-
-        logfile.close()
 
 if build_mode == 0:    
     shutil.copytree(resDir, output_folder + "/res")

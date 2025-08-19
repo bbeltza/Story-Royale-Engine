@@ -50,9 +50,11 @@ int main()
     }
     else
     {
-        EngineClass e;
+        Engine = new EngineClass;
         Engine->Run();
     }
+
+    if (Engine) delete Engine;
 
     return result;
 }

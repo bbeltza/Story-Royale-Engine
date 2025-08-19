@@ -8,9 +8,9 @@
 
 using namespace Components;
 
-// Physics are temporarely unavaiable! Working on them...
+// Physics are temporarely unavaiable! Will be working on them...
 
-void Game::Entity::_pProcess(delta_model dt)
+void Game::Entity::_pProcess(TimeStamp dt)
 {
     if (m_Components.empty())
         return;
@@ -22,7 +22,7 @@ void Game::Entity::_pProcess(delta_model dt)
     }
 }
 
-void Game::World::pUpdate(delta_model dt)
+void Game::World::pUpdate(TimeStamp dt)
 {
     for (Entity *entity : m_Entities)
     {

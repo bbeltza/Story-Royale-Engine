@@ -1,18 +1,19 @@
 [submodule "3rdparty/SDL"]
 	path = 3rdparty/SDL
 	url = https://github.com/libsdl-org/SDL.git
-	branch = release-2.32.x
+	branch = SDL2
 [submodule "3rdparty/SDL_ttf"]
 	path = 3rdparty/SDL_ttf
 	url = https://github.com/libsdl-org/SDL_ttf.git
-	branch = release-2.24.x
+	branch = SDL2
 [submodule "3rdparty/SDL_image"]
 	path = 3rdparty/SDL_image
 	url = https://github.com/libsdl-org/SDL_image.git
-	branch = release-2.6.x
+	branch = SDL2
 [submodule "3rdparty/SDL_mixer"]
 	path = 3rdparty/SDL_mixer
 	url = https://github.com/libsdl-org/SDL_mixer.git
+	branch = SDL2
 [submodule "3rdparty/fmt"]
 	path = 3rdparty/fmt
 	url = https://github.com/fmtlib/fmt.git

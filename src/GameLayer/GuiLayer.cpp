@@ -5,7 +5,7 @@
 #include "Game/GuiComponent.h"
 
 Color4 Game::GuiLayer::Foreground = {0, 0, 0, 0};
-Game::GuiLayer *Game::GuiLayer::Current = nullptr;
+Game::GuiLayer *Game::GuiLayer::m_Current = nullptr;
 
 Game::GuiContainer *Game::GuiContainer::s_targetParentContainer = nullptr;
 
@@ -16,7 +16,6 @@ Game::GuiContainer::GuiContainer() : m_parent(s_targetParentContainer),
 
 Game::GuiContainer::~GuiContainer()
 {
-    printf("%d\n", m_children.size());
     if (m_parent)
         m_parent->m_children.remove(reinterpret_cast<GuiObject *>(this));
     
@@ -72,7 +71,7 @@ void Game::GuiContainer::_renderchildren()
     }
 }
 
-void Game::GuiContainer::_callUpdate(float dt)
+void Game::GuiContainer::_callUpdate(TimeStamp dt)
 {
     Update(dt);
 

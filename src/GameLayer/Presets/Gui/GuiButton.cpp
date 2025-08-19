@@ -1,7 +1,7 @@
 #include "Engine.h"
 #include "Game/GuiPresets/Button.h"
 
-std::list<GuiPresets::Button*> GuiPresets::Button::s_buttons;
+std::unordered_set<GuiPresets::Button*> GuiPresets::Button::s_buttons;
 
 void GuiPresets::Button::clickevent(MouseButton* buttonData)
 {
@@ -22,16 +22,16 @@ Connection* GuiPresets::Button::s_clickconnection = nullptr;
 GuiPresets::Button::Button()
 {
     if (!s_clickconnection) Engine->Input.mouseButton.Connect(event_callback(clickevent));
-    s_buttons.push_back(this);
+    s_buttons.insert(this);
     addComponent(&m_mod);
 }
 
 GuiPresets::Button::~Button()
 {
-    s_buttons.remove(this);
+    s_buttons.erase(this);
 }
 
-void GuiPresets::Button::Update(float dt)
+void GuiPresets::Button::Update(TimeStamp dt)
 {
     m_hover = isHovering();
     m_mod.enabled = m_hover;

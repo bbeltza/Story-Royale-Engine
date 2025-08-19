@@ -39,8 +39,8 @@ void DrawingDevice::DrawRectangleAtWorld(const RectF &_Rectangle, const Color4 &
 {
     CHECK_LOCK
     Vector2f target_pos = _Rectangle.getTopLeft();
-    if (Game::World::Current)
-        target_pos = Game::World::Current->worldToScreenSpace(target_pos.X, target_pos.Y);
+    if (Game::World::m_Current)
+        target_pos = Game::World::m_Current->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
         target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, this function is static
 
@@ -78,19 +78,19 @@ void DrawingDevice::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const d
 {
     CHECK_LOCK
     Vector2f target_pos(_Rectangle.Position);
-    if (Game::World::Current)
-        target_pos = Game::World::Current->worldToScreenSpace(target_pos.X, target_pos.Y);
+    if (Game::World::m_Current)
+        target_pos = Game::World::m_Current->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
         target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y);
 
     return DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col);
 }
 
-void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into world coordinates
+void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into screen coordinates
 {
     CHECK_LOCK
-    if (Game::World::Current)
-        pos = Game::World::Current->worldToScreenSpace(pos.X, pos.Y);
+    if (Game::World::m_Current)
+        pos = Game::World::m_Current->worldToScreenSpace(pos.X, pos.Y);
     else
         pos = Game::World::worldToScreen(pos.X, pos.Y);
 
@@ -105,7 +105,7 @@ void DrawingDevice::render()
     tr();
 
     // Render current world
-    if (Game::World::Current)
+    if (Game::World::m_Current)
         renderCurrentWorld();
     else
     {
@@ -117,7 +117,7 @@ void DrawingDevice::render()
     m_Engine->BeforeRender.Fire(0);
 
     // Drawing the Gui layer
-    if (Game::GuiLayer::Current)
+    if (Game::GuiLayer::Current())
         renderCurrentUI();
 
     m_Engine->AfterRender.Fire(0);
@@ -129,7 +129,7 @@ void DrawingDevice::render()
 
 void DrawingDevice::renderCurrentWorld()
 {
-    auto world = Game::World::Current;
+    auto world = Game::World::m_Current;
 
     //// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
     Color3 &bg = world->Background;
@@ -156,7 +156,7 @@ void DrawingDevice::renderCurrentWorld()
 
 void DrawingDevice::renderCurrentUI()
 {
-    auto layer = Game::GuiLayer::Current;
+    auto layer = Game::GuiLayer::Current();
 
     Color4 &uifg = layer->Foreground;
 
@@ -374,10 +374,9 @@ void DrawingDevice::processViewport()
         scale = (viewportsize / GameSettings::ScalingResolution).getMin();
     scale = scale ? scale : 1;
     SDL_RenderSetScale(sdl_renderer, (float)scale, (float)scale);
-
-    if (!Game::GuiLayer::Current) return;
-
-    auto layer = Game::GuiLayer::Current;
+    
+    auto layer = Game::GuiLayer::Current();
+    if (!layer) return;
     
     layer->m_absolute.Size.X = (float)m_viewport.w;
     layer->m_absolute.Size.Y = (float)m_viewport.h;

@@ -21,10 +21,10 @@ void InputClass::queryObjects()
     queryEntity = nullptr;
     queryObject = nullptr;
 
-    queryObject = Game::GuiLayer::Current ? Game::GuiLayer::Current->_query() : 0;
+    queryObject = Game::GuiLayer::Current() ? Game::GuiLayer::Current()->_query() : 0;
     if (queryObject)
         return;
-    queryEntity = Game::World::Current ? Game::World::Current->_query() : 0;
+    queryEntity = Game::World::m_Current ? Game::World::m_Current->_query() : 0;
 }
 
 bool Game::GuiObject::isHovering() const

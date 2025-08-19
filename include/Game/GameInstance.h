@@ -1,10 +1,11 @@
 #pragma once
+#include "Datatypes/TimeStamp.h"
 
 struct GameInstance
 {
     virtual ~GameInstance() {}
 
-    virtual void Update(float dt) {}
+    virtual void Update(TimeStamp dt) {}
     virtual void preRender() {}
     virtual void postRender() {}
 
@@ -13,5 +14,5 @@ struct GameInstance
 
 struct WorldInstance: public GameInstance
 {
-    virtual void pUpdate(float dt) {}
+    virtual void pUpdate(TimeStamp dt) {}
 };

@@ -2,13 +2,19 @@
 #include <stdint.h>
 #include "Datatypes/Vector.h"
 
+struct WindowOptions
+{
+    bool VSync;
+    bool Resizable;
+};
+
 namespace GameSettings
 {
-    extern const char* Title;
-    extern Vector2u StartResolution;
-    extern Vector2u ScalingResolution;
+    extern const char* const Title;
+    extern Vector2u const StartResolution;
+    extern Vector2u const ScalingResolution;
 
-    extern uint16_t targetFPS;
-    extern uint8_t windowFlags;
-    extern uint8_t renderMode;
+    extern uint16_t const TargetFPS;
+    
+    extern WindowOptions const WindowOptions;
 }

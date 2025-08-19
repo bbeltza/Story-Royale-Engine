@@ -1,4 +1,5 @@
 #pragma once
+#include "utils.h"
 
 template <typename _Num>
 struct Flags
@@ -16,12 +17,14 @@ struct Flags
     inline void ToggleOn(_Num flag) {m_data |= flag;}
     inline void ToggleOff(_Num flag) {m_data &= flag;}
 
+    operator _Num() const { return Get(); }
+
     private:
 
     _Num m_data;
 };
 
-typedef Flags<char> Flags8;
-typedef Flags<short> Flags16;
-typedef Flags<long> Flags32;
-typedef Flags<long long> Flags64;
+typedef Flags<uint8_t> Flags8;
+typedef Flags<uint16_t> Flags16;
+typedef Flags<uint32_t> Flags32;
+typedef Flags<uint64_t> Flags64;

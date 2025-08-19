@@ -1,9 +1,5 @@
-find_package(PythonInterp)
-find_package(Python)
-
 macro(srEngine_set_resource_file PROJECT SRC)
     set(WANT_BINDING ON)
-    message("ARGN: ${ARGN}")
     if ("${ARGN}" MATCHES NO_BIND)
         set(WANT_BINDING OFF)
         message("-- NOT binding resources on target ${PROJECT}")

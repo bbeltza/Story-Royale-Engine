@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine.h"
-#include <standard.h>
+#include "Datatypes/TimeStamp.h"
 
 class Tween
 {
@@ -50,8 +50,8 @@ public:
     inline void SetTarget(void* target) {m_target.u8 = (uint8_t*)target;}
 
     void Play();
-    delta_model Cancel();
-    delta_model Pause();
+    TimeStamp Cancel();
+    TimeStamp Pause();
 
     Signal Completed;
 
@@ -79,14 +79,14 @@ private:
 
     TargetType m_type;
 
-    delta_model m_elapsed = 0;
+    TimeStamp m_elapsed = 0;
     bool m_Playing = false;
 
     int64_t m_longstart = 0;
 
-    void Update(float delta);
+    void Update(TimeStamp delta);
 
-    static void global_update(float delta);
-    static std::list<Tween*>* s_tweens;
+    static void global_update(TimeStamp delta);
+    static std::unordered_set<Tween*>* s_tweens;
     friend EngineClass;
 };

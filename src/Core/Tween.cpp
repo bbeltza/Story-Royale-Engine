@@ -1,7 +1,9 @@
 #include "Classes/Tween.h"
 
-std::list<Tween*>* Tween::s_tweens = nullptr;
-void Tween::global_update(float delta)
+#include "utils.h"
+
+std::unordered_set<Tween*>* Tween::s_tweens = nullptr;
+void Tween::global_update(TimeStamp delta)
 {
     if (!s_tweens) return;
     for (Tween* tween : *s_tweens)
@@ -19,13 +21,13 @@ Tween::Tween(Info* info, void* target, const void* src, TargetType type):
     m_start.i64 = &m_longstart;
 
     if (!s_tweens)
-        s_tweens = new std::list<Tween*>;
-    s_tweens->push_back(this);
+        s_tweens = new std::unordered_set<Tween*>;
+    s_tweens->insert(this);
 }
 
 Tween::~Tween()
 {
-    s_tweens->remove(this);
+    s_tweens->erase(this);
     if (s_tweens->empty())
         delete s_tweens;
 }
@@ -70,7 +72,7 @@ void Tween::Play()
     }
 }
 
-float Tween::Cancel()
+TimeStamp Tween::Cancel()
 {
     m_Playing = false;
 
@@ -79,14 +81,14 @@ float Tween::Cancel()
     return elapse;
 }
 
-float Tween::Pause()
+TimeStamp Tween::Pause()
 {
     m_Playing = false;
 
     return m_elapsed;
 }
 
-void Tween::Update(float delta)
+void Tween::Update(TimeStamp delta)
 {
     float alpha;
     m_elapsed += delta;

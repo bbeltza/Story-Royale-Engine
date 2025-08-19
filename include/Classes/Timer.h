@@ -2,13 +2,15 @@
 #include <standard.h>
 #include "Classes/Signal.h"
 
+#include "Datatypes/TimeStamp.h"
+
 class Timer
 {
     static std::chrono::steady_clock s_global_clock;
     static std::vector<Timer*> *s_timers;
 
     public:
-    Timer(delta_model duration, bool looped=false);
+    Timer(TimeStamp duration, bool looped=false);
     ~Timer();
 
     void Start();
@@ -26,8 +28,8 @@ class Timer
     void _hit();
 
     bool m_playing = false;
-    delta_model m_Duration;
-    delta_model m_timestamp;
+    TimeStamp m_Duration;
+    TimeStamp m_timestamp;
 
-    static delta_model global_update();
+    static TimeStamp global_update();
 };

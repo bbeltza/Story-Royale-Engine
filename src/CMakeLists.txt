@@ -1,7 +1,6 @@
 set(SOURCES 
 
 "main.cpp"
-"DefaultGameSettings.cpp"
 "System.cpp"
 "File.cpp"
 "Music.cpp"
@@ -62,20 +61,15 @@ if(WIN32)
     set(SYSTEMDEP_SOURCES ${WINDOWS_SOURCES})
 endif()
 
-foreach(src ${CORE_SOURCES})
-set(SOURCES ${SOURCES} "Core/${src}")
-endforeach()
-foreach(src ${DATATYPES_SOURCES})
-set(SOURCES ${SOURCES} "Datatypes/${src}")
-endforeach()
-foreach(src ${LAYER_SOURCES})
-set(SOURCES ${SOURCES} "GameLayer/${src}")
-endforeach()
-foreach(src ${SYSTEMDEP_SOURCES})
-set(SOURCES ${SOURCES} "SystemDependent/${src}")
-endforeach()
+macro(set_src FLDR SRCS)
+    foreach(src ${${SRCS}})
+        set(SOURCES ${SOURCES} "${FLDR}/${src}")
+    endforeach()
+endmacro()
 
+set_src(Core CORE_SOURCES)
+set_src(Datatypes DATATYPES_SOURCES)
+set_src(GameLayer LAYER_SOURCES)
+set_src(SystemDependent SYSTEMDEP_SOURCES)
 
-add_library(StoryRoyaleEngine
-${SOURCES}
-)
+add_library(StoryRoyaleEngine ${SOURCES})

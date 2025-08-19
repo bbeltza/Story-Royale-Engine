@@ -9,21 +9,13 @@
 #include <list>
 #include <array>
 
-#include <set>
+#include <unordered_set>
 #include <unordered_map>
 
 extern "C"
 {
     #include "C/extra_string.h"
-    #include "C/delta_model.h"
 }
-
-#ifndef sign
-#define sign(x) ((0 < x) - (x < 0))
-#endif
-#ifndef lerp
-#define lerp(a, b, t) (a + (b - a) * t)
-#endif
 
 #define RES_PREFIX "res://"
 

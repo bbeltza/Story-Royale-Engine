@@ -17,10 +17,10 @@ namespace Components
         };
         enum Flags : Flags8::Type
         {
-            VisibleFlag = (1 << 1),
-            CanTouchFlag = (1 << 2),
-            CanCollideFlag = (1 << 3),
-            CanQueryFlag = (1 << 4),
+            VisibleFlag = bit(0),
+            CanTouchFlag = bit(1),
+            CanCollideFlag = bit(2),
+            CanQueryFlag = bit(3),
         };
 
     public:

@@ -10,7 +10,8 @@ struct System
     {
         NO_ERROR = 0,
         FILE_NOT_FOUND,
-        SDL_ERROR
+        SDL_ERROR,
+        WORLD_CREATION_ERROR
     };
     
     template <class... T> static void Log(const char* fmtstr, const T&... args) {fmt::print(fmtstr, args...);}
@@ -25,6 +26,9 @@ struct System
             break;
         case SDL_ERROR:
             last_err.append(fmt::format("SDL Error: '{}'", GetSDLError()));
+            break;
+        case WORLD_CREATION_ERROR:
+            last_err.append("Failed to instantiate World, failed to compare tag (meaning that the passed world is not a world inherited class)");
             break;
         default:
             last_err.append(fmt::format("An error has occurred!"));
@@ -42,8 +46,8 @@ struct System
     static void Sleep(float duration);
     
 private:
-    System() {};
-    friend int main(void);
+    System() = delete;
+    friend int main();
 
     static jmp_buf err;
     static std::string last_err;

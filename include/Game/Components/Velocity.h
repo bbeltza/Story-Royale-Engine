@@ -2,6 +2,7 @@
 #include "Game/Component.h"
 
 #include "Datatypes/Vector.h"
+#include "Datatypes/TimeStamp.h"
 
 namespace Components
 {
@@ -10,7 +11,10 @@ namespace Components
         public:
         Velocity() { p_flags = p_pUpdate; }
         Vector2f velocity;
-
-        void pUpdate(::Game::Entity*, delta_model) override;
+        
+        // Normalizes the velocity and multiplies it by the speed parameter
+        // @param speed the speed to multiply
+        void normalize(float=1.0f);
+        void pUpdate(::Game::Entity*, TimeStamp) override;
     };
 }

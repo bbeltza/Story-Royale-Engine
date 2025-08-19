@@ -35,6 +35,8 @@ EngineClass::EngineClass()
     DEF_BASE(DrawingContext)
     DEF_BASE(Audio)
 
+    SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG);
+
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
@@ -50,16 +52,25 @@ EngineClass::EngineClass()
         DrawingContext.scale = s.getMin();
     }
 
+    Vector2u start_res = GameSettings::StartResolution ? GameSettings::StartResolution : GameSettings::ScalingResolution * 2;
+    Flags32 windowFlags;
+    Flags32 rendererFlags;
+
+    if (GameSettings::WindowOptions.Resizable)
+        windowFlags.ToggleOn(SDL_WINDOW_RESIZABLE);
+    if (GameSettings::WindowOptions.VSync)
+        windowFlags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
+
     Window.sdl_window = SDL_CreateWindow(
         GameSettings::Title,
         WCENTERED,
         WCENTERED,
-        GameSettings::StartResolution.X,
-        GameSettings::StartResolution.Y,
-        SDL_WINDOW_RESIZABLE
+        start_res.X,
+        start_res.Y,
+        windowFlags
         );
 
-    DrawingContext.sdl_renderer = SDL_CreateRenderer(Window.sdl_window, -1, 0);
+    DrawingContext.sdl_renderer = SDL_CreateRenderer(Window.sdl_window, -1, rendererFlags);
     SDL_SetRenderDrawBlendMode(DrawingContext.sdl_renderer, SDL_BLENDMODE_BLEND);
     
     DrawingContext.sdl_rectTexture = SDL_CreateTexture(DrawingContext.sdl_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 1, 1);
@@ -71,20 +82,24 @@ EngineClass::EngineClass()
 
 EngineClass::~EngineClass()
 {
-    if (Game::World::Current)
-        delete Game::World::Current;
-    if (Game::GuiLayer::Current)
-        delete Game::GuiLayer::Current;
+    if (Game::World::m_Current)
+        delete Game::World::m_Current;
+    if (Game::GuiLayer::m_Current)
+        delete Game::GuiLayer::m_Current;
+
+    queueDestroyingInstances();
     Mix_CloseAudio();
     Mix_Quit();
     IMG_Quit();
     TTF_Quit();
     SDL_Quit();
+
+    Engine = nullptr;
 }
 
 void WindowClass::setTargetFPS(unsigned short fps)
 {
-    targetFrameTime = std::chrono::duration<double>(GameSettings::targetFPS > 0 ? (1.0f / GameSettings::targetFPS) : 0);
+    targetFrameTime = std::chrono::duration<double>(GameSettings::TargetFPS > 0 ? (1.0f / GameSettings::TargetFPS) : 0);
 }
 
 void WindowClass::toggleFullscreen()
@@ -112,12 +127,12 @@ void EngineClass::Run()
 
     m_wasRun = 1;
 
-    Window.setTargetFPS(GameSettings::targetFPS);
+    Window.setTargetFPS(GameSettings::TargetFPS);
 
     while (pollWindowEvents())
     {
         auto start = std::chrono::steady_clock::now();
-        delta_model dt = Timer::global_update();
+        TimeStamp dt = Timer::global_update();
         Tween::global_update(dt);
 
         queueDestroyingInstances();
@@ -125,14 +140,14 @@ void EngineClass::Run()
         Input.processEvents();
         Input.queryObjects();
 
-        if (Game::World::Current)
+        if (Game::World::m_Current)
         {
-            Game::World::Current->Update(dt);
-            Game::World::Current->pUpdate(dt);
+            Game::World::m_Current->Update(dt);
+            Game::World::m_Current->pUpdate(dt);
         }
         
-        if (Game::GuiLayer::Current)
-            Game::GuiLayer::Current->_callUpdate(dt);
+        if (Game::GuiLayer::m_Current)
+            Game::GuiLayer::m_Current->_callUpdate(dt);
         DrawingContext.processViewport();
         DrawingContext.render();
 
@@ -144,7 +159,6 @@ void EngineClass::Run()
             std::this_thread::sleep_for(sleeptime);
         }
     }
-
 }
 
 bool EngineClass::pollWindowEvents()
@@ -159,7 +173,6 @@ bool EngineClass::pollWindowEvents()
             break;
         }
         Input.processWindowEvents(&Window.sdl_event);
-        
     }
     return 1;
 }

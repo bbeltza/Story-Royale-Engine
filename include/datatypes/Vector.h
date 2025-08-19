@@ -5,6 +5,7 @@
 template <class _Num>
 struct Vector2
 {
+    Vector2(const _Num scalar): X(scalar), Y(scalar) {}
     Vector2(const _Num x, const _Num y): X(x), Y(y) {}
     Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
     Vector2(): Vector2(0, 0) {}
@@ -33,16 +34,17 @@ struct Vector2
 #define vec2aop(op) { first.X op= other.X; first.Y op= other.Y; return first; }
 #define vec2 Vector2<_Num>
 #define _t template <class _Num>
+#define _t2 template <class _Num, class _Num2>
 
 _t inline vec2 operator +(const vec2& first, const vec2& other) vec2op(+)
 _t inline vec2 operator -(const vec2& first, const vec2& other) vec2op(-)
 _t inline vec2 operator *(const vec2& first, const vec2& other) vec2op(*)
 _t inline vec2 operator /(const vec2& first, const vec2& other) vec2op(/)
 
-_t inline vec2 operator +(const vec2& first, const _Num& other) vec2op_num(+)
-_t inline vec2 operator -(const vec2& first, const _Num& other) vec2op_num(-)
-_t inline vec2 operator *(const vec2& first, const _Num& other) vec2op_num(*)
-_t inline vec2 operator /(const vec2& first, const _Num& other) vec2op_num(/)
+_t2 inline vec2 operator +(const vec2& first, const _Num2 other) vec2op_num(+)
+_t2 inline vec2 operator -(const vec2& first, const _Num2 other) vec2op_num(-)
+_t2 inline vec2 operator *(const vec2& first, const _Num2 other) vec2op_num(*)
+_t2 inline vec2 operator /(const vec2& first, const _Num2 other) vec2op_num(/)
 
 _t inline vec2& operator +=(vec2& first, const vec2& other) { first.X += other.X; first.Y += other.Y; return first; }
 _t inline vec2& operator -=(vec2& first, const vec2& other) { first.X -= other.X; first.Y -= other.Y; return first; }

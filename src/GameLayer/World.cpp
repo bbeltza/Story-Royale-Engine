@@ -4,12 +4,15 @@
 #include "Game/Entity.h"
 
 #include "Engine.h"
+#include "System.h"
 
 Vector2f Game::World::center;
 Color3 Game::World::Background = {255, 149, 236};
 Color4 Game::World::Foreground = {0};
-Game::World* Game::World::Current = nullptr;
+Game::World* Game::World::m_Current = nullptr;
 Game::World* Game::World::s_TargetWorld = nullptr;
+
+static const char* const static_wTag = "WorldTag ;)";
 
 bool Game::World::cmp(const Entity* first, const Entity* second)
 {
@@ -17,11 +20,11 @@ bool Game::World::cmp(const Entity* first, const Entity* second)
     return res;
 }
 
-Game::World::World() {}
+Game::World::World(): m_worldTag(static_wTag) {}
 
 Game::World::~World()
 {
-    if (Current == this) Current = nullptr;
+    if (m_Current == this) m_Current = nullptr;
     
     while (!m_Entities.empty())
     {
@@ -29,7 +32,28 @@ Game::World::~World()
     }
 }
 
-void Game::World::Update(delta_model dt)
+Game::Entity* Game::World::addEntity()
+{
+    return addEntity<Entity>();
+}
+
+Game::World* Game::World::checkCurrent(World* world)
+{
+    if (world->m_worldTag != static_wTag)
+    {
+        return nullptr;
+    }
+
+    m_Current = world;
+    return world;
+}
+
+void Game::World::err()
+{
+    return System::Error(System::WORLD_CREATION_ERROR);
+}
+
+void Game::World::Update(TimeStamp dt)
 {
     for (Entity* entity : getEntities<Entity>())
     {
@@ -41,10 +65,10 @@ void Game::World::call_render()
 {
     center = Engine->DrawingContext.getScreenCenter();
 
-    if (!Current) return;
+    if (!m_Current) return;
 
-    Current->m_Entities.sort(cmp);
-    for (Entity* entity : Current->m_Entities)
+    m_Current->m_Entities.sort(cmp);
+    for (Entity* entity : m_Current->m_Entities)
     {
         entity->preRender();
         entity->call_render();

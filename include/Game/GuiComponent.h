@@ -12,11 +12,12 @@ namespace Game
         enum UpdateFlags: Flags8::Type
         {
             NOUPDATEFLAGS = 0,
-            PROCESS_SIZE = (1 << 1),
-            PROCESS_POSITION = (1 << 2),
-            PROCESS_CHILDREN = (1 << 3),
-            RENDER = (1 << 4),
-            PRE_RENDER = (1 << 5),
+
+            PROCESS_SIZE = bit(0),
+            PROCESS_POSITION = bit(1),
+            PROCESS_CHILDREN = bit(2),
+            RENDER = bit(3),
+            PRE_RENDER = bit(4),
 
             CUSTOMUPDATEFLAGS = NOUPDATEFLAGS
         };

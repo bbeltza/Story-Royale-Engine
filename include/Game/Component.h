@@ -2,6 +2,7 @@
 #include "standard.h"
 
 #include "Datatypes/Flags.h"
+#include "Datatypes/TimeStamp.h"
 
 namespace Game
 {
@@ -14,18 +15,19 @@ namespace Game
     {
         p_Special = 0,
         p_Custom = p_Special, // An alias for p_Special
-        p_Render = (1 << 0),
-        p_Update = (1 << 1),
-        p_pUpdate = (1 << 2),
-        p_Query = (1 << 3)
+
+        p_Render = bit(0),
+        p_Update = bit(1),
+        p_pUpdate = bit(2),
+        p_Query = bit(3)
     };
     using ComponentProcessFlags = Flags<ProcessFlags>;
 
     public:
         virtual ~Component() {}
         virtual void Render(Entity *) {}
-        virtual void Update(Entity *, delta_model) {}
-        virtual void pUpdate(Entity *, delta_model) {}
+        virtual void Update(Entity *, TimeStamp) {}
+        virtual void pUpdate(Entity *, TimeStamp) {}
         virtual bool Query(Entity *) { return false; } // By default it returns false, the derived component should add its own implementation
 
         inline const ProcessFlags getProcessFlags() const { return p_flags.Get(); }

@@ -45,10 +45,10 @@ void Components::Shape::Render(Game::Entity* _entity)
     Vector2f pos = _entity->getWorld<Game::World>()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
 
 
-    SDL_SetRenderDrawColor(target_renderer, Color.r, Color.b, Color.g, Color.a);
-
+    
     if (shape == CircleShape)
     {
+        SDL_SetRenderDrawColor(target_renderer, Color.r, Color.b, Color.g, Color.a);
         SDL_RenderFillCircle(target_renderer, pos.X + Rect.Position.X, pos.Y + Rect.Position.Y, Rect.Size.X / 2);
     }
     else
