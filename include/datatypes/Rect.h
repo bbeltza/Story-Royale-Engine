@@ -11,6 +11,12 @@ template <typename _Num> inline double _rad(_Num x) {return (x * (r_pi / 180));}
 template <typename _Num>
 struct Rect
 {
+    void Print() {
+        printf("{ ");
+        std::cout << Position.X << ", " << Position.Y << ", " << Size.X << ", " << Size.Y;
+        printf(" }\n");
+    }
+
     Rect(): Position(0, 0), Size(50, 50) {}
     Rect(const _Num x, const _Num y, const _Num width, const _Num height): Position(x, y), Size(width, height) {}
     Rect(const _Num xy, const _Num wh): Position(xy, xy), Size(wh, wh) {}

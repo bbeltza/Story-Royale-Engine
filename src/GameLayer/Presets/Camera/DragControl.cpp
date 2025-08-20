@@ -30,7 +30,13 @@ void DragControl::Update(TimeStamp delta)
     }
     else
     {
-        m_camSpeed = m_camSpeed.Lerp(Vector2f::ZERO, delta / 0.2f);
+        if (Smoothness <= 0.0f)
+            m_camSpeed = Vector2f::ZERO;
+        else
+        {
+            float a = SDL_min(delta/Smoothness, 1.0f);
+            m_camSpeed = m_camSpeed.Lerp(Vector2f::ZERO, a);
+        }
     }
     
     CurrentCamera.x -= m_camSpeed.X;

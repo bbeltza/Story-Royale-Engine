@@ -14,6 +14,8 @@ namespace CameraControllers
     public:
         DragControl();
         ~DragControl();
+
+        float Smoothness = 0.0f;
     protected:
         void Update(TimeStamp) override;
     private:

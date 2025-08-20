@@ -173,12 +173,14 @@ void DrawingDevice::renderCurrentUI()
     }
 }
 
-void DrawingDevice::DrawTexture(const RectF &_Rectangle, File &_File)
+void DrawingDevice::DrawTexture(const RectF& _Rectangle, File &_File)
 {
     if (!LoadFileTexture(_File))
         return;
-
-    SDL_FRect render_rect{_Rectangle.getLeft(), _Rectangle.getTop(), _Rectangle.Size.X, _Rectangle.Size.Y};
+    
+    float left = roundf(_Rectangle.getLeft() * scale) / scale;
+    float top = roundf(_Rectangle.getTop() * scale) / scale;
+    SDL_FRect render_rect{left, top, _Rectangle.Size.X, _Rectangle.Size.Y};
     SDL_RenderCopyF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect);
 }
 

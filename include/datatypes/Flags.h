@@ -15,7 +15,7 @@ struct Flags
 
     inline void Toggle(_Num flag) {m_data ^= flag;}
     inline void ToggleOn(_Num flag) {m_data |= flag;}
-    inline void ToggleOff(_Num flag) {m_data &= flag;}
+    inline void ToggleOff(_Num flag) {m_data &= ~flag;}
 
     operator _Num() const { return Get(); }
 
