@@ -29,10 +29,11 @@ namespace Game
             };
         };
 
-        inline CameraController* getCameraController() const { return m_Controller; }
+        inline CameraController* getController() const { return m_Controller; }
+        inline void setController(CameraController* controller) { m_Controller = controller; m_Controller->m_Camera = this; }
 
         private:
-        CameraController* m_Controller;
+        CameraController* m_Controller = nullptr;
 
         void Update(TimeStamp);
     };

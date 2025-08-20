@@ -1,5 +1,13 @@
-set(SOURCES 
+macro(set_dst_src FLDR SRCS DST)
+    foreach(src ${${SRCS}})
+        set(${DST} ${${DST}} "${FLDR}/${src}")
+    endforeach()
+endmacro()
+macro(set_src FLDR SRCS)
+    set_dst_src(${FLDR} ${SRCS} SOURCES)
+endmacro()
 
+set(SOURCES 
 "main.cpp"
 "System.cpp"
 "File.cpp"
@@ -11,7 +19,6 @@ set(SOURCES
 )
 
 set(CORE_SOURCES 
-
 "Input.cpp"
 "InputEvents.cpp"
 "InstanceRendering.cpp"
@@ -21,37 +28,39 @@ set(CORE_SOURCES
 "Runtime.cpp"
 "Timer.cpp"
 "Tween.cpp"
-
 )
 
 set(DATATYPES_SOURCES
-
 "Color.c"
 "Signal.cpp"
 "UDim.cpp"
-
 )
 
 set(LAYER_SOURCES
-
 "Entity.cpp"
 "GuiLayer.cpp"
 "World.cpp"
-
-"Components/Gui/AspectRatio.cpp"
-"Components/Gui/Modulate.cpp"
-"Components/Gui/Padding.cpp"
-"Components/Gui/Text.cpp"
-"Components/Gui/List.cpp"
-
-"Components/World/Shape.cpp"
-"Components/World/Velocity.cpp"
-"Components/World/Sprite.cpp"
-"Components/World/StaticTexture.cpp"
+"CameraController.cpp"
 
 "Presets/Gui/GuiButton.cpp"
 
+"Presets/Camera/DragControl.cpp"
+"Presets/Camera/EntityControl.cpp"
 )
+set(COMPONENT_SOURCES
+"Gui/AspectRatio.cpp"
+"Gui/Modulate.cpp"
+"Gui/Padding.cpp"
+"Gui/Text.cpp"
+"Gui/List.cpp"
+
+"World/Shape.cpp"
+"World/Velocity.cpp"
+"World/Sprite.cpp"
+"World/StaticTexture.cpp"
+)
+
+set_dst_src(Components COMPONENT_SOURCES LAYER_SOURCES)
 
 set(WINDOWS_SOURCES
 "Windows.cpp"
@@ -60,12 +69,6 @@ set(WINDOWS_SOURCES
 if(WIN32)
     set(SYSTEMDEP_SOURCES ${WINDOWS_SOURCES})
 endif()
-
-macro(set_src FLDR SRCS)
-    foreach(src ${${SRCS}})
-        set(SOURCES ${SOURCES} "${FLDR}/${src}")
-    endforeach()
-endmacro()
 
 set_src(Core CORE_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)

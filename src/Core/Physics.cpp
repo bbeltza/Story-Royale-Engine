@@ -29,4 +29,6 @@ void Game::World::pUpdate(TimeStamp dt)
         entity->_pProcess(dt);
         entity->pUpdate(dt);
     }
+
+    CurrentCamera.Update(dt);
 }

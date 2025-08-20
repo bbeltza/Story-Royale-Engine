@@ -3,12 +3,19 @@
 
 namespace Game
 {
+    class Camera;
+
     class CameraController
     {
         friend class Camera;
+        
         public:
-
+        CameraController();
+        virtual ~CameraController();
+        inline Camera* getCamera() const {return m_Camera;}
+        protected:
+        virtual void Update(TimeStamp) = 0;
         private:
-        void Update(TimeStamp);
+        Camera* m_Camera;
     };
 }

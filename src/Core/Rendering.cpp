@@ -347,11 +347,6 @@ Vector2f Game::World::screenToWorld(float x, float y, Camera *cam)
 {
     if (!cam)
         return screenToWorld(x, y, &zeroCam);
-    if (cam->clamp.Size)
-    {
-        cam->x = SDL_clamp(cam->x, cam->clamp.getLeft(), cam->clamp.getRight());
-        cam->y = SDL_clamp(cam->y, cam->clamp.getTop(), cam->clamp.getBottom());
-    }
     return Vector2f(x - center.X + cam->x, y - center.Y + cam->y);
 }
 

@@ -24,17 +24,26 @@ struct Vector2
 
     inline operator bool() const {return X && Y;}
 
+    static const Vector2<_Num> ZERO;
+    static const Vector2<_Num> ONE;
+
     _Num X, Y;
 };
+
+#define vec2 Vector2<_Num>
+#define _t template <class _Num>
+#define _t2 template <class _Num, class _Num2>
+
+// Static
+
+_t const vec2 vec2::ZERO = {0};
+_t const vec2 vec2::ONE = {1};
 
 // Built-in operators
 
 #define vec2op(op) { return {first.X op other.X, first.Y op other.Y}; }
 #define vec2op_num(op) { return {first.X op other, first.Y op other}; }
 #define vec2aop(op) { first.X op= other.X; first.Y op= other.Y; return first; }
-#define vec2 Vector2<_Num>
-#define _t template <class _Num>
-#define _t2 template <class _Num, class _Num2>
 
 _t inline vec2 operator +(const vec2& first, const vec2& other) vec2op(+)
 _t inline vec2 operator -(const vec2& first, const vec2& other) vec2op(-)
