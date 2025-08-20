@@ -14,6 +14,8 @@ EntityControl::~EntityControl()
 
 void EntityControl::Update(TimeStamp dt)
 {
-    getCamera()->x = m_Entity->Position.X;
-    getCamera()->y = m_Entity->Position.Y;
+    Camera& CurrentCamera = *getCamera();
+
+    CurrentCamera.x = m_Entity->Position.X;
+    CurrentCamera.y = m_Entity->Position.Y;
 }

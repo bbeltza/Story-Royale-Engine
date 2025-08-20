@@ -13,6 +13,8 @@ namespace Game
         CameraController();
         virtual ~CameraController();
         inline Camera* getCamera() const {return m_Camera;}
+
+        bool Enabled = true;
         protected:
         virtual void Update(TimeStamp) = 0;
         private:

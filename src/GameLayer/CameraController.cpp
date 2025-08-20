@@ -16,7 +16,7 @@ CameraController::~CameraController()
 
 void Camera::Update(TimeStamp dt)
 {
-    if (m_Controller)
+    if (m_Controller && m_Controller->Enabled)
         m_Controller->Update(dt);
 
     if (clamp.Size)
