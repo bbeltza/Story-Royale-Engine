@@ -5,15 +5,18 @@
 use_namespace
 
 Vector2f DragControl::s_lastmouseDelta;
+Connection* DragControl::s_mouseConnection = nullptr;
 
 DragControl::DragControl()
 {
-
+    if (!s_mouseConnection)
+        s_mouseConnection = Engine->Input.mouseMove.Connect(event_callback(DragControl::mouseMoveCallback));
+    s_mouseConnection->Reconnect();
 }
 
 DragControl::~DragControl()
 {
-
+    s_mouseConnection->Disconnect();
 }
 
 void DragControl::Update(TimeStamp delta)
@@ -45,5 +48,3 @@ void DragControl::mouseMoveCallback(const MouseMove* event)
         s_lastmouseDelta.Y += event->delta.Y;
     }
 }
-
-Connection* const DragControl::s_mouseConnection = Engine->Input.mouseMove.Connect(event_callback(DragControl::mouseMoveCallback));

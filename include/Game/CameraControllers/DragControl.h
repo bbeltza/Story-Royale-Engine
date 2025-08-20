@@ -20,7 +20,7 @@ namespace CameraControllers
         Vector2f m_camSpeed;
 
         static Vector2f s_lastmouseDelta;
-        static Connection* const s_mouseConnection;
+        static Connection* s_mouseConnection;
         static void mouseMoveCallback(const MouseMove*);
     };
 }
