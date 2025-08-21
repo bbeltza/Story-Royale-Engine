@@ -96,7 +96,7 @@ function(srEngine_link_target target)
     srEngine_link_settings(${target})
     
     if (${ARGN} MATCHES NO_CONSOLE)
-        target_link_options(${target} PRIVATE ${NO_CONSOLE_OPTIONS})
+        target_link_options(${target} PRIVATE ${SRENGINE_NO_CONSOLE_OPTIONS})
     endif()
 
     if (NOT BIND_RESOURCES)
