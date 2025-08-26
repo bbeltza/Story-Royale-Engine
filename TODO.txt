@@ -1,0 +1,5 @@
+- Animations/Keyframes
+- Audio class
+- Binding with ImGui (maybe later uh)
+
+- Work on the game !
