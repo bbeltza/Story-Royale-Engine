@@ -76,6 +76,6 @@ void Game::World::call_render()
     }
 
 #ifdef _DEBUG
-    for (Entity* entity : Game::World::Current->m_Entities) entity->_debugDraw();
+    for (Entity* entity : Game::World::m_Current->m_Entities) entity->_debugDraw();
 #endif
 }

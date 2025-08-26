@@ -88,6 +88,7 @@ EngineClass::~EngineClass()
         delete Game::GuiLayer::m_Current;
 
     queueDestroyingInstances();
+
     Mix_CloseAudio();
     Mix_Quit();
     IMG_Quit();
