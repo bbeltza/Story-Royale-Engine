@@ -6,8 +6,10 @@
 
 class Timer
 {
+    typedef std::unordered_set<Timer*> Set;
+
     static std::chrono::steady_clock s_global_clock;
-    static std::vector<Timer*> *s_timers;
+    static Set& get_timers();
 
     public:
     Timer(TimeStamp duration, bool looped=false);

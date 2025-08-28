@@ -12,11 +12,9 @@ using namespace Components;
 
 void Game::Entity::_pProcess(TimeStamp dt)
 {
-    if (m_Components.empty())
-        return;
-
     for (auto c : m_Components)
     {
+        if (componentDisabled(c)) continue;
         if (c->hasProcessFlag(Component::p_pUpdate))
             c->pUpdate(this, dt);
     }

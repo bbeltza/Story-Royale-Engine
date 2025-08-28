@@ -75,6 +75,7 @@ private:
         float *float_;
         double *double_;
     } m_target, m_src, m_start;
+    typedef std::unordered_set<Tween*> Set;
 
 
     TargetType m_type;
@@ -87,6 +88,6 @@ private:
     void Update(TimeStamp delta);
 
     static void global_update(TimeStamp delta);
-    static std::unordered_set<Tween*>* s_tweens;
+    static Set& get_tweens();
     friend EngineClass;
 };

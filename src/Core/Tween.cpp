@@ -2,11 +2,15 @@
 
 #include "utils.h"
 
-std::unordered_set<Tween*>* Tween::s_tweens = nullptr;
+Tween::Set& Tween::get_tweens()
+{
+    static Set set;
+    return set;
+}
+
 void Tween::global_update(TimeStamp delta)
 {
-    if (!s_tweens) return;
-    for (Tween* tween : *s_tweens)
+    for (Tween* tween : get_tweens())
     {
         if (tween->m_Playing)
             tween->Update(delta);
@@ -20,16 +24,12 @@ Tween::Tween(Info* info, void* target, const void* src, TargetType type):
     m_src.u8 = (uint8_t*)src;
     m_start.i64 = &m_longstart;
 
-    if (!s_tweens)
-        s_tweens = new std::unordered_set<Tween*>;
-    s_tweens->insert(this);
+    get_tweens().insert(this);
 }
 
 Tween::~Tween()
 {
-    s_tweens->erase(this);
-    if (s_tweens->empty())
-        delete s_tweens;
+    get_tweens().erase(this);
 }
 
 void Tween::Play()

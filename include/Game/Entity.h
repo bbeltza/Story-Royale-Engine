@@ -24,17 +24,20 @@ namespace Game
         };
 
         public:
-
         Vector2f Position;
         int zIndex = 0;
 
         template <class w_Type> inline w_Type* getWorld() const { return reinterpret_cast<w_Type*>(m_world); }
         inline void addComponent(Component* const component) { m_Components.push_back(component); }
+        inline void enableComponent(Component* const component) { m_DisabledComps.erase(component); }
+        inline void disableComponent(Component* const component) { m_DisabledComps.insert(component); }
+        inline bool componentDisabled(Component* const component) {return m_DisabledComps.find(component) != m_DisabledComps.end();}
+
         void reParent(World* const _world);
 
         private:
-
         std::list<Component*> m_Components;
+        std::unordered_set<Component*> m_DisabledComps;
 
         // Draws a red cross representing the entity's position, only calls in debug mode
         void _debugDraw();

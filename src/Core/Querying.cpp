@@ -67,8 +67,8 @@ Game::Entity *Game::World::_query()
         auto entity = reinterpret_cast<Entity *>(*it);
         for (auto component : entity->m_Components)
         {
-            if (!component->hasProcessFlag(component->p_Query))
-                continue;
+            if (entity->componentDisabled(component)) continue;
+            if (!component->hasProcessFlag(component->p_Query)) continue;
             if (component->Query(entity))
             {
                 target_returnEntity = entity;

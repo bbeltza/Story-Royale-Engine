@@ -1,33 +1,22 @@
 #include "Classes/Timer.h"
 
-std::vector<Timer*> *Timer::s_timers = nullptr;
 std::chrono::steady_clock Timer::s_global_clock;
 static std::chrono::duration<TimeStamp> helper_ts_duration;
 
+Timer::Set& Timer::get_timers()
+{
+    static Set timers;
+    return timers;
+}
 
 Timer::Timer(TimeStamp duration, bool looped): m_Duration(duration), Looped(looped)
 {
-    if (!s_timers) s_timers = new std::vector<Timer*>; // Heap allocating it because it automatically empties itself when stack allocating
-    s_timers->push_back(this);
-    printf("%p\n", &s_timers);
+    get_timers().insert(this);
 };
 
 Timer::~Timer()
 {
-    for (auto it = s_timers->begin(); it != s_timers->end(); it++)
-    {
-            if (*it == this)
-            {
-                s_timers->erase(it);
-                break;
-            }
-    }
-
-    if (s_timers->empty())
-    {
-        delete s_timers;
-        s_timers = nullptr;
-    }
+    get_timers().erase(this);
 }
 
 void Timer::Start()
@@ -69,8 +58,7 @@ TimeStamp Timer::global_update()
     last_frame_time = s_global_clock.now().time_since_epoch();
     TimeStamp delta = helper_ts_duration.count();
 
-    if (!s_timers) goto ret;
-    for (auto timer : *s_timers)
+    for (auto timer : get_timers())
     {
         if (!timer->m_playing) continue;
         timer->m_timestamp += delta;
@@ -80,8 +68,6 @@ TimeStamp Timer::global_update()
         while (timer->m_timestamp >= timer->m_Duration)
             timer->_hit();
     }
-
-    ret:
 
     return delta;
 }

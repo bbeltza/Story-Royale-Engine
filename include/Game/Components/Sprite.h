@@ -8,8 +8,10 @@
 namespace Components
 {
     class Sprite : public ::Game::Component
-    {
+    {       
     public:
+        typedef std::unordered_map<std::string, File> Map;
+
         Sprite();
         ~Sprite();
 
@@ -22,13 +24,6 @@ namespace Components
 
         File& LoadFile(const char*);
     private:
-        struct Initializer
-        {
-            ~Initializer();
-        };
-
         std::vector<File*> textures;
-
-        static const Initializer s_init;
     };
 }

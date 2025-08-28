@@ -26,6 +26,7 @@ void Game::Entity::call_render()
 {
     for (Component *component : this->m_Components)
     {
+        if (componentDisabled(component)) continue;
         if (component->hasProcessFlag(Component::p_Render))
             component->Render(this);
     }

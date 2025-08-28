@@ -28,16 +28,11 @@ const char *SOUND_TYPES[] = {
 };
 
 const bool File::s_resbind = _game_res != nullptr;
-std::unordered_map<std::string, File::FileInfo>* File::s_loadedfiles = nullptr;
-
-const File::Initializer File::s_init;
 
 const char res_prefix[] = "_res/";
 
 File::File() : m_type(Type::Uninitialized)
 {
-    if (!s_loadedfiles)
-        s_loadedfiles = new std::unordered_map<std::string, File::FileInfo>;
 }
 
 File::File(File &&moved)
@@ -48,6 +43,12 @@ File::File(File &&moved)
 File::~File()
 {
     if (m_type == Type::Unknown || m_type == Type::Uninitialized) return;
+}
+
+File::Map& File::get_loaded()
+{
+    static Map lf;
+    return lf;
 }
 
 static bool checkType(const char *ext, const char *_array[], File::Type _target, File::Type *_type)
