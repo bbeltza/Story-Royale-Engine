@@ -12,10 +12,18 @@ AudioData::AudioData(File& file)
     if (!f_size) {/*Will do something*/}
 
     SDL_RWops* audio_rw = SDL_RWFromConstMem(f_data, f_size);
+    
+    {
+        Uint8* wav_data;
+        SDL_LoadWAV_RW(audio_rw, 1, &m_spec, &wav_data, &m_len);
+        System::CheckForSDLErrors();
+    
+        m_data = (int8_t*)malloc(m_len);
+        memcpy(m_data, wav_data, m_len);
 
-    SDL_LoadWAV_RW(audio_rw, 1, &m_spec, (Uint8**)&m_data, &m_len);
+        SDL_FreeWAV(wav_data);
+    }
 
-    System::CheckForSDLErrors();
     
 
     m_len /= AUDIO_BYTESIZE(m_spec.format);
@@ -95,7 +103,7 @@ void AudioDevice::callback(AudioDevice* dev, int32_t* stream, int len)
     const size_t byte_count = AUDIO_BYTESIZE(dev->m_Spec.format);
     const size_t sample_len = len / byte_count;
 
-    printf("%p %d\n", stream, sample_len);
+    //printf("%p %d\n", stream, sample_len);
 
     Queue stop_queue;
 
