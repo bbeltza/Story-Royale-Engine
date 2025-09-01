@@ -45,7 +45,7 @@ public:
 
     inline const FileInfo& getInfo() const {return get_loaded().at(m_filepath);}
     inline const Type getType() const { return m_type; }
-    inline const unsigned char* getRawData() const { return getInfo().data; }
+    inline const void* getRawData() const { return (void*)getInfo().data; }
     inline size_t getSize() const { return getInfo().size; }
 
     static inline bool areResourcesBound() {return s_resbind;}

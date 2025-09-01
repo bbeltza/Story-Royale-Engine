@@ -42,12 +42,16 @@ struct System
         longjmp(err, id);
     }
 
-    static void Exit() {exit(0);}
+    static inline bool isExiting() { return m_exiting; }
+    static inline void Exit() {m_exiting = true;}
+    static inline void CheckForSDLErrors() {if (GetSDLError()[0]) {Error(SDL_ERROR);}}
     static void Sleep(float duration);
     
 private:
     System() = delete;
     friend int main();
+
+    static bool m_exiting;
 
     static jmp_buf err;
     static std::string last_err;

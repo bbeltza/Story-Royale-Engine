@@ -99,22 +99,16 @@ void File::Load(const char *path)
                     int cmp = strcmp((const char *)resptr, REAL_path);
                     if (!cmp)
                     {
-                        printf("COMPARED\n");
                         info.handle = (void *)resptr;
-                        printf("l: %d\n", l);
                         resptr += l + 1;
                         int32_t datapos = 0;
                         for (int i = 0; i <= 3; i++)
                             datapos |= (resptr[3 - i] << 8 * i);
-                        printf("%d\n", datapos);
-                        printf("datapos: %d\n", datapos);
 
                         info.data = (unsigned char *)(_game_res + datapos);
-                        printf("%d %d %d %d\n", info.data[0], info.data[1], info.data[2], info.data[3]);
                         info.size = info.data[3];
                         for (int i = 0; i <= 3; i++)
                             info.size |= (info.data[3 - i] << 8 * i);
-                        printf("%zd\n", info.size);
                         info.data += 4;
 
                         break;
@@ -141,7 +135,6 @@ void File::Load(const char *path)
     }
     else
     {
-        printf("%s\n", path);
         m_filepath = path;
         FILE* fstream = fopen(path, "rb");
         if (!fstream)

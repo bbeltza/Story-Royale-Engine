@@ -16,8 +16,9 @@ struct DisplayText: public Game::GuiLayer
         label->anchor = Vector2f(0.5, 0);
         label->position = UDim2(0.5, 0, 0, 10);
         
+        text.Alignment = text.AlCentered;
         text.color = {255, 255, 255};
-        text.text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
+        text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
         text.LoadFont("res://fonts/OpenSans-Regular.ttf");
 
         label->addComponent(&text);
@@ -59,11 +60,6 @@ void DisplayText::postRender()
 
 void Game::Initialize()
 {
-    printf("%s\n", _game_res);
-    GameSettings::ScalingResolution = {320, 180};
-    GameSettings::targetFPS = 40;
-    GameSettings::Title = "Rectangle Test";
-
     Game::GuiLayer::setCurrent<DisplayText>();
 
     Engine->Input.mouseWheel.Connect(event_callback(mousewheel));

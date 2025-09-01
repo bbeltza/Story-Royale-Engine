@@ -17,6 +17,7 @@ struct Signal
     Connection* Connect(EventFunction fn);
     Connection* Once(EventFunction fn);
 
+    inline void Fire() {return Fire(nullptr);} 
     void Fire(void* userdata);
     void DisconnectAll();
 

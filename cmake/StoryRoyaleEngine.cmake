@@ -15,7 +15,7 @@ function(srEngine_link_resource PROJECT)
     get_target_property(INPUT ${PROJECT} INPUT)
     get_target_property(BIND_RESOURCES ${PROJECT} WANT_BINDING)
     get_target_property(SRC ${PROJECT} SRC)
-    set(OUTPUT "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    
 
     if(NOT INPUT)
     return()
@@ -23,34 +23,37 @@ function(srEngine_link_resource PROJECT)
 
 
     if (WANT_BINDING)
+        set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}")
         add_custom_target(
-        bind_${PROJECT} ALL
+        bind_${PROJECT}
+        COMMENT "--- Binding source resources..."
         ${PYTHON_COMMAND}resource_binder.py
         ${INPUT} 1
         ${OUTPUT}
         OUTPUT ${OUTPUT}/_res.c
-        COMMENT "--- Binding source resources"
+        DEPENDS ${INPUT}
         )
 
         file(WRITE ${OUTPUT}/_res.c)
         
         add_dependencies(${PROJECT} bind_${PROJECT})
 
-        target_sources(${PROJECT} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_res.c)
+        target_sources(${PROJECT} PRIVATE ${OUTPUT}/_res.c)
     else()
+        get_target_property(OUTPUT ${PROJECT} RUNTIME_OUTPUT_DIRECTORY)
         add_custom_target(
-            copy_${PROJECT} ALL
+            copy_${PROJECT}
+            COMMENT "--- Copying source resources into ${OUTPUT}/${SRC}"
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${INPUT}
             ${OUTPUT}/${SRC}
-            COMMENT "--- Copying source resources into ${OUTPUT}/${SRC}"
             )
         add_custom_target(
-            rename_${PROJECT} ALL
+            rename_${PROJECT}
+            COMMENT "--- Renaming resources folder to '_res'"
             COMMAND ${CMAKE_COMMAND} -E rm -rf ${OUTPUT}/_res
             COMMAND ${CMAKE_COMMAND} -E rename
             ${OUTPUT}/${SRC} ${OUTPUT}/_res
-            COMMENT "--- Renaming resources folder to '_res'"
         )
         message("-- ${OUTPUT}")
         message("-- ${CMAKE_BUILD_TYPE}")
@@ -67,15 +70,19 @@ function(srEngine_link_settings TARGET)
     set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/g_settings.cpp)
 
     macro(gen_settings INPUT_JSON)
-        add_custom_target(${TARGET}_settings
+        if (NOT ${INPUT_JSON} EQUAL 0)
+            set(DEPEND DEPENDS ${INPUT_JSON})
+        endif()
+
+        message("-.- ${DEPEND}")
+        add_custom_command(
+            OUTPUT ${OUTPUT_FILE}
+            ${DEPEND}
             ${PYTHON_COMMAND}game_settings.py
             ${INPUT_JSON}
             ${CMAKE_CURRENT_BINARY_DIR}
-            OUTPUT ${OUTPUT_FILE}
-            COMMENT "--- Generating game settings...")
+            COMMENT "--- Generating game settings for ${TARGET}...")
 
-        file(WRITE ${OUTPUT_FILE})
-        add_dependencies(${TARGET} ${TARGET}_settings)
         target_sources(${TARGET} PRIVATE ${OUTPUT_FILE})
     endmacro()
 
@@ -89,6 +96,8 @@ function(srEngine_link_settings TARGET)
 endfunction()
 
 function(srEngine_link_target target)
+    set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target})
+    set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${target})
     get_target_property(BIND_RESOURCES ${target} WANT_BINDING)
 
     target_link_libraries(${target} StoryRoyaleEngine)

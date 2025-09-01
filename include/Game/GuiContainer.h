@@ -42,14 +42,14 @@ namespace Game
 
         bool visible = true, canQuery = true;
     private:
-        void _callUpdate(TimeStamp);
+        void _callUpdate(TimeStamp dt);
         void _processchildren();
         void _renderchildren();
         void _prerender_components();
         void _render_components();
         void _procpos_components();
         void _procsize_components();
-        void _proc_children_components(uint32_t);
+        void _proc_children_components(uint32_t index);
 
         GuiObject* _query();
 

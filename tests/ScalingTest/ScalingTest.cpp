@@ -11,8 +11,6 @@ void Render()
 
 void Game::Initialize()
 {
-    GameSettings::ScalingResolution = {320, 180};
-
     printf("Hello World\n");
     Engine->BeforeRender.Connect(event_callback(Render));
 }

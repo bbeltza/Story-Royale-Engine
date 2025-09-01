@@ -18,7 +18,8 @@ set(SOURCES
 "Extras/ExtraString.c"
 )
 
-set(CORE_SOURCES 
+set(CORE_SOURCES
+"Audio.cpp"
 "Input.cpp"
 "InputEvents.cpp"
 "InstanceRendering.cpp"

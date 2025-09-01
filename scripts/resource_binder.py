@@ -101,6 +101,3 @@ else:
         except PermissionError as p:
             pass
     print(i)
-         
-    
-

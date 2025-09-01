@@ -10,6 +10,8 @@
 
 #include "GameSettings.h"
 
+#include "config.h"
+
 Vector2f DrawingDevice::getScreenCenter()
 {
     return {m_viewport.w / 2.0f, m_viewport.h / 2.0f};
@@ -95,8 +97,8 @@ void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a ref
         pos = Game::World::worldToScreen(pos.X, pos.Y);
 
     SDL_SetRenderDrawColor(sdl_renderer, 255, 64, 0, 255);
-    SDL_RenderDrawLineF(sdl_renderer, pos.X - ENTITY_DBGLINESIZE, pos.Y, pos.X + ENTITY_DBGLINESIZE, pos.Y);
-    SDL_RenderDrawLineF(sdl_renderer, pos.X, pos.Y - ENTITY_DBGLINESIZE, pos.X, pos.Y + ENTITY_DBGLINESIZE);
+    SDL_RenderDrawLineF(sdl_renderer, pos.X - DRAW_ENTCENTER_LINESIZE, pos.Y, pos.X + DRAW_ENTCENTER_LINESIZE, pos.Y);
+    SDL_RenderDrawLineF(sdl_renderer, pos.X, pos.Y - DRAW_ENTCENTER_LINESIZE, pos.X, pos.Y + DRAW_ENTCENTER_LINESIZE);
 }
 
 void DrawingDevice::render()

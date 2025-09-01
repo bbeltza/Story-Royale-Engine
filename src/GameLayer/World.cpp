@@ -6,6 +6,8 @@
 #include "Engine.h"
 #include "System.h"
 
+#include "config.h"
+
 Vector2f Game::World::center;
 Color3 Game::World::Background = {255, 149, 236};
 Color4 Game::World::Foreground = {0};
@@ -75,7 +77,7 @@ void Game::World::call_render()
         entity->postRender();
     }
 
-#ifdef _DEBUG
+#ifdef DRAW_ENTITY_CENTER
     for (Entity* entity : Game::World::m_Current->m_Entities) entity->_debugDraw();
 #endif
 }

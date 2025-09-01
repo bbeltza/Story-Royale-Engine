@@ -2,9 +2,6 @@
 #include <SDL.hpp>
 #include "EngineBase.h"
 
-#define ENTITY_DRAWCENTERDBG 1
-#define ENTITY_DBGLINESIZE 3
-
 class WindowClass
 {
     ENGINE_BASE

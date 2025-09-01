@@ -10,6 +10,8 @@
 #include "Game/GuiComponents/Stroke.h"
 #include "Game/GuiComponents/Text.h"
 
+#include "config.h"
+
 SDL_Renderer* target_renderer;
 
 void DrawingDevice::tr()
@@ -28,9 +30,9 @@ void GuiComponents::Fill::render(Game::GuiContainer* obj)
 
 void Game::Entity::_debugDraw()
 {
-#if !ENTITY_DRAWCENTERDBG
+#if DRAW_ENT_CENTER_ONLY_EMPTY
     if (this->m_Components.empty())
-#endif // !1
+#endif
     {
         Engine->DrawingContext.DrawDebug(Position);
     }
@@ -77,7 +79,7 @@ void GuiComponents::Text::render(Game::GuiContainer* obj)
 {
     RectF* r = getAbsolute(obj);
     SDL_Rect ir{(int)r->Position.X, (int)r->Position.Y, (int)r->Size.X, (int)r->Size.Y};
-    Engine->DrawingContext.DrawFont(&ir, this->m_file, text.c_str(), count, Alignment);
+    Engine->DrawingContext.DrawFont(&ir, this->m_file, m_str.c_str(), count, Alignment);
 }
 
 void Components::Sprite::Render(Game::Entity* _entity)

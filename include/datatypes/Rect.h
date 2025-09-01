@@ -11,17 +11,15 @@ template <typename _Num> inline double _rad(_Num x) {return (x * (r_pi / 180));}
 template <typename _Num>
 struct Rect
 {
-    void Print() {
-        printf("{ ");
-        std::cout << Position.X << ", " << Position.Y << ", " << Size.X << ", " << Size.Y;
-        printf(" }\n");
-    }
+    void Print() { printf("{ {%g, %g} ; {%g, %g}", (double)Position.X, (double)Position.Y, (double)Size.X, (double)Size.Y); }
 
     Rect(): Position(0, 0), Size(50, 50) {}
     Rect(const _Num x, const _Num y, const _Num width, const _Num height): Position(x, y), Size(width, height) {}
     Rect(const _Num xy, const _Num wh): Position(xy, xy), Size(wh, wh) {}
     Rect(const Vector2<_Num> &position, const Vector2<_Num> &size): Position(position), Size(size) {}
     Rect(const Rect& other): Position(other.Position), Size(other.Size) {}
+    Rect(const void* userdata)
+        : Position((_Num*)userdata[0] - (_Num*)userdata[2]/2, (_Num*)userdata[1] - (_Num*)userdata[3]/2), Size((_Num*)userdata[2], (_Num*)userdata[3]) {}
     template <class _OtherNum> Rect(const Rect<_OtherNum>& other): Position(other.Position), Size(other.Size) {}
 
     vec2 Position, Size;
@@ -31,6 +29,9 @@ struct Rect
         _abs(this->Position.Y - other.Position.Y) < this->Size.Y/2 + other.Size.Y/2;
     }
 
+    Rect& reCenter() { Position = getBottomRight(); return *this; }
+
+    Rect getCentered() const { return {getBottomRight(), Size}; }
     inline constexpr _Num getTop() const {return this->Position.Y - this->Size.Y/2;}
     inline constexpr _Num getBottom() const {return this->Position.Y + this->Size.Y/2;}
     inline constexpr _Num getLeft() const {return this->Position.X - this->Size.X/2;}

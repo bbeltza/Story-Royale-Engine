@@ -58,7 +58,5 @@ void Music::Play()
         res = Mix_FadeInMusic(music_dat, -m_info->looped, (int)(m_info->fade_in*1000));
     else
         res = Mix_PlayMusic(music_dat, m_info ? -m_info->looped : 0);
-    printf("PLAYING MUSIC %d\n", res);
-    if (res < 0)
-        System::Error(System::SDL_ERROR);
+    System::CheckForSDLErrors();
 }

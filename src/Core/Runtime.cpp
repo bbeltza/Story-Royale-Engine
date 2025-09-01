@@ -1,6 +1,7 @@
 #include <standard.h>
 
 #include "Engine.h"
+#include "System.h"
 
 #include "Game/World.h"
 #include "Game/Component.h"
@@ -26,18 +27,16 @@ EngineClass* Engine = nullptr;
 
 EngineClass::EngineClass()
 {
-    // Useful in case of restarting the whole engine by just constructing another one
-    if (Engine) delete Engine;
     Engine = this;
 
     DEF_BASE(Window)
     DEF_BASE(Input)
     DEF_BASE(DrawingContext)
-    DEF_BASE(Audio)
+    DEF_BASE(AudioDevice)
 
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG);
 
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
     Mix_Init(MIX_INIT_OGG);
@@ -96,6 +95,8 @@ EngineClass::~EngineClass()
     SDL_Quit();
 
     Engine = nullptr;
+
+    printf("Engine destructed...\n");
 }
 
 void WindowClass::setTargetFPS(unsigned short fps)
@@ -162,8 +163,11 @@ void EngineClass::Run()
     }
 }
 
+bool System::m_exiting = false;
 bool EngineClass::pollWindowEvents()
 {
+    if (System::isExiting()) return 0;
+
     while (SDL_PollEvent(&Window.sdl_event) != 0)
     {
         switch (Window.sdl_event.type)
@@ -175,6 +179,7 @@ bool EngineClass::pollWindowEvents()
         }
         Input.processWindowEvents(&Window.sdl_event);
     }
+
     return 1;
 }
 
@@ -191,6 +196,3 @@ void GameInstance::Destroy()
 {
     destroyQueue.push_back(this);
 }
-
-
-

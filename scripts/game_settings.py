@@ -3,8 +3,6 @@ import sys
 
 from game_settings_types import types as settings_types
 
-print("-- ARGV: ", sys.argv)
-
 game_settings_path = sys.argv[1]
 output_dir = sys.argv[2]
 output_filedir = output_dir + "/g_settings.cpp"
@@ -43,20 +41,12 @@ with open(output_filedir, "w") as outputfile:
         ctype = v[1]
         assign_str = ctype + namespace_prefix + k + "="
 
-        value:any = None
-
-        try:
-            value = game_settings[k]
-            print(f"Value of key {k}: {value}")
-
-        except KeyError:
-            print(f"Could not find setting ${k}, using default")
-            value = v[0]
+        value = game_settings.get(k, v[0])
 
         if type(value) == dict:
             l = []
             for key in v[2]:
-                l.append(value[key])
+                l.append(value.get(key, v[0][len(l)]) )
             
             value = l
 

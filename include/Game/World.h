@@ -122,12 +122,6 @@ namespace Game
 
         static World *m_Current;
     };
-
-    // The method to be defined by the game using the engine
-    // EVERY game should have this defined, even if it's empty
-    // This is the entry point for the game, it's called after initializing the libraries, but before creating the window
-    // You can change the game settings here (Untill a json implementation is goind to be added)
-    void Initialize();
 }
 
 // This thing is so overcommented ah!!

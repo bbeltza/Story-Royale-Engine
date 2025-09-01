@@ -4,6 +4,8 @@
 #include "Game/GuiObject.h"
 #include "Game/GuiComponent.h"
 
+#include "config.h"
+
 Color4 Game::GuiLayer::Foreground = {0, 0, 0, 0};
 Game::GuiLayer *Game::GuiLayer::m_Current = nullptr;
 
@@ -60,13 +62,16 @@ void Game::GuiContainer::_renderchildren()
     _prerender_components();
     _render_components();
 
+    #ifdef DRAW_GUI_CONTAINER_BOX
+        RectF abs = m_absolute.getCentered();
+        Color4 r{255, 0, 0, 255};
+        Engine->DrawingContext.DrawRectangle(abs, r, DrawingDevice::dm_Stroke);
+    #endif
     for (GuiContainer *obj : m_children)
     {
         if (!obj->visible)
             continue;
 
-        obj->_prerender_components();
-        obj->_render_components();
         obj->_renderchildren();
     }
 }

@@ -8,6 +8,10 @@ struct WindowOptions
     bool Resizable;
 };
 
+struct AudioOptions
+{
+};
+
 namespace GameSettings
 {
     extern const char* const Title;
@@ -16,5 +20,6 @@ namespace GameSettings
 
     extern uint16_t const TargetFPS;
     
-    extern WindowOptions const WindowOptions;
+    extern ::WindowOptions const WindowOptions;
+    extern ::AudioOptions const AudioOptions;
 }

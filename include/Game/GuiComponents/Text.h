@@ -19,15 +19,21 @@ namespace GuiComponents
         ~Text();
 
         void LoadFont(const char* path);
+        
+        inline void assign(const char* str) {m_str = str;}
+        template <class... T> inline void format(const char* fmt, T&&... args) { m_str = fmt::format(fmt, args); }
 
-        std::string text = "Display text!";
+        inline int getLength() { return m_str.size(); }
 
-        unsigned int scale = 0;
         int count = -1;
+        unsigned int scale = 0;
+
         Color3 color = { 0, 0, 0 };
     protected:
         void render(::Game::GuiContainer*) override;
     private:
         File m_file;
+
+        std::string m_str;
     };
 }

@@ -13,7 +13,7 @@ struct Vector2
     template <class _Num2> Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
     template <class _Num2> Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
-    inline void Print() const {std::cout << "{ " << X << ", " << Y << " }\n";}
+    inline void Print() const {printf("{ %g, %g }\n", (double)X, (double)Y);}
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
 
