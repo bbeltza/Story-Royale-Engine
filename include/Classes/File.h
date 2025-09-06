@@ -48,7 +48,7 @@ public:
     inline const void* getRawData() const { return (void*)getInfo().data; }
     inline size_t getSize() const { return getInfo().size; }
 
-    static inline bool areResourcesBound() {return s_resbind;}
+    static inline bool areResourcesBound() { return _game_res != nullptr; }
 
 private:
     friend class DrawingDevice;
@@ -57,9 +57,6 @@ private:
 
     void* m_userdata = nullptr;
     std::string m_filepath;
-
-    // This one is different, tells if the resources are binded, m_info.resbind is always false if this constant is false
-    static const bool s_resbind;
 
     static Map& get_loaded();
 

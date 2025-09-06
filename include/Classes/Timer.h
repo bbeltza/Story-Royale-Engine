@@ -8,7 +8,8 @@ class Timer
 {
     typedef std::unordered_set<Timer*> Set;
 
-    static std::chrono::steady_clock s_global_clock;
+    static std::chrono::high_resolution_clock s_global_clock;
+    static std::chrono::duration<TimeStamp> s_last_frame_time;
     static Set& get_timers();
 
     public:
@@ -19,7 +20,7 @@ class Timer
     void Stop();
     void Pause();
 
-    float getCurrentTimestamp() const {return m_timestamp;};
+    TimeStamp getCurrentTimestamp() const {return m_timestamp;};
 
     bool Looped = false;
 

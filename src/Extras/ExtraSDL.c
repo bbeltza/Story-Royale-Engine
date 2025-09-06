@@ -1,21 +1,21 @@
 #include <string.h>
 #include "C/ExtraSDL.h"
 
-int SDL_RenderFillCircle(SDL_Renderer* renderer, int x0, int y0, int radius)
+int SDL_RenderFillCircleF(SDL_Renderer* renderer, float _x, float _y, float radius)
 {
     SDL_Rect v;
     SDL_RenderGetViewport(renderer, &v);
 
-   if (x0 + radius < 0 || y0 + radius < 0 || x0 - radius > v.w || y0 - radius > v.h) return 1;
+   if (_x + radius < 0 || _y + radius < 0 || _x - radius > v.w || _y - radius > v.h) return 1;
 
-    int x = radius;
-    int y = 0;
-    int radiusError = 1 - x;
+    float x = radius;
+    float y = 0;
+    float radiusError = 1 - x;
     while (x >= y) {
-        SDL_RenderDrawLine(renderer, x + x0, y + y0, -x + x0, y + y0);
-        SDL_RenderDrawLine(renderer, y + x0, x + y0, -y + x0, x + y0);
-        SDL_RenderDrawLine(renderer, -x + x0, -y + y0, x + x0, -y + y0);
-        SDL_RenderDrawLine(renderer, -y + x0, -x + y0, y + x0, -x + y0);
+        SDL_RenderDrawLineF(renderer, x + _x, y + _y, -x + _x, y + _y);
+        SDL_RenderDrawLineF(renderer, y + _x, x + _y, -y + _x, x + _y);
+        SDL_RenderDrawLineF(renderer, -x + _x, -y + _y, x + _x, -y + _y);
+        SDL_RenderDrawLineF(renderer, -y + _x, -x + _y, y + _x, -x + _y);
         y++;
         if (radiusError < 0)
             radiusError += 2 * y + 1;
@@ -28,14 +28,19 @@ int SDL_RenderFillCircle(SDL_Renderer* renderer, int x0, int y0, int radius)
     return 1;
 }
 
+int SDL_RenderFillCircle(SDL_Renderer* renderer, int _x, int _y, int radius)
+{
+    return SDL_RenderFillCircleF(renderer, (float)_x, (float)_y, (float)radius);
+}
+
 int TTF_MeasureTextSpaced(TTF_Font* font, const char* text, int measure_width, int* extent, int* count)
 {
-    int c;
+    size_t c;
     int res = TTF_MeasureText(font, text, measure_width, extent, &c);
     if (res < 0) goto ret;
     if (!count && !extent) goto ret;
     if (!count) count = &c; else *count = c;
-    if (*count >= strlen(text)) goto ret;
+    if (c >= strlen(text)) goto ret;
 
     char* spaced_text = malloc(*count+1);
     strncpy(spaced_text, text, *count);

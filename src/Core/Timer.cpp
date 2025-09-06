@@ -1,6 +1,7 @@
 #include "Classes/Timer.h"
 
-std::chrono::steady_clock Timer::s_global_clock;
+std::chrono::high_resolution_clock Timer::s_global_clock;
+std::chrono::duration<TimeStamp> Timer::s_last_frame_time = s_global_clock.now().time_since_epoch();
 static std::chrono::duration<TimeStamp> helper_ts_duration;
 
 Timer::Set& Timer::get_timers()
@@ -53,9 +54,9 @@ void Timer::_hit()
 
 TimeStamp Timer::global_update()
 {
-    static std::chrono::duration<TimeStamp> last_frame_time = s_global_clock.now().time_since_epoch();
-    helper_ts_duration = s_global_clock.now().time_since_epoch() - last_frame_time;
-    last_frame_time = s_global_clock.now().time_since_epoch();
+    helper_ts_duration = s_global_clock.now().time_since_epoch() - s_last_frame_time;
+    s_last_frame_time = s_global_clock.now().time_since_epoch();
+    
     TimeStamp delta = helper_ts_duration.count();
 
     for (auto timer : get_timers())
@@ -68,6 +69,8 @@ TimeStamp Timer::global_update()
         while (timer->m_timestamp >= timer->m_Duration)
             timer->_hit();
     }
+
+    printf("%g\n", 1/delta);
 
     return delta;
 }

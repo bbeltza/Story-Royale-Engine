@@ -27,8 +27,6 @@ const char *SOUND_TYPES[] = {
     NULL
 };
 
-const bool File::s_resbind = _game_res != nullptr;
-
 const char res_prefix[] = "_res/";
 
 File::File() : m_type(Type::Uninitialized)

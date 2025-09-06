@@ -3,11 +3,11 @@
 
 namespace Game
 {
-    class Camera;
+    struct Camera;
 
     class CameraController
     {
-        friend class Camera;
+        friend struct Camera;
         
         public:
         CameraController();

@@ -59,24 +59,43 @@ void DrawingDevice::DrawRectangleAtWorld(const RectF &_Rectangle, const Color4 &
         SDL_RenderFillRectF(sdl_renderer, &r);
 }
 
-void DrawingDevice::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle, const Color4 &_Col)
+void DrawingDevice::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm)
 {
     CHECK_LOCK
     if (_angle == 0)
         return DrawRectangle(_Rectangle, _Col);
 
-    SDL_FRect r{
-        _Rectangle.getLeft(),
-        _Rectangle.getTop(),
-        _Rectangle.Size.X,
-        _Rectangle.Size.Y};
+    switch (_dm)
+    {
+    case dm_Stroke:
+        {
+            Vector2f points[4] = 
+            {
+                _Rectangle.getTopLeftRotated(_angle),
+                _Rectangle.getTopRightRotated(_angle),
+                _Rectangle.getBottomRightRotated(_angle),
+                _Rectangle.getBottomLeftRotated(_angle)
+            };
+            SDL_RenderDrawLinesF(sdl_renderer, (SDL_FPoint*)points, 4);
+        }
+        break;
+    default:
+        {
+            SDL_FRect r{
+            _Rectangle.getLeft(),
+            _Rectangle.getTop(),
+            _Rectangle.Size.X,
+            _Rectangle.Size.Y};
 
-    SDL_SetTextureColorMod(sdl_rectTexture, _Col.r, _Col.g, _Col.b);
-    SDL_SetTextureAlphaMod(sdl_rectTexture, _Col.a);
-    SDL_RenderCopyExF(sdl_renderer, sdl_rectTexture, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
+            SDL_SetTextureColorMod(sdl_rectTexture, _Col.r, _Col.g, _Col.b);
+            SDL_SetTextureAlphaMod(sdl_rectTexture, _Col.a);
+            SDL_RenderCopyExF(sdl_renderer, sdl_rectTexture, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
+        }
+        break;
+    }
 }
 
-void DrawingDevice::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const double _angle, const Color4 &_Col)
+void DrawingDevice::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm)
 {
     CHECK_LOCK
     Vector2f target_pos(_Rectangle.Position);
@@ -85,7 +104,7 @@ void DrawingDevice::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const d
     else
         target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y);
 
-    return DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col);
+    return DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col, _dm);
 }
 
 void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into screen coordinates
@@ -99,6 +118,13 @@ void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a ref
     SDL_SetRenderDrawColor(sdl_renderer, 255, 64, 0, 255);
     SDL_RenderDrawLineF(sdl_renderer, pos.X - DRAW_ENTCENTER_LINESIZE, pos.Y, pos.X + DRAW_ENTCENTER_LINESIZE, pos.Y);
     SDL_RenderDrawLineF(sdl_renderer, pos.X, pos.Y - DRAW_ENTCENTER_LINESIZE, pos.X, pos.Y + DRAW_ENTCENTER_LINESIZE);
+}
+
+void DrawingDevice::DrawCircle(const Vector2f& _Pos, const float _Radius, const Color4& _Col, DrawingMode _dm)
+{
+    CHECK_LOCK;
+
+    SDL_RenderFillCircleF(sdl_renderer, _Pos.X, _Pos.Y, _Radius);
 }
 
 void DrawingDevice::render()

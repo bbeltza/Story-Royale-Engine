@@ -17,10 +17,12 @@ struct Vector2
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
 
-    inline Vector2 Lerp(const Vector2& other, float alpha) {return *this + (other - *this) * alpha;}
+    inline Vector2 Lerp(const Vector2& other, double alpha) {return *this + (other - *this) * alpha;}
 
     inline _Num getMin() const {return X < Y ? X : Y;}
     inline _Num getMax() const {return X > Y ? X : Y;}
+
+    inline bool isZero() const {return !(X || Y);}
 
     inline operator bool() const {return X && Y;}
 

@@ -28,8 +28,10 @@ public:
     void DrawRectangle(const RectF& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
     void DrawRectangleAtWorld(const RectF& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
 
-    void DrawRotatedRectangle(const RectF& _Rectangle, const double _angle, const Color4& _Col);
-    void DrawRotatedRectangleAtWorld(const RectF& _Rectangle, const double _angle, const Color4& _Col);
+    void DrawRotatedRectangle(const RectF& _Rectangle, const double _angle, const Color4& _Col, DrawingMode _mode = dm_Fill);
+    void DrawRotatedRectangleAtWorld(const RectF& _Rectangle, const double _angle, const Color4& _Col, DrawingMode _mode = dm_Fill);
+
+    void DrawCircle(const Vector2f& _Pos, const float _Radius, const Color4& _Col, DrawingMode _mode=dm_Fill);
 
     void DrawDebug(Vector2f pos);
 

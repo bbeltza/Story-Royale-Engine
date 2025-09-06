@@ -58,7 +58,7 @@ EngineClass::EngineClass()
     if (GameSettings::WindowOptions.Resizable)
         windowFlags.ToggleOn(SDL_WINDOW_RESIZABLE);
     if (GameSettings::WindowOptions.VSync)
-        windowFlags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
+        rendererFlags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
 
     Window.sdl_window = SDL_CreateWindow(
         GameSettings::Title,
@@ -101,7 +101,7 @@ EngineClass::~EngineClass()
 
 void WindowClass::setTargetFPS(unsigned short fps)
 {
-    targetFrameTime = std::chrono::duration<double>(GameSettings::TargetFPS > 0 ? (1.0f / GameSettings::TargetFPS) : 0);
+    targetFrameTime = std::chrono::duration<TimeStamp>(GameSettings::TargetFPS > 0 ? (1.0f / GameSettings::TargetFPS) : 0);
 }
 
 void WindowClass::toggleFullscreen()
@@ -133,13 +133,14 @@ void EngineClass::Run()
 
     while (pollWindowEvents())
     {
-        auto start = std::chrono::steady_clock::now();
+        auto start = Timer::s_global_clock.now();
         TimeStamp dt = Timer::global_update();
         Tween::global_update(dt);
 
+        Input.processEvents();
+
         queueDestroyingInstances();
 
-        Input.processEvents();
         Input.queryObjects();
 
         if (Game::World::m_Current)
@@ -150,6 +151,7 @@ void EngineClass::Run()
         
         if (Game::GuiLayer::m_Current)
             Game::GuiLayer::m_Current->_callUpdate(dt);
+        
         DrawingContext.processViewport();
         DrawingContext.render();
 

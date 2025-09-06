@@ -9,8 +9,8 @@ void Components::Velocity::normalize(float speed)
         return;
     }
     
-    float mag = velocity.getMagnitude();
-    if (mag == 0.0f) return;
+    double mag = velocity.getMagnitude();
+    if (mag == 0.0) return;
 
     velocity = velocity / mag * speed;
 }

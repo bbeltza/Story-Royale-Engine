@@ -50,8 +50,7 @@ void Components::Shape::Render(Game::Entity* _entity)
     
     if (shape == CircleShape)
     {
-        SDL_SetRenderDrawColor(target_renderer, Color.r, Color.b, Color.g, Color.a);
-        SDL_RenderFillCircle(target_renderer, pos.X + Rect.Position.X, pos.Y + Rect.Position.Y, Rect.Size.X / 2);
+        Engine->DrawingContext.DrawCircle(pos, Rect.Size.X / 2, Color);
     }
     else
     {

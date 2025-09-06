@@ -12,8 +12,8 @@ class Audio
     public:
     AudioData& Load(AudioData& data) { m_data =  &data; return data;}
 
-    TimeStamp timePosition() { return m_samplepos / m_data->freq(); }
-    TimeStamp timeLength() { return m_data->len() / m_data->freq(); }
+    TimeStamp timePosition() { return m_samplepos / (TimeStamp)m_data->freq(); }
+    TimeStamp timeLength() { return m_data->len() / (TimeStamp)m_data->freq(); }
     
     private:
 

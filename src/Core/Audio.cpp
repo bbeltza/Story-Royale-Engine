@@ -2,6 +2,8 @@
 #include "System.h"
 #include "Base/AudioDevice.h"
 
+#include "ogg/ogg.h"
+
 #include "utils.h"
 
 AudioData::AudioData(File& file)
@@ -52,7 +54,7 @@ AudioData& AudioDevice::LoadAudio(const char* path)
     {
         return *loaded_audios.at(path).get();
     }
-    catch(const std::out_of_range& e)
+    catch(const std::out_of_range&)
     {
         File audio_file;
         audio_file.Load(path);
@@ -118,7 +120,7 @@ void AudioDevice::callback(AudioDevice* dev, int32_t* stream, int len)
             SDL_MixAudioFormat(dst, (Uint8*)((int32_t*)audio->m_data->m_data + audio->m_samplepos), dev->m_Spec.format, byte_count, 64);
 
             audio->m_fsamplepos += faudio_sample_len;
-            audio->m_samplepos = audio->m_fsamplepos;
+            audio->m_samplepos = (uint32_t)audio->m_fsamplepos;
 
             if (audio->m_samplepos >= audio->m_data->m_len)
             {
