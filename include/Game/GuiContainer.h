@@ -42,7 +42,8 @@ namespace Game
 
         bool visible = true, canQuery = true;
     private:
-        void _callUpdate(TimeStamp dt);
+        void call_update(TimeStamp dt);
+        
         void _processchildren();
         void _renderchildren();
         void _prerender_components();

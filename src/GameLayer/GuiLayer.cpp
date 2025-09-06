@@ -76,14 +76,14 @@ void Game::GuiContainer::_renderchildren()
     }
 }
 
-void Game::GuiContainer::_callUpdate(TimeStamp dt)
+void Game::GuiContainer::call_update(TimeStamp dt)
 {
     Update(dt);
 
     for (auto obj : m_children)
     {
         if (obj->visible)
-            obj->_callUpdate(dt);
+            obj->call_update(dt);
     }
 }
 

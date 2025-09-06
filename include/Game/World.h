@@ -91,11 +91,6 @@ namespace Game
         /// Use it with precaution
         template <class _wType> _wType* cast() const {return reinterpret_cast<_wType>(this);}
 
-        // Override methods
-
-        void Update(TimeStamp) override;
-        void pUpdate(TimeStamp) override;
-
     private:
         Entity *_query();
 
@@ -112,6 +107,8 @@ namespace Game
         // Static member that tells an entity which world to be in, set to this when world->addEntity() is called
         static World* s_TargetWorld;
 
+        void call_update(TimeStamp);
+        void call_pupdate(TimeStamp);
         static void call_render();
         static bool cmp(const Entity*, const Entity*);
 

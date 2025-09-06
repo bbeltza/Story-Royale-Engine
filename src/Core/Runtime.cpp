@@ -145,12 +145,12 @@ void EngineClass::Run()
 
         if (Game::World::m_Current)
         {
-            Game::World::m_Current->Update(dt);
-            Game::World::m_Current->pUpdate(dt);
+            Game::World::m_Current->call_update(dt);
+            Game::World::m_Current->call_pupdate(dt);
         }
         
         if (Game::GuiLayer::m_Current)
-            Game::GuiLayer::m_Current->_callUpdate(dt);
+            Game::GuiLayer::m_Current->call_update(dt);
         
         DrawingContext.processViewport();
         DrawingContext.render();

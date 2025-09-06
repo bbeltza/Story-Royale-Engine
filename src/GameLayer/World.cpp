@@ -55,8 +55,19 @@ void Game::World::err()
     return System::Error(System::WORLD_CREATION_ERROR);
 }
 
-void Game::World::Update(TimeStamp dt)
+void Game::World::call_pupdate(TimeStamp dt)
 {
+    for (Entity *entity : m_Entities)
+    {
+        entity->call_pupdate(dt);
+    }
+
+    CurrentCamera.Update(dt);
+}
+
+void Game::World::call_update(TimeStamp dt)
+{
+    Update(dt);
     for (Entity* entity : getEntities<Entity>())
     {
         entity->Update(dt);

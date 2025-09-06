@@ -44,7 +44,7 @@ namespace Game
         // Calls Render() to all of its components
         // Entities by default don't render itself, the components with the Render process flag do
         void call_render();
-        void _pProcess(TimeStamp);
+        void call_pupdate(TimeStamp);
 
         ParentType m_ParentType = WorldParent;
         union {

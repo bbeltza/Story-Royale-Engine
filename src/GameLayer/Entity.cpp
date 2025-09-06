@@ -31,3 +31,14 @@ void Game::Entity::call_render()
             component->Render(this);
     }
 }
+
+void Game::Entity::call_pupdate(TimeStamp dt)
+{
+    for (auto c : m_Components)
+    {
+        if (componentDisabled(c)) continue;
+        if (c->hasProcessFlag(Component::p_pUpdate))
+            c->pUpdate(this, dt);
+    }
+    return pUpdate(dt);
+}
