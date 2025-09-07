@@ -1,8 +1,0 @@
-macro(srEngine_set_resource_file PROJECT SRC)
-    set(WANT_BINDING ON)
-    if ("${ARGN}" MATCHES NO_BIND)
-        set(WANT_BINDING OFF)
-        message("-- NOT binding resources on target ${PROJECT}")
-    endif()
-    set_target_properties(${PROJECT} PROPERTIES INPUT ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}/ BIND_RESOURCES ${WANT_BINDING} SRC ${SRC})
-endmacro()
