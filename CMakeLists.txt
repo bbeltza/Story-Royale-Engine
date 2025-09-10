@@ -38,7 +38,8 @@ SDL2_image::SDL2_image-static
 SDL2_mixer::SDL2_mixer-static
 
 fmt::fmt
-ogg)
+stb
+)
 set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 
@@ -47,7 +48,7 @@ set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_image
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_mixer
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/ogg/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stb
 )
 
 target_include_directories(StoryRoyaleEngine PUBLIC ${SRENGINE_INCLUDE_DIRS})

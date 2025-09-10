@@ -32,18 +32,21 @@ struct Rect
     Rect& reCenter() { Position = getBottomRight(); return *this; }
 
     Rect getCentered() const { return {getBottomRight(), Size}; }
-    inline constexpr _Num getTop() const {return this->Position.Y - this->Size.Y/2;}
-    inline constexpr _Num getBottom() const {return this->Position.Y + this->Size.Y/2;}
-    inline constexpr _Num getLeft() const {return this->Position.X - this->Size.X/2;}
-    inline constexpr _Num getRight() const {return this->Position.X + this->Size.X/2;}
+    inline constexpr _Num absSizeX() const { return abs(this->Size.X); }
+    inline constexpr _Num absSizeY() const { return abs(this->Size.Y); }
+
+    inline constexpr _Num getTop() const {return this->Position.Y - absSizeY()/2;}
+    inline constexpr _Num getBottom() const {return this->Position.Y + absSizeY() /2;}
+    inline constexpr _Num getLeft() const {return this->Position.X - absSizeX()/2;}
+    inline constexpr _Num getRight() const {return this->Position.X + absSizeX()/2;}
 
     inline constexpr vec2 getTopLeft() const {return {this->getLeft(), this->getTop()};}
     inline constexpr vec2 getTopRight() const {return {this->getRight(), this->getTop()};}
     inline constexpr vec2 getBottomLeft() const {return {this->getLeft(), this->getBottom()};}
     inline constexpr vec2 getBottomRight() const {return {this->getRight(), this->getBottom()};}
 
-    inline constexpr vec2 getXRotatedOffset(double angle) const {return {this->Size.X/2 * cos(_rad(angle)), this->Size.X/2 * sin(_rad(angle))};}
-    inline constexpr vec2 getYRotatedOffset(double angle) const {return {this->Size.Y/2 * cos(_rad(angle + 90)), this->Size.Y/2 * sin(_rad(angle + 90))};}
+    inline constexpr vec2 getXRotatedOffset(double angle) const {return { absSizeX()/2 * cos(_rad(angle)), absSizeX()/2 * sin(_rad(angle))};}
+    inline constexpr vec2 getYRotatedOffset(double angle) const {return { absSizeY()/2 * cos(_rad(angle + 90)), absSizeY()/2 * sin(_rad(angle + 90))};}
 
     inline constexpr vec2 getLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle);}
     inline constexpr vec2 getRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle);}

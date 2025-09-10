@@ -1,5 +1,6 @@
 set(SDL2TTF_VENDORED ON)
 set(SDL2MIXER_VENDORED ON)
+set(SDL2MIXER_VORBIS OFF)
 set(SDL2_VENDORED ON)
 set(SDL2IMAGE_SAMPLES OFF)
 set(SDL2IMAGE_INSTALL OFF)
@@ -13,4 +14,4 @@ add_subdirectory(SDL_mixer)
 
 # Rest of the libs
 add_subdirectory(fmt)
-#add_subdirectory(ogg)
+add_subdirectory(stb)

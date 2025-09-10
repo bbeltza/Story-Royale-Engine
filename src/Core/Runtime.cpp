@@ -39,9 +39,9 @@ EngineClass::EngineClass()
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
-    Mix_Init(MIX_INIT_OGG);
+    //Mix_Init(MIX_INIT_OGG);
 
-    Mix_OpenAudio(32000, AUDIO_S16, 2, 2048);
+    //Mix_OpenAudio(32000, AUDIO_S16, 2, 2048);
 
     Game::Initialize();
 
@@ -88,8 +88,8 @@ EngineClass::~EngineClass()
 
     queueDestroyingInstances();
 
-    Mix_CloseAudio();
-    Mix_Quit();
+    //Mix_CloseAudio();
+    //Mix_Quit();
     IMG_Quit();
     TTF_Quit();
     SDL_Quit();
@@ -130,6 +130,8 @@ void EngineClass::Run()
     m_wasRun = 1;
 
     Window.setTargetFPS(GameSettings::TargetFPS);
+
+    Timer::s_last_frame_time = Timer::s_global_clock.now();
 
     while (pollWindowEvents())
     {

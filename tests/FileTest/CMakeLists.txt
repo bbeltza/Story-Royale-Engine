@@ -1,9 +1,6 @@
-project(FileTest)
 include(StoryRoyaleEngine)
-include(srEngineResources)
+project(FileTest)
 
-add_executable(FileTest FileTest.cpp)
+set(SOURCES FileTest.cpp)
 
-srEngine_include_directories(FileTest)
-SRENGINE_SET_RESOURCE_FILE(FileTest assets)
-srEngine_link_target(FileTest)
+srEngine_build(FileTest)

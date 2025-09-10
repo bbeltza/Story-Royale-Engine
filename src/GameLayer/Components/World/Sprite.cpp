@@ -20,7 +20,7 @@ File& Components::Sprite::LoadFile(const char* path)
     auto& t_files = get_texture_files();
     std::string str_path = path; 
 
-    if (t_files[str_path].getType() == File::Type::Uninitialized)
+    if (t_files[str_path].getType() == File::T_UNKNOWN)
         t_files[str_path].Load(path);
     textures.emplace_back(&t_files.at(str_path));
 

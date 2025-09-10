@@ -10,6 +10,8 @@
 
 #include "GameSettings.h"
 
+#include "System.h"
+
 #include "config.h"
 
 Vector2f DrawingDevice::getScreenCenter()
@@ -205,11 +207,15 @@ void DrawingDevice::DrawTexture(const RectF& _Rectangle, File &_File)
 {
     if (!LoadFileTexture(_File))
         return;
+    if (_Rectangle.Size.X == 0 || _Rectangle.Size.Y == 0)
+        return;
     
     float left = roundf(_Rectangle.getLeft() * scale) / scale;
     float top = roundf(_Rectangle.getTop() * scale) / scale;
-    SDL_FRect render_rect{left, top, _Rectangle.Size.X, _Rectangle.Size.Y};
-    SDL_RenderCopyF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect);
+    SDL_FRect render_rect{left, top, abs(_Rectangle.Size.X), abs(_Rectangle.Size.Y)};
+    int flip = (_Rectangle.Size.X < 0 ? bit(0) : 0) | (_Rectangle.Size.Y < 0 ? bit(1) : 0);
+
+    SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect, NULL, NULL, (SDL_RendererFlip)flip);
 }
 
 void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const char *text, int count, uint8_t alignment)
@@ -224,9 +230,6 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
         font_characters[95] = 0;
     }
 
-    if (_FontFile.m_type != File::Type::Font)
-        return;
-
     if (TTF_Font *target_font = m_LoadedFonts[_FontFile.m_filepath])
     {
         _FontFile.m_userdata = target_font;
@@ -235,6 +238,9 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
     {
         SDL_RWops *temp_rw = SDL_RWFromConstMem(_FontFile.getInfo().data, _FontFile.getInfo().size);
         m_LoadedFonts[_FontFile.m_filepath] = TTF_OpenFontRW(temp_rw, 1, 12);
+        System::CheckForSDLErrors();
+
+        _FontFile.m_type = File::T_TTF;
 
         SDL_Surface *temp_surf = TTF_RenderText_Solid(m_LoadedFonts[_FontFile.m_filepath],
                                                       font_characters, {255, 255, 255});
@@ -339,12 +345,6 @@ bool DrawingDevice::LoadFileTexture(File &_File)
     if (_File.m_userdata)
         return true;
 
-    if (_File.m_type != File::Type::Image)
-    {
-        printf("Invalid type, type must be IMAGE, current type is %d\n", _File.m_type);
-        return false;
-    }
-
     if (SDL_Texture *target_texture = m_LoadedTextures[_File.m_filepath])
     {
         _File.m_userdata = target_texture;
@@ -355,6 +355,10 @@ bool DrawingDevice::LoadFileTexture(File &_File)
         SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.getInfo().data, _File.getInfo().size);
         if (!temp_rw)
             goto err;
+
+        if (IMG_isPNG(temp_rw))
+            _File.m_type = File::T_PNG;
+
         m_LoadedTextures[_File.m_filepath] = IMG_LoadTexture_RW(sdl_renderer, temp_rw, 1);
         if (!m_LoadedTextures[_File.m_filepath])
             goto err;

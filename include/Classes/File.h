@@ -9,15 +9,25 @@ extern "C"
 class File
 {
 public:
-    enum struct Type : unsigned char
+enum Type: int8_t
 {
-    Uninitialized = 0,
-    Text,
-    Image,
-    Sound,
-    Font,
+    // Plain text or unknown type
 
-    Unknown
+    T_UNKNOWN = -1,
+    T_TXT,
+    
+    // Image types
+
+    T_PNG,
+
+    // Sound types
+
+    T_WAV,
+    T_OGG,
+
+    // Font types (or maybe only just one type...)
+
+    T_TTF
 };
 
 private:
@@ -47,6 +57,8 @@ public:
     inline const Type getType() const { return m_type; }
     inline const void* getRawData() const { return (void*)getInfo().data; }
     inline size_t getSize() const { return getInfo().size; }
+
+    inline void setType(Type type) { if (m_type < T_TXT) m_type = type; }
 
     static inline bool areResourcesBound() { return _game_res != nullptr; }
 

@@ -10,15 +10,13 @@ endmacro()
 set(SOURCES 
 "main.cpp"
 "System.cpp"
-"File.cpp"
-"Music.cpp"
-"Sound.cpp"
 
 "Extras/ExtraSDL.c"
 "Extras/ExtraString.c"
 )
 
 set(CORE_SOURCES
+"AudioFormat.c"
 "Audio.cpp"
 "Input.cpp"
 "InputEvents.cpp"
@@ -35,6 +33,11 @@ set(DATATYPES_SOURCES
 "Color.c"
 "Signal.cpp"
 "UDim.cpp"
+)
+
+set(CLASS_SOURCES
+"File/Class.cpp"
+"File/Loading.cpp"
 )
 
 set(LAYER_SOURCES
@@ -72,6 +75,7 @@ if(WIN32)
 endif()
 
 set_src(Core CORE_SOURCES)
+set_src(Classes CLASS_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)
 set_src(GameLayer LAYER_SOURCES)
 set_src(SystemDependent SYSTEMDEP_SOURCES)
