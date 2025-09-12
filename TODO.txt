@@ -11,6 +11,10 @@
 - More options to the EntityControl camera controller (Like adding smoothness, and adding bounds for the camera to move)
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
+- Multithreading:
+    - Immediate threads (Threads that can be spawned immediately, it's immediate but can use a lot of memory)
+    - Thread pool (A queue of functions run that a set number of threads will run)
+
 - Work on the game ^^
 
 (current version: 0.009.11)
