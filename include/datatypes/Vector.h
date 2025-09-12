@@ -26,8 +26,12 @@ struct Vector2
 
     inline operator bool() const {return X && Y;}
 
+    // A vector with its components set to 0
     static const Vector2<_Num> ZERO;
+    // A vector with its components set to 1
     static const Vector2<_Num> ONE;
+    // A vector with its components set to 0.5, however, if the vector should be composed of floating point types, otherwise the components will be rounded to 0
+    static const Vector2<_Num> CENTER;
 
     _Num X, Y;
 };
@@ -40,6 +44,7 @@ struct Vector2
 
 _t const vec2 vec2::ZERO = {0};
 _t const vec2 vec2::ONE = {1};
+_t const vec2 vec2::CENTER = {0.5};
 
 // Built-in operators
 

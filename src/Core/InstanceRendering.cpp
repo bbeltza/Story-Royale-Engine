@@ -12,20 +12,11 @@
 
 #include "config.h"
 
-SDL_Renderer* target_renderer;
-
-void DrawingDevice::tr()
-{
-    target_renderer = sdl_renderer;
-}
-
 void GuiComponents::Fill::render(Game::GuiContainer* obj)
 {
     auto absolute = getAbsolute(obj);
-    SDL_FRect r = *(SDL_FRect*)absolute;
 
-    SDL_SetRenderDrawColorMod(target_renderer, reinterpret_cast<SDL_Color*>(&color), reinterpret_cast<SDL_Color*>(getModulate(obj)));
-    SDL_RenderFillRectF(target_renderer, &r);
+    Engine->DrawingContext.DrawRectangle(*absolute, color, *getModulate(obj), Vector2f::ZERO);
 }
 
 void Game::Entity::_debugDraw()
@@ -47,31 +38,28 @@ void Components::Shape::Render(Game::Entity* _entity)
     Vector2f pos = _entity->getWorld<Game::World>()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
 
 
-    
-    if (shape == CircleShape)
+    switch (shape)
     {
-        Engine->DrawingContext.DrawCircle(pos, Rect.Size.X / 2, Color);
-    }
-    else
-    {
-        Engine->DrawingContext.DrawRectangleAtWorld(render_rect, Color);
+        case CircleShape:
+            Engine->DrawingContext.DrawCircle(pos, Rect.Size.X / 2, Color);
+            break;
+        default:
+            Engine->DrawingContext.DrawRectangleAtWorld(render_rect, Color);
+            break;
     }
 }
 
 void GuiComponents::Stroke::render(Game::GuiContainer* obj)
 {
-    SDL_SetRenderDrawColorMod(target_renderer, reinterpret_cast<SDL_Color*>(&color), reinterpret_cast<SDL_Color*>(getModulate(obj)));
-
-    RectF* absolute = getAbsolute(obj);
     for (unsigned int i = 0; i < size; i++)
     {
-        SDL_FRect r = *(SDL_FRect*)absolute;
-        r.h -= i * 2;
-        r.w -= i * 2;
-        r.x += i;
-        r.y += i;
+        RectF absolute = *getAbsolute(obj);
+        absolute.Size.X -= i * 2;
+        absolute.Size.Y -= i * 2;
+        absolute.Position.X += i;
+        absolute.Position.Y += i;
 
-        SDL_RenderDrawRectF(target_renderer, &r);
+        Engine->DrawingContext.DrawRectangle(absolute, color, *getModulate(obj), Vector2f::ZERO, DrawingDevice::dm_Stroke);
     }
 }
 void GuiComponents::Text::render(Game::GuiContainer* obj)
@@ -92,7 +80,10 @@ void Components::Sprite::Render(Game::Entity* _entity)
     int w, h;
     SDL_QueryTexture((SDL_Texture*)texture.GetUserData(), NULL, NULL, &w, &h);
 
-    RectF render_rect(_entity->getWorld<Game::World>()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y), {w, h});
+    RectF render_rect(
+        Game::World::Current()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y),
+        {w, h}
+    );
 
     render_rect.Size *= Scale;
     render_rect.Position += Offset;

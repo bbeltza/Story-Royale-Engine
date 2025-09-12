@@ -18,8 +18,6 @@ struct Rect
     Rect(const _Num xy, const _Num wh): Position(xy, xy), Size(wh, wh) {}
     Rect(const Vector2<_Num> &position, const Vector2<_Num> &size): Position(position), Size(size) {}
     Rect(const Rect& other): Position(other.Position), Size(other.Size) {}
-    Rect(const void* userdata)
-        : Position((_Num*)userdata[0] - (_Num*)userdata[2]/2, (_Num*)userdata[1] - (_Num*)userdata[3]/2), Size((_Num*)userdata[2], (_Num*)userdata[3]) {}
     template <class _OtherNum> Rect(const Rect<_OtherNum>& other): Position(other.Position), Size(other.Size) {}
 
     vec2 Position, Size;

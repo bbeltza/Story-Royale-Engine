@@ -86,7 +86,7 @@ namespace Game
 
         // Gets the current world.
         /// The world that will be updated and rendered.
-        template <class _wType> static _wType* Current() {return reinterpret_cast<_wType>(m_Current);}
+        template <class _wType = World> static _wType* Current() {return reinterpret_cast<_wType*>(m_Current);}
         // Casts the world to a derivate
         /// Use it with precaution
         template <class _wType> _wType* cast() const {return reinterpret_cast<_wType>(this);}

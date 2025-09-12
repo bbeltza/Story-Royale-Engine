@@ -25,8 +25,8 @@ public:
     Vector2i getScreenSize() {SDL_Rect r; SDL_RenderGetViewport(sdl_renderer, &r); return {r.w, r.h};};
     Vector2i getScreenAbsoluteSize() {int x, y; SDL_GetRendererOutputSize(sdl_renderer, &x, &y); return {x, y};};
 
-    void DrawRectangle(const RectF& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
-    void DrawRectangleAtWorld(const RectF& _Rectangle, const Color4& _Col, DrawingMode _mode=dm_Fill);
+    void DrawRectangle(const RectF& Rectangle, const Color4& Color, const Color4& Modulate=COLOR4_WHITE, const Vector2f &AnchorPoint=Vector2f::CENTER, DrawingMode Mode=dm_Fill);
+    void DrawRectangleAtWorld(RectF Rectangle, const Color4& Color, const Color4& Modulate=COLOR4_WHITE, const Vector2f &AnchorPoint=Vector2f::CENTER, DrawingMode Mode=dm_Fill);
 
     void DrawRotatedRectangle(const RectF& _Rectangle, const double _angle, const Color4& _Col, DrawingMode _mode = dm_Fill);
     void DrawRotatedRectangleAtWorld(const RectF& _Rectangle, const double _angle, const Color4& _Col, DrawingMode _mode = dm_Fill);
@@ -55,7 +55,6 @@ private:
     void renderCurrentUI();
 
     inline void m_switchLock() {m_Locked = !m_Locked;}
-    void tr();
 
     unsigned int scale = 0;
 };

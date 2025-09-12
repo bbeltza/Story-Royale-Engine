@@ -25,8 +25,6 @@ set(CORE_SOURCES
 "Querying.cpp"
 "Rendering.cpp"
 "Runtime.cpp"
-"Timer.cpp"
-"Tween.cpp"
 )
 
 set(DATATYPES_SOURCES
@@ -38,6 +36,9 @@ set(DATATYPES_SOURCES
 set(CLASS_SOURCES
 "File/Class.cpp"
 "File/Loading.cpp"
+
+"Timer.cpp"
+"Tween.cpp"
 )
 
 set(LAYER_SOURCES

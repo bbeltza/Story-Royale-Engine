@@ -40,21 +40,8 @@ AudioData::AudioData(File &file)
             m_spec.format = AUDIO_S16;
         }
 
-        printf("m_len: %f\n", m_len);
         SDL_ClearError();
     }
-
-    printf(
-        R"({
-    channels: %d
-    format: %x
-    frequency: %d
-    samples: %u
-    silence: %u
-    size: %u
-}
-)",
-        m_spec.channels, m_spec.format, m_spec.freq, m_spec.samples, m_spec.silence, m_spec.size);
 }
 
 AudioData::~AudioData()
@@ -129,8 +116,6 @@ void AudioDevice::callback(AudioDevice *dev, int32_t *stream, int len)
 
     const size_t byte_count = AUDIO_BYTESIZE(dev->m_Spec.format);
     const size_t sample_len = len / byte_count;
-
-    // printf("%p %d\n", stream, sample_len);
 
     Queue stop_queue;
 

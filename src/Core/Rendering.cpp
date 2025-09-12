@@ -23,42 +23,35 @@ Vector2f DrawingDevice::getScreenCenter()
     if (m_Locked)  \
         return;
 
-void DrawingDevice::DrawRectangle(const RectF &_Rectangle, const Color4 &_Col, DrawingMode _mode)
+void DrawingDevice::DrawRectangle(const RectF& Rectangle, const Color4& Color, const Color4& Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
 {
     CHECK_LOCK
-    SDL_FRect r{
-        _Rectangle.getLeft(),
-        _Rectangle.getTop(),
-        _Rectangle.Size.X,
-        _Rectangle.Size.Y};
 
-    SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
-    if (_mode == dm_Stroke)
+    SDL_FRect r{
+        Rectangle.Position.X - Rectangle.Size.X * AnchorPoint.X,
+        Rectangle.Position.Y - Rectangle.Size.Y * AnchorPoint.Y,
+        Rectangle.Size.X,
+        Rectangle.Size.Y};
+
+    SDL_SetRenderDrawColorMod(sdl_renderer, (SDL_Color*)&Color, (SDL_Color*)&Modulate);
+    switch (Mode)
+    {
+    case dm_Stroke:
         SDL_RenderDrawRectF(sdl_renderer, &r);
-    else
+        break;
+    
+    default:
         SDL_RenderFillRectF(sdl_renderer, &r);
+        break;
+    }
 };
 
-void DrawingDevice::DrawRectangleAtWorld(const RectF &_Rectangle, const Color4 &_Col, DrawingMode _mode)
+void DrawingDevice::DrawRectangleAtWorld(RectF Rectangle, const Color4& Color, const Color4& Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
 {
     CHECK_LOCK
-    Vector2f target_pos = _Rectangle.getTopLeft();
-    if (Game::World::m_Current)
-        target_pos = Game::World::m_Current->worldToScreenSpace(target_pos.X, target_pos.Y);
-    else
-        target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y); // If there's no world, then draw at the center, this function is static
 
-    SDL_FRect r{
-        target_pos.X,
-        target_pos.Y,
-        _Rectangle.Size.X,
-        _Rectangle.Size.Y};
-
-    SDL_SetRenderDrawColor(sdl_renderer, _Col.r, _Col.g, _Col.b, _Col.a);
-    if (_mode == dm_Stroke)
-        SDL_RenderDrawRectF(sdl_renderer, &r);
-    else
-        SDL_RenderFillRectF(sdl_renderer, &r);
+    Rectangle.Position = Game::World::worldToScreen(Rectangle.Position.X, Rectangle.Position.Y, &Game::World::m_Current->CurrentCamera);
+    return DrawRectangle(Rectangle, Color, Modulate, AnchorPoint, Mode);
 }
 
 void DrawingDevice::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm)
@@ -132,7 +125,6 @@ void DrawingDevice::DrawCircle(const Vector2f& _Pos, const float _Radius, const 
 void DrawingDevice::render()
 {
     m_switchLock();
-    tr();
 
     // Render current world
     if (Game::World::m_Current)

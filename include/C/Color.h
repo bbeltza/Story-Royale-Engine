@@ -16,6 +16,9 @@ extern "C"
     {
         uint8_t r, g, b, a;
     } Color4;
+
+    extern const Color3 COLOR3_WHITE;
+    extern const Color4 COLOR4_WHITE;
 #if __cplusplus
 }
 #endif

@@ -63,9 +63,8 @@ void Game::GuiContainer::_renderchildren()
     _render_components();
 
     #ifdef DRAW_GUI_CONTAINER_BOX
-        RectF abs = m_absolute.getCentered();
         Color4 r{255, 0, 0, 255};
-        Engine->DrawingContext.DrawRectangle(abs, r, DrawingDevice::dm_Stroke);
+        Engine->DrawingContext.DrawRectangle(m_absolute, r, COLOR4_WHITE, Vector2f::ZERO, DrawingDevice::dm_Stroke);
     #endif
     for (GuiContainer *obj : m_children)
     {
