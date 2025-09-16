@@ -14,7 +14,8 @@ def to_c_assign(value, defaultval) -> str:
     t = type(value)
 
     if t == str:
-        return f'"{value}"'
+        if type(defaultval) != t: return str(value)
+        return f"\"{value}\""
     elif t == bool:
         return value and "true" or "false"
     elif t == list:

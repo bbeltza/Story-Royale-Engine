@@ -15,6 +15,8 @@
     - Immediate threads (Threads that can be spawned immediately, it's immediate but can use a lot of memory)
     - Thread pool (A queue of functions run that a set number of threads will run)
 
+- Better error messaging
+
 - Work on the game ^^
 
 (current version: 0.009.11)

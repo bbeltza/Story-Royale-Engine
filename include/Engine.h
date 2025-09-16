@@ -8,6 +8,7 @@
 #include "Base/Input.h"
 #include "Base/DrawingContext.h"
 #include "Base/AudioDevice.h"
+#include "Base/ThreadPool.h"
 
 class EngineClass
 {
@@ -17,6 +18,7 @@ public:
     InputClass Input;
     DrawingDevice DrawingContext;
     AudioDevice AudioDevice;
+    ThreadPool ThreadPool;
 
     Signal OnUpdate;
     Signal BeforeRender;

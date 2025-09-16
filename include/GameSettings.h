@@ -8,18 +8,28 @@ struct WindowOptions
     bool Resizable;
 };
 
+enum InterpolationMode
+{
+    Linear,
+    Cubic,
+    Gaussian
+};
+
 struct AudioOptions
 {
+    uint16_t Frequency;
+    uint8_t Channels;
+    uint8_t Interpolation;
 };
 
 namespace GameSettings
 {
-    extern const char* const Title;
+    extern const char *const Title;
     extern Vector2u const StartResolution;
     extern Vector2u const ScalingResolution;
 
     extern uint16_t const TargetFPS;
-    
+
     extern ::WindowOptions const WindowOptions;
     extern ::AudioOptions const AudioOptions;
 }

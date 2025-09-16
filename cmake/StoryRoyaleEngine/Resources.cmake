@@ -2,6 +2,7 @@ function(srEngine_link_resource PROJECT)
     get_target_property(INPUT ${PROJECT} RES_FOLDER)
 
     if(NOT INPUT)
+        target_link_libraries(${PROJECT} no_bind)
         return()
     endif()
 

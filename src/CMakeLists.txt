@@ -25,6 +25,7 @@ set(CORE_SOURCES
 "Querying.cpp"
 "Rendering.cpp"
 "Runtime.cpp"
+"ThreadPool.cpp"
 )
 
 set(DATATYPES_SOURCES
