@@ -30,7 +30,6 @@ set(CORE_SOURCES
 
 set(DATATYPES_SOURCES
 "Color.c"
-"Signal.cpp"
 "UDim.cpp"
 )
 
@@ -38,8 +37,10 @@ set(CLASS_SOURCES
 "File/Class.cpp"
 "File/Loading.cpp"
 
+"Thread.cpp"
 "Timer.cpp"
 "Tween.cpp"
+"Signal.cpp"
 )
 
 set(LAYER_SOURCES

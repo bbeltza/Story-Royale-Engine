@@ -4,10 +4,7 @@ ThreadPool::ThreadPool()
 {
     for (int i = 0; i < NUM_THREADS; i++)
     {
-        CallbackArgs* args = new CallbackArgs;
-        args->self = this;
-        args->index = i;
-        threads[i] = SDL_CreateThread((SDL_ThreadFunction)thread_callback, NULL, args);
+        threads[i] = new Thread((ThreadFunction)thread_callback, this, i);
     }
 
 }
@@ -15,16 +12,16 @@ ThreadPool::ThreadPool()
 ThreadPool::~ThreadPool()
 {
     for (int i = 0; i < NUM_THREADS; i++)
-        SDL_DetachThread(threads[i]);
+        delete threads[i];
 }
 
-int ThreadPool::thread_callback(CallbackArgs* args)
+int ThreadPool::thread_callback(ThreadPool* self, int index)
 {
+    /*
     ThreadPool* self = args->self;
     int index = args->index;
     free(args);
-
-    printf("self: %p\n", self);
+    */
 
     while (true)
     {
@@ -32,6 +29,7 @@ int ThreadPool::thread_callback(CallbackArgs* args)
         {;
             if (self->func_queue.empty()) {
                 SDL_UnlockMutex(self->queue_mutex);
+                SDL_Delay(1);
                 break;
             }
             FuncBase back = self->func_queue.back();
@@ -49,7 +47,6 @@ int ThreadPool::thread_callback(CallbackArgs* args)
                 back.args[7]
             );
         }
-        SDL_Delay(1);
     }
 
     return 0;

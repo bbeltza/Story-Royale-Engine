@@ -43,7 +43,8 @@ EngineClass::EngineClass()
 
     //Mix_OpenAudio(32000, AUDIO_S16, 2, 2048);
 
-    Game::Initialize();
+    m_entryThread = SDL_CreateThread((SDL_ThreadFunction)Game::Initialize, "Entry", NULL);
+
 
     if (GameSettings::ScalingResolution)
     {
@@ -81,6 +82,8 @@ EngineClass::EngineClass()
 
 EngineClass::~EngineClass()
 {
+    SDL_DetachThread(m_entryThread);
+
     if (Game::World::m_Current)
         delete Game::World::m_Current;
     if (Game::GuiLayer::m_Current)
@@ -118,8 +121,6 @@ void WindowClass::toggleFullscreen()
     if (fullscreen)
         SDL_GetWindowSize(sdl_window, &oW, &oH);
     
-
-    SDL_MaximizeWindow(sdl_window);
     SDL_SetWindowFullscreen(sdl_window, fullscreen * SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 

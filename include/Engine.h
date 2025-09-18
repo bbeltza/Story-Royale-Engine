@@ -42,21 +42,10 @@ private:
     bool m_wasRun = false;
 
     bool n_dtrc = false;
+
+    SDL_Thread* m_entryThread;
 };
 
 extern EngineClass* Engine;
 
-#define init extern "C" void Initialize()
-
-namespace Game
-{
-    // The method to be defined by the game using the engine
-    // EVERY game should have this defined, even if it's empty
-    // This is the entry point for the game, it's called after initializing the libraries, but before creating the window
-    // You can change the game settings here (Untill a json implementation is goind to be added)
-    init;
-}
-
-init;
-
-#undef init
+#include "GameEntry.h"

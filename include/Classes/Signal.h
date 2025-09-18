@@ -1,43 +1,49 @@
 #pragma once
 
-typedef void (*EventFunction)(void*);
+typedef void (*EventFunction)(void *);
 
-#define event_callback(fn) (EventFunction)fn
+#define event_callback(fn) (EventFunction) fn
 
 struct Signal;
 struct Connection;
 
-
 struct Signal
 {
     Signal() {}
-    Signal(Signal& other) = delete;
+    Signal(Signal &other) = delete;
     ~Signal();
 
-    Connection* Connect(EventFunction fn);
-    Connection* Once(EventFunction fn);
+    Connection *Connect(EventFunction fn);
+    Connection *Once(EventFunction fn);
+    void* Wait();
 
-    inline void Fire() {return Fire(nullptr);} 
-    void Fire(void* userdata);
+    inline void Fire() { return Fire(nullptr); }
+    void Fire(void *userdata);
     void DisconnectAll();
 
 private:
-    Connection* m_handlerListHead = nullptr;
+    Connection *m_handlerListHead = nullptr;
+    void* m_waitSem = create_sem();
+    void* m_returnData = nullptr;
+
+    void* create_sem();
 };
 
-struct Connection
+class Connection
 {
-    Connection(Signal* signal, EventFunction fn, void* self):
-        m_signal(signal),
-        m_fn(fn),
-        m_connected(1),
-        m_next(nullptr),
-        m_class(self)
-    {}
-    Connection(Signal* signal, EventFunction fn) :
-        Connection(signal, fn, nullptr)
-    {}
-    Connection(Connection& other) = delete;
+    friend struct Signal;
+
+    Connection(Signal *signal, EventFunction fn, void *self, bool once = false)
+    : m_signal(signal),
+      m_fn(fn),
+      m_connected(1),
+      m_next(nullptr),
+      m_class(self),
+      m_once(once)  {}
+    Connection(Signal *signal, EventFunction fn, bool once = false) : Connection(signal, fn, nullptr, once) {}
+    Connection(Connection &other) = delete;
+
+public:
     void Disconnect() { m_connected = 0; }
     void Reconnect() { m_connected = 1; }
 
@@ -46,9 +52,10 @@ private:
     ~Connection() {}
 
     EventFunction m_fn;
-    void* m_class;
-    const Signal* m_signal;
-    Connection* m_next;
+    void *m_class;
+    const Signal *m_signal;
+    Connection *m_next;
 
     bool m_connected;
+    const bool m_once;
 };
