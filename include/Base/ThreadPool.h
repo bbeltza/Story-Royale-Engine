@@ -14,8 +14,8 @@ class ThreadPool
     ThreadPool();
     ~ThreadPool();
 
-    template <class retType, class ...arg>
-    inline void Queue(retType(*func)(arg...), arg... args)
+    template <class F, class ...arg>
+    inline void Queue(F func, arg... args)
     {
         return _queue_func((ThreadFunction)func, args...);
     }
