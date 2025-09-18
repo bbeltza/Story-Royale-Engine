@@ -84,6 +84,8 @@ namespace Game
         static Vector2f worldToScreen(const float x, const float y, Camera *cam = nullptr);
         static Vector2f screenToWorld(const float x, const float y, Camera *cam = nullptr);
 
+	static inline Camera* currentCamera() { return m_Current ? &m_Current->CurrentCamera : nullptr; }
+
         // Gets the current world.
         /// The world that will be updated and rendered.
         template <class _wType = World> static _wType* Current() {return reinterpret_cast<_wType*>(m_Current);}

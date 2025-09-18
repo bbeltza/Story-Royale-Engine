@@ -50,7 +50,7 @@ void DrawingDevice::DrawRectangleAtWorld(RectF Rectangle, const Color4& Color, c
 {
     CHECK_LOCK
 
-    Rectangle.Position = Game::World::worldToScreen(Rectangle.Position.X, Rectangle.Position.Y, &Game::World::m_Current->CurrentCamera);
+    Rectangle.Position = Game::World::worldToScreen(Rectangle.Position.X, Rectangle.Position.Y, Game::World::currentCamera());
     return DrawRectangle(Rectangle, Color, Modulate, AnchorPoint, Mode);
 }
 
