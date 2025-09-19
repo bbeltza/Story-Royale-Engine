@@ -9,18 +9,18 @@ class WindowClass
 public:
     void setTargetFPS(unsigned short fps);
     void toggleFullscreen();
+
+    inline void show() { SDL_ShowWindow(sdl_window); }
+    inline void hide() { SDL_HideWindow(sdl_window); }
+public:
+    inline bool isFullScreen() { return fullscreen; }
+    inline bool isHidden() { return SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_HIDDEN; }
 private:
 
     WindowClass(): sdl_window(nullptr) {}
 
     SDL_Window* sdl_window;
-
     SDL_Event sdl_event;
-
-    SDL_Rect m_viewport;
-
-    bool pollEvents();
-    void processViewport();
 
     bool fullscreen = false;
 };

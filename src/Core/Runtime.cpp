@@ -58,6 +58,9 @@ EngineClass::EngineClass()
 
     if (GameSettings::WindowOptions.Resizable)
         windowFlags.ToggleOn(SDL_WINDOW_RESIZABLE);
+    if (GameSettings::WindowOptions.Hidden)
+        windowFlags.ToggleOn(SDL_WINDOW_HIDDEN);
+    
     if (GameSettings::WindowOptions.VSync)
         rendererFlags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
 
