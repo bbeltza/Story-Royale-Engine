@@ -1,7 +1,7 @@
 #include "Classes/Timer.h"
 
-std::chrono::high_resolution_clock Timer::s_global_clock;
-std::chrono::high_resolution_clock::time_point Timer::s_last_frame_time;
+std::chrono::steady_clock Timer::s_global_clock;
+std::chrono::steady_clock::time_point Timer::s_last_frame_time;
 static std::chrono::duration<TimeStamp> helper_ts_duration;
 
 Timer::Set& Timer::get_timers()

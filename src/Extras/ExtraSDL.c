@@ -48,7 +48,7 @@ int SDL_RenderFillCircle(SDL_Renderer* renderer, int _x, int _y, int radius)
 
 int TTF_MeasureTextSpaced(TTF_Font* font, const char* text, int measure_width, int* extent, int* count)
 {
-    size_t c;
+    int c;
     int res = TTF_MeasureText(font, text, measure_width, extent, &c);
     if (res < 0) goto ret;
     if (!count && !extent) goto ret;

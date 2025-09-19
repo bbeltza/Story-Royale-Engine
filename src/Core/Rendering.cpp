@@ -207,7 +207,7 @@ void DrawingDevice::DrawTexture(const RectF& _Rectangle, File &_File)
     SDL_FRect render_rect{left, top, abs(_Rectangle.Size.X), abs(_Rectangle.Size.Y)};
     int flip = (_Rectangle.Size.X < 0 ? bit(0) : 0) | (_Rectangle.Size.Y < 0 ? bit(1) : 0);
 
-    SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect, NULL, NULL, (SDL_RendererFlip)flip);
+    SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
 }
 
 void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const char *text, int count, uint8_t alignment)

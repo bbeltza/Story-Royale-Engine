@@ -1,8 +1,14 @@
+macro(srEngine_nobind PROJECT)
+	message("--- Linking ${PROJECT} with a no-binder")
+	target_sources(${PROJECT} PRIVATE ${SRENGINE_DIR}/gen_src/empty_res.c)
+	# target_link_libraries(${PROJECT} no_bind)
+endmacro()
+
 function(srEngine_link_resource PROJECT)
     get_target_property(INPUT ${PROJECT} RES_FOLDER)
 
     if(NOT INPUT)
-        target_link_libraries(${PROJECT} no_bind)
+	srEngine_nobind(${PROJECT})
         return()
     endif()
 
@@ -19,13 +25,12 @@ function(srEngine_link_resource PROJECT)
             ${INPUT}
             ${OUTPUT}/_res
             )
-        message("-- ${OUTPUT}")
+	message("-- ${OUTPUT}")	
         message("-- ${CMAKE_BUILD_TYPE}")
         
         add_dependencies(${PROJECT} copy_${PROJECT})
-
-        message("--- Linking ${target} with a no-binder")
-        target_link_libraries(${PROJECT} no_bind)
+	
+	srEngine_nobind(${PROJECT})
     else()
         set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}")
         add_custom_target(

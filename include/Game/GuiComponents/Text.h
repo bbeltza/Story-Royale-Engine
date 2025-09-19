@@ -2,6 +2,7 @@
 #include "Game/GuiComponent.h"
 #include "Classes/File.h"
 #include "SDL.hpp"
+#include <fmt/format.h>
 
 namespace GuiComponents
 {
@@ -21,7 +22,7 @@ namespace GuiComponents
         void LoadFont(const char* path);
         
         inline void assign(const char* str) {m_str = str;}
-        template <class... T> inline void format(const char* fmt, T&&... args) { m_str = fmt::format(fmt, args); }
+        template <class... T> inline void format(const char* fmt, T&&... args) { m_str = fmt::format(fmt, args...); }
 
         inline int getLength() { return m_str.size(); }
 

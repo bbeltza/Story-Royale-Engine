@@ -6,6 +6,7 @@ struct WindowOptions
 {
     bool VSync;
     bool Resizable;
+    bool Hidden;
 };
 
 enum InterpolationMode

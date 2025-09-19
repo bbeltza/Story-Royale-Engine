@@ -136,7 +136,7 @@ void EngineClass::Run()
 
     while (pollWindowEvents())
     {
-        auto start = Timer::s_global_clock.now();
+	auto start = Timer::s_global_clock.now();
         TimeStamp dt = Timer::global_update();
         Tween::global_update(dt);
 
