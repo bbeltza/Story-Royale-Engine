@@ -12,6 +12,8 @@ int Thread::invokethread_handler(Thread *self)
         self->m_args[6],
         self->m_args[7]
     );
+
+    return 0;
 }
 
 Thread::Thread(Function func, ...)

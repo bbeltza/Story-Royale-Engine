@@ -13,6 +13,10 @@ ThreadPool::~ThreadPool()
 {
     for (int i = 0; i < NUM_THREADS; i++)
         delete threads[i];
+    for (Thread* thrd : immediate_threads)
+    {
+        delete thrd;
+    }
 }
 
 int ThreadPool::thread_callback(ThreadPool* self, int index)
