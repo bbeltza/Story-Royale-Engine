@@ -12,6 +12,8 @@ public:
 
     inline void show() { SDL_ShowWindow(sdl_window); }
     inline void hide() { SDL_HideWindow(sdl_window); }
+
+    inline void focus() { SDL_RaiseWindow(sdl_window); }
 public:
     inline bool isFullScreen() { return fullscreen; }
     inline bool isHidden() { return SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_HIDDEN; }
