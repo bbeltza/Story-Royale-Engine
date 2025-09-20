@@ -9,7 +9,7 @@ struct Connection;
 
 struct Signal
 {
-    Signal() {}
+    Signal(bool multithreaded=true): m_multithreaded(multithreaded) {}
     Signal(Signal &other) = delete;
     ~Signal();
 
@@ -25,6 +25,8 @@ private:
     Connection *m_handlerListHead = nullptr;
     void* m_waitSem = create_sem();
     void* m_returnData = nullptr;
+
+    bool m_multithreaded;
 
     void* create_sem();
 };

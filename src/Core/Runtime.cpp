@@ -25,7 +25,7 @@ const static std::chrono::duration<double> zero = std::chrono::duration<float>::
 
 EngineClass* Engine = nullptr;
 
-EngineClass::EngineClass()
+EngineClass::EngineClass(): BeforeRender(false), AfterRender(false)
 {
     Engine = this;
 
@@ -45,6 +45,7 @@ EngineClass::EngineClass()
 
     m_entryThread = SDL_CreateThread((SDL_ThreadFunction)Game::Initialize, "Entry", NULL);
 
+    // Window
 
     if (GameSettings::ScalingResolution)
     {
@@ -73,6 +74,8 @@ EngineClass::EngineClass()
         windowFlags
         );
 
+    // DrawingContext
+
     DrawingContext.sdl_renderer = SDL_CreateRenderer(Window.sdl_window, -1, rendererFlags);
     SDL_SetRenderDrawBlendMode(DrawingContext.sdl_renderer, SDL_BLENDMODE_BLEND);
     
@@ -81,11 +84,14 @@ EngineClass::EngineClass()
         uint64_t WHITE = UINT64_MAX;
         SDL_UpdateTexture(DrawingContext.sdl_rectTexture, NULL, &WHITE, 4);
     }
+
+    SDL_TryLockMutex(DrawingContext.m_lockmutex);
 }
 
 EngineClass::~EngineClass()
 {
     SDL_DetachThread(m_entryThread);
+    SDL_DestroyMutex(DrawingContext.m_lockmutex);
 
     if (Game::World::m_Current)
         delete Game::World::m_Current;
@@ -94,15 +100,11 @@ EngineClass::~EngineClass()
 
     queueDestroyingInstances();
 
-    //Mix_CloseAudio();
-    //Mix_Quit();
     IMG_Quit();
     TTF_Quit();
     SDL_Quit();
 
     Engine = nullptr;
-
-    printf("Engine destructed...\n");
 }
 
 void WindowClass::setTargetFPS(unsigned short fps)

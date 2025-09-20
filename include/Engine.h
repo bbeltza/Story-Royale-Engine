@@ -14,11 +14,11 @@ class EngineClass
 {
 public:
     // Engine namespaces
+    ThreadPool ThreadPool;
     WindowClass Window;
     InputClass Input;
     DrawingDevice DrawingContext;
     AudioDevice AudioDevice;
-    ThreadPool ThreadPool;
 
     Signal OnUpdate;
     Signal BeforeRender;

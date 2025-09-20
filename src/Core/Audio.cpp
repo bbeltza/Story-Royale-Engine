@@ -15,11 +15,11 @@ void AudioData::Load()
     const void* f_data = m_file.getRawData();
 
     SDL_RWops *audio_rw = SDL_RWFromConstMem(f_data, f_size);
-
+    
     int channels_int, err;
     Uint8 *stream_data;
     SDL_zero(m_spec);
-
+    
     if (SDL_LoadWAV_RW(audio_rw, 0, &m_spec, &stream_data, &m_len))
     {
         m_file.setType(File::T_WAV);
@@ -35,6 +35,7 @@ void AudioData::Load()
         m_spec.channels = channels_int;
         m_spec.format = AUDIO_S16;
     }
+
     SDL_ClearError();
     SDL_FreeRW(audio_rw);
 }
@@ -56,11 +57,14 @@ AudioData::~AudioData()
 
 void AudioDevice::threadedload(AudioDevice *dev, AudioData* audio)
 {
+    printf("Start of theadedload\n");
     audio->Load();
     ConvertAudioFormat(audio->m_spec.format, dev->m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
+    printf("End of theadedload\n");
 
     audio->m_spec.format = dev->m_Spec.format;
     audio->m_loaded = true;
+
 
     audio->Loaded.Fire();
 }
@@ -191,7 +195,7 @@ void AudioDevice::PlayAudio(Audio &audio, bool force)
 {
     if (!audio.m_data->m_loaded)
         audio.m_data->Loaded.Wait();
-
+    
     SDL_LockAudioDevice(m_Id);
     if (force)
         StopAudio(audio);
