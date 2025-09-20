@@ -9,36 +9,42 @@
 
 extern "C" int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, int len_input);
 
-AudioData::AudioData(File &file): f_data(file.getRawData()), f_size(file.getSize())
+void AudioData::Load()
 {
-    if (!f_size)
-    { /*Will do something*/
-    }
+    const size_t f_size = m_file.getSize();
+    const void* f_data = m_file.getRawData();
 
     SDL_RWops *audio_rw = SDL_RWFromConstMem(f_data, f_size);
-	
-	{
-	    int channels_int, err;
-	    Uint8 *stream_data;
-	    SDL_zero(self.m_spec);
 
-	    if (SDL_LoadWAV_RW(audio_rw, 0, &self.m_spec, &stream_data, &self.m_len))
-	    {
-	        file.setType(File::T_WAV);
-	        self.m_data = (int8_t *)malloc(self.m_len);
-	        memcpy(self.m_data, stream_data, self.m_len);
-	        SDL_FreeWAV(stream_data);
-	        self.m_len /= AUDIO_BYTESIZE(self.m_spec.format);
-	        self.m_len /= self.m_spec.channels;
-											        }
-    	    else if ((self.m_len = stb_vorbis_decode_memory((uint8_t *)self.f_data, self.f_size, &channels_int, &self.m_spec.freq, (short **)&self.m_data)) > 0)
-	    {
-	        file.setType(File::T_OGG);
-	        self.m_spec.channels = channels_int;
-	        self.m_spec.format = AUDIO_S16;
-	    }
-       SDL_ClearError();
-	    SDL_FreeRW(audio_rw);
+    int channels_int, err;
+    Uint8 *stream_data;
+    SDL_zero(m_spec);
+
+    if (SDL_LoadWAV_RW(audio_rw, 0, &m_spec, &stream_data, &m_len))
+    {
+        file.setType(File::T_WAV);
+        m_data = (int8_t *)malloc(m_len);
+        memcpy(m_data, stream_data, m_len);
+        SDL_FreeWAV(stream_data);
+        m_len /= AUDIO_BYTESIZE(m_spec.format);
+        m_len /= m_spec.channels;
+    }
+    else if ((m_len = stb_vorbis_decode_memory((uint8_t *)f_data, f_size, &channels_int, &m_spec.freq, (short **)&m_data)) > 0)
+    {
+        file.setType(File::T_OGG);
+        m_spec.channels = channels_int;
+        m_spec.format = AUDIO_S16;
+    }
+    SDL_ClearError();
+    SDL_FreeRW(audio_rw);
+}
+
+AudioData::AudioData(const char *path)
+{
+    m_file.Load(path);
+
+    if (!m_file.getSize())
+    { /*Will do something*/
     }
 }
 
@@ -48,18 +54,15 @@ AudioData::~AudioData()
         free((void *)m_data);
 }
 
-void AudioDevice::threadedload(AudioDevice* dev, const char* path)
+void AudioDevice::threadedload(AudioDevice *dev, AudioData* audio)
 {
-	File audio_file;
-        audio_file.Load(path);
+    audio->Load();
+    ConvertAudioFormat(audio->m_spec.format, m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
 
-        dev->loaded_audios.emplace(path, new AudioData(audio_file));
-	audio = loaded_audios.at(path).get();
-	ConvertAudioFormat(audio->m_spec.format, m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
-	audio->m_spec.format = m_Spec.format;
-	printf("new m_len from %s: %d\n", path, audio->m_len);
-	
-	audio.Loaded.Fire();
+    audio->m_spec.format = m_Spec.format;
+    audio->m_loaded = true;
+    
+    audio.Loaded.Fire();
 }
 
 AudioData &AudioDevice::LoadAudio(const char *path)
@@ -69,11 +72,12 @@ AudioData &AudioDevice::LoadAudio(const char *path)
     try
     {
         audio = loaded_audios.at(path).get();
-        return *audio;
     }
     catch (const std::out_of_range &)
     {
-	    m_Engine->ThreadPool.Queue(threadedload, this, path);
+        loaded_audios.emplace(path, new AudioData(path));
+        audio = loaded_audios.at(path).get();
+        m_Engine->ThreadPool.Queue(threadedload, this, audio);
     }
 
     return *audio;
@@ -149,8 +153,8 @@ void AudioDevice::callback(AudioDevice *dev, int32_t *stream, int len)
                     break;
                 }
             }
-            else audio->m_fadevol = 1;
-                
+            else
+                audio->m_fadevol = 1;
 
             for (int c = 0; c < channel_count; c++)
             {

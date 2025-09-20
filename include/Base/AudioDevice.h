@@ -11,16 +11,17 @@ class AudioData
     friend class AudioDevice;
 
     AudioData() = delete;
-    AudioData(File&);
+    AudioData(const char* path);
 
+    void Load();
+
+    File m_file;
+    
     int8_t* m_data = nullptr;
     uint32_t m_len;
     SDL_AudioSpec m_spec;
 
     bool m_loaded = false;
-
-    const size_t f_size;
-    const void* f_data;
 
     public:
     ~AudioData();
@@ -29,9 +30,6 @@ class AudioData
 
     inline uint32_t len() {return m_len;} 
     inline uint32_t freq() {return m_spec.freq;} 
-
-    private:
-    static void threaded_load(AudioData& self, SDL_RWops* audio_rw, File& file);
 };
 
 #include "Classes/Audio.h"
