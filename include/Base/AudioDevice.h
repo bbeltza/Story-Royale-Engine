@@ -56,7 +56,7 @@ class AudioDevice
 
     private:
     static void callback(AudioDevice* dev, int32_t* stream, int len);
-    static void threadedload(AudioDevice* dev, const char* path);
+    static void threadedload(AudioDevice* dev, AudioData* audio);
     
     SDL_AudioSpec m_Spec;
     SDL_AudioDeviceID m_Id;

@@ -22,7 +22,7 @@ void AudioData::Load()
 
     if (SDL_LoadWAV_RW(audio_rw, 0, &m_spec, &stream_data, &m_len))
     {
-        file.setType(File::T_WAV);
+        m_file.setType(File::T_WAV);
         m_data = (int8_t *)malloc(m_len);
         memcpy(m_data, stream_data, m_len);
         SDL_FreeWAV(stream_data);
@@ -31,7 +31,7 @@ void AudioData::Load()
     }
     else if ((m_len = stb_vorbis_decode_memory((uint8_t *)f_data, f_size, &channels_int, &m_spec.freq, (short **)&m_data)) > 0)
     {
-        file.setType(File::T_OGG);
+        m_file.setType(File::T_OGG);
         m_spec.channels = channels_int;
         m_spec.format = AUDIO_S16;
     }
@@ -57,12 +57,12 @@ AudioData::~AudioData()
 void AudioDevice::threadedload(AudioDevice *dev, AudioData* audio)
 {
     audio->Load();
-    ConvertAudioFormat(audio->m_spec.format, m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
+    ConvertAudioFormat(audio->m_spec.format, dev->m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
 
-    audio->m_spec.format = m_Spec.format;
+    audio->m_spec.format = dev->m_Spec.format;
     audio->m_loaded = true;
-    
-    audio.Loaded.Fire();
+
+    audio->Loaded.Fire();
 }
 
 AudioData &AudioDevice::LoadAudio(const char *path)
@@ -189,6 +189,9 @@ void AudioDevice::callback(AudioDevice *dev, int32_t *stream, int len)
 
 void AudioDevice::PlayAudio(Audio &audio, bool force)
 {
+    if (!audio.m_data->m_loaded)
+        audio.m_data->Loaded.Wait();
+
     SDL_LockAudioDevice(m_Id);
     if (force)
         StopAudio(audio);

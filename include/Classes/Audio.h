@@ -19,21 +19,25 @@ class Audio
 {
     friend class AudioDevice;
 
-    public:
-    AudioData& Attach(AudioData& data) { m_data =  &data; return data;}
+public:
+    AudioInfo Info;
+
+public:
+    AudioData &Attach(AudioData &data)
+    {
+        m_data = &data;
+        return data;
+    }
 
     TimeStamp timePosition() { return m_samplepos / (TimeStamp)m_data->freq(); }
     TimeStamp timeLength() { return m_data->len() / (TimeStamp)m_data->freq(); }
 
     void FadeOut() { m_fadeout = true; }
 
-    AudioInfo Info;
-    
-    private:
+private:
+    AudioData *m_data = nullptr;
 
-    AudioData* m_data = nullptr;
-
-    double m_fsamplepos = 0; // The position of the sample with subsample precition
+    double m_fsamplepos = 0;  // The position of the sample with subsample precition
     uint32_t m_samplepos = 0; // The position (in samples) of the audio sample
 
     bool m_fadein = false, m_fadeout = false;
