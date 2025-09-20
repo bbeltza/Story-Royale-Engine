@@ -35,7 +35,6 @@ set(3RDPARTYLIBS
 SDL2::SDL2-static
 SDL2_ttf::SDL2_ttf-static
 SDL2_image::SDL2_image-static
-SDL2_mixer::SDL2_mixer-static
 
 fmt::fmt
 stb
@@ -46,7 +45,6 @@ set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_ttf
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_image
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_mixer
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stb
 )
