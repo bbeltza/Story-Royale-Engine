@@ -1,21 +1,17 @@
 - Animations/Keyframes
 - Binding with ImGui (maybe later uh)
 
-- Better DrawingDevice API (For example, add an anchor point parameter for rendering and get rid of the target_renderer to render, so rendering instances would totally depend on DrawingDevice)
 - Texture API (Basically a class to store textures)
 - Get rid of DrawingDevice::DrawFont() to rely on the texture API for text rendering
 
-- Audio options (set the frequency, channels, etc... Through GameSettings.json ; But NOT the format as that would make it harder to implement each possible format)
 - Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
 
 - More options to the EntityControl camera controller (Like adding smoothness, and adding bounds for the camera to move)
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
-- Multithreading:
-    - Immediate threads (Threads that can be spawned immediately, it's immediate but can use a lot of memory)
-    - Thread pool (A queue of functions run that a set number of threads will run)
-
 - Better error messaging
+	- More error codes
+	- Message box api (Something that should directly use the operating system's API because SDL's one is really obsolete)
 
 - Work on the game ^^
 
