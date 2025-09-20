@@ -30,7 +30,7 @@ class ThreadPool
         return *immediate_threads.back();
     }
 
-    static const size_t NUM_THREADS = 12;
+    static const size_t NUM_THREADS = 64;
 
     private:
     struct FuncBase
@@ -45,7 +45,7 @@ class ThreadPool
 
     std::vector<Thread*> immediate_threads;
 
-    static int thread_callback(ThreadPool* self, int index);
+    static void thread_callback(ThreadPool* self, int index);
 
     void _queue_func(ThreadFunction func, ...);
 };

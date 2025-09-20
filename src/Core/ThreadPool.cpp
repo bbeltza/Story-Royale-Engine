@@ -14,12 +14,10 @@ ThreadPool::~ThreadPool()
     for (int i = 0; i < NUM_THREADS; i++)
         delete threads[i];
     for (Thread* thrd : immediate_threads)
-    {
         delete thrd;
-    }
 }
 
-int ThreadPool::thread_callback(ThreadPool* self, int index)
+void ThreadPool::thread_callback(ThreadPool* self, int index)
 {
     /*
     ThreadPool* self = args->self;
@@ -30,7 +28,7 @@ int ThreadPool::thread_callback(ThreadPool* self, int index)
     while (true)
     {
         while (!SDL_LockMutex(self->queue_mutex))
-        {;
+        {
             if (self->func_queue.empty()) {
                 SDL_UnlockMutex(self->queue_mutex);
                 SDL_Delay(1);
@@ -52,8 +50,6 @@ int ThreadPool::thread_callback(ThreadPool* self, int index)
             );
         }
     }
-
-    return 0;
 }
 
 void ThreadPool::_queue_func(ThreadFunction func, ...)
