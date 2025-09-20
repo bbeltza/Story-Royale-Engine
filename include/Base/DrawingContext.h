@@ -40,11 +40,12 @@ public:
 
     bool LoadFileTexture(File& _File);
 private:
-    bool m_Locked = true;
     SDL_Renderer *sdl_renderer;
     SDL_Texture *sdl_rectTexture;
     
     SDL_Rect m_viewport;
+
+    SDL_mutex *m_lockmutex = SDL_CreateMutex();
 
     std::unordered_map<std::string, SDL_Texture*> m_LoadedTextures;
     std::unordered_map<std::string, TTF_Font*> m_LoadedFonts;
@@ -53,8 +54,6 @@ private:
     void render();
     void renderCurrentWorld();
     void renderCurrentUI();
-
-    inline void m_switchLock() {m_Locked = !m_Locked;}
 
     unsigned int scale = 0;
 };

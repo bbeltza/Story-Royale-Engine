@@ -15,6 +15,8 @@ ThreadPool::~ThreadPool()
         delete threads[i];
     for (Thread* thrd : immediate_threads)
         delete thrd;
+
+    SDL_DestroyMutex(queue_mutex);
 }
 
 void ThreadPool::thread_callback(ThreadPool* self, int index)

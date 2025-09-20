@@ -20,6 +20,8 @@ Signal::~Signal()
         delete item;
         item = m_handlerListHead;
     }
+
+    SDL_DestroySemaphore((SDL_sem*)m_waitSem);
 }
 
 void Signal::DisconnectAll()
@@ -66,7 +68,11 @@ void Signal::Fire(void* userdata)
     {
         if (item->m_connected)
         {
-            invoke_func(item->m_fn, userdata);
+            if (m_multithreaded)
+                invoke_func(item->m_fn, userdata);
+            else
+                item->m_fn(userdata);
+            
             if (item->m_once)
             {
                 m_handlerListHead = item->m_next;

@@ -30,7 +30,7 @@ class ThreadPool
         return *immediate_threads.back();
     }
 
-    static const size_t NUM_THREADS = 64;
+    static const size_t NUM_THREADS = 12;
 
     private:
     struct FuncBase

@@ -20,6 +20,8 @@ class AudioData
     int8_t* m_data = nullptr;
     uint32_t m_len;
     SDL_AudioSpec m_spec;
+    
+    SDL_RWops* m_rw;
 
     bool m_loaded = false;
 

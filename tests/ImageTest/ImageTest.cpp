@@ -16,8 +16,6 @@ static void mouse(MouseButton* event)
 
 void Game::Initialize()
 {
-    printf("Hello world\n");
-
     Game::World::setCurrent<TexturePalace>();
 
     Engine->Input.mouseButton.Connect(event_callback(mouse));

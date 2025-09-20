@@ -5,8 +5,6 @@ Audio test1, test2, test3;
 
 void Initialize()
 {
-    printf("Hello world!\n");
-
     AudioData& stereotest_data = Engine->AudioDevice.LoadAudio("res://stereotest.wav");
     AudioData& test1_data = Engine->AudioDevice.LoadAudio("res://test1.wav");
     AudioData& test2_data = Engine->AudioDevice.LoadAudio("res://test2.ogg");
@@ -25,6 +23,4 @@ void Initialize()
     stereotest.Info.looped = true;
 
     Engine->AudioDevice.PlayAudio(test3);
-
-    //Engine->Window.hide();
 }

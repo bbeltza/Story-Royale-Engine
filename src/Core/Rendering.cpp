@@ -19,13 +19,12 @@ Vector2f DrawingDevice::getScreenCenter()
     return {m_viewport.w / 2.0f, m_viewport.h / 2.0f};
 }
 
-#define CHECK_LOCK \
-    if (m_Locked)  \
-        return;
+#define START_DRAW SDL_LockMutex(m_lockmutex);
+#define END_DRAW SDL_UnlockMutex(m_lockmutex);
 
 void DrawingDevice::DrawRectangle(const RectF& Rectangle, const Color4& Color, const Color4& Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
 {
-    CHECK_LOCK
+    START_DRAW
 
     SDL_FRect r{
         Rectangle.Position.X - Rectangle.Size.X * AnchorPoint.X,
@@ -44,19 +43,24 @@ void DrawingDevice::DrawRectangle(const RectF& Rectangle, const Color4& Color, c
         SDL_RenderFillRectF(sdl_renderer, &r);
         break;
     }
+
+    END_DRAW
 };
 
 void DrawingDevice::DrawRectangleAtWorld(RectF Rectangle, const Color4& Color, const Color4& Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
 {
-    CHECK_LOCK
+    START_DRAW
 
     Rectangle.Position = Game::World::worldToScreen(Rectangle.Position.X, Rectangle.Position.Y, Game::World::currentCamera());
-    return DrawRectangle(Rectangle, Color, Modulate, AnchorPoint, Mode);
+    DrawRectangle(Rectangle, Color, Modulate, AnchorPoint, Mode);
+
+    END_DRAW
 }
 
 void DrawingDevice::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm)
 {
-    CHECK_LOCK
+    START_DRAW
+
     if (_angle == 0)
         return DrawRectangle(_Rectangle, _Col);
 
@@ -88,23 +92,29 @@ void DrawingDevice::DrawRotatedRectangle(const RectF &_Rectangle, const double _
         }
         break;
     }
+
+    END_DRAW
 }
 
 void DrawingDevice::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm)
 {
-    CHECK_LOCK
+    START_DRAW
+
     Vector2f target_pos(_Rectangle.Position);
     if (Game::World::m_Current)
         target_pos = Game::World::m_Current->worldToScreenSpace(target_pos.X, target_pos.Y);
     else
         target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y);
 
-    return DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col, _dm);
+    DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col, _dm);
+
+    END_DRAW
 }
 
 void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into screen coordinates
 {
-    CHECK_LOCK
+    START_DRAW
+
     if (Game::World::m_Current)
         pos = Game::World::m_Current->worldToScreenSpace(pos.X, pos.Y);
     else
@@ -113,18 +123,22 @@ void DrawingDevice::DrawDebug(Vector2f pos) // Sounds weird to not pass as a ref
     SDL_SetRenderDrawColor(sdl_renderer, 255, 64, 0, 255);
     SDL_RenderDrawLineF(sdl_renderer, pos.X - DRAW_ENTCENTER_LINESIZE, pos.Y, pos.X + DRAW_ENTCENTER_LINESIZE, pos.Y);
     SDL_RenderDrawLineF(sdl_renderer, pos.X, pos.Y - DRAW_ENTCENTER_LINESIZE, pos.X, pos.Y + DRAW_ENTCENTER_LINESIZE);
+
+    END_DRAW
 }
 
 void DrawingDevice::DrawCircle(const Vector2f& _Pos, const float _Radius, const Color4& _Col, DrawingMode _dm)
 {
-    CHECK_LOCK;
+    START_DRAW
 
     SDL_RenderFillCircleF(sdl_renderer, _Pos.X, _Pos.Y, _Radius);
+
+    END_DRAW
 }
 
 void DrawingDevice::render()
 {
-    m_switchLock();
+    SDL_UnlockMutex(m_lockmutex);
 
     // Render current world
     if (Game::World::m_Current)
@@ -136,16 +150,16 @@ void DrawingDevice::render()
         SDL_RenderClear(sdl_renderer);
     }
 
-    m_Engine->BeforeRender.Fire(0);
+    m_Engine->BeforeRender.Fire();
 
     // Drawing the Gui layer
     if (Game::GuiLayer::Current())
         renderCurrentUI();
 
-    m_Engine->AfterRender.Fire(0);
+    m_Engine->AfterRender.Fire();
 
     // Present the screen
-    m_switchLock();
+    SDL_LockMutex(m_lockmutex);
     SDL_RenderPresent(sdl_renderer);
 }
 
@@ -201,6 +215,8 @@ void DrawingDevice::DrawTexture(const RectF& _Rectangle, File &_File)
         return;
     if (_Rectangle.Size.X == 0 || _Rectangle.Size.Y == 0)
         return;
+
+    START_DRAW
     
     float left = roundf(_Rectangle.getLeft() * scale) / scale;
     float top = roundf(_Rectangle.getTop() * scale) / scale;
@@ -208,10 +224,14 @@ void DrawingDevice::DrawTexture(const RectF& _Rectangle, File &_File)
     int flip = (_Rectangle.Size.X < 0 ? bit(0) : 0) | (_Rectangle.Size.Y < 0 ? bit(1) : 0);
 
     SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
+
+    END_DRAW
 }
 
 void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const char *text, int count, uint8_t alignment)
 {
+    START_DRAW
+
     static char font_characters[96];
     if (!font_characters[0])
     {
@@ -329,6 +349,8 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
     }
 
     delete[] linetest;
+
+    END_DRAW
 }
 
 bool DrawingDevice::LoadFileTexture(File &_File)

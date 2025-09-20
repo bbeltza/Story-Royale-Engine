@@ -11,6 +11,5 @@ void Render()
 
 void Game::Initialize()
 {
-    printf("Hello World\n");
     Engine->BeforeRender.Connect(event_callback(Render));
 }

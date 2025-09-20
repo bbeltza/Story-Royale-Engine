@@ -1,3 +1,4 @@
 {
-    "Resources": "assets"
+    "Resources": "assets",
+    "WindowOptions": {"Hidden": true}
 }
