@@ -21,7 +21,7 @@ Signal::~Signal()
         item = m_handlerListHead;
     }
 
-    SDL_DestroySemaphore((SDL_sem*)m_waitSem);
+    //SDL_DestroySemaphore((SDL_sem*)m_waitSem);
 }
 
 void Signal::DisconnectAll()

@@ -31,6 +31,7 @@ void AudioData::Load()
     }
     else if ((m_len = stb_vorbis_decode_memory((uint8_t *)f_data, f_size, &channels_int, &m_spec.freq, (short **)&m_data)) > 0)
     {
+        printf("len: %d\n", m_len);
         m_file.setType(File::T_OGG);
         m_spec.channels = channels_int;
         m_spec.format = AUDIO_S16;
@@ -57,10 +58,8 @@ AudioData::~AudioData()
 
 void AudioDevice::threadedload(AudioDevice *dev, AudioData* audio)
 {
-    printf("Start of theadedload\n");
     audio->Load();
     ConvertAudioFormat(audio->m_spec.format, dev->m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
-    printf("End of theadedload\n");
 
     audio->m_spec.format = dev->m_Spec.format;
     audio->m_loaded = true;
@@ -73,16 +72,14 @@ AudioData &AudioDevice::LoadAudio(const char *path)
 {
     AudioData *audio;
 
-    try
-    {
-        audio = loaded_audios.at(path).get();
-    }
-    catch (const std::out_of_range &)
+    if (loaded_audios.count(path) == 0)
     {
         loaded_audios.emplace(path, new AudioData(path));
         audio = loaded_audios.at(path).get();
-        m_Engine->ThreadPool.Queue(threadedload, this, audio);
+        m_Engine->ThreadPool.CreateImmediateThread(threadedload, this, audio);
     }
+    else
+        audio = loaded_audios.at(path).get();
 
     return *audio;
 }

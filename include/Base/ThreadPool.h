@@ -17,7 +17,7 @@ class ThreadPool
     template <class F, class ...arg>
     inline void Queue(F&& func, arg&&... args)
     {
-        return _queue_func((ThreadFunction)func, args...);
+        return _queue_func((ThreadFunction)func, sizeof...(args), args...);
     }
 
     template <class F, class ...arg>
@@ -47,5 +47,5 @@ class ThreadPool
 
     static void thread_callback(ThreadPool* self, int index);
 
-    void _queue_func(ThreadFunction func, ...);
+    void _queue_func(ThreadFunction func, size_t argn, ...);
 };
