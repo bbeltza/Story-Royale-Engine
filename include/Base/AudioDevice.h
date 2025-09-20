@@ -2,6 +2,7 @@
 #include "EngineBase.h"
 
 #include "Classes/File.h"
+#include "Classes/Signal.h"
 
 #define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
 
@@ -16,11 +17,21 @@ class AudioData
     uint32_t m_len;
     SDL_AudioSpec m_spec;
 
+    bool m_loaded = false;
+
+    const size_t f_size;
+    const void* f_data;
+
     public:
     ~AudioData();
 
+    Signal Loaded;
+
     inline uint32_t len() {return m_len;} 
     inline uint32_t freq() {return m_spec.freq;} 
+
+    private:
+    static void threaded_load(AudioData& self, SDL_RWops* audio_rw, File& file);
 };
 
 #include "Classes/Audio.h"
@@ -47,6 +58,7 @@ class AudioDevice
 
     private:
     static void callback(AudioDevice* dev, int32_t* stream, int len);
+    static void threadedload(AudioDevice* dev, const char* path);
     
     SDL_AudioSpec m_Spec;
     SDL_AudioDeviceID m_Id;

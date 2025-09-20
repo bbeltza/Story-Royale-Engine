@@ -1,4 +1,5 @@
 #include <SDL.hpp>
+#include "Engine.h"
 #include "System.h"
 #include "Base/AudioDevice.h"
 
@@ -8,39 +9,36 @@
 
 extern "C" int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, int len_input);
 
-AudioData::AudioData(File &file)
+AudioData::AudioData(File &file): f_data(file.getRawData()), f_size(file.getSize())
 {
-    const void *f_data = file.getRawData();
-    size_t f_size = file.getSize();
-
     if (!f_size)
     { /*Will do something*/
     }
 
     SDL_RWops *audio_rw = SDL_RWFromConstMem(f_data, f_size);
+	
+	{
+	    int channels_int, err;
+	    Uint8 *stream_data;
+	    SDL_zero(self.m_spec);
 
-    {
-        int channels_int, err;
-        Uint8 *stream_data;
-        SDL_zero(m_spec);
-
-        if (SDL_LoadWAV_RW(audio_rw, 1, &m_spec, &stream_data, &m_len))
-        {
-            file.setType(File::T_WAV);
-            m_data = (int8_t *)malloc(m_len);
-            memcpy(m_data, stream_data, m_len);
-            SDL_FreeWAV(stream_data);
-            m_len /= AUDIO_BYTESIZE(m_spec.format);
-            m_len /= m_spec.channels;
-        }
-        else if ((m_len = stb_vorbis_decode_memory((uint8_t *)file.getRawData(), file.getSize(), &channels_int, &m_spec.freq, (short **)&m_data)) > 0)
-        {
-            file.setType(File::T_OGG);
-            m_spec.channels = channels_int;
-            m_spec.format = AUDIO_S16;
-        }
-
-        SDL_ClearError();
+	    if (SDL_LoadWAV_RW(audio_rw, 0, &self.m_spec, &stream_data, &self.m_len))
+	    {
+	        file.setType(File::T_WAV);
+	        self.m_data = (int8_t *)malloc(self.m_len);
+	        memcpy(self.m_data, stream_data, self.m_len);
+	        SDL_FreeWAV(stream_data);
+	        self.m_len /= AUDIO_BYTESIZE(self.m_spec.format);
+	        self.m_len /= self.m_spec.channels;
+											        }
+    	    else if ((self.m_len = stb_vorbis_decode_memory((uint8_t *)self.f_data, self.f_size, &channels_int, &self.m_spec.freq, (short **)&self.m_data)) > 0)
+	    {
+	        file.setType(File::T_OGG);
+	        self.m_spec.channels = channels_int;
+	        self.m_spec.format = AUDIO_S16;
+	    }
+       SDL_ClearError();
+	    SDL_FreeRW(audio_rw);
     }
 }
 
@@ -48,6 +46,20 @@ AudioData::~AudioData()
 {
     if (m_data)
         free((void *)m_data);
+}
+
+void AudioDevice::threadedload(AudioDevice* dev, const char* path)
+{
+	File audio_file;
+        audio_file.Load(path);
+
+        dev->loaded_audios.emplace(path, new AudioData(audio_file));
+	audio = loaded_audios.at(path).get();
+	ConvertAudioFormat(audio->m_spec.format, m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
+	audio->m_spec.format = m_Spec.format;
+	printf("new m_len from %s: %d\n", path, audio->m_len);
+	
+	audio.Loaded.Fire();
 }
 
 AudioData &AudioDevice::LoadAudio(const char *path)
@@ -61,17 +73,7 @@ AudioData &AudioDevice::LoadAudio(const char *path)
     }
     catch (const std::out_of_range &)
     {
-        File audio_file;
-        audio_file.Load(path);
-
-        loaded_audios.emplace(path, new AudioData(audio_file));
-
-        audio = loaded_audios.at(path).get();
-
-        ConvertAudioFormat(audio->m_spec.format, m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
-        audio->m_spec.format = m_Spec.format;
-
-        printf("new m_len from %s: %d\n", path, audio->m_len);
+	    m_Engine->ThreadPool.Queue(threadedload, this, path);
     }
 
     return *audio;

@@ -53,7 +53,7 @@ EngineClass::EngineClass()
     }
 
     Vector2u start_res = GameSettings::StartResolution ? GameSettings::StartResolution : GameSettings::ScalingResolution * 2;
-    Flags32 windowFlags;
+    Flags32 windowFlags = SDL_WINDOW_ALLOW_HIGHDPI;
     Flags32 rendererFlags;
 
     if (GameSettings::WindowOptions.Resizable)
