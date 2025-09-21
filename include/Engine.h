@@ -36,7 +36,7 @@ private:
     void loop();
     void Run();
 
-    static int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev);
+    static int eventfilter(EngineClass *engine, SDL_Event *ev);
 
     bool pollWindowEvents();
 
