@@ -2,6 +2,9 @@
 #include <SDL.hpp>
 #include "EngineBase.h"
 
+#include "Datatypes/Vector.h"
+#include "Datatypes/Flags.h"
+
 class WindowClass
 {
     ENGINE_BASE
@@ -29,4 +32,7 @@ private:
     bool fullscreen = false;
 
     void Setup();
+
+    Flags32 start_flags;
+    Vector2f start_res;
 };
