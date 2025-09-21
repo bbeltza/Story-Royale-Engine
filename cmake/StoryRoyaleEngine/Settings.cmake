@@ -13,7 +13,7 @@ function(srEngine_link_settings TARGET)
         add_custom_command(
             OUTPUT ${OUTPUT_FILE}
             ${DEPEND}
-            ${PYTHON_COMMAND}game_settings.py
+            COMMAND ${PYTHON_COMMAND}game_settings.py
             ${INPUT_JSON}
             ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "--- Generating game settings for ${TARGET}...")

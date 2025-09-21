@@ -4,14 +4,13 @@
 #include "Datatypes/Vector.h"
 
 #include "Classes/File.h"
+#include "Classes/Texture.h"
 
 namespace Components
 {
     class Sprite : public ::Game::Component
     {       
     public:
-        typedef std::unordered_map<std::string, File> Map;
-
         Sprite();
         ~Sprite();
 
@@ -22,8 +21,8 @@ namespace Components
 
         void Render(::Game::Entity*) override;
 
-        File& LoadFile(const char*);
+        void Attach(Texture&);
     private:
-        std::vector<File*> textures;
+        std::vector<Texture*> textures;
     };
 }

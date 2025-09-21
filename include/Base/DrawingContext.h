@@ -1,10 +1,13 @@
 #pragma once
 #include <standard.h>
+#include <SDL.hpp>
 #include "EngineBase.h"
 
 #include "C/Color.h"
 #include "Datatypes/Rect.h"
+
 #include "Classes/File.h"
+#include "Classes/Texture.h"
 
 namespace Components
 {
@@ -14,6 +17,11 @@ class DrawingDevice
 {
     ENGINE_BASE
     friend class Components::StaticTexture;
+    friend class Texture;
+
+    DrawingDevice(EngineClass*);
+    ~DrawingDevice();
+    void Setup();
 public:
     enum DrawingMode
     {
@@ -35,7 +43,8 @@ public:
 
     void DrawDebug(Vector2f pos);
 
-    void DrawTexture(const RectF& _Rectangle, File& _File);
+    void LegacyDrawTexture(const RectF& _Rectangle, File& _File);
+    void DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate=COLOR4_WHITE, const Vector2f& AnchorPoint=Vector2f::CENTER);
     void DrawFont(const SDL_Rect* _Bounds, File& _FontFile, const char* text, int count, uint8_t alignment);
 
     bool LoadFileTexture(File& _File);
@@ -49,6 +58,8 @@ private:
 
     std::unordered_map<std::string, SDL_Texture*> m_LoadedTextures;
     std::unordered_map<std::string, TTF_Font*> m_LoadedFonts;
+
+    Texture::Queue textures_toload;
 
     void processViewport();
     void render();

@@ -56,7 +56,7 @@ AudioData::~AudioData()
         free((void *)m_data);
 }
 
-void AudioDevice::threadedload(AudioDevice *dev, AudioData* audio)
+void AudDevice::threadedload(AudDevice *dev, AudioData* audio)
 {
     audio->Load();
     ConvertAudioFormat(audio->m_spec.format, dev->m_Spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
@@ -68,7 +68,7 @@ void AudioDevice::threadedload(AudioDevice *dev, AudioData* audio)
     audio->Loaded.Fire();
 }
 
-AudioData &AudioDevice::LoadAudio(const char *path)
+AudioData &AudDevice::LoadAudio(const char *path)
 {
     AudioData *audio;
 
@@ -84,7 +84,7 @@ AudioData &AudioDevice::LoadAudio(const char *path)
     return *audio;
 }
 
-void AudioDevice::UnloadAudio(AudioData &data)
+void AudDevice::UnloadAudio(AudioData &data)
 {
     for (auto &kv : loaded_audios)
     {
@@ -93,7 +93,7 @@ void AudioDevice::UnloadAudio(AudioData &data)
     }
 }
 
-AudioDevice::AudioDevice()
+AudDevice::AudDevice(EngineClass* engine): m_Engine(engine)
 {
     SDL_AudioSpec desiredspec{0};
     desiredspec.callback = (SDL_AudioCallback)callback;
@@ -110,12 +110,12 @@ AudioDevice::AudioDevice()
     System::CheckForSDLErrors();
 }
 
-AudioDevice::~AudioDevice()
+AudDevice::~AudDevice()
 {
     SDL_CloseAudioDevice(m_Id);
 }
 
-void AudioDevice::callback(AudioDevice *dev, int32_t *stream, int len)
+void AudDevice::callback(AudDevice *dev, int32_t *stream, int len)
 {
     memset(stream, 0, len);
 
@@ -188,7 +188,7 @@ void AudioDevice::callback(AudioDevice *dev, int32_t *stream, int len)
     }
 }
 
-void AudioDevice::PlayAudio(Audio &audio, bool force)
+void AudDevice::PlayAudio(Audio &audio, bool force)
 {
     if (!audio.m_data->m_loaded)
         audio.m_data->Loaded.Wait();
@@ -215,7 +215,7 @@ void AudioDevice::PlayAudio(Audio &audio, bool force)
     SDL_UnlockAudioDevice(m_Id);
 }
 
-TimeStamp AudioDevice::PauseAudio(Audio &audio)
+TimeStamp AudDevice::PauseAudio(Audio &audio)
 {
     SDL_LockAudioDevice(m_Id);
 

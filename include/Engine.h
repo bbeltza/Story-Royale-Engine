@@ -14,11 +14,11 @@ class EngineClass
 {
 public:
     // Engine namespaces
-    ThreadPool ThreadPool;
+    ThrdPool ThreadPool;
     WindowClass Window;
     InputClass Input;
     DrawingDevice DrawingContext;
-    AudioDevice AudioDevice;
+    AudDevice AudioDevice;
 
     Signal OnUpdate;
     Signal BeforeRender;
@@ -33,7 +33,10 @@ private:
 
     // Private use functions
 
+    void loop();
     void Run();
+
+    static int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev);
 
     bool pollWindowEvents();
 

@@ -36,7 +36,7 @@ function(srEngine_link_resource PROJECT)
         add_custom_target(
         bind_${PROJECT}
         COMMENT "--- Binding source resources..."
-        ${PYTHON_COMMAND}resource_binder.py
+        COMMAND ${PYTHON_COMMAND}resource_binder.py
         ${INPUT} 1
         ${OUTPUT}
         OUTPUT ${OUTPUT}/_res.c

@@ -7,8 +7,10 @@ namespace CameraControllers
     cam_controldef(EntityControl)
     {
     public:
-        EntityControl(Game::Entity &);
+        EntityControl(Game::Entity& entity): m_Entity(&entity) {}
         ~EntityControl();
+
+        float Smoothness = 0.1;
 
     protected:
         void Update(TimeStamp) override;

@@ -5,6 +5,7 @@
 class WindowClass
 {
     ENGINE_BASE
+    friend class DrawingDevice;
     friend class GuiContainer;
 public:
     void setTargetFPS(unsigned short fps);
@@ -14,15 +15,18 @@ public:
     inline void hide() { SDL_HideWindow(sdl_window); }
 
     inline void focus() { SDL_RaiseWindow(sdl_window); }
+
+    void setIcon(const char* path);
 public:
     inline bool isFullScreen() { return fullscreen; }
     inline bool isHidden() { return SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_HIDDEN; }
 private:
+    WindowClass(EngineClass*);
 
-    WindowClass(): sdl_window(nullptr) {}
-
-    SDL_Window* sdl_window;
+    SDL_Window* sdl_window = nullptr;
     SDL_Event sdl_event;
 
     bool fullscreen = false;
+
+    void Setup();
 };

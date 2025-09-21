@@ -17,7 +17,7 @@ struct AudioInfo
 
 class Audio
 {
-    friend class AudioDevice;
+    friend class AudDevice;
 
 public:
     AudioInfo Info;

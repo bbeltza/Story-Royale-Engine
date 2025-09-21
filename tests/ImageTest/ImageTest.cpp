@@ -4,14 +4,14 @@
 #include <Events/Mouse.h>
 
 struct TexturePalace;
-struct Texture;
+struct TextureEntity;
 
 static size_t frame = 0;
 
 static void mouse(MouseButton* event)
 {
     if (event->pressed && event->button == 1)
-    frame = !frame;
+    frame++;
 }
 
 void Game::Initialize()
@@ -25,16 +25,25 @@ struct TexturePalace : public Game::World
 {
     TexturePalace()
     {
-        auto texture = addEntity<Texture>();
+        Engine->Input.mouseButton.Wait();
+        auto texture = addEntity<TextureEntity>();
     }
 };
 
-struct Texture : public Game::Entity
+struct TextureEntity : public Game::Entity
 {
-    Texture()
+    Texture sprt1;
+    Texture sprt2;
+    Texture testsprt;
+
+    TextureEntity():
+        sprt1("res://test_texture.png"),
+        sprt2("res://test_texture2.png"),
+        testsprt(10, 10)
     {
-        sprite.LoadFile("res://test_texture.png");
-        sprite.LoadFile("res://test_texture2.png");
+        sprite.Attach(sprt1);
+        sprite.Attach(sprt2);
+        sprite.Attach(testsprt);
         sprite.Scale = { 4, 4 };
         addComponent(&sprite);
     }

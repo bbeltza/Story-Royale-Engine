@@ -1,4 +1,4 @@
-#define DO_IT_ANYWAY 1
+#define DO_IT_ANYWAY 0
 
 #if defined(DEBUG) || DO_IT_ANYWAY
     #define DRAW_GUI_CONTAINER_BOX

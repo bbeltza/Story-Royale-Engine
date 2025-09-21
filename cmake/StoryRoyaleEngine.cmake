@@ -1,5 +1,5 @@
 find_package(Python REQUIRED)
-set(PYTHON_COMMAND COMMAND ${PYTHON_EXECUTABLE} ${SRENGINE_DIR}/scripts/)
+set(PYTHON_COMMAND python ${SRENGINE_DIR}/scripts/)
 
 include(StoryRoyaleEngine/Policy)
 include(StoryRoyaleEngine/Resources)

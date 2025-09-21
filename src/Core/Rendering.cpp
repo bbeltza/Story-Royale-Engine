@@ -136,33 +136,6 @@ void DrawingDevice::DrawCircle(const Vector2f& _Pos, const float _Radius, const 
     END_DRAW
 }
 
-void DrawingDevice::render()
-{
-    SDL_UnlockMutex(m_lockmutex);
-
-    // Render current world
-    if (Game::World::m_Current)
-        renderCurrentWorld();
-    else
-    {
-        Game::World::call_render();
-        SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, 0);
-        SDL_RenderClear(sdl_renderer);
-    }
-
-    m_Engine->BeforeRender.Fire();
-
-    // Drawing the Gui layer
-    if (Game::GuiLayer::Current())
-        renderCurrentUI();
-
-    m_Engine->AfterRender.Fire();
-
-    // Present the screen
-    SDL_LockMutex(m_lockmutex);
-    SDL_RenderPresent(sdl_renderer);
-}
-
 void DrawingDevice::renderCurrentWorld()
 {
     auto world = Game::World::m_Current;
@@ -209,21 +182,25 @@ void DrawingDevice::renderCurrentUI()
     }
 }
 
-void DrawingDevice::DrawTexture(const RectF& _Rectangle, File &_File)
+void DrawingDevice::DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint)
 {
-    if (!LoadFileTexture(_File))
-        return;
-    if (_Rectangle.Size.X == 0 || _Rectangle.Size.Y == 0)
-        return;
-
     START_DRAW
-    
-    float left = roundf(_Rectangle.getLeft() * scale) / scale;
-    float top = roundf(_Rectangle.getTop() * scale) / scale;
-    SDL_FRect render_rect{left, top, abs(_Rectangle.Size.X), abs(_Rectangle.Size.Y)};
-    int flip = (_Rectangle.Size.X < 0 ? bit(0) : 0) | (_Rectangle.Size.Y < 0 ? bit(1) : 0);
 
-    SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
+    if (Rectangle.Size.X == 0 || Rectangle.Size.Y == 0)
+        return;
+
+    float absW = abs(Rectangle.Size.X);
+    float absH = abs(Rectangle.Size.Y);
+
+    float rl = Rectangle.Position.X - absW * AnchorPoint.X;
+    float rt = Rectangle.Position.Y - absH * AnchorPoint.Y;
+
+    float left = roundf(rl * scale) / scale;
+    float top = roundf(rt * scale) / scale;
+    SDL_FRect render_rect{left, top, absW, absH};
+    int flip = (Rectangle.Size.X < 0 ? bit(0) : 0) | (Rectangle.Size.Y < 0 ? bit(1) : 0);
+
+    SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_Texture.texture, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
 
     END_DRAW
 }
@@ -353,38 +330,6 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
     END_DRAW
 }
 
-bool DrawingDevice::LoadFileTexture(File &_File)
-{
-    // printf("%p\n", _File.m_userdata);
-    if (_File.m_userdata)
-        return true;
-
-    if (SDL_Texture *target_texture = m_LoadedTextures[_File.m_filepath])
-    {
-        _File.m_userdata = target_texture;
-        return true;
-    }
-    else
-    {
-        SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.getInfo().data, _File.getInfo().size);
-        if (!temp_rw)
-            goto err;
-
-        if (IMG_isPNG(temp_rw))
-            _File.m_type = File::T_PNG;
-
-        m_LoadedTextures[_File.m_filepath] = IMG_LoadTexture_RW(sdl_renderer, temp_rw, 1);
-        if (!m_LoadedTextures[_File.m_filepath])
-            goto err;
-        _File.m_userdata = m_LoadedTextures[_File.m_filepath];
-        return true;
-    }
-
-err:
-    printf("%s\n", SDL_GetError());
-    return false;
-}
-
 //
 
 //
@@ -425,4 +370,57 @@ void DrawingDevice::processViewport()
     layer->m_absolute.Size.Y = (float)m_viewport.h;
 
     layer->_processchildren();
+}
+
+// LEGACY
+
+bool DrawingDevice::LoadFileTexture(File &_File)
+{
+    // printf("%p\n", _File.m_userdata);
+    if (_File.m_userdata)
+        return true;
+
+    if (SDL_Texture *target_texture = m_LoadedTextures[_File.m_filepath])
+    {
+        _File.m_userdata = target_texture;
+        return true;
+    }
+    else
+    {
+        SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.getInfo().data, _File.getInfo().size);
+        if (!temp_rw)
+            goto err;
+
+        if (IMG_isPNG(temp_rw))
+            _File.m_type = File::T_PNG;
+
+        m_LoadedTextures[_File.m_filepath] = IMG_LoadTexture_RW(sdl_renderer, temp_rw, 1);
+        if (!m_LoadedTextures[_File.m_filepath])
+            goto err;
+        _File.m_userdata = m_LoadedTextures[_File.m_filepath];
+        return true;
+    }
+
+err:
+    printf("%s\n", SDL_GetError());
+    return false;
+}
+
+void DrawingDevice::LegacyDrawTexture(const RectF& _Rectangle, File &_File)
+{
+    if (!LoadFileTexture(_File))
+        return;
+    if (_Rectangle.Size.X == 0 || _Rectangle.Size.Y == 0)
+        return;
+
+    START_DRAW
+    
+    float left = roundf(_Rectangle.getLeft() * scale) / scale;
+    float top = roundf(_Rectangle.getTop() * scale) / scale;
+    SDL_FRect render_rect{left, top, abs(_Rectangle.Size.X), abs(_Rectangle.Size.Y)};
+    int flip = (_Rectangle.Size.X < 0 ? bit(0) : 0) | (_Rectangle.Size.Y < 0 ? bit(1) : 0);
+
+    SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
+
+    END_DRAW
 }

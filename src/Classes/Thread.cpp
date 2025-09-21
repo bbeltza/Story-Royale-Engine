@@ -1,4 +1,5 @@
 #include "Classes/Thread.h"
+#include "Base/ThreadPool.h"
 
 int Thread::invokethread_handler(Thread *self)
 {
@@ -24,7 +25,7 @@ Thread::Thread(Function func, ...)
     m_func = func;
 
     for (int i = 0; i < NUM_ARGS; i++)
-        m_args[i] = va_arg(va, long long);
+        m_args[i] = va_arg(va, void*);
 
     va_end(va);
 

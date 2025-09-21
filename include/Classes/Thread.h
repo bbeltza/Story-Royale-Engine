@@ -4,7 +4,7 @@
 
 class Thread
 {
-    friend class ThreadPool;
+    friend class ThrdPool;
 public:
 
 typedef void (*Function)(...);
@@ -18,7 +18,7 @@ private:
     SDL_Thread *m_handle;
 
     Function m_func;
-    long long m_args[NUM_ARGS];
+    void* m_args[NUM_ARGS];
 
     static int invokethread_handler(Thread *self);
 };

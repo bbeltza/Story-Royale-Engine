@@ -9,7 +9,5 @@ void testmyself(char a, char b)
 
 void Game::Initialize()
 {
-    Engine->ThreadPool.Queue(testmyself, 3, 2);
-    SDL_Delay(500);
     Engine->ThreadPool.CreateImmediateThread(testmyself, 3, 2);
 }

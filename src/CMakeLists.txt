@@ -23,9 +23,11 @@ set(CORE_SOURCES
 "InstanceRendering.cpp"
 "Physics.cpp"
 "Querying.cpp"
+"Renderer.cpp"
 "Rendering.cpp"
 "Runtime.cpp"
 "ThreadPool.cpp"
+"Window.cpp"
 )
 
 set(DATATYPES_SOURCES
@@ -37,6 +39,7 @@ set(CLASS_SOURCES
 "File/Class.cpp"
 "File/Loading.cpp"
 
+"Texture.cpp"
 "Thread.cpp"
 "Timer.cpp"
 "Tween.cpp"

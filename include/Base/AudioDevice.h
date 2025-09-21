@@ -8,7 +8,7 @@
 
 class AudioData
 {
-    friend class AudioDevice;
+    friend class AudDevice;
 
     AudioData() = delete;
     AudioData(const char* path);
@@ -36,11 +36,11 @@ class AudioData
 
 #include "Classes/Audio.h"
 
-class AudioDevice
+class AudDevice
 {
     ENGINE_BASE
-    AudioDevice();
-    ~AudioDevice();
+    AudDevice(EngineClass*);
+    ~AudDevice();
 
     typedef std::unordered_map<std::string, std::unique_ptr<AudioData>> Map;
     typedef std::unordered_set<Audio*> QueueSet;
@@ -57,8 +57,8 @@ class AudioDevice
     bool IsAudioPlaying(Audio& audio) {return audio_queue.find(&audio) != audio_queue.end();}
 
     private:
-    static void callback(AudioDevice* dev, int32_t* stream, int len);
-    static void threadedload(AudioDevice* dev, AudioData* audio);
+    static void callback(AudDevice* dev, int32_t* stream, int len);
+    static void threadedload(AudDevice* dev, AudioData* audio);
     
     SDL_AudioSpec m_Spec;
     SDL_AudioDeviceID m_Id;

@@ -10,6 +10,7 @@
 class InputClass
 {
     ENGINE_BASE
+    InputClass(EngineClass* engine): m_Engine(engine) {}
 public:
     // Mouse button enum
 
@@ -45,8 +46,6 @@ public:
     //
     struct _mState { float x, y; uint32_t state; };
 private:
-    InputClass() {}
-
     void processWindowEvents(SDL_Event* event);
     void processEvents();
     void queryObjects();

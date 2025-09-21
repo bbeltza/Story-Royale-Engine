@@ -72,21 +72,18 @@ void GuiComponents::Text::render(Game::GuiContainer* obj)
 void Components::Sprite::Render(Game::Entity* _entity)
 {
     if (textures.empty()) return;
+
     auto frame = std::min(current_frame, textures.size() - 1);
     current_frame = frame;
-    File& texture = *textures[frame];
-    if (!Engine->DrawingContext.LoadFileTexture(texture)) return;
-    
-    int w, h;
-    SDL_QueryTexture((SDL_Texture*)texture.GetUserData(), NULL, NULL, &w, &h);
+    Texture& texture = *textures[frame];
 
     RectF render_rect(
         Game::World::Current()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y),
-        {w, h}
+        texture.GetSize()
     );
 
     render_rect.Size *= Scale;
     render_rect.Position += Offset;
 
-    Engine->DrawingContext.DrawTexture(render_rect, texture);
+    Engine->DrawingContext.DrawTexture(texture, render_rect);
 }
