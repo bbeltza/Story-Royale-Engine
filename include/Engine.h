@@ -34,6 +34,7 @@ private:
     // Private use functions
 
     void loop();
+    void run_multithreaded();
     void Run();
 
     static int eventfilter(EngineClass *engine, SDL_Event *ev);

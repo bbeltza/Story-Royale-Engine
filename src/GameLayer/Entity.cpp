@@ -34,11 +34,15 @@ void Game::Entity::call_render()
 
 void Game::Entity::call_pupdate(TimeStamp dt)
 {
+    *const_cast<Vector2f*>(&lastVelocity) = Position;
     for (auto c : m_Components)
     {
         if (componentDisabled(c)) continue;
         if (c->hasProcessFlag(Component::p_pUpdate))
             c->pUpdate(this, dt);
     }
+
+    *const_cast<Vector2f*>(&lastVelocity) = Position.getSub(lastVelocity);
+
     return pUpdate(dt);
 }

@@ -6,12 +6,17 @@
 
 - Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
 
-- More options to the EntityControl camera controller (Like adding smoothness, and adding bounds for the camera to move)
+- More options to the EntityControl camera controller
+	- Smoothness: DONE
+	- Bounds: TODO
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
 - Better error messaging
 	- More error codes
 	- Message box api (Something that should directly use the operating system's API because SDL's one is really obsolete)
+
+- Change the pipeline:
+	- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
 
 - Work on the game ^^
 

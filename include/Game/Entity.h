@@ -25,6 +25,8 @@ namespace Game
 
         public:
         Vector2f Position;
+        const Vector2f lastVelocity;
+
         int zIndex = 0;
 
         template <class _comp> inline const std::list<_comp *> &getComponents() const { return *(std::list<_comp *> *)(&m_Components); }

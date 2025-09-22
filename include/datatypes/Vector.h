@@ -13,6 +13,26 @@ struct Vector2
     template <class _Num2> Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
     template <class _Num2> Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
+    _Num X, Y;
+
+    inline void Add(const Vector2& other) { X += other.X; Y += other.Y; }
+    inline void Sub(const Vector2& other) { X -= other.X; Y -= other.Y; }
+    inline void Mul(const Vector2& other) { X *= other.X; Y *= other.Y; }
+    inline void Div(const Vector2& other) { X /= other.X; Y /= other.Y; }
+    inline void Add(const _Num other) { X += other; Y += other; }
+    inline void Sub(const _Num other) { X -= other; Y -= other; }
+    inline void Mul(const _Num other) { X *= other; Y *= other; }
+    inline void Div(const _Num other) { X /= other; Y /= other; }
+
+    inline Vector2 getAdd(const Vector2& other) const { return {X + other.X, Y + other.Y}; }
+    inline Vector2 getSub(const Vector2& other) const { return {X - other.X, Y - other.Y}; }
+    inline Vector2 getMul(const Vector2& other) const { return {X * other.X, Y * other.Y}; }
+    inline Vector2 getDiv(const Vector2& other) const { return {X / other.X, Y / other.Y}; }
+    inline Vector2 getAdd(const _Num other) const { return {X + other, Y + other}; }
+    inline Vector2 getSub(const _Num other) const { return {X - other, Y - other}; }
+    inline Vector2 getMul(const _Num other) const { return {X * other, Y * other}; }
+    inline Vector2 getDiv(const _Num other) const { return {X / other, Y / other}; }
+
     inline void Print() const {printf("{ %g, %g }\n", (double)X, (double)Y);}
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
@@ -25,6 +45,7 @@ struct Vector2
     inline bool isZero() const {return !(X || Y);}
 
     inline operator bool() const {return X && Y;}
+    //template <class _Num2> inline operator Vector2<_Num2>() const { return Vector2<_Num2>(X, Y); }
 
     // A vector with its components set to 0
     static const Vector2<_Num> ZERO;
@@ -33,7 +54,6 @@ struct Vector2
     // A vector with its components set to 0.5, however, if the vector should be composed of floating point types, otherwise the components will be rounded to 0
     static const Vector2<_Num> CENTER;
 
-    _Num X, Y;
 };
 
 #define vec2 Vector2<_Num>
