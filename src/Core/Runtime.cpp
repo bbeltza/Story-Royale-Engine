@@ -113,14 +113,6 @@ void EngineClass::Run()
     }
 }
 
-void EngineClass::run_multithreaded()
-{
-    while (1)
-    {
-        
-    }
-}
-
 void EngineClass::loop()
 {
     auto start = Timer::s_global_clock.now();

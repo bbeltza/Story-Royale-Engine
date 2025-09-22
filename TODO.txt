@@ -18,6 +18,13 @@
 - Change the pipeline:
 	- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
 
+- System/global functions, global functions that don't have any namespace:
+	- logging (errors, informations, debugging...)
+	- yielding (waiting or yielding a thread (this last one can be done on the ThreadPool API))
+	- spawning functions to the main thread (this is useful for stuff that can only be done on the main thread, like the whole texture loading shenanigan)
+	- probably more...
+	- they'll also mostly be written in C (so I get more C code ya!)
+
 - Work on the game ^^
 
 (current version: 0.009.19)
