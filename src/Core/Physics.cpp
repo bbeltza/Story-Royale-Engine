@@ -8,4 +8,9 @@
 
 using namespace Components;
 
+void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
+{
+	
+}
+
 // Physics are temporarely unavaiable! Will be working on them...

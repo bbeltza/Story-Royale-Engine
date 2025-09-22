@@ -4,6 +4,8 @@
 #include "Game/Entity.h"
 #include "Game/World.h"
 
+std::unordered_set<Components::Shape*> Components::Shape::shape_set;
+
 Components::Shape::Shape() :
     Rect(),
     shape(RectangleShape),

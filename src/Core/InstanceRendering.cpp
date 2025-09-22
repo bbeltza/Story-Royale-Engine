@@ -31,20 +31,22 @@ void Game::Entity::_debugDraw()
 
 void Components::Shape::Render(Game::Entity* _entity)
 {
-    if (!(this->flags.Has(VisibleFlag))) return;
+    if (!this->flags.Has(VisibleFlag)) return;
 
-    const RectF render_rect = getRealRect(_entity);
     //Engine->DrawingContext.DrawRectangleAtWorld(render_rect, {255, 0, 0, 255}, DrawingDevice::dm_Stroke);
     Vector2f pos = _entity->getWorld<Game::World>()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
 
-
+    
     switch (shape)
     {
         case CircleShape:
-            Engine->DrawingContext.DrawCircle(pos, Rect.Size.X / 2, Color);
+	    Engine->DrawingContext.DrawCircle(pos, Rect.Size.X / 2, Color);
             break;
         default:
-            Engine->DrawingContext.DrawRectangleAtWorld(render_rect, Color);
+	    {
+		RectF render_rect = getRealRect(_entity);
+	        Engine->DrawingContext.DrawRectangleAtWorld(render_rect, Color);
+	    }
             break;
     }
 }

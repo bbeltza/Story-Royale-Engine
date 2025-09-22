@@ -9,6 +9,7 @@ namespace Components
 {
     class Shape : public ::Game::Component
     {
+	 static std::unordered_set<Shape*> shape_set
     public: // Enums
         enum ShapeForm : Flags8::Type
         {
@@ -34,6 +35,7 @@ namespace Components
         Flags8 flags;
 
         void Render(::Game::Entity*) override;
+	void pUpdate(::Game::Entity*, TimeStamp) override;
         bool Query(::Game::Entity*) override;
 
         bool isInScreenPoint(::Game::Entity*, Vector2f);
