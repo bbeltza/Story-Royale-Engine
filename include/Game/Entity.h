@@ -27,6 +27,7 @@ namespace Game
         Vector2f Position;
         int zIndex = 0;
 
+        template <class _comp> inline const std::list<_comp *> &getComponents() const { return *(std::list<_comp *> *)(&m_Components); }
         template <class w_Type> inline w_Type* getWorld() const { return reinterpret_cast<w_Type*>(m_world); }
         inline void addComponent(Component* const component) { m_Components.push_back(component); }
         inline void enableComponent(Component* const component) { m_DisabledComps.erase(component); }

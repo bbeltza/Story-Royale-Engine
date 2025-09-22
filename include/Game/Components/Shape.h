@@ -9,7 +9,8 @@ namespace Components
 {
     class Shape : public ::Game::Component
     {
-	 static std::unordered_set<Shape*> shape_set
+        typedef std::unordered_set<Components::Shape*> CollisionSet;
+        static CollisionSet& get_colliderset();
     public: // Enums
         enum ShapeForm : Flags8::Type
         {
@@ -19,13 +20,15 @@ namespace Components
         enum Flags : Flags8::Type
         {
             VisibleFlag = bit(0),
-            CanTouchFlag = bit(1),
-            CanCollideFlag = bit(2),
-            CanQueryFlag = bit(3),
+            AnchoredFlag = bit(1),
+            CanTouchFlag = bit(2),
+            CanCollideFlag = bit(3),
+            CanQueryFlag = bit(4),
         };
 
     public:
         Shape();
+        ~Shape();
 
         // The rect representing the area of the shape by its size, and the offset from the entity by its position
         RectF Rect;
@@ -34,8 +37,8 @@ namespace Components
         ShapeForm shape;
         Flags8 flags;
 
+	    void pUpdate(::Game::Entity*, TimeStamp) override;
         void Render(::Game::Entity*) override;
-	void pUpdate(::Game::Entity*, TimeStamp) override;
         bool Query(::Game::Entity*) override;
 
         bool isInScreenPoint(::Game::Entity*, Vector2f);

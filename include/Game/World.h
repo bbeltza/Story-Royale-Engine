@@ -66,11 +66,7 @@ namespace Game
         // Adds a Base Entity to the world, it's just an alias for addEntity<Entity>();
         Entity *addEntity();
         // Gets the list of entities that the world has, templated by a derived class of your choice.
-        template <class _entity>
-        inline const std::list<_entity *> &getEntities() const
-        {
-            return *(std::list<_entity *> *)(&m_Entities);
-        }
+        template <class _entity> inline const std::list<_entity *> &getEntities() const { return *(std::list<_entity *> *)(&m_Entities); }
 
         // Coordinate converting
 
