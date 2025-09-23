@@ -9,15 +9,13 @@
 using namespace Components;
 
 void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
-{
-    CollisionSet& collider_set = get_colliderset();
-    
+{    
     if (!flags.Has(CanCollideFlag))
     {
-        collider_set.erase(this);
+        collider_set->erase(this);
         return;
     }
-    collider_set.insert(this);
+    collider_set->insert(this);
 
     if (flags.Has(AnchoredFlag)) return;
 
@@ -27,7 +25,7 @@ void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
 
         for (auto comp : ent->getComponents<Shape>())
         {
-            if (collider_set.count(comp) == 0) continue;
+            if (collider_set->count(comp) == 0) continue;
 
             RectF thisRect = getRealRect(entity),
                  otherRect = comp->getRealRect(ent);

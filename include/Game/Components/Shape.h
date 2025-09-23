@@ -9,8 +9,8 @@ namespace Components
 {
     class Shape : public ::Game::Component
     {
-        typedef std::unordered_set<Components::Shape*> CollisionSet;
-        static CollisionSet& get_colliderset();
+        typedef std::unordered_set<Components::Shape *> CollisionSet;
+
     public: // Enums
         enum ShapeForm : Flags8::Type
         {
@@ -27,6 +27,7 @@ namespace Components
         };
 
     public:
+        static CollisionSet *collider_set;
         Shape();
         ~Shape();
 
@@ -37,13 +38,13 @@ namespace Components
         ShapeForm shape;
         Flags8 flags;
 
-	    void pUpdate(::Game::Entity*, TimeStamp) override;
-        void Render(::Game::Entity*) override;
-        bool Query(::Game::Entity*) override;
+        void pUpdate(::Game::Entity *, TimeStamp) override;
+        void Render(::Game::Entity *) override;
+        bool Query(::Game::Entity *) override;
 
-        bool isInScreenPoint(::Game::Entity*, Vector2f);
+        bool isInScreenPoint(::Game::Entity *, Vector2f);
 
-        inline RectF getRealRect(::Game::Entity* parent) const { return {parent->Position + Rect.Position, Rect.Size}; }
-        inline bool collidesWith(::Game::Entity* parent, const RectF& other_Rect) const {return getRealRect(parent).Intersects(other_Rect);}
+        inline RectF getRealRect(::Game::Entity *parent) const { return {parent->Position + Rect.Position, Rect.Size}; }
+        inline bool collidesWith(::Game::Entity *parent, const RectF &other_Rect) const { return getRealRect(parent).Intersects(other_Rect); }
     };
 }

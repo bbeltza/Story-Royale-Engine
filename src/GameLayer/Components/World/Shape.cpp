@@ -4,26 +4,31 @@
 #include "Game/Entity.h"
 #include "Game/World.h"
 
-Components::Shape::CollisionSet& Components::Shape::get_colliderset()
-{
-    static CollisionSet set;
-    return set;
-}
+Components::Shape::CollisionSet* Components::Shape::collider_set = nullptr;
 
 Components::Shape::Shape() :
     Rect(),
     shape(RectangleShape),
     flags(VisibleFlag)
 {
-    CollisionSet& collider_set = get_colliderset();
+    if (!collider_set)
+        collider_set = new CollisionSet;
+
     p_flags = (ProcessFlags)(p_Render | p_pUpdate);
     if (flags.Has(CanCollideFlag))
-        collider_set.insert(this);
+        collider_set->insert(this);
 }
 
 Components::Shape::~Shape()
 {
-    get_colliderset().erase(this);
+    if (!collider_set) return;
+
+    collider_set->erase(this);
+    if (collider_set->empty())
+    {
+        delete collider_set;
+        collider_set = nullptr;
+    }
 }
 
 bool Components::Shape::isInScreenPoint(Game::Entity* p, Vector2f pt)

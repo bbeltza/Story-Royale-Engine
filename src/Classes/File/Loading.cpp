@@ -85,7 +85,6 @@ void File::Load(const char *path)
         info.data = new unsigned char[info.size];
         fseek(fs(info.handle), 0, SEEK_SET);
         fread(info.data, 1, info.size, fs(info.handle));
-        printf("%zd\n", info.size);
         for (size_t i = 0; i < info.size; i++)
         {
             //putchar(m_info().data[i]);
