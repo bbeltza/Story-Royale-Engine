@@ -1,0 +1,54 @@
+{
+    "type": "object",
+    "properties": {
+        "Resources": {
+            "description": "The resources folder of the game. It is evaluated by cmake, so don't forget to re-configure cmake after changing it",
+            "type": "string"
+        },
+        "Title": {
+            "type": "string",
+            "description": "The title of the Window/Application"
+        },
+        "StartResolution": {
+            "description": "The starting resolution of the window, can be [0, 0] if you've already precised a scaling resolution",
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "items": {
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "ScalingResolution": {
+            "description": "The target scaled resolution of the window, set it to [0, 0] if you don't want any target scaling",
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "items": {
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "TargetFPS": {
+            "description": "The target frametime of the runtime. Set it to 0 if you don't want to lock your FPS",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65536
+        },
+
+        "WindowOptions": {
+            "description": "Object containing several window options",
+            "type": ["object", "array"],
+            "properties": {
+
+            }
+        },
+        "AudioOptions": {
+            "description": "Object containing several options of the audio engine",
+            "type": ["object", "array"],
+            "properties": {
+
+            }
+        }
+    }
+}
