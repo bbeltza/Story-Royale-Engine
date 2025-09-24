@@ -1,5 +1,4 @@
 #include <standard.h>
-#include "System.h"
 
 #include "Game/GuiComponents/Text.h"
 

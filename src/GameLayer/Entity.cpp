@@ -2,7 +2,6 @@
 #include "Game/Entity.h"
 #include "Game/Component.h"
 #include "Base/Window.h"
-#include "System.h"
 
 
 Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)

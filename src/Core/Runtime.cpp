@@ -1,7 +1,7 @@
 #include <standard.h>
 
 #include "Engine.h"
-#include "System.h"
+#include "Sys.h"
 
 #include "Game/World.h"
 #include "Game/Component.h"
@@ -62,28 +62,6 @@ EngineClass::~EngineClass()
     Engine = nullptr;
 }
 
-void WindowClass::setTargetFPS(unsigned short fps)
-{
-    targetFrameTime = std::chrono::duration<TimeStamp>(GameSettings::TargetFPS > 0 ? (1.0f / GameSettings::TargetFPS) : 0);
-}
-
-void WindowClass::toggleFullscreen()
-{
-    static int oW, oH; // Old width and height for the window
-    fullscreen = !fullscreen;
-    if (fullscreen)
-    {
-        SDL_DisplayMode d;
-        SDL_GetDesktopDisplayMode(0, &d);
-        SDL_SetWindowDisplayMode(sdl_window, &d);
-    }
-
-    if (fullscreen)
-        SDL_GetWindowSize(sdl_window, &oW, &oH);
-
-    SDL_SetWindowFullscreen(sdl_window, fullscreen * SDL_WINDOW_FULLSCREEN_DESKTOP);
-}
-
 int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev)
 {
     #ifdef _WIN32
@@ -96,13 +74,16 @@ int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev)
     return 1;
 }
 
+void WindowClass::setTargetFPS(unsigned short fps)
+{
+    targetFrameTime = std::chrono::duration<TimeStamp>(fps > 0 ? (1.0 / fps) : 0);
+}
+
 void EngineClass::Run()
 {
     if (m_wasRun)
         return;
     m_wasRun = 1;
-
-    Window.setTargetFPS(GameSettings::TargetFPS);
 
     SDL_SetEventFilter((SDL_EventFilter)eventfilter, this);
 
@@ -146,10 +127,9 @@ void EngineClass::loop()
     }
 }
 
-bool System::m_exiting = false;
 bool EngineClass::pollWindowEvents()
 {
-    if (System::isExiting())
+    if (sysexiting())
         return 0;
 
     while (SDL_PollEvent(&Window.sdl_event) != 0)

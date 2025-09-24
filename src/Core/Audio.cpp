@@ -1,6 +1,5 @@
 #include <SDL.hpp>
 #include "Engine.h"
-#include "System.h"
 #include "Base/AudioDevice.h"
 
 #include "vorbis.h"
@@ -107,7 +106,6 @@ AudDevice::AudDevice(EngineClass* engine): m_Engine(engine)
     SDL_InitSubSystem(SDL_INIT_AUDIO);
 
     this->m_Id = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &m_Spec, 0);
-    System::CheckForSDLErrors();
 }
 
 AudDevice::~AudDevice()

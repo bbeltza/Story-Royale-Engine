@@ -14,6 +14,8 @@ WindowClass::WindowClass(EngineClass* engine): m_Engine(engine),
         start_flags.ToggleOn(SDL_WINDOW_RESIZABLE);
     if (GameSettings::WindowOptions.Hidden)
         start_flags.ToggleOn(SDL_WINDOW_HIDDEN);
+
+    setTargetFPS(GameSettings::TargetFPS);
 }
 
 void WindowClass::Setup()
@@ -36,4 +38,21 @@ void WindowClass::setIcon(const char* path)
     SDL_Surface* icon = IMG_Load_RW(SDL_RWFromConstMem(file.getRawData(), file.getSize()), 1);
     SDL_SetWindowIcon(sdl_window, icon);
     SDL_FreeSurface(icon);
+}
+
+void WindowClass::toggleFullscreen()
+{
+    static int oW, oH; // Old width and height for the window
+    fullscreen = !fullscreen;
+    if (fullscreen)
+    {
+        SDL_DisplayMode d;
+        SDL_GetDesktopDisplayMode(0, &d);
+        SDL_SetWindowDisplayMode(sdl_window, &d);
+    }
+
+    if (fullscreen)
+        SDL_GetWindowSize(sdl_window, &oW, &oH);
+
+    SDL_SetWindowFullscreen(sdl_window, fullscreen * SDL_WINDOW_FULLSCREEN_DESKTOP);
 }

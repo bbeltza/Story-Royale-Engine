@@ -9,10 +9,14 @@ endmacro()
 
 set(SOURCES 
 "main.cpp"
-"System.cpp"
 
 "Extras/ExtraSDL.c"
 "Extras/ExtraString.c"
+)
+
+set(SYS_SOURCES
+"error.c"
+"sleep.c"
 )
 
 set(CORE_SOURCES
@@ -73,13 +77,14 @@ set(COMPONENT_SOURCES
 set_dst_src(Components COMPONENT_SOURCES LAYER_SOURCES)
 
 set(WINDOWS_SOURCES
-"Windows.cpp"
+##"Windows.cpp"
 )
 
 if(WIN32)
     set(SYSTEMDEP_SOURCES ${WINDOWS_SOURCES})
 endif()
 
+set_src(Sys SYS_SOURCES)
 set_src(Core CORE_SOURCES)
 set_src(Classes CLASS_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)

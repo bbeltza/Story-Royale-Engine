@@ -1,7 +1,7 @@
 #define fs(x) (FILE *)x
 
 #include "Classes/File.h"
-#include "System.h"
+#include "Sys.h"
 
 const char res_prefix[] = "_res/";
 
@@ -54,7 +54,7 @@ void File::Load(const char *path)
                     resptr += strlen((const char*)resptr) + 5;
                 }
                 if (*resptr == '\n')
-                    return (void)System::Error(System::FILE_NOT_FOUND, path);
+                    return syserror(FILE_NOT_FOUND, path);
             }
         }
         else
@@ -73,7 +73,7 @@ void File::Load(const char *path)
         m_filepath = path;
         FILE* fstream = fopen(path, "rb");
         if (!fstream)
-            return System::Error(System::FILE_NOT_FOUND, path);
+            return syserror(FILE_NOT_FOUND, path);
 
         FileInfo &info = m_info();
 

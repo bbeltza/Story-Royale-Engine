@@ -9,8 +9,7 @@
 #include "Game/GuiComponents/Text.h"
 
 #include "GameSettings.h"
-
-#include "System.h"
+#include "Sys.h"
 
 #include "config.h"
 
@@ -226,8 +225,11 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
     else
     {
         SDL_RWops *temp_rw = SDL_RWFromConstMem(_FontFile.getInfo().data, _FontFile.getInfo().size);
-        m_LoadedFonts[_FontFile.m_filepath] = TTF_OpenFontRW(temp_rw, 1, 12);
-        System::CheckForSDLErrors();
+        TTF_Font* font = TTF_OpenFontRW(temp_rw, 1, 12);
+        if (!font)
+            {syserror(SDL_ERROR, "Failed loading font", SDL_GetError()); return;}
+        m_LoadedFonts[_FontFile.m_filepath] = font;
+
 
         _FontFile.m_type = File::T_TTF;
 

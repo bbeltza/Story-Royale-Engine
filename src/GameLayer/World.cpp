@@ -4,7 +4,7 @@
 #include "Game/Entity.h"
 
 #include "Engine.h"
-#include "System.h"
+#include "Sys.h"
 
 #include "config.h"
 
@@ -52,7 +52,7 @@ Game::World* Game::World::checkCurrent(World* world)
 
 void Game::World::err()
 {
-    return System::Error(System::WORLD_CREATION_ERROR);
+    return syserror(UNKNOWN_ERROR, "Failed instancing world, inserted World isn't inherited by base World");
 }
 
 void Game::World::call_pupdate(TimeStamp dt)

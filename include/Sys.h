@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 #define NUM_ARGS 8
 
@@ -6,21 +7,40 @@
 extern "C" {
 #endif
 
-typedef void* (*func_va)(...);
+typedef enum _syserr
+{
+	UNKNOWN_ERROR,
+    FILE_NOT_FOUND,
+    SDL_ERROR,
+    WORLD_CREATION_ERROR
+} syserr;
+
+typedef void* (*sysfunc_va)(void*, ...);
 typedef struct
 {
-	func_va function;
+	sysfunc_va function;
 	void* args[NUM_ARGS];
-} func_base;
+} sysfunc_base;
 
-void error(int code, ...);
-void defer(func_va function, ...);
+
+int syscode();
+int sysexiting();
+void sysexit(int code);
+void syserror(syserr code, ...);
+void sysdefer(sysfunc_va function, ...);
+void syspawn(sysfunc_va function, ...);
+
+void sysleeps(float s);
+void sysleepms(uint32_t s);
+
+int syslog(const char* fmt, ...);
+int syslogln(const char* fmt, ...);
 
 
 #ifdef __cplusplus
 }
 
-// Template wrappers can be implemented here so watch out!
+// Template C++ wrappers can be implemented here so watch out!
 
 //
 #endif
