@@ -8,6 +8,8 @@ static char err_buffer[500];
 static int exitcode = 0;
 static uint8_t exiting = 0;
 
+#define printmsg(stream) fprintf(stream, "Error: %s | Code: %d\n", err_buffer, code)
+
 void syserror(syserr code, ...)
 {
     va_list va;
@@ -33,7 +35,7 @@ void syserror(syserr code, ...)
 
     exitcode = code;
     
-    printf("Error: %s | Code: %d\n", err_buffer, code);
+    printmsg(stderr);
     abort();
 }
 
@@ -46,7 +48,7 @@ void sysexit(int code)
 
 int sysexiting()
 {
-    return exiting || exitcode;
+    return exiting;
 }
 
 int syscode()
