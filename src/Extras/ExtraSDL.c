@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include "C/ExtraSDL.h"
 
 int SDL_SetRenderDrawColorMod(SDL_Renderer* renderer, SDL_Color* color, SDL_Color* mod)
