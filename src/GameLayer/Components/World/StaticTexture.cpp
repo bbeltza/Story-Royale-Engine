@@ -6,6 +6,7 @@
 #include "Classes/File.h"
 
 #include "Engine.h"
+#include "Sys.h"
 
 Components::StaticTexture::StaticTexture()
 {
@@ -46,8 +47,7 @@ void Components::StaticTexture::AddFile(const char *path, std::list<Vector2f>& O
     _f.Load(path);
     if (!Engine->DrawingContext.LoadFileTexture(_f))
     {
-        printf("Failed adding a file to CustomTexture. File is not a texture or hasn't been found\n");
-        return;
+        return syserror(UNKNOWN_ERROR, "Failed adding a file to CustomTexture. File is not a texture or hasn't been found");
     }
 
     int width, height;
@@ -72,10 +72,10 @@ void Components::StaticTexture::AddFile(const char *path, std::list<Vector2f>& O
         if (maxYvec->Y < vec.Y)
             maxYvec = &vec;
     }
-    minXvec->Print();
-    maxXvec->Print();
-    minYvec->Print();
-    maxYvec->Print();
+    minXvec->PrintLn();
+    maxXvec->PrintLn();
+    minYvec->PrintLn();
+    maxYvec->PrintLn();
     
     Vector2i textureSize = {
         width + (maxXvec->X - minXvec->X),

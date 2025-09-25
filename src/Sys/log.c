@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdarg.h>
 #include "Sys.h"
 
 int sysvlog(const char* fmt, va_list va)
