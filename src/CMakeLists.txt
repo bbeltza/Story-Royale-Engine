@@ -15,6 +15,7 @@ set(SOURCES
 )
 
 set(SYS_SOURCES
+"log.c"
 "error.c"
 "sleep.c"
 )

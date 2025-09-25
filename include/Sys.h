@@ -33,6 +33,7 @@ void syspawn(sysfunc_va function, ...);
 void sysleeps(float s);
 void sysleepms(uint32_t s);
 
+int sysvlog(const char* fmt, va_list va);
 int syslog(const char* fmt, ...);
 int syslogln(const char* fmt, ...);
 

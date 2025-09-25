@@ -2,12 +2,18 @@
 #include <stdarg.h>
 #include "Sys.h"
 
+int sysvlog(const char* fmt, va_list va)
+{
+    fputs("[LOG]: ", stdout);
+    return vprintf(fmt, va);
+}
+
 int syslog(const char* fmt, ...)
 {
     va_list va;
     va_start(va, fmt);
 
-    int c = vprintf(fmt, va);
+    int c = sysvlog(fmt, va);
 
     va_end(va);
 
@@ -19,7 +25,7 @@ int syslogln(const char* fmt, ...)
     va_list va;
     va_start(va, fmt);
 
-    int c = syslog(fmt, va);
+    int c = sysvlog(fmt, va);
     putchar('\n');
 
     va_end(va);
