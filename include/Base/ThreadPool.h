@@ -5,6 +5,8 @@
 #include "EngineBase.h"
 #include "Classes/Thread.h"
 
+#include <assert.h>
+
 class ThrdPool
 {
     ENGINE_BASE
@@ -24,6 +26,7 @@ class ThrdPool
 
     inline void DetachThread(Thread& thrd)
     {
+        assert("Attempt to detach an invalid thread. Thread has probably already been detached by the ThreadPool destructor" && immediate_threads.count(&thrd));
         immediate_threads.erase(&thrd);
         delete &thrd;
     }

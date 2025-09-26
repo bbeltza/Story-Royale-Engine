@@ -46,14 +46,16 @@ EngineClass::EngineClass() : BeforeRender(false), AfterRender(false),
 EngineClass::~EngineClass()
 {
     SDL_DetachThread(m_entryThread);
-    ThreadPool.detach_threads();
 
     if (Game::World::m_Current)
         delete Game::World::m_Current;
     if (Game::GuiLayer::m_Current)
         delete Game::GuiLayer::m_Current;
 
+
     queueDestroyingInstances();
+    
+    ThreadPool.detach_threads();
 
     IMG_Quit();
     TTF_Quit();
