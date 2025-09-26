@@ -204,7 +204,7 @@ void DrawingDevice::DrawTexture(Texture& _Texture, const RectF& Rectangle, const
     END_DRAW
 }
 
-void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const char *text, int count, uint8_t alignment)
+void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, const Color3& Color, File &_FontFile, const char *text, int count, uint8_t alignment)
 {
     START_DRAW
 
@@ -319,6 +319,7 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, File &_FontFile, const cha
         }
         dest.y = _Bounds->y + y;
 
+        SDL_SetTextureColorMod(m_LoadedTextures[_FontFile.m_filepath], Color.r, Color.g, Color.b);
         SDL_RenderCopy(sdl_renderer, m_LoadedTextures[_FontFile.m_filepath], &src, &dest);
 
         SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, 255);
