@@ -5,11 +5,11 @@
 void Render()
 {
     Vector2f mpos = Engine->Input.getMouseScreenPosition();
-    mpos.Print();
+    mpos.PrintLn();
     Engine->DrawingContext.DrawRotatedRectangle(RectF(mpos.X, mpos.Y, 10, 10), 45, {255, 255, 255, 255});
 }
 
 void Game::Initialize()
 {
-    Engine->BeforeRender.Connect(event_callback(Render));
+    Engine->BeforeRender.Connect(event_callback(Render), nullptr);
 }
