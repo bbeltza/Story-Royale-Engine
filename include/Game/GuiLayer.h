@@ -20,7 +20,7 @@ namespace Game
         template <class layer_t> static inline layer_t* setCurrent()
         {
             if (m_Current)
-                delete m_Current;
+                m_Current->Destroy();
             auto new_layer = new layer_t;
             m_Current = reinterpret_cast<GuiLayer*>(new_layer);
             return new_layer;

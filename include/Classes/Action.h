@@ -25,7 +25,7 @@ class Action
         }
 
         private:
-        int press_frame = -1;
+        long long press_frame = -1;
 
         std::unordered_set<SDL_KeyCode> m_keycodes;
         std::unordered_set<SDL_Scancode> m_scancodes;

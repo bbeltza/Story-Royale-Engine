@@ -35,7 +35,7 @@ namespace Game
         static inline w_type *setCurrent()
         {
             if (m_Current)
-                delete m_Current;
+                m_Current->Destroy();
 
             auto new_current = new w_type;
             if (checkCurrent(reinterpret_cast<World *>(new_current)))

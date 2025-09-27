@@ -25,7 +25,7 @@ public:
     Signal AfterRender;
 
     // Get the number of frames that the engine has rendered
-    inline int runtime_frame() const {return m_frame;}
+    inline long long runtime_frame() const {return m_frame;}
 private:
     // Friend int main so that the entry point runs void Run()
     friend int main();
