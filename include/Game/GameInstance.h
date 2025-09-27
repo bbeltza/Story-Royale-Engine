@@ -4,7 +4,7 @@
 
 struct GameInstance
 {
-    virtual ~GameInstance() {}
+    virtual ~GameInstance();
 
     virtual void Update(TimeStamp dt) {}
     virtual void preRender() {}

@@ -14,17 +14,18 @@ class Action
         inline bool isPressed() {
             if (isKeyCodePressed() || isScanCodePressed() || isMousePressed())
                 return true;
-            already_pressed = false;
+            press_frame = -1;
             return false;
         }
         inline bool isJustPressed() {
-            if (isPressed() && !already_pressed)
-                return already_pressed = true;
-            return false;
+            if (isPressed() && press_frame < 0)
+                return (press_frame = Engine->runtime_frame()) || true;
+            
+            return press_frame == Engine->runtime_frame();
         }
 
         private:
-        bool already_pressed = false;
+        int press_frame = -1;
 
         std::unordered_set<SDL_KeyCode> m_keycodes;
         std::unordered_set<SDL_Scancode> m_scancodes;

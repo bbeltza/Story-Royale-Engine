@@ -12,7 +12,7 @@
 #include "Classes/Timer.h"
 #include "Classes/Tween.h"
 
-static std::vector<GameInstance *> destroyQueue;
+static std::unordered_set<GameInstance *> destroyQueue;
 
 static void queueDestroyingInstances();
 static SDL_mutex* queueDestroyMutex;
@@ -100,6 +100,7 @@ void EngineClass::Run()
 
 void EngineClass::loop()
 {
+    m_frame++;
     auto start = Timer::s_global_clock.now();
     TimeStamp dt = Timer::global_update();
     Tween::global_update(dt);
@@ -156,9 +157,8 @@ void queueDestroyingInstances()
     SDL_LockMutex(queueDestroyMutex);
     while (!destroyQueue.empty())
     {
-        GameInstance* back = destroyQueue.back();
+        GameInstance* back = *destroyQueue.begin();
         delete back;
-        destroyQueue.pop_back();
     }
     SDL_UnlockMutex(queueDestroyMutex);
 }
@@ -166,6 +166,11 @@ void queueDestroyingInstances()
 void GameInstance::Destroy()
 {
     SDL_LockMutex(queueDestroyMutex);
-    destroyQueue.push_back(this);
+    destroyQueue.insert(this);
     SDL_UnlockMutex(queueDestroyMutex);
+}
+
+GameInstance::~GameInstance()
+{
+    destroyQueue.erase(this);
 }

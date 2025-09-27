@@ -23,6 +23,9 @@ public:
     Signal OnUpdate;
     Signal BeforeRender;
     Signal AfterRender;
+
+    // Get the number of frames that the engine has rendered
+    inline int runtime_frame() const {return m_frame;}
 private:
     // Friend int main so that the entry point runs void Run()
     friend int main();
@@ -47,6 +50,8 @@ private:
     bool n_dtrc = false;
 
     SDL_Thread* m_entryThread;
+
+    long long m_frame = -1;
 };
 
 extern EngineClass* Engine;

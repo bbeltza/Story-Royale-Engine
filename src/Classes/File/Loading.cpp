@@ -24,6 +24,8 @@ void File::Load(const char *path)
             m_filepath = REAL_path;
 
             FileInfo &info = m_info();
+            SDL_AtomicAdd(&info.ref, 1);
+            syslogln("File::Load() %d", SDL_AtomicGet(&info.ref));
 
             if (!info.resbind)
             {
@@ -37,7 +39,7 @@ void File::Load(const char *path)
                     int cmp = strcmp((const char *)resptr, REAL_path);
                     if (!cmp)
                     {
-                        info.handle = (void *)resptr;
+                        //info.handle = (void *)resptr;
                         resptr += l + 1;
                         int32_t datapos = 0;
                         for (int i = 0; i <= 3; i++)
@@ -71,24 +73,26 @@ void File::Load(const char *path)
     else
     {
         m_filepath = path;
+        if (s_loaded->count(path)) return;
+
         FILE* fstream = fopen(path, "rb");
         if (!fstream)
+        {
             return syserror(FILE_NOT_FOUND, path);
+        }
 
         FileInfo &info = m_info();
 
+        SDL_AtomicAdd(&info.ref, 1);
         info.resbind = false;
-        info.handle = fstream;
 
-        fseek(fs(info.handle), 0, SEEK_END);
-        info.size = ftell(fs(info.handle));
+        fseek(fstream, 0, SEEK_END);
+        info.size = ftell(fstream);
         info.data = new unsigned char[info.size];
-        fseek(fs(info.handle), 0, SEEK_SET);
-        fread(info.data, 1, info.size, fs(info.handle));
-        for (size_t i = 0; i < info.size; i++)
-        {
-            //putchar(m_info().data[i]);
-        }
+        fseek(fstream, 0, SEEK_SET);
+        fread(info.data, 1, info.size, fstream);
+
+        fclose(fstream);
     }
 
     m_type = T_TXT;

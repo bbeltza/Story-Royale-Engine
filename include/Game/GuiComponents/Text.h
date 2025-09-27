@@ -33,8 +33,8 @@ namespace GuiComponents
     protected:
         void render(::Game::GuiContainer*) override;
     private:
-        File m_file;
-
+        const char* m_path;
         std::string m_str;
+        static std::unordered_map<std::string, File> file_map;
     };
 }
