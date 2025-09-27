@@ -40,7 +40,7 @@ void AudioData::Load()
     SDL_FreeRW(audio_rw);
 }
 
-AudioData::AudioData(const char *path)
+AudioData::AudioData(const char *path): Loaded(this)
 {
     m_file.Load(path);
 

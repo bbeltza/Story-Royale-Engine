@@ -18,7 +18,7 @@ void Tween::global_update(TimeStamp delta)
 }
 
 Tween::Tween(Info* info, void* target, const void* src, TargetType type):
-    m_info(info), m_type(type)
+    m_info(info), m_type(type), Completed(this)
 {
     m_target.u8 = (uint8_t*)target;
     m_src.u8 = (uint8_t*)src;

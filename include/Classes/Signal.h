@@ -1,6 +1,6 @@
 #pragma once
 
-typedef void (*EventFunction)(void *);
+typedef void (*EventFunction)(void *signal_data, void *connection_data, ...);
 
 #define event_callback(fn) (EventFunction) fn
 
@@ -9,17 +9,18 @@ class Connection;
 
 struct Signal
 {
-    Signal(bool multithreaded=true): m_multithreaded(multithreaded) {}
+    Signal(void* userdata, bool multithreaded=true): userdata(userdata), m_multithreaded(multithreaded) {}
     Signal(Signal &other) = delete;
     ~Signal();
 
-    Connection *Connect(EventFunction fn);
-    Connection *Once(EventFunction fn);
+    Connection *Connect(EventFunction fn, void* userdata);
+    Connection *Once(EventFunction fn, void* userdata);
     void* Wait();
 
-    inline void Fire() { return Fire(nullptr); }
-    void Fire(void *userdata);
+    void Fire(void* data=nullptr);
     void DisconnectAll();
+
+    void* userdata;
 
 private:
     Connection *m_handlerListHead = nullptr;
@@ -35,26 +36,25 @@ class Connection
 {
     friend struct Signal;
 
-    Connection(Signal *signal, EventFunction fn, void *self, bool once = false)
+    Connection(Signal *signal, EventFunction fn, void *data, bool once = false)
     : m_signal(signal),
       m_fn(fn),
       m_connected(1),
       m_next(nullptr),
-      m_class(self),
+      userdata(data),
       m_once(once)  {}
-    Connection(Signal *signal, EventFunction fn, bool once = false) : Connection(signal, fn, nullptr, once) {}
     Connection(Connection &other) = delete;
 
 public:
     void Disconnect() { m_connected = 0; }
     void Reconnect() { m_connected = 1; }
+    void* userdata;
 
 private:
     friend struct Signal;
     ~Connection() {}
 
     EventFunction m_fn;
-    void *m_class;
     const Signal *m_signal;
     Connection *m_next;
 

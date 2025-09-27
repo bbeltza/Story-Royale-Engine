@@ -17,13 +17,13 @@ namespace GuiPresets
         virtual void MouseHover(bool hovered) {}
 
     private:
-        static std::unordered_set<Button *> s_buttons;
-        static void clickevent(MouseButton *buttonData);
+        static void clickevent(void*, Button* button, MouseButton *buttonData);
         static Connection *s_clickconnection;
 
         void Update(TimeStamp dt) override;
 
         bool m_hover = 0;
+        Connection* m_connection;
         GuiComponents::Modulate m_mod;
     };
 }

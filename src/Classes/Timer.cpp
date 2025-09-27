@@ -10,7 +10,7 @@ Timer::Set& Timer::get_timers()
     return timers;
 }
 
-Timer::Timer(TimeStamp duration, bool looped): m_Duration(duration), Looped(looped)
+Timer::Timer(TimeStamp duration, bool looped): m_Duration(duration), Looped(looped), Hit(this), Hit_Single(this)
 {
     get_timers().insert(this);
 };

@@ -27,10 +27,10 @@
 
 - Better Signals:
 	- Not only the Fire() stack frame should give the data, but also:
-		- The signal
-		- The connection (Connect() function)
+		(DONE) - The signal
+		(DONE) - The connection (Connect() function)
 		- Finally the Fire() stack frame / thread, with varidic arguments
 
 - Work on the game ^^
 
-(current version: 0.009.27)
+(current version: 0.009.271)

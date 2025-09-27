@@ -1,45 +1,38 @@
 #include "Engine.h"
 #include "Game/GuiPresets/Button.h"
 
-std::unordered_set<GuiPresets::Button*> GuiPresets::Button::s_buttons;
 
-void GuiPresets::Button::clickevent(MouseButton* buttonData)
+void GuiPresets::Button::clickevent(void *, Button *button, MouseButton *buttonData)
 {
-    if (!buttonData->pressed) return;
-    for (auto button : s_buttons)
-    {
-        if (!button->canQuery) continue;
-        if (button->isHovering())
-        {
-            button->ButtonClick(buttonData);
-            break;
-        }
-    }
+    if (!buttonData->pressed)
+        return;
+
+    if (button->isHovering())
+        button->ButtonClick(buttonData);
 }
 
-Connection* GuiPresets::Button::s_clickconnection = nullptr;
+Connection *GuiPresets::Button::s_clickconnection = nullptr;
 
 GuiPresets::Button::Button()
 {
-    if (!s_clickconnection) Engine->Input.mouseButton.Connect(event_callback(clickevent));
-    s_buttons.insert(this);
+    m_connection = Engine->Input.mouseButton.Connect(event_callback(clickevent), this);
     addComponent(&m_mod);
 }
 
 GuiPresets::Button::~Button()
 {
-    s_buttons.erase(this);
+    m_connection->Disconnect();
 }
 
 void GuiPresets::Button::Update(TimeStamp dt)
 {
     m_hover = isHovering();
     m_mod.enabled = m_hover;
-    if (!m_hover) return;
+    if (!m_hover)
+        return;
 
     if (Engine->Input.isMouseButtonPressed())
-        m_mod.Value = { 150, 150, 150, 255 };
+        m_mod.Value = {150, 150, 150, 255};
     else
-        m_mod.Value = { 200, 200, 200, 255 };
-
+        m_mod.Value = {200, 200, 200, 255};
 }

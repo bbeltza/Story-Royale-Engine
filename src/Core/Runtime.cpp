@@ -22,7 +22,7 @@ const static std::chrono::duration<double> zero = std::chrono::duration<float>::
 
 EngineClass *Engine = nullptr;
 
-EngineClass::EngineClass() : BeforeRender(false), AfterRender(false),
+EngineClass::EngineClass() : BeforeRender(this, false), AfterRender(this, false), OnUpdate(this, true),
                              ThreadPool(this),
                              Window(this),
                              Input(this),

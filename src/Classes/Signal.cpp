@@ -1,10 +1,8 @@
-#include <SDL.hpp>
-#include "Classes/Signal.h"
+#include <utility>
 
-static void invoke_func(EventFunction func, void* userdata)
-{
-    SDL_CreateThread((SDL_ThreadFunction)func, NULL, userdata);
-}
+#include <SDL.hpp>
+
+#include "Engine.h"
 
 void* Signal::create_sem()
 {
@@ -36,18 +34,18 @@ void Signal::DisconnectAll()
 }
 
 #define SignalConnect(o) \
-auto connetion = new Connection(this, fn, o);  \
+auto connetion = new Connection(this, fn, data, o);  \
     if (m_handlerListHead)  \
         connetion->m_next = m_handlerListHead;  \
     this->m_handlerListHead = connetion;    \
     return connetion;   \
 
-Connection* Signal::Connect(EventFunction fn)
+Connection* Signal::Connect(EventFunction fn, void* data)
 {
     SignalConnect(false)
 }
 
-Connection* Signal::Once(EventFunction fn)
+Connection* Signal::Once(EventFunction fn, void* data)
 {
     SignalConnect(true)
 }
@@ -58,9 +56,9 @@ void* Signal::Wait()
     return m_returnData;
 }
 
-void Signal::Fire(void* userdata)
+void Signal::Fire(void* data)
 {
-    m_returnData = userdata;
+    m_returnData = data;
 
     Connection* item = m_handlerListHead;
     SDL_SemPost((SDL_sem*)m_waitSem);
@@ -69,9 +67,9 @@ void Signal::Fire(void* userdata)
         if (item->m_connected)
         {
             if (m_multithreaded)
-                invoke_func(item->m_fn, userdata);
+                Engine->ThreadPool.CreateImmediateThread(item->m_fn, userdata, item->userdata, data);
             else
-                item->m_fn(userdata);
+                item->m_fn(userdata, item->userdata, data);
             
             if (item->m_once)
             {

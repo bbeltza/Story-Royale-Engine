@@ -4,19 +4,14 @@
 
 use_namespace
 
-Vector2f DragControl::s_lastmouseDelta;
-Connection* DragControl::s_mouseConnection = nullptr;
-
 DragControl::DragControl()
 {
-    if (!s_mouseConnection)
-        s_mouseConnection = Engine->Input.mouseMove.Connect(event_callback(DragControl::mouseMoveCallback));
-    s_mouseConnection->Reconnect();
+    m_mouseConnection = Engine->Input.mouseMove.Connect(event_callback(DragControl::mouseMoveCallback), this);
 }
 
 DragControl::~DragControl()
 {
-    s_mouseConnection->Disconnect();
+    m_mouseConnection->Disconnect();
 }
 
 void DragControl::Update(TimeStamp delta)
@@ -25,8 +20,8 @@ void DragControl::Update(TimeStamp delta)
 
     if (Engine->Input.isMouseButtonPressed(InputClass::mbRight))
     {
-        m_camSpeed.X = s_lastmouseDelta.X;
-        m_camSpeed.Y = s_lastmouseDelta.Y;
+        m_camSpeed.X = m_lastmouseDelta.X;
+        m_camSpeed.Y = m_lastmouseDelta.Y;
     }
     else
     {
@@ -42,15 +37,15 @@ void DragControl::Update(TimeStamp delta)
     CurrentCamera.x -= m_camSpeed.X;
     CurrentCamera.y -= m_camSpeed.Y;
     
-    s_lastmouseDelta.X = 0;
-    s_lastmouseDelta.Y = 0;
+    m_lastmouseDelta.X = 0;
+    m_lastmouseDelta.Y = 0;
 }
 
-void DragControl::mouseMoveCallback(const MouseMove* event)
+void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)
 {
     if (event->state & SDL_BUTTON(InputClass::mbRight))
     {
-        s_lastmouseDelta.X += event->delta.X;
-        s_lastmouseDelta.Y += event->delta.Y;
+        self->m_lastmouseDelta.X += event->delta.X;
+        self->m_lastmouseDelta.Y += event->delta.Y;
     }
 }

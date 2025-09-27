@@ -10,7 +10,11 @@
 class InputClass
 {
     ENGINE_BASE
-    InputClass(EngineClass* engine): m_Engine(engine) {}
+    InputClass(EngineClass* engine): m_Engine(engine),
+                                    keyEvent(this),
+                                    mouseButton(this),
+                                    mouseWheel(this),
+                                    mouseMove(this) {}
 public:
     // Mouse button enum
 

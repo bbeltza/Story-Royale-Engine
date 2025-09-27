@@ -20,9 +20,9 @@ namespace CameraControllers
         void Update(TimeStamp) override;
     private:
         Vector2f m_camSpeed;
+        Vector2f m_lastmouseDelta;
+        Connection* m_mouseConnection;
 
-        static Vector2f s_lastmouseDelta;
-        static Connection* s_mouseConnection;
-        static void mouseMoveCallback(const MouseMove*);
+        static void mouseMoveCallback(void*, DragControl*, const MouseMove*);
     };
 }
