@@ -15,6 +15,7 @@
 static std::vector<GameInstance *> destroyQueue;
 
 static void queueDestroyingInstances();
+static SDL_mutex* queueDestroyMutex;
 
 static std::chrono::duration<double> targetFrameTime;
 const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
@@ -38,6 +39,7 @@ EngineClass::EngineClass() : BeforeRender(false), AfterRender(false),
     TTF_Init();
 
     m_entryThread = SDL_CreateThread((SDL_ThreadFunction)Game::Initialize, "Entry", NULL);
+    queueDestroyMutex = SDL_CreateMutex();
 
     Window.Setup();
     DrawingContext.Setup();
@@ -151,14 +153,19 @@ bool EngineClass::pollWindowEvents()
 
 void queueDestroyingInstances()
 {
+    SDL_LockMutex(queueDestroyMutex);
     while (!destroyQueue.empty())
     {
-        delete destroyQueue.back();
+        GameInstance* back = destroyQueue.back();
+        delete back;
         destroyQueue.pop_back();
     }
+    SDL_UnlockMutex(queueDestroyMutex);
 }
 
 void GameInstance::Destroy()
 {
+    SDL_LockMutex(queueDestroyMutex);
     destroyQueue.push_back(this);
+    SDL_UnlockMutex(queueDestroyMutex);
 }

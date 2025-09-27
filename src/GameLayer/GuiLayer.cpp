@@ -73,6 +73,7 @@ void Game::GuiContainer::_renderchildren()
 
         obj->_renderchildren();
     }
+    Rendered.Fire(this);
 }
 
 void Game::GuiContainer::call_update(TimeStamp dt)
@@ -84,6 +85,7 @@ void Game::GuiContainer::call_update(TimeStamp dt)
         if (obj->visible)
             obj->call_update(dt);
     }
+    Updated.Fire(this);
 }
 
 Game::GuiComponent::GuiComponent() {}

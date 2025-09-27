@@ -5,7 +5,7 @@ typedef void (*EventFunction)(void *);
 #define event_callback(fn) (EventFunction) fn
 
 struct Signal;
-struct Connection;
+class Connection;
 
 struct Signal
 {

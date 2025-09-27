@@ -57,12 +57,15 @@ void Game::World::err()
 
 void Game::World::call_pupdate(TimeStamp dt)
 {
+    pUpdate(dt);
     for (Entity *entity : m_Entities)
     {
         entity->call_pupdate(dt);
+        entity->pUpdated.Fire(entity);
     }
 
     CurrentCamera.Update(dt);
+    pUpdated.Fire(this);
 }
 
 void Game::World::call_update(TimeStamp dt)
@@ -71,7 +74,10 @@ void Game::World::call_update(TimeStamp dt)
     for (Entity* entity : getEntities<Entity>())
     {
         entity->Update(dt);
+        entity->Updated.Fire(entity);
     }
+
+    Updated.Fire(this);
 }
 
 void Game::World::call_render()
@@ -81,14 +87,20 @@ void Game::World::call_render()
     if (!m_Current) return;
 
     m_Current->m_Entities.sort(cmp);
+
+    m_Current->preRender();
     for (Entity* entity : m_Current->m_Entities)
     {
         entity->preRender();
         entity->call_render();
         entity->postRender();
+        entity->Rendered.Fire(entity);
     }
+    m_Current->postRender();
 
 #ifdef DRAW_ENTITY_CENTER
     for (Entity* entity : Game::World::m_Current->m_Entities) entity->_debugDraw();
 #endif
+
+    m_Current->Rendered.Fire(m_Current);
 }

@@ -3,7 +3,7 @@
 
 int Thread::invokethread_handler(Thread *self)
 {
-    self->m_func(
+    self->t_returned = self->m_func(
         self->m_args[0],
         self->m_args[1],
         self->m_args[2],
@@ -35,4 +35,5 @@ Thread::Thread(Function func, ...)
 Thread::~Thread()
 {
     SDL_DetachThread(m_handle);
+    printf("Thread done\n");
 }

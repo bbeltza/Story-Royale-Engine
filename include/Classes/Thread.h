@@ -7,7 +7,7 @@ class Thread
     friend class ThrdPool;
 public:
 
-typedef void (*Function)(...);
+typedef void* (*Function)(...);
 static const uint8_t NUM_ARGS = 8;  
 public:
 /* Ready for some public methods */
@@ -19,6 +19,8 @@ private:
 
     Function m_func;
     void* m_args[NUM_ARGS];
+
+    void* t_returned;
 
     static int invokethread_handler(Thread *self);
 };

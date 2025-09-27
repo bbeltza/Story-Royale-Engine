@@ -31,6 +31,16 @@ class ThrdPool
         delete &thrd;
     }
 
+    template <class ret>
+    inline ret JoinThread(Thread& thrd)
+    {
+        SDL_WaitThread(thrd.m_handle, NULL);
+        void* retval = thrd.t_returned;
+        immediate_threads.erase(&thrd);
+        return (ret)retval;
+    }
+    inline void* JoinThread(Thread& thrd) { return JoinThread<void*>(thrd); }
+
     private:
     struct FuncBase
     {

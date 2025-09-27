@@ -34,11 +34,11 @@ private:
 struct FileInfo
     {
         ~FileInfo() {if (data && !resbind) {delete[] data; fclose((FILE*)handle);}}
-        size_t size;
-        void* handle;
+        size_t size = 0;
+        void* handle = nullptr;
         unsigned char* data = nullptr;
         // Whether the file points to the embedded resources or not 
-        bool resbind;
+        bool resbind = false;
     };
     typedef std::unordered_map<std::string, File::FileInfo> Map;
 
