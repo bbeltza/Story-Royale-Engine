@@ -14,7 +14,7 @@ class InputClass
                                     keyEvent(this),
                                     mouseButton(this),
                                     mouseWheel(this),
-                                    mouseMove(this) {}
+                                    mouseMove(this, false) {}
 public:
     // Mouse button enum
 

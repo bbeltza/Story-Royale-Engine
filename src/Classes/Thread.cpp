@@ -1,5 +1,5 @@
 #include "Classes/Thread.h"
-#include "Base/ThreadPool.h"
+#include "Engine.h"
 
 int Thread::invokethread_handler(Thread *self)
 {
@@ -13,6 +13,8 @@ int Thread::invokethread_handler(Thread *self)
         self->m_args[6],
         self->m_args[7]
     );
+
+    Engine->ThreadPool.DetachThread(*self);
 
     return 0;
 }
@@ -35,5 +37,4 @@ Thread::Thread(Function func, ...)
 Thread::~Thread()
 {
     SDL_DetachThread(m_handle);
-    printf("Thread done\n");
 }
