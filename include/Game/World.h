@@ -4,7 +4,7 @@
 #include "GameInstance.h"
 #include "Camera.h"
 
-#include "C/Color.h"
+#include "Datatypes/Color.h"
 #include "Datatypes/Vector.h"
 
 class InputClass;

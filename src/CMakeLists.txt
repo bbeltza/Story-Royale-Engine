@@ -36,7 +36,6 @@ set(CORE_SOURCES
 )
 
 set(DATATYPES_SOURCES
-"Color.c"
 "Color.cpp"
 "UDim.cpp"
 )

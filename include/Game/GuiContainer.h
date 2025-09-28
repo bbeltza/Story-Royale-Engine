@@ -2,7 +2,7 @@
 #include "standard.h"
 #include "Game/GameInstance.h"
 
-#include "C/Color.h"
+#include "Datatypes/Color.h"
 #include "Datatypes/Rect.h"
 #include "Datatypes/TimeStamp.h"
 

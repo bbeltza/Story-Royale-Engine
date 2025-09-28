@@ -3,7 +3,7 @@
 #include "Game/Entity.h"
 
 #include "Datatypes/Rect.h"
-#include "C/Color.h"
+#include "Datatypes/Color.h"
 
 namespace Components
 {
