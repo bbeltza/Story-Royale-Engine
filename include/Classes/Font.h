@@ -24,8 +24,6 @@ class Font
     Font(const char* path, int pt=12);
     ~Font();
 
-    void RenderTest();
-
     void Render(const RectF& bounds, const char* text, int count, HAlign halignment=HLeft, VAlign valignment=VTop);
     bool PreloadTextures(const char* desired);
     private:

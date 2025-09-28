@@ -14,28 +14,6 @@ Font::~Font()
     if (TTF_WasInit()) TTF_CloseFont(m_font);
 }
 
-const char* teststr = "Hello World guys...";
-
-void Font::RenderTest()
-{
-    RectF advance;
-    size_t n = 0;
-    while (teststr[n])
-    {
-        char c = teststr[n];
-        if (!textures.count(c)) textures.emplace(c, TTF_RenderGlyph_Solid(m_font, c, Color4::WHITE));
-
-        Texture& texture = textures.at(c);
-        advance.Size = texture.GetSize();
-
-        Engine->DrawingContext.DrawTexture(texture, advance, Color4::WHITE, Vector2f::ZERO);
-
-        advance.Position.X += advance.Size.X;
-
-        n++;
-    }
-}
-
 bool Font::PreloadTextures(const char* text)
 {
     bool unloaded = false;
