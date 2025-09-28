@@ -64,12 +64,6 @@ void GuiComponents::Stroke::render(Game::GuiContainer* obj)
         Engine->DrawingContext.DrawRectangle(absolute, color, *getModulate(obj), Vector2f::ZERO, DrawingDevice::dm_Stroke);
     }
 }
-void GuiComponents::Text::render(Game::GuiContainer* obj)
-{
-    RectF* r = getAbsolute(obj);
-    SDL_Rect ir{(int)r->Position.X, (int)r->Position.Y, (int)r->Size.X, (int)r->Size.Y};
-    Engine->DrawingContext.DrawFont(&ir, color, file_map[m_path], m_str.c_str(), count, Alignment);
-}
 
 void Components::Sprite::Render(Game::Entity* _entity)
 {

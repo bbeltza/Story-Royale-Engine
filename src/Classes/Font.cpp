@@ -41,7 +41,6 @@ void Font::Render(const RectF& bounds, const char* text, int count, HAlign halig
     size_t scount = count < 0 ? (size_t)-1 : count;
     size_t n = 0;
     RectF advance = bounds;
-    advance.Position.Y -= 3;
     while (text[n])
     {
         if (n >= scount) break;

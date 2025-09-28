@@ -209,6 +209,7 @@ void DrawingDevice::DrawTexture(Texture& _Texture, const RectF& Rectangle, const
     END_DRAW
 }
 
+#if 0
 void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, const Color3& Color, File &_FontFile, const char *text, int count, uint8_t alignment)
 {
     START_DRAW
@@ -337,6 +338,7 @@ void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, const Color3& Color, File 
 
     END_DRAW
 }
+#endif
 
 //
 
