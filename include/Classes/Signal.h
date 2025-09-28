@@ -18,6 +18,9 @@ struct Signal
     Signal(Signal &other) = delete;
     ~Signal();
 
+    template <typename Func, typename T> inline Connection* Connect(Func fn, T userdata) { return Connect(event_callback(fn), (void*)userdata); }
+    template <typename Func, typename T> inline Connection* Once(Func fn, T* userdata) { return Once(event_callback(fn), (void*)userdata); }
+
     Connection *Connect(EventFunction fn, void* userdata);
     Connection *Once(EventFunction fn, void* userdata);
     argbase Wait();

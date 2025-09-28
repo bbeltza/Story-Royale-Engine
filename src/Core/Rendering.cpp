@@ -201,6 +201,11 @@ void DrawingDevice::DrawTexture(Texture& _Texture, const RectF& Rectangle, const
 
     SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_Texture.texture, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
 
+    #if 0
+    SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);
+    SDL_RenderDrawRectF(sdl_renderer, &render_rect);
+    #endif
+
     END_DRAW
 }
 

@@ -45,6 +45,6 @@ static void mouse(void*, TextureEntity* ent, MouseButton* event)
 
 void Game::Initialize()
 {
-    m_buttonConnection = Engine->Input.mouseButton.Connect(event_callback(mouse), nullptr);
+    m_buttonConnection = Engine->Input.mouseButton.Connect(mouse, nullptr);
     Game::World::setCurrent<TexturePalace>();
 }

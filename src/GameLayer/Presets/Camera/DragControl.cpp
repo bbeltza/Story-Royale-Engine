@@ -6,7 +6,7 @@ use_namespace
 
 DragControl::DragControl()
 {
-    m_mouseConnection = Engine->Input.mouseMove.Connect(event_callback(DragControl::mouseMoveCallback), this);
+    m_mouseConnection = Engine->Input.mouseMove.Connect(DragControl::mouseMoveCallback, this);
 }
 
 DragControl::~DragControl()

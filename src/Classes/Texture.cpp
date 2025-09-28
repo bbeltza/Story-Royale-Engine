@@ -2,7 +2,6 @@
 #include "Classes/Texture.h"
 
 Texture::Texture(Texture&& moving): 
-    m_file(std::move(moving.m_file)),
     texture(moving.texture),
     file_surface(moving.file_surface)
 {
@@ -12,13 +11,19 @@ Texture::Texture(Texture&& moving):
 
 Texture::Texture(const char* path)
 {
-    m_file.Load(path);
+    File file;
+    file.Load(path);
 
     {
-        SDL_RWops* rw = SDL_RWFromConstMem(m_file.getRawData(), m_file.getSize());
+        SDL_RWops* rw = SDL_RWFromConstMem(file.getRawData(), file.getSize());
         file_surface = IMG_Load_RW(rw, 1);
-        Engine->DrawingContext.textures_toload.push_back(this);
     }
+    push_queue();
+}
+
+Texture::Texture(void* from_surface): file_surface(from_surface)
+{
+    push_queue();
 }
 
 Texture::Texture(int w, int h): texture(SDL_CreateTexture(Engine->DrawingContext.sdl_renderer, 0, SDL_TEXTUREACCESS_STREAMING, w, h))
@@ -40,4 +45,9 @@ Vector2i Texture::GetSize()
     int w, h;
     SDL_QueryTexture(m_Texture, NULL, NULL, &w, &h);
     return {w, h};
+}
+
+void Texture::push_queue()
+{
+    Engine->DrawingContext.textures_toload.push_back(this);
 }

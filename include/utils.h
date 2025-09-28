@@ -6,5 +6,9 @@
 
 #define bit(x) (1 << x)
 
-#define max(x, y) ( x < y ? y : x)
-#define min(x, y) ( x > y ? y : x)
+#ifndef mmax
+#define mmax(x, y) ( x < y ? y : x)
+#endif
+#ifndef mmin
+#define mmin(x, y) ( x > y ? y : x)
+#endif

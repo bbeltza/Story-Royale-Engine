@@ -47,7 +47,7 @@ void DisplayText::postRender()
         col = {255, 0, 0, 255}; // Red
 
     Vector2f mPos = Engine->Input.getMouseWorldPosition();
-    mPos.Print();
+    mPos.PrintLn();
     mouseRect.Position.X = mPos.X;
     mouseRect.Position.Y = mPos.Y;
     Engine->DrawingContext.DrawRectangleAtWorld(staticRect, {255, 255, 255, 255});
@@ -62,5 +62,5 @@ void Game::Initialize()
 {
     Game::GuiLayer::setCurrent<DisplayText>();
 
-    Engine->Input.mouseWheel.Connect(event_callback(mousewheel));
+    Engine->Input.mouseWheel.Connect(mousewheel, nullptr);
 }

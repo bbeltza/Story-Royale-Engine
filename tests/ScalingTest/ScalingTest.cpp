@@ -11,5 +11,5 @@ void Render()
 
 void Game::Initialize()
 {
-    Engine->BeforeRender.Connect(event_callback(Render), nullptr);
+    Engine->BeforeRender.Connect(Render, nullptr);
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <SDL_pixels.h>
 #include <standard.h>
 #include "syslog.h"
 
@@ -71,6 +72,8 @@ struct Color4
 	inline void operator+=(const Color4& other) { Add(other); }
 	inline void operator-=(const Color4& other) { Sub(other); }
 	inline void operator*=(const Color4& other) { Mul(other); }
+
+	inline operator SDL_Color&() const {return *(SDL_Color*)this;}
 
 	static const Color4 WHITE, BLACK, INVISIBLE;
 };
