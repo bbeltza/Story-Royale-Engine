@@ -9,15 +9,20 @@ class Connection;
 
 struct Signal
 {
+    struct argbase
+    {
+        void* args[6];
+    };
+
     Signal(void* userdata, bool multithreaded=true): userdata(userdata), m_multithreaded(multithreaded) {}
     Signal(Signal &other) = delete;
     ~Signal();
 
     Connection *Connect(EventFunction fn, void* userdata);
     Connection *Once(EventFunction fn, void* userdata);
-    void* Wait();
+    argbase Wait();
 
-    void Fire(void* data=nullptr);
+    void Fire(void* first=nullptr, ...);
     void DisconnectAll();
 
     void* userdata;
@@ -25,11 +30,12 @@ struct Signal
 private:
     Connection *m_handlerListHead = nullptr;
     void* m_waitSem = create_sem();
-    void* m_returnData = nullptr;
 
     bool m_multithreaded;
 
     void* create_sem();
+
+    argbase return_data;
 };
 
 class Connection

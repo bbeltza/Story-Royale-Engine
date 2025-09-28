@@ -7,13 +7,12 @@
 - Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
 
 - More options to the EntityControl camera controller
-	- Smoothness: DONE
-	- Bounds: TODO
+	(DONE) - Smoothness
+	- Bounds
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
-- Better error messaging
+- Better error messaging (With the sys API)
 	- More error codes
-	- Message box api (Something that should directly use the operating system's API because SDL's one is really obsolete)
 
 - Change the pipeline:
 	- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
@@ -25,12 +24,6 @@
 	- probably more...
 	- they'll also mostly be written in C (so I get more C code ya!)
 
-- Better Signals:
-	- Not only the Fire() stack frame should give the data, but also:
-		(DONE) - The signal
-		(DONE) - The connection (Connect() function)
-		- Finally the Fire() stack frame / thread, with varidic arguments
-
 - Work on the game ^^
 
-(current version: 0.009.271)
+(current version: 0.009.28)

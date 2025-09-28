@@ -50,15 +50,22 @@ Connection* Signal::Once(EventFunction fn, void* data)
     SignalConnect(true)
 }
 
-void* Signal::Wait()
+Signal::argbase Signal::Wait()
 {
     SDL_SemWait((SDL_sem*)m_waitSem);
-    return m_returnData;
+    return return_data;
 }
 
-void Signal::Fire(void* data)
+void Signal::Fire(void* first, ...)
 {
-    m_returnData = data;
+    va_list va;
+    va_start(va, first);
+
+    return_data.args[0] = first;
+    for (int i = 1; i < 6; i++)
+        return_data.args[i] = va_arg(va, void*);
+
+    va_end(va);
 
     Connection* item = m_handlerListHead;
     SDL_SemPost((SDL_sem*)m_waitSem);
@@ -67,9 +74,17 @@ void Signal::Fire(void* data)
         if (item->m_connected)
         {
             if (m_multithreaded)
-                Engine->ThreadPool.CreateImmediateThread(item->m_fn, userdata, item->userdata, data);
+                Engine->ThreadPool.CreateImmediateThread(item->m_fn, userdata, item->userdata,
+                    return_data.args[0], return_data.args[1],
+                    return_data.args[2], return_data.args[3],
+                    return_data.args[4], return_data.args[5]
+                    );
             else
-                item->m_fn(userdata, item->userdata, data);
+                item->m_fn(userdata, item->userdata,
+                    return_data.args[0], return_data.args[1],
+                    return_data.args[2], return_data.args[3],
+                    return_data.args[4], return_data.args[5]
+                    );
             
             if (item->m_once)
             {
