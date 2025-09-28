@@ -15,10 +15,26 @@ struct Color3
 	uint8_t g = 0;
 	uint8_t b = 0;
 
-	static const Color3 WHITE;
-
 	void Print() const;
 	inline void PrintLn() const { Print(); putchar('\n'); }
+
+	void Add(const Color3& other);
+	void Sub(const Color3& other);
+	void Mul(const Color3& other);
+
+	Color3 getAdd(const Color3& other) const;
+	Color3 getSub(const Color3& other) const;
+	Color3 getMul(const Color3& other) const;
+
+	inline Color3 operator+(const Color3& other) const { return getAdd(other); }
+	inline Color3 operator-(const Color3& other) const { return getSub(other); }
+	inline Color3 operator*(const Color3& other) const { return getMul(other); }
+
+	inline void operator+=(const Color3& other) { Add(other); }
+	inline void operator-=(const Color3& other) { Sub(other); }
+	inline void operator*=(const Color3& other) { Mul(other); }
+
+	static const Color3 WHITE, BLACK;
 };
 
 struct Color4
@@ -36,8 +52,24 @@ struct Color4
 	uint8_t b;
 	uint8_t a;
 
-	static const Color4 WHITE;
-
 	void Print() const;
 	inline void PrintLn() const { Print(); putchar('\n'); }
+
+	void Add(const Color4& other);
+	void Sub(const Color4& other);
+	void Mul(const Color4& other);
+
+	Color4 getAdd(const Color4& other) const;
+	Color4 getSub(const Color4& other) const;
+	Color4 getMul(const Color4& other) const;
+
+	inline Color4 operator+(const Color4& other) const { return getAdd(other); }
+	inline Color4 operator-(const Color4& other) const { return getSub(other); }
+	inline Color4 operator*(const Color4& other) const { return getMul(other); }
+
+	inline void operator+=(const Color4& other) { Add(other); }
+	inline void operator-=(const Color4& other) { Sub(other); }
+	inline void operator*=(const Color4& other) { Mul(other); }
+
+	static const Color4 WHITE, BLACK, INVISIBLE;
 };

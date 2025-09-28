@@ -75,7 +75,7 @@ void Components::Sprite::Render(Game::Entity* _entity)
 {
     if (textures.empty()) return;
 
-    auto frame = std::min(current_frame, textures.size() - 1);
+    auto frame = min(current_frame, textures.size() - 1);
     current_frame = frame;
     Texture& texture = *textures[frame];
 

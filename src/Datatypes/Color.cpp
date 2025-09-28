@@ -1,7 +1,20 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include "utils.h"
+
 #include "Datatypes/Color.h"
+
+#define c3getop(macro) { return Color3(macro(r), macro(g), macro(b)); }
+#define c4getop(macro) { return Color4(macro(r), macro(g), macro(b), macro(a)); }
+
+#define colgetadd(comp) max(255, this->comp + other.comp)
+#define colgetsub(comp) min(0, this->comp - other.comp)
+#define colgetmul(comp) (this->comp * other.comp) / 255
+
+#define coladd(comp) this->comp = colgetadd(comp)
+#define colsub(comp) this->comp = colgetsub(comp)
+#define colmul(comp) this->comp = colgetmul(comp)
 
 uint8_t xdigit(char digit)
 {
@@ -15,6 +28,7 @@ uint8_t xdigit(char digit)
 		return (10 + (digit - 'a'));
 }
 
+#pragma region Color3
 Color3::Color3(const char* HEX) // 12 34 56
 {
 	size_t len = strlen(HEX);
@@ -35,6 +49,29 @@ Color3::Color3(const char* HEX) // 12 34 56
 	}
 }
 
+void Color3::Print() const
+{
+	syslog("{ %d, %d, %d } ( %g%%, %g%%, %g%% )",
+		r,
+		g,
+		b,
+
+		r / 255.0f * 100,
+		g / 255.0f * 100,
+		b / 255.0f * 100
+	);
+}
+
+void Color3::Add(const Color3& other) { coladd(r); coladd(g); coladd(b); }
+void Color3::Sub(const Color3& other) { colsub(r); colsub(g); colsub(b); }
+void Color3::Mul(const Color3& other) { colmul(r); colmul(g); colmul(b); }
+
+Color3 Color3::getAdd(const Color3& other) const c3getop(colgetadd)
+Color3 Color3::getSub(const Color3& other) const c3getop(colgetsub)
+Color3 Color3::getMul(const Color3& other) const c3getop(colgetmul)
+
+#pragma endregion
+#pragma region Color4
 Color4::Color4(const char* HEX)
 {
 	size_t len = strlen(HEX);
@@ -55,19 +92,6 @@ Color4::Color4(const char* HEX)
 	}
 }
 
-void Color3::Print() const
-{
-	syslog("{ %d, %d, %d } ( %g%%, %g%%, %g%% )",
-		r,
-		g,
-		b,
-
-		r / 255.0f * 100,
-		g / 255.0f * 100,
-		b / 255.0f * 100
-	);
-}
-
 void Color4::Print() const
 {
 	syslog("{ %d, %d, %d, %d } ( %g%%, %g%%, %g%%, %g%% )",
@@ -82,3 +106,20 @@ void Color4::Print() const
 		a / 255.0f * 100
 	);
 }
+
+void Color4::Add(const Color4& other) { coladd(r); coladd(g); coladd(b); coladd(a); }
+void Color4::Sub(const Color4& other) { colsub(r); colsub(g); colsub(b); colsub(a); }
+void Color4::Mul(const Color4& other) { colmul(r); colmul(g); colmul(b); colmul(a); }
+
+Color4 Color4::getAdd(const Color4& other) const c4getop(colgetadd)
+Color4 Color4::getSub(const Color4& other) const c4getop(colgetsub)
+Color4 Color4::getMul(const Color4& other) const c4getop(colgetmul)
+#pragma endregion
+#pragma region ColorDefinitions
+const Color3 Color3::WHITE(255, 255, 255);
+const Color3 Color3::BLACK(0, 0, 0);
+
+const Color4 Color4::WHITE(255, 255, 255, 255);
+const Color4 Color4::BLACK(0, 0, 0, 255);
+const Color4 Color4::INVISIBLE(0, 0, 0, 0);
+#pragma endregion
