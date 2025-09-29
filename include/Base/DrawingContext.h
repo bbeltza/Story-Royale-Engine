@@ -43,11 +43,10 @@ public:
 
     void DrawDebug(Vector2f pos);
 
-    void LegacyDrawTexture(const RectF& _Rectangle, File& _File);
     void DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate=Color4::WHITE, const Vector2f& AnchorPoint=Vector2f::CENTER);
-    void DrawFont(const SDL_Rect* _Bounds, const Color3& Color, File& _FontFile, const char* text, int count, uint8_t alignment);
 
-    bool LoadFileTexture(File& _File);
+    void LegacyDrawTexture(const RectF& _Rectangle, File& _File);
+    bool LegacyLoadFileTexture(File& _File);
 private:
     SDL_Renderer *sdl_renderer;
     SDL_Texture *sdl_rectTexture;

@@ -45,7 +45,7 @@ void Components::StaticTexture::AddFile(const char *path, std::list<Vector2f>& O
 {
     File _f;
     _f.Load(path);
-    if (!Engine->DrawingContext.LoadFileTexture(_f))
+    if (!Engine->DrawingContext.LegacyLoadFileTexture(_f))
     {
         return syserror(UNKNOWN_ERROR, "Failed adding a file to CustomTexture. File is not a texture or hasn't been found");
     }

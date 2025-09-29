@@ -209,137 +209,6 @@ void DrawingDevice::DrawTexture(Texture& _Texture, const RectF& Rectangle, const
     END_DRAW
 }
 
-#if 0
-void DrawingDevice::DrawFont(const SDL_Rect *_Bounds, const Color3& Color, File &_FontFile, const char *text, int count, uint8_t alignment)
-{
-    START_DRAW
-
-    static char font_characters[96];
-    if (!font_characters[0])
-    {
-        for (char i = 32; i < 127; i++)
-        {
-            font_characters[i - 32] = i;
-        }
-        font_characters[95] = 0;
-    }
-
-    if (TTF_Font *target_font = m_LoadedFonts[_FontFile.m_filepath])
-    {
-        _FontFile.m_userdata = target_font;
-    }
-    else
-    {
-        SDL_RWops *temp_rw = SDL_RWFromConstMem(_FontFile.getInfo().data, _FontFile.getInfo().size);
-        TTF_Font* font = TTF_OpenFontRW(temp_rw, 1, 12);
-        if (!font)
-            {syserror(SDL_ERROR, "Failed loading font", SDL_GetError()); return;}
-        m_LoadedFonts[_FontFile.m_filepath] = font;
-
-
-        _FontFile.m_type = File::T_TTF;
-
-        SDL_Surface *temp_surf = TTF_RenderText_Solid(m_LoadedFonts[_FontFile.m_filepath],
-                                                      font_characters, {255, 255, 255});
-        m_LoadedTextures[_FontFile.m_filepath] = SDL_CreateTextureFromSurface(sdl_renderer, temp_surf);
-        SDL_FreeSurface(temp_surf);
-        _FontFile.m_userdata = m_LoadedFonts[_FontFile.m_filepath];
-    }
-    
-    int h, max_w;
-    SDL_QueryTexture(m_LoadedTextures[_FontFile.m_filepath], NULL, NULL, &max_w, &h);
-
-    int max_count, linelength;
-    TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text, _Bounds->w, &linelength, &max_count);
-
-    char *linetest = new char[strlen(text) + 1];
-
-    strncpy(linetest, text, max_count);
-    linetest[max_count] = 0;
-    TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, NULL);
-
-    int x = 0;
-    int y = 0;
-    char constchar[2] = {0, 0};
-
-    unsigned int i = 0;
-    unsigned int c = count;
-    while (text[i] && (i < c))
-    {
-        const char &character = text[i];
-        if (i > unsigned(max_count))
-        {
-        new_line:
-            x = 0;
-            y += h;
-
-            TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], text + i, _Bounds->w, NULL, &max_count);
-
-            strncpy(linetest, text + i, max_count);
-            linetest[max_count] = 0;
-            TTF_MeasureTextSpaced(m_LoadedFonts[_FontFile.m_filepath], linetest, _Bounds->w, &linelength, &max_count);
-            max_count += i - 1;
-            continue;
-        }
-        switch (character)
-        {
-        case ' ':
-            x += 3;
-            i++;
-            continue;
-        case '\n':
-            i++;
-            goto new_line;
-            continue;
-        default:
-            break;
-        };
-        SDL_Rect src = {0, 0, 0, 0}, dest = {0, 0, 0, 0};
-        src.h = h;
-        dest.h = h;
-
-        constchar[0] = character;
-        TTF_MeasureText(m_LoadedFonts[_FontFile.m_filepath], constchar, max_w, &src.w, NULL);
-        if (!src.w)
-            continue;
-
-        font_characters[character - 32] = 0;
-        TTF_MeasureText(m_LoadedFonts[_FontFile.m_filepath], font_characters, max_w, &src.x, NULL);
-        font_characters[character - 32] = character;
-
-        if (character == 'i' || character == 'n')
-            --src.w;
-        dest.w = src.w;
-
-        dest.x = _Bounds->x + x;
-        switch (alignment)
-        {
-        case GuiComponents::Text::AlCentered:
-            dest.x += (_Bounds->w - linelength) / 2;
-            break;
-        case GuiComponents::Text::AlRight:
-            dest.x += (_Bounds->w - linelength);
-            break;
-        default:
-            break;
-        }
-        dest.y = _Bounds->y + y;
-
-        SDL_SetTextureColorMod(m_LoadedTextures[_FontFile.m_filepath], Color.r, Color.g, Color.b);
-        SDL_RenderCopy(sdl_renderer, m_LoadedTextures[_FontFile.m_filepath], &src, &dest);
-
-        SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, 255);
-
-        x += src.w;
-        i++;
-    }
-
-    delete[] linetest;
-
-    END_DRAW
-}
-#endif
-
 //
 
 //
@@ -384,7 +253,7 @@ void DrawingDevice::processViewport()
 
 // LEGACY
 
-bool DrawingDevice::LoadFileTexture(File &_File)
+bool DrawingDevice::LegacyLoadFileTexture(File &_File)
 {
     // printf("%p\n", _File.m_userdata);
     if (_File.m_userdata)
@@ -418,7 +287,7 @@ err:
 
 void DrawingDevice::LegacyDrawTexture(const RectF& _Rectangle, File &_File)
 {
-    if (!LoadFileTexture(_File))
+    if (!LegacyLoadFileTexture(_File))
         return;
     if (_Rectangle.Size.X == 0 || _Rectangle.Size.Y == 0)
         return;
