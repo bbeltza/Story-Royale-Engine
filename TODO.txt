@@ -2,7 +2,8 @@
 - Binding with ImGui (maybe later uh)
 
 - Texture API (Basically a class to store textures)
-- Get rid of DrawingDevice::DrawFont() to rely on the texture API for text rendering
+	(DONE) - Get rid of DrawingDevice::DrawFont() to rely on the texture API for text rendering
+	- Being able to do something similar to SDL's render targets, but with the Texture API (for the StaticTexture component)
 
 - Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
 
@@ -26,4 +27,4 @@
 
 - Work on the game ^^
 
-(current version: 0.009.28)
+(current version: 0.009.29)
