@@ -25,6 +25,7 @@ class Font
     ~Font();
 
     void Render(const RectF& bounds, const char* text, int count, HAlign halignment=HLeft, VAlign valignment=VTop);
+    void RenderLine(const Vector2f& start, const char* text, int count);
     bool PreloadTextures(const char* desired);
     private:
     std::unordered_map<char, Texture> textures;
@@ -32,4 +33,5 @@ class Font
 
     File m_file;
     TTF_Font* m_font;
+
 };

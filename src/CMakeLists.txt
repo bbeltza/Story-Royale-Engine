@@ -45,6 +45,7 @@ set(CLASS_SOURCES
 "File/Loading.cpp"
 
 "Font.cpp"
+"FontRenderer.cpp"
 "Texture.cpp"
 "Thread.cpp"
 "Timer.cpp"
