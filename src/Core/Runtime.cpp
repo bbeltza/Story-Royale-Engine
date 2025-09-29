@@ -120,7 +120,7 @@ void EngineClass::loop()
     if (Game::GuiLayer::m_Current)
         Game::GuiLayer::m_Current->call_update(dt);
 
-    OnUpdate.Fire((void*)*(int*)&dt);
+    OnUpdate.Fire(dt);
 
     DrawingContext.processViewport();
     DrawingContext.render();

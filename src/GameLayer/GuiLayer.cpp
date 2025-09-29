@@ -84,6 +84,8 @@ void Game::GuiContainer::call_update(TimeStamp dt)
     {
         if (obj->visible)
             obj->call_update(dt);
+        else
+            obj->Updated.Fire(this);
     }
     Updated.Fire(this);
 }

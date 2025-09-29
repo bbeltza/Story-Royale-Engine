@@ -25,6 +25,7 @@ struct Signal
     Connection *Once(EventFunction fn, void* userdata);
     argbase Wait();
 
+    template <typename _First, class... _Args> inline void Fire(_First first, _Args... args) {Fire(*(void**)&first, args...);}
     void Fire(void* first=nullptr, ...);
     void DisconnectAll();
 
