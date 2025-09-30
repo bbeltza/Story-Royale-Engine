@@ -1,5 +1,5 @@
-#include <Engine.h>
-#include <Classes/Font.h>
+#include <Engine.hpp>
+#include <Classes/Font.hpp>
 
 Font* font;
 const RectF bounds(10, 10, 120, 30);

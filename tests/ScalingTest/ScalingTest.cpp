@@ -1,6 +1,5 @@
-#include <ECS.h>
-#include <GameSettings.h>
-#include <Engine.h>
+#include <ECS.hpp>
+#include <Engine.hpp>
 
 void Render()
 {
