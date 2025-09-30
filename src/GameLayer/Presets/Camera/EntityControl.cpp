@@ -1,4 +1,4 @@
-#include "Game/CameraControllers/EntityControl.h"
+#include "Game/CameraControllers/EntityControl.hpp"
 #include "utils.h"
 
 use_namespace

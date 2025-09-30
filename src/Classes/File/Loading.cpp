@@ -1,6 +1,6 @@
 #define fs(x) (FILE *)x
 
-#include "Classes/File.h"
+#include "Classes/File.hpp"
 #include "Sys.h"
 
 const char res_prefix[] = "_res/";

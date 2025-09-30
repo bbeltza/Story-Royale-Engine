@@ -1,5 +1,5 @@
 #include "SDL.hpp"
-#include "Game/GuiComponents/Modulate.h"
+#include "Game/GuiComponents/Modulate.hpp"
 
 void GuiComponents::Modulate::pre_render(Game::GuiContainer* obj)
 {

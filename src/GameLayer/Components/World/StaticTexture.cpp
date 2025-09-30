@@ -1,11 +1,11 @@
 #include "SDL.hpp"
-#include "Game/Components/StaticTexture.h"
-#include "Game/World.h"
-#include "Game/Entity.h"
+#include "Game/Components/StaticTexture.hpp"
+#include "Game/World.hpp"
+#include "Game/Entity.hpp"
 
-#include "Classes/File.h"
+#include "Classes/File.hpp"
 
-#include "Engine.h"
+#include "Engine.hpp"
 #include "Sys.h"
 
 Components::StaticTexture::StaticTexture()

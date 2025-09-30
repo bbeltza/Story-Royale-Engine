@@ -1,14 +1,14 @@
-#include <standard.h>
+#include <standard>
 
-#include "Engine.h"
-#include "Game/Camera.h"
-#include "Game/World.h"
-#include "Game/GuiLayer.h"
-#include "Game/GuiComponent.h"
+#include "Engine.hpp"
+#include "Game/Camera.hpp"
+#include "Game/World.hpp"
+#include "Game/GuiLayer.hpp"
+#include "Game/GuiComponent.hpp"
 
-#include "Game/GuiComponents/Text.h"
+#include "Game/GuiComponents/Text.hpp"
 
-#include "GameSettings.h"
+#include "GameSettings.hpp"
 #include "Sys.h"
 
 #include "config.h"

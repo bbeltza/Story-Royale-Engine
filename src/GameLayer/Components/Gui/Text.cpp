@@ -1,6 +1,6 @@
-#include <standard.h>
+#include <standard>
 
-#include "Game/GuiComponents/Text.h"
+#include "Game/GuiComponents/Text.hpp"
 
 std::unordered_map<std::string, Font> GuiComponents::Text::font_map;
 

@@ -1,5 +1,5 @@
-#include "Classes/Thread.h"
-#include "Engine.h"
+#include "Classes/Thread.hpp"
+#include "Engine.hpp"
 
 int Thread::invokethread_handler(Thread *self)
 {

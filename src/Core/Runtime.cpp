@@ -1,16 +1,16 @@
-#include <standard.h>
+#include <standard>
 
-#include "Engine.h"
+#include "Engine.hpp"
 #include "Sys.h"
 
-#include "Game/World.h"
-#include "Game/Component.h"
-#include "Game/GuiLayer.h"
+#include "Game/World.hpp"
+#include "Game/Component.hpp"
+#include "Game/GuiLayer.hpp"
 
-#include "GameSettings.h"
+#include "GameSettings.hpp"
 
-#include "Classes/Timer.h"
-#include "Classes/Tween.h"
+#include "Classes/Timer.hpp"
+#include "Classes/Tween.hpp"
 
 static std::unordered_set<GameInstance *> destroyQueue;
 

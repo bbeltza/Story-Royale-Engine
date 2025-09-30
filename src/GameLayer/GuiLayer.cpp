@@ -1,8 +1,8 @@
-#include "Engine.h"
+#include "Engine.hpp"
 
-#include "Game/GuiLayer.h"
-#include "Game/GuiObject.h"
-#include "Game/GuiComponent.h"
+#include "Game/GuiLayer.hpp"
+#include "Game/GuiObject.hpp"
+#include "Game/GuiComponent.hpp"
 
 #include "config.h"
 

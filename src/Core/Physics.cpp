@@ -1,10 +1,10 @@
-#include <standard.h>
+#include <standard>
 #include <SDL.hpp>
 
-#include "Game/World.h"
-#include "Game/Entity.h"
-#include "Game/Component.h"
-#include "Game/Components/Shape.h"
+#include "Game/World.hpp"
+#include "Game/Entity.hpp"
+#include "Game/Component.hpp"
+#include "Game/Components/Shape.hpp"
 
 using namespace Components;
 

@@ -1,5 +1,5 @@
-#include "Base/Input.h"
-#include "Game/World.h"
+#include "Base/Input.hpp"
+#include "Game/World.hpp"
 
 
 // Input functions

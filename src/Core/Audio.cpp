@@ -1,6 +1,6 @@
 #include <SDL.hpp>
-#include "Engine.h"
-#include "Base/AudioDevice.h"
+#include "Engine.hpp"
+#include "Base/AudioDevice.hpp"
 
 #include "vorbis.h"
 
