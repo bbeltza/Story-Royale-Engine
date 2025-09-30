@@ -4,6 +4,8 @@
 #include "Classes/File.h"
 #include "Classes/Signal.h"
 
+#include <SDL.h>
+
 #define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
 
 class AudioData
