@@ -57,12 +57,13 @@ class Connection
 
 public:
     void Disconnect() { m_connected = 0; }
-    void Reconnect() { m_connected = 1; }
     void* userdata;
 
 private:
     friend struct Signal;
     ~Connection() {}
+
+    void gcDisconnected();
 
     EventFunction m_fn;
     const Signal *m_signal;
