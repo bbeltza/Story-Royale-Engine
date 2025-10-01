@@ -1,9 +1,9 @@
-#include <standard.h>
-#include "Game/World.h"
-#include "Game/Component.h"
-#include "Game/Entity.h"
+#include <standard>
+#include "Game/World.hpp"
+#include "Game/Component.hpp"
+#include "Game/Entity.hpp"
 
-#include "Engine.h"
+#include "Engine.hpp"
 #include "Sys.h"
 
 #include "config.h"

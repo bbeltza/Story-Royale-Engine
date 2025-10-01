@@ -1,7 +1,7 @@
-#include <Engine.h>
-#include <ECS.h>
-#include <Game/Components/Sprite.h>
-#include <Events/Mouse.h>
+#include <Engine.hpp>
+#include <ECS.hpp>
+#include <Game/Components/Sprite.hpp>
+#include <Events/Mouse.hpp>
 
 struct TexturePalace;
 struct TextureEntity;

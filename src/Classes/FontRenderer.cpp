@@ -1,6 +1,6 @@
-#include "Classes/Font.h"
+#include "Classes/Font.hpp"
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 static std::vector<std::string> line_buff;
 //static std::vector<int> width_buff;

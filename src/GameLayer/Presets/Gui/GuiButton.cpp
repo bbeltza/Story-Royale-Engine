@@ -1,5 +1,5 @@
-#include "Engine.h"
-#include "Game/GuiPresets/Button.h"
+#include "Engine.hpp"
+#include "Game/GuiPresets/Button.hpp"
 
 
 void GuiPresets::Button::clickevent(void *, Button *button, MouseButton *buttonData)

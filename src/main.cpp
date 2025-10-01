@@ -4,8 +4,8 @@
 #include <SDL.hpp>
 #include <fmt/format.h>
 
-#include "GameSettings.h"
-#include "Engine.h"
+#include "GameSettings.hpp"
+#include "Engine.hpp"
 #include "Sys.h"
 
 int main()

@@ -1,10 +1,9 @@
-#include <GameSettings.h>
-#include <Engine.h>
-#include <ECS.h>
-#include <GUI.h>
+#include <Engine.hpp>
+#include <ECS.hpp>
+#include <GUI.hpp>
 
-#include <Events/Mouse.h>
-#include <Game/GuiComponents/Text.h>
+#include <Events/Mouse.hpp>
+#include <Game/GuiComponents/Text.hpp>
 
 static double rot = 0;
 
@@ -16,7 +15,7 @@ struct DisplayText: public Game::GuiLayer
         label->anchor = Vector2f(0.5, 0);
         label->position = UDim2(0.5, 0, 0, 10);
         
-        text.Alignment = text.AlCentered;
+        text.h_alignment = Font::HCenter;
         text.color = {255, 255, 255};
         text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
         text.LoadFont("res://fonts/OpenSans-Regular.ttf");

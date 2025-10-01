@@ -2,7 +2,7 @@
 
 #include <SDL.hpp>
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 void* Signal::create_sem()
 {

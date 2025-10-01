@@ -1,8 +1,8 @@
 #include "SDL.hpp"
-#include "Game/Components/Shape.h"
+#include "Game/Components/Shape.hpp"
 
-#include "Game/Entity.h"
-#include "Game/World.h"
+#include "Game/Entity.hpp"
+#include "Game/World.hpp"
 
 Components::Shape::CollisionSet* Components::Shape::collider_set = nullptr;
 

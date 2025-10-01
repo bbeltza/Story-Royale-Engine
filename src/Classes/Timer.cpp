@@ -1,4 +1,4 @@
-#include "Classes/Timer.h"
+#include "Classes/Timer.hpp"
 
 std::chrono::steady_clock Timer::s_global_clock;
 std::chrono::steady_clock::time_point Timer::s_last_frame_time;

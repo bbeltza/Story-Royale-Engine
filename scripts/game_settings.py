@@ -7,7 +7,7 @@ game_settings_path = sys.argv[1]
 output_dir = sys.argv[2]
 output_filedir = output_dir + "/g_settings.cpp"
 
-output_header = '#include "GameSettings.h"\n'
+output_header = '#include "GameSettings.hpp"\n'
 namespace_prefix = " const GameSettings::"
 
 def to_c_assign(value, defaultval) -> str:

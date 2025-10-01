@@ -1,9 +1,9 @@
-#include "GameSettings.h"
-#include "Engine.h"
-#include "Game/GuiLayer.h"
-#include "ECS.h"
+#include "GameSettings.hpp"
+#include "Engine.hpp"
+#include "Game/GuiLayer.hpp"
+#include "ECS.hpp"
 
-#include "Datatypes/Flags.h"
+#include "Datatypes/Flags.hpp"
 
 static Flags32 rendererFlags;
 

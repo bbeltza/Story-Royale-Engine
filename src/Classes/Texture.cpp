@@ -1,5 +1,5 @@
-#include "Engine.h"
-#include "Classes/Texture.h"
+#include "Engine.hpp"
+#include "Classes/Texture.hpp"
 
 Texture::Texture(Texture&& moving): 
     texture(moving.texture),

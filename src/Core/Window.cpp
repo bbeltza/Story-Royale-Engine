@@ -1,8 +1,8 @@
-#include "Base/Window.h"
+#include "Base/Window.hpp"
 
-#include "Classes/File.h"
+#include "Classes/File.hpp"
 
-#include "GameSettings.h"
+#include "GameSettings.hpp"
 
 #define WCENTERED SDL_WINDOWPOS_CENTERED
 

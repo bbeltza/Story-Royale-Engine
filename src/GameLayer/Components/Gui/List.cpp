@@ -1,5 +1,5 @@
-#include "Game/GuiObject.h"
-#include "Game/GuiComponents/List.h"
+#include "Game/GuiObject.hpp"
+#include "Game/GuiComponents/List.hpp"
 
 void GuiComponents::List::process_children(Game::GuiObject* child, uint32_t index)
 {

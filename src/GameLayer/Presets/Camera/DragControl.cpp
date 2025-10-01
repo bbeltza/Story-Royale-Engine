@@ -1,6 +1,6 @@
-#include "Game/CameraControllers/DragControl.h"
+#include "Game/CameraControllers/DragControl.hpp"
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 use_namespace
 

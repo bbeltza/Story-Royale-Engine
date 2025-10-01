@@ -1,5 +1,5 @@
-#include <Classes/File.h>
-#include <Engine.h>
+#include <Classes/File.hpp>
+#include <Engine.hpp>
 
 void Game::Initialize(void)
 {

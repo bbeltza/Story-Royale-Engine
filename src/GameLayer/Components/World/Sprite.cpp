@@ -1,5 +1,5 @@
-#include "Engine.h"
-#include "Game/Components/Sprite.h"
+#include "Engine.hpp"
+#include "Game/Components/Sprite.hpp"
 
 Components::Sprite::Sprite(): Scale(1, 1), Offset(0, 0)
 {

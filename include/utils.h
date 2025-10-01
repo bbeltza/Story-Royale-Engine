@@ -18,4 +18,4 @@ Creates a null terminated array, of anything, takes any argument to put into an 
 
 It's discouraged to use it with numbers as numbers can be NULL too
 */
-#define array(...) {__VA_ARGS__, NULL}
+#define n_array(...) {__VA_ARGS__, NULL}

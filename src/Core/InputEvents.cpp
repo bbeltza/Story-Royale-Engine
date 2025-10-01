@@ -1,7 +1,7 @@
-#include <standard.h>
-#include "Engine.h"
-#include "Events/Key.h"
-#include "Events/Mouse.h"
+#include <standard>
+#include "Engine.hpp"
+#include "Events/Key.hpp"
+#include "Events/Mouse.hpp"
 
 #define processEventQueue(queue, ev) while (!queue.empty()) { ev.Fire(&queue.back()); queue.pop_back(); }
 

@@ -1,13 +1,13 @@
-#include "Base/Input.h"
+#include "Base/Input.hpp"
 
-#include "Game/World.h"
-#include "Game/Entity.h"
-#include "Game/Component.h"
+#include "Game/World.hpp"
+#include "Game/Entity.hpp"
+#include "Game/Component.hpp"
 
-#include "Game/GuiLayer.h"
-#include "Game/GuiObject.h"
+#include "Game/GuiLayer.hpp"
+#include "Game/GuiObject.hpp"
 
-#include "Game/Components/Shape.h"
+#include "Game/Components/Shape.hpp"
 
 static Game::GuiObject *queryObject = nullptr;
 static Game::Entity *queryEntity = nullptr;

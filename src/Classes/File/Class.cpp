@@ -1,5 +1,5 @@
-#include <standard.h>
-#include "Classes/File.h"
+#include <standard>
+#include "Classes/File.hpp"
 #include "SDL.hpp"
 
 #include "Sys.h"

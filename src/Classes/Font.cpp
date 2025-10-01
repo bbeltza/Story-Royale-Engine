@@ -1,7 +1,7 @@
-#include "Datatypes/Color.h"
-#include "Classes/Font.h"
+#include "Datatypes/Color.hpp"
+#include "Classes/Font.hpp"
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 Font::Font(const char* path, int pt)
 {

@@ -1,4 +1,4 @@
-#include "Game/GuiComponents/Padding.h"
+#include "Game/GuiComponents/Padding.hpp"
 
 void GuiComponents::Padding::setPadding(const UDim& value)
 {

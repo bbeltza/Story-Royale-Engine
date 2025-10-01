@@ -1,5 +1,5 @@
 #include <SDL.hpp>
-#include "Game/Camera.h"
+#include "Game/Camera.hpp"
 
 using namespace Game;
 

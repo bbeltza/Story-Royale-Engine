@@ -1,5 +1,5 @@
-#include "Game/Components/Velocity.h"
-#include "Game/Entity.h"
+#include "Game/Components/Velocity.hpp"
+#include "Game/Entity.hpp"
 
 void Components::Velocity::normalize(float speed)
 {
