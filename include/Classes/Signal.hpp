@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_set>
 
 typedef void (*EventFunction)(void *signal_data, void *connection_data, ...);
 
@@ -9,6 +10,8 @@ class Connection;
 
 struct Signal
 {
+    friend class Connection;
+
     struct argbase
     {
         void* args[6];
@@ -32,14 +35,15 @@ struct Signal
     void* userdata;
 
 private:
-    Connection *m_handlerListHead = nullptr;
     void* m_waitSem = create_sem();
 
     bool m_multithreaded;
+    bool m_firing = false;
 
     void* create_sem();
 
     argbase return_data;
+    std::unordered_set<Connection*> m_connections;
 };
 
 class Connection
@@ -49,26 +53,20 @@ class Connection
     Connection(Signal *signal, EventFunction fn, void *data, bool once = false)
     : m_signal(signal),
       m_fn(fn),
-      m_connected(1),
-      m_next(nullptr),
       userdata(data),
       m_once(once)  {}
-    Connection(Connection &other) = delete;
+    Connection(const Connection &other) = delete;
 
 public:
-    void Disconnect() { m_connected = 0; }
+    void Disconnect();
     void* userdata;
 
 private:
     friend struct Signal;
-    ~Connection() {}
-
-    void gcDisconnected();
+    ~Connection() { const_cast<Signal*>(m_signal)->m_connections.erase(this); };
 
     EventFunction m_fn;
     const Signal *m_signal;
-    Connection *m_next;
 
-    bool m_connected;
     const bool m_once;
 };

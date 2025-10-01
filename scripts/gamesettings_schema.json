@@ -40,14 +40,14 @@
             "description": "Object containing several window options",
             "type": ["object", "array"],
             "properties": {
-
+                
             }
         },
         "AudioOptions": {
             "description": "Object containing several options of the audio engine",
             "type": ["object", "array"],
             "properties": {
-
+                
             }
         }
     }
