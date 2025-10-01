@@ -3,8 +3,6 @@
 #include "Datatypes/TimeStamp.h"
 #include "Base/AudioDevice.hpp"
 
-// Will remplace the actual Music and Sound classes
-
 struct AudioInfo
 {
     int loop_start = 0, loop_end = -1;
