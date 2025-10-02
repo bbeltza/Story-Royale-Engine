@@ -4,6 +4,7 @@
 class Action
     {
         public:
+        Action(const Action& other) : press_frame(-1), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons) {}
         Action() = default;
         ~Action() = default;
 
