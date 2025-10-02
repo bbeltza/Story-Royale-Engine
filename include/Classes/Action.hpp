@@ -8,6 +8,9 @@ class Action
         Action() = default;
         ~Action() = default;
 
+        template <typename... _Args>
+        Action(_Args... args) { _addinputs_recurse(args...); }
+
         inline void AddInput(SDL_KeyCode keyCode) {m_keycodes.insert(keyCode);}
         inline void AddInput(SDL_Scancode scanCode) {m_scancodes.insert(scanCode);}
         inline void AddInput(InputClass::MouseButton mouseButton) {m_mousebuttons.insert(mouseButton);}
@@ -35,4 +38,11 @@ class Action
         inline bool isKeyCodePressed() const {for (auto keyCode : m_keycodes) if (Engine->Input.isKeyPressed(keyCode)) return true; return false;}
         inline bool isScanCodePressed() const {for (auto scanCode : m_scancodes) if (Engine->Input.isKeyPressed(scanCode)) return true; return false;}
         inline bool isMousePressed() const {for (auto mouseButton : m_mousebuttons) if (Engine->Input.isMouseButtonPressed(mouseButton)) return true; return false;}
-    };
+        
+        template <typename First, typename... Rest>
+        inline void _addinputs_recurse(First first, Rest... args) {
+            AddInput(first);
+            _addinputs_recurse(args...);
+        }
+        inline void _addinputs_recurse() {}
+};
