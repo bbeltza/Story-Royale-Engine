@@ -58,8 +58,6 @@ private:
     std::unordered_map<std::string, SDL_Texture*> m_LoadedTextures;
     std::unordered_map<std::string, TTF_Font*> m_LoadedFonts;
 
-    Texture::Queue textures_toload;
-
     void processViewport();
     void render();
     void renderCurrentWorld();

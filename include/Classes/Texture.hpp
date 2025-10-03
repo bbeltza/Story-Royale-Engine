@@ -9,6 +9,7 @@ class Texture
 {
     friend class DrawingDevice;
     typedef std::deque<Texture*> Queue;
+    static Queue* to_load;
 
 public:
     Texture(const Texture& other) = delete;

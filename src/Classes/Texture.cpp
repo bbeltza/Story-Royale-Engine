@@ -9,8 +9,13 @@ Texture::Texture(Texture&& moving):
     moving.file_surface = nullptr;
 }
 
+Texture::Queue* Texture::to_load = nullptr;
+
 Texture::Texture(const char* path)
 {
+    static Queue queue;
+    to_load = &queue;
+
     File file;
     file.Load(path);
 
@@ -49,5 +54,5 @@ Vector2i Texture::GetSize()
 
 void Texture::push_queue()
 {
-    Engine->DrawingContext.textures_toload.push_back(this);
+    to_load->push_back(this);
 }

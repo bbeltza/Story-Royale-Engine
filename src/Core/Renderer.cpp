@@ -16,7 +16,7 @@ DrawingDevice::DrawingDevice(EngineClass* engine): m_Engine(engine)
     }
     
     if (GameSettings::WindowOptions.VSync)
-    rendererFlags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
+        rendererFlags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
 }
 
 DrawingDevice::~DrawingDevice()
@@ -41,13 +41,16 @@ void DrawingDevice::Setup()
 
 void DrawingDevice::render()
 {
-    while (!textures_toload.empty())
+    if (!Texture::to_load) goto section;
+    while (!Texture::to_load->empty())
     {
-        Texture& tex = *textures_toload.front();
-        textures_toload.pop_front();
+        Texture& tex = *Texture::to_load->front();
+        Texture::to_load->pop_front();
 
         tex.texture = SDL_CreateTextureFromSurface(sdl_renderer, (SDL_Surface*)tex.file_surface);
     }
+
+    section:
 
     SDL_UnlockMutex(m_lockmutex);
 
