@@ -20,7 +20,7 @@ static SDL_mutex* queueDestroyMutex;
 static std::chrono::duration<double> targetFrameTime;
 const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
 
-EngineClass *Engine = nullptr;
+EngineClass* Engine = nullptr;
 
 EngineClass::EngineClass() : BeforeRender(this, false), AfterRender(this, false), OnUpdate(this, true),
                              ThreadPool(this),
@@ -63,7 +63,7 @@ EngineClass::~EngineClass()
     TTF_Quit();
     SDL_Quit();
 
-    Engine = nullptr;
+    *(EngineClass**)&Engine = nullptr;
 }
 
 int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev)

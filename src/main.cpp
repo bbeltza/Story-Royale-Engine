@@ -11,8 +11,7 @@
 int main()
 {
     EngineClass e;
-    Engine = &e;
-    Engine->Run();
+    e.Run();
 
     return syscode();
 }
