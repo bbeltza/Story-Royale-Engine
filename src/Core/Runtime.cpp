@@ -20,7 +20,8 @@ static SDL_mutex* queueDestroyMutex;
 static std::chrono::duration<double> targetFrameTime;
 const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
 
-EngineClass* Engine = nullptr;
+static EngineClass* thisengine = nullptr;
+EngineClass* const& Engine = thisengine;
 
 EngineClass::EngineClass() : BeforeRender(this, false), AfterRender(this, false), OnUpdate(this, true),
                              ThreadPool(this),
@@ -30,7 +31,7 @@ EngineClass::EngineClass() : BeforeRender(this, false), AfterRender(this, false)
                              AudioDevice(this)
 
 {
-    Engine = this;
+    thisengine = this;
 
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG);
 
@@ -63,7 +64,7 @@ EngineClass::~EngineClass()
     TTF_Quit();
     SDL_Quit();
 
-    *(EngineClass**)&Engine = nullptr;
+    thisengine = nullptr;
 }
 
 int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev)

@@ -54,6 +54,6 @@ private:
     long long m_frame = -1;
 };
 
-extern EngineClass* Engine;
+extern EngineClass* const & Engine;
 
 #include "GameEntry.h"
