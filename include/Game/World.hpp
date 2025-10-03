@@ -49,7 +49,6 @@ namespace Game
         // Member
 
         Camera CurrentCamera;
-        bool Paused = 0;
 
     public:
         // Entity Handling

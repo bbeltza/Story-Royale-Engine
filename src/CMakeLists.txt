@@ -68,6 +68,7 @@ set(COMPONENT_SOURCES
 "Gui/AspectRatio.cpp"
 "Gui/Modulate.cpp"
 "Gui/Padding.cpp"
+"Gui/Image.cpp"
 "Gui/Text.cpp"
 "Gui/List.cpp"
 

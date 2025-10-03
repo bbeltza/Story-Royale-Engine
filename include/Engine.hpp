@@ -24,13 +24,15 @@ public:
     Signal BeforeRender;
     Signal AfterRender;
 
-    // Get the number of frames that the engine has rendered
+    // Get the current frame count
+    // @returns The frame count starting from 0, or -1 if the application hasn't been run yet
     inline long long runtime_frame() const {return m_frame;}
 private:
     // Friend int main so that the entry point runs void Run()
     friend int main();
 
     // Constructors
+
     EngineClass();
     ~EngineClass();
 
