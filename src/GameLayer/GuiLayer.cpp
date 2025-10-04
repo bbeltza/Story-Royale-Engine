@@ -64,7 +64,7 @@ void Game::GuiContainer::_renderchildren()
 
     #ifdef DRAW_GUI_CONTAINER_BOX
         Color4 r{255, 0, 0, 255};
-        Engine->DrawingContext.DrawRectangle(m_absolute, r, COLOR4_WHITE, Vector2f::ZERO, DrawingDevice::dm_Stroke);
+        Engine->DrawingContext.DrawRectangle(m_absolute, r, Color4::WHITE, Vector2f::ZERO, DrawingDevice::dm_Stroke);
     #endif
     for (GuiContainer *obj : m_children)
     {

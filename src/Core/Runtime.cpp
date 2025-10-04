@@ -24,6 +24,7 @@ static EngineClass* thisengine = nullptr;
 EngineClass* const& Engine = thisengine;
 
 EngineClass::EngineClass() : BeforeRender(this, false), AfterRender(this, false), OnUpdate(this, true),
+
                              ThreadPool(this),
                              Window(this),
                              Input(this),
@@ -121,7 +122,7 @@ void EngineClass::loop()
     if (Game::GuiLayer::m_Current)
         Game::GuiLayer::m_Current->call_update(dt);
 
-    OnUpdate.Fire(dt);
+    OnUpdate.Fire(dt); // @TODO: this only works on x86...
 
     DrawingContext.processViewport();
     DrawingContext.render();

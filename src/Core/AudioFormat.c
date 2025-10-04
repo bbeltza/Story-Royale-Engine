@@ -11,10 +11,10 @@
 #define defamt16 defamt(0x7FFF)
 #define defamt8 defamt(0x7F)
 
-#define reti8 return amt * 0x7F;
-#define reti16 return amt * 0x7FFF;
-#define reti32 return amt * 0x7FFFFFFF;
-#define reti64 return amt * 0x7FFFFFFFFFFFFFFF;
+#define reti8 return (int8_t)(amt * 0x7F);
+#define reti16 return (int16_t)(amt * 0x7FFF);
+#define reti32 return (int32_t)(amt * 0x7FFFFFFF);
+#define reti64 return (int64_t)(amt * 0x7FFFFFFFFFFFFFFF);
 
 static inline int32_t format_i64_i32(int64_t x) { defamt64; reti32 }
 static inline int32_t format_i16_i32(int16_t x) { defamt16; reti32 }
