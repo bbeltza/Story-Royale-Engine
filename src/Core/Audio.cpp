@@ -30,7 +30,6 @@ void AudioData::Load()
     }
     else if ((m_len = stb_vorbis_decode_memory((uint8_t *)f_data, f_size, &channels_int, &m_spec.freq, (short **)&m_data)) > 0)
     {
-        printf("len: %d\n", m_len);
         m_file.setType(File::T_OGG);
         m_spec.channels = channels_int;
         m_spec.format = AUDIO_S16;

@@ -39,7 +39,7 @@ void sysleepms(uint32_t s);
 #ifdef __cplusplus
 }
 
-// Template C++ wrappers can be implemented here so watch out!
+// Template C++ wrappers can be implemented here!
 
 //
 #endif
