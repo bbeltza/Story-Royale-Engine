@@ -16,6 +16,8 @@ Font::~Font()
 
 bool Font::PreloadTextures(const char* text)
 {
+    if (!text[0]) return true;
+
     bool unloaded = false;
     size_t n = 0;
     while (text[n])
