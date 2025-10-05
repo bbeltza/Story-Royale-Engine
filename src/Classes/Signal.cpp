@@ -12,7 +12,7 @@ void *Signal::create_sem()
 Signal::~Signal()
 {
     DisconnectAll();
-    SDL_DestroySemaphore((SDL_sem *)m_waitSem);
+    if (SDL_WasInit(0)) SDL_DestroySemaphore((SDL_sem *)m_waitSem);
 }
 
 void Signal::DisconnectAll()
