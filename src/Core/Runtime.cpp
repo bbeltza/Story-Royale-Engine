@@ -15,7 +15,7 @@
 static std::unordered_set<GameInstance *> destroyQueue;
 
 static void queueDestroyingInstances();
-static SDL_mutex* queueDestroyMutex;
+static SDL_mutex* queueDestroyMutex = SDL_CreateMutex();;
 
 static std::chrono::duration<double> targetFrameTime;
 const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
@@ -34,15 +34,15 @@ EngineClass::EngineClass() : BeforeRender(this, false), AfterRender(this, false)
 {
     thisengine = this;
 
-    SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG);
+    //SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG);
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 
+    
     m_entryThread = SDL_CreateThread((SDL_ThreadFunction)Game::Initialize, "Entry", NULL);
-    queueDestroyMutex = SDL_CreateMutex();
-
+    
     Window.Setup();
     DrawingContext.Setup();
 }

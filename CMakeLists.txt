@@ -40,7 +40,6 @@ SDL2_image::SDL2_image-static
 
 fmt::fmt
 stb
-ImGui
 )
 set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include

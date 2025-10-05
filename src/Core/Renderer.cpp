@@ -74,5 +74,28 @@ void DrawingDevice::render()
 
     // Present the screen
     SDL_LockMutex(m_lockmutex);
+
     SDL_RenderPresent(sdl_renderer);
+}
+
+void DrawingDevice::processViewport()
+{
+    // Updating the viewport rect
+    SDL_RenderGetViewport(sdl_renderer, &m_viewport);
+
+    Vector2u viewportsize;
+    SDL_GetRendererOutputSize(sdl_renderer, (int *)&viewportsize.X, (int *)&viewportsize.Y);
+
+    if (GameSettings::ScalingResolution)
+        scale = (viewportsize / GameSettings::ScalingResolution).getMin();
+    scale = scale ? scale : 1;
+    SDL_RenderSetScale(sdl_renderer, (float)scale, (float)scale);
+    
+    auto layer = Game::GuiLayer::Current();
+    if (!layer) return;
+    
+    layer->m_absolute.Size.X = (float)m_viewport.w;
+    layer->m_absolute.Size.Y = (float)m_viewport.h;
+
+    layer->_processchildren();
 }
