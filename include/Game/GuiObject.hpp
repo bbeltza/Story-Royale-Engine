@@ -10,12 +10,17 @@ namespace Game
     public:
         UDim2 position, size;
         Vector2f anchor;
+        int zIndex = 0;
 
         bool isGuiLayer() const override { return 0; }
         bool isHovering() const;
 
     private:
         void _process();
+        static inline bool cmp(GuiObject* first, GuiObject* second)
+        {
+            return first->zIndex < second->zIndex;
+        }
 
         friend class GuiContainer;
     };

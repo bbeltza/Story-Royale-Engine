@@ -16,7 +16,7 @@ Connection *GuiPresets::Button::s_clickconnection = nullptr;
 GuiPresets::Button::Button()
 {
     m_connection = Engine->Input.mouseButton.Connect(clickevent, this);
-    addComponent(&m_mod);
+    addComponent(m_mod);
 }
 
 GuiPresets::Button::~Button()

@@ -37,8 +37,8 @@ namespace Game
             return obj;
         }
 
-        inline void addComponent(void* _component) {m_components.push_back(reinterpret_cast<GuiComponent*>(_component));}
-        inline void removeComponent(void* _component) {m_components.remove(reinterpret_cast<GuiComponent*>(_component));}
+        inline void addComponent(GuiComponent& _component) {m_components.push_back(&_component);}
+        inline void removeComponent(GuiComponent& _component) {m_components.remove(&_component);}
 
         bool visible = true, canQuery = true;
     private:

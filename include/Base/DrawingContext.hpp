@@ -64,4 +64,11 @@ private:
     void renderCurrentUI();
 
     unsigned int scale = 0;
+
+    // Support for taget textures
+    friend class TargetTexture;
+    std::vector<SDL_Texture*> target_textures = {nullptr};
+    size_t targetptr = 0;
+
+    void reset_targets();
 };

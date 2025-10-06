@@ -27,6 +27,7 @@ Game::GuiContainer::~GuiContainer()
 
 void Game::GuiContainer::_processchildren()
 {
+    m_children.sort(GuiObject::cmp);
     uint32_t i = 0;
     for (GuiObject *obj : m_children)
     {

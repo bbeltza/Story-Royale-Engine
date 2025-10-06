@@ -80,16 +80,19 @@ void DrawingDevice::render()
 
 void DrawingDevice::processViewport()
 {
-    // Updating the viewport rect
-    SDL_RenderGetViewport(sdl_renderer, &m_viewport);
-
-    Vector2u viewportsize;
-    SDL_GetRendererOutputSize(sdl_renderer, (int *)&viewportsize.X, (int *)&viewportsize.Y);
+    Vector2u outsize;
+    SDL_GetRendererOutputSize(sdl_renderer, (int *)&outsize.X, (int *)&outsize.Y);
 
     if (GameSettings::ScalingResolution)
-        scale = (viewportsize / GameSettings::ScalingResolution).getMin();
+        scale = (outsize / GameSettings::ScalingResolution).getMin();
     scale = scale ? scale : 1;
     SDL_RenderSetScale(sdl_renderer, (float)scale, (float)scale);
+
+    // Updating the viewport rect
+    int oldw = m_viewport.w, oldh = m_viewport.h;
+    SDL_RenderGetViewport(sdl_renderer, &m_viewport);
+    if (oldw < m_viewport.w || oldh < m_viewport.h)
+        reset_targets();
     
     auto layer = Game::GuiLayer::Current();
     if (!layer) return;
@@ -98,4 +101,13 @@ void DrawingDevice::processViewport()
     layer->m_absolute.Size.Y = (float)m_viewport.h;
 
     layer->_processchildren();
+}
+
+void DrawingDevice::reset_targets()
+{
+    while (target_textures.size() > 1)
+    {
+        SDL_DestroyTexture(target_textures.back());
+        target_textures.pop_back();
+    }
 }

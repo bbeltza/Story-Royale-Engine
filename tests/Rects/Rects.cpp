@@ -20,7 +20,7 @@ struct DisplayText: public Game::GuiLayer
         text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
         text.LoadFont("res://fonts/OpenSans-Regular.ttf");
 
-        label->addComponent(&text);
+        label->addComponent(text);
     }
 
     GuiComponents::Text text;
