@@ -28,10 +28,10 @@ namespace Game
         inline Vector2f getAbsolutePosition() const { return m_absolute.Position; }
         inline Vector2f getAbsoluteSize() const { return m_absolute.Size; }
 
-        template <class obj_type> inline obj_type* addChild()
+        template <class obj_type, class... args> inline obj_type* addChild(args... arg)
         {
             s_targetParentContainer = this;
-            auto obj = new obj_type;
+            auto obj = new obj_type(arg...);
             s_targetParentContainer = nullptr;
             m_children.push_back(reinterpret_cast<GuiObject*>(obj));
             return obj;

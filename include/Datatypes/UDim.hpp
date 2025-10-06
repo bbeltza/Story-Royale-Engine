@@ -1,4 +1,5 @@
 #pragma once
+#include <Datatypes/Vector.hpp>
 
 struct UDim
 {
@@ -25,6 +26,8 @@ struct UDim2
 
     UDim X;
     UDim Y;
+
+    static UDim2 FromOffset(const Vector2i& vec) { return { 0, vec.X, 0, vec.Y }; }
 };
 
 extern const UDim UDIM_ZERO;
