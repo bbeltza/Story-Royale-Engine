@@ -1,7 +1,7 @@
 - Animations/Keyframes
 
 - Texture API (Basically a class to store textures)
-	- Being able to do something similar to SDL's render targets, but with the Texture API (for the StaticTexture component)
+	- Being able to create Texture objects with TargetTextures
 
 - Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
 
