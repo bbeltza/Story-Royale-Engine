@@ -34,5 +34,5 @@ private:
     void Setup();
 
     Flags32 start_flags;
-    Vector2f start_res;
+    Vector2u start_res;
 };

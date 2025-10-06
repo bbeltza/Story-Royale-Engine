@@ -15,7 +15,7 @@ void AudioData::Load()
 
     SDL_RWops *audio_rw = SDL_RWFromConstMem(f_data, f_size);
     
-    int channels_int, err;
+    int channels_int;
     Uint8 *stream_data;
     SDL_zero(m_spec);
     
@@ -130,7 +130,7 @@ void AudDevice::callback(AudDevice *dev, int32_t *stream, int len)
 
         for (size_t i = 0; i < sample_len; i += audio->m_data->m_spec.channels)
         {
-            float a = audio->m_fsamplepos - audio->m_samplepos;
+            double a = audio->m_fsamplepos - audio->m_samplepos;
 
             if (audio->m_fadein)
             {
@@ -158,13 +158,13 @@ void AudDevice::callback(AudDevice *dev, int32_t *stream, int len)
             {
                 int cc = audio->m_data->m_spec.channels > 1 ? c : 0;
                 Uint8 *dst = (Uint8 *)(stream + i + c);
-                SDL_MixAudioFormat(dst, (Uint8 *)((int32_t *)audio->m_data->m_data + audio->m_samplepos * audio->m_data->m_spec.channels + cc), dev->m_Spec.format, byte_count, audio->Info.volume * audio->m_fadevol * 64);
+                SDL_MixAudioFormat(dst, (Uint8 *)((int32_t *)audio->m_data->m_data + audio->m_samplepos * audio->m_data->m_spec.channels + cc), dev->m_Spec.format, byte_count, (int)(audio->Info.volume * audio->m_fadevol * 64));
             }
 
             audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
             audio->m_samplepos = (uint32_t)audio->m_fsamplepos;
 
-            int loop_end = ((signed int)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
+            uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
 
             if (audio->Info.looped && audio->m_samplepos >= loop_end)
             {

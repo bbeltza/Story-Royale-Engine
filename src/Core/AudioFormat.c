@@ -30,8 +30,8 @@ int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t
 
     uint8_t out_bitsize = SDL_AUDIO_BITSIZE(f_output), in_bitsize = SDL_AUDIO_BITSIZE(f_input);
 
-    float fac = out_bitsize / in_bitsize;
-    int len_output = len_input * fac;
+    float fac = out_bitsize / (float)in_bitsize;
+    int len_output = (int)(len_input * fac);
     
     int8_t* out_data = malloc(len_output);
 

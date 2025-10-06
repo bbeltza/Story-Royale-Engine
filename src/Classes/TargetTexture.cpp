@@ -53,3 +53,32 @@ void TargetTexture::Blit(const RectI& src, const RectF& dest, const Vector2f& an
     SDL_RenderCopyF(renderer, m_texture, srcRect, &destRect);
     SDL_SetRenderTarget(renderer, m_texture);
 }
+
+Texture TargetTexture::CreateTexture(const RectI& src)
+{
+    setup_aliases
+
+    const SDL_Rect* rect = reinterpret_cast<const SDL_Rect*>(&src);
+    int w = rect->w, h = rect->h;
+    if (src.Size.X == 0 || src.Size.Y == 0)
+    {
+        rect = NULL;
+        SDL_QueryTexture(m_texture, NULL, NULL, &w, &h);
+    }
+    syslogln("%d %d", w, h);
+
+    uint64_t* pixeldata = new uint64_t[w * h];
+
+    SDL_RenderReadPixels(renderer, rect, 0, pixeldata, w * 4);
+    Texture texture;
+    
+    SDL_Texture* sdl_texture = SDL_CreateTexture(renderer, NULL, SDL_TEXTUREACCESS_STATIC, w, h);
+    SDL_SetTextureBlendMode(sdl_texture, SDL_BLENDMODE_BLEND);
+    SDL_UpdateTexture(sdl_texture, NULL, pixeldata, w * 4);
+
+    texture.texture = sdl_texture;
+
+
+    delete[] pixeldata;
+    return texture;
+}

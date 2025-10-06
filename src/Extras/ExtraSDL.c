@@ -8,10 +8,10 @@ int SDL_SetRenderDrawColorMod(SDL_Renderer* renderer, SDL_Color* color, SDL_Colo
         return SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
     else
         return SDL_SetRenderDrawColor(renderer,
-            color->r * mod->r / 255.0f,
-            color->g * mod->g / 255.0f,
-            color->b * mod->b / 255.0f,
-            color->a * mod->a / 255.0f
+            (Uint8)(color->r * mod->r / 255.0f),
+            (Uint8)(color->g * mod->g / 255.0f),
+            (Uint8)(color->b * mod->b / 255.0f),
+            (Uint8)(color->a * mod->a / 255.0f)
         );
 }
 
@@ -45,31 +45,4 @@ int SDL_RenderFillCircleF(SDL_Renderer* renderer, float _x, float _y, float radi
 int SDL_RenderFillCircle(SDL_Renderer* renderer, int _x, int _y, int radius)
 {
     return SDL_RenderFillCircleF(renderer, (float)_x, (float)_y, (float)radius);
-}
-
-int TTF_MeasureTextSpaced(TTF_Font* font, const char* text, int measure_width, int* extent, int* count)
-{
-    int c;
-    int res = TTF_MeasureText(font, text, measure_width, extent, &c);
-    if (res < 0) goto ret;
-    if (!count && !extent) goto ret;
-    if (!count) count = &c; else *count = c;
-    if (c >= strlen(text)) goto ret;
-
-    char* spaced_text = malloc(*count+1);
-    strncpy(spaced_text, text, *count);
-    spaced_text[*count] = 0;
-
-    char* spaced_ptr = strrchr(spaced_text, ' ');
-    if (spaced_ptr && spaced_ptr != spaced_text)
-        *spaced_ptr = 0;
-    char* newline_ptr = strrchr(spaced_text, '\n');
-    if (newline_ptr && newline_ptr != spaced_text)
-        *newline_ptr = 0;
-    
-    res = TTF_MeasureText(font, spaced_text, measure_width, extent, count);
-
-    free(spaced_text);
-    ret:
-    return res;
 }

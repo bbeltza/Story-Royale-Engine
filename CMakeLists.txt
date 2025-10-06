@@ -16,6 +16,7 @@ srEngine_policy()
 
 if(MSVC)
     set(SR_ENGINE_NO_CONSOLE_OPTIONS "/SUBSYSTEM:WINDOWS")
+    set(SR_ENGINE_COMPILER_OPTIONS "/WX")
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 else()
@@ -31,6 +32,7 @@ project(StoryRoyaleEngine)
 add_subdirectory(gen_src)
 add_subdirectory(src)
 target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
+target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
 
 
 set(3RDPARTYLIBS

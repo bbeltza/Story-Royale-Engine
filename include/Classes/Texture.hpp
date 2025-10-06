@@ -8,15 +8,16 @@
 class Texture
 {
     friend class DrawingDevice;
+    friend class TargetTexture;
     typedef std::deque<Texture*> Queue;
     static Queue* to_load;
 
+    Texture() = default;
 public:
     Texture(const Texture& other) = delete;
-    Texture(void* from_texture);
-    Texture(Texture&& moving);
+    Texture(void* from_surface);
+    Texture(Texture&& moving) noexcept;
     Texture(const char* path);
-    Texture(int w, int h);
     ~Texture();
 
     Vector2i GetSize();

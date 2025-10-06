@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Classes/Texture.hpp"
 #include "Datatypes/Rect.hpp"
 
 // An object that when created, becomes the DrawingDevice's current target to render stuff on a separate texture.
@@ -18,6 +19,8 @@ public:
     ~TargetTexture();
 
     void Blit(const RectI& src, const RectF& dest, const Vector2f& anchor=Vector2f::CENTER);
+
+    Texture CreateTexture(const RectI& src);
 
     void* operator new(size_t size) = delete;
 };

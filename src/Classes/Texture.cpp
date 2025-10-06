@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 #include "Classes/Texture.hpp"
 
-Texture::Texture(Texture&& moving): 
+Texture::Texture(Texture&& moving) noexcept: 
     texture(moving.texture),
     file_surface(moving.file_surface)
 {
@@ -26,11 +26,6 @@ Texture::Texture(const char* path)
 Texture::Texture(void* from_surface): file_surface(from_surface)
 {
     push_queue();
-}
-
-Texture::Texture(int w, int h): texture(SDL_CreateTexture(Engine->DrawingContext.sdl_renderer, 0, SDL_TEXTUREACCESS_STREAMING, w, h))
-{
-    SDL_SetTextureBlendMode(m_Texture, SDL_BLENDMODE_BLEND);
 }
 
 Texture::~Texture()
