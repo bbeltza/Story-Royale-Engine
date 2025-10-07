@@ -8,8 +8,8 @@
 #define c3getop(macro) { return Color3(macro(r), macro(g), macro(b)); }
 #define c4getop(macro) { return Color4(macro(r), macro(g), macro(b), macro(a)); }
 
-#define colgetadd(comp) mmax(255, this->comp + other.comp)
-#define colgetsub(comp) mmin(0, this->comp - other.comp)
+#define colgetadd(comp) ut_max(255, this->comp + other.comp)
+#define colgetsub(comp) ut_min(0, this->comp - other.comp)
 #define colgetmul(comp) (this->comp * other.comp) / 255
 
 #define coladd(comp) this->comp = colgetadd(comp)

@@ -16,10 +16,10 @@ namespace Game
         p_Special = 0,
         p_Custom = p_Special, // An alias for p_Special
 
-        p_Render = bit(0),
-        p_Update = bit(1),
-        p_pUpdate = bit(2),
-        p_Query = bit(3)
+        p_Render = ut_bit(0),
+        p_Update = ut_bit(1),
+        p_pUpdate = ut_bit(2),
+        p_Query = ut_bit(3)
     };
     using ComponentProcessFlags = Flags<ProcessFlags>;
 

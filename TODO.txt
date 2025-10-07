@@ -1,13 +1,7 @@
 - Animations/Keyframes
 
-- Texture API (Basically a class to store textures)
-	- Being able to create Texture objects with TargetTextures
-
 - Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
 
-- More options to the EntityControl camera controller
-	(DONE) - Smoothness
-	- Bounds
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
 - Better error messaging (With the sys API)

@@ -199,7 +199,7 @@ void DrawingDevice::DrawTexture(Texture& _Texture, const RectF& Rectangle, const
     float left = roundf(rl * scale) / scale;
     float top = roundf(rt * scale) / scale;
     SDL_FRect render_rect{left, top, absW, absH};
-    int flip = (Rectangle.Size.X < 0 ? bit(0) : 0) | (Rectangle.Size.Y < 0 ? bit(1) : 0);
+    int flip = (Rectangle.Size.X < 0 ? ut_bit(0) : 0) | (Rectangle.Size.Y < 0 ? ut_bit(1) : 0);
 
     SDL_SetTextureColorMod((SDL_Texture*)_Texture.texture, Modulate.r, Modulate.g, Modulate.b);
     SDL_SetTextureAlphaMod((SDL_Texture*)_Texture.texture, Modulate.a);
@@ -279,7 +279,7 @@ void DrawingDevice::LegacyDrawTexture(const RectF& _Rectangle, File &_File)
     float left = roundf(_Rectangle.getLeft() * scale) / scale;
     float top = roundf(_Rectangle.getTop() * scale) / scale;
     SDL_FRect render_rect{left, top, abs(_Rectangle.Size.X), abs(_Rectangle.Size.Y)};
-    int flip = (_Rectangle.Size.X < 0 ? bit(0) : 0) | (_Rectangle.Size.Y < 0 ? bit(1) : 0);
+    int flip = (_Rectangle.Size.X < 0 ? ut_bit(0) : 0) | (_Rectangle.Size.Y < 0 ? ut_bit(1) : 0);
 
     SDL_RenderCopyExF(sdl_renderer, (SDL_Texture *)_File.m_userdata, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
 

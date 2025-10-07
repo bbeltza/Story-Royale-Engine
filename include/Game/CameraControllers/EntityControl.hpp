@@ -10,12 +10,14 @@ namespace CameraControllers
         EntityControl(Game::Entity& entity): m_Entity(&entity) {}
         ~EntityControl();
 
-        float Smoothness = 0.1f;
+        float Smoothness = 0.13f;
+        Vector2f Bounds;
 
     protected:
         void Update(TimeStamp) override;
 
     private:
         Game::Entity *const m_Entity;
+        Vector2f m_Target;
     };
 }

@@ -13,11 +13,11 @@ namespace Game
         {
             NOUPDATEFLAGS = 0,
 
-            PROCESS_SIZE = bit(0),
-            PROCESS_POSITION = bit(1),
-            PROCESS_CHILDREN = bit(2),
-            RENDER = bit(3),
-            PRE_RENDER = bit(4),
+            PROCESS_SIZE = ut_bit(0),
+            PROCESS_POSITION = ut_bit(1),
+            PROCESS_CHILDREN = ut_bit(2),
+            RENDER = ut_bit(3),
+            PRE_RENDER = ut_bit(4),
 
             CUSTOMUPDATEFLAGS = NOUPDATEFLAGS
         };

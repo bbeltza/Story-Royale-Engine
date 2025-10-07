@@ -35,16 +35,16 @@ enum TargetType
 
 struct Info
     {
-        float duration;
-        EasingStyle easingStyle;
-        EasingDirection esingDirection;
+        float duration = 1;
+        EasingStyle easingStyle = Es_Linear;
+        EasingDirection esingDirection = Ed_InOut;
 
-        float delay;
-        int repeat;
-        bool reverse;
+        float delay = 0;
+        int repeat = 1;
+        bool reverse = false;
     };
 public:
-    Tween(Info* info, void* target, const void* src, TargetType type);
+    Tween(const Info* info, void* target, const void* src, TargetType type);
     ~Tween();
 
     inline void SetTarget(void* target) {m_target.u8 = (uint8_t*)target;}
@@ -57,7 +57,7 @@ public:
 
     inline float GetAlpha() {return m_info->duration ? m_elapsed/m_info->duration : 1;}
 private:
-    Info* m_info;
+    const Info* m_info;
     union TypePointers
     {
         uint8_t *u8;
