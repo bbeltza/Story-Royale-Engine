@@ -22,7 +22,7 @@ TargetTexture::TargetTexture(const Vector2i& size): has_customsize(true)
         target_textures.push_back(
             SDL_CreateTexture(
                 renderer, // DrawingContext's renderer (they are friends so it can access it heh)
-                NULL, // Shouldn't care about the format on a rendering target
+                0, // Shouldn't care about the format on a rendering target
                 SDL_TEXTUREACCESS_TARGET,
                 size.X,
                 size.Y
@@ -86,7 +86,7 @@ Texture TargetTexture::CreateTexture(const RectI& src)
     SDL_RenderReadPixels(renderer, rect, 0, pixeldata, w*4);
     SDL_SetRenderTarget(renderer, target_textures.at(targetptr));
 
-    SDL_Texture* sdl_texture = SDL_CreateTexture(renderer, NULL, SDL_TEXTUREACCESS_STATIC, w, h);
+    SDL_Texture* sdl_texture = SDL_CreateTexture(renderer, 0, SDL_TEXTUREACCESS_STATIC, w, h);
     SDL_SetTextureBlendMode(sdl_texture, SDL_BLENDMODE_BLEND);
     SDL_UpdateTexture(sdl_texture, NULL, pixeldata, w*4);
 
