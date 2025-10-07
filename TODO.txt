@@ -1,3 +1,6 @@
+- UI Tween functions
+- Changing a little bit the Tween class
+
 - Animations/Keyframes
 
 - Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
