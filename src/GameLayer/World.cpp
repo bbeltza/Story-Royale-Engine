@@ -10,7 +10,7 @@
 
 Vector2f Game::World::center;
 Color3 Game::World::Background = {255, 149, 236};
-Color4 Game::World::Foreground = {0};
+Color4 Game::World::Foreground = {0x00000000};
 Game::World* Game::World::m_Current = nullptr;
 Game::World* Game::World::s_TargetWorld = nullptr;
 
@@ -52,7 +52,7 @@ Game::World* Game::World::checkCurrent(World* world)
 
 void Game::World::err()
 {
-    return syserror(UNKNOWN_ERROR, "Failed instancing world, inserted World isn't inherited by base World");
+    return syserror(WORLD_CREATION_ERROR);
 }
 
 void Game::World::call_pupdate(TimeStamp dt)

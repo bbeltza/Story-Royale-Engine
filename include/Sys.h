@@ -22,7 +22,6 @@ typedef struct
 	void* args[NUM_ARGS];
 } sysfunc_base;
 
-
 int syscode();
 int sysexiting();
 void sysexit(int code);

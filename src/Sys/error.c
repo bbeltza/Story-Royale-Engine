@@ -7,7 +7,7 @@ static char err_buffer[500];
 static int exitcode = 0;
 static uint8_t exiting = 0;
 
-#define printmsg(stream) fprintf(stream, "Error: %s | Code: %d\n", err_buffer, code)
+#define printmsg(stream) fprintf(stream, "[Error]: %s | Code: %d\n", err_buffer, code)
 
 void syserror(syserr code, ...)
 {
@@ -23,6 +23,8 @@ void syserror(syserr code, ...)
     case SDL_ERROR:
         fmtmsg = "SDL Error: %s '%s'";
         break;
+    case WORLD_CREATION_ERROR:
+        fmtmsg = "Failed instancing world, did you inherit your class from Game::World?";
     default:
         fmtmsg = "An error has occurred! %s.";
         break;
