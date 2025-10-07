@@ -63,6 +63,8 @@ private:
     void renderCurrentWorld();
     void renderCurrentUI();
 
+    void load_textures();
+
     unsigned int scale = 0;
 
     // Support for taget textures

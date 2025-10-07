@@ -76,7 +76,6 @@ set(COMPONENT_SOURCES
 "World/Shape.cpp"
 "World/Velocity.cpp"
 "World/Sprite.cpp"
-"World/StaticTexture.cpp"
 )
 
 set_dst_src(Components COMPONENT_SOURCES LAYER_SOURCES)

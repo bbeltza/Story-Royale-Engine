@@ -41,16 +41,7 @@ void DrawingDevice::Setup()
 
 void DrawingDevice::render()
 {
-    if (!Texture::to_load) goto section;
-    while (!Texture::to_load->empty())
-    {
-        Texture& tex = *Texture::to_load->front();
-        Texture::to_load->pop_front();
-
-        tex.texture = SDL_CreateTextureFromSurface(sdl_renderer, (SDL_Surface*)tex.file_surface);
-    }
-
-    section:
+    load_textures();
 
     SDL_UnlockMutex(m_lockmutex);
 
@@ -101,6 +92,18 @@ void DrawingDevice::processViewport()
     layer->m_absolute.Size.Y = (float)m_viewport.h;
 
     layer->_processchildren();
+}
+
+void DrawingDevice::load_textures()
+{
+    if (!Texture::to_load) return;
+    while (!Texture::to_load->empty())
+    {
+        Texture& tex = *Texture::to_load->front();
+        Texture::to_load->pop_front();
+
+        tex.texture = SDL_CreateTextureFromSurface(sdl_renderer, (SDL_Surface*)tex.file_surface);
+    }
 }
 
 void DrawingDevice::reset_targets()

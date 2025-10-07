@@ -187,6 +187,8 @@ void DrawingDevice::DrawTexture(Texture& _Texture, const RectF& Rectangle, const
 
     if (Rectangle.Size.X == 0 || Rectangle.Size.Y == 0)
         return;
+    
+    if (!_Texture.texture) load_textures();
 
     float absW = abs(Rectangle.Size.X);
     float absH = abs(Rectangle.Size.Y);

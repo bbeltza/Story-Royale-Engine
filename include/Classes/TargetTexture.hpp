@@ -14,7 +14,9 @@ class TargetTexture
     friend class DrawingDevice;
 private:
     void* m_handle;
+    bool has_customsize = false;
 public:
+    TargetTexture(const Vector2i&);
     TargetTexture();
     ~TargetTexture();
 
