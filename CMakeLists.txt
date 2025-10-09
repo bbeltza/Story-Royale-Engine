@@ -23,6 +23,7 @@ else()
     if ("${CMAKE_SYSTEM_NAME}" EQUAL "Windows")
         set(SR_ENGINE_NO_CONSOLE_OPTIONS "-mwindows")
     endif()
+    set(SR_ENGINE_COMPILER_OPTIONS "-Werror")
 endif()
 
 add_subdirectory(3rdparty)
@@ -32,8 +33,8 @@ project(StoryRoyaleEngine)
 add_subdirectory(gen_src)
 add_subdirectory(src)
 target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
-target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
 target_compile_features(StoryRoyaleEngine PRIVATE cxx_std_11 c_std_99)
+target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
 
 
 set(3RDPARTYLIBS

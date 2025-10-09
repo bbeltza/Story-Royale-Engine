@@ -6,7 +6,7 @@ const RectF bounds(10, 10, 120, 30);
 
 void render()
 {
-    font->Render(bounds, "Hello world guys", -1);
+    font->Render(bounds, "Hello world from Font::Render()", -1, Font::HCenter, Font::VCenter);
     Engine->DrawingContext.DrawRectangle(bounds, {255, 0, 0, 255}, Color4::WHITE, Vector2f::ZERO, DrawingDevice::dm_Stroke);
 }
 

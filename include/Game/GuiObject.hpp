@@ -14,13 +14,12 @@ namespace Game
 
         bool isGuiLayer() const override { return 0; }
         bool isHovering() const;
+        void TweenPosition();
+        void TweenSize();
 
     private:
         void _process();
-        static inline bool cmp(GuiObject* first, GuiObject* second)
-        {
-            return first->zIndex < second->zIndex;
-        }
+        static inline bool cmp(GuiObject* first, GuiObject* second) { return first->zIndex < second->zIndex; }
 
         friend class GuiContainer;
     };

@@ -31,7 +31,7 @@ struct TextureEntity : public Game::Entity
         sprite.Attach(sprt1);
         sprite.Attach(sprt2);
         sprite.Scale = { 4, 4 };
-        addComponent(&sprite);
+        addComponent(sprite);
     }
     Components::Sprite sprite;
 };

@@ -5,9 +5,10 @@
 
 #include "Datatypes/Vector.hpp"
 
+#include "Game/World.hpp"
+
 namespace Game
 {
-    class World;
     class Component;
 
     class Entity:public WorldInstance

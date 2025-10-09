@@ -25,7 +25,6 @@ void File::Load(const char *path)
 
             FileInfo &info = m_info();
             SDL_AtomicAdd(&info.ref, 1);
-            syslogln("File::Load() %d", SDL_AtomicGet(&info.ref));
 
             if (!info.resbind)
             {

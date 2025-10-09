@@ -1,4 +1,7 @@
 {
-    "ScalingResolution": [100, 100],
+    "StartResolution": [140, 100],
+    "WindowOptions": {
+        "Resizable": false
+    },
     "Resources": "res"
 }
