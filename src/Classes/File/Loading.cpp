@@ -31,7 +31,7 @@ void File::Load(const char *path)
             {
                 info.resbind = true;
 
-                unsigned int l = strlen(REAL_path);
+                unsigned int l = (int)strlen(REAL_path);
 
                 const unsigned char *resptr = _game_res;
                 while (*resptr != '\n')
@@ -61,7 +61,7 @@ void File::Load(const char *path)
         }
         else
         {
-            unsigned int s = strlen(path + strlen(RES_PREFIX)) + 56;
+            unsigned int s = (int)(strlen(path + strlen(RES_PREFIX)) + 56);
             REAL_path = new char[s];
             strcpy_s(REAL_path, sizeof(res_prefix), res_prefix);
             strcat_s(REAL_path, s, path + sizeof(res_prefix));

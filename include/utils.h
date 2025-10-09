@@ -15,5 +15,5 @@ It's discouraged to use it with numbers as numbers can be NULL too
 */
 #define ut_array(...) {__VA_ARGS__, NULL}
 
-#define ut_clamp(x, max, min) (x > max ? max : x < min ? min : x )
-#define ut_setclamp(x, max, min) x = ut_clamp(x, max, min)
+#define ut_clamp(x, min, max) (((x) > (max)) ? (max) : ((x) < (min)) ? (min) : (x))
+#define ut_setclamp(x, min, max) x = ut_clamp(x, min, max)

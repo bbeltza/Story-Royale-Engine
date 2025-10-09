@@ -1,15 +1,11 @@
 #include <string.h>
 #include <C/extra_string.h>
-
-static int min(int x, int y)
-{
-    return x < y ? x : y;
-}
+#include "utils.h"
 
 const char* strnrchr(const char* _src, int _Char, size_t _Count)
 {
     size_t l = strlen(_src);
-    const char* new_ptr = _src+min(l, _Count);
+    const char* new_ptr = _src+ ut_min(l, _Count);
     while (new_ptr != _src && *new_ptr != _Char)
         new_ptr--;
     

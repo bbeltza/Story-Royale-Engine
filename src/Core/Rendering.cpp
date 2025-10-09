@@ -248,7 +248,7 @@ bool DrawingDevice::LegacyLoadFileTexture(File &_File)
     }
     else
     {
-        SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.getInfo().data, _File.getInfo().size);
+        SDL_RWops *temp_rw = SDL_RWFromConstMem(_File.getRawData(), (int)_File.getSize());
         if (!temp_rw)
             goto err;
 

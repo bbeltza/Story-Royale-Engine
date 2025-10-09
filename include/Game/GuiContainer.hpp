@@ -22,18 +22,24 @@ namespace Game
         virtual ~GuiContainer();
         virtual bool isGuiLayer() const = 0;
 
-        inline GuiContainer *getParent() const { return m_parent; }
+        template <class _container=GuiContainer>
+        inline _container *getParent() const { return m_parent->cast<_container>(); }
         inline const std::list<GuiObject*>& getChildren() const { return m_children; }
+
+        template <class _container=GuiContainer>
+        inline _container* cast() { return dynamic_cast<_container*>(this); }
 
         inline Vector2f getAbsolutePosition() const { return m_absolute.Position; }
         inline Vector2f getAbsoluteSize() const { return m_absolute.Size; }
 
-        template <class obj_type, class... args> inline obj_type* addChild(args... arg)
+        template <class _obj=GuiObject, class... args>
+        inline _obj* addChild(args... arg)
         {
             s_targetParentContainer = this;
-            auto obj = new obj_type(arg...);
+            auto obj = new _obj(arg...);
             s_targetParentContainer = nullptr;
-            m_children.push_back(reinterpret_cast<GuiObject*>(obj));
+            
+            m_children.push_back(obj);
             return obj;
         }
 

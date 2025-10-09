@@ -6,7 +6,7 @@
 Font::Font(const char* path, int pt)
 {
     m_file.Load(path);
-    m_font = TTF_OpenFontRW(SDL_RWFromConstMem(m_file.getRawData(), m_file.getSize()), 1, pt);
+    m_font = TTF_OpenFontRW(SDL_RWFromConstMem(m_file.getRawData(), (int)m_file.getSize()), 1, pt);
 }
 
 Font::~Font()

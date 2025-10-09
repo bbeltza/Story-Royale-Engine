@@ -1,4 +1,4 @@
-#include <SDL.hpp>
+#include "utils.h"
 #include "Game/Camera.hpp"
 
 using namespace Game;
@@ -21,7 +21,7 @@ void Camera::Update(TimeStamp dt)
 
     if (clamp.Size)
     {
-        x = SDL_clamp(x, clamp.getLeft(), clamp.getRight());
-        y = SDL_clamp(y, clamp.getTop(), clamp.getBottom());
+        x = ut_clamp(x, clamp.getLeft(), clamp.getRight());
+        y = ut_clamp(y, clamp.getTop(), clamp.getBottom());
     }
 }

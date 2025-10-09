@@ -25,7 +25,7 @@ void Game::Entity::call_render()
 {
     for (Component *component : this->m_Components)
     {
-        if (componentDisabled(component)) continue;
+        if (componentDisabled(*component)) continue;
         if (component->hasProcessFlag(Component::p_Render))
             component->Render(this);
     }
@@ -36,7 +36,7 @@ void Game::Entity::call_pupdate(TimeStamp dt)
     *const_cast<Vector2f*>(&lastVelocity) = Position;
     for (auto c : m_Components)
     {
-        if (componentDisabled(c)) continue;
+        if (componentDisabled(*c)) continue;
         if (c->hasProcessFlag(Component::p_pUpdate))
             c->pUpdate(this, dt);
     }

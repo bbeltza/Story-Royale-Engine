@@ -69,7 +69,7 @@ void Font::Render(const RectF & bounds, const char* text, int count, HAlign hali
 
         startvec.X = bounds.Position.X + xoffset;
 
-        RenderLine(startvec, c_str, count, n);
+        RenderLine(startvec, c_str, count, (int)n);
 
         startvec.Y += line_skip;
         n += strlen(c_str);

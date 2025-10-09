@@ -23,8 +23,6 @@ void syserror(syserr code, ...)
     case SDL_ERROR:
         fmtmsg = "SDL Error: %s '%s'";
         break;
-    case WORLD_CREATION_ERROR:
-        fmtmsg = "Failed instancing world, did you inherit your class from Game::World?";
     default:
         fmtmsg = "An error has occurred! %s.";
         break;

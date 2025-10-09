@@ -35,7 +35,7 @@ void WindowClass::setIcon(const char* path)
     File file;
     file.Load(path);
 
-    SDL_Surface* icon = IMG_Load_RW(SDL_RWFromConstMem(file.getRawData(), file.getSize()), 1);
+    SDL_Surface* icon = IMG_Load_RW(SDL_RWFromConstMem(file.getRawData(), (int)file.getSize()), 1);
     SDL_SetWindowIcon(sdl_window, icon);
     SDL_FreeSurface(icon);
 }

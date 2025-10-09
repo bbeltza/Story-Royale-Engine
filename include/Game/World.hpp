@@ -20,7 +20,6 @@ namespace Game
     protected:
         World();
         ~World();
-
     public:
 
         // Static
@@ -31,19 +30,15 @@ namespace Game
         /// This acts also as the background of the GUI Layer
         static Color4 Foreground;
 
-        template <class w_type>
-        static inline w_type *setCurrent()
+        template <class _wType=World, class... _args>
+        static inline _wType *setCurrent(_args... args)
         {
             if (m_Current)
                 m_Current->Destroy();
 
-            auto new_current = new w_type;
-            if (checkCurrent(reinterpret_cast<World *>(new_current)))
-                return new_current;
-            delete new_current;
-            err();
-            
-            return nullptr;
+            auto new_current = new _wType(args...);
+            m_Current = new_current;
+            return new_current;
         }
 
         // Member
@@ -55,18 +50,18 @@ namespace Game
 
         // Adds an entity to the world, templated by a derived class of your choice.
         // But make sure it inherits correctly from the class Entity because the engine will have to call Update() on them
-        template <class _entity>
-        inline _entity *addEntity()
+        template <class _entity=Entity, class... _args>
+        inline _entity *addEntity(_args... args)
         {
             s_TargetWorld = this;
-            auto newEntity = new _entity;
+            auto newEntity = new _entity(args...);
             s_TargetWorld = nullptr;
+
+            Entity* implicit_check = newEntity;
             return newEntity;
         }
-        // Adds a Base Entity to the world, it's just an alias for addEntity<Entity>();
-        Entity *addEntity();
         // Gets the list of entities that the world has, templated by a derived class of your choice.
-        template <class _entity> inline const std::list<_entity *> &getEntities() const { return *(std::list<_entity *> *)(&m_Entities); }
+        template <class _entity=Entity> inline const std::list<_entity *> &getEntities() const { return *(std::list<_entity *> *)(&m_Entities); }
 
         // Coordinate converting
 
@@ -80,23 +75,17 @@ namespace Game
         static Vector2f worldToScreen(const float x, const float y, Camera *cam = nullptr);
         static Vector2f screenToWorld(const float x, const float y, Camera *cam = nullptr);
 
-	static inline Camera* currentCamera() { return m_Current ? &m_Current->CurrentCamera : nullptr; }
+        // Get the current world's camera, or NULL if there's no world
+	    static inline Camera* currentCamera() { return m_Current ? &m_Current->CurrentCamera : nullptr; }
 
         // Gets the current world.
         /// The world that will be updated and rendered.
-        template <class _wType = World> static _wType* Current() {return reinterpret_cast<_wType*>(m_Current);}
+        template <class _wType=World> static _wType* Current() {return dynamic_cast<_wType*>(m_Current);}
         // Casts the world to a derivate
-        /// Use it with precaution
-        template <class _wType> _wType* cast() const {return reinterpret_cast<_wType>(this);}
+        template <class _wType> _wType* cast() {return dynamic_cast<_wType*>(this);}
 
     private:
         Entity *_query();
-
-        // Used to check whether a world is really a world, it points at a static variable in World.cpp
-        const char* const m_worldTag;
-
-        static World* checkCurrent(World*);
-        static void err();
 
         // The container that holds all of its entities
         std::list<Entity *> m_Entities;

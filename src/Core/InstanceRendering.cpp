@@ -34,7 +34,7 @@ void Components::Shape::Render(Game::Entity* _entity)
     if (!this->flags.Has(VisibleFlag)) return;
 
     //Engine->DrawingContext.DrawRectangleAtWorld(render_rect, {255, 0, 0, 255}, DrawingDevice::dm_Stroke);
-    Vector2f pos = _entity->getWorld<Game::World>()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
+    Vector2f pos = _entity->getWorld()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
 
     
     switch (shape)

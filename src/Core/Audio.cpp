@@ -10,7 +10,7 @@ extern "C" int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_out
 
 void AudioData::Load()
 {
-    const size_t f_size = m_file.getSize();
+    const int f_size = (int)m_file.getSize();
     const void* f_data = m_file.getRawData();
 
     SDL_RWops *audio_rw = SDL_RWFromConstMem(f_data, f_size);
@@ -118,7 +118,7 @@ void AudDevice::callback(AudDevice *dev, int32_t *stream, int len)
 
     const uint8_t channel_count = dev->m_Spec.channels;
 
-    const size_t byte_count = AUDIO_BYTESIZE(dev->m_Spec.format);
+    const uint32_t byte_count = AUDIO_BYTESIZE(dev->m_Spec.format);
     const size_t sample_len = len / byte_count;
 
     Queue stop_queue;

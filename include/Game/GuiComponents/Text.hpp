@@ -17,7 +17,7 @@ namespace GuiComponents
         inline void assign(const char* str) {m_str = str;}
         template <class... T> inline void format(const char* fmt, T&&... args) { m_str = fmt::format(fmt, args...); }
 
-        inline int getLength() { return m_str.size(); }
+        inline int getLength() { return (int)m_str.size(); }
 
         int count = -1;
         unsigned int scale = 0;

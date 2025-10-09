@@ -44,10 +44,10 @@ Game::GuiObject *Game::GuiContainer::_query()
         if (!obj->canQuery)
             continue;
         target_return = obj->_query();
-        if (target_return) break;
+        if (target_return) return target_return;
     }
 
-    if (!target_return && !isGuiLayer())
+    if (!isGuiLayer())
     {
         SDL_FPoint mousePoint = {mState->x, mState->y};
         SDL_FRect r{m_absolute.Position.X, m_absolute.Position.Y, m_absolute.Size.X, m_absolute.Size.Y};
@@ -64,10 +64,10 @@ Game::Entity *Game::World::_query()
 
     for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); it++)
     {
-        auto entity = reinterpret_cast<Entity *>(*it);
+        auto entity = *it;
         for (auto component : entity->m_Components)
         {
-            if (entity->componentDisabled(component)) continue;
+            if (entity->componentDisabled(*component)) continue;
             if (!component->hasProcessFlag(component->p_Query)) continue;
             if (component->Query(entity))
             {

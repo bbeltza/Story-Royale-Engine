@@ -17,7 +17,7 @@ Texture::Texture(const char* path)
     file.Load(path);
 
     {
-        SDL_RWops* rw = SDL_RWFromConstMem(file.getRawData(), file.getSize());
+        SDL_RWops* rw = SDL_RWFromConstMem(file.getRawData(), (int)file.getSize());
         file_surface = IMG_Load_RW(rw, 1);
     }
     push_queue();

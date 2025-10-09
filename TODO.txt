@@ -26,4 +26,4 @@
 
 - Work on the game ^^
 
-(current version: 0.010.07)
+(current version: 0.010.09)

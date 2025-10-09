@@ -33,6 +33,7 @@ add_subdirectory(gen_src)
 add_subdirectory(src)
 target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
+target_compile_features(StoryRoyaleEngine PRIVATE cxx_std_11 c_std_99)
 
 
 set(3RDPARTYLIBS
@@ -67,7 +68,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     add_subdirectory(tests/TargetTextures)
     add_subdirectory(tests/GlyphTest)
 else()
-  set(SR_ENGINE_NO_CONSOLE_OPTIONS ${SR_ENGINE_NO_CONSOLE_OPTIONS} PARENT_SCOPE)
+    set(SR_ENGINE_NO_CONSOLE_OPTIONS ${SR_ENGINE_NO_CONSOLE_OPTIONS} PARENT_SCOPE)
     set(SRENGINE_DIR ${SRENGINE_DIR} PARENT_SCOPE)
     set(SRENGINE_INCLUDE_DIRS ${SRENGINE_INCLUDE_DIRS} PARENT_SCOPE)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRENGINE_CMAKE_MODULE_PATH} PARENT_SCOPE)

@@ -29,12 +29,12 @@ namespace Game
 
         int zIndex = 0;
 
-        template <class _comp> inline const std::list<_comp *> &getComponents() const { return *(std::list<_comp *> *)(&m_Components); }
-        template <class w_Type> inline w_Type* getWorld() const { return reinterpret_cast<w_Type*>(m_world); }
-        inline void addComponent(Component* const component) { m_Components.push_back(component); }
-        inline void enableComponent(Component* const component) { m_DisabledComps.erase(component); }
-        inline void disableComponent(Component* const component) { m_DisabledComps.insert(component); }
-        inline bool componentDisabled(Component* const component) {return m_DisabledComps.find(component) != m_DisabledComps.end();}
+        template <class _comp=Component> inline const std::list<_comp *> &getComponents() const { return *(std::list<_comp *> *)(&m_Components); }
+        template <class _wType=World> inline _wType* getWorld() const { return m_world->cast<_wType>(); }
+        inline void addComponent(Component& component) { m_Components.push_back(&component); }
+        inline void enableComponent(Component& component) { m_DisabledComps.erase(&component); }
+        inline void disableComponent(Component& component) { m_DisabledComps.insert(&component); }
+        inline bool componentDisabled(Component& component) {return m_DisabledComps.count(&component) != 0;}
 
         void reParent(World* const _world);
 

@@ -14,15 +14,13 @@ Color4 Game::World::Foreground = {0x00000000};
 Game::World* Game::World::m_Current = nullptr;
 Game::World* Game::World::s_TargetWorld = nullptr;
 
-static const char* const static_wTag = "WorldTag ;)";
-
 bool Game::World::cmp(const Entity* first, const Entity* second)
 {
     bool res = first->zIndex < second->zIndex;
     return res;
 }
 
-Game::World::World(): m_worldTag(static_wTag) {}
+Game::World::World() {}
 
 Game::World::~World()
 {
@@ -32,27 +30,6 @@ Game::World::~World()
     {
         delete m_Entities.back();
     }
-}
-
-Game::Entity* Game::World::addEntity()
-{
-    return addEntity<Entity>();
-}
-
-Game::World* Game::World::checkCurrent(World* world)
-{
-    if (world->m_worldTag != static_wTag)
-    {
-        return nullptr;
-    }
-
-    m_Current = world;
-    return world;
-}
-
-void Game::World::err()
-{
-    return syserror(WORLD_CREATION_ERROR);
 }
 
 void Game::World::call_pupdate(TimeStamp dt)
