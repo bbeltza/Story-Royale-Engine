@@ -49,8 +49,6 @@ private:
 
     bool m_wasRun = false;
 
-    bool n_dtrc = false;
-
     SDL_Thread* m_entryThread;
 
     long long m_frame = -1;

@@ -18,7 +18,7 @@ namespace Game
         ~Entity();
         public:
         
-        enum ParentType: uint8_t
+        enum ParentType: uint32_t
         {
             WorldParent,
             ComponentParent

@@ -7,7 +7,7 @@ namespace GuiComponents
     class List : public ::Game::GuiComponent
     {
     public:
-        enum Direction : char
+        enum Direction : int
         {
             dir_horizontal,
             dir_vertical

@@ -22,13 +22,13 @@ void Signal::DisconnectAll()
     {
         auto item = *m_connections.begin();
         delete item;
-        m_connections.erase(item);
+        m_connections.remove(item);
     }
 }
 
 #define SignalConnect(o)                                 \
     auto connection = new Connection(this, fn, data, o); \
-    m_connections.insert(connection);                    \
+    m_connections.push_back(connection);                    \
     return connection;
 
 Connection *Signal::Connect(EventFunction fn, void *data){
@@ -51,7 +51,7 @@ void Signal::count_fire(size_t count, ...)
 
     if (return_data) delete return_data;
     return_data = new argbase;
-    int i;
+    size_t i;
     for (i = 0; i < count; i++)
         return_data->args[i] = va_arg(va, void *);
     for (; i < 6; i++)

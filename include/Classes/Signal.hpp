@@ -43,7 +43,7 @@ struct Signal
     void count_fire(size_t count, ...);
     
     argbase* return_data = nullptr;
-    std::unordered_set<Connection*> m_connections;
+    std::list<Connection*> m_connections;
 };
 
 class Connection
@@ -63,7 +63,7 @@ public:
 
 private:
     friend struct Signal;
-    ~Connection() { const_cast<Signal*>(m_signal)->m_connections.erase(this); };
+    ~Connection() { const_cast<Signal*>(m_signal)->m_connections.remove(this); };
 
     EventFunction m_fn;
     const Signal *m_signal;
