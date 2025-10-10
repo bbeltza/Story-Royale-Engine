@@ -28,21 +28,21 @@ struct Signal
     Connection *Once(EventFunction fn, void* userdata);
     argbase Wait();
 
-    template <typename _First, class... _Args> inline void Fire(_First first, _Args... args) {Fire(*(void**)&first, args...);}
-    void Fire(void* first=nullptr, ...);
+    template <class... _Args> inline void Fire(_Args... args) {count_fire(sizeof...(args), args...);}
     void DisconnectAll();
-
+    
     void* userdata;
-
-private:
+    
+    private:
     void* m_waitSem = create_sem();
-
+    
     bool m_multithreaded;
     bool m_firing = false;
-
+    
     void* create_sem();
-
-    argbase return_data;
+    void count_fire(size_t count, ...);
+    
+    argbase* return_data = nullptr;
     std::unordered_set<Connection*> m_connections;
 };
 

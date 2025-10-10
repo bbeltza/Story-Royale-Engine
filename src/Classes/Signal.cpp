@@ -13,6 +13,7 @@ Signal::~Signal()
 {
     DisconnectAll();
     if (SDL_WasInit(0)) SDL_DestroySemaphore((SDL_sem *)m_waitSem);
+    if (return_data) delete return_data;
 }
 
 void Signal::DisconnectAll()
@@ -39,18 +40,22 @@ Connection *Signal::Once(EventFunction fn, void *data){
 Signal::argbase Signal::Wait()
 {
     SDL_SemWait((SDL_sem *)m_waitSem);
-    return return_data;
+    return *return_data;
 }
 
 static std::vector<Connection*> delete_list;
-void Signal::Fire(void *first, ...)
+void Signal::count_fire(size_t count, ...)
 {
     va_list va;
-    va_start(va, first);
+    va_start(va, count);
 
-    return_data.args[0] = first;
-    for (int i = 1; i < 6; i++)
-        return_data.args[i] = va_arg(va, void *);
+    if (return_data) delete return_data;
+    return_data = new argbase;
+    int i;
+    for (i = 0; i < count; i++)
+        return_data->args[i] = va_arg(va, void *);
+    for (; i < 6; i++)
+        return_data->args[i] = nullptr;
 
     va_end(va);
 
@@ -60,14 +65,14 @@ void Signal::Fire(void *first, ...)
     {
         if (m_multithreaded)
             Engine->ThreadPool.CreateImmediateThread(item->m_fn, userdata, item->userdata,
-                                                     return_data.args[0], return_data.args[1],
-                                                     return_data.args[2], return_data.args[3],
-                                                     return_data.args[4], return_data.args[5]);
+                                                     return_data->args[0], return_data->args[1],
+                                                     return_data->args[2], return_data->args[3],
+                                                     return_data->args[4], return_data->args[5]);
         else
             item->m_fn(userdata, item->userdata,
-                       return_data.args[0], return_data.args[1],
-                       return_data.args[2], return_data.args[3],
-                       return_data.args[4], return_data.args[5]);
+                       return_data->args[0], return_data->args[1],
+                       return_data->args[2], return_data->args[3],
+                       return_data->args[4], return_data->args[5]);
 
         if (item->m_once)
             delete_list.push_back(item);
