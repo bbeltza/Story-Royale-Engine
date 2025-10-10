@@ -2,6 +2,7 @@
 #include "Game/GuiContainer.hpp"
 
 #include "Datatypes/UDim.hpp"
+#include "Classes/Tween.hpp"
 
 namespace Game
 {
@@ -14,8 +15,8 @@ namespace Game
 
         bool isGuiLayer() const override { return 0; }
         bool isHovering() const;
-        void TweenPosition();
-        void TweenSize();
+        void TweenPosition(Tween::Info& Info, float* XScale, int* XOffset, float* YScale, int* YOffset);
+        void TweenSize(Tween::Info& Info, float* XScale, int* XOffset, float* YScale, int* YOffset);
 
     private:
         void _process();
