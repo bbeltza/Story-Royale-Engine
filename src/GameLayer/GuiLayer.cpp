@@ -142,3 +142,47 @@ void Game::GuiContainer::_proc_children_components(uint32_t index)
         if (comp->hasFlag(GuiComponent::PROCESS_CHILDREN) && comp->enabled)
             comp->process_children((GuiObject *)this, index);
 }
+
+#define checktw(src, i, prop, t) if (src) {             \
+    if (tweens[i]) delete tweens[i];                     \
+    tweens[i] = new Tween(&Info, &prop, src, Tween::t);   \
+    tweens[i]->Play();                                     \
+    lastTw = tweens[i];                                     \
+}
+
+Signal* Game::GuiObject::TweenPosition(Tween::Info& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
+{
+    Tween* lastTw = nullptr;
+    checktw(XScale, 0, position.X.Scale, TT_float)
+    checktw(XOffset, 1, position.X.Offset, TT_int32)
+    checktw(YScale, 2, position.Y.Scale, TT_float)
+    checktw(YOffset, 3, position.Y.Offset, TT_int32)
+
+    return lastTw ? &lastTw->Completed : nullptr;
+}
+
+Signal* Game::GuiObject::TweenSize(Tween::Info& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
+{
+    Tween* lastTw = nullptr;
+    checktw(XScale, 4, size.X.Scale, TT_float)
+    checktw(XOffset, 5, size.X.Offset, TT_int32)
+    checktw(YScale, 6, size.Y.Scale, TT_float)
+    checktw(YOffset, 7, size.Y.Offset, TT_int32)
+
+    return lastTw ? &lastTw->Completed : nullptr;
+}
+
+Signal* Game::GuiObject::TweenAnchor(Tween::Info& Info, const float* X, const float* Y)
+{
+    Tween* lastTw = nullptr;
+    checktw(X, 8, anchor.X, TT_float)
+    checktw(Y, 9, anchor.Y, TT_float)
+
+    return lastTw ? &lastTw->Completed : nullptr;
+}
+
+Game::GuiObject::~GuiObject()
+{
+    for (int i=0; i < 10; i++)
+        if (tweens[i]) delete tweens[i];
+}

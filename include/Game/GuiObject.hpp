@@ -8,6 +8,8 @@ namespace Game
 {
     class GuiObject : public GuiContainer
     {
+    protected:
+        ~GuiObject();
     public:
         UDim2 position, size;
         Vector2f anchor;
@@ -15,13 +17,16 @@ namespace Game
 
         bool isGuiLayer() const override { return 0; }
         bool isHovering() const;
-        void TweenPosition(Tween::Info& Info, float* XScale, int* XOffset, float* YScale, int* YOffset);
-        void TweenSize(Tween::Info& Info, float* XScale, int* XOffset, float* YScale, int* YOffset);
+        Signal* TweenPosition(Tween::Info& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
+        Signal* TweenSize(Tween::Info& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
+        Signal* TweenAnchor(Tween::Info& Info, const float* X, const float* Y);
 
     private:
         void _process();
         static inline bool cmp(GuiObject* first, GuiObject* second) { return first->zIndex < second->zIndex; }
 
         friend class GuiContainer;
+
+        Tween* tweens[10] = {nullptr};
     };
 }

@@ -1,5 +1,5 @@
-- UI Tween functions
-- Changing a little bit the Tween class
+- New and better Tween class that uses templates
+	- You'll also be able to create tweens on datatypes that will have the Lerp() function
 
 - Animations/Keyframes
 
