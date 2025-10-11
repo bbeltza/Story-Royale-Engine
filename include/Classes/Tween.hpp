@@ -57,10 +57,6 @@ private:
     static Set& get_tweens();
 };
 
-// T* src
-// const T* target
-// T start
-
 template <class T>
 class Tween: public TweenBase
 {
@@ -75,3 +71,4 @@ public:
     Tween(const TweenInfo& info, const T& source): TweenBase(info), m_src(&source) {}
     void setTarget(T& target) { m_target = &target; }
 };
+

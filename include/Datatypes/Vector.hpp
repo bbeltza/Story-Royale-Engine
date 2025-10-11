@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "syslog.h"
+#include "utils.h"
 
 template <class _Num>
 struct Vector2
@@ -40,7 +41,9 @@ struct Vector2
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
 
-    inline Vector2 Lerp(const Vector2& other, double alpha) {return *this + (other - *this) * alpha;}
+    inline void LerpTo(const Vector2& other, float alpha, const Vector2& origin) { X = ut_lerp(origin.X, other.X, alpha); Y = ut_lerp(origin.Y, other.Y, alpha); }
+    inline void LerpTo(const Vector2& other, float alpha) { LerpTo(other, alpha, *this); }
+    inline Vector2 Lerp(const Vector2& other, float alpha) const {return {ut_lerp(X, other.X, alpha), ut_lerp(Y, other.Y, alpha)};}
 
     inline _Num getMin() const {return X < Y ? X : Y;}
     inline _Num getMax() const {return X > Y ? X : Y;}
