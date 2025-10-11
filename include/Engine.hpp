@@ -14,15 +14,15 @@ class EngineClass
 {
 public:
     // Engine namespaces
-    ThrdPool ThreadPool;
-    WindowClass Window;
-    InputClass Input;
-    DrawingDevice DrawingContext;
-    AudDevice AudioDevice;
+    ThrdPool ThreadPool{this};
+    WindowClass Window{this};
+    InputClass Input{this};
+    DrawingDevice DrawingContext{this};
+    AudDevice AudioDevice{this};
 
-    Signal OnUpdate;
-    Signal BeforeRender;
-    Signal AfterRender;
+    Signal OnUpdate{this};
+    Signal BeforeRender{this, false};
+    Signal AfterRender{this, false};
 
     // Get the current frame count
     // @returns The frame count starting from 0, or -1 if the application hasn't been run yet

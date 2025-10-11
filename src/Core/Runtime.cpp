@@ -23,14 +23,7 @@ const static std::chrono::duration<double> zero = std::chrono::duration<float>::
 static EngineClass* thisengine = nullptr;
 EngineClass* const& Engine = thisengine;
 
-EngineClass::EngineClass() : BeforeRender(this, false), AfterRender(this, false), OnUpdate(this, true),
-
-                             ThreadPool(this),
-                             Window(this),
-                             Input(this),
-                             DrawingContext(this),
-                             AudioDevice(this)
-
+EngineClass::EngineClass()
 {
     thisengine = this;
 

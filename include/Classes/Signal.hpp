@@ -1,5 +1,5 @@
 #pragma once
-#include <unordered_set>
+#include <list>
 
 typedef void (*EventFunction)(void *signal_data, void *connection_data, ...);
 
