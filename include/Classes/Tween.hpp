@@ -2,9 +2,6 @@
 #include "Engine.hpp"
 #include "Datatypes/TimeStamp.h"
 
-class Tween
-{
-public:
 enum EasingStyle
 {
     Es_Linear,
@@ -15,79 +12,66 @@ enum EasingDirection
     Ed_In,
     Ed_Out
 };
-enum TargetType
+
+struct TweenInfo
 {
-    TT_uint8,
-    TT_int8,
+    float duration = 1;
+    EasingStyle easingStyle = Es_Linear;
+    EasingDirection esingDirection = Ed_InOut;
 
-    TT_uint16,
-    TT_int16,
-    
-    TT_uint32,
-    TT_int32,
-    
-    TT_uint64,
-    TT_int64,
-
-    TT_float,
-    TT_double
+    float delay = 0;
+    int repeat = 1;
+    bool reverse = false;
 };
 
-struct Info
-    {
-        float duration = 1;
-        EasingStyle easingStyle = Es_Linear;
-        EasingDirection esingDirection = Ed_InOut;
+class TweenBase
+{
+    template <class T>
+    friend class Tween;
+    friend EngineClass;
 
-        float delay = 0;
-        int repeat = 1;
-        bool reverse = false;
-    };
+    TweenBase(const TweenInfo& info);
 public:
-    Tween(const Info* info, void* target, const void* src, TargetType type);
-    ~Tween();
-
-    inline void SetTarget(void* target) {m_target.u8 = (uint8_t*)target;}
+    ~TweenBase();
 
     void Play();
     TimeStamp Cancel();
     TimeStamp Pause();
 
     Signal Completed;
+    const TweenInfo& Info;
 
-    inline float GetAlpha() {return m_info->duration ? m_elapsed/m_info->duration : 1;}
+    inline float GetAlpha() const {return Info.duration ? m_elapsed/Info.duration : 1;}
 private:
-    const Info* m_info;
-    union TypePointers
-    {
-        uint8_t *u8;
-        int8_t *i8;
-
-        uint16_t *u16;
-        int16_t *i16;
-
-        uint32_t *u32;
-        int32_t *i32;
-
-        uint64_t *u64;
-        int64_t *i64;
-
-        float *float_;
-        double *double_;
-    } m_target, m_src, m_start;
-    typedef std::unordered_set<Tween*> Set;
-
-
-    TargetType m_type;
 
     TimeStamp m_elapsed = 0;
     bool m_Playing = false;
 
-    int64_t m_longstart = 0;
-
-    void Update(TimeStamp delta);
+    void base_update(TimeStamp delta);
+    virtual void step(float alpha) = 0;
+    virtual void start() = 0;
 
     static void global_update(TimeStamp delta);
+
+    typedef std::unordered_set<TweenBase*> Set;
     static Set& get_tweens();
-    friend EngineClass;
+};
+
+// T* src
+// const T* target
+// T start
+
+template <class T>
+class Tween: public TweenBase
+{
+    const T* m_src;
+    T* m_target = nullptr;
+    T m_start;
+
+    inline void step(float alpha) override { *m_target = (T)ut_lerp(m_start, *m_src, alpha); }
+    inline void start() override { if (m_target) m_start = *m_target; }
+public:
+    Tween(const TweenInfo& info, T& target, const T& source): TweenBase(info), m_target(&target), m_src(&source) {}
+    Tween(const TweenInfo& info, const T& source): TweenBase(info), m_src(&source) {}
+    void setTarget(T& target) { m_target = &target; }
 };

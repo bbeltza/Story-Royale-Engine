@@ -105,7 +105,7 @@ void EngineClass::loop()
     m_frame++;
     auto start = Timer::s_global_clock.now();
     TimeStamp dt = Timer::global_update();
-    Tween::global_update(dt);
+    TweenBase::global_update(dt);
 
     Input.processEvents();
 
