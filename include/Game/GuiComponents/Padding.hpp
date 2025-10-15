@@ -7,7 +7,6 @@ namespace GuiComponents
     class Padding: public ::Game::GuiComponent
     {
         public:
-        Padding() { p_flags = PRE_RENDER | PROCESS_POSITION; }
         struct
         {
             UDim2 topleft = UDIM2_ZERO, bottomright = UDIM2_ZERO;

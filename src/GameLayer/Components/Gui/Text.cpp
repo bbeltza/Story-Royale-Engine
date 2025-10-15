@@ -6,7 +6,6 @@ std::unordered_map<std::string, Font> GuiComponents::Text::font_map;
 
 GuiComponents::Text::Text()
 {
-    p_flags = RENDER | PROCESS_POSITION;
 }
 
 GuiComponents::Text::~Text()

@@ -50,11 +50,9 @@ bool Components::Shape::isInScreenPoint(Game::Entity* p, Vector2f pt)
         r.w = Rect.Size.X;
         r.h = Rect.Size.Y;
         return SDL_PointInFRect(&fpt, &r);
-        break;
     case CircleShape:
         screenSpace = w->worldToScreenSpace(p->Position.X + Rect.Position.X, p->Position.Y + Rect.Position.Y);
         return (screenSpace - pt).getMagnitude() <= Rect.Size.X/2;
-        break;
     default:
         return 0;
         break;

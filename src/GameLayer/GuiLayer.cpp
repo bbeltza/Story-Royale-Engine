@@ -91,9 +91,11 @@ void Game::GuiContainer::call_update(TimeStamp dt)
     Updated.Fire(this);
 }
 
+/*
 Game::GuiComponent::GuiComponent() {}
 
 Game::GuiComponent::~GuiComponent() {}
+*/
 
 void Game::GuiContainer::_prerender_components()
 {
@@ -104,7 +106,7 @@ void Game::GuiContainer::_prerender_components()
 
     for (GuiComponent *comp : m_components)
     {
-        if (comp->hasFlag(GuiComponent::PRE_RENDER) && comp->enabled)
+        if (comp->enabled)
             comp->pre_render(this);
     }
 }
@@ -113,7 +115,7 @@ void Game::GuiContainer::_render_components()
 {
     for (GuiComponent *comp : m_components)
     {
-        if (comp->hasFlag(GuiComponent::RENDER) && comp->enabled)
+        if (comp->enabled)
             comp->render(this);
     }
 }
@@ -122,7 +124,7 @@ void Game::GuiContainer::_procpos_components()
 {
     for (GuiComponent *comp : m_components)
     {
-        if (comp->hasFlag(GuiComponent::PROCESS_POSITION) && comp->enabled)
+        if (comp->enabled)
             comp->process_position(this);
     }
 }
@@ -131,7 +133,7 @@ void Game::GuiContainer::_procsize_components()
 {
     for (GuiComponent *comp : m_components)
     {
-        if (comp->hasFlag(GuiComponent::PROCESS_SIZE) && comp->enabled)
+        if (comp->enabled)
             comp->process_size(this);
     }
 }
@@ -139,13 +141,13 @@ void Game::GuiContainer::_procsize_components()
 void Game::GuiContainer::_proc_children_components(uint32_t index)
 {
     for (GuiComponent *comp : m_parent->m_components)
-        if (comp->hasFlag(GuiComponent::PROCESS_CHILDREN) && comp->enabled)
+        if (comp->enabled)
             comp->process_children((GuiObject *)this, index);
 }
 
 #define checktw(src, i, prop, t) if (src) {             \
     if (tweens[i]) delete tweens[i];                     \
-    tweens[i] = new Tween<t>(Info, prop, *src);   \
+    tweens[i] = new Tween<t>(Info, prop, *src);           \
     tweens[i]->Play();                                     \
     lastTw = tweens[i];                                     \
 }

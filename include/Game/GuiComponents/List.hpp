@@ -14,8 +14,6 @@ namespace GuiComponents
         };
 
     public:
-        List() { p_flags = PROCESS_CHILDREN; }
-
         Direction direction = dir_vertical;
         UDim Padding = UDIM_ZERO;
     protected:

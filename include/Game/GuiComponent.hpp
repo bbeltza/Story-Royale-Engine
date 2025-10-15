@@ -9,34 +9,15 @@ namespace Game
     class GuiComponent
     {
     public:
-        enum UpdateFlags: Flags8::Type
-        {
-            NOUPDATEFLAGS = 0,
-
-            PROCESS_SIZE = ut_bit(0),
-            PROCESS_POSITION = ut_bit(1),
-            PROCESS_CHILDREN = ut_bit(2),
-            RENDER = ut_bit(3),
-            PRE_RENDER = ut_bit(4),
-
-            CUSTOMUPDATEFLAGS = NOUPDATEFLAGS
-        };
-    public:
-        GuiComponent();
-        virtual ~GuiComponent();
-
-        inline const UpdateFlags getUpdateFlags() const { return (UpdateFlags)p_flags.Get(); }
-        inline bool hasFlag(UpdateFlags flag) const { return p_flags.Has(flag); }
+        virtual ~GuiComponent() {}
 
         bool enabled = true;
     protected:
-        Flags8 p_flags = 0;
-
-        virtual void render(GuiContainer*) {};
-        virtual void pre_render(GuiContainer*) {};
-        virtual void process_size(GuiContainer*) {};
-        virtual void process_position(GuiContainer*) {};
-        virtual void process_children(GuiObject* Object, uint32_t index) {};
+        virtual void render(GuiContainer*) {}
+        virtual void pre_render(GuiContainer*) {}
+        virtual void process_size(GuiContainer*) {}
+        virtual void process_position(GuiContainer*) {}
+        virtual void process_children(GuiObject* Object, uint32_t index) {}
 
         inline RectF* getAbsolute(GuiContainer* container) { return &container->m_absolute; }
         inline Color4* getModulate(GuiContainer* container) { return &container->m_modulate; }
