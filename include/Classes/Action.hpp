@@ -4,19 +4,21 @@
 class Action
     {
         public:
-        Action(const Action& other) : press_frame(-1), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons) {}
+        Action(const Action& other) : press_frame(-1), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons), m_touchCount(other.m_touchCount) {}
         Action() = default;
         ~Action() = default;
 
         template <typename... _Args>
         Action(_Args... args) { _addinputs_recurse(args...); }
+        template <typename... _Args>
+        Action(int touch_count, _Args... args) : Action(args...) { m_touchCount = touch_count; }
 
         inline void AddInput(SDL_KeyCode keyCode) {m_keycodes.insert(keyCode);}
         inline void AddInput(SDL_Scancode scanCode) {m_scancodes.insert(scanCode);}
         inline void AddInput(InputClass::MouseButton mouseButton) {m_mousebuttons.insert(mouseButton);}
 
         inline bool isPressed() {
-            if (isKeyCodePressed() || isScanCodePressed() || isMousePressed())
+            if (isKeyCodePressed() || isScanCodePressed() || isMousePressed() || isTouchPressed())
                 return true;
             press_frame = -1;
             return false;
@@ -30,11 +32,13 @@ class Action
 
         private:
         long long press_frame = -1;
+        int m_touchCount = 0;
 
         std::unordered_set<SDL_KeyCode> m_keycodes;
         std::unordered_set<SDL_Scancode> m_scancodes;
         std::unordered_set<InputClass::MouseButton> m_mousebuttons;
 
+        inline bool isTouchPressed() const { if (m_touchCount == 0) return false; return Engine->Input.getFingersPressed() >= m_touchCount; }
         inline bool isKeyCodePressed() const {for (auto keyCode : m_keycodes) if (Engine->Input.isKeyPressed(keyCode)) return true; return false;}
         inline bool isScanCodePressed() const {for (auto scanCode : m_scancodes) if (Engine->Input.isKeyPressed(scanCode)) return true; return false;}
         inline bool isMousePressed() const {for (auto mouseButton : m_mousebuttons) if (Engine->Input.isMouseButtonPressed(mouseButton)) return true; return false;}

@@ -6,15 +6,12 @@
 #include "Classes/Signal.hpp"
 
 #include "Datatypes/Vector.hpp"
+#include "Datatypes/Flags.hpp"
 
 class InputClass
 {
     ENGINE_BASE
-    InputClass(EngineClass* engine): m_Engine(engine),
-                                    keyEvent(this),
-                                    mouseButton(this),
-                                    mouseWheel(this),
-                                    mouseMove(this, false) {}
+    InputClass(EngineClass* engine): m_Engine(engine) {}
 public:
     // Mouse button enum
 
@@ -39,16 +36,21 @@ public:
     const Vector2f getMouseScreenPosition() const { return Vector2f(m_mouseState.x, m_mouseState.y); }
     const Vector2f getMouseWorldPosition() const;
 
-    inline uint8_t getScaleRatio() const {return m_scaleratio;}
+    // Touch functions
+    int getFingersPressed(SDL_TouchID touchid = -1) const;
+
+    inline float getScaleRatio() const {return m_scaleratio;}
 
     // Input events
-    Signal keyEvent;
-    Signal mouseButton;
-    Signal mouseWheel;
-    Signal mouseMove;
+    Signal keyEvent{this};
+    Signal mouseButton{this};
+    Signal mouseWheel{this};
+    Signal mouseMove{this, false};
+    Signal fingerTouch{this};
+    Signal fingerMove{this, false};
 
     //
-    struct _mState { float x, y; uint32_t state; };
+    struct _mState { float x, y; Flags32 state; };
 private:
     void processWindowEvents(SDL_Event* event);
     void processEvents();
@@ -56,7 +58,9 @@ private:
 
     // Private states
     _mState m_mouseState;
-    uint8_t m_keyboardState[SDL_NUM_SCANCODES] = {0};
+    Flags8 m_keyboardState[SDL_NUM_SCANCODES] = {0};
 
-    uint8_t m_scaleratio;
+    SDL_TouchID mlast_touchid = -1;
+
+    float m_scaleratio;
 };

@@ -20,7 +20,7 @@ public:
     DrawingDevice DrawingContext{this};
     AudDevice AudioDevice{this};
 
-    Signal OnUpdate{this};
+    Signal OnUpdate{this, false};
     Signal BeforeRender{this, false};
     Signal AfterRender{this, false};
 
