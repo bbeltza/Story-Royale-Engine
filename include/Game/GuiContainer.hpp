@@ -58,7 +58,7 @@ namespace Game
         void _procsize_components();
         void _proc_children_components(uint32_t index);
 
-        GuiObject* _query();
+        GuiObject* _query(float* pt);
 
         GuiContainer *m_parent = nullptr;
         std::list<GuiObject*> m_children;

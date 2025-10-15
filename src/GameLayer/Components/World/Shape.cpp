@@ -14,7 +14,6 @@ Components::Shape::Shape() :
     if (!collider_set)
         collider_set = new CollisionSet;
 
-    p_flags = (ProcessFlags)(p_Render | p_pUpdate);
     if (flags.Has(CanCollideFlag))
         collider_set->insert(this);
 }

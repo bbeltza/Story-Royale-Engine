@@ -42,11 +42,11 @@ public:
     inline float getScaleRatio() const {return m_scaleratio;}
 
     // Input events
-    Signal keyEvent{this};
-    Signal mouseButton{this};
-    Signal mouseWheel{this};
+    Signal keyEvent{this, false};
+    Signal mouseButton{this, false};
+    Signal mouseWheel{this, false};
     Signal mouseMove{this, false};
-    Signal fingerTouch{this};
+    Signal fingerTouch{this, false};
     Signal fingerMove{this, false};
 
     //

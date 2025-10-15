@@ -9,7 +9,6 @@ namespace Components
     class Velocity: public ::Game::Component
     {
         public:
-        Velocity() { p_flags = p_pUpdate; }
         Vector2f velocity;
         
         // Normalizes the velocity and multiplies it by the speed parameter

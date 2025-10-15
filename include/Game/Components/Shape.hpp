@@ -40,7 +40,7 @@ namespace Components
 
         void pUpdate(::Game::Entity *, TimeStamp) override;
         void Render(::Game::Entity *) override;
-        bool Query(::Game::Entity *) override;
+        bool Query(::Game::Entity *, float*) override;
 
         bool isInScreenPoint(::Game::Entity *, Vector2f);
 

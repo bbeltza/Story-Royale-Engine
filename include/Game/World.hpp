@@ -85,7 +85,7 @@ namespace Game
         template <class _wType> _wType* cast() {return dynamic_cast<_wType*>(this);}
 
     private:
-        Entity *_query();
+        Entity *_query(float*);
 
         // The container that holds all of its entities
         std::list<Entity *> m_Entities;
