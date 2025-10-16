@@ -60,7 +60,7 @@ void Game::Entity::call_pupdate(TimeStamp dt)
     pUpdate(dt);
 }
 
-Game::Entity* Game::World::_query(float* pt)
+Game::Entity* Game::World::call_query(float* pt)
 {
     Entity* target_returnEntity = nullptr;
 

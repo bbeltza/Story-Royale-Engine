@@ -36,7 +36,7 @@ void InputClass::queryObjects()
     queryObject = Game::GuiLayer::Current() ? Game::GuiLayer::Current()->_query(reinterpret_cast<float*>(&pt)) : 0;
     if (queryObject)
         return;
-    queryEntity = Game::World::m_Current ? Game::World::m_Current->_query(reinterpret_cast<float*>(&pt)) : 0;
+    queryEntity = Game::World::m_Current ? Game::World::m_Current->call_query(reinterpret_cast<float*>(&pt)) : 0;
 }
 
 bool Game::GuiObject::isHovering() const
