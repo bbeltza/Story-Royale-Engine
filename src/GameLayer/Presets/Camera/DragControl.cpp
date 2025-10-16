@@ -4,9 +4,12 @@
 
 use_namespace
 
-DragControl::DragControl()
+Action DragControl::default_action{ 1, InputClass::mbRight };
+
+DragControl::DragControl(Action& action): m_action(action)
 {
     m_mouseConnection = Engine->Input.mouseMove.Connect(DragControl::mouseMoveCallback, this);
+    m_touchConnection = Engine->Input.fingerMove.Connect(DragControl::touchMotionCallback, this);
 }
 
 DragControl::~DragControl()
@@ -18,7 +21,7 @@ void DragControl::Update(TimeStamp delta)
 {
     Camera& CurrentCamera = *getCamera();
 
-    if (Engine->Input.isMouseButtonPressed(InputClass::mbRight))
+    if (m_action.isPressed())
     {
         m_camSpeed.X = m_lastmouseDelta.X;
         m_camSpeed.Y = m_lastmouseDelta.Y;
@@ -48,4 +51,12 @@ void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* e
         self->m_lastmouseDelta.X += event->delta.X;
         self->m_lastmouseDelta.Y += event->delta.Y;
     }
+}
+
+void DragControl::touchMotionCallback(void*, DragControl* self, const TouchFinger* event)
+{
+    Vector2f screen = Engine->DrawingContext.getScreenSize();
+
+    self->m_lastmouseDelta.X += event->Delta.X * screen.X;
+    self->m_lastmouseDelta.Y += event->Delta.Y * screen.Y;
 }

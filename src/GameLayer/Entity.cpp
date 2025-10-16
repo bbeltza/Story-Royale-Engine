@@ -3,6 +3,11 @@
 #include "Game/Component.hpp"
 #include "Base/Window.hpp"
 
+struct component_vtable
+{
+    static const component_vtable& get(const Game::Component* component) { return *reinterpret_cast<const component_vtable*>(component); }
+
+};
 
 Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)
 {

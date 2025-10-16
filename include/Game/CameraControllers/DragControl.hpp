@@ -3,14 +3,16 @@
 
 #include "Datatypes/Vector.hpp"
 #include "Classes/Signal.hpp"
+#include "Classes/Action.hpp"
 #include "Events/Mouse.hpp"
+#include "Events/Touch.hpp"
 
 namespace CameraControllers
 {
     cam_controldef(DragControl)
     {
     public:
-        DragControl();
+        DragControl(Action& action=default_action);
         ~DragControl();
 
         float Smoothness = 0.0f;
@@ -20,7 +22,11 @@ namespace CameraControllers
         Vector2f m_camSpeed;
         Vector2f m_lastmouseDelta;
         Connection* m_mouseConnection;
+        Connection* m_touchConnection;
+        Action& m_action;
 
         static void mouseMoveCallback(void*, DragControl*, const MouseMove*);
+        static void touchMotionCallback(void*, DragControl*, const TouchFinger*);
+        static Action default_action;
     };
 }
