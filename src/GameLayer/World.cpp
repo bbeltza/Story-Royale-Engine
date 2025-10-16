@@ -51,7 +51,7 @@ void Game::World::call_update(TimeStamp dt)
     for (Entity* entity : getEntities<Entity>())
     {
         entity->Update(dt);
-        entity->Updated.Fire(entity);
+        entity->Updated.Fire();
     }
 
     Updated.Fire(this);

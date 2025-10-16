@@ -69,27 +69,6 @@ Game::GuiObject *Game::GuiContainer::_query(float* pt)
     return target_return;
 }
 
-Game::Entity *Game::World::_query(float* pt)
-{
-    Entity *target_returnEntity = nullptr;
-
-    for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); it++)
-    {
-        auto entity = *it;
-        for (auto component : entity->m_Components)
-        {
-            if (entity->componentDisabled(*component)) continue;
-            if (component->Query(entity, pt))
-            {
-                target_returnEntity = entity;
-                break;
-            }
-        }
-    }
-
-    return target_returnEntity;
-}
-
 bool Components::Shape::Query(Game::Entity *_entity, float* pt)
 {
     return isInScreenPoint(_entity, {pt[0], pt[1]});
