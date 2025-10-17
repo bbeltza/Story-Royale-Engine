@@ -11,7 +11,7 @@
 class InputClass
 {
     ENGINE_BASE
-    InputClass(EngineClass* engine): m_Engine(engine) {}
+    InputClass(EngineClass* engine) : m_Engine(engine) { setupActions(); }
 public:
     // Mouse button enum
 
@@ -51,14 +51,15 @@ public:
     Signal fingerMove{this, false};
 
     // Future Input events
-
+    /*
     Signal InputBegin{this};
     Signal InputEnd{this};
     Signal InputChange{this};
-
+    */
     //
     struct _mState { float x, y; Flags32 state; };
 private:
+    void setupActions();
     void processWindowEvents(SDL_Event* event);
     void processEvents();
     void queryObjects();

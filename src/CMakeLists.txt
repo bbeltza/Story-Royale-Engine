@@ -44,6 +44,7 @@ set(CLASS_SOURCES
 "File/Class.cpp"
 "File/Loading.cpp"
 
+"Action.cpp"
 "Font.cpp"
 "FontRenderer.cpp"
 "TargetTexture.cpp"

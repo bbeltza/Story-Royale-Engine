@@ -1,9 +1,9 @@
 - New and better Tween class that uses templates
 	- You'll also be able to create tweens on datatypes that will have the Lerp() function
 
-- Actions may be event based
-
-- Use unique_ptrs for Connections, they may only have a single owner
+- New Signals class:
+	- Make the signal templated
+	- Use unique_ptrs for Connections, they may only have a single owner
 
 - Animations/Keyframes
 

@@ -1,52 +1,61 @@
 #pragma once
 #include "Engine.hpp"
 
+#include "Events/Key.hpp"
+#include "Events/Mouse.hpp"
+#include "Events/Touch.hpp"
+
 class Action
-    {
-        public:
-        Action(const Action& other) : press_frame(-1), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons), m_touchCount(other.m_touchCount) {}
-        Action() = default;
-        ~Action() = default;
+{
+	friend class InputClass;
+	typedef std::list<Action*> list;
+	static list* s_actions;
+	static Connection* sc_mouse;
+	static Connection* sc_keyboard;
+	static Connection* sc_touch;
+	static void sc_mouseHandle(void*, void*, MouseButton* ev);
+	static void sc_keyboardHandle(void*, void*, Key* ev);
+	static void sc_touchHandle(void*, void*, TouchFinger* ev);
 
-        template <typename... _Args>
-        Action(_Args... args) { _addinputs_recurse(args...); }
-        template <typename... _Args>
-        Action(int touch_count, _Args... args) : Action(args...) { m_touchCount = touch_count; }
+public:
+	Action(const Action& other) : press_frame(-1), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons), enable_touch(other.enable_touch) { push_self(); }
+	~Action();
 
-        inline void AddInput(SDL_KeyCode keyCode) {m_keycodes.insert(keyCode);}
-        inline void AddInput(SDL_Scancode scanCode) {m_scancodes.insert(scanCode);}
-        inline void AddInput(InputClass::MouseButton mouseButton) {m_mousebuttons.insert(mouseButton);}
+	template <typename... _Args>
+	Action(bool touch, _Args... args) : enable_touch(touch) { _addinputs_recurse(args...); push_self(); }
+	template <typename... _Args>
+	Action(_Args... args) : Action(false, args...) {}
 
-        inline bool isPressed() {
-            if (isKeyCodePressed() || isScanCodePressed() || isMousePressed() || isTouchPressed())
-                return true;
-            press_frame = -1;
-            return false;
-        }
-        inline bool isJustPressed() {
-            if (isPressed() && press_frame < 0)
-                return (press_frame = Engine->runtime_frame()) || true;
-            
-            return press_frame == Engine->runtime_frame();
-        }
+	inline void AddInput(SDL_KeyCode keyCode) { m_keycodes[keyCode] = false; }
+	inline void AddInput(SDL_Scancode scanCode) { m_scancodes[scanCode] = false; }
+	inline void AddInput(InputClass::MouseButton mouseButton) { m_mousebuttons[mouseButton] = false; }
 
-        private:
-        long long press_frame = -1;
-        int m_touchCount = 0;
+	inline bool isPressed() const {
+		return (isKeyCodePressed() || isScanCodePressed() || isMousePressed() || isTouchPressed());
+	}
+	inline bool isJustPressed() const {
+		return press_frame == Engine->runtime_frame();
+	}
 
-        std::unordered_set<SDL_KeyCode> m_keycodes;
-        std::unordered_set<SDL_Scancode> m_scancodes;
-        std::unordered_set<InputClass::MouseButton> m_mousebuttons;
+private:
+	long long press_frame = -1;
+	bool enable_touch;
 
-        inline bool isTouchPressed() const { if (m_touchCount == 0) return false; return Engine->Input.getFingersPressed() >= m_touchCount; }
-        inline bool isKeyCodePressed() const {for (auto keyCode : m_keycodes) if (Engine->Input.isKeyPressed(keyCode)) return true; return false;}
-        inline bool isScanCodePressed() const {for (auto scanCode : m_scancodes) if (Engine->Input.isKeyPressed(scanCode)) return true; return false;}
-        inline bool isMousePressed() const {for (auto mouseButton : m_mousebuttons) if (Engine->Input.isMouseButtonPressed(mouseButton)) return true; return false;}
-        
-        template <typename First, typename... Rest>
-        inline void _addinputs_recurse(First first, Rest... args) {
-            AddInput(first);
-            _addinputs_recurse(args...);
-        }
-        inline void _addinputs_recurse() {}
+	std::unordered_map<SDL_KeyCode, bool> m_keycodes;
+	std::unordered_map<SDL_Scancode, bool> m_scancodes;
+	std::unordered_map<InputClass::MouseButton, bool> m_mousebuttons;
+
+	inline bool isTouchPressed() const { if (!enable_touch) return false; return Engine->Input.getFingersPressed() != 0; }
+	inline bool isKeyCodePressed() const { for (auto& kv : m_keycodes) if (kv.second) return true; return false; }
+	inline bool isScanCodePressed() const { for (auto& kv: m_scancodes) if (kv.second) return true; return false; }
+	inline bool isMousePressed() const { for (auto& kv: m_mousebuttons) if (kv.second) return true; return false; }
+
+	template <typename First, typename... Rest>
+	inline void _addinputs_recurse(First first, Rest... args) {
+		AddInput(first);
+		_addinputs_recurse(args...);
+	}
+	inline void _addinputs_recurse() {}
+
+	void push_self();
 };

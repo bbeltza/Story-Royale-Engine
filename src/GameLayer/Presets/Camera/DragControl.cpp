@@ -4,9 +4,9 @@
 
 use_namespace
 
-Action DragControl::default_action{ 1, InputClass::mbRight };
+Action DragControl::default_action{ true, InputClass::mbRight };
 
-DragControl::DragControl(Action& action): m_action(action)
+DragControl::DragControl(const Action& action): m_action(action)
 {
     m_mouseConnection = Engine->Input.mouseMove.Connect(DragControl::mouseMoveCallback, this);
     m_touchConnection = Engine->Input.fingerMove.Connect(DragControl::touchMotionCallback, this);

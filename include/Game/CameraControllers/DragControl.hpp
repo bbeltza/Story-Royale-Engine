@@ -12,7 +12,7 @@ namespace CameraControllers
     cam_controldef(DragControl)
     {
     public:
-        DragControl(Action& action=default_action);
+        DragControl(const Action& action=default_action);
         ~DragControl();
 
         float Smoothness = 0.0f;
@@ -23,7 +23,7 @@ namespace CameraControllers
         Vector2f m_lastmouseDelta;
         Connection* m_mouseConnection;
         Connection* m_touchConnection;
-        Action& m_action;
+        const Action& m_action;
 
         static void mouseMoveCallback(void*, DragControl*, const MouseMove*);
         static void touchMotionCallback(void*, DragControl*, const TouchFinger*);
