@@ -21,8 +21,6 @@ namespace Game
 
         inline RectF* getAbsolute(GuiContainer* container) { return &container->m_absolute; }
         inline Color4* getModulate(GuiContainer* container) { return &container->m_modulate; }
-        inline RectF* getAbsolute(GuiObject* container) { return &container->m_absolute; }
-        inline Color4* getModulate(GuiObject* container) { return &container->m_modulate; }
     private:
         friend class GuiContainer;
     };

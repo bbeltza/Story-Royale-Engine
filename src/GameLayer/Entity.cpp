@@ -60,24 +60,14 @@ void Game::Entity::call_pupdate(TimeStamp dt)
     pUpdate(dt);
 }
 
-Game::Entity* Game::World::call_query(float* pt)
+bool Game::Entity::call_query(float* pt)
 {
-    Entity* target_returnEntity = nullptr;
-
-    for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); it++)
+    for (auto component : m_Components)
     {
-        auto entity = *it;
-        for (auto component : entity->m_Components)
-        {
-            check_vtablefor(query)
-            if (entity->componentDisabled(*component)) continue;
-            if (component->Query(entity, pt))
-            {
-                target_returnEntity = entity;
-                break;
-            }
-        }
+        check_vtablefor(query)
+        if (componentDisabled(*component)) continue;
+        if (component->Query(this, pt)) return true;
     }
 
-    return target_returnEntity;
+    return false;
 }

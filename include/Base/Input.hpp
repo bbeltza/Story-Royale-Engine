@@ -42,12 +42,19 @@ public:
     inline float getScaleRatio() const {return m_scaleratio;}
 
     // Input events
+
     Signal keyEvent{this, false};
     Signal mouseButton{this, false};
     Signal mouseWheel{this, false};
     Signal mouseMove{this, false};
     Signal fingerTouch{this, false};
     Signal fingerMove{this, false};
+
+    // Future Input events
+
+    Signal InputBegin{this};
+    Signal InputEnd{this};
+    Signal InputChange{this};
 
     //
     struct _mState { float x, y; Flags32 state; };

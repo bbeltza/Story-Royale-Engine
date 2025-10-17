@@ -81,3 +81,14 @@ void Game::World::call_render()
 
     m_Current->Rendered.Fire(m_Current);
 }
+
+Game::Entity* Game::World::call_query(float* pt)
+{
+    for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); ++it)
+    {
+        auto entity = *it;
+        if (entity->call_query(pt)) return entity;
+    }
+
+    return nullptr;
+}

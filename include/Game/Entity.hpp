@@ -43,12 +43,13 @@ namespace Game
         std::list<Component*> m_Components;
         std::unordered_set<Component*> m_DisabledComps;
 
-        // Draws a red cross representing the entity's position, only calls in debug mode
+        // Draws a red cross representing the entity's position, only for debugging purposes
         void _debugDraw();
         // Calls Render() to all of its components
-        // Entities by default don't render itself, the components with the Render process flag do
+        // Entities by default don't render itself, the components with their overritten render function do
         void call_render();
         void call_pupdate(TimeStamp);
+        bool call_query(float* pt);
 
         ParentType m_ParentType = WorldParent;
         union {
