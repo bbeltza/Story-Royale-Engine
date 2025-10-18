@@ -74,7 +74,7 @@ void Game::GuiContainer::_renderchildren()
 
         obj->_renderchildren();
     }
-    Rendered.Fire(this);
+    Rendered.Fire();
 }
 
 void Game::GuiContainer::call_update(TimeStamp dt)
@@ -86,9 +86,9 @@ void Game::GuiContainer::call_update(TimeStamp dt)
         if (obj->visible)
             obj->call_update(dt);
         else
-            obj->Updated.Fire(this);
+            obj->Updated.Fire(dt);
     }
-    Updated.Fire(this);
+    Updated.Fire(dt);
 }
 
 /*
@@ -152,7 +152,7 @@ void Game::GuiContainer::_proc_children_components(uint32_t index)
     lastTw = tweens[i];                                     \
 }
 
-Signal* Game::GuiObject::TweenPosition(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
+Signal<>* Game::GuiObject::TweenPosition(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
 {
     TweenBase* lastTw = nullptr;
     checktw(XScale, 0, position.X.Scale, float)
@@ -163,7 +163,7 @@ Signal* Game::GuiObject::TweenPosition(TweenInfo& Info, const float* XScale, con
     return lastTw ? &lastTw->Completed : nullptr;
 }
 
-Signal* Game::GuiObject::TweenSize(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
+Signal<>* Game::GuiObject::TweenSize(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
 {
     TweenBase* lastTw = nullptr;
     checktw(XScale, 4, size.X.Scale, float)
@@ -174,7 +174,7 @@ Signal* Game::GuiObject::TweenSize(TweenInfo& Info, const float* XScale, const i
     return lastTw ? &lastTw->Completed : nullptr;
 }
 
-Signal* Game::GuiObject::TweenAnchor(TweenInfo& Info, const float* X, const float* Y)
+Signal<>* Game::GuiObject::TweenAnchor(TweenInfo& Info, const float* X, const float* Y)
 {
     TweenBase* lastTw = nullptr;
     checktw(X, 8, anchor.X, float)

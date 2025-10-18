@@ -24,8 +24,8 @@ class Timer
 
     bool Looped = false;
 
-    Signal Hit_Single;
-    Signal Hit;
+    Signal<> Hit_Single{this};
+    Signal<> Hit{this};
     private:
     friend class EngineClass;
     void _hit();

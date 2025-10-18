@@ -21,8 +21,8 @@ namespace CameraControllers
     private:
         Vector2f m_camSpeed;
         Vector2f m_lastmouseDelta;
-        Connection* m_mouseConnection;
-        Connection* m_touchConnection;
+        ConnectionHandle m_mouseConnection;
+        ConnectionHandle m_touchConnection;
         const Action& m_action;
 
         static void mouseMoveCallback(void*, DragControl*, const MouseMove*);

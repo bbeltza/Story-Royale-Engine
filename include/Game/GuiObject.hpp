@@ -17,9 +17,9 @@ namespace Game
 
         bool isGuiLayer() const override { return 0; }
         bool isHovering() const;
-        Signal* TweenPosition(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
-        Signal* TweenSize(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
-        Signal* TweenAnchor(TweenInfo& Info, const float* X, const float* Y);
+        Signal<>* TweenPosition(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
+        Signal<>* TweenSize(TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
+        Signal<>* TweenAnchor(TweenInfo& Info, const float* X, const float* Y);
 
     private:
         void _process();

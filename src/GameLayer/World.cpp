@@ -38,11 +38,11 @@ void Game::World::call_pupdate(TimeStamp dt)
     for (Entity *entity : m_Entities)
     {
         entity->call_pupdate(dt);
-        entity->pUpdated.Fire(entity);
+        entity->pUpdated.Fire(dt);
     }
 
     CurrentCamera.Update(dt);
-    pUpdated.Fire(this);
+    pUpdated.Fire(dt);
 }
 
 void Game::World::call_update(TimeStamp dt)
@@ -51,10 +51,10 @@ void Game::World::call_update(TimeStamp dt)
     for (Entity* entity : getEntities<Entity>())
     {
         entity->Update(dt);
-        entity->Updated.Fire();
+        entity->Updated.Fire(dt);
     }
 
-    Updated.Fire(this);
+    Updated.Fire(dt);
 }
 
 void Game::World::call_render()
@@ -71,7 +71,7 @@ void Game::World::call_render()
         entity->preRender();
         entity->call_render();
         entity->postRender();
-        entity->Rendered.Fire(entity);
+        entity->Rendered.Fire();
     }
     m_Current->postRender();
 
@@ -79,7 +79,7 @@ void Game::World::call_render()
     for (Entity* entity : Game::World::m_Current->m_Entities) entity->_debugDraw();
 #endif
 
-    m_Current->Rendered.Fire(m_Current);
+    m_Current->Rendered.Fire();
 }
 
 Game::Entity* Game::World::call_query(float* pt)

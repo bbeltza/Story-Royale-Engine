@@ -2,7 +2,7 @@
 #include "Game/GuiPresets/Button.hpp"
 
 
-void GuiPresets::Button::clickevent(void *, Button *button, MouseButton *buttonData)
+void GuiPresets::Button::clickevent(void *, Button *button, const MouseButton *buttonData)
 {
     if (!buttonData->pressed)
         return;
@@ -19,10 +19,7 @@ GuiPresets::Button::Button()
     addComponent(m_mod);
 }
 
-GuiPresets::Button::~Button()
-{
-    m_connection->Disconnect();
-}
+GuiPresets::Button::~Button() {}
 
 void GuiPresets::Button::Update(TimeStamp dt)
 {

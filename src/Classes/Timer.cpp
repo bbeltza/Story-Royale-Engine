@@ -39,7 +39,7 @@ void Timer::Pause()
 
 void Timer::_hit()
 {
-    Hit.Fire(this);
+    Hit.Fire();
 
     if (Looped)
     {
@@ -65,7 +65,7 @@ TimeStamp Timer::global_update()
         timer->m_timestamp += delta;
 
         if (timer->m_timestamp >= timer->m_Duration)
-            timer->Hit_Single.Fire(nullptr);
+            timer->Hit_Single.Fire();
         while (timer->m_timestamp >= timer->m_Duration)
             timer->_hit();
     }

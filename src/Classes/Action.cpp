@@ -1,12 +1,13 @@
 #include "Classes/Action.hpp"
 
 Action::list* Action::s_actions = nullptr;
-Connection* Action::sc_mouse = nullptr;
-Connection* Action::sc_keyboard = nullptr;
-Connection* Action::sc_touch = nullptr;
+ConnectionHandle Action::sc_mouse;
+ConnectionHandle Action::sc_keyboard;
+ConnectionHandle Action::sc_touch;
 
 void InputClass::setupActions()
 {
+	std::unique_ptr<int> t;
 	Action::sc_mouse = mouseButton.Connect(Action::sc_mouseHandle, NULL);
 	Action::sc_keyboard = keyEvent.Connect(Action::sc_keyboardHandle, NULL);
 	Action::sc_touch = fingerTouch.Connect(Action::sc_touchHandle, NULL);
@@ -35,7 +36,7 @@ Action::~Action()
 #define sa_check if (!s_actions) return;
 #define act_frame act->press_frame = Engine->runtime_frame()
 
-void Action::sc_mouseHandle(void*, void*, MouseButton* ev)
+void Action::sc_mouseHandle(void*, void*, const MouseButton* ev)
 {
 	sa_check
 
@@ -51,7 +52,7 @@ void Action::sc_mouseHandle(void*, void*, MouseButton* ev)
 	}
 }
 
-void Action::sc_keyboardHandle(void*, void*, Key* ev)
+void Action::sc_keyboardHandle(void*, void*, const Key* ev)
 {
 	sa_check
 	if (ev->repeat) return;
@@ -76,7 +77,7 @@ void Action::sc_keyboardHandle(void*, void*, Key* ev)
 	}
 }
 
-void Action::sc_touchHandle(void*, void*, TouchFinger* ev)
+void Action::sc_touchHandle(void*, void*, const TouchFinger* ev)
 {
 	sa_check
 	if (ev->Pressed) return;

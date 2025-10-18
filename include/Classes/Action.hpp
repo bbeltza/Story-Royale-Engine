@@ -10,12 +10,12 @@ class Action
 	friend class InputClass;
 	typedef std::list<Action*> list;
 	static list* s_actions;
-	static Connection* sc_mouse;
-	static Connection* sc_keyboard;
-	static Connection* sc_touch;
-	static void sc_mouseHandle(void*, void*, MouseButton* ev);
-	static void sc_keyboardHandle(void*, void*, Key* ev);
-	static void sc_touchHandle(void*, void*, TouchFinger* ev);
+	static ConnectionHandle sc_mouse;
+	static ConnectionHandle sc_keyboard;
+	static ConnectionHandle sc_touch;
+	static void sc_mouseHandle(void*, void*, const MouseButton* ev);
+	static void sc_keyboardHandle(void*, void*, const Key* ev);
+	static void sc_touchHandle(void*, void*, const TouchFinger* ev);
 
 public:
 	Action(const Action& other) : press_frame(-1), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons), enable_touch(other.enable_touch) { push_self(); }

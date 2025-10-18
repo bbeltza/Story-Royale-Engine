@@ -12,10 +12,7 @@ DragControl::DragControl(const Action& action): m_action(action)
     m_touchConnection = Engine->Input.fingerMove.Connect(DragControl::touchMotionCallback, this);
 }
 
-DragControl::~DragControl()
-{
-    m_mouseConnection->Disconnect();
-}
+DragControl::~DragControl() {}
 
 void DragControl::Update(TimeStamp delta)
 {

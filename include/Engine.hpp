@@ -20,9 +20,9 @@ public:
     DrawingDevice DrawingContext{this};
     AudDevice AudioDevice{this};
 
-    Signal OnUpdate{this, false};
-    Signal BeforeRender{this, false};
-    Signal AfterRender{this, false};
+    Signal<TimeStamp> OnUpdate{this, false};
+    Signal<> BeforeRender{this, false};
+    Signal<> AfterRender{this, false};
 
     // Get the current frame count
     // @returns The frame count starting from 0, or -1 if the application hasn't been run yet

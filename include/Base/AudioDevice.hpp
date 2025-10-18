@@ -30,7 +30,7 @@ class AudioData
     public:
     ~AudioData();
 
-    Signal Loaded;
+    Signal<> Loaded;
 
     inline uint32_t len() {return m_len;} 
     inline uint32_t freq() {return m_spec.freq;} 

@@ -8,6 +8,10 @@
 #include "Datatypes/Vector.hpp"
 #include "Datatypes/Flags.hpp"
 
+#include "Events/Key.hpp"
+#include "Events/Mouse.hpp"
+#include "Events/Touch.hpp"
+
 class InputClass
 {
     ENGINE_BASE
@@ -43,12 +47,12 @@ public:
 
     // Input events
 
-    Signal keyEvent{this, false};
-    Signal mouseButton{this, false};
-    Signal mouseWheel{this, false};
-    Signal mouseMove{this, false};
-    Signal fingerTouch{this, false};
-    Signal fingerMove{this, false};
+    Signal<const ::Key*> keyEvent{this, false};
+    Signal<const ::MouseButton*> mouseButton{this, false};
+    Signal<const ::MouseWheel*> mouseWheel{this, false};
+    Signal<const ::MouseMove*> mouseMove{this, false};
+    Signal<const ::TouchFinger*> fingerTouch{this, false};
+    Signal<const ::TouchFinger*> fingerMove{this, false};
 
     // Future Input events
     /*

@@ -1,95 +1,79 @@
-#include <utility>
-
-#include <SDL.hpp>
-
+#include <SDL.h>
+#include "Classes/Signal.hpp"
 #include "Engine.hpp"
 
-void *Signal::create_sem()
+#pragma region SignalBase
+#define get_semaphore reinterpret_cast<SDL_sem*>(semaphore)
+void SignalBase::static_invoker(SignalBase* sig, Connection* connection)
 {
-    return SDL_CreateSemaphore(0);
+	sig->invoke_func(connection);
 }
 
-Signal::~Signal()
+void SignalBase::base_fire()
 {
-    DisconnectAll();
-    if (SDL_WasInit(0)) SDL_DestroySemaphore((SDL_sem *)m_waitSem);
-    if (return_data) delete return_data;
+	SDL_SemPost(get_semaphore);
+	if (multithreaded)
+	{
+		for (Connection* connection : connections)
+			Engine->ThreadPool.CreateImmediateThread(static_invoker, this, connection);
+	}
+	else
+	{
+		for (Connection* connection : connections)
+			invoke_func(connection);
+	}
 }
 
-void Signal::DisconnectAll()
+SignalBase::SignalBase(void* _userdata, bool _multithreaded): Userdata(_userdata), semaphore(SDL_CreateSemaphore(0)), multithreaded(_multithreaded) {}
+
+SignalBase::~SignalBase()
 {
-    while (!m_connections.empty())
-    {
-        auto item = *m_connections.begin();
-        delete item;
-        m_connections.remove(item);
-    }
+	while (!connections.empty())
+		delete connections.front();
 }
 
-#define SignalConnect(o)                                 \
-    auto connection = new Connection(this, fn, data, o); \
-    m_connections.push_back(connection);                    \
-    return connection;
-
-Connection *Signal::Connect(EventFunction fn, void *data){
-    SignalConnect(false)}
-
-Connection *Signal::Once(EventFunction fn, void *data){
-    SignalConnect(true)}
-
-Signal::argbase Signal::Wait()
+Connection* SignalBase::base_connect(dummy_func_t _func, void* _userdata)
 {
-    SDL_SemWait((SDL_sem *)m_waitSem);
-    return *return_data;
+	Connection* ret = new Connection{ this, _func, _userdata };
+	return ret;
 }
 
-static std::vector<Connection*> delete_list;
-void Signal::count_fire(size_t count, ...)
+void SignalBase::base_yield()
 {
-    va_list va;
-    va_start(va, count);
-
-    if (return_data) delete return_data;
-    return_data = new argbase;
-    size_t i;
-    for (i = 0; i < count; i++)
-        return_data->args[i] = va_arg(va, void *);
-    for (; i < 6; i++)
-        return_data->args[i] = nullptr;
-
-    va_end(va);
-
-    m_firing = true;
-    SDL_SemPost((SDL_sem *)m_waitSem);
-    for (auto item : m_connections)
-    {
-        if (m_multithreaded)
-            Engine->ThreadPool.CreateImmediateThread(item->m_fn, userdata, item->userdata,
-                                                     return_data->args[0], return_data->args[1],
-                                                     return_data->args[2], return_data->args[3],
-                                                     return_data->args[4], return_data->args[5]);
-        else
-            item->m_fn(userdata, item->userdata,
-                       return_data->args[0], return_data->args[1],
-                       return_data->args[2], return_data->args[3],
-                       return_data->args[4], return_data->args[5]);
-
-        if (item->m_once)
-            delete_list.push_back(item);
-    }
-    m_firing = false;
-
-    while (!delete_list.empty())
-    {
-        delete delete_list.back();
-        delete_list.pop_back();
-    }
+	SDL_SemWait(get_semaphore);
+}
+#pragma endregion
+#pragma region Connection
+Connection::Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata) : signal(_signal), func(_func), Userdata(_userdata)
+{
+	signal->connections.push_back(this);
 }
 
-void Connection::Disconnect()
+Connection::~Connection()
 {
-    if (m_signal->m_firing)
-        delete_list.push_back(this);
-    else
-        delete this;
+	signal->connections.remove(this);
 }
+#pragma endregion
+#pragma region Connection Handle
+ConnectionHandle::ConnectionHandle(Connection* _connection): connection(_connection) {}
+ConnectionHandle::ConnectionHandle(ConnectionHandle&& moving): connection(moving.connection)
+{
+	moving.connection = nullptr;
+}
+ConnectionHandle::~ConnectionHandle()
+{
+	if (connection)
+		delete connection;
+}
+ConnectionHandle& ConnectionHandle::operator=(ConnectionHandle&& moving)
+{
+	moving.connection = nullptr;
+	return *this;
+}
+void ConnectionHandle::Disconnect()
+{
+	if (connection)
+		delete connection;
+	connection = nullptr;
+}
+#pragma endregion

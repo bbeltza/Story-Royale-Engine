@@ -38,7 +38,7 @@ public:
     TimeStamp Cancel();
     TimeStamp Pause();
 
-    Signal Completed;
+    Signal<> Completed;
     const TweenInfo& Info;
 
     inline float GetAlpha() const {return Info.duration ? m_elapsed/Info.duration : 1;}

@@ -11,8 +11,8 @@ struct GameInstance
     virtual void preRender() {}
     virtual void postRender() {}
 
-    Signal Updated{this};
-    Signal Rendered{this};
+    Signal<TimeStamp> Updated{this};
+    Signal<> Rendered{this};
 
     void Destroy();
 };
@@ -21,5 +21,5 @@ struct WorldInstance: public GameInstance
 {
     WorldInstance() {}
     virtual void pUpdate(TimeStamp dt) {}
-    Signal pUpdated{this};
+    Signal<TimeStamp> pUpdated{this};
 };

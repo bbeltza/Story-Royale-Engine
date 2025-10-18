@@ -1,72 +1,80 @@
 #pragma once
-#include <list>
+#include <standard>
 
-typedef void (*EventFunction)(void *signal_data, void *connection_data, ...);
+#define _make_t template <typename... _args>
 
-#define event_callback(fn) (EventFunction) fn
-
-struct Signal;
-class Connection;
-
-struct Signal
+class SignalBase
 {
-    friend class Connection;
+	_make_t friend class Signal;
+	friend class Connection;
+	typedef void (*dummy_func_t)(void*, void*, ...);
 
-    struct argbase
-    {
-        void* args[6];
-    };
+	SignalBase(void*, bool);
+	~SignalBase();
 
-    Signal(void* userdata, bool multithreaded=true): userdata(userdata), m_multithreaded(multithreaded) {}
-    Signal(Signal &other) = delete;
-    ~Signal();
+	virtual void invoke_func(Connection* connection) = 0;
+	static void static_invoker(SignalBase* sig, Connection* connection);
 
-    template <typename Func, typename T> inline Connection* Connect(Func fn, T userdata) { return Connect(event_callback(fn), (void*)userdata); }
-    template <typename Func, typename T> inline Connection* Once(Func fn, T* userdata) { return Once(event_callback(fn), (void*)userdata); }
+	void base_fire();
+	void base_yield();
+	Connection* base_connect(dummy_func_t _fun, void* _userdata);
 
-    Connection *Connect(EventFunction fn, void* userdata);
-    Connection *Once(EventFunction fn, void* userdata);
-    argbase Wait();
-
-    template <class... _Args> inline void Fire(_Args... args) {count_fire(sizeof...(args), args...);}
-    void DisconnectAll();
-    
-    void* userdata;
-    
-    private:
-    void* m_waitSem = create_sem();
-    
-    bool m_multithreaded;
-    bool m_firing = false;
-    
-    void* create_sem();
-    void count_fire(size_t count, ...);
-    
-    argbase* return_data = nullptr;
-    std::list<Connection*> m_connections;
+	std::list<Connection*> connections;
+public:
+	void* Userdata;
+private:
+	void* semaphore;
+	bool multithreaded;
 };
 
 class Connection
 {
-    friend struct Signal;
+	_make_t friend class Signal;
+	friend class SignalBase;
+	friend class ConnectionHandle;
+	typedef SignalBase::dummy_func_t dummy_func_t;
 
-    Connection(Signal *signal, EventFunction fn, void *data, bool once = false)
-    : m_signal(signal),
-      m_fn(fn),
-      userdata(data),
-      m_once(once)  {}
-    Connection(const Connection &other) = delete;
+	Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata);
+	~Connection();
+
+	dummy_func_t func;
+	SignalBase* const signal;
+public:
+	void* Userdata;
+};
+
+class ConnectionHandle
+{
+	_make_t friend class Signal;
+	Connection* connection;
+	ConnectionHandle(Connection* _connection);
+public:
+	ConnectionHandle(): connection(NULL) {}
+	ConnectionHandle(const ConnectionHandle& other) = delete;
+	ConnectionHandle(ConnectionHandle&& moving);
+	~ConnectionHandle();
+
+	ConnectionHandle& operator=(ConnectionHandle&& moving);
+
+	inline bool Disconnected() { return connection == nullptr; };
+	void Disconnect();
+};
+
+_make_t
+class Signal: public SignalBase
+{
+	typedef void(*callable_t)(void*, void*, _args...);
+	std::tuple<_args...> ret_args;
+
+	template <size_t... _indices> void invoke(Connection* connection, std::index_sequence<_indices...>) { (reinterpret_cast<callable_t>(connection->func))(this->Userdata, connection->Userdata, std::get<_indices>(ret_args)...); }
+	void invoke_func(Connection* connection) override { invoke(connection, std::make_index_sequence<sizeof...(_args)>{}); }
 
 public:
-    void Disconnect();
-    void* userdata;
-
-private:
-    friend struct Signal;
-    ~Connection() { const_cast<Signal*>(m_signal)->m_connections.remove(this); };
-
-    EventFunction m_fn;
-    const Signal *m_signal;
-
-    const bool m_once;
+	Signal(void* Userdata=NULL, bool Multithreaded=true): SignalBase(Userdata, Multithreaded) {}
+	void Fire(_args... args) { ret_args = { args... }; base_fire(); }
+	template <typename _retype, typename _sigdata, typename _connectdata> ConnectionHandle Connect(_retype(*Func)(_sigdata*, _connectdata*, _args...), void* Userdata = NULL) { return base_connect(reinterpret_cast<dummy_func_t>(Func), Userdata); }
+	template <typename _retype> ConnectionHandle Connect(_retype(*Func)(void), void* Userdata = NULL) { return base_connect(reinterpret_cast<dummy_func_t>(Func), Userdata); }
+	std::tuple<_args...> Wait() { base_yield(); return ret_args; }
 };
+
+#undef _make_t

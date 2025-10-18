@@ -1,47 +1,72 @@
 #pragma once
-#include <standard>
+#include <list>
 
-#define _make_t template <typename... _args>
+typedef void (*EventFunction)(void *signal_data, void *connection_data, ...);
 
-class SignalBase
+#define event_callback(fn) (EventFunction) fn
+
+struct Signal;
+class Connection;
+
+struct Signal
 {
-	_make_t friend class _Signal;
-	friend class _Connection;
+    friend class Connection;
 
-	virtual void invoke_func(_Connection* connection) = 0;
+    struct argbase
+    {
+        void* args[6];
+    };
 
-	void base_fire();
+    Signal(void* userdata, bool multithreaded=true): userdata(userdata), m_multithreaded(multithreaded) {}
+    Signal(Signal &other) = delete;
+    ~Signal();
 
-	std::list<_Connection*> connections;
-public:
-	void* Userdata;
+    template <typename Func, typename T> inline Connection* Connect(Func fn, T userdata) { return Connect(event_callback(fn), (void*)userdata); }
+    template <typename Func, typename T> inline Connection* Once(Func fn, T* userdata) { return Once(event_callback(fn), (void*)userdata); }
+
+    Connection *Connect(EventFunction fn, void* userdata);
+    Connection *Once(EventFunction fn, void* userdata);
+    argbase Wait();
+
+    template <class... _Args> inline void Fire(_Args... args) {count_fire(sizeof...(args), args...);}
+    void DisconnectAll();
+    
+    void* userdata;
+    
+    private:
+    void* m_waitSem = create_sem();
+    
+    bool m_multithreaded;
+    bool m_firing = false;
+    
+    void* create_sem();
+    void count_fire(size_t count, ...);
+    
+    argbase* return_data = nullptr;
+    std::list<Connection*> m_connections;
 };
 
-class _Connection
+class Connection
 {
-	_make_t friend class _Signal;
-	typedef void (*dummy_func_t)(void*, void*, ...);
+    friend struct Signal;
 
-	_Connection();
-	~_Connection();
-
-	dummy_func_t func;
-public:
-	void* Userdata;
-};
-
-_make_t
-class _Signal: public SignalBase
-{
-	std::tuple<_args...> ret_args;
-	void invoke_func(_Connection* connection) override { connection->func(this->Userdata, connection->Userdata); }
+    Connection(Signal *signal, EventFunction fn, void *data, bool once = false)
+    : m_signal(signal),
+      m_fn(fn),
+      userdata(data),
+      m_once(once)  {}
+    Connection(const Connection &other) = delete;
 
 public:
-	void Fire(_args... args)
-	{
-		ret_args = { args... };
-		base_fire();
-	}
-};
+    void Disconnect();
+    void* userdata;
 
-#undef _make_t
+private:
+    friend struct Signal;
+    ~Connection() { const_cast<Signal*>(m_signal)->m_connections.remove(this); };
+
+    EventFunction m_fn;
+    const Signal *m_signal;
+
+    const bool m_once;
+};
