@@ -54,6 +54,7 @@ void Action::sc_mouseHandle(void*, void*, MouseButton* ev)
 void Action::sc_keyboardHandle(void*, void*, Key* ev)
 {
 	sa_check
+	if (ev->repeat) return;
 
 	for_each
 	{

@@ -39,7 +39,7 @@ public:
 
 private:
 	long long press_frame = -1;
-	bool enable_touch;
+	bool enable_touch = false;
 
 	std::unordered_map<SDL_KeyCode, bool> m_keycodes;
 	std::unordered_map<SDL_Scancode, bool> m_scancodes;

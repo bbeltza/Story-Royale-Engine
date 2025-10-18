@@ -139,12 +139,20 @@ bool EngineClass::pollWindowEvents()
     {
         switch (Window.sdl_event.type)
         {
+        case SDL_WINDOWEVENT:
+            switch (Window.sdl_event.window.event)
+            {
+            case SDL_WINDOWEVENT_FOCUS_LOST:
+                SDL_ResetKeyboard();
+                break;
+            }
+            break;
         case SDL_QUIT:
             return 0;
         default:
+            Input.processWindowEvents(&Window.sdl_event);
             break;
         }
-        Input.processWindowEvents(&Window.sdl_event);
     }
 
     return 1;

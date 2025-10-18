@@ -10,6 +10,7 @@ using namespace Components;
 
 void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
 {    
+    if (!collider_set) return;
     if (!flags.Has(CanCollideFlag))
     {
         collider_set->erase(this);
