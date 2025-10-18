@@ -20,7 +20,7 @@ void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
 
     if (flags.Has(AnchoredFlag)) return;
 
-    for (auto ent : entity->getWorld<Game::World>()->getEntities<Game::Entity>())
+    for (auto ent : entity->getWorld()->getEntities<Game::Entity>())
     {
         if (ent == entity) continue;
 
