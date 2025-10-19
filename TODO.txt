@@ -1,3 +1,5 @@
+- Bring everything engine-related into several namespaces, and have the entire data of the engine into a single structure
+
 - Be able to create tweens on datatypes that will have the Lerp() function (for now it only supports for those with the used operators)
 
 - Animations/Keyframes
@@ -8,9 +10,6 @@
 
 - Better error messaging (With the sys API)
 	- More error codes
-
-- Change the pipeline:
-	- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
 
 - System/global functions, global functions that don't have any namespace:
 	- logging (errors, informations, debugging...)
@@ -26,3 +25,8 @@
 - Work on the game ^^
 
 (current version: 0.010.18)
+
+Less likely ideas:
+
+	- Change the pipeline:
+		- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one

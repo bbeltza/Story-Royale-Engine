@@ -71,7 +71,7 @@ class Signal: public SignalBase
 	typedef void(*callable_t)(void*, void*, _args...);
 	std::tuple<_args...> ret_args;
 
-	template <size_t... _indices> void invoke(Connection* connection, std::index_sequence<_indices...>) { (reinterpret_cast<callable_t>(connection->func))(this->Userdata, connection->Userdata, std::get<_indices>(ret_args)...); }
+	template <size_t... _indices> void invoke(Connection* connection, std::index_sequence<_indices...>) { (reinterpret_cast<callable_t>(connection->func))(this->Userdata, connection->Userdata, std::move(std::get<_indices>(ret_args))...); }
 	void invoke_func(Connection* connection) override { invoke(connection, std::make_index_sequence<sizeof...(_args)>{}); }
 
 public:
