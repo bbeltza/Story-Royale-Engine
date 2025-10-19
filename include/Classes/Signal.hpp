@@ -3,6 +3,8 @@
 
 #define _make_t template <typename... _args>
 
+class Connection;
+
 class SignalBase
 {
 	_make_t friend class Signal;
