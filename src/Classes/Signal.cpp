@@ -15,12 +15,16 @@ void SignalBase::base_fire()
 	if (multithreaded)
 	{
 		for (Connection* connection : connections)
+		{
 			Engine->ThreadPool.CreateImmediateThread(static_invoker, this, connection);
+		}
 	}
 	else
 	{
 		for (Connection* connection : connections)
+		{
 			invoke_func(connection);
+		}
 	}
 }
 
@@ -28,6 +32,7 @@ SignalBase::SignalBase(void* _userdata, bool _multithreaded): Userdata(_userdata
 
 SignalBase::~SignalBase()
 {
+	if (SDL_WasInit(0)) SDL_DestroySemaphore(get_semaphore);
 	while (!connections.empty())
 		delete connections.front();
 }
@@ -51,29 +56,30 @@ Connection::Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata)
 
 Connection::~Connection()
 {
+	if (current_handle) current_handle->connection = nullptr;
 	signal->connections.remove(this);
 }
 #pragma endregion
 #pragma region Connection Handle
-ConnectionHandle::ConnectionHandle(Connection* _connection): connection(_connection) {}
-ConnectionHandle::ConnectionHandle(ConnectionHandle&& moving): connection(moving.connection)
+ConnectionHandle::ConnectionHandle(ConnectionHandle&& moving) noexcept: connection(moving.connection)
 {
 	moving.connection = nullptr;
+	connection->current_handle = this;
 }
 ConnectionHandle::~ConnectionHandle()
 {
 	if (connection)
 		delete connection;
 }
-ConnectionHandle& ConnectionHandle::operator=(ConnectionHandle&& moving)
+ConnectionHandle& ConnectionHandle::operator=(Connection* ptr)
 {
-	moving.connection = nullptr;
+	connection = ptr;
+	connection->current_handle = this;
 	return *this;
 }
 void ConnectionHandle::Disconnect()
 {
 	if (connection)
 		delete connection;
-	connection = nullptr;
 }
 #pragma endregion

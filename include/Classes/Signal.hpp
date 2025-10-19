@@ -41,6 +41,7 @@ class Connection
 
 	dummy_func_t func;
 	SignalBase* const signal;
+	ConnectionHandle* current_handle = nullptr;
 public:
 	void* Userdata;
 };
@@ -48,17 +49,19 @@ public:
 class ConnectionHandle
 {
 	_make_t friend class Signal;
+	friend class Connection;
 	Connection* connection;
-	ConnectionHandle(Connection* _connection);
 public:
 	ConnectionHandle(): connection(NULL) {}
+	ConnectionHandle(Connection* connection) { *this = connection; }
 	ConnectionHandle(const ConnectionHandle& other) = delete;
-	ConnectionHandle(ConnectionHandle&& moving);
+	ConnectionHandle(ConnectionHandle&& moving) noexcept;
 	~ConnectionHandle();
 
-	ConnectionHandle& operator=(ConnectionHandle&& moving);
+	ConnectionHandle& operator=(Connection* ptr);
+	inline Connection* operator->() { return connection; }
 
-	inline bool Disconnected() { return connection == nullptr; };
+	inline bool Connected() { return connection != nullptr; };
 	void Disconnect();
 };
 
@@ -74,8 +77,8 @@ class Signal: public SignalBase
 public:
 	Signal(void* Userdata=NULL, bool Multithreaded=true): SignalBase(Userdata, Multithreaded) {}
 	void Fire(_args... args) { ret_args = { args... }; base_fire(); }
-	template <typename _retype, typename _sigdata, typename _connectdata> ConnectionHandle Connect(_retype(*Func)(_sigdata*, _connectdata*, _args...), void* Userdata = NULL) { return base_connect(reinterpret_cast<dummy_func_t>(Func), Userdata); }
-	template <typename _retype> ConnectionHandle Connect(_retype(*Func)(void), void* Userdata = NULL) { return base_connect(reinterpret_cast<dummy_func_t>(Func), Userdata); }
+	template <typename _retype, typename _sigdata, typename _connectdata> Connection* Connect(_retype(*Func)(_sigdata*, _connectdata*, _args...), void* Userdata = NULL) { return base_connect(reinterpret_cast<dummy_func_t>(Func), Userdata); }
+	template <typename _retype> Connection* Connect(_retype(*Func)(void), void* Userdata = NULL) { return base_connect(reinterpret_cast<dummy_func_t>(Func), Userdata); }
 	std::tuple<_args...> Wait() { base_yield(); return ret_args; }
 };
 

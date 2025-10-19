@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(StoryRoyaleEngine)
 srEngine_policy()
 
+project(StoryRoyaleEngine)
+
 if(MSVC)
     set(SR_ENGINE_NO_CONSOLE_OPTIONS "/SUBSYSTEM:WINDOWS")
     set(SR_ENGINE_COMPILER_OPTIONS "/WX")
@@ -27,8 +29,6 @@ else()
 endif()
 
 add_subdirectory(3rdparty)
-
-project(StoryRoyaleEngine)
 
 add_subdirectory(gen_src)
 add_subdirectory(src)

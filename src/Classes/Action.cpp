@@ -7,7 +7,6 @@ ConnectionHandle Action::sc_touch;
 
 void InputClass::setupActions()
 {
-	std::unique_ptr<int> t;
 	Action::sc_mouse = mouseButton.Connect(Action::sc_mouseHandle, NULL);
 	Action::sc_keyboard = keyEvent.Connect(Action::sc_keyboardHandle, NULL);
 	Action::sc_touch = fingerTouch.Connect(Action::sc_touchHandle, NULL);
