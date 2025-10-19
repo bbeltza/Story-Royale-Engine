@@ -18,7 +18,7 @@ static void queueDestroyingInstances();
 static SDL_mutex* queueDestroyMutex = SDL_CreateMutex();;
 
 static std::chrono::duration<double> targetFrameTime;
-const static std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
+static const std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
 
 static EngineClass* thisengine = nullptr;
 EngineClass* const& Engine = thisengine;
