@@ -32,7 +32,7 @@ struct DisplayText: public Game::GuiLayer
 RectF mouseRect(0, 0, 100, 50);
 RectI staticRect(0, 20, 250, 90);
 
-void mousewheel(MouseWheel* event)
+void mousewheel(void* signal_data, void* connection_data, const MouseWheel* event)
 {
     mouseRect.Size = mouseRect.Size + Vector2f(event->amount * 10);
 }

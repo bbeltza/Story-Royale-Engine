@@ -6,8 +6,6 @@
 struct TexturePalace;
 struct TextureEntity;
 
-Connection* m_buttonConnection;
-
 struct TexturePalace : public Game::World
 {
     TexturePalace()
@@ -16,18 +14,21 @@ struct TexturePalace : public Game::World
     }
 };
 
+
+static void mouse(void*, TextureEntity* ent, const MouseButton* event);
+
 struct TextureEntity : public Game::Entity
 {
     Texture sprt1;
     Texture sprt2;
     //Texture testsprt;
 
+    ConnectionHandle button_connection = Engine->Input.mouseButton.Connect(mouse, this);
+
     TextureEntity():
         sprt1("res://test_texture.png"),
         sprt2("res://test_texture2.png")
     {
-        m_buttonConnection->userdata = this;
-
         sprite.Attach(sprt1);
         sprite.Attach(sprt2);
         sprite.Scale = { 4, 4 };
@@ -36,7 +37,7 @@ struct TextureEntity : public Game::Entity
     Components::Sprite sprite;
 };
 
-static void mouse(void*, TextureEntity* ent, MouseButton* event)
+static void mouse(void*, TextureEntity* ent, const MouseButton* event)
 {
     if (event->pressed && event->button == 1)
     ent->sprite.current_frame++;
@@ -45,6 +46,5 @@ static void mouse(void*, TextureEntity* ent, MouseButton* event)
 
 void Game::Initialize()
 {
-    m_buttonConnection = Engine->Input.mouseButton.Connect(mouse, nullptr);
     Game::World::setCurrent<TexturePalace>();
 }
