@@ -8,7 +8,8 @@ macro(set_src FLDR SRCS)
 endmacro()
 
 set(SOURCES 
-"main.cpp"
+"main.c"
+"InitEngine.c"
 
 "Extras/ExtraSDL.c"
 "Extras/ExtraString.c"

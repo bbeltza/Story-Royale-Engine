@@ -10,7 +10,7 @@ extern "C" {
 	{
 		// Runtime data
 
-		signed size_t frame;
+		int frame;
 
 		// Instance data
 
@@ -59,9 +59,15 @@ extern "C" {
 
 	extern struct _engine_data __engine_data;
 
-	extern void __initialize_engine(_engine_data* engine);
-	extern void __run_current_engine();
+	extern void __initialize_engine();
+	extern void __run_engine();
+	extern void __end_engine();
+
+	extern void __setup_window_data();
+	extern void __create_window();
 
 #ifdef __cplusplus
 }
 #endif
+
+#define engine __engine_data // Macro for easier typing
