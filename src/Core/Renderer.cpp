@@ -41,6 +41,7 @@ void DrawingDevice::Setup()
 
 void DrawingDevice::render()
 {
+#if 0
     load_textures();
 
     SDL_UnlockMutex(m_lockmutex);
@@ -67,6 +68,7 @@ void DrawingDevice::render()
     SDL_LockMutex(m_lockmutex);
 
     SDL_RenderPresent(sdl_renderer);
+#endif
 }
 
 void DrawingDevice::processViewport()

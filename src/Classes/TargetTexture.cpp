@@ -1,19 +1,23 @@
+#include <standard>
+
 #include "Engine.hpp"
 #include "Classes/TargetTexture.hpp"
 
-#define setup_aliases   auto& target_textures = Engine->DrawingContext.target_textures; \
-                        auto& targetptr = Engine->DrawingContext.targetptr; \
-                        auto renderer = Engine->DrawingContext.sdl_renderer;
+#include "../internal.h"
+
+#define setup_aliases   auto& target_textures = *reinterpret_cast<std::vector<SDL_Texture*>*>(engine.target_textures); \
+                        auto& targetptr = engine.targetptr; \
+                        auto renderer = engine.sdl_rendererhndl;
 
 #define m_texture reinterpret_cast<SDL_Texture*>(m_handle)
-TargetTexture::TargetTexture(): TargetTexture({Engine->DrawingContext.m_viewport.w, Engine->DrawingContext.m_viewport.h})
+TargetTexture::TargetTexture(): TargetTexture({engine.viewport.w, engine.viewport.h})
 {
     has_customsize = false;
 }
 
 TargetTexture::TargetTexture(const Vector2i& size): has_customsize(true)
 {
-    assert(Engine && "Target texture must NOT be created statically and shouldn't be created before initializing");
+    assert(engine.target_textures && "Target texture must NOT be created statically and shouldn't be created before initializing");
 
     setup_aliases
     targetptr++;
@@ -21,7 +25,7 @@ TargetTexture::TargetTexture(const Vector2i& size): has_customsize(true)
     if (target_textures.size() <= targetptr)
         target_textures.push_back(
             SDL_CreateTexture(
-                renderer, // DrawingContext's renderer (they are friends so it can access it heh)
+                renderer,
                 0, // Shouldn't care about the format on a rendering target
                 SDL_TEXTUREACCESS_TARGET,
                 size.X,
@@ -78,7 +82,6 @@ Texture TargetTexture::CreateTexture(const RectI& src)
         rect = NULL;
         SDL_QueryTexture(m_texture, NULL, NULL, &w, &h);
     }
-    syslogln("%d %d", w, h);
 
     uint64_t* pixeldata = new uint64_t[w * h];
 

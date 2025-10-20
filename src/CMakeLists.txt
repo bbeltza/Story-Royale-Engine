@@ -9,7 +9,6 @@ endmacro()
 
 set(SOURCES 
 "main.c"
-"InitEngine.c"
 
 "Extras/ExtraSDL.c"
 "Extras/ExtraString.c"
@@ -21,19 +20,25 @@ set(SYS_SOURCES
 "sleep.c"
 )
 
-set(CORE_SOURCES
-"AudioFormat.c"
+set(NEWCORE
+"InitEngine.c"
+"WindowCreation.c"
 "Audio.cpp"
+"AudioInternal.cpp"
+"DestroyQueue.cpp"
 "Input.cpp"
 "InputEvents.cpp"
-"InstanceRendering.cpp"
-"Physics.cpp"
-"Querying.cpp"
 "Renderer.cpp"
 "Rendering.cpp"
 "Runtime.cpp"
-"ThreadPool.cpp"
 "Window.cpp"
+"WindowData.cpp"
+)
+
+set(CORE_SOURCES
+"AudioFormat.c"
+"Physics.cpp"
+"Querying.cpp"
 )
 
 set(DATATYPES_SOURCES
@@ -74,6 +79,7 @@ set(COMPONENT_SOURCES
 "Gui/Image.cpp"
 "Gui/Text.cpp"
 "Gui/List.cpp"
+"Gui/Rendering.cpp"
 
 "World/Shape.cpp"
 "World/Velocity.cpp"
@@ -89,6 +95,8 @@ set(WINDOWS_SOURCES
 if(WIN32)
     set(SYSTEMDEP_SOURCES ${WINDOWS_SOURCES})
 endif()
+
+set_src(NewCore NEWCORE)
 
 set_src(Sys SYS_SOURCES)
 set_src(Core CORE_SOURCES)

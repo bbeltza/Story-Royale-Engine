@@ -1,14 +1,16 @@
 #include <ECS.hpp>
+#include <Display.hpp>
+#include <Input.hpp>
 #include <Engine.hpp>
 
 void Render()
 {
-    Vector2f mpos = Engine->Input.getMouseScreenPosition();
+    Vector2f mpos = Input::MouseScreenPosition();
     mpos.PrintLn();
-    Engine->DrawingContext.DrawRotatedRectangle(RectF(mpos.X, mpos.Y, 10, 10), 45, {255, 255, 255, 255});
+    Display::DrawRotatedRectangle(RectF(mpos.X, mpos.Y, 10, 10), 45, {255, 255, 255, 255});
 }
 
 void Game::Initialize()
 {
-    Engine->BeforeRender.Connect(Render, nullptr);
+    Runtime::BeforeRender.Connect(Render, nullptr);
 }

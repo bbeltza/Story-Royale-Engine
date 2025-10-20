@@ -27,7 +27,7 @@ class Timer
     Signal<> Hit_Single{this};
     Signal<> Hit{this};
     private:
-    friend class EngineClass;
+    friend void __update_classes();
     void _hit();
 
     bool m_playing = false;

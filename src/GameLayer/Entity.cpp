@@ -1,7 +1,10 @@
 #include "Game/World.hpp"
 #include "Game/Entity.hpp"
 #include "Game/Component.hpp"
-#include "Base/Window.hpp"
+
+#include "Base/Display.hpp"
+
+#include "config.h"
 
 struct component_vtable
 {
@@ -70,4 +73,14 @@ bool Game::Entity::call_query(float* pt)
     }
 
     return false;
+}
+
+void Game::Entity::_debugDraw()
+{
+#if DRAW_ENT_CENTER_ONLY_EMPTY
+    if (this->m_Components.empty())
+#endif
+    {
+        Display::DrawDebug(Position);
+    }
 }

@@ -12,9 +12,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(StoryRoyaleEngine)
-srEngine_policy()
-
 project(StoryRoyaleEngine)
+
+srEngine_policy()
 
 if(MSVC)
     set(SR_ENGINE_NO_CONSOLE_OPTIONS "/SUBSYSTEM:WINDOWS")

@@ -15,7 +15,7 @@
 static std::unordered_set<GameInstance *> destroyQueue;
 
 static void queueDestroyingInstances();
-static SDL_mutex* queueDestroyMutex = SDL_CreateMutex();;
+static SDL_mutex* queueDestroyMutex = SDL_CreateMutex();
 
 static std::chrono::duration<double> targetFrameTime;
 static const std::chrono::duration<double> zero = std::chrono::duration<float>::zero();
@@ -43,6 +43,7 @@ EngineClass::EngineClass()
 
 EngineClass::~EngineClass()
 {
+#if 0
     SDL_DetachThread(m_entryThread);
 
     if (Game::World::m_Current)
@@ -52,14 +53,13 @@ EngineClass::~EngineClass()
 
 
     queueDestroyingInstances();
-    
-    ThreadPool.detach_threads();
 
     IMG_Quit();
     TTF_Quit();
     SDL_Quit();
 
     thisengine = nullptr;
+#endif
 }
 
 int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev)
@@ -81,6 +81,7 @@ void WindowClass::setTargetFPS(unsigned short fps)
 
 void EngineClass::Run()
 {
+#if 0
     if (m_wasRun)
         return;
     m_wasRun = 1;
@@ -92,10 +93,12 @@ void EngineClass::Run()
     {
         loop();
     }
+#endif
 }
 
 void EngineClass::loop()
 {
+#if 0
     m_frame++;
     auto start = Timer::s_global_clock.now();
     TimeStamp dt = Timer::global_update();
@@ -128,6 +131,7 @@ void EngineClass::loop()
         auto sleeptime = targetFrameTime - frametime;
         std::this_thread::sleep_for(sleeptime);
     }
+#endif
 }
 
 bool EngineClass::pollWindowEvents()

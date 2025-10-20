@@ -1,15 +1,16 @@
 #include "Game/CameraControllers/DragControl.hpp"
 
-#include "Engine.hpp"
+#include "Base/Input.hpp"
+#include "Base/Display.hpp"
 
 use_namespace
 
-Action DragControl::default_action{ true, InputClass::mbRight };
+Action DragControl::default_action{ true, Input::mbRight };
 
 DragControl::DragControl(const Action& action): m_action(action)
 {
-    m_mouseConnection = Engine->Input.mouseMove.Connect(DragControl::mouseMoveCallback, this);
-    m_touchConnection = Engine->Input.fingerMove.Connect(DragControl::touchMotionCallback, this);
+    m_mouseConnection = Input::MouseMove.Connect(DragControl::mouseMoveCallback, this);
+    m_touchConnection = Input::FingerMove.Connect(DragControl::touchMotionCallback, this);
 }
 
 DragControl::~DragControl() {}
@@ -43,7 +44,7 @@ void DragControl::Update(TimeStamp delta)
 
 void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)
 {
-    if (event->state & SDL_BUTTON(InputClass::mbRight))
+    if (event->state & SDL_BUTTON(Input::mbRight))
     {
         self->m_lastmouseDelta.X += event->delta.X;
         self->m_lastmouseDelta.Y += event->delta.Y;
@@ -52,7 +53,7 @@ void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* e
 
 void DragControl::touchMotionCallback(void*, DragControl* self, const TouchFinger* event)
 {
-    Vector2f screen = Engine->DrawingContext.getScreenSize();
+    Vector2f screen = Display::GetSize();
 
     self->m_lastmouseDelta.X += event->Delta.X * screen.X;
     self->m_lastmouseDelta.Y += event->Delta.Y * screen.Y;

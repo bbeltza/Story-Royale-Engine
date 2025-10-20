@@ -10,6 +10,8 @@ class DrawingDevice;
 class InputClass;
 class EngineClass;
 
+extern "C" void __display_render();
+
 namespace Game
 {
     class GuiComponent;
@@ -74,5 +76,7 @@ namespace Game
         friend class ::EngineClass;
         friend class GuiObject;
         friend class GuiComponent;
+
+        friend void ::__display_render();
     };
 }

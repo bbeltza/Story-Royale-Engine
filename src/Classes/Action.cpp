@@ -1,16 +1,19 @@
 #include "Classes/Action.hpp"
+#include "Engine.hpp"
 
 Action::list* Action::s_actions = nullptr;
 ConnectionHandle Action::sc_mouse;
 ConnectionHandle Action::sc_keyboard;
 ConnectionHandle Action::sc_touch;
 
-void InputClass::setupActions()
+#if 0
+void setupActions()
 {
-	Action::sc_mouse = mouseButton.Connect(Action::sc_mouseHandle, NULL);
-	Action::sc_keyboard = keyEvent.Connect(Action::sc_keyboardHandle, NULL);
-	Action::sc_touch = fingerTouch.Connect(Action::sc_touchHandle, NULL);
+	Action::sc_mouse = Input::MouseButton.Connect(Action::sc_mouseHandle, NULL);
+	Action::sc_keyboard = Input::KeyEvent.Connect(Action::sc_keyboardHandle, NULL);
+	Action::sc_touch = Input::FingerTouch.Connect(Action::sc_touchHandle, NULL);
 }
+#endif
 
 void Action::push_self()
 {
@@ -33,7 +36,7 @@ Action::~Action()
 
 #define for_each for (auto act: *s_actions)
 #define sa_check if (!s_actions) return;
-#define act_frame act->press_frame = Engine->runtime_frame()
+#define act_frame act->press_frame = Runtime::CurrentFrame()
 
 void Action::sc_mouseHandle(void*, void*, const MouseButton* ev)
 {
@@ -41,7 +44,7 @@ void Action::sc_mouseHandle(void*, void*, const MouseButton* ev)
 
 	for_each
 	{
-		InputClass::MouseButton button = (InputClass::MouseButton)ev->button;
+		Input::Button button = (Input::Button)ev->button;
 		if (act->m_mousebuttons.count(button))
 		{
 			act->m_mousebuttons.at(button) = ev->pressed;

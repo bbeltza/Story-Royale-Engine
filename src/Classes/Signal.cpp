@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include "Classes/Signal.hpp"
+#include "Classes/Thread.hpp"
 #include "Engine.hpp"
 
 #pragma region SignalBase
@@ -16,7 +17,7 @@ void SignalBase::base_fire()
 	{
 		for (Connection* connection : connections)
 		{
-			Engine->ThreadPool.CreateImmediateThread(static_invoker, this, connection);
+			Threads::Create(static_invoker, this, connection);
 		}
 	}
 	else

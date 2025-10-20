@@ -1,6 +1,14 @@
 #pragma once
 #include <SDL.hpp>
 #include <standard>
+#define TEMPL template <class F, class... _args>
+
+class Thread;
+
+namespace Threads // Designed to replace ThreadPool
+{
+    TEMPL Thread& Create(F&& func, _args&&... args);
+}
 
 class Thread
 {
@@ -10,10 +18,14 @@ public:
 typedef void* (*Function)(...);
 static const uint8_t NUM_ARGS = 8;  
 public:
-/* Ready for some public methods */
+    void Join();
+    void Detach();
 private:
     Thread(Function func, ...);
     ~Thread();
+
+    friend class std::default_delete<Thread>;
+    TEMPL friend Thread& Threads::Create(F&& func, _args&&... args);
 
     SDL_Thread *m_handle;
 
@@ -24,3 +36,7 @@ private:
 
     static int invokethread_handler(Thread *self);
 };
+
+TEMPL Thread& Threads::Create(F&& func, _args&&... args) { return *new Thread((Thread::Function)func, args...); }
+
+#undef TEMPL

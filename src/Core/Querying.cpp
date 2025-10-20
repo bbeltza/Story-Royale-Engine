@@ -12,8 +12,9 @@
 static Game::GuiObject *queryObject = nullptr;
 static Game::Entity *queryEntity = nullptr;
 
-void InputClass::queryObjects()
+void queryObjects()
 {
+#if 0
     queryEntity = nullptr;
     queryObject = nullptr;
 
@@ -37,6 +38,7 @@ void InputClass::queryObjects()
     if (queryObject)
         return;
     queryEntity = Game::World::m_Current ? Game::World::m_Current->call_query(reinterpret_cast<float*>(&pt)) : 0;
+#endif
 }
 
 bool Game::GuiObject::isHovering() const
