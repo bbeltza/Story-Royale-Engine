@@ -26,7 +26,7 @@ struct DisplayText: public Game::GuiLayer
     GuiComponents::Text text;
 
     void postRender();
-    void Update(float delta) { rot += delta * 80; }
+    void Update(TimeStamp delta) { rot += delta * 80; }
 };
 
 RectF mouseRect(0, 0, 100, 50);
@@ -45,21 +45,21 @@ void DisplayText::postRender()
     else
         col = {255, 0, 0, 255}; // Red
 
-    Vector2f mPos = Engine->Input.getMouseWorldPosition();
+    Vector2f mPos = Input::MouseWorldPosition();
     mPos.PrintLn();
     mouseRect.Position.X = mPos.X;
     mouseRect.Position.Y = mPos.Y;
-    Engine->DrawingContext.DrawRectangleAtWorld(staticRect, {255, 255, 255, 255});
-    Engine->DrawingContext.DrawRectangleAtWorld(mouseRect, col);
-    Engine->DrawingContext.DrawDebug(mouseRect.getTopLeft());
-    Engine->DrawingContext.DrawDebug(mouseRect.getTopRight());
-    Engine->DrawingContext.DrawDebug(mouseRect.getBottomLeft());
-    Engine->DrawingContext.DrawDebug(mouseRect.getBottomRight());
+    Display::DrawRectangleAtWorld(staticRect, {255, 255, 255, 255});
+    Display::DrawRectangleAtWorld(mouseRect, col);
+    Display::DrawDebug(mouseRect.getTopLeft());
+    Display::DrawDebug(mouseRect.getTopRight());
+    Display::DrawDebug(mouseRect.getBottomLeft());
+    Display::DrawDebug(mouseRect.getBottomRight());
 }
 
 void Game::Initialize()
 {
     Game::GuiLayer::setCurrent<DisplayText>();
 
-    Engine->Input.mouseWheel.Connect(mousewheel, nullptr);
+    Input::MouseWheel.Connect(mousewheel, nullptr);
 }

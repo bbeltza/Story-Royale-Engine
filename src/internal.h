@@ -91,7 +91,6 @@ extern "C" {
 
 	extern void __update_viewport();
 	extern void __update_input();
-	extern void __update_classes();
 
 	extern void __destroy_queue();
 

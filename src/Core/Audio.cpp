@@ -24,7 +24,7 @@ void AudioData::Load()
     if (SDL_LoadWAV_RW(audio_rw, 0, &m_spec, &stream_data, &m_len))
     {
         m_file.setType(File::T_WAV);
-        m_data = (int8_t *)malloc(m_len);
+        m_data = (int8_t *)operator new(m_len);
         memcpy(m_data, stream_data, m_len);
         SDL_FreeWAV(stream_data);
         m_len /= AUDIO_BYTESIZE(m_spec.format);

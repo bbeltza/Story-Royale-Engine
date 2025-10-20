@@ -12,6 +12,7 @@ class DrawingDevice;
 class EngineClass;
 
 extern "C" void __display_render();
+extern "C" void __update_layer();
 
 namespace Game
 {
@@ -109,6 +110,7 @@ namespace Game
         friend class ::EngineClass;
 
         friend void ::__display_render();
+        friend void ::__update_layer();
     };
 }
 

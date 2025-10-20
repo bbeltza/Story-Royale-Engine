@@ -6,8 +6,20 @@
 
 #include "config.h"
 
-Color4 Game::GuiLayer::Foreground = {0, 0, 0, 0};
-Game::GuiLayer *Game::GuiLayer::m_Current = nullptr;
+#include "../internal.h"
+
+Game::GuiLayer::~GuiLayer()
+{
+    if (engine.current_guilayer == this)
+        engine.current_guilayer = nullptr;
+}
+
+void Game::GuiLayer::set(GuiLayer* layer)
+{
+    if (engine.current_guilayer)
+        delete currlayer;
+    engine.current_guilayer = layer;
+}
 
 Game::GuiContainer *Game::GuiContainer::s_targetParentContainer = nullptr;
 
@@ -187,4 +199,14 @@ Game::GuiObject::~GuiObject()
 {
     for (int i=0; i < 10; i++)
         if (tweens[i]) delete tweens[i];
+}
+
+void __update_layer()
+{
+    if (!engine.current_guilayer) return;
+    currlayer->m_absolute.Size.X = engine.viewport.w;
+    currlayer->m_absolute.Size.Y = engine.viewport.h;
+    currlayer->_processchildren();
+
+    currlayer->call_update(engine.last_dt);
 }

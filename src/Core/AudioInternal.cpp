@@ -7,6 +7,8 @@
 static std::unordered_map<std::string, std::unique_ptr<AudioData>> loaded_audios;
 static std::unordered_set<Audio*> audio_queue;
 
+static void audio_callback(void* data, int32_t* stream, int len);
+
 void __setup_audio_device()
 {
     loaded_audios.clear();
@@ -16,7 +18,7 @@ void __setup_audio_device()
     engine.audio_queue = &audio_queue;
 
     SDL_AudioSpec desiredspec{ 0 };
-    desiredspec.callback = (SDL_AudioCallback)NULL;
+    desiredspec.callback = (SDL_AudioCallback)audio_callback;
     desiredspec.userdata = &engine;
 
     desiredspec.channels = 2;
@@ -35,7 +37,7 @@ AudioData& Audio::Load(const char* path)
     {
         loaded_audios.emplace(path, new AudioData(path));
         audio = loaded_audios.at(path).get();
-        Threads::Create(threadedload, audio);
+        Threads::Create(threadedload, audio, &engine.audio_spec);
     }
     else
         audio = loaded_audios.at(path).get();

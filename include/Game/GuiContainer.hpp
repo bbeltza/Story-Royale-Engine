@@ -10,6 +10,7 @@ class DrawingDevice;
 class InputClass;
 class EngineClass;
 
+extern "C" void __update_layer();
 extern "C" void __display_render();
 
 namespace Game
@@ -71,12 +72,10 @@ namespace Game
 
         static GuiContainer* s_targetParentContainer;
 
-        friend class ::DrawingDevice;
-        friend class ::InputClass;
-        friend class ::EngineClass;
         friend class GuiObject;
         friend class GuiComponent;
 
         friend void ::__display_render();
+        friend void ::__update_layer();
     };
 }

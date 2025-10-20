@@ -65,7 +65,7 @@ public:
 	TimeStamp timePosition() const { return m_fsamplepos / (TimeStamp)m_data->freq(); }
 	TimeStamp timeLength() const { return m_data->len() / (TimeStamp)m_data->freq(); }
 
-	void Play(bool force);
+	void Play(bool force=false);
 	void FadeOut() { m_fadeout = true; }
 
 	TimeStamp Pause();

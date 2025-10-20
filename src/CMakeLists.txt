@@ -20,7 +20,7 @@ set(SYS_SOURCES
 "sleep.c"
 )
 
-set(NEWCORE
+set(CORE_SOURCES
 "InitEngine.c"
 "WindowCreation.c"
 "Audio.cpp"
@@ -33,9 +33,7 @@ set(NEWCORE
 "Runtime.cpp"
 "Window.cpp"
 "WindowData.cpp"
-)
 
-set(CORE_SOURCES
 "AudioFormat.c"
 "Physics.cpp"
 "Querying.cpp"
@@ -95,8 +93,6 @@ set(WINDOWS_SOURCES
 if(WIN32)
     set(SYSTEMDEP_SOURCES ${WINDOWS_SOURCES})
 endif()
-
-set_src(NewCore NEWCORE)
 
 set_src(Sys SYS_SOURCES)
 set_src(Core CORE_SOURCES)
