@@ -5,7 +5,7 @@
 struct _win_settings __setup_window_data()
 {
 	Vector2i start_res(GameSettings::StartResolution ? GameSettings::StartResolution : GameSettings::ScalingResolution * 2);
-	Flags32 win_flags(SDL_WINDOW_ALLOW_HIGHDPI);
+	Flags32 win_flags{};
 	Flags32 render_flags;
 	if (GameSettings::WindowOptions.Resizable)
 		win_flags.ToggleOn(SDL_WINDOW_RESIZABLE);

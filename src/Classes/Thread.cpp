@@ -16,8 +16,6 @@ int Thread::invokethread_handler(Thread *self)
         self->m_args[7]
     );
 
-    self->Detach();
-
     return 0;
 }
 

@@ -6,14 +6,12 @@ ConnectionHandle Action::sc_mouse;
 ConnectionHandle Action::sc_keyboard;
 ConnectionHandle Action::sc_touch;
 
-#if 0
-void setupActions()
+extern "C" void __init_actions()
 {
-	Action::sc_mouse = Input::MouseButton.Connect(Action::sc_mouseHandle, NULL);
-	Action::sc_keyboard = Input::KeyEvent.Connect(Action::sc_keyboardHandle, NULL);
-	Action::sc_touch = Input::FingerTouch.Connect(Action::sc_touchHandle, NULL);
+	Action::sc_mouse = Input::MouseButton.Connect(Action::sc_mouseHandle, NULL, false);
+	Action::sc_keyboard = Input::KeyEvent.Connect(Action::sc_keyboardHandle, NULL, false);
+	Action::sc_touch = Input::FingerTouch.Connect(Action::sc_touchHandle, NULL, false);
 }
-#endif
 
 void Action::push_self()
 {

@@ -36,7 +36,7 @@ void Window::SetFramerate(unsigned short FPS)
 
 void Window::Show() { SDL_ShowWindow(engine.sdl_windowhndl); }
 void Window::Hide() { SDL_HideWindow(engine.sdl_windowhndl); }
-void Window::Focus() { SDL_SetWindowInputFocus(engine.sdl_windowhndl); }
+void Window::Focus() { SDL_RaiseWindow(engine.sdl_windowhndl); }
 
 bool Window::IsFullScreen() { return SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_FULLSCREEN; }
 bool Window::IsHidden() { return SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN; }

@@ -26,7 +26,7 @@ EngineClass* const& Engine = thisengine;
 EngineClass::EngineClass()
 {
     thisengine = this;
-
+    SDL_GetError()
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 

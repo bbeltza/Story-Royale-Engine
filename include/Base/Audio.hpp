@@ -62,8 +62,8 @@ public:
 
 	bool IsPlaying() const;
 
-	TimeStamp timePosition() const { return m_fsamplepos / (TimeStamp)m_data->freq(); }
-	TimeStamp timeLength() const { return m_data->len() / (TimeStamp)m_data->freq(); }
+	TimeStamp timePosition() const { return static_cast<TimeStamp>(m_fsamplepos / m_data->freq()); }
+	TimeStamp timeLength() const { return static_cast<TimeStamp>(m_data->len() / (TimeStamp)m_data->freq()); }
 
 	void Play(bool force=false);
 	void FadeOut() { m_fadeout = true; }

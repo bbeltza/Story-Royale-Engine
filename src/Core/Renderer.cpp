@@ -54,8 +54,8 @@ void __update_viewport()
 	SDL_RenderGetViewport(engine.sdl_rendererhndl, &engine.viewport);
 	if (ow < engine.viewport.w || oh < engine.viewport.h)
 		reset_targets(); // Later on for resetting target textures
-	engine.center_x = engine.viewport.w / 2;
-	engine.center_y = engine.viewport.h / 2;
+	engine.center_x = engine.viewport.w / 2.0f;
+	engine.center_y = engine.viewport.h / 2.0f;
 }
 
 void __display_render()

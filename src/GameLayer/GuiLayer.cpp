@@ -21,6 +21,8 @@ void Game::GuiLayer::set(GuiLayer* layer)
     engine.current_guilayer = layer;
 }
 
+Game::GuiLayer* Game::GuiLayer::curr() { return currlayer; }
+
 Game::GuiContainer *Game::GuiContainer::s_targetParentContainer = nullptr;
 
 Game::GuiContainer::GuiContainer() : m_parent(s_targetParentContainer),
@@ -204,8 +206,8 @@ Game::GuiObject::~GuiObject()
 void __update_layer()
 {
     if (!engine.current_guilayer) return;
-    currlayer->m_absolute.Size.X = engine.viewport.w;
-    currlayer->m_absolute.Size.Y = engine.viewport.h;
+    currlayer->m_absolute.Size.X = static_cast<float>(engine.viewport.w);
+    currlayer->m_absolute.Size.Y = static_cast<float>(engine.viewport.h);
     currlayer->_processchildren();
 
     currlayer->call_update(engine.last_dt);

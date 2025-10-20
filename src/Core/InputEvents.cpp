@@ -6,7 +6,7 @@
 
 #include "Datatypes/Flags.hpp"
 
-Signal<const Key*> Input::KeyEvent;
+Signal<const Key*> Input::KeyEvent{NULL, false};
 Signal<const MouseButton*> Input::MouseButton;
 Signal<const MouseWheel*> Input::MouseWheel;
 Signal<const MouseMove*> Input::MouseMove;
@@ -85,8 +85,8 @@ void __update_input()
 
     {
         register float w, h;
-        w = engine.osize_x / engine.viewport.w;
-        h = engine.osize_y / engine.viewport.h;
+        w = static_cast<float>(engine.osize_x / engine.viewport.w);
+        h = static_cast<float>(engine.osize_y / engine.viewport.h);
         engine.real_scale = fminf(w, h);
     }
 

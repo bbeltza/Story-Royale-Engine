@@ -30,7 +30,10 @@ static void loop()
 
     // __query_objects();
     
+    __update_world();
     __update_layer();
+
+    Runtime::OnUpdate.Fire(engine.last_dt);
 
     __display_render();
 }

@@ -10,10 +10,9 @@
 
 #include "config.h"
 
-Vector2f Display::GetCenter()
-{
-    return { engine.center_x, engine.center_y };
-}
+Vector2f Display::GetCenter() { return { engine.center_x, engine.center_y }; }
+Vector2i Display::GetSize() { return { engine.viewport.w, engine.viewport.h }; }
+Vector2i Display::GetAbsoluteSize() { return { engine.osize_x, engine.osize_y }; }
 
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);

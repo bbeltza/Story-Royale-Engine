@@ -7,9 +7,11 @@
 
 #include "Base/Input.hpp"
 
+extern "C" void __init_actions();
+
 class Action
 {
-	friend class InputClass;
+	friend void __init_actions();
 	typedef std::list<Action*> list;
 	static list* s_actions;
 	static ConnectionHandle sc_mouse;

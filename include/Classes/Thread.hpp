@@ -24,7 +24,7 @@ private:
     Thread(Function func, ...);
     ~Thread();
 
-    friend class std::default_delete<Thread>;
+    friend struct std::default_delete<Thread>;
     TEMPL friend Thread& Threads::Create(F&& func, _args&&... args);
 
     SDL_Thread *m_handle;

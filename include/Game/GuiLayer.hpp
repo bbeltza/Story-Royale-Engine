@@ -12,7 +12,7 @@ namespace Game
         GuiLayer() {}
         ~GuiLayer();
     public:
-        template <class _layer=GuiLayer> static _layer* Current() { return dynamic_cast<_layer*>(m_Current); }
+        template <class _layer=GuiLayer> static _layer* Current() { return dynamic_cast<_layer*>(curr()); }
         Color4 Foreground = { 0, 0, 0, 0 };
         
         bool isGuiLayer() const override { return 1; }
@@ -25,5 +25,6 @@ namespace Game
         }
     private:
         static void set(GuiLayer* layer);
+        static GuiLayer* curr();
     };
 }

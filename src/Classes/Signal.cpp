@@ -13,11 +13,15 @@ void SignalBase::static_invoker(SignalBase* sig, Connection* connection)
 void SignalBase::base_fire()
 {
 	SDL_SemPost(get_semaphore);
+	critical = true;
 	if (multithreaded)
 	{
 		for (Connection* connection : connections)
 		{
-			Threads::Create(static_invoker, this, connection);
+			if (connection->multithreaded)
+				Threads::Create(static_invoker, this, connection);
+			else
+				invoke_func(connection);
 		}
 	}
 	else
@@ -26,6 +30,13 @@ void SignalBase::base_fire()
 		{
 			invoke_func(connection);
 		}
+	}
+	critical = false;
+
+	while (!delete_queue.empty())
+	{
+		delete delete_queue.front();
+		delete_queue.pop();
 	}
 }
 
@@ -38,9 +49,9 @@ SignalBase::~SignalBase()
 		delete connections.front();
 }
 
-Connection* SignalBase::base_connect(dummy_func_t _func, void* _userdata)
+Connection* SignalBase::base_connect(dummy_func_t _func, void* _userdata, bool _multithreaded)
 {
-	Connection* ret = new Connection{ this, _func, _userdata };
+	Connection* ret = new Connection{ this, _func, _userdata, _multithreaded };
 	return ret;
 }
 
@@ -50,7 +61,7 @@ void SignalBase::base_yield()
 }
 #pragma endregion
 #pragma region Connection
-Connection::Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata) : signal(_signal), func(_func), Userdata(_userdata)
+Connection::Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata, bool _multithreaded) : signal(_signal), func(_func), Userdata(_userdata), multithreaded(_multithreaded)
 {
 	signal->connections.push_back(this);
 }
@@ -67,11 +78,7 @@ ConnectionHandle::ConnectionHandle(ConnectionHandle&& moving) noexcept: connecti
 	moving.connection = nullptr;
 	connection->current_handle = this;
 }
-ConnectionHandle::~ConnectionHandle()
-{
-	if (connection)
-		delete connection;
-}
+ConnectionHandle::~ConnectionHandle() { Disconnect(); }
 ConnectionHandle& ConnectionHandle::operator=(Connection* ptr)
 {
 	connection = ptr;
@@ -81,6 +88,11 @@ ConnectionHandle& ConnectionHandle::operator=(Connection* ptr)
 void ConnectionHandle::Disconnect()
 {
 	if (connection)
-		delete connection;
+	{
+		if (connection->signal->critical)
+			connection->signal->delete_queue.push(connection);
+		else
+			delete connection;
+	}
 }
 #pragma endregion

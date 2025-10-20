@@ -83,6 +83,8 @@ extern "C" {
 	extern struct _win_settings __setup_window_data();
 	extern void __create_window(const struct _win_settings* _win);
 	extern void __setup_renderer(uint32_t flags);
+	
+	extern void __init_actions();
 
 	extern void __setup_audio_device();
 
