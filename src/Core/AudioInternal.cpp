@@ -98,11 +98,13 @@ static void audio_callback(void* data, int32_t* stream, int len)
 			else
 				audio->m_fadevol = 1;
 
-			for (int c = 0; c < channel_count; c++)
+			for (size_t c = 0; c < channel_count; c++)
 			{
-				int cc = audio->m_data->m_spec.channels > 1 ? c : 0;
-				Uint8* dst = (Uint8*)(stream + i + c);
-				SDL_MixAudioFormat(dst, (Uint8*)((int32_t*)audio->m_data->m_data + audio->m_samplepos * audio->m_data->m_spec.channels + cc), engine.audio_spec.format, byte_count, (int)(audio->Info.volume * audio->m_fadevol * 64));
+				size_t cc = audio->m_data->m_spec.channels > 1 ? c : 0;
+				uint8_t* dst = (Uint8*)(stream + i + c);
+				int32_t* src = reinterpret_cast<int32_t*>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels + cc;
+				int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
+				SDL_MixAudioFormat(dst, (Uint8*)src, engine.audio_spec.format, 4, vol);
 			}
 
 			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
@@ -133,7 +135,6 @@ void Audio::Play(bool force)
 {
 	if (!m_data->m_loaded)
 		m_data->Loaded.Wait();
-
 	SDL_LockAudioDevice(engine.audio_device);
 	if (force)
 		Stop();
