@@ -22,6 +22,7 @@ extern "C" {
 
 		intptr_t frame;
 		TimeStamp last_dt;
+		uint32_t target_ms;
 
 		// Instance data
 
@@ -94,8 +95,11 @@ extern "C" {
 	extern void __update_viewport();
 	extern void __update_input();
 
+	extern void __query_objects();
+
 	extern void __destroy_queue();
 
+	extern void __update_classes();
 	extern void __update_world();
 	extern void __update_layer();
 

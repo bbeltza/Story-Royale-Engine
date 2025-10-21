@@ -7,12 +7,15 @@
 #include "Datatypes/Color.hpp"
 #include "Datatypes/Vector.hpp"
 
+#include "internal_def.hh"
+
 class InputClass;
 class DrawingDevice;
 class EngineClass;
 
-extern "C" void __display_render();
-extern "C" void __update_world();
+__def_internal(__display_render)
+__def_internal(__update_world)
+__def_internal(__query_objects)
 
 namespace Game
 {
@@ -109,8 +112,9 @@ namespace Game
         friend class ::DrawingDevice;
         friend class ::EngineClass;
 
-        friend void ::__display_render();
-        friend void ::__update_world();
+        __friend_internal(__display_render)
+        __friend_internal(__update_world)
+        __friend_internal(__query_objects)
     };
 }
 

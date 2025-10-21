@@ -1,3 +1,5 @@
+#include "../internal.h"
+
 #include "Base/Input.hpp"
 
 #include "Game/World.hpp"
@@ -12,20 +14,19 @@
 static Game::GuiObject *queryObject = nullptr;
 static Game::Entity *queryEntity = nullptr;
 
-void queryObjects()
+void __query_objects()
 {
-#if 0
     queryEntity = nullptr;
     queryObject = nullptr;
 
-    SDL_FPoint pt{m_mouseState.x, m_mouseState.y};
+    SDL_FPoint pt{engine.mouse_x, engine.mouse_y};
 
-    if (mlast_touchid < 0) goto callsection;
-    int finger_count = SDL_GetNumTouchFingers(mlast_touchid);
+    if (engine.input_last_touchid < 0) goto callsection;
+    int finger_count = SDL_GetNumTouchFingers(engine.input_last_touchid);
     if (!finger_count) goto callsection;
     {
-        Vector2f screensize = m_Engine->DrawingContext.getScreenSize();
-        SDL_Finger* lastfinger = SDL_GetTouchFinger(mlast_touchid, finger_count - 1);
+        Vector2f screensize = { engine.viewport.w, engine.viewport.h };
+        SDL_Finger* lastfinger = SDL_GetTouchFinger(engine.input_last_touchid, finger_count - 1);
 
         pt.x = lastfinger->x * screensize.X;
         pt.y = lastfinger->y * screensize.Y;
@@ -34,11 +35,10 @@ void queryObjects()
 
     callsection:
 
-    queryObject = Game::GuiLayer::Current() ? Game::GuiLayer::Current()->_query(reinterpret_cast<float*>(&pt)) : 0;
+    queryObject = engine.current_guilayer ? currlayer->_query(reinterpret_cast<float*>(&pt)) : 0;
     if (queryObject)
         return;
-    queryEntity = Game::World::m_Current ? Game::World::m_Current->call_query(reinterpret_cast<float*>(&pt)) : 0;
-#endif
+    queryEntity = engine.current_world ? currworld->call_query(reinterpret_cast<float*>(&pt)) : 0;
 }
 
 bool Game::GuiObject::isHovering() const

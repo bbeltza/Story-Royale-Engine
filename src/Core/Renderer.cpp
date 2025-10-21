@@ -33,6 +33,8 @@ void __setup_renderer(uint32_t flags)
 	engine.target_textures = &target_textures;
 
 	SDL_TryLockMutex(engine.sdl_rendermutex);
+
+	Runtime::SetFramerate(GameSettings::TargetFPS);
 }
 
 void __update_viewport()
@@ -60,8 +62,12 @@ void __update_viewport()
 
 void __display_render()
 {
+	Runtime::OnUpdate.Fire(engine.last_dt);
+
+	// Load unloaded textures
 	Texture::load_textures();
 
+	// Unlock the renderer
 	SDL_UnlockMutex(engine.sdl_rendermutex);
 
 	// Render current world

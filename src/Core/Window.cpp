@@ -29,11 +29,6 @@ void Window::ToggleFullscreen()
     SDL_SetWindowFullscreen(engine.sdl_windowhndl, willbe_full * SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
-void Window::SetFramerate(unsigned short FPS)
-{
-
-}
-
 void Window::Show() { SDL_ShowWindow(engine.sdl_windowhndl); }
 void Window::Hide() { SDL_HideWindow(engine.sdl_windowhndl); }
 void Window::Focus() { SDL_RaiseWindow(engine.sdl_windowhndl); }

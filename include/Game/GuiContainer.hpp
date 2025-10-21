@@ -6,12 +6,15 @@
 #include "Datatypes/Rect.hpp"
 #include "Datatypes/TimeStamp.h"
 
+#include "internal_def.hh"
+
 class DrawingDevice;
 class InputClass;
 class EngineClass;
 
-extern "C" void __update_layer();
-extern "C" void __display_render();
+__def_internal(__update_layer)
+__def_internal(__display_render)
+__def_internal(__query_objects)
 
 namespace Game
 {
@@ -75,7 +78,8 @@ namespace Game
         friend class GuiObject;
         friend class GuiComponent;
 
-        friend void ::__display_render();
-        friend void ::__update_layer();
+        __friend_internal(__display_render)
+        __friend_internal(__update_layer)
+        __friend_internal(__query_objects)
     };
 }

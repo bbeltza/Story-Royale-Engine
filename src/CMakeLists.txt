@@ -23,6 +23,7 @@ set(SYS_SOURCES
 set(CORE_SOURCES
 "InitEngine.c"
 "WindowCreation.c"
+"Runtime.c"
 "Audio.cpp"
 "AudioInternal.cpp"
 "DestroyQueue.cpp"
@@ -102,3 +103,4 @@ set_src(GameLayer LAYER_SOURCES)
 set_src(SystemDependent SYSTEMDEP_SOURCES)
 
 add_library(StoryRoyaleEngine ${SOURCES})
+target_compile_definitions(StoryRoyaleEngine PRIVATE INTERNAL_DEF)

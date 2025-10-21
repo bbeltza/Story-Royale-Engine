@@ -4,6 +4,9 @@
 
 #include "Datatypes/TimeStamp.h"
 
+#include "internal_def.hh"
+__def_internal(__update_classes)
+
 class Timer
 {
     typedef std::unordered_set<Timer*> Set;
@@ -27,7 +30,6 @@ class Timer
     Signal<> Hit_Single{this};
     Signal<> Hit{this};
     private:
-    friend void __update_classes();
     void _hit();
 
     bool m_playing = false;
@@ -35,4 +37,6 @@ class Timer
     TimeStamp m_timestamp;
 
     static TimeStamp global_update();
+
+    __friend_internal(__update_classes)
 };

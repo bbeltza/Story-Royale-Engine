@@ -24,6 +24,8 @@ struct TweenInfo
     bool reverse = false;
 };
 
+extern "C" void __update_classes();
+
 class TweenBase
 {
     template <class T>

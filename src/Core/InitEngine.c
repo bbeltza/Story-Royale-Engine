@@ -43,6 +43,8 @@ void __end_engine()
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DetachThread(engine.entry_thread);
 
+    SDL_CloseAudioDevice(engine.audio_device);
+
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();

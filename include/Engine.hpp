@@ -12,6 +12,7 @@ namespace Runtime
     extern Signal<> AfterRender;
 
     intptr_t CurrentFrame();
+    void SetFramerate(unsigned short FPS);
 }
 
 #include "GameEntry.h"

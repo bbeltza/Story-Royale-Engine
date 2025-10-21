@@ -4,6 +4,7 @@
 
 #include "Classes/Timer.hpp"
 #include "Classes/Tween.hpp"
+#include "Classes/Thread.hpp"
 
 Signal<TimeStamp> Runtime::OnUpdate{ NULL, false };
 Signal<> Runtime::BeforeRender{ NULL, false };
@@ -11,35 +12,12 @@ Signal<> Runtime::AfterRender{ NULL, false };
 
 intptr_t Runtime::CurrentFrame() { return engine.frame; }
 
-static void loop();
+void Runtime::SetFramerate(unsigned short FPS) { engine.target_ms = 1000 / FPS; }
 
-void __run_engine()
+void __update_classes()
 {
-    while (__poll_events())
-        loop();
-}
+	Thread::queue_removing();
 
-static void loop()
-{
-    ++engine.frame;
-    __update_classes();
-    __update_viewport();
-    __update_input();
-    
-    __destroy_queue();
-
-    // __query_objects();
-    
-    __update_world();
-    __update_layer();
-
-    Runtime::OnUpdate.Fire(engine.last_dt);
-
-    __display_render();
-}
-
-static void __update_classes()
-{
-    engine.last_dt = Timer::global_update();
-    TweenBase::global_update(engine.last_dt);
+	engine.last_dt = Timer::global_update();
+	TweenBase::global_update(engine.last_dt);
 }
