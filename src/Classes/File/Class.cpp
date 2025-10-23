@@ -6,11 +6,7 @@
 
 File::Map* File::s_loaded = nullptr;
 
-File::File() : m_type(T_UNKNOWN)
-{
-    if (!s_loaded)
-        s_loaded = new Map;
-}
+File::File() : m_type(T_UNKNOWN) {}
 
 File::File(File &&moved)
     : m_type(moved.m_type), m_userdata(moved.m_userdata), m_filepath(moved.m_filepath)

@@ -74,5 +74,9 @@ private:
 
     static Map* s_loaded;
 
-    inline FileInfo& m_info() const { return (*s_loaded)[m_filepath]; }
+    inline FileInfo& m_info() const 
+    {
+        if (!s_loaded) s_loaded = new Map; 
+        return (*s_loaded)[m_filepath];
+    }
 };

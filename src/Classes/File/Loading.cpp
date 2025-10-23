@@ -72,7 +72,7 @@ void File::Load(const char *path)
     else
     {
         m_filepath = path;
-        if (s_loaded->count(path)) return;
+        if (s_loaded && s_loaded->count(path)) return;
 
         FILE* fstream = fopen(path, "rb");
         if (!fstream)

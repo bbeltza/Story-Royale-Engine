@@ -55,6 +55,7 @@ Thread::Thread(Function func, ...)
 }
 
 Thread::Thread(Thread&& moving) : _data(moving._data) { moving._data = nullptr; _data->thrd = this; }
+Thread& Thread::operator=(Thread&& moving) { _data = moving._data; _data->thrd = this; moving._data = nullptr; return *this; }
 
 Thread::~Thread() { if (_data) _data->thrd = nullptr; }
 

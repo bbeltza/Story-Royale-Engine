@@ -87,7 +87,7 @@ extern "C" {
 
 	extern void __initialize_engine();
 	extern void __run_engine();
-	extern void __end_engine();
+	extern void __end_engine(void);
 
 	extern struct _win_settings __setup_window_data();
 	extern void __create_window(const struct _win_settings* _win);

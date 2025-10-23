@@ -1,5 +1,4 @@
 #pragma once
-#define SDL_MAIN_HANDLED
 #define SDL_STATIC_LIB
 
 #include <SDL.h>

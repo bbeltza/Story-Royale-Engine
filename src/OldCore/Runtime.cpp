@@ -61,18 +61,6 @@ EngineClass::~EngineClass()
 #endif
 }
 
-int EngineClass::eventfilter(EngineClass *engine, SDL_Event *ev)
-{
-    #ifdef _WIN32
-    if (ev->type == SDL_WINDOWEVENT && ev->window.event == SDL_WINDOWEVENT_EXPOSED)
-    {
-        engine->loop();
-    }
-    #endif
-
-    return 1;
-}
-
 void WindowClass::setTargetFPS(unsigned short fps)
 {
     targetFrameTime = std::chrono::duration<TimeStamp>(fps > 0 ? (1.0 / fps) : 0);

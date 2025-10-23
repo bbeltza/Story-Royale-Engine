@@ -31,7 +31,7 @@ AudioData& Audio::Load(const char* path)
 	{
 		loaded->emplace(path, new AudioData(path));
 		audio = loaded->at(path).get();
-		Threads::Create(threadedload, audio, &engine.audio_spec);
+		audio->thrd = Threads::Create(threadedload, audio, &engine.audio_spec);
 	}
 	else
 		audio = loaded->at(path).get();

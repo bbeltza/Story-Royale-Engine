@@ -26,7 +26,10 @@ public:
     void Detach();
 
     ~Thread();
+    Thread() {}
     Thread(Thread&& moving);
+
+    Thread& operator=(Thread&& moving);
 
     struct data
     {
@@ -36,7 +39,7 @@ public:
         SDL_Thread* handle;
         Function func;
         void* args[NUM_ARGS];
-    } *_data;
+    } *_data = nullptr;
 private:
     Thread(Function func, ...);
     Thread(const Thread& other) = delete;

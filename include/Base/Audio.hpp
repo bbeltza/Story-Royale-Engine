@@ -1,6 +1,7 @@
 #pragma once
 #include "Classes/File.hpp"
 #include "Classes/Signal.hpp"
+#include "Classes/Thread.hpp"
 
 #include "Datatypes/TimeStamp.h"
 
@@ -26,6 +27,8 @@ class AudioData
 	void Unload();
 
 	File m_file;
+	
+	Thread thrd;
 
 	int8_t* m_data = nullptr;
 	uint32_t m_len;
