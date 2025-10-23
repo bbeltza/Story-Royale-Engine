@@ -15,7 +15,7 @@ TargetTexture::TargetTexture(): TargetTexture({engine.viewport.w, engine.viewpor
     has_customsize = false;
 }
 
-TargetTexture::TargetTexture(const Vector2i& size): has_customsize(true)
+TargetTexture::TargetTexture(const Vector2i& size)
 {
     assert(engine.target_textures && "Target texture must NOT be created statically and shouldn't be created before initializing");
 

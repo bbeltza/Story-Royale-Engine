@@ -1,4 +1,5 @@
 #include <Engine.hpp>
+#include <GUI.hpp> 
 
 Audio stereotest;
 Audio test1, test2, test3;

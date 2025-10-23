@@ -12,7 +12,7 @@ Signal<> Runtime::AfterRender{ NULL, false };
 
 intptr_t Runtime::CurrentFrame() { return engine.frame; }
 
-void Runtime::SetFramerate(unsigned short FPS) { engine.target_ms = 1000 / FPS; }
+void Runtime::SetFramerate(unsigned short FPS) { engine.target_ms = FPS ? 1000 / FPS : 0; }
 
 void __update_classes()
 {

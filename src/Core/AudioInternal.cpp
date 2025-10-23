@@ -6,21 +6,13 @@
 
 #include "Sys.h"
 
-static std::unordered_map<std::string, std::unique_ptr<AudioData>> loaded_audios;
-static std::unordered_set<Audio*> audio_queue;
-
-static void audio_callback(void* data, int32_t* stream, int len);
+#define loaded reinterpret_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
+#define aqueue reinterpret_cast<std::unordered_set<Audio*> *>(engine.audio_queue)
 
 void __setup_audio_device()
 {
-	loaded_audios.clear();
-	audio_queue.clear();
-
-	engine.loaded_audios = &loaded_audios;
-	engine.audio_queue = &audio_queue;
-
 	SDL_AudioSpec desiredspec{ 0 };
-	desiredspec.callback = (SDL_AudioCallback)audio_callback;
+	desiredspec.callback = (SDL_AudioCallback)__audio_callback;
 
 	desiredspec.channels = 2;
 	desiredspec.freq = 32000;
@@ -34,30 +26,33 @@ AudioData& Audio::Load(const char* path)
 {
 	AudioData* audio;
 
-	if (loaded_audios.count(path) == 0)
+	syslogln("%p", engine.loaded_audios);
+	if (loaded->count(path) == 0)
 	{
-		loaded_audios.emplace(path, new AudioData(path));
-		audio = loaded_audios.at(path).get();
+		loaded->emplace(path, new AudioData(path));
+		audio = loaded->at(path).get();
 		Threads::Create(threadedload, audio, &engine.audio_spec);
 	}
 	else
-		audio = loaded_audios.at(path).get();
+		audio = loaded->at(path).get();
 
 	return *audio;
 }
 
 void AudioData::Unload()
 {
-	for (auto& kv : loaded_audios)
+	for (auto& kv : *loaded)
 	{
 		if (kv.second.get() == this)
-			loaded_audios.erase(kv.first);
+			return (void)loaded->erase(kv.first);
 	}
+	abort();
 }
 
-
-static void audio_callback(void* data, int32_t* stream, int len)
+void __audio_callback(void* data, int32_t* stream, int len)
 {
+	if (!aqueue) return;
+
 	memset(stream, 0, len);
 
 	const uint8_t channel_count = engine.audio_spec.channels;
@@ -67,7 +62,7 @@ static void audio_callback(void* data, int32_t* stream, int len)
 
 	std::queue<Audio*> stop_queue;
 
-	for (Audio* audio : audio_queue)
+	for (Audio* audio : *aqueue)
 	{
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
@@ -144,7 +139,7 @@ void Audio::Play(bool force)
 		return;
 	}
 
-	audio_queue.insert(this);
+	aqueue->insert(this);
 
 	if (Info.fade_in > 0)
 	{
@@ -169,8 +164,8 @@ TimeStamp Audio::Pause()
 {
 	SDL_LockAudioDevice(engine.audio_device);
 
-	audio_queue.erase(this);
-	if (audio_queue.empty())
+	aqueue->erase(this);
+	if (aqueue->empty())
 		SDL_PauseAudioDevice(engine.audio_device, 1);
 
 	SDL_UnlockAudioDevice(engine.audio_device);
@@ -180,5 +175,5 @@ TimeStamp Audio::Pause()
 
 bool Audio::IsPlaying() const
 {
-	return audio_queue.count(const_cast<Audio*>(this)) != 0;
+	return aqueue->count(const_cast<Audio*>(this)) != 0;
 }

@@ -26,6 +26,7 @@ set(CORE_SOURCES
 "Runtime.c"
 "Audio.cpp"
 "AudioInternal.cpp"
+"Containers.cpp"
 "DestroyQueue.cpp"
 "Input.cpp"
 "InputEvents.cpp"
@@ -103,4 +104,4 @@ set_src(GameLayer LAYER_SOURCES)
 set_src(SystemDependent SYSTEMDEP_SOURCES)
 
 add_library(StoryRoyaleEngine ${SOURCES})
-target_compile_definitions(StoryRoyaleEngine PRIVATE INTERNAL_DEF)
+target_compile_definitions(StoryRoyaleEngine PRIVATE INTERNAL_DEF=1)

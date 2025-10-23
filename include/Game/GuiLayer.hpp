@@ -17,7 +17,7 @@ namespace Game
         
         bool isGuiLayer() const override { return 1; }
 
-        template <class _layer=GuiObject, class... _args> static inline _layer* setCurrent(_args... args)
+        template <class _layer=GuiLayer, class... _args> static inline _layer* setCurrent(_args... args)
         {
             auto new_layer = new _layer(args...);
             set(new_layer);

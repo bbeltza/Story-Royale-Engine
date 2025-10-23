@@ -39,6 +39,6 @@ private:
     void push_queue();
 
     void* texture = nullptr;
-    // Temporary SDL_Surface* used to then load the texture to the GPU. Texture creating may be multithreaded, but creating textures cannot be. So the image data is instead loaded into the CPU first.
+    // Temporary SDL_Surface* used to then load the texture to the GPU. Texture creating may be multithreaded, but creating textures may not be. So the image data is instead loaded into the CPU first.
     void* file_surface = nullptr;
 };

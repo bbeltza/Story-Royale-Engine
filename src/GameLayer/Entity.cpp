@@ -16,7 +16,7 @@ struct component_vtable
     void* query;
 };
 #define check_vtablefor(func)   auto vtable = component_vtable::get(component); \
-                                if (vtable->render == BASE_VTABLE->func) continue;
+                                if (vtable->func == BASE_VTABLE->func) continue;
 
 static const Game::Component BASE_COMP;
 static const component_vtable* BASE_VTABLE = component_vtable::get(&BASE_COMP);

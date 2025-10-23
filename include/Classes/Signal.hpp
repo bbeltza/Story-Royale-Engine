@@ -1,9 +1,11 @@
 #pragma once
 #include <standard>
+#include "CppUtils/sequence.hpp"
 
 #define _make_t template <typename... _args>
 
 class Connection;
+class ConnectionHandle;
 
 class SignalBase
 {
@@ -75,8 +77,8 @@ class Signal: public SignalBase
 	typedef void(*callable_t)(void*, void*, _args...);
 	std::tuple<_args...> ret_args;
 
-	template <size_t... _indices> void invoke(Connection* connection, std::index_sequence<_indices...>) { reinterpret_cast<callable_t>(connection->func)(this->Userdata, connection->Userdata, std::move(std::get<_indices>(ret_args))...); }
-	void invoke_func(Connection* connection) override { invoke(connection, std::make_index_sequence<sizeof...(_args)>{}); }
+	template <size_t... _indices> void invoke(Connection* connection, ut::sequence<_indices...>) { reinterpret_cast<callable_t>(connection->func)(this->Userdata, connection->Userdata, std::move(std::get<_indices>(ret_args))...); }
+	void invoke_func(Connection* connection) override { invoke(connection, typename ut::make_sequence<sizeof...(_args)>::type {}); }
 
 public:
 	Signal(void* Userdata=NULL, bool Multithreaded=true): SignalBase(Userdata, Multithreaded) {}

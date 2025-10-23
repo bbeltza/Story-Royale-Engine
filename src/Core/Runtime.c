@@ -24,5 +24,5 @@ static void loop()
 
     __display_render();
 
-    SDL_Delay(engine.target_ms);
+    if (engine.target_ms) SDL_Delay(engine.target_ms);
 }

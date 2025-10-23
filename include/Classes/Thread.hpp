@@ -27,11 +27,6 @@ public:
 
     ~Thread();
     Thread(Thread&& moving);
-private:
-    Thread(Function func, ...);
-    Thread(const Thread& other) = delete;
-
-    TEMPL friend Thread Threads::Create(F&& func, _args&&... args);
 
     struct data
     {
@@ -42,6 +37,11 @@ private:
         Function func;
         void* args[NUM_ARGS];
     } *_data;
+private:
+    Thread(Function func, ...);
+    Thread(const Thread& other) = delete;
+
+    TEMPL friend Thread Threads::Create(F&& func, _args&&... args);
 
     static int invokethread_handler(data *);
     static void queue_removing();

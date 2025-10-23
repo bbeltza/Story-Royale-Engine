@@ -22,9 +22,10 @@ void __query_objects()
     SDL_FPoint pt{engine.mouse_x, engine.mouse_y};
 
     if (engine.input_last_touchid < 0) goto callsection;
-    int finger_count = SDL_GetNumTouchFingers(engine.input_last_touchid);
-    if (!finger_count) goto callsection;
     {
+        int finger_count = SDL_GetNumTouchFingers(engine.input_last_touchid);
+        if (!finger_count) goto callsection;
+
         Vector2f screensize = { engine.viewport.w, engine.viewport.h };
         SDL_Finger* lastfinger = SDL_GetTouchFinger(engine.input_last_touchid, finger_count - 1);
 

@@ -31,10 +31,7 @@ extern "C" {
 
 		SDL_mutex* destroyqueue_mutex;
 
-		// Multithreading data
-
 		SDL_Thread* entry_thread;
-		void* allocated_threads; // Either an std::list or an std::unordered_map
 
 		// Window data
 
@@ -50,10 +47,6 @@ extern "C" {
 		int osize_x, osize_y;
 		float center_x, center_y;
 
-		void* loaded_textures;
-		void* loadedfonts; // Both std::unordered_map
-
-		void* target_textures; // An std::vector
 		size_t targetptr;
 
 		unsigned int integer_scale;
@@ -64,15 +57,30 @@ extern "C" {
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
-		void* loaded_audios; // An std::unordered_map of unique pointers to AudioData structures
-		void* audio_queue; // An std::unordered_set of Audio instances
-
 		// Input data
 
 		float mouse_x, mouse_y;
 		uint32_t mouse_press;
 		SDL_TouchID input_last_touchid;
 		uint8_t keyboard_state[SDL_NUM_SCANCODES];
+
+		// C++ containers
+
+		// Multithreading
+
+		void* allocated_threads; // std::list
+		void* finished_threads; // std::queue of thread data
+		// void* threadid_map; // std::unordered_map to map thread ids to threads
+
+			// Audio
+
+		void* loaded_audios; // An std::unordered_map of unique pointers to AudioData structures
+		void* audio_queue; // An std::unordered_set of Audio instances
+
+			// 
+
+		void* target_textures; // An std::vector
+		void* loaded_textures;
 	};
 
 	extern struct _engine_data __engine_data;
@@ -85,6 +93,7 @@ extern "C" {
 	extern void __create_window(const struct _win_settings* _win);
 	extern void __setup_renderer(uint32_t flags);
 	
+	extern void __init_containers();
 	extern void __init_actions();
 
 	extern void __setup_audio_device();
@@ -105,6 +114,7 @@ extern "C" {
 
 	extern void __display_render();
 
+	extern void __clean_containers();
 #ifdef __cplusplus
 }
 

@@ -9,13 +9,14 @@
 
 #include "Classes/Texture.hpp"
 
-static std::vector<SDL_Texture*> target_textures{ NULL };
+#define t_textures reinterpret_cast<std::vector<SDL_Texture*>*>(engine.target_textures)
+
 static void reset_targets()
 {
-	while (target_textures.size() > 1)
+	while (t_textures->size() > 1)
 	{
-		SDL_DestroyTexture(target_textures.back());
-		target_textures.pop_back();
+		SDL_DestroyTexture(t_textures->back());
+		t_textures->pop_back();
 	}
 }
 
@@ -29,8 +30,6 @@ void __setup_renderer(uint32_t flags)
 		uint64_t WHITE = UINT64_MAX;
 		SDL_UpdateTexture(engine.sdl_rectTex, NULL, &WHITE, 4);
 	}
-
-	engine.target_textures = &target_textures;
 
 	SDL_TryLockMutex(engine.sdl_rendermutex);
 

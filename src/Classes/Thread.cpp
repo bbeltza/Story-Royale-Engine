@@ -71,6 +71,7 @@ void Thread::Join()
     assert(_data);
     assert(_data->handle);
     SDL_WaitThread(_data->handle, NULL);
+    _data->handle = nullptr;
 }
 
 void Thread::Detach()

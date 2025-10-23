@@ -8,10 +8,16 @@
 
 #define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
 
+#if INTERNAL_DEF
+extern void __audio_callback(void*, int32_t*, int);
+#define friend_callback friend void __audio_callback(void*, int32_t*, int);
+#else
+#define friend_callback
+#endif
+
 class AudioData
 {
 	friend class Audio;
-	friend void audio_callback(void*, int32_t*, int);
 
 	AudioData() = delete;
 	AudioData(const char* path);
@@ -36,6 +42,8 @@ public:
 
 	inline uint32_t len() const { return m_len; }
 	inline uint32_t freq() const { return m_spec.freq; }
+
+	friend_callback
 };
 
 struct AudioInfo
@@ -81,5 +89,5 @@ private:
 	bool m_fadein = false, m_fadeout = false;
 	float m_fadevol = 1;
 
-	friend void audio_callback(void*, int32_t*, int);
+	friend_callback
 };

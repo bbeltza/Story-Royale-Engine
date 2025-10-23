@@ -23,6 +23,7 @@ void __initialize_engine()
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 
+    __init_containers();
 
     const struct _win_settings _win = __setup_window_data();
 
@@ -37,13 +38,15 @@ void __initialize_engine()
 
 void __end_engine()
 {
-    __destroy_queue();
+    SDL_DestroyWindow(engine.sdl_windowhndl);
+    SDL_CloseAudioDevice(engine.audio_device);
+
+    __clean_containers();
 
     SDL_DestroyMutex(engine.sdl_rendermutex);
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DetachThread(engine.entry_thread);
-
-    SDL_CloseAudioDevice(engine.audio_device);
+    SDL_DestroyTexture(engine.sdl_rectTex);
 
     TTF_Quit();
     IMG_Quit();

@@ -7,11 +7,11 @@
 #include "Datatypes/Flags.hpp"
 
 Signal<const Key*> Input::KeyEvent{NULL, false};
+Signal<const TouchFinger*> Input::FingerMove{ NULL, false };
+Signal<const MouseMove*> Input::MouseMove{NULL, false};
 Signal<const MouseButton*> Input::MouseButton;
 Signal<const MouseWheel*> Input::MouseWheel;
-Signal<const MouseMove*> Input::MouseMove;
 Signal<const TouchFinger*> Input::FingerTouch;
-Signal<const TouchFinger*> Input::FingerMove;
 
 #define processEventQueue(queue, ev) while (!queue.empty()) { ev.Fire(&queue.back()); queue.pop_back(); }
 
