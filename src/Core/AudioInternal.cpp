@@ -26,7 +26,6 @@ AudioData& Audio::Load(const char* path)
 {
 	AudioData* audio;
 
-	syslogln("%p", engine.loaded_audios);
 	if (loaded->count(path) == 0)
 	{
 		loaded->emplace(path, new AudioData(path));
@@ -49,7 +48,7 @@ void AudioData::Unload()
 	abort();
 }
 
-void __audio_callback(void* data, int32_t* stream, int len)
+void __audio_callback(void* data, uint8_t* stream, int len)
 {
 	if (!aqueue) return;
 
@@ -58,7 +57,7 @@ void __audio_callback(void* data, int32_t* stream, int len)
 	const uint8_t channel_count = engine.audio_spec.channels;
 
 	const uint32_t byte_count = AUDIO_BYTESIZE(engine.audio_spec.format);
-	const size_t sample_len = len / byte_count;
+	const size_t sample_len = static_cast<size_t>(len / byte_count);
 
 	std::queue<Audio*> stop_queue;
 
@@ -67,7 +66,7 @@ void __audio_callback(void* data, int32_t* stream, int len)
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
 
-		for (size_t i = 0; i < sample_len; i += audio->m_data->m_spec.channels)
+		for (size_t i = 0; i <= sample_len - 2; i += audio->m_data->m_spec.channels)
 		{
 			double a = audio->m_fsamplepos - audio->m_samplepos;
 
@@ -96,10 +95,11 @@ void __audio_callback(void* data, int32_t* stream, int len)
 			for (size_t c = 0; c < channel_count; c++)
 			{
 				size_t cc = audio->m_data->m_spec.channels > 1 ? c : 0;
-				uint8_t* dst = (Uint8*)(stream + i + c);
+				uint8_t* dst = stream + (i + c) * byte_count;
 				int32_t* src = reinterpret_cast<int32_t*>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels + cc;
 				int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
 				SDL_MixAudioFormat(dst, (Uint8*)src, engine.audio_spec.format, 4, vol);
+				
 			}
 
 			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;

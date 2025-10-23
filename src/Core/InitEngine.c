@@ -6,6 +6,8 @@
 
 #include "GameEntry.h"
 
+#include <stdlib.h>
+
 static inline void __setup_engine_data()
 {
     engine.input_last_touchid = -1;
@@ -26,14 +28,16 @@ void __initialize_engine()
     __init_containers();
 
     const struct _win_settings _win = __setup_window_data();
-
     __setup_audio_device();
-
     __setup_engine_data();
 
     __create_window(&_win);
     __setup_renderer(_win.renderflags);
     __init_actions();
+
+    atexit(__end_engine);
+
+    syslogln("%p", &engine.audio_device);
 }
 
 void __end_engine()

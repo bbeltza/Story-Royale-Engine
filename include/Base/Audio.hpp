@@ -10,8 +10,8 @@
 #define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
 
 #if INTERNAL_DEF
-extern void __audio_callback(void*, int32_t*, int);
-#define friend_callback friend void __audio_callback(void*, int32_t*, int);
+extern void __audio_callback(void*, uint8_t*, int);
+#define friend_callback friend void __audio_callback(void*, uint8_t*, int);
 #else
 #define friend_callback
 #endif

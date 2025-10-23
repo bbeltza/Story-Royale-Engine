@@ -69,14 +69,14 @@ Thread::data::~data()
 
 void Thread::Join()
 {
-    assert(_data);
-    assert(_data->handle);
-    SDL_WaitThread(_data->handle, NULL);
-    _data->handle = nullptr;
+    if (_data && _data->handle)
+    {
+        SDL_WaitThread(_data->handle, NULL);
+        _data->handle = nullptr;
+    }
 }
 
 void Thread::Detach()
 {
-    assert(_data);
     threads_list.remove(*_data);
 }

@@ -52,6 +52,7 @@ AudioData::AudioData(const char *path): Loaded(this)
 
 AudioData::~AudioData()
 {
+    thrd.Detach();
     if (m_data)
         free((void *)m_data);
 }
@@ -63,7 +64,6 @@ void Audio::threadedload(AudioData* audio, SDL_AudioSpec* devspec)
 
     audio->m_spec.format = devspec->format;
     audio->m_loaded = true;
-
 
     audio->Loaded.Fire();
 }
