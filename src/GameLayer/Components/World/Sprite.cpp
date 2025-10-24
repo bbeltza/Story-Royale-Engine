@@ -27,5 +27,5 @@ void Components::Sprite::Render(Game::Entity* entity)
     render_rect.Size *= Scale;
     render_rect.Position += Offset;
 
-    Display::DrawTexture(texture, render_rect);
+    Display::DrawTexture(texture, render_rect, Modulate);
 }
