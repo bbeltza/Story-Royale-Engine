@@ -20,36 +20,21 @@ void Thread::queue_removing()
 
 int Thread::invokethread_handler(data *_data)
 {
-    _data->func(
-        _data->args[0],
-        _data->args[1],
-        _data->args[2],
-        _data->args[3],
-        _data->args[4],
-        _data->args[5],
-        _data->args[6],
-        _data->args[7]
-    );
+    _data->func(_data->data);
 
     to_remove.push(_data);
 
     return 0;
 }
 
-Thread::Thread(Function func, ...)
+#include <thread>
+Thread::Thread(Function func, void* userdata)
 {
     threads_list.emplace_back();
     _data = &threads_list.back();
     _data->func = func;
     _data->thrd = this;
-
-    va_list va;
-    va_start(va, func);
-
-    for (int i = 0; i < NUM_ARGS; i++)
-        _data->args[i] = va_arg(va, void*);
-
-    va_end(va);
+    _data->data = userdata;
 
     _data->handle = SDL_CreateThread((SDL_ThreadFunction)invokethread_handler, NULL, _data);
 }
