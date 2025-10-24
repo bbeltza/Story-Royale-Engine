@@ -6,6 +6,8 @@
 
 #include "Sys.h"
 
+extern "C" int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, int len_input);
+
 #define loaded reinterpret_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
 #define aqueue reinterpret_cast<std::unordered_set<Audio*> *>(engine.audio_queue)
 
@@ -22,6 +24,17 @@ void __setup_audio_device()
 	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, 0);
 }
 
+void Audio::threadedload(AudioData* audio)
+{
+    audio->Load();
+    ConvertAudioFormat(audio->m_spec.format, engine.audio_spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
+
+    audio->m_spec.format = engine.audio_spec.format;
+    audio->m_loaded = true;
+
+    audio->Loaded.Fire();
+}
+
 AudioData& Audio::Load(const char* path)
 {
 	AudioData* audio;
@@ -30,7 +43,7 @@ AudioData& Audio::Load(const char* path)
 	{
 		loaded->emplace(path, new AudioData(path));
 		audio = loaded->at(path).get();
-		audio->thrd = Threads::Create(threadedload, audio, &engine.audio_spec);
+		audio->thrd = Threads::Create(threadedload, audio);
 	}
 	else
 		audio = loaded->at(path).get();
@@ -146,6 +159,7 @@ void Audio::Play(bool force)
 		m_fadein = true;
 		m_fadevol = 0;
 	}
+	m_fadeout = false;
 
 	SDL_PauseAudioDevice(engine.audio_device, 0);
 

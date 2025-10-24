@@ -1,7 +1,9 @@
 #pragma once
 #include <SDL.hpp>
 #include <standard>
-#define TEMPL template <class F, class... _args>
+#define TEMPL template <class _Fn, class... _Args>
+
+#include "Datatypes/TimeStamp.h"
 
 #include "internal_def.hh"
 
@@ -9,17 +11,14 @@
 
 class Thread;
 
-template <typename F, typename _tupl>
-struct __threaduserdata
-{
-    template <typename... _args> __threaduserdata(F&& func, _args&&... args) : f(func), tuple(args...) {}
-    F&& f;
-    _tupl tuple;
-};
-
 namespace Threads // Designed to replace ThreadPool
 {
-    TEMPL Thread Create(F&& func, _args&&... args);
+    TEMPL Thread Create(_Fn&& _Fx, _Args&&... _Ax) {
+        return Delay(
+        0,
+        std::forward<_Fn>(_Fx),
+        std::forward<_Args>(_Ax)...); }
+    TEMPL Thread Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax);
 }
 
 __def_internal(__update_classes)
@@ -49,19 +48,19 @@ public:
         SDL_Thread* handle;
         Function func;
         void* data;
+        TimeStamp delay;
     } *_data = nullptr;
 private:
     Thread(const Thread& other) = delete;
-    Thread(Function func, void* userdata);
+    Thread(Function func, void* userdata, TimeStamp delay);
 
-    template <typename F, typename _tupl, size_t... _sizes >
-    static Function get_invoke(ut::sequence<_sizes...>) { return (Function)&_invoke<F, _tupl, _sizes...>; }
-    template <typename F, typename _tupl, size_t... _sizes>
+    template <typename _Tuple, size_t... _Indices>
+    static Function get_invoke(ut::sequence<_Indices...>) { return (Function)&_invoke<_Tuple, _Indices...>; }
+    template <typename _Tuple, size_t... _Indices>
     static void _invoke(void* _rawdata)
     {
-        syslogln("%p", _rawdata);
-        auto _data = reinterpret_cast<__threaduserdata<F, _tupl>*>(_rawdata);
-        _data->f(std::move(std::get<_sizes>(_data->tuple))...);
+        auto _data = static_cast<_Tuple*>(_rawdata);
+        std::invoke(std::move(std::get<_Indices>(*_data))...);
         delete _data;
     }
 
@@ -70,19 +69,18 @@ private:
     static std::list<data> threads_list;
     static std::queue<data*> to_remove;
 
-    TEMPL friend Thread Threads::Create(F&& func, _args&&... args);
+    TEMPL friend Thread Threads::Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax);
     __friend_internal(__update_classes)
 };
 
-TEMPL Thread Threads::Create(F&& func, _args&&... args)
+TEMPL Thread Threads::Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax)
 {
-    using _tupl = std::tuple<_args...>;
+    using _Tuple = std::tuple<std::decay_t<_Fn>, std::decay_t<_Args>...>;
 
-    auto data = new __threaduserdata<F, _tupl>(func, args...);
-    syslogln("%p %p", func, data);
-    auto invokefunc = Thread::get_invoke<F, _tupl>(typename ut::make_sequence<sizeof...(_args)>::type());
+    auto tuple = new _Tuple(std::forward<_Fn>(_Fx), std::forward<_Args>(_Ax)...);
+    auto invokefunc = Thread::get_invoke<_Tuple>(typename ut::make_sequence<1 + sizeof...(_Args)>::type());
 
-    return Thread(invokefunc, data);
+    return Thread(invokefunc, tuple, Duration);
 }
 
 #undef TEMPL

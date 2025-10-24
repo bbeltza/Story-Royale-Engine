@@ -83,7 +83,7 @@ public:
 	TimeStamp Stop();
 
 private:
-	static void threadedload(AudioData* audio, SDL_AudioSpec* devspec);
+	static void threadedload(AudioData* audio);
 	AudioData* m_data = nullptr;
 
 	double m_fsamplepos = 0;  // The position of the sample with subsample precition

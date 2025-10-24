@@ -8,8 +8,6 @@
 
 #include "utils.h"
 
-extern "C" int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, int len_input);
-
 void AudioData::Load()
 {
     const int f_size = (int)m_file.getSize();
@@ -55,15 +53,4 @@ AudioData::~AudioData()
     thrd.Detach();
     if (m_data)
         free((void *)m_data);
-}
-
-void Audio::threadedload(AudioData* audio, SDL_AudioSpec* devspec)
-{
-    audio->Load();
-    ConvertAudioFormat(audio->m_spec.format, devspec->format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
-
-    audio->m_spec.format = devspec->format;
-    audio->m_loaded = true;
-
-    audio->Loaded.Fire();
 }

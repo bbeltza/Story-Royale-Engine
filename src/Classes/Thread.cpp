@@ -20,6 +20,8 @@ void Thread::queue_removing()
 
 int Thread::invokethread_handler(data *_data)
 {
+    if (_data->delay) sysleeps(static_cast<float>(_data->delay));
+
     _data->func(_data->data);
 
     to_remove.push(_data);
@@ -28,13 +30,14 @@ int Thread::invokethread_handler(data *_data)
 }
 
 #include <thread>
-Thread::Thread(Function func, void* userdata)
+Thread::Thread(Function func, void* userdata, TimeStamp delay)
 {
     threads_list.emplace_back();
     _data = &threads_list.back();
     _data->func = func;
     _data->thrd = this;
     _data->data = userdata;
+    _data->delay = delay;
 
     _data->handle = SDL_CreateThread((SDL_ThreadFunction)invokethread_handler, NULL, _data);
 }

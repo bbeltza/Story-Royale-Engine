@@ -14,5 +14,4 @@ void Game::Initialize()
 {
     Thread& thrd = Threads::Create(testmyself, 3, 2.0f);
     syslogln("Thread has been finished");
-
 }
