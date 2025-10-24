@@ -6,8 +6,22 @@
 
 #include "config.h"
 
-Color4 Game::GuiLayer::Foreground = {0, 0, 0, 0};
-Game::GuiLayer *Game::GuiLayer::m_Current = nullptr;
+#include "../internal.h"
+
+Game::GuiLayer::~GuiLayer()
+{
+    if (engine.current_guilayer == this)
+        engine.current_guilayer = nullptr;
+}
+
+void Game::GuiLayer::set(GuiLayer* layer)
+{
+    if (engine.current_guilayer)
+        currlayer->Destroy();
+    engine.current_guilayer = layer;
+}
+
+Game::GuiLayer* Game::GuiLayer::curr() { return currlayer; }
 
 Game::GuiContainer *Game::GuiContainer::s_targetParentContainer = nullptr;
 
@@ -83,10 +97,7 @@ void Game::GuiContainer::call_update(TimeStamp dt)
 
     for (auto obj : m_children)
     {
-        if (obj->visible)
-            obj->call_update(dt);
-        else
-            obj->Updated.Fire(dt);
+        obj->call_update(dt);
     }
     Updated.Fire(dt);
 }
@@ -187,4 +198,14 @@ Game::GuiObject::~GuiObject()
 {
     for (int i=0; i < 10; i++)
         if (tweens[i]) delete tweens[i];
+}
+
+void __update_layer()
+{
+    if (!engine.current_guilayer) return;
+    currlayer->m_absolute.Size.X = static_cast<float>(engine.viewport.w);
+    currlayer->m_absolute.Size.Y = static_cast<float>(engine.viewport.h);
+    currlayer->_processchildren();
+
+    currlayer->call_update(engine.last_dt);
 }

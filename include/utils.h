@@ -8,7 +8,7 @@
 #define ut_min(x, y) ( x > y ? y : x)
 #define ut_sign(x) (x < 0 ? -1 : x > 0 ? 1 : 0)
 
-/* 
+/*
 Creates a null terminated array, of anything, takes any argument to put into an array in which will add NULL at the end, to be able to iterate without having to speficy a size.
 
 It's discouraged to use it with numbers as numbers can be NULL too

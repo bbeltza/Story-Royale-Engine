@@ -1,6 +1,10 @@
 #pragma once
 
+#ifdef __cplusplus
 #define init extern "C" void Initialize()
+#else
+#define init void Initialize();
+#endif
 
 init;
 

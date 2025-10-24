@@ -5,9 +5,13 @@
 #include "Events/Mouse.hpp"
 #include "Events/Touch.hpp"
 
+#include "Base/Input.hpp"
+
+extern "C" void __init_actions();
+
 class Action
 {
-	friend class InputClass;
+	friend void __init_actions();
 	typedef std::list<Action*> list;
 	static list* s_actions;
 	static ConnectionHandle sc_mouse;
@@ -28,13 +32,13 @@ public:
 
 	inline void AddInput(SDL_KeyCode keyCode) { m_keycodes[keyCode] = false; }
 	inline void AddInput(SDL_Scancode scanCode) { m_scancodes[scanCode] = false; }
-	inline void AddInput(InputClass::MouseButton mouseButton) { m_mousebuttons[mouseButton] = false; }
+	inline void AddInput(Input::Button mouseButton) { m_mousebuttons[mouseButton] = false; }
 
 	inline bool isPressed() const {
 		return (isKeyCodePressed() || isScanCodePressed() || isMousePressed() || isTouchPressed());
 	}
 	inline bool isJustPressed() const {
-		return press_frame == Engine->runtime_frame();
+		return press_frame == Runtime::CurrentFrame();
 	}
 
 private:
@@ -43,9 +47,9 @@ private:
 
 	std::unordered_map<SDL_KeyCode, bool> m_keycodes;
 	std::unordered_map<SDL_Scancode, bool> m_scancodes;
-	std::unordered_map<InputClass::MouseButton, bool> m_mousebuttons;
+	std::unordered_map<Input::Button, bool> m_mousebuttons;
 
-	inline bool isTouchPressed() const { if (!enable_touch) return false; return Engine->Input.getFingersPressed() != 0; }
+	inline bool isTouchPressed() const { if (!enable_touch) return false; return Input::GetFingersPressed() != 0; }
 	inline bool isKeyCodePressed() const { for (auto& kv : m_keycodes) if (kv.second) return true; return false; }
 	inline bool isScanCodePressed() const { for (auto& kv: m_scancodes) if (kv.second) return true; return false; }
 	inline bool isMousePressed() const { for (auto& kv: m_mousebuttons) if (kv.second) return true; return false; }

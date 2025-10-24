@@ -1,36 +1,41 @@
+#include "../internal.h"
+
 #include "Base/Input.hpp"
 #include "Game/World.hpp"
 
+#include "Datatypes/Flags.hpp"
 
-// Input functions
-
-bool InputClass::isKeyPressed(SDL_KeyCode keycode) const
+bool Input::KeyPressed(SDL_KeyCode keycode)
 {
-    return m_keyboardState[keycode & ~(1 << 30)].Has(2);
+    return flags_kbstate[keycode & ~(1 << 30)].Has(2);
 }
 
-bool InputClass::isKeyPressed(SDL_Scancode scancode) const
+bool Input::KeyPressed(SDL_Scancode scancode)
 {
-    return m_keyboardState[scancode].Has(1);
+    return flags_kbstate[scancode].Has(1);
 }
 
-bool InputClass::isMouseButtonPressed(MouseButton button) const
+bool Input::MouseButtonPressed(Button button)
 {
-    if (button == mbANY) return m_mouseState.state.Has(mbANY);
-    return m_mouseState.state.Has(SDL_BUTTON(button));
+    if (button == mbANY)
+        return flags_mousepress.Has(mbANY);
+    return flags_mousepress.Has(SDL_BUTTON(button));
 }
 
-int InputClass::getFingersPressed(SDL_TouchID touchid) const
+int Input::GetFingersPressed(SDL_TouchID touchid)
 {
-    if (mlast_touchid < 0) return false;
-    if (touchid < 0) touchid = mlast_touchid;
+    if (engine.input_last_touchid < 0) return false;
+    if (touchid < 0) touchid = engine.input_last_touchid;
 
     return SDL_GetNumTouchFingers(touchid);
 }
 
-const Vector2f InputClass::getMouseWorldPosition() const
+Vector2f Input::MouseScreenPosition()
 {
-    if (!Game::World::m_Current)
-        return Game::World::screenToWorld(m_mouseState.x, m_mouseState.y);
-    return Game::World::m_Current->screenToWorldSpace(m_mouseState.x, m_mouseState.y);
+    return { engine.mouse_x, engine.mouse_y };
+}
+
+Vector2f Input::MouseWorldPosition()
+{
+    return Game::World::screenToWorld(engine.mouse_x, engine.mouse_y, Game::World::currentCamera());
 }

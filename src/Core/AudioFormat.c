@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <SDL.h>
 
@@ -32,8 +33,9 @@ int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t
 
     float fac = out_bitsize / (float)in_bitsize;
     int len_output = (int)(len_input * fac);
-    
+
     int8_t* out_data = malloc(len_output);
+    assert(out_data);
 
     switch (in_bitsize)
     {

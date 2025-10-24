@@ -24,11 +24,13 @@ struct TweenInfo
     bool reverse = false;
 };
 
+extern "C" void __update_classes();
+
 class TweenBase
 {
     template <class T>
     friend class Tween;
-    friend EngineClass;
+    friend void __update_classes();
 
     TweenBase(const TweenInfo& info);
 public:

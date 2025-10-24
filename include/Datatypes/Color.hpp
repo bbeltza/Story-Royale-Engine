@@ -3,6 +3,8 @@
 #include <standard>
 #include "syslog.h"
 
+struct Color4;
+
 struct Color3
 {
 	Color3() = default;
@@ -36,13 +38,15 @@ struct Color3
 	inline void operator-=(const Color3& other) { Sub(other); }
 	inline void operator*=(const Color3& other) { Mul(other); }
 
+	inline operator Color4() const;
+
 	static const Color3 WHITE, BLACK;
 };
 
 struct Color4
 {
 	Color4(): r(0), g(0), b(0), a(255) {};
-	Color4(uint8_t R, uint8_t G, uint8_t B, uint8_t A) : r(R), g(G), b(B), a(A) {}
+	Color4(uint8_t R, uint8_t G, uint8_t B, uint8_t A=255) : r(R), g(G), b(B), a(A) {}
 	Color4(uint8_t RGB, uint8_t A=255) : r(RGB), g(RGB), b(RGB), a(A) {}
 	Color4(const Color4& other) : r(other.r), g(other.g), b(other.b), a(other.a) {}
 
@@ -74,7 +78,11 @@ struct Color4
 	inline void operator-=(const Color4& other) { Sub(other); }
 	inline void operator*=(const Color4& other) { Mul(other); }
 
+	inline operator Color3&() const;
 	inline operator SDL_Color&() const {return *(SDL_Color*)this;}
 
 	static const Color4 WHITE, BLACK, INVISIBLE;
 };
+
+inline Color3::operator Color4() const { return {r, g, b, 255}; }
+inline Color4::operator Color3&() const { return *(Color3*)this; }

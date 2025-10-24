@@ -9,5 +9,5 @@ void Image::render(Game::GuiContainer* obj)
 
     RectF* abs = getAbsolute(obj);
 
-    Engine->DrawingContext.DrawTexture(*CurrentImage, *abs, Modulate, Vector2f::ZERO);
+    Display::DrawTexture(*CurrentImage, *abs, Modulate, Vector2f::ZERO);
 }

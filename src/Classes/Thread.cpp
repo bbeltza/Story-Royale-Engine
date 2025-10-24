@@ -1,38 +1,82 @@
 #include "Classes/Thread.hpp"
-#include "Engine.hpp"
+#include "../internal.h"
 
-int Thread::invokethread_handler(Thread *self)
+#include "Sys.h"
+
+std::list<Thread::data> Thread::threads_list;
+std::queue<Thread::data*> Thread::to_remove;
+
+void Thread::queue_removing()
 {
-    self->t_returned = self->m_func(
-        self->m_args[0],
-        self->m_args[1],
-        self->m_args[2],
-        self->m_args[3],
-        self->m_args[4],
-        self->m_args[5],
-        self->m_args[6],
-        self->m_args[7]
+    while (!to_remove.empty())
+    {
+        auto thrd_data = to_remove.front();
+        SDL_WaitThread(thrd_data->handle, NULL);
+        thrd_data->handle = nullptr;
+        threads_list.remove(*thrd_data);
+        to_remove.pop();
+    }
+}
+
+int Thread::invokethread_handler(data *_data)
+{
+    _data->func(
+        _data->args[0],
+        _data->args[1],
+        _data->args[2],
+        _data->args[3],
+        _data->args[4],
+        _data->args[5],
+        _data->args[6],
+        _data->args[7]
     );
+
+    to_remove.push(_data);
 
     return 0;
 }
 
 Thread::Thread(Function func, ...)
 {
+    threads_list.emplace_back();
+    _data = &threads_list.back();
+    _data->func = func;
+    _data->thrd = this;
+
     va_list va;
     va_start(va, func);
 
-    m_func = func;
-
     for (int i = 0; i < NUM_ARGS; i++)
-        m_args[i] = va_arg(va, void*);
+        _data->args[i] = va_arg(va, void*);
 
     va_end(va);
 
-    m_handle = SDL_CreateThread((SDL_ThreadFunction)invokethread_handler, NULL, this);
+    _data->handle = SDL_CreateThread((SDL_ThreadFunction)invokethread_handler, NULL, _data);
 }
 
-Thread::~Thread()
+Thread::Thread(Thread&& moving) : _data(moving._data) { moving._data = nullptr; _data->thrd = this; }
+Thread& Thread::operator=(Thread&& moving) { _data = moving._data; _data->thrd = this; moving._data = nullptr; return *this; }
+
+Thread::~Thread() { if (_data) _data->thrd = nullptr; }
+
+Thread::data::~data()
 {
-    SDL_DetachThread(m_handle);
+    if (handle)
+        SDL_DetachThread(handle);
+    if (thrd)
+        thrd->_data = nullptr;
+}
+
+void Thread::Join()
+{
+    if (_data && _data->handle)
+    {
+        SDL_WaitThread(_data->handle, NULL);
+        _data->handle = nullptr;
+    }
+}
+
+void Thread::Detach()
+{
+    threads_list.remove(*_data);
 }

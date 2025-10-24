@@ -41,4 +41,7 @@ void sysleepms(uint32_t s);
 // Template C++ wrappers can be implemented here!
 
 //
+
 #endif
+
+#undef NUM_ARGS

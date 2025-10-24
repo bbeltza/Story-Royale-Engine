@@ -7,9 +7,16 @@
 #include "Datatypes/Color.hpp"
 #include "Datatypes/Vector.hpp"
 
+#include "internal_def.hh"
+
 class InputClass;
 class DrawingDevice;
 class EngineClass;
+
+__def_internal(__display_render)
+__def_internal(__update_world)
+__def_internal(__query_objects)
+__def_internal(__clean_containers)
 
 namespace Game
 {
@@ -25,19 +32,19 @@ namespace Game
         // Static
 
         /// @brief The background color that the game will have when there's a world
-        static Color3 Background;
+        Color3 Background = { 255, 149, 236 };
+    private:
+        char _padding;
+    public:
         /// The color that the game will render on top of the world.
         /// This acts also as the background of the GUI Layer
-        static Color4 Foreground;
+        Color4 Foreground = Color4::INVISIBLE;
 
         template <class _wType=World, class... _args>
         static inline _wType *setCurrent(_args... args)
         {
-            if (m_Current)
-                m_Current->Destroy();
-
             auto new_current = new _wType(args...);
-            m_Current = new_current;
+            set(new_current);
             return new_current;
         }
 
@@ -72,31 +79,33 @@ namespace Game
 
         // Static functions that convert coordinates, without the need of a world
 
-        static Vector2f worldToScreen(const float x, const float y, Camera *cam = nullptr);
-        static Vector2f screenToWorld(const float x, const float y, Camera *cam = nullptr);
+        static Vector2f worldToScreen(const float x, const float y, const Camera *cam = nullptr);
+        static Vector2f screenToWorld(const float x, const float y, const Camera *cam = nullptr);
 
         // Get the current world's camera, or NULL if there's no world
-	    static inline Camera* currentCamera() { return m_Current ? &m_Current->CurrentCamera : nullptr; }
+        static Camera* currentCamera();
 
         // Gets the current world.
         /// The world that will be updated and rendered.
-        template <class _wType=World> static _wType* Current() {return dynamic_cast<_wType*>(m_Current);}
+        template <class _wType=World> static _wType* Current() {return dynamic_cast<_wType*>(current());}
         // Casts the world to a derivate
         template <class _wType> _wType* cast() {return dynamic_cast<_wType*>(this);}
 
     private:
+        static void set(World*);
+        static World* current();
+
         Entity *call_query(float*);
 
         // The container that holds all of its entities
         std::list<Entity *> m_Entities;
 
-        static Vector2f center;
         // Static member that tells an entity which world to be in, set to this when world->addEntity() is called
         static World* s_TargetWorld;
 
         void call_update(TimeStamp);
         void call_pupdate(TimeStamp);
-        static void call_render();
+        void call_render();
         static bool cmp(const Entity*, const Entity*);
 
         friend class Entity;
@@ -104,7 +113,10 @@ namespace Game
         friend class ::DrawingDevice;
         friend class ::EngineClass;
 
-        static World *m_Current;
+        __friend_internal(__display_render)
+        __friend_internal(__update_world)
+        __friend_internal(__query_objects)
+        __friend_internal(__clean_containers)
     };
 }
 

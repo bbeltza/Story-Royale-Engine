@@ -1,6 +1,5 @@
-#include "Engine.hpp"
+#include "Base/Input.hpp"
 #include "Game/GuiPresets/Button.hpp"
-
 
 void GuiPresets::Button::clickevent(void *, Button *button, const MouseButton *buttonData)
 {
@@ -15,7 +14,7 @@ Connection *GuiPresets::Button::s_clickconnection = nullptr;
 
 GuiPresets::Button::Button()
 {
-    m_connection = Engine->Input.mouseButton.Connect(clickevent, this);
+    m_connection = Input::MouseButton.Connect(clickevent, this);
     addComponent(m_mod);
 }
 
@@ -28,7 +27,7 @@ void GuiPresets::Button::Update(TimeStamp dt)
     if (!m_hover)
         return;
 
-    if (Engine->Input.isMouseButtonPressed())
+    if (Input::MouseButtonPressed())
         m_mod.Value = {150, 150, 150, 255};
     else
         m_mod.Value = {200, 200, 200, 255};

@@ -1,22 +1,32 @@
 #include "Game/World.hpp"
 #include "Game/Entity.hpp"
 #include "Game/Component.hpp"
-#include "Base/Window.hpp"
 
+#include "Base/Display.hpp"
+
+#include "config.h"
+
+#if _MSC_VER && 0
 struct component_vtable
 {
     static inline const component_vtable* get(const Game::Component* component) { return *(component_vtable**)component; }
     void* destructor;
-    void* render;
+    void* Render;
     //void* update;
-    void* pupdate;
-    void* query;
+    void* pUpdate;
+    void* Query;
 };
 #define check_vtablefor(func)   auto vtable = component_vtable::get(component); \
-                                if (vtable->render == BASE_VTABLE->func) continue;
+                                if (vtable->func == BASE_VTABLE->func) continue;
+                                
 
 static const Game::Component BASE_COMP;
 static const component_vtable* BASE_VTABLE = component_vtable::get(&BASE_COMP);
+#elif __GNUC__ && 0
+#define check_vtablefor(func) if (Game::Component::func == component->func) continue;
+#else
+#define check_vtablefor(func)
+#endif
 
 Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)
 {
@@ -39,7 +49,7 @@ void Game::Entity::call_render()
 {
     for (Component *component : this->m_Components)
     {
-        check_vtablefor(render)
+        check_vtablefor(Render)
         if (componentDisabled(*component)) continue;
         component->Render(this);
     }
@@ -70,4 +80,14 @@ bool Game::Entity::call_query(float* pt)
     }
 
     return false;
+}
+
+void Game::Entity::_debugDraw()
+{
+#if DRAW_ENT_CENTER_ONLY_EMPTY
+    if (this->m_Components.empty())
+#endif
+    {
+        Display::DrawDebug(Position);
+    }
 }

@@ -1,3 +1,5 @@
+#include "../internal.h"
+
 #include "Engine.hpp"
 #include "Classes/Texture.hpp"
 
@@ -7,6 +9,14 @@ Texture::Texture(Texture&& moving) noexcept:
 {
     moving.texture = nullptr;
     moving.file_surface = nullptr;
+    for (auto& el : *to_load)
+    {
+        if (el == &moving)
+        {
+            el = this;
+            return;
+        }
+    }
 }
 
 Texture::Queue* Texture::to_load = nullptr;
@@ -30,8 +40,12 @@ Texture::Texture(void* from_surface): file_surface(from_surface)
 
 Texture::~Texture()
 {
+    if (!SDL_WasInit(0)) return;
+
     if (file_surface) SDL_FreeSurface(m_Surface);
     if (texture) SDL_DestroyTexture(m_Texture);
+    file_surface = nullptr;
+    texture = nullptr;
 }
 
 Vector2i Texture::GetSize()

@@ -1,7 +1,7 @@
 #include <Engine.hpp>
 #include <ECS.hpp>
+
 #include <Game/Components/Sprite.hpp>
-#include <Events/Mouse.hpp>
 
 struct TexturePalace;
 struct TextureEntity;
@@ -23,7 +23,7 @@ struct TextureEntity : public Game::Entity
     Texture sprt2;
     //Texture testsprt;
 
-    ConnectionHandle button_connection = Engine->Input.mouseButton.Connect(mouse, this);
+    ConnectionHandle button_connection = Input::MouseButton.Connect(mouse, this);
 
     TextureEntity():
         sprt1("res://test_texture.png"),

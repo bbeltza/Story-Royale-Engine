@@ -1,58 +1,37 @@
+#include "../internal.h"
+
 #include "Base/Window.hpp"
 
 #include "Classes/File.hpp"
 
-#include "GameSettings.hpp"
-
-#define WCENTERED SDL_WINDOWPOS_CENTERED
-
-WindowClass::WindowClass(EngineClass* engine): m_Engine(engine),
-    start_res(GameSettings::StartResolution ? GameSettings::StartResolution : GameSettings::ScalingResolution * 2),
-    start_flags(SDL_WINDOW_ALLOW_HIGHDPI)
-{
-    if (GameSettings::WindowOptions.Resizable)
-        start_flags.ToggleOn(SDL_WINDOW_RESIZABLE);
-    if (GameSettings::WindowOptions.Hidden)
-        start_flags.ToggleOn(SDL_WINDOW_HIDDEN);
-
-    setTargetFPS(GameSettings::TargetFPS);
-}
-
-void WindowClass::Setup()
-{
-    sdl_window = SDL_CreateWindow(
-        GameSettings::Title,
-        WCENTERED,
-        WCENTERED,
-        start_res.X,
-        start_res.Y,
-        start_flags
-    );
-}
-
-void WindowClass::setIcon(const char* path)
+void Window::ChangeIcon(const char* path)
 {
     File file;
     file.Load(path);
 
     SDL_Surface* icon = IMG_Load_RW(SDL_RWFromConstMem(file.getRawData(), (int)file.getSize()), 1);
-    SDL_SetWindowIcon(sdl_window, icon);
+    SDL_SetWindowIcon(engine.sdl_windowhndl, icon);
     SDL_FreeSurface(icon);
 }
 
-void WindowClass::toggleFullscreen()
+void Window::ToggleFullscreen()
 {
     static int oW, oH; // Old width and height for the window
-    fullscreen = !fullscreen;
-    if (fullscreen)
+    bool willbe_full = !IsFullScreen();
+    if (willbe_full)
     {
         SDL_DisplayMode d;
         SDL_GetDesktopDisplayMode(0, &d);
-        SDL_SetWindowDisplayMode(sdl_window, &d);
+        SDL_SetWindowDisplayMode(engine.sdl_windowhndl, &d);
+        SDL_GetWindowSize(engine.sdl_windowhndl, &oW, &oH);
     }
 
-    if (fullscreen)
-        SDL_GetWindowSize(sdl_window, &oW, &oH);
-
-    SDL_SetWindowFullscreen(sdl_window, fullscreen * SDL_WINDOW_FULLSCREEN_DESKTOP);
+    SDL_SetWindowFullscreen(engine.sdl_windowhndl, willbe_full * SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
+
+void Window::Show() { SDL_ShowWindow(engine.sdl_windowhndl); }
+void Window::Hide() { SDL_HideWindow(engine.sdl_windowhndl); }
+void Window::Focus() { SDL_RaiseWindow(engine.sdl_windowhndl); }
+
+bool Window::IsFullScreen() { return SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_FULLSCREEN; }
+bool Window::IsHidden() { return SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN; }

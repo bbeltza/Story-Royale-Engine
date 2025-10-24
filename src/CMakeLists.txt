@@ -8,7 +8,7 @@ macro(set_src FLDR SRCS)
 endmacro()
 
 set(SOURCES 
-"main.cpp"
+"main.c"
 
 "Extras/ExtraSDL.c"
 "Extras/ExtraString.c"
@@ -21,18 +21,24 @@ set(SYS_SOURCES
 )
 
 set(CORE_SOURCES
-"AudioFormat.c"
+"InitEngine.c"
+"WindowCreation.c"
+"Runtime.c"
 "Audio.cpp"
+"AudioInternal.cpp"
+"Containers.cpp"
+"DestroyQueue.cpp"
 "Input.cpp"
 "InputEvents.cpp"
-"InstanceRendering.cpp"
-"Physics.cpp"
-"Querying.cpp"
 "Renderer.cpp"
 "Rendering.cpp"
 "Runtime.cpp"
-"ThreadPool.cpp"
 "Window.cpp"
+"WindowData.cpp"
+
+"AudioFormat.c"
+"Physics.cpp"
+"Querying.cpp"
 )
 
 set(DATATYPES_SOURCES
@@ -73,6 +79,7 @@ set(COMPONENT_SOURCES
 "Gui/Image.cpp"
 "Gui/Text.cpp"
 "Gui/List.cpp"
+"Gui/Rendering.cpp"
 
 "World/Shape.cpp"
 "World/Velocity.cpp"
@@ -97,3 +104,4 @@ set_src(GameLayer LAYER_SOURCES)
 set_src(SystemDependent SYSTEMDEP_SOURCES)
 
 add_library(StoryRoyaleEngine ${SOURCES})
+target_compile_definitions(StoryRoyaleEngine PRIVATE INTERNAL_DEF=1)

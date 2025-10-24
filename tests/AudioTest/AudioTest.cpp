@@ -1,14 +1,15 @@
 #include <Engine.hpp>
+#include <GUI.hpp> 
 
 Audio stereotest;
 Audio test1, test2, test3;
 
 void Initialize()
 {
-    AudioData& stereotest_data = Engine->AudioDevice.LoadAudio("res://stereotest.wav");
-    AudioData& test1_data = Engine->AudioDevice.LoadAudio("res://test1.wav");
-    AudioData& test2_data = Engine->AudioDevice.LoadAudio("res://test2.ogg");
-    AudioData& test3_data = Engine->AudioDevice.LoadAudio("res://test3.ogg");
+    AudioData& stereotest_data = Audio::Load("res://stereotest.wav");
+    AudioData& test1_data = Audio::Load("res://test1.wav");
+    AudioData& test2_data = Audio::Load("res://test2.ogg");
+    AudioData& test3_data = Audio::Load("res://test3.ogg");
 
     stereotest.Attach(stereotest_data);
     test1.Attach(test1_data);
@@ -22,5 +23,5 @@ void Initialize()
 
     stereotest.Info.looped = true;
 
-    Engine->AudioDevice.PlayAudio(test3);
+    test3.Play();
 }

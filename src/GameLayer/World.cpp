@@ -8,10 +8,15 @@
 
 #include "config.h"
 
-Vector2f Game::World::center;
-Color3 Game::World::Background = {255, 149, 236};
-Color4 Game::World::Foreground = {0x00000000};
-Game::World* Game::World::m_Current = nullptr;
+#include "../internal.h"
+
+void __update_world()
+{
+    if (!engine.current_world) return;
+    currworld->call_update(engine.last_dt);
+    currworld->call_pupdate(engine.last_dt);
+}
+
 Game::World* Game::World::s_TargetWorld = nullptr;
 
 bool Game::World::cmp(const Entity* first, const Entity* second)
@@ -24,7 +29,7 @@ Game::World::World() {}
 
 Game::World::~World()
 {
-    if (m_Current == this) m_Current = nullptr;
+    if (engine.current_world == this) engine.current_world = nullptr;
     
     while (!m_Entities.empty())
     {
@@ -57,31 +62,6 @@ void Game::World::call_update(TimeStamp dt)
     Updated.Fire(dt);
 }
 
-void Game::World::call_render()
-{
-    center = Engine->DrawingContext.getScreenCenter();
-
-    if (!m_Current) return;
-
-    m_Current->m_Entities.sort(cmp);
-
-    m_Current->preRender();
-    for (Entity* entity : m_Current->m_Entities)
-    {
-        entity->preRender();
-        entity->call_render();
-        entity->postRender();
-        entity->Rendered.Fire();
-    }
-    m_Current->postRender();
-
-#ifdef DRAW_ENTITY_CENTER
-    for (Entity* entity : Game::World::m_Current->m_Entities) entity->_debugDraw();
-#endif
-
-    m_Current->Rendered.Fire();
-}
-
 Game::Entity* Game::World::call_query(float* pt)
 {
     for (auto it = m_Entities.rbegin(); it != m_Entities.rend(); ++it)
@@ -91,4 +71,51 @@ Game::Entity* Game::World::call_query(float* pt)
     }
 
     return nullptr;
+}
+
+//
+
+void Game::World::call_render()
+{
+    m_Entities.sort(cmp);
+
+    preRender();
+    for (Entity* entity : m_Entities)
+    {
+        entity->preRender();
+        entity->call_render();
+        entity->postRender();
+        entity->Rendered.Fire();
+    }
+    postRender();
+
+#ifdef DRAW_ENTITY_CENTER
+    for (Entity* entity : m_Entities) entity->_debugDraw();
+#endif
+
+    Rendered.Fire();
+}
+
+Game::Camera* Game::World::currentCamera() { return engine.current_world ? &currworld->CurrentCamera : NULL; }
+
+void Game::World::set(Game::World* world)
+{
+    if (engine.current_world) currworld->Destroy();
+    engine.current_world = world;
+}
+
+Game::World* Game::World::current() { return currworld; }
+
+static const Game::Camera zero_cam;
+
+Vector2f Game::World::screenToWorld(float x, float y, const Camera* cam)
+{
+    if (!cam) cam = &zero_cam;
+    return Vector2f(x - engine.center_x + cam->x, y - engine.center_y + cam->y);
+}
+
+Vector2f Game::World::worldToScreen(float x, float y, const Camera* cam)
+{
+    if (!cam) cam = &zero_cam;
+    return Vector2f(x + engine.center_x - cam->x, y + engine.center_y - cam->y);
 }

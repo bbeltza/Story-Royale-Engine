@@ -1,38 +1,19 @@
 #pragma once
 #include <SDL.hpp>
-#include "EngineBase.hpp"
 
 #include "Datatypes/Vector.hpp"
 #include "Datatypes/Flags.hpp"
 
-class WindowClass
+namespace Window
 {
-    ENGINE_BASE
-    friend class DrawingDevice;
-    friend class GuiContainer;
-public:
-    void setTargetFPS(unsigned short fps);
-    void toggleFullscreen();
+    void ChangeIcon(const char* path);
+    void SetFramerate(unsigned short FPS);
+    void ToggleFullscreen();
 
-    inline void show() { SDL_ShowWindow(sdl_window); }
-    inline void hide() { SDL_HideWindow(sdl_window); }
+    void Show();
+    void Hide();
+    void Focus();
 
-    inline void focus() { SDL_RaiseWindow(sdl_window); }
-
-    void setIcon(const char* path);
-public:
-    inline bool isFullScreen() { return fullscreen; }
-    inline bool isHidden() { return SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_HIDDEN; }
-private:
-    WindowClass(EngineClass*);
-
-    SDL_Window* sdl_window = nullptr;
-    SDL_Event sdl_event;
-
-    bool fullscreen = false;
-
-    void Setup();
-
-    Flags32 start_flags;
-    Vector2u start_res;
-};
+    bool IsFullScreen();
+    bool IsHidden();
+}
