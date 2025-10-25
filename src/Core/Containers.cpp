@@ -8,7 +8,7 @@
 #include "Game/GuiLayer.hpp"
 
 typedef std::tuple<
-	std::list<std::unique_ptr<Thread::data>>,
+	std::list<Thread::data>,
 	std::queue<Thread::data*>,
 
 	std::unordered_map<std::string, std::unique_ptr<AudioData>>,

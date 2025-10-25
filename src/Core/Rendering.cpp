@@ -156,3 +156,13 @@ void Display::DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color
 
     END_DRAW
 }
+
+void Display::Fill(const Color4& Color)
+{
+    START_DRAW
+
+    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
+    SDL_RenderFillRectF(engine.sdl_rendererhndl, NULL);
+
+    END_DRAW
+}

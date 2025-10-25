@@ -3,18 +3,18 @@
 
 #include "Sys.h"
 
-std::list<Thread::data> Thread::threads_list;
-std::queue<Thread::data*> Thread::to_remove;
+#define threads_list reinterpret_cast<std::list<Thread::data>*>(engine.allocated_threads)
+#define to_remove reinterpret_cast<std::queue<Thread::data*>*>(engine.finished_threads)
 
 void Thread::queue_removing()
 {
-    while (!to_remove.empty())
+    while (!to_remove->empty())
     {
-        auto thrd_data = to_remove.front();
+        auto thrd_data = to_remove->front();
         SDL_WaitThread(thrd_data->handle, NULL);
         thrd_data->handle = nullptr;
-        threads_list.remove(*thrd_data);
-        to_remove.pop();
+        threads_list->remove(*thrd_data);
+        to_remove->pop();
     }
 }
 
@@ -24,7 +24,7 @@ int Thread::invokethread_handler(data *_data)
 
     _data->func(_data->data);
 
-    to_remove.push(_data);
+    to_remove->push(_data);
 
     return 0;
 }
@@ -32,8 +32,8 @@ int Thread::invokethread_handler(data *_data)
 #include <thread>
 Thread::Thread(Function func, void* userdata, TimeStamp delay)
 {
-    threads_list.emplace_back();
-    _data = &threads_list.back();
+    threads_list->emplace_back();
+    _data = &threads_list->back();
     _data->func = func;
     _data->thrd = this;
     _data->data = userdata;
@@ -66,5 +66,6 @@ void Thread::Join()
 
 void Thread::Detach()
 {
-    threads_list.remove(*_data);
+    if (_data)
+        threads_list->remove(*_data);
 }

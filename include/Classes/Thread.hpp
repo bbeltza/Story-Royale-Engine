@@ -66,8 +66,6 @@ private:
 
     static int invokethread_handler(data *);
     static void queue_removing();
-    static std::list<data> threads_list;
-    static std::queue<data*> to_remove;
 
     TEMPL friend Thread Threads::Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax);
     __friend_internal(__update_classes)

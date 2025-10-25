@@ -18,7 +18,7 @@ namespace Components
         Vector2f Offset;
         Vector2f Scale;
 
-        Color4 Modulate;
+        Color4 Modulate = Color4::WHITE;
 
         size_t current_frame = 0;
 

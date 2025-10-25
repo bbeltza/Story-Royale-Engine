@@ -15,6 +15,8 @@ namespace Display
     Vector2i GetSize();
     Vector2i GetAbsoluteSize();
 
+    void Fill(const Color4& Color);
+
     void DrawRectangle(const RectF& Rectangle, const Color4& Color, const Color4& Modulate = Color4::WHITE, const Vector2f& AnchorPoint = Vector2f::CENTER, DrawingMode Mode = dm_Fill);
     void DrawRectangleAtWorld(RectF Rectangle, const Color4& Color, const Color4& Modulate = Color4::WHITE, const Vector2f& AnchorPoint = Vector2f::CENTER, DrawingMode Mode = dm_Fill);
 
