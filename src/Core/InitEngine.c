@@ -36,8 +36,6 @@ void __initialize_engine()
     __init_actions();
 
     atexit(__end_engine);
-
-    syslogln("%p", &engine.audio_device);
 }
 
 void __end_engine()
