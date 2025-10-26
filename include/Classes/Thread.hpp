@@ -13,12 +13,8 @@ class Thread;
 
 namespace Threads // Designed to replace ThreadPool
 {
-    TEMPL Thread Create(_Fn&& _Fx, _Args&&... _Ax) {
-        return Delay(
-        0,
-        std::forward<_Fn>(_Fx),
-        std::forward<_Args>(_Ax)...); }
-    TEMPL Thread Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax);
+    TEMPL inline Thread Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax);
+    TEMPL inline Thread Create(_Fn&& _Fx, _Args&&... _Ax);
 }
 
 __def_internal(__update_classes)
@@ -51,16 +47,26 @@ public:
         TimeStamp delay;
     } *_data = nullptr;
 private:
+    template <typename _Fx, typename _Tuple>
+    struct invokedata
+    {
+        _Fx&& fn;
+        _Tuple tuple;
+
+        template <typename... _Args>
+        invokedata(_Fx&& func, _Args&&... args): fn(std::forward<_Fx>(func)), tuple(std::forward<_Args>(args)...) {}
+    };
+
     Thread(const Thread& other) = delete;
     Thread(Function func, void* userdata, TimeStamp delay);
 
-    template <typename _Tuple, size_t... _Indices>
-    static Function get_invoke(ut::sequence<_Indices...>) { return (Function)&_invoke<_Tuple, _Indices...>; }
-    template <typename _Tuple, size_t... _Indices>
+    template <typename _Data, size_t... _Indices>
+    static Function get_invoke(ut::sequence<_Indices...>) { return (Function)&_invoke<_Data, _Indices...>; }
+    template <typename _Data, size_t... _Indices>
     static void _invoke(void* _rawdata)
     {
-        auto _data = static_cast<_Tuple*>(_rawdata);
-        std::invoke(std::move(std::get<_Indices>(*_data))...);
+        auto _data = static_cast<_Data*>(_rawdata);
+        _data->fn(std::move(std::get<_Indices>(_data->tuple))...);
         delete _data;
     }
 
@@ -73,12 +79,20 @@ private:
 
 TEMPL Thread Threads::Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax)
 {
-    using _Tuple = std::tuple<std::decay_t<_Fn>, std::decay_t<_Args>...>;
+    using _Tuple = std::tuple<typename std::decay<_Args>::type...>;
+    using _Invoke = Thread::invokedata<_Fn, _Tuple>;
 
-    auto tuple = new _Tuple(std::forward<_Fn>(_Fx), std::forward<_Args>(_Ax)...);
-    auto invokefunc = Thread::get_invoke<_Tuple>(typename ut::make_sequence<1 + sizeof...(_Args)>::type());
+    auto invoke = new _Invoke(std::forward<_Fn>(_Fx), std::forward<_Args>(_Ax)...);
+    auto invokefunc = Thread::get_invoke<_Invoke>(typename ut::make_sequence<sizeof...(_Args)>::type());
 
-    return Thread(invokefunc, tuple, Duration);
+    return Thread(invokefunc, invoke, Duration);
+}
+TEMPL Thread Threads::Create(_Fn&& _Fx, _Args&&... _Ax)
+{
+    return Delay(
+        0,
+        std::forward<_Fn>(_Fx),
+        std::forward<_Args>(_Ax)...);
 }
 
 #undef TEMPL
