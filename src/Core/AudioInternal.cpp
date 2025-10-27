@@ -6,7 +6,7 @@
 
 #include "Sys.h"
 
-extern "C" int ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, int len_input);
+extern "C" intptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, intptr_t len_input);
 
 #define loaded reinterpret_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
 #define aqueue reinterpret_cast<std::unordered_set<Audio*> *>(engine.audio_queue)
@@ -116,7 +116,7 @@ void __audio_callback(void* data, uint8_t* stream, int len)
 			}
 
 			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
-			audio->m_samplepos = (uint32_t)audio->m_fsamplepos;
+			audio->m_samplepos = static_cast<uint32_t>(round(audio->m_fsamplepos));
 
 			uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
 

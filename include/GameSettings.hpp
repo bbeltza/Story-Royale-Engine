@@ -11,6 +11,7 @@ struct WindowOptions
 
 enum InterpolationMode
 {
+    Nearest,
     Linear,
     Cubic,
     Gaussian

@@ -52,10 +52,13 @@ extern "C" {
 		unsigned int integer_scale;
 		float real_scale;
 
-		// Audio device data
+		// Audio data
 
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
+
+		int32_t* audio_backbuffer;
+		int audio_bufflen; // in bytes
 
 		// Input data
 
