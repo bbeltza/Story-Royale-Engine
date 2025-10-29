@@ -17,6 +17,14 @@ namespace Display
 
     void Fill(const Color4& Color);
 
+    void DrawLine(const Color4& Color, const Vector2f& Pt1, const Vector2f& Pt2);
+    void DrawLines(const Color4& Color, size_t Count, const Vector2f* Pts);
+    template <typename... _Args> void DrawLines(const Color4& Color, _Args&... Pts)
+    {
+        std::vector<Vector2f> vec = {Pts...};
+        DrawLines(Color, sizeof...(Pts), vec.data());
+    }
+
     void DrawRectangle(const RectF& Rectangle, const Color4& Color, const Color4& Modulate = Color4::WHITE, const Vector2f& AnchorPoint = Vector2f::CENTER, DrawingMode Mode = dm_Fill);
     void DrawRectangleAtWorld(RectF Rectangle, const Color4& Color, const Color4& Modulate = Color4::WHITE, const Vector2f& AnchorPoint = Vector2f::CENTER, DrawingMode Mode = dm_Fill);
 

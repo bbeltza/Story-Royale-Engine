@@ -17,6 +17,26 @@ Vector2i Display::GetAbsoluteSize() { return { engine.osize_x, engine.osize_y };
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
 
+void Display::DrawLine(const Color4& Color, const Vector2f& Pt1, const Vector2f& Pt2)
+{
+    START_DRAW
+
+    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
+    SDL_RenderDrawLineF(engine.sdl_rendererhndl, Pt1.X, Pt1.Y, Pt2.X, Pt2.Y);
+
+    END_DRAW
+}
+
+void Display::DrawLines(const Color4& Color, size_t Count, const Vector2f* Pts)
+{
+    START_DRAW
+
+    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
+    SDL_RenderDrawLinesF(engine.sdl_rendererhndl, reinterpret_cast<const SDL_FPoint*>(Pts), Count);
+
+    END_DRAW
+}
+
 void Display::DrawRectangle(const RectF& Rectangle, const Color4& Color, const Color4& Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
 {
     START_DRAW
