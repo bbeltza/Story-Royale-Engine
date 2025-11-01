@@ -10,39 +10,26 @@
 #define loaded reinterpret_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
 #define aqueue reinterpret_cast<std::unordered_set<Audio *> *>(engine.audio_queue)
 
-static void audio_callback(void* data, uint8_t* stream, int len)
+void __audio_callback(void* data, uint8_t* stream, int len)
 {
-	if (!aqueue)
-		return;
+	if (!aqueue) return;
+
+	memset(stream, 0, len);
 	
-	// Setting up the backbuffer
-
-	int audio_desiredlen = len * engine.in_freq / engine.audio_spec.freq;
-	syslogln("%d %d", audio_desiredlen, len);
-
-	if (audio_desiredlen > engine.audio_bufflen)
-	{
-		engine.audio_bufflen = audio_desiredlen;
-
-		free(engine.audio_backbuffer);
-		engine.audio_backbuffer = (int32_t*)malloc(audio_desiredlen);
-	}
-
-	// Updating the audio
-	memset(engine.audio_backbuffer, NULL, audio_desiredlen);
-	//__update_audio();
-
+	engine.audio_stream = stream;
+	engine.audio_slen = len;
+	__update_audio();
 }
 
-#if 0
 void __update_audio()
 {
-	const size_t sample_len = static_cast<size_t>(engine.audio_bufflen / 4);
 	const uint8_t channel_count = engine.audio_spec.channels;
 
-	std::queue<Audio *> stop_queue;
+	const size_t sample_len = static_cast<size_t>(engine.audio_slen / 2);
 
-	for (Audio *audio : *aqueue)
+	std::queue<Audio*> stop_queue;
+
+	for (Audio* audio : *aqueue)
 	{
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
@@ -50,8 +37,6 @@ void __update_audio()
 		for (size_t i = 0; i <= sample_len - 2; i += audio->m_data->m_spec.channels)
 		{
 			double a = audio->m_fsamplepos - audio->m_samplepos;
-
-			// Fade handling
 
 			if (audio->m_fadein)
 			{
@@ -68,41 +53,37 @@ void __update_audio()
 				if (audio->m_fadevol <= 0)
 				{
 					audio->m_fadeout = false;
-					goto stop_section;
+					stop_queue.push(audio);
+					break;
 				}
 			}
 			else
 				audio->m_fadevol = 1;
 
-			// Mixing the audio
-
 			for (size_t c = 0; c < channel_count; c++)
 			{
 				size_t cc = audio->m_data->m_spec.channels > 1 ? c : 0;
-				uint8_t *dst = stream + (i + c) * 4;
-				int32_t *src = reinterpret_cast<int32_t *>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels + cc;
+				uint8_t* dst = engine.audio_stream + (i + c) * 2;
+				short val = reinterpret_cast<short*>(audio->m_data->m_data)[audio->m_samplepos * audio->m_data->m_spec.channels + cc];
 				int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
-				SDL_MixAudioFormat(dst, (Uint8 *)src, engine.audio_spec.format, 4, vol);
+				SDL_MixAudioFormat(dst, (Uint8*)&val, engine.audio_spec.format, 2, vol);
 			}
-
-			// Updating the sample position
 
 			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
 			audio->m_samplepos = static_cast<uint32_t>(round(audio->m_fsamplepos));
 
-			// Loop handling
-
 			uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
-			if (audio->Info.looped && audio->m_samplepos >= loop_end)
-				audio->m_fsamplepos = audio->Info.loop_start;
-			else if (audio->m_samplepos >= loop_end)
-				goto stop_section;
-			continue;
-		}
-		continue;
 
-	stop_section:
-		stop_queue.push(audio);
+			if (audio->Info.looped && audio->m_samplepos >= loop_end)
+			{
+				audio->m_fsamplepos = audio->Info.loop_start;
+			}
+			else if (audio->m_samplepos >= loop_end)
+			{
+				stop_queue.push(audio);
+				break;
+			}
+		}
 	}
 
 	while (!stop_queue.empty())
@@ -111,22 +92,24 @@ void __update_audio()
 		stop_queue.pop();
 	}
 }
-#endif // 0
 
 void __setup_audio_device()
 {
 	SDL_AudioSpec desiredspec{0};
-	desiredspec.callback = audio_callback;
+	desiredspec.callback = __audio_callback;
 
-    engine.in_freq = GameSettings::AudioOptions.InputFrequency;
 	desiredspec.freq = GameSettings::AudioOptions.OutputFrequency;
 	desiredspec.channels = 2;
 	desiredspec.samples = 512;
-	desiredspec.format = AUDIO_S32;
+	desiredspec.format = AUDIO_S16;
 
-	syslogln("%d %d", desiredspec.freq, engine.in_freq);
+	int CHANGES = 0;
+	if (!desiredspec.freq)
+		CHANGES |= SDL_AUDIO_ALLOW_FREQUENCY_CHANGE;
 
-	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, 0);
+	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, CHANGES);
+
+	syslogln("%d", engine.audio_spec.freq);
 }
 
 extern "C" intptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, intptr_t len_input);

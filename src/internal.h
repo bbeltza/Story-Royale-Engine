@@ -54,12 +54,11 @@ extern "C" {
 
 		// Audio data
 
-		int in_freq;
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
-		int32_t* audio_backbuffer;
-		int audio_bufflen; // in bytes
+		unsigned char* audio_stream;
+		int audio_slen; // in bytes
 
 		// Input data
 

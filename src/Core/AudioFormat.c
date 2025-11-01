@@ -54,6 +54,13 @@ uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, 
                 if (out_bitsize == 32)
                     ((int32_t*)out_data)[i] = (int32_t)format_i32(((int16_t*)*data)[i], 0x7FFF);
             }
+        case 32:
+            len_input /= 4;
+            for (uintptr_t i = 0; i < len_input; i++)
+            {
+                if (out_bitsize == 16)
+                    ((int16_t*)out_data)[i] = (int16_t)format_i16(((int32_t*)*data)[i], 0x7FFFFFFF);
+            }
     }
 
     free(*data);
