@@ -12,8 +12,8 @@ struct TouchFinger
 		Pressed(pressed)
 	{}
 
-	Vector2f Delta;
 	Vector2f UV;
+	Vector2f Delta;
 	
 	// SDL Metadata
 	SDL_TouchID TouchID; SDL_FingerID FingerID;

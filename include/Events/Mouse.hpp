@@ -47,8 +47,8 @@ struct MouseWheel
 
     const Uint32 id;
 
-    const Vector2f p_amount;
     const Vector2i amount;
+    const Vector2f p_amount;
     const Vector2f position;
 };
 

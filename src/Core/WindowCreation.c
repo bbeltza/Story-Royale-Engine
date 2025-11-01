@@ -14,6 +14,7 @@ void __create_window(const struct _win_settings* _win)
 		_win->h,
 		_win->flags
 	);
+    SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);
 }
 
 int __poll_events()

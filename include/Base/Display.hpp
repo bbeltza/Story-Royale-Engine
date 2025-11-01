@@ -18,7 +18,7 @@ namespace Display
     void Fill(const Color4& Color);
 
     void DrawLine(const Color4& Color, const Vector2f& Pt1, const Vector2f& Pt2);
-    void DrawLines(const Color4& Color, size_t Count, const Vector2f* Pts);
+    void DrawLines(const Color4& Color, int Count, const Vector2f* Pts);
     template <typename... _Args> void DrawLines(const Color4& Color, _Args&... Pts)
     {
         std::vector<Vector2f> vec = {Pts...};

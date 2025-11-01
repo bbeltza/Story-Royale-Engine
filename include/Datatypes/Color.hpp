@@ -12,7 +12,7 @@ struct Color3
 	Color3(uint8_t RGB): r(RGB), g(RGB), b(RGB) {}
 	Color3(const Color3& other): r(other.r), g(other.g), b(other.b) {}
 
-	Color3(uint32_t HEX): b(HEX & 0xFF), g((HEX >> 8) & 0xFF), r((HEX >> 16) & 0xFF) {}
+	Color3(uint32_t HEX): r((HEX >> 16) & 0xFF), g((HEX >> 8) & 0xFF), b(HEX & 0xFF) {}
 	Color3(const char* HEX);
 
 	uint8_t r = 0;
@@ -51,7 +51,7 @@ struct Color4
 	Color4(const Color4& other) : r(other.r), g(other.g), b(other.b), a(other.a) {}
 
 	Color4(int32_t HEX): Color4((uint32_t)HEX) {}
-	Color4(uint32_t HEX): a(HEX & 0xFF), b((HEX >> 8) & 0xFF), g((HEX >> 16) & 0xFF), r((HEX >> 24) & 0xFF) {}
+	Color4(uint32_t HEX): r((HEX >> 24) & 0xFF), g((HEX >> 16) & 0xFF), b((HEX >> 8) & 0xFF), a(HEX & 0xFF) {}
 	Color4(const char* HEX);
 
 	uint8_t r;

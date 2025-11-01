@@ -22,7 +22,7 @@ class Action
 	static void sc_touchHandle(void*, void*, const TouchFinger* ev);
 
 public:
-	Action(const Action& other) : press_frame(-1), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons), enable_touch(other.enable_touch) { push_self(); }
+	Action(const Action& other) : press_frame(-1), enable_touch(other.enable_touch), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons) { push_self(); }
 	~Action();
 
 	template <typename... _Args>

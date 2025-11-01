@@ -84,7 +84,7 @@ void __update_input()
     engine.mouse_press = SDL_GetMouseState(&x, &y);
 
     {
-        register float w, h;
+        float w, h;
         w = static_cast<float>(engine.osize_x / engine.viewport.w);
         h = static_cast<float>(engine.osize_y / engine.viewport.h);
         engine.real_scale = fminf(w, h);

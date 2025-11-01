@@ -44,8 +44,8 @@ class Connection
 	Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata, bool _mutithreaded);
 	~Connection();
 
-	dummy_func_t func;
 	SignalBase* const signal;
+	dummy_func_t func;
 	ConnectionHandle* current_handle = nullptr;
 public:
 	void* Userdata;

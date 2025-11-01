@@ -28,7 +28,8 @@ void syserror(syserr code, ...)
         break;
     }
 
-    int len = vsnprintf(err_buffer, 500, fmtmsg, va);
+    //int len = 
+    vsnprintf(err_buffer, 500, fmtmsg, va);
 
     va_end(va);
 

@@ -17,14 +17,6 @@
 #define reti32 return (int32_t)(amt * 0x7FFFFFFF);
 #define reti64 return (int64_t)(amt * 0x7FFFFFFFFFFFFFFF);
 
-static inline int32_t format_i64_i32(int64_t x) { defamt64; reti32 }
-static inline int32_t format_i16_i32(int16_t x) { defamt16; reti32 }
-static inline int32_t format_i8_i32(int8_t x) { defamt8; reti32 }
-
-static inline int16_t format_i64_i16(int64_t x) { defamt64; reti16 }
-static inline int16_t format_i32_i16(int32_t x) { defamt32; reti16 }
-static inline int16_t format_i8_i16(int8_t x) { defamt8; reti16 }
-
 #define format_int(x, m, y) ((x / (double)m) * y)
 
 #define format_i8(x, m) format_int(x, m, 0x7F)
@@ -36,7 +28,7 @@ uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, 
 {
     if (f_input == f_output) return len_input;
 
-    uint32_t start = SDL_GetTicks();
+    //uint32_t start = SDL_GetTicks();
 
     int out_bitsize = SDL_AUDIO_BITSIZE(f_output), in_bitsize = SDL_AUDIO_BITSIZE(f_input);
 
@@ -67,7 +59,7 @@ uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, 
     free(*data);
     *data = out_data;
 
-    uint32_t end = SDL_GetTicks();
+    //uint32_t end = SDL_GetTicks();
     //printf("Audio converted, lasted %f seconds\n", (float)(end - start)/1000);
 
     return len_output;

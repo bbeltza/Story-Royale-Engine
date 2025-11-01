@@ -4,7 +4,7 @@ types:dict = {
     "ScalingResolution": [[0, 0], "Vector2u"],
     "TargetFPS": [60, "uint16_t"],
     "WindowOptions": [[True, True, False], "WindowOptions", ["VSync", "Resizable", "Hidden"]],
-    "AudioOptions": [[44100, 2, 0], "AudioOptions", ["Frequency", "Channels", "Interpolation"]]
+    "AudioOptions": [[44100, 44100, 2, 0], "AudioOptions", ["InputFrequency", "OutputFrequency", "Channels", "Interpolation"]]
 }
 
 if __name__ == "__main__":

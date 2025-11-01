@@ -54,6 +54,7 @@ extern "C" {
 
 		// Audio data
 
+		int in_freq;
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
@@ -114,6 +115,8 @@ extern "C" {
 	extern void __update_classes();
 	extern void __update_world();
 	extern void __update_layer();
+
+	extern void __update_audio();
 
 	extern void __display_render();
 

@@ -18,7 +18,7 @@ void TweenBase::global_update(TimeStamp delta)
 }
 
 TweenBase::TweenBase(const TweenInfo& info):
-    Info(info), Completed(this)
+    Info(info)
 {
     get_tweens().insert(this);
 }

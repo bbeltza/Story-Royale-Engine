@@ -5,16 +5,13 @@
 
 #include "Datatypes/TimeStamp.h"
 
+#include "internal_def.hh"
+
 #include <SDL.h>
 
 #define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
 
-#if INTERNAL_DEF
-extern void __audio_callback(void*, uint8_t*, int);
-#define friend_callback friend void __audio_callback(void*, uint8_t*, int);
-#else
-#define friend_callback
-#endif
+__def_internal(__update_audio)
 
 class AudioData
 {
@@ -46,7 +43,7 @@ public:
 	inline uint32_t len() const { return m_len; }
 	inline uint32_t freq() const { return m_spec.freq; }
 
-	friend_callback
+	__friend_internal(__update_audio)
 };
 
 struct AudioInfo
@@ -92,5 +89,5 @@ private:
 	bool m_fadein = false, m_fadeout = false;
 	float m_fadevol = 1;
 
-	friend_callback
+	__friend_internal(__update_audio)
 };

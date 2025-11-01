@@ -22,7 +22,7 @@ if(MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 else()
-    if ("${CMAKE_SYSTEM_NAME}" EQUAL "Windows")
+    if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         set(SR_ENGINE_NO_CONSOLE_OPTIONS "-mwindows")
     endif()
     set(SR_ENGINE_COMPILER_OPTIONS "-Werror")
@@ -35,7 +35,6 @@ add_subdirectory(src)
 target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_compile_features(StoryRoyaleEngine PRIVATE cxx_std_11 c_std_99)
 target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
-
 
 set(3RDPARTYLIBS
 SDL2::SDL2-static

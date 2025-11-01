@@ -34,13 +34,13 @@ class TweenBase
 
     TweenBase(const TweenInfo& info);
 public:
-    ~TweenBase();
+    virtual ~TweenBase();
 
     void Play();
     TimeStamp Cancel();
     TimeStamp Pause();
 
-    Signal<> Completed;
+    Signal<> Completed{this};
     const TweenInfo& Info;
 
     inline float GetAlpha() const {return Info.duration ? m_elapsed/Info.duration : 1;}
@@ -69,7 +69,7 @@ class Tween: public TweenBase
     inline void step(float alpha) override { *m_target = (T)ut_lerp(m_start, *m_src, alpha); }
     inline void start() override { if (m_target) m_start = *m_target; }
 public:
-    Tween(const TweenInfo& info, T& target, const T& source): TweenBase(info), m_target(&target), m_src(&source) {}
+    Tween(const TweenInfo& info, T& target, const T& source): TweenBase(info), m_src(&source), m_target(&target) {}
     Tween(const TweenInfo& info, const T& source): TweenBase(info), m_src(&source) {}
     void setTarget(T& target) { m_target = &target; }
 };

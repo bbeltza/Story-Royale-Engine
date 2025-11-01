@@ -27,7 +27,7 @@ void Display::DrawLine(const Color4& Color, const Vector2f& Pt1, const Vector2f&
     END_DRAW
 }
 
-void Display::DrawLines(const Color4& Color, size_t Count, const Vector2f* Pts)
+void Display::DrawLines(const Color4& Color, int Count, const Vector2f* Pts)
 {
     START_DRAW
 

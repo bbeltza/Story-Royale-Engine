@@ -42,7 +42,10 @@ void __update_viewport()
 
 	SDL_GetRendererOutputSize(engine.sdl_rendererhndl, &engine.osize_x, &engine.osize_y);
 	if (has_scaling)
+	{
 		engine.integer_scale = ut_min(engine.osize_x / GameSettings::ScalingResolution.X, engine.osize_y / GameSettings::ScalingResolution.Y);
+		engine.integer_scale = engine.integer_scale ? engine.integer_scale : 1;
+	}
 	else
 		engine.integer_scale = 1;
 	{
