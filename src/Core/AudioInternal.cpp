@@ -62,15 +62,19 @@ void __update_audio()
 
 			uint8_t* dest = engine.audio_stream + i * 2;
 			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels;
-			short vals[2] = { src[0], src[0] };
+			short val = (short)ut_lerp(src[0], src[audio->m_data->m_spec.channels], a);
+			short vals[2] = { val, val };
 
 			int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
 			if (audio->m_data->m_spec.channels == 2)
-				vals[1] = src[1];
+			{
+				val = (short)ut_lerp(src[1], src[1+audio->m_data->m_spec.channels], a);
+				vals[1] = val;
+			}
 
 			if (channel_count == 1)
 			{
-				short val = (short)ut_lerp(vals[0], vals[1], 0.5f);
+				val = (short)ut_lerp(vals[0], vals[1], 0.5f);
 				SDL_MixAudioFormat(dest, (Uint8*)&val, engine.audio_spec.format, 2, vol);
 			}
 			else
@@ -79,7 +83,7 @@ void __update_audio()
 			}
 
 			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
-			audio->m_samplepos = static_cast<uint32_t>(round(audio->m_fsamplepos));
+			audio->m_samplepos = static_cast<uint32_t>(audio->m_fsamplepos);
 
 			uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
 
