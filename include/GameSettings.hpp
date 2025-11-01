@@ -19,8 +19,7 @@ enum InterpolationMode
 
 struct AudioOptions
 {
-    uint16_t InputFrequency;
-    uint16_t OutputFrequency;
+    uint16_t Frequency;
     uint8_t Channels;
     uint8_t Interpolation;
 };

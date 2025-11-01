@@ -34,7 +34,7 @@ void __update_audio()
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
 
-		for (size_t i = 0; i <= sample_len - 2; i += audio->m_data->m_spec.channels)
+		for (size_t i = 0; i <= sample_len - 1; i += audio->m_data->m_spec.channels)
 		{
 			double a = audio->m_fsamplepos - audio->m_samplepos;
 
@@ -60,13 +60,22 @@ void __update_audio()
 			else
 				audio->m_fadevol = 1;
 
-			for (size_t c = 0; c < channel_count; c++)
+			uint8_t* dest = engine.audio_stream + i * 2;
+			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels;
+			short vals[2] = { src[0], src[0] };
+
+			int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
+			if (audio->m_data->m_spec.channels == 2)
+				vals[1] = src[1];
+
+			if (channel_count == 1)
 			{
-				size_t cc = audio->m_data->m_spec.channels > 1 ? c : 0;
-				uint8_t* dst = engine.audio_stream + (i + c) * 2;
-				short val = reinterpret_cast<short*>(audio->m_data->m_data)[audio->m_samplepos * audio->m_data->m_spec.channels + cc];
-				int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
-				SDL_MixAudioFormat(dst, (Uint8*)&val, engine.audio_spec.format, 2, vol);
+				short val = (short)ut_lerp(vals[0], vals[1], 0.5f);
+				SDL_MixAudioFormat(dest, (Uint8*)&val, engine.audio_spec.format, 2, vol);
+			}
+			else
+			{
+				SDL_MixAudioFormat(dest, (Uint8*)vals, engine.audio_spec.format, 4, vol);
 			}
 
 			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
@@ -98,7 +107,7 @@ void __setup_audio_device()
 	SDL_AudioSpec desiredspec{0};
 	desiredspec.callback = __audio_callback;
 
-	desiredspec.freq = GameSettings::AudioOptions.OutputFrequency;
+	desiredspec.freq = GameSettings::AudioOptions.Frequency;
 	desiredspec.channels = 2;
 	desiredspec.samples = 512;
 	desiredspec.format = AUDIO_S16;
