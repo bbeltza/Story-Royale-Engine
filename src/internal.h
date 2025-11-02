@@ -127,6 +127,9 @@ extern "C" {
 #define currlayer reinterpret_cast<::Game::GuiLayer*>(engine.current_guilayer) // Same with this...
 #define flags_kbstate reinterpret_cast<::Flags8*>(engine.keyboard_state)
 #define flags_mousepress (*reinterpret_cast<::Flags8*>(&engine.mouse_press))
+
+#define _audio_loaded reinterpret_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
+#define _audio_queue reinterpret_cast<std::unordered_set<Audio *> *>(engine.audio_queue)
 #endif
 
 #define engine __engine_data // Macro for easier typing

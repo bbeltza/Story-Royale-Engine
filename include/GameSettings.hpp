@@ -20,8 +20,8 @@ enum InterpolationMode
 struct AudioOptions
 {
     uint16_t Frequency;
-    uint8_t Channels;
-    uint8_t Interpolation;
+    uint8_t Filter;
+    bool Mono;
 };
 
 namespace GameSettings

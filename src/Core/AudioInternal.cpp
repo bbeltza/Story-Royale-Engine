@@ -7,12 +7,9 @@
 #include "Sys.h"
 #include "GameSettings.hpp"
 
-#define loaded reinterpret_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
-#define aqueue reinterpret_cast<std::unordered_set<Audio *> *>(engine.audio_queue)
-
 void __audio_callback(void* data, uint8_t* stream, int len)
 {
-	if (!aqueue) return;
+	if (!engine.audio_queue) return;
 
 	memset(stream, 0, len);
 	
@@ -29,7 +26,7 @@ void __update_audio()
 
 	std::queue<Audio*> stop_queue;
 
-	for (Audio* audio : *aqueue)
+	for (Audio* audio : *_audio_queue)
 	{
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
@@ -124,96 +121,4 @@ void __setup_audio_device()
 	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, CHANGES);
 
 	syslogln("%d", engine.audio_spec.freq);
-}
-
-extern "C" intptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, intptr_t len_input);
-
-void Audio::threadedload(AudioData *audio)
-{
-	audio->Load();
-	ConvertAudioFormat(audio->m_spec.format, engine.audio_spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
-
-	audio->m_spec.format = engine.audio_spec.format;
-	audio->m_loaded = true;
-
-	audio->Loaded.Fire();
-}
-
-AudioData &Audio::Load(const char *path)
-{
-	AudioData *audio;
-
-	if (loaded->count(path) == 0)
-	{
-		loaded->emplace(path, new AudioData(path));
-		audio = loaded->at(path).get();
-		audio->thrd = Threads::Create(threadedload, audio);
-	}
-	else
-		audio = loaded->at(path).get();
-
-	return *audio;
-}
-
-void AudioData::Unload()
-{
-	for (auto &kv : *loaded)
-	{
-		if (kv.second.get() == this)
-			return (void)loaded->erase(kv.first);
-	}
-	abort();
-}
-
-void Audio::Play(bool force)
-{
-	if (!m_data->m_loaded)
-		m_data->Loaded.Wait();
-	SDL_LockAudioDevice(engine.audio_device);
-	if (force)
-		Stop();
-	else if (IsPlaying())
-	{
-		SDL_UnlockAudioDevice(engine.audio_device);
-		return;
-	}
-
-	aqueue->insert(this);
-
-	if (Info.fade_in > 0)
-	{
-		m_fadein = true;
-		m_fadevol = 0;
-	}
-	m_fadeout = false;
-
-	SDL_PauseAudioDevice(engine.audio_device, 0);
-
-	SDL_UnlockAudioDevice(engine.audio_device);
-}
-
-TimeStamp Audio::Stop()
-{
-	auto ts = Pause();
-	m_fsamplepos = 0;
-	m_samplepos = 0;
-	return ts;
-}
-
-TimeStamp Audio::Pause()
-{
-	SDL_LockAudioDevice(engine.audio_device);
-
-	aqueue->erase(this);
-	if (aqueue->empty())
-		SDL_PauseAudioDevice(engine.audio_device, 1);
-
-	SDL_UnlockAudioDevice(engine.audio_device);
-
-	return timePosition();
-}
-
-bool Audio::IsPlaying() const
-{
-	return aqueue->count(const_cast<Audio *>(this)) != 0;
 }

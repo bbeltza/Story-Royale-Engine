@@ -5,9 +5,9 @@
 
 #pragma region SignalBase
 #define get_semaphore reinterpret_cast<SDL_sem*>(semaphore)
-void SignalBase::static_invoker(SignalBase* sig, Connection* connection)
+void SignalBase::static_invoker(SignalBase* sig, dummy_func_t func, void* data)
 {
-	sig->invoke_func(connection);
+	sig->invoke_func(func, data);
 }
 
 void SignalBase::base_fire()
@@ -18,17 +18,19 @@ void SignalBase::base_fire()
 	{
 		for (Connection* connection : connections)
 		{
-			if (connection->multithreaded)
-				Threads::Create(static_invoker, this, connection);
+			if (connection->flags & Connection::multithreaded)
+				Threads::Create(static_invoker, this, connection->func, connection->Userdata);
 			else
-				invoke_func(connection);
+				invoke_func(connection->func, connection->Userdata);
+			if (connection->flags & Connection::once) delete_queue.push(connection);
 		}
 	}
 	else
 	{
 		for (Connection* connection : connections)
 		{
-			invoke_func(connection);
+			invoke_func(connection->func, connection->Userdata);
+			if (connection->flags & Connection::once) delete_queue.push(connection);
 		}
 	}
 	critical = false;
@@ -49,9 +51,9 @@ SignalBase::~SignalBase()
 		delete connections.front();
 }
 
-Connection* SignalBase::base_connect(dummy_func_t _func, void* _userdata, bool _multithreaded)
+Connection* SignalBase::base_connect(dummy_func_t _func, void* _userdata, intptr_t _flags)
 {
-	Connection* ret = new Connection{ this, _func, _userdata, _multithreaded };
+	Connection* ret = new Connection{ this, _func, _userdata, _flags };
 	return ret;
 }
 
@@ -61,7 +63,7 @@ void SignalBase::base_yield()
 }
 #pragma endregion
 #pragma region Connection
-Connection::Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata, bool _multithreaded) : signal(_signal), func(_func), Userdata(_userdata), multithreaded(_multithreaded)
+Connection::Connection(SignalBase* _signal, dummy_func_t _func, void* _userdata, intptr_t _flags) : signal(_signal), func(_func), Userdata(_userdata), flags(_flags)
 {
 	signal->connections.push_back(this);
 }

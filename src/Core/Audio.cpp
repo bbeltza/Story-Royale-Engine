@@ -5,8 +5,10 @@
 #include "Classes/Thread.hpp"
 
 #include "vorbis.h"
-
 #include "utils.h"
+#include "../internal.h"
+
+//
 
 void AudioData::Load()
 {
@@ -39,6 +41,16 @@ void AudioData::Load()
     SDL_FreeRW(audio_rw);
 }
 
+void AudioData::Unload()
+{
+	for (auto &kv : *_audio_loaded)
+	{
+		if (kv.second.get() == this)
+			return (void)_audio_loaded->erase(kv.first);
+	}
+	abort();
+}
+
 AudioData::AudioData(const char *path): Loaded(this)
 {
     m_file.Load(path);
@@ -53,4 +65,87 @@ AudioData::~AudioData()
     thrd.Detach();
     if (m_data)
         free((void *)m_data);
+}
+
+AudioData& Audio::Load(const char *path)
+{
+	AudioData *audio;
+
+	if (_audio_loaded->count(path) == 0)
+	{
+		_audio_loaded->emplace(path, new AudioData(path));
+		audio = _audio_loaded->at(path).get();
+		audio->thrd = Threads::Create(threadedload, audio);
+	}
+	else
+		audio = _audio_loaded->at(path).get();
+
+	return *audio;
+}
+
+//
+
+extern "C" uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, intptr_t len_input);
+void Audio::threadedload(AudioData *audio)
+{
+	audio->Load();
+	ConvertAudioFormat(audio->m_spec.format, engine.audio_spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
+
+	audio->m_spec.format = engine.audio_spec.format;
+	audio->m_loaded = true;
+
+	audio->Loaded.Fire();
+}
+
+void Audio::Play(bool force)
+{
+	if (!m_data->m_loaded)
+		m_data->Loaded.Wait();
+	SDL_LockAudioDevice(engine.audio_device);
+	if (force)
+		Stop();
+	else if (IsPlaying())
+	{
+		SDL_UnlockAudioDevice(engine.audio_device);
+		return;
+	}
+
+	_audio_queue->insert(this);
+
+	if (Info.fade_in > 0)
+	{
+		m_fadein = true;
+		m_fadevol = 0;
+	}
+	m_fadeout = false;
+
+	SDL_PauseAudioDevice(engine.audio_device, 0);
+
+	SDL_UnlockAudioDevice(engine.audio_device);
+}
+
+TimeStamp Audio::Pause()
+{
+	SDL_LockAudioDevice(engine.audio_device);
+
+	_audio_queue->erase(this);
+	if (_audio_queue->empty())
+		SDL_PauseAudioDevice(engine.audio_device, 1);
+
+	SDL_UnlockAudioDevice(engine.audio_device);
+
+	return timePosition();
+}
+
+TimeStamp Audio::Stop()
+{
+	auto ts = Pause();
+	m_fsamplepos = 0;
+	m_samplepos = 0;
+	return ts;
+}
+
+bool Audio::IsPlaying() const
+{
+	return _audio_queue->count(const_cast<Audio *>(this)) != 0;
 }
