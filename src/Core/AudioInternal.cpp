@@ -62,6 +62,7 @@ void __update_audio()
 
 			uint8_t* dest = engine.audio_stream + i * 2;
 			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels;
+
 			short val = (short)ut_lerp(src[0], src[audio->m_data->m_spec.channels], a);
 			short vals[2] = { val, val };
 
@@ -74,7 +75,7 @@ void __update_audio()
 
 			if (channel_count == 1)
 			{
-				val = (short)ut_lerp(vals[0], vals[1], 0.5f);
+				val = (vals[0] + vals[1]) / 2;
 				SDL_MixAudioFormat(dest, (Uint8*)&val, engine.audio_spec.format, 2, vol);
 			}
 			else
