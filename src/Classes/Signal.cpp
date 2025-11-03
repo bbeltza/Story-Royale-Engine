@@ -1,6 +1,6 @@
 #include <SDL.h>
-#include "Classes/Signal.hpp"
-#include "Classes/Thread.hpp"
+#include "Base/Signal.hpp"
+#include "Base/Thread.hpp"
 #include "Engine.hpp"
 
 #pragma region SignalBase

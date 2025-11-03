@@ -4,8 +4,8 @@
 #include "Datatypes/Vector.hpp"
 #include "Datatypes/Color.hpp"
 
-#include "Classes/File.hpp"
-#include "Classes/Texture.hpp"
+#include "Base/File.hpp"
+#include "Base/Texture.hpp"
 
 namespace Components
 {

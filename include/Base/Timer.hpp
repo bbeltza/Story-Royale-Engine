@@ -1,6 +1,6 @@
 #pragma once
 #include <standard>
-#include "Classes/Signal.hpp"
+#include "Base/Signal.hpp"
 
 #include "Datatypes/TimeStamp.h"
 

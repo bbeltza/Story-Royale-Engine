@@ -1,6 +1,6 @@
 #pragma once
 #include "Datatypes/TimeStamp.h"
-#include "Classes/Signal.hpp"
+#include "Base/Signal.hpp"
 
 struct GameInstance
 {

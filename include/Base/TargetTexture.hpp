@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Classes/Texture.hpp"
+#include "Base/Texture.hpp"
 #include "Datatypes/Rect.hpp"
 
 // An object that when created, becomes the DrawingDevice's current target to render stuff on a separate texture.

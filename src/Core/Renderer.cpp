@@ -7,7 +7,7 @@
 
 #include "Engine.hpp"
 
-#include "Classes/Texture.hpp"
+#include "Base/Texture.hpp"
 
 #define t_textures reinterpret_cast<std::vector<SDL_Texture*>*>(engine.target_textures)
 

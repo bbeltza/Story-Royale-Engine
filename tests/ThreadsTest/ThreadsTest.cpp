@@ -1,4 +1,4 @@
-#include <Classes/Thread.hpp>
+#include <Base/Thread.hpp>
 #include <GameEntry.h>
 
 #include <Sys.h>

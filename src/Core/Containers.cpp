@@ -1,7 +1,7 @@
 #include "../internal.h"
 
-#include "Classes/Texture.hpp"
-#include "Classes/Thread.hpp"
+#include "Base/Texture.hpp"
+#include "Base/Thread.hpp"
 #include "Base/Audio.hpp"
 
 #include "Game/World.hpp"

@@ -1,4 +1,4 @@
-#include "Classes/Thread.hpp"
+#include "Base/Thread.hpp"
 #include "../internal.h"
 
 #include "Sys.h"

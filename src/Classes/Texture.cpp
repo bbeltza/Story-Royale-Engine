@@ -1,7 +1,7 @@
 #include "../internal.h"
 
 #include "Engine.hpp"
-#include "Classes/Texture.hpp"
+#include "Base/Texture.hpp"
 
 Texture::Texture(Texture&& moving) noexcept: 
     texture(moving.texture),

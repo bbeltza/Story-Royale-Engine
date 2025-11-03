@@ -2,7 +2,7 @@
 #include "Datatypes/Vector.hpp"
 #include "Datatypes/Color.hpp"
 #include "Datatypes/Rect.hpp"
-#include "Classes/File.hpp"
+#include "Base/File.hpp"
 
 #define m_Texture ((SDL_Texture*)texture)
 #define m_Surface ((SDL_Surface*)file_surface)

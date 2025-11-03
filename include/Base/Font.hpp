@@ -2,7 +2,7 @@
 #include <SDL.hpp>
 #include <standard>
 
-#include "Classes/Texture.hpp"
+#include "Base/Texture.hpp"
 #include "Datatypes/Rect.hpp"
 
 class Font

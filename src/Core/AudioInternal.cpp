@@ -2,7 +2,7 @@
 #include "../internal.h"
 
 #include "Base/Audio.hpp"
-#include "Classes/Thread.hpp"
+#include "Base/Thread.hpp"
 
 #include "Sys.h"
 #include "GameSettings.hpp"

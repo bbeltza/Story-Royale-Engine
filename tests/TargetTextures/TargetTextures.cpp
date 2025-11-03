@@ -1,6 +1,6 @@
 #include <Engine.hpp>
 #include <ECS.hpp>
-#include <Classes/TargetTexture.hpp>
+#include <Base/TargetTexture.hpp>
 
 void Render()
 {

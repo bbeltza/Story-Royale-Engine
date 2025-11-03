@@ -3,7 +3,7 @@
 #include "Events/Mouse.hpp"
 #include "Events/Touch.hpp"
 
-#include "Classes/Signal.hpp"
+#include "Base/Signal.hpp"
 
 namespace Input
 {

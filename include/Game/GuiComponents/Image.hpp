@@ -1,6 +1,6 @@
 #pragma once
 #include "Game/GuiComponent.hpp"
-#include "Classes/Texture.hpp"
+#include "Base/Texture.hpp"
 
 namespace GuiComponents
 {

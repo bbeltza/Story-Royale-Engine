@@ -2,10 +2,10 @@
 #include "Game/CameraControllers/API"
 
 #include "Datatypes/Vector.hpp"
-#include "Classes/Signal.hpp"
-#include "Classes/Action.hpp"
 #include "Events/Mouse.hpp"
 #include "Events/Touch.hpp"
+#include "Base/Signal.hpp"
+#include "Base/Action.hpp"
 
 namespace CameraControllers
 {

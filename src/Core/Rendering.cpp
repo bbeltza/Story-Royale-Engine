@@ -3,8 +3,7 @@
 #include "../internal.h"
 
 #include "Base/Display.hpp"
-
-#include "Classes/Texture.hpp"
+#include "Base/Texture.hpp"
 
 #include "Game/World.hpp"
 

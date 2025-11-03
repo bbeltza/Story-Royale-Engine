@@ -1,6 +1,6 @@
 #pragma once
 #include "Game/GuiComponent.hpp"
-#include "Classes/Font.hpp"
+#include "Base/Font.hpp"
 #include <SDL.hpp>
 #include <fmt/format.h>
 

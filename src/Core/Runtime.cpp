@@ -2,9 +2,9 @@
 
 #include "Engine.hpp"
 
-#include "Classes/Timer.hpp"
-#include "Classes/Tween.hpp"
-#include "Classes/Thread.hpp"
+#include "Base/Timer.hpp"
+#include "Base/Tween.hpp"
+#include "Base/Thread.hpp"
 
 Signal<TimeStamp> Runtime::OnUpdate{ NULL, false };
 Signal<> Runtime::BeforeRender{ NULL, false };

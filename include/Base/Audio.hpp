@@ -1,7 +1,7 @@
 #pragma once
-#include "Classes/File.hpp"
-#include "Classes/Signal.hpp"
-#include "Classes/Thread.hpp"
+#include "Base/File.hpp"
+#include "Base/Signal.hpp"
+#include "Base/Thread.hpp"
 
 #include "Datatypes/TimeStamp.h"
 

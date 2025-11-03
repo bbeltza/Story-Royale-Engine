@@ -1,8 +1,7 @@
 #include "../internal.h"
 
 #include "Base/Window.hpp"
-
-#include "Classes/File.hpp"
+#include "Base/File.hpp"
 
 void Window::ChangeIcon(const char* path)
 {

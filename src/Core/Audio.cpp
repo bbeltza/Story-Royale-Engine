@@ -1,8 +1,7 @@
 #include <SDL.hpp>
 #include "Engine.hpp"
 #include "Base/Audio.hpp"
-
-#include "Classes/Thread.hpp"
+#include "Base/Thread.hpp"
 
 #include "vorbis.h"
 #include "utils.h"
