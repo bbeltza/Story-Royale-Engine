@@ -14,8 +14,8 @@ function(srEngine_build TARGET)
     srEngine_link_settings(${TARGET} ${ARGN})
     srEngine_link_resource(${TARGET} ${ARGN})
 
-    target_include_directories(${TARGET} PUBLIC StoryRoyaleEngine)
-    target_link_libraries(${TARGET} StoryRoyaleEngine)
+    target_include_directories(${TARGET} PRIVATE StoryRoyaleEngine)
+    target_link_libraries(${TARGET} PRIVATE StoryRoyaleEngine)
 
     if ("${ARGN}" MATCHES NO_CONSOLE)
         message("--- ${TARGET} HAS NO CONSOLE ${SR_ENGINE_NO_CONSOLE_OPTIONS}")

@@ -10,13 +10,6 @@
 
 #include "../internal.h"
 
-void __update_world()
-{
-    if (!engine.current_world) return;
-    currworld->call_update(engine.last_dt);
-    currworld->call_pupdate(engine.last_dt);
-}
-
 Game::World* Game::World::s_TargetWorld = nullptr;
 
 bool Game::World::cmp(const Entity* first, const Entity* second)

@@ -12,7 +12,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(StoryRoyaleEngine)
+
 project(StoryRoyaleEngine)
+project(StoryRoyaleEngineCore)
 
 srEngine_policy()
 
@@ -55,7 +57,10 @@ set(SRENGINE_INCLUDE_DIRS
 )
 
 target_include_directories(StoryRoyaleEngine PUBLIC ${SRENGINE_INCLUDE_DIRS})
-target_link_libraries(StoryRoyaleEngine ${3RDPARTYLIBS})
+target_link_libraries(StoryRoyaleEngine PUBLIC ${3RDPARTYLIBS})
+
+target_include_directories(StoryRoyaleEngineCore PUBLIC ${SRENGINE_INCLUDE_DIRS})
+target_link_libraries(StoryRoyaleEngine PRIVATE StoryRoyaleEngineCore)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     set(BUILD_TESTS ON)

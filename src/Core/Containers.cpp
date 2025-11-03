@@ -3,6 +3,8 @@
 #include "Base/Texture.hpp"
 #include "Base/Thread.hpp"
 #include "Base/Audio.hpp"
+#include "Base/Tween.hpp"
+#include "Base/Timer.hpp"
 
 #include "Game/World.hpp"
 #include "Game/GuiLayer.hpp"
@@ -48,4 +50,29 @@ void __clean_containers()
 		delete reinterpret_cast<::Game::GuiContainer*>(__engine_data.current_guilayer);
 
 	__destroy_queue();
+}
+
+void __update_classes()
+{
+	Thread::queue_removing();
+
+	engine.last_dt = Timer::global_update();
+	TweenBase::global_update(engine.last_dt);
+}
+
+void __update_layer()
+{
+	if (!engine.current_guilayer) return;
+	currlayer->m_absolute.Size.X = static_cast<float>(engine.viewport.w);
+	currlayer->m_absolute.Size.Y = static_cast<float>(engine.viewport.h);
+	currlayer->_processchildren();
+
+	currlayer->call_update(engine.last_dt);
+}
+
+void __update_world()
+{
+	if (!engine.current_world) return;
+	currworld->call_update(engine.last_dt);
+	currworld->call_pupdate(engine.last_dt);
 }

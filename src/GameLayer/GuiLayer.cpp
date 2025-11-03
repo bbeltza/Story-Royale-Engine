@@ -199,13 +199,3 @@ Game::GuiObject::~GuiObject()
     for (int i=0; i < 10; i++)
         if (tweens[i]) delete tweens[i];
 }
-
-void __update_layer()
-{
-    if (!engine.current_guilayer) return;
-    currlayer->m_absolute.Size.X = static_cast<float>(engine.viewport.w);
-    currlayer->m_absolute.Size.Y = static_cast<float>(engine.viewport.h);
-    currlayer->_processchildren();
-
-    currlayer->call_update(engine.last_dt);
-}

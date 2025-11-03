@@ -3,6 +3,7 @@ set(SDL2_VENDORED ON)
 set(SDL2IMAGE_SAMPLES OFF)
 set(SDL2IMAGE_INSTALL OFF)
 set(FMT-TEST OFF)
+set(FMT_UNICODE OFF)
 
 # SDL libs
 add_subdirectory(SDL)

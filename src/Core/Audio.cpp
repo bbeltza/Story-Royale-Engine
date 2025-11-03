@@ -1,150 +1,124 @@
-#include <SDL.hpp>
-#include "Engine.hpp"
+#include <standard>
+#include "../internal.h"
+
 #include "Base/Audio.hpp"
 #include "Base/Thread.hpp"
 
-#include "vorbis.h"
-#include "utils.h"
-#include "../internal.h"
+#include "Sys.h"
+#include "GameSettings.hpp"
 
-//
-
-void AudioData::Load()
+void __audio_callback(void* data, uint8_t* stream, int len)
 {
-    const int f_size = (int)m_file.getSize();
-    const void* f_data = m_file.getRawData();
+	if (!engine.audio_queue) return;
 
-    SDL_RWops *audio_rw = SDL_RWFromConstMem(f_data, f_size);
-    
-    int channels_int;
-    Uint8 *stream_data;
-    SDL_zero(m_spec);
-    
-    if (SDL_LoadWAV_RW(audio_rw, 0, &m_spec, &stream_data, &m_len))
-    {
-        m_file.setType(File::T_WAV);
-        m_data = (int8_t *)operator new(m_len);
-        memcpy(m_data, stream_data, m_len);
-        SDL_FreeWAV(stream_data);
-        m_len /= AUDIO_BYTESIZE(m_spec.format);
-        m_len /= m_spec.channels;
-    }
-    else if ((m_len = stb_vorbis_decode_memory((uint8_t *)f_data, f_size, &channels_int, &m_spec.freq, (short **)&m_data)) > 0)
-    {
-        m_file.setType(File::T_OGG);
-        m_spec.channels = channels_int;
-        m_spec.format = AUDIO_S16;
-    }
-
-    SDL_ClearError();
-    SDL_FreeRW(audio_rw);
+	memset(stream, 0, len);
+	
+	engine.audio_stream = stream;
+	engine.audio_slen = len;
+	__update_audio();
 }
 
-void AudioData::Unload()
+void __update_audio()
 {
-	for (auto &kv : *_audio_loaded)
+	const uint8_t channel_count = engine.audio_spec.channels;
+
+	const size_t sample_len = static_cast<size_t>(engine.audio_slen / 2);
+
+	std::queue<Audio*> stop_queue;
+
+	for (Audio* audio : *_audio_queue)
 	{
-		if (kv.second.get() == this)
-			return (void)_audio_loaded->erase(kv.first);
-	}
-	abort();
-}
+		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
+		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
 
-AudioData::AudioData(const char *path): Loaded(this)
-{
-    m_file.Load(path);
+		for (size_t i = 0; i <= sample_len - 1; i += audio->m_data->m_spec.channels)
+		{
+			double a = audio->m_fsamplepos - audio->m_samplepos;
 
-    if (!m_file.getSize())
-    { /*Will do something*/
-    }
-}
+			if (audio->m_fadein)
+			{
+				audio->m_fadevol += audio->Info.fade_in / engine.audio_spec.freq;
+				if (audio->m_fadevol >= 1)
+				{
+					audio->m_fadein = false;
+					audio->m_fadevol = 1;
+				}
+			}
+			else if (audio->m_fadeout)
+			{
+				audio->m_fadevol -= audio->Info.fade_out / engine.audio_spec.freq;
+				if (audio->m_fadevol <= 0)
+				{
+					audio->m_fadeout = false;
+					stop_queue.push(audio);
+					break;
+				}
+			}
+			else
+				audio->m_fadevol = 1;
 
-AudioData::~AudioData()
-{
-    thrd.Detach();
-    if (m_data)
-        free((void *)m_data);
-}
+			uint8_t* dest = engine.audio_stream + i * 2;
+			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels;
 
-AudioData& Audio::Load(const char *path)
-{
-	AudioData *audio;
+			short val = (short)ut_lerp(src[0], src[audio->m_data->m_spec.channels], a);
+			short vals[2] = { val, val };
 
-	if (_audio_loaded->count(path) == 0)
-	{
-		_audio_loaded->emplace(path, new AudioData(path));
-		audio = _audio_loaded->at(path).get();
-		audio->thrd = Threads::Create(threadedload, audio);
-	}
-	else
-		audio = _audio_loaded->at(path).get();
+			int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
+			if (audio->m_data->m_spec.channels == 2)
+			{
+				val = (short)ut_lerp(src[1], src[1+audio->m_data->m_spec.channels], a);
+				vals[1] = val;
+			}
 
-	return *audio;
-}
+			if (channel_count == 1)
+			{
+				val = (vals[0] + vals[1]) / 2;
+				SDL_MixAudioFormat(dest, (Uint8*)&val, engine.audio_spec.format, 2, vol);
+			}
+			else
+			{
+				SDL_MixAudioFormat(dest, (Uint8*)vals, engine.audio_spec.format, 4, vol);
+			}
 
-//
+			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
+			audio->m_samplepos = static_cast<uint32_t>(audio->m_fsamplepos);
 
-extern "C" uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, intptr_t len_input);
-void Audio::threadedload(AudioData *audio)
-{
-	audio->Load();
-	ConvertAudioFormat(audio->m_spec.format, engine.audio_spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
+			uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
 
-	audio->m_spec.format = engine.audio_spec.format;
-	audio->m_loaded = true;
-
-	audio->Loaded.Fire();
-}
-
-void Audio::Play(bool force)
-{
-	if (!m_data->m_loaded)
-		m_data->Loaded.Wait();
-	SDL_LockAudioDevice(engine.audio_device);
-	if (force)
-		Stop();
-	else if (IsPlaying())
-	{
-		SDL_UnlockAudioDevice(engine.audio_device);
-		return;
+			if (audio->Info.looped && audio->m_samplepos >= loop_end)
+			{
+				audio->m_fsamplepos = audio->Info.loop_start;
+			}
+			else if (audio->m_samplepos >= loop_end)
+			{
+				stop_queue.push(audio);
+				break;
+			}
+		}
 	}
 
-	_audio_queue->insert(this);
-
-	if (Info.fade_in > 0)
+	while (!stop_queue.empty())
 	{
-		m_fadein = true;
-		m_fadevol = 0;
+		stop_queue.front()->Stop();
+		stop_queue.pop();
 	}
-	m_fadeout = false;
-
-	SDL_PauseAudioDevice(engine.audio_device, 0);
-
-	SDL_UnlockAudioDevice(engine.audio_device);
 }
 
-TimeStamp Audio::Pause()
+void __setup_audio_device()
 {
-	SDL_LockAudioDevice(engine.audio_device);
+	SDL_AudioSpec desiredspec{0};
+	desiredspec.callback = __audio_callback;
 
-	_audio_queue->erase(this);
-	if (_audio_queue->empty())
-		SDL_PauseAudioDevice(engine.audio_device, 1);
+	desiredspec.freq = GameSettings::AudioOptions.Frequency;
+	desiredspec.channels = 2;
+	desiredspec.samples = 512;
+	desiredspec.format = AUDIO_S16;
 
-	SDL_UnlockAudioDevice(engine.audio_device);
+	int CHANGES = 0;
+	if (!desiredspec.freq)
+		CHANGES |= SDL_AUDIO_ALLOW_FREQUENCY_CHANGE;
 
-	return timePosition();
-}
+	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, CHANGES);
 
-TimeStamp Audio::Stop()
-{
-	auto ts = Pause();
-	m_fsamplepos = 0;
-	m_samplepos = 0;
-	return ts;
-}
-
-bool Audio::IsPlaying() const
-{
-	return _audio_queue->count(const_cast<Audio *>(this)) != 0;
+	syslogln("%d", engine.audio_spec.freq);
 }

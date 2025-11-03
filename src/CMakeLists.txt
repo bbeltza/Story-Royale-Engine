@@ -10,6 +10,7 @@ endmacro()
 set(SOURCES 
 "main.c"
 
+"Extras/AudioFormat.c"
 "Extras/ExtraSDL.c"
 "Extras/ExtraString.c"
 )
@@ -20,45 +21,30 @@ set(SYS_SOURCES
 "sleep.c"
 )
 
-set(CORE_SOURCES
-"InitEngine.c"
-"WindowCreation.c"
-"Runtime.c"
-"Audio.cpp"
-"AudioInternal.cpp"
-"Containers.cpp"
-"DestroyQueue.cpp"
-"Input.cpp"
-"InputEvents.cpp"
-"Renderer.cpp"
-"Rendering.cpp"
-"Runtime.cpp"
-"Window.cpp"
-"WindowData.cpp"
-
-"AudioFormat.c"
-"Physics.cpp"
-"Querying.cpp"
-)
-
 set(DATATYPES_SOURCES
 "Color.cpp"
 "UDim.cpp"
 )
 
-set(CLASS_SOURCES
+set(BASE_SOURCES
 "File/Class.cpp"
 "File/Loading.cpp"
 
 "Action.cpp"
+"Audio.cpp"
 "Font.cpp"
 "FontRenderer.cpp"
+"Input.cpp"
+"Physics.cpp"
+"Rendering.cpp"
+"Runtime.cpp"
+"Signal.cpp"
 "TargetTexture.cpp"
 "Texture.cpp"
 "Thread.cpp"
 "Timer.cpp"
 "Tween.cpp"
-"Signal.cpp"
+"Window.cpp"
 )
 
 set(LAYER_SOURCES
@@ -97,11 +83,28 @@ if(WIN32)
 endif()
 
 set_src(Sys SYS_SOURCES)
-set_src(Core CORE_SOURCES)
-set_src(Classes CLASS_SOURCES)
+set_src(Base BASE_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)
 set_src(GameLayer LAYER_SOURCES)
 set_src(SystemDependent SYSTEMDEP_SOURCES)
 
 add_library(StoryRoyaleEngine ${SOURCES})
-target_compile_definitions(StoryRoyaleEngine PRIVATE INTERNAL_DEF=1)
+
+set(CORE_SOURCES
+"Audio.cpp"
+"Containers.cpp"
+"DestroyQueue.cpp"
+"Input.cpp"
+"Querying.cpp"
+"Renderer.cpp"
+"WindowData.cpp"
+
+"InitEngine.c"
+"Runtime.c"
+"WindowCreation.c"
+)
+
+set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
+
+add_library(StoryRoyaleEngineCore ${SRCORE_SOURCES})
+target_compile_definitions(StoryRoyaleEngineCore PRIVATE INTERNAL_DEF=1)
