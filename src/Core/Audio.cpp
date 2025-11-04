@@ -20,20 +20,25 @@ void __audio_callback(void* data, uint8_t* stream, int len)
 
 void __update_audio()
 {
+	static std::queue<Audio*> stop_queue;
+
 	const uint8_t channel_count = engine.audio_spec.channels;
 
 	const size_t sample_len = static_cast<size_t>(engine.audio_slen / 2);
 
-	std::queue<Audio*> stop_queue;
 
 	for (Audio* audio : *_audio_queue)
 	{
+		const uint8_t audio_channels = audio->m_data->m_spec.channels;
+
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
 
 		for (size_t i = 0; i <= sample_len - 1; i += audio->m_data->m_spec.channels)
 		{
-			double a = audio->m_fsamplepos - audio->m_samplepos;
+			const double a = audio->m_fsamplepos - audio->m_samplepos;
+
+			//
 
 			if (audio->m_fadein)
 			{
@@ -56,27 +61,28 @@ void __update_audio()
 			}
 			else
 				audio->m_fadevol = 1;
+			
+			int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
 
 			uint8_t* dest = engine.audio_stream + i * 2;
-			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio->m_data->m_spec.channels;
+			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio_channels;
 
-			short val = (short)ut_lerp(src[0], src[audio->m_data->m_spec.channels], a);
-			short vals[2] = { val, val };
-
-			int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
-			if (audio->m_data->m_spec.channels == 2)
-			{
-				val = (short)ut_lerp(src[1], src[1+audio->m_data->m_spec.channels], a);
-				vals[1] = val;
-			}
+			short vals[2] = { src[0], src[1 - 2 + audio_channels] };
+			short nextvals[2] = {src[audio_channels], src[audio_channels*2 - 1]};
 
 			if (channel_count == 1)
 			{
-				val = (vals[0] + vals[1]) / 2;
+				short val = (vals[0] + vals[1]) / 2;
+				short next = (nextvals[0] + nextvals[1]) / 2;
+
+				val = (short)ut_lerp(val, next, a);
 				SDL_MixAudioFormat(dest, (Uint8*)&val, engine.audio_spec.format, 2, vol);
 			}
 			else
 			{
+				vals[0] = (short)ut_lerp(vals[0], nextvals[0], a);
+				vals[1] = (short)ut_lerp(vals[1], nextvals[1], a);
+
 				SDL_MixAudioFormat(dest, (Uint8*)vals, engine.audio_spec.format, 4, vol);
 			}
 
@@ -110,7 +116,7 @@ void __setup_audio_device()
 	desiredspec.callback = __audio_callback;
 
 	desiredspec.freq = GameSettings::AudioOptions.Frequency;
-	desiredspec.channels = 2;
+	desiredspec.channels = 1;
 	desiredspec.samples = 512;
 	desiredspec.format = AUDIO_S16;
 
