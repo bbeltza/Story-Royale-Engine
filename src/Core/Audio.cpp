@@ -34,7 +34,7 @@ void __update_audio()
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
 
-		for (size_t i = 0; i <= sample_len - 1; i += audio->m_data->m_spec.channels)
+		for (size_t i = 0; i < sample_len; i += audio_channels)
 		{
 			const double a = audio->m_fsamplepos - audio->m_samplepos;
 
@@ -116,7 +116,7 @@ void __setup_audio_device()
 	desiredspec.callback = __audio_callback;
 
 	desiredspec.freq = GameSettings::AudioOptions.Frequency;
-	desiredspec.channels = 1;
+	desiredspec.channels = 2;
 	desiredspec.samples = 512;
 	desiredspec.format = AUDIO_S16;
 
