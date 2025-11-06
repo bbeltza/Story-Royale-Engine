@@ -29,12 +29,18 @@ void __update_audio()
 
 	for (Audio* audio : *_audio_queue)
 	{
+		const uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
+
 		const uint8_t audio_channels = audio->m_data->m_spec.channels;
+		const size_t minchannels = ut_min(audio_channels, channel_count);
 
 		const float faudio_channel_ratio = (float)engine.audio_spec.channels / (float)audio->m_data->m_spec.channels;
 		const float faudio_sample_len = (float)audio->m_data->m_spec.freq / (float)engine.audio_spec.freq / faudio_channel_ratio;
 
-		for (size_t i = 0; i < sample_len; i += audio_channels)
+		const float step_count = faudio_sample_len * audio->Info.speed / (audio_channels / minchannels);
+
+
+		for (size_t i = 0; i < sample_len; i += minchannels)
 		{
 			const double a = audio->m_fsamplepos - audio->m_samplepos;
 
@@ -67,8 +73,14 @@ void __update_audio()
 			uint8_t* dest = engine.audio_stream + i * 2;
 			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio_channels;
 
-			short vals[2] = { src[0], src[1 - 2 + audio_channels] };
-			short nextvals[2] = {src[audio_channels], src[audio_channels*2 - 1]};
+			short vals[2] = {
+				src[0],
+				src[1 - 2 + audio_channels]
+			};
+			short nextvals[2] = {
+				src[audio_channels],
+				src[audio_channels*2 - 1]
+			};
 
 			if (channel_count == 1)
 			{
@@ -76,6 +88,7 @@ void __update_audio()
 				short next = (nextvals[0] + nextvals[1]) / 2;
 
 				val = (short)ut_lerp(val, next, a);
+
 				SDL_MixAudioFormat(dest, (Uint8*)&val, engine.audio_spec.format, 2, vol);
 			}
 			else
@@ -86,10 +99,8 @@ void __update_audio()
 				SDL_MixAudioFormat(dest, (Uint8*)vals, engine.audio_spec.format, 4, vol);
 			}
 
-			audio->m_fsamplepos += faudio_sample_len * audio->Info.speed;
+			audio->m_fsamplepos += step_count;
 			audio->m_samplepos = static_cast<uint32_t>(audio->m_fsamplepos);
-
-			uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
 
 			if (audio->Info.looped && audio->m_samplepos >= loop_end)
 			{
@@ -115,8 +126,8 @@ void __setup_audio_device()
 	SDL_AudioSpec desiredspec{0};
 	desiredspec.callback = __audio_callback;
 
-	desiredspec.freq = GameSettings::AudioOptions.Frequency;
-	desiredspec.channels = 2;
+	desiredspec.freq = GameSettings::AudioOptions.Frequency; // I should make an enum for different frequencies instead of letting the user have free choice
+	desiredspec.channels = 2 - GameSettings::AudioOptions.Mono;
 	desiredspec.samples = 512;
 	desiredspec.format = AUDIO_S16;
 
@@ -125,6 +136,4 @@ void __setup_audio_device()
 		CHANGES |= SDL_AUDIO_ALLOW_FREQUENCY_CHANGE;
 
 	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, CHANGES);
-
-	syslogln("%d", engine.audio_spec.freq);
 }
