@@ -20,7 +20,7 @@ void __audio_callback(void* data, uint8_t* stream, int len)
 
 void __update_audio()
 {
-	static std::queue<Audio*> stop_queue;
+	std::queue<Audio*> stop_queue;
 
 	const uint8_t channel_count = engine.audio_spec.channels;
 
