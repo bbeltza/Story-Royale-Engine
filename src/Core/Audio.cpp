@@ -42,7 +42,7 @@ void __update_audio()
 
 		for (size_t i = 0; i < sample_len; i += minchannels)
 		{
-			const double a = audio->m_fsamplepos - audio->m_samplepos;
+			double a = audio->m_fsamplepos - audio->m_samplepos;
 
 			//
 
@@ -68,7 +68,8 @@ void __update_audio()
 			else
 				audio->m_fadevol = 1;
 			
-			int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * 64);
+			int vol = static_cast<int>(audio->Info.volume * audio->m_fadevol * SDL_MIX_MAXVOLUME);
+			ut_setclamp(vol, 0, SDL_MIX_MAXVOLUME);
 
 			uint8_t* dest = engine.audio_stream + i * 2;
 			short* src = reinterpret_cast<short*>(audio->m_data->m_data) + audio->m_samplepos * audio_channels;
@@ -93,6 +94,8 @@ void __update_audio()
 			}
 			else
 			{
+				//a = pow(a, exp(1));
+				//a = pow(a, 2);
 				vals[0] = (short)ut_lerp(vals[0], nextvals[0], a);
 				vals[1] = (short)ut_lerp(vals[1], nextvals[1], a);
 

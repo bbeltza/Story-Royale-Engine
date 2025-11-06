@@ -1,10 +1,16 @@
 #include <stdio.h>
 #include "Sys.h"
 
+#define lockfile _lock_file
+#define unlockfile _unlock_file
+
 int sysvlog(const char* fmt, va_list va)
 {
+    lockfile(stdout);
     fputs("[LOG]: ", stdout);
-    return vprintf(fmt, va);
+    int c = vfprintf(stdout, fmt, va);
+    unlockfile(stdout);
+    return c;
 }
 
 int syslog(const char* fmt, ...)
