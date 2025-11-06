@@ -2,7 +2,11 @@
 
 - Animations/Keyframes
 
-- Audio interpolation (specially the gaussian one that the SNES uses to give a more retro-like style to the game)
+- Audio interpolation
+	- Modes:
+		Nearest - Rounds the alpha to the closest, either 0 or 1, and then interpolates.
+		Linear - Interpolates with the given alpha.
+		Filter (Gaussian & Possibly cubic) - Passes a filter function to the alpha to give more smoothness, and then interpolates.
 
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
@@ -18,7 +22,7 @@
 
 - Work on the game ^^
 
-(current version: 0.011.01 (experimental))
+(current version: 0.011.06)
 
 Less likely ideas:
 
