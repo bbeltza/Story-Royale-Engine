@@ -75,19 +75,10 @@ set(COMPONENT_SOURCES
 
 set_dst_src(Components COMPONENT_SOURCES LAYER_SOURCES)
 
-set(WINDOWS_SOURCES
-##"Windows.cpp"
-)
-
-if(WIN32)
-    set(SYSTEMDEP_SOURCES ${WINDOWS_SOURCES})
-endif()
-
 set_src(Sys SYS_SOURCES)
 set_src(Base BASE_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)
 set_src(GameLayer LAYER_SOURCES)
-set_src(SystemDependent SYSTEMDEP_SOURCES)
 
 add_library(StoryRoyaleEngine ${SOURCES})
 
@@ -109,3 +100,5 @@ set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
 
 add_library(StoryRoyaleEngineCore ${SRCORE_SOURCES})
 target_compile_definitions(StoryRoyaleEngineCore PRIVATE INTERNAL_DEF=1)
+
+add_subdirectory("os")

@@ -1,11 +1,13 @@
 #include <stdio.h>
 
+#include "OS.h"
 #include "logging.h"
 
-void LOG(const char* fmt, ...)
+void NLOG(const char* fmt, ...)
 {
-	putchar('\n');
-	fflush(stdout);
+	if (!os.output_hasnline())
+		putchar('\n');
 
-	int ret = getc(stdout);
+	fputs("[LOG]: ", stdout);
+	printf(fmt);
 }

@@ -3,6 +3,12 @@
 
 _CAPI_BEGIN
 
-void LOG(const char* fmt, ...);
+void NLOG(const char* fmt, ...);
+void ALOG(const char* fmt, ...);
+
+#define LOG NLOG
+
+void ERROR(const char* fmt, int level, ...);
+void WARN(const char* fmt, ...);
 
 _CAPI_END

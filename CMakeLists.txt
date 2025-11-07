@@ -57,9 +57,10 @@ set(SRENGINE_INCLUDE_DIRS
 )
 
 target_include_directories(StoryRoyaleEngine PUBLIC ${SRENGINE_INCLUDE_DIRS})
-target_link_libraries(StoryRoyaleEngine PUBLIC ${3RDPARTYLIBS})
-
+target_include_directories(StoryRoyaleEngineOS PUBLIC ${SRENGINE_INCLUDE_DIRS})
 target_include_directories(StoryRoyaleEngineCore PUBLIC ${SRENGINE_INCLUDE_DIRS})
+
+target_link_libraries(StoryRoyaleEngine PUBLIC ${3RDPARTYLIBS})
 target_link_libraries(StoryRoyaleEngine PRIVATE StoryRoyaleEngineCore)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
