@@ -30,7 +30,7 @@ static const component_vtable* BASE_VTABLE = component_vtable::get(&BASE_COMP);
 
 Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)
 {
-    m_world->m_Entities.push_back(this);
+    m_world->m_Entities.push_front(this);
 }
 
 Game::Entity::~Entity()
@@ -41,7 +41,7 @@ Game::Entity::~Entity()
 void Game::Entity::reParent(World* const _world)
 {
     m_world->m_Entities.remove(this);
-    _world->m_Entities.push_back(this);
+    _world->m_Entities.push_front(this);
     m_world = _world;
 }
 
