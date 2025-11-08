@@ -1,7 +1,8 @@
 #include "Base/Thread.hpp"
 #include "../internal.h"
 
-#include "Sys.h"
+#include "OS.h"
+#include "logging.h"
 
 #define threads_list reinterpret_cast<std::list<Thread::data>*>(engine.allocated_threads)
 #define to_remove reinterpret_cast<std::queue<Thread::data*>*>(engine.finished_threads)
@@ -20,7 +21,7 @@ void Thread::queue_removing()
 
 int Thread::invokethread_handler(data *_data)
 {
-    if (_data->delay) sysleeps(static_cast<float>(_data->delay));
+    if (_data->delay) os.delay(_data->delay);
 
     _data->func(_data->data);
 
@@ -29,7 +30,6 @@ int Thread::invokethread_handler(data *_data)
     return 0;
 }
 
-#include <thread>
 Thread::Thread(Function func, void* userdata, TimeStamp delay)
 {
     threads_list->emplace_back();
@@ -39,7 +39,7 @@ Thread::Thread(Function func, void* userdata, TimeStamp delay)
     _data->data = userdata;
     _data->delay = delay;
 
-    _data->handle = SDL_CreateThread((SDL_ThreadFunction)invokethread_handler, NULL, _data);
+    _data->handle = SDL_CreateThread((SDL_ThreadFunction)invokethread_handler, "Story Royale Engine Thread", _data);
 }
 
 Thread::Thread(Thread&& moving) : _data(moving._data) { moving._data = nullptr; _data->thrd = this; }
@@ -50,7 +50,9 @@ Thread::~Thread() { if (_data) _data->thrd = nullptr; }
 Thread::data::~data()
 {
     if (handle)
+    {
         SDL_DetachThread(handle);
+    }
     if (thrd)
         thrd->_data = nullptr;
 }

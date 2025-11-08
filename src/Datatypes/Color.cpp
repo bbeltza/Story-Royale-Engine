@@ -51,7 +51,7 @@ Color3::Color3(const char* HEX) // 12 34 56
 
 void Color3::Print() const
 {
-	syslog("{ %d, %d, %d } ( %g%%, %g%%, %g%% )",
+	LOG("{ %d, %d, %d } ( %g%%, %g%%, %g%% )",
 		r,
 		g,
 		b,
@@ -94,7 +94,7 @@ Color4::Color4(const char* HEX)
 
 void Color4::Print() const
 {
-	syslog("{ %d, %d, %d, %d } ( %g%%, %g%%, %g%%, %g%% )",
+	LOG("{ %d, %d, %d, %d } ( %g%%, %g%%, %g%%, %g%% )",
 		r,
 		g,
 		b,

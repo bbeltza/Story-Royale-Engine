@@ -1,3 +1,4 @@
+#include <OS.h>
 #include "../internal.h"
 
 static void loop();
@@ -26,7 +27,8 @@ static void loop()
 
     __display_render();
 
-    if (engine.target_ms) SDL_Delay(engine.target_ms);
+    if (engine.target_ms)
+        os.msdelay(engine.target_ms);
 }
 
 static int eventfilter(void* data, SDL_Event *ev)

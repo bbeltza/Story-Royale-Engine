@@ -4,7 +4,6 @@
 #include "Base/Audio.hpp"
 #include "Base/Thread.hpp"
 
-#include "Sys.h"
 #include "GameSettings.hpp"
 
 void __audio_callback(void* data, uint8_t* stream, int len)

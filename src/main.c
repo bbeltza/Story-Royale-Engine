@@ -66,8 +66,6 @@ static void handle_arg(const char* arg, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    LOG("");
-
 	for (int i = 1; i < argc; i++)
         handle_arg(argv[i], argv);
 	

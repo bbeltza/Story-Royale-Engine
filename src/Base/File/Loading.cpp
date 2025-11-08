@@ -1,7 +1,6 @@
 #define fs(x) (FILE *)x
 
 #include "Base/File.hpp"
-#include "Sys.h"
 
 const char res_prefix[] = "_res/";
 
@@ -55,7 +54,11 @@ void File::Load(const char *path)
                     resptr += strlen((const char*)resptr) + 5;
                 }
                 if (*resptr == '\n')
-                    return syserror(FILE_NOT_FOUND, path);
+                {
+                    // TODO: Add error support for stuff like this
+                    //ERROR(FILE_NOT_FOUND, path);
+                    return;
+                }
             }
         }
         else
@@ -77,7 +80,9 @@ void File::Load(const char *path)
         FILE* fstream = fopen(path, "rb");
         if (!fstream)
         {
-            return syserror(FILE_NOT_FOUND, path);
+            // TODO: And this
+            // ERROR(FILE_NOT_FOUND, path);
+            return;
         }
 
         FileInfo &info = m_info();

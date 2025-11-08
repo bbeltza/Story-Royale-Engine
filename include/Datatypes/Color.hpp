@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL_pixels.h>
 #include <standard>
-#include "syslog.h"
+#include "logging.h"
 
 struct Color4;
 

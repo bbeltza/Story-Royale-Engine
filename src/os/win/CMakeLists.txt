@@ -1,0 +1,1 @@
+add_library(StoryRoyaleEngineOS "os.c" "output.c" "sync.c")

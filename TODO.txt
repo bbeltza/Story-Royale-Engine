@@ -22,7 +22,7 @@
 
 - Work on the game ^^
 
-(current version: 0.011.06)
+(current version: 0.011.08)
 
 Less likely ideas:
 

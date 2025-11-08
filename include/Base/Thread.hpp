@@ -18,6 +18,7 @@ namespace Threads // Designed to replace ThreadPool
 }
 
 __def_internal(__update_classes)
+__def_internal(__clean_containers)
 
 class Thread
 {
@@ -75,6 +76,7 @@ private:
 
     TEMPL friend Thread Threads::Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax);
     __friend_internal(__update_classes)
+    __friend_internal(__clean_containers)
 };
 
 TEMPL Thread Threads::Delay(TimeStamp Duration, _Fn&& _Fx, _Args&&... _Ax)

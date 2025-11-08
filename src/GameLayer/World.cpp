@@ -4,7 +4,6 @@
 #include "Game/Entity.hpp"
 
 #include "Engine.hpp"
-#include "Sys.h"
 
 #include "config.h"
 

@@ -90,8 +90,8 @@ public:
 	Signal(void* Userdata=NULL, bool Multithreaded=true): SignalBase(Userdata, Multithreaded) {}
 	void Fire(_args... args) { ret_args = { args... }; base_fire(); }
 
-	#define _csyntax1(n)  template <typename _retype, typename _sigdata, typename _connectdata> Connection* n##(_retype(*Func)(_sigdata*, _connectdata*, _args...), void* Userdata = NULL, bool multithreaded=true)
-	#define _csyntax2(n)  template <typename _retype> Connection* n##(_retype(*Func)(void), void* Userdata = NULL, bool multithreaded=true)
+	#define _csyntax1(n)  template <typename _retype, typename _sigdata, typename _connectdata> Connection* n(_retype(*Func)(_sigdata*, _connectdata*, _args...), void* Userdata = NULL, bool multithreaded=true)
+	#define _csyntax2(n)  template <typename _retype> Connection* n(_retype(*Func)(void), void* Userdata = NULL, bool multithreaded=true)
 
 	#define _basecreateconnect(flags) base_connect(reinterpret_cast<dummy_func_t>(Func), Userdata, flags)
 	#define _baseconnect _basecreateconnect(multithreaded ? Connection::multithreaded : 0)

@@ -1,7 +1,5 @@
 #include "../internal.h"
 
-#include "Sys.h"
-
 #define CENTERED SDL_WINDOWPOS_CENTERED
 
 void __create_window(const struct _win_settings* _win)
@@ -19,9 +17,6 @@ void __create_window(const struct _win_settings* _win)
 
 int __poll_events()
 {
-    if (sysexiting())
-        return 0;
-
     while (SDL_PollEvent(&engine.sdl_eventhndl) != 0)
     {
         switch (engine.sdl_eventhndl.type)

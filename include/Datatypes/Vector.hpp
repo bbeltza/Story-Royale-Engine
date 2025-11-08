@@ -2,7 +2,7 @@
 #include <math.h>
 #include <iostream>
 
-#include "syslog.h"
+#include "logging.h"
 #include "utils.h"
 
 template <class _Num>

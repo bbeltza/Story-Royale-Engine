@@ -2,8 +2,6 @@
 #include "Base/File.hpp"
 #include "SDL.hpp"
 
-#include "Sys.h"
-
 File::Map* File::s_loaded = nullptr;
 
 File::File() : m_type(T_UNKNOWN) {}

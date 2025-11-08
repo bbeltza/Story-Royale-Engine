@@ -1,6 +1,6 @@
 #pragma once
 #include "utils.h"
-#include "syslog.h"
+#include "logging.h"
 
 template <typename _Num>
 struct Flags

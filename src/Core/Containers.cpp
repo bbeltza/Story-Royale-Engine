@@ -9,40 +9,43 @@
 #include "Game/World.hpp"
 #include "Game/GuiLayer.hpp"
 
-typedef std::tuple<
-	std::list<Thread::data>,
-	std::queue<Thread::data*>,
+struct ENGINE_CONTAINERS
+{
+	std::list<Thread::data> allocated_threads;
+	std::queue<Thread::data*> finished_threads;
 
-	std::unordered_map<std::string, std::unique_ptr<AudioData>>,
-	std::unordered_set<Audio*>,
+	std::unordered_map<std::string, std::unique_ptr<AudioData>> loaded_audios;
+	std::unordered_set<Audio*> audio_queue;
 
-	std::vector<SDL_Texture*>
-> _Tup;
+	std::vector<SDL_Texture*> target_textures;
+};
 
-static _Tup* containers_tuple;
+static ENGINE_CONTAINERS* cc;
 
 #define get_container(n) std::get<n>(*containers_tuple)
 
 void __init_containers()
 {
-	containers_tuple = new _Tup;
+	cc = new ENGINE_CONTAINERS;
 
-	engine.allocated_threads = &get_container(0);
-	engine.finished_threads = &get_container(1);
+	engine.allocated_threads = &cc->allocated_threads;
+	engine.finished_threads = &cc->finished_threads;
 
-	engine.loaded_audios = &get_container(2);
-	engine.audio_queue = &get_container(3);
+	engine.loaded_audios = &cc->loaded_audios;
+	engine.audio_queue = &cc->audio_queue;
 
-	engine.target_textures = &get_container(4);
+	engine.target_textures = &cc->target_textures;
 
-	get_container(4).push_back(NULL);
+	cc->target_textures.push_back(NULL);
 }
 
 void __clean_containers()
 {
-	memset(&engine.allocated_threads, 0, &engine.target_textures - &engine.allocated_threads);
+	Thread::queue_removing();
 
-	delete containers_tuple;
+	memset(&engine.allocated_threads, 0, (&engine.target_textures - &engine.allocated_threads) * sizeof(void*));
+
+	delete cc;
 
 	if (engine.current_world)
 		delete reinterpret_cast<::Game::World*>(__engine_data.current_world);
