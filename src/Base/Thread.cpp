@@ -24,8 +24,9 @@ int Thread::invokethread_handler(data *_data)
     if (_data->delay) os.delay(_data->delay);
 
     _data->func(_data->data);
-
-    to_remove->push(_data);
+    
+    if (engine.finished_threads)
+        to_remove->push(_data);
 
     return 0;
 }
@@ -68,6 +69,6 @@ void Thread::Join()
 
 void Thread::Detach()
 {
-    if (_data)
+    if (_data && engine.allocated_threads)
         threads_list->remove(*_data);
 }
