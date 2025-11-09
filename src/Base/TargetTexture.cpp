@@ -83,15 +83,15 @@ Texture TargetTexture::CreateTexture(const RectI& src)
         SDL_QueryTexture(m_texture, NULL, NULL, &w, &h);
     }
 
-    uint64_t* pixeldata = new uint64_t[w * h];
+    std::unique_ptr<uint64_t> pixeldata(new uint64_t[w * h]);
 
     SDL_SetRenderTarget(renderer, m_texture);
-    SDL_RenderReadPixels(renderer, rect, 0, pixeldata, w*4);
+    SDL_RenderReadPixels(renderer, rect, 0, pixeldata.get(), w*4);
     SDL_SetRenderTarget(renderer, target_textures.at(targetptr));
 
     SDL_Texture* sdl_texture = SDL_CreateTexture(renderer, 0, SDL_TEXTUREACCESS_STATIC, w, h);
     SDL_SetTextureBlendMode(sdl_texture, SDL_BLENDMODE_BLEND);
-    SDL_UpdateTexture(sdl_texture, NULL, pixeldata, w*4);
+    SDL_UpdateTexture(sdl_texture, NULL, pixeldata.get(), w*4);
 
     Texture texture;
     texture.texture = sdl_texture;

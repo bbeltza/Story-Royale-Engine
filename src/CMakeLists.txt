@@ -37,7 +37,6 @@ set(BASE_SOURCES
 "TargetTexture.cpp"
 "Texture.cpp"
 "Thread.cpp"
-"Timer.cpp"
 "Tween.cpp"
 "Window.cpp"
 )
@@ -91,7 +90,7 @@ set(CORE_SOURCES
 
 set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
 
-add_library(StoryRoyaleEngineCore ${SRCORE_SOURCES})
+add_library(StoryRoyaleEngineCore ${SRCORE_SOURCES} "Base/Timer.cpp")
 target_compile_definitions(StoryRoyaleEngineCore PRIVATE INTERNAL_DEF=1)
 
 add_subdirectory("os")

@@ -19,12 +19,8 @@ void __audio_callback(void* data, uint8_t* stream, int len)
 
 void __update_audio()
 {
-	std::queue<Audio*> stop_queue;
-
 	const uint8_t channel_count = engine.audio_spec.channels;
-
 	const size_t sample_len = static_cast<size_t>(engine.audio_slen / 2);
-
 
 	for (Audio* audio : *_audio_queue)
 	{
@@ -60,7 +56,7 @@ void __update_audio()
 				if (audio->m_fadevol <= 0)
 				{
 					audio->m_fadeout = false;
-					stop_queue.push(audio);
+					_audio_stopqueue->push(audio);
 					break;
 				}
 			}
@@ -110,16 +106,16 @@ void __update_audio()
 			}
 			else if (audio->m_samplepos >= loop_end)
 			{
-				stop_queue.push(audio);
+				_audio_stopqueue->push(audio);
 				break;
 			}
 		}
 	}
 
-	while (!stop_queue.empty())
+	while (!_audio_stopqueue->empty())
 	{
-		stop_queue.front()->Stop();
-		stop_queue.pop();
+		_audio_stopqueue->front()->Stop();
+		_audio_stopqueue->pop();
 	}
 }
 

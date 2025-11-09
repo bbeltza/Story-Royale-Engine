@@ -34,6 +34,7 @@ add_subdirectory(3rdparty)
 
 add_subdirectory(gen_src)
 add_subdirectory(src)
+
 target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_compile_features(StoryRoyaleEngine PRIVATE cxx_std_11 c_std_99)
 target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")

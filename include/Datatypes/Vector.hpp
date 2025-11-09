@@ -36,7 +36,7 @@ struct Vector2
     inline Vector2 getMul(const _Num other) const { return {X * other, Y * other}; }
     inline Vector2 getDiv(const _Num other) const { return {X / other, Y / other}; }
 
-    inline void Print() const {syslog("{ %g, %g }", (double)X, (double)Y);}
+    inline void Print() const {ALOG("{ %g, %g }", (double)X, (double)Y);}
     inline void PrintLn() const {Print(); putchar('\n');}
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}

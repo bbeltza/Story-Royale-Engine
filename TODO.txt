@@ -13,8 +13,7 @@
 - Better error handling
 	- Errors should not crash, instead they should just inform the user that something went wrong. In case the error won't let the program continue, then crash
 
-- Better logging supports
-- Like having a log file opened
+- Have a log file opened
 
 - Icon embedder (for the cmake configuration)
 	- a python script that takes a or multiple images to make an .ico file (this is easily possible thanks to a library called Pillow)
@@ -22,7 +21,7 @@
 
 - Work on the game ^^
 
-(current version: 0.011.08)
+(current version: 0.011.09)
 
 Less likely ideas:
 

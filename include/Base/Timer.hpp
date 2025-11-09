@@ -7,7 +7,7 @@
 #include "internal_def.hh"
 __def_internal(__update_classes)
 
-    class Timer
+class Timer
 {
     typedef std::unordered_set<Timer *> Set;
 

@@ -1,4 +1,5 @@
 #include <OS.h>
+#include <stdio.h>
 #include "../internal.h"
 
 static void loop();
@@ -9,6 +10,9 @@ void __run_engine()
     SDL_SetEventFilter(eventfilter, NULL);
     while (__poll_events())
         loop();
+    #ifdef __unix__
+    putchar('\n');
+    #endif
 }
 
 static void loop()
@@ -27,8 +31,12 @@ static void loop()
 
     __display_render();
 
-    if (engine.target_ms)
-        os.msdelay(engine.target_ms);
+    #ifdef __unix__ // Update console content for unix (since it only does update for every new-line)
+    fflush(stdout);
+    #endif
+
+    if (engine.target_dt)
+        os.delay(engine.target_dt);
 }
 
 static int eventfilter(void* data, SDL_Event *ev)

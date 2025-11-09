@@ -1,1 +1,1 @@
-add_library(StoryRoyaleEngineOS "os.c" "output.c")
+add_library(StoryRoyaleEngineOS "os.c" "output.c" "wherexy.c" "sync.c")

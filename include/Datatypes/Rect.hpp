@@ -11,7 +11,7 @@ template <typename _Num> inline double _rad(_Num x) {return (x * (r_pi / 180));}
 template <typename _Num>
 struct Rect
 {
-    void Print() const { syslog("{ {%g, %g} ; {%g, %g}", (double)Position.X, (double)Position.Y, (double)Size.X, (double)Size.Y); }
+    void Print() const { ALOG("{ {%g, %g} ; {%g, %g}", (double)Position.X, (double)Position.Y, (double)Size.X, (double)Size.Y); }
     void PrintLn() const { Print(); putchar('\n'); }
 
     Rect(): Position(0, 0), Size(50, 50) {}
