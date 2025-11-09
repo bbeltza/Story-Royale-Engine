@@ -36,8 +36,8 @@ struct Vector2
     inline Vector2 getMul(const _Num other) const { return {X * other, Y * other}; }
     inline Vector2 getDiv(const _Num other) const { return {X / other, Y / other}; }
 
-    inline void Print() const {ALOG("{ %g, %g }", (double)X, (double)Y);}
-    inline void PrintLn() const {Print(); putchar('\n');}
+    inline void Print() const {display(&ALOG);}
+    inline void PrintLn() const {display(&NLOG);}
 
     inline double getMagnitude() {return sqrt(X*X + Y*Y);}
 
@@ -60,6 +60,8 @@ struct Vector2
     // A vector with its components set to 0.5, however, if the vector should be composed of floating point types, otherwise the components will be rounded to 0
     static const Vector2<_Num> CENTER;
 
+    private:
+    void display(logfunc_t _printer) const {_printer("{ %g, %g }", (double)X, (double)Y);}
 };
 
 #define vec2 Vector2<_Num>

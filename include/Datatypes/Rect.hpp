@@ -11,8 +11,8 @@ template <typename _Num> inline double _rad(_Num x) {return (x * (r_pi / 180));}
 template <typename _Num>
 struct Rect
 {
-    void Print() const { ALOG("{ {%g, %g} ; {%g, %g}", (double)Position.X, (double)Position.Y, (double)Size.X, (double)Size.Y); }
-    void PrintLn() const { Print(); putchar('\n'); }
+    void Print() const { display(&ALOG); }
+    void PrintLn() const { display(&NLOG); }
 
     Rect(): Position(0, 0), Size(50, 50) {}
     Rect(const _Num x, const _Num y, const _Num width, const _Num height): Position(x, y), Size(width, height) {}
@@ -57,6 +57,8 @@ struct Rect
     inline constexpr vec2 getBottomLeftRotated(double angle) const {return this->Position - getXRotatedOffset(angle) + getYRotatedOffset(angle);}
     inline constexpr vec2 getBottomRightRotated(double angle) const {return this->Position + getXRotatedOffset(angle) + getYRotatedOffset(angle);}
 
+    private:
+    void display(logfunc_t _printer) const { _printer("{ {%g, %g} ; {%g, %g}", (double)Position.X, (double)Position.Y, (double)Size.X, (double)Size.Y); }
 };
 
 #undef vec2

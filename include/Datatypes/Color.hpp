@@ -19,8 +19,8 @@ struct Color3
 	uint8_t g = 0;
 	uint8_t b = 0;
 
-	void Print() const;
-	inline void PrintLn() const { Print(); putchar('\n'); }
+	void Print() const { display(&ALOG); };
+	void PrintLn() const { display(&NLOG); };
 
 	void Add(const Color3& other);
 	void Sub(const Color3& other);
@@ -41,6 +41,10 @@ struct Color3
 	inline operator Color4() const;
 
 	static const Color3 WHITE, BLACK;
+
+	private:
+
+	void display(logfunc_t _printer) const;
 };
 
 struct Color4
@@ -59,8 +63,8 @@ struct Color4
 	uint8_t b;
 	uint8_t a;
 
-	void Print() const;
-	inline void PrintLn() const { Print(); putchar('\n'); }
+	void Print() const { display(&ALOG); };
+	void PrintLn() const { display(&NLOG); };
 
 	void Add(const Color4& other);
 	void Sub(const Color4& other);
@@ -82,6 +86,10 @@ struct Color4
 	inline operator SDL_Color&() const {return *(SDL_Color*)this;}
 
 	static const Color4 WHITE, BLACK, INVISIBLE;
+
+	private:
+
+	void display(logfunc_t _printer) const;
 };
 
 inline Color3::operator Color4() const { return {r, g, b, 255}; }

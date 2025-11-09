@@ -17,22 +17,25 @@ struct Flags
     inline void Toggle(_Num flag) {m_data ^= flag;}
     inline void ToggleOn(_Num flag) {m_data |= flag;}
     inline void ToggleOff(_Num flag) {m_data &= ~flag;}
-    inline void Print() {
-        const size_t bitsize = sizeof(m_data) * 8;
-
-        char buff[bitsize + 1] = {0};
-        for (size_t i = 0; i < bitsize; i++)
-            buff[bitsize - i - 1] = 48 + ((m_data >> i) & 1);
-        
-        syslog("{ %s (0x%x) }", buff, m_data);
-    }
-    inline void PrintLn() {Print(); putchar('\n');}
+    
+    inline void Print() const { display(&ALOG); }
+    inline void PrintLn() const { display(&NLOG); }
 
     operator _Num() const { return Get(); }
 
     private:
 
     _Num m_data;
+
+    inline void display(logfunc_t _printer) const {
+        const size_t bitsize = sizeof(m_data) * 8;
+
+        char buff[bitsize + 1] = {0};
+        for (size_t i = 0; i < bitsize; i++)
+            buff[bitsize - i - 1] = 48 + ((m_data >> i) & 1);
+        
+        _printer("{ %s (0x%x) }", buff, m_data);
+    }
 };
 
 typedef Flags<uint8_t> Flags8;

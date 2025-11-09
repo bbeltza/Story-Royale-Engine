@@ -35,7 +35,7 @@ void* operator new(size_t size)
 	block[0] = size;
 	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, static_cast<int>(size));
 
-	LOG("GOT OPERATOR NEW, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
+	//LOG("GOT OPERATOR NEW, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
 
 	return ++block;
 }
@@ -46,7 +46,7 @@ void operator delete(void* block)
 
 	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, -static_cast<int>(tblock[0]));
 
-	LOG("GOT OPERATOR DELETE, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
+	//LOG("GOT OPERATOR DELETE, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
 
 	free(tblock);
 }

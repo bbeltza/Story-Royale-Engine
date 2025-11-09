@@ -1,6 +1,9 @@
 #pragma once
 #include "C/API.h"
 
+// logging function signature type
+typedef void (*logfunc_t)(const char* format, ...);
+
 // File locking macros
 #if defined(_WIN32)
 
@@ -26,13 +29,13 @@
 // LOG API
 _CAPI_BEGIN
 
-void NLOG(const char* fmt, ...);
-void ALOG(const char* fmt, ...);
+void NLOG(const char* format, ...);
+void ALOG(const char* format, ...);
 
 #define LOG NLOG
 
-void DEBUG(const char* fmt, ...);
-void ERROR(const char* fmt, int level, ...);
-void WARN(const char* fmt, ...);
+void DEBUG(const char* format, ...);
+void ERROR(const char* format, int level, ...);
+void WARN(const char* format, ...);
 
 _CAPI_END
