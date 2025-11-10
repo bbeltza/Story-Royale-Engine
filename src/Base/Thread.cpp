@@ -48,16 +48,6 @@ Thread& Thread::operator=(Thread&& moving) { _data = moving._data; _data->thrd =
 
 Thread::~Thread() { if (_data) _data->thrd = nullptr; }
 
-Thread::data::~data()
-{
-    if (handle)
-    {
-        SDL_DetachThread(handle);
-    }
-    if (thrd)
-        thrd->_data = nullptr;
-}
-
 void Thread::Join()
 {
     if (_data && _data->handle)
