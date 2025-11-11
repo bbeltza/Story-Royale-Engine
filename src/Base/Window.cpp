@@ -5,10 +5,9 @@
 
 void Window::ChangeIcon(const char* path)
 {
-    File file;
-    file.Load(path);
+    File file(path);
 
-    SDL_Surface* icon = IMG_Load_RW(SDL_RWFromConstMem(file.getRawData(), (int)file.getSize()), 1);
+    SDL_Surface* icon = IMG_Load_RW(file.toRWops(), 1);
     SDL_SetWindowIcon(engine.sdl_windowhndl, icon);
     SDL_FreeSurface(icon);
 }

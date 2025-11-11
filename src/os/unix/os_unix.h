@@ -3,8 +3,8 @@
 
 _CAPI_BEGIN
 
-short* os_unix_outputcoordget(short[2]);
-void os_unix_outputcoordset(const short[2]);
+int* os_unix_outputcoordget(int[2]);
+void os_unix_outputcoordset(const int[2]);
 
 int os_unix_outputgetc(void);
 int os_unix_outputhasnline(void);

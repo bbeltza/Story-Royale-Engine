@@ -22,8 +22,8 @@ set(DATATYPES_SOURCES
 )
 
 set(BASE_SOURCES
-"File/Class.cpp"
-"File/Loading.cpp"
+"File/Stream.cpp"
+"File/Chunk.cpp"
 
 "Action.cpp"
 "Audio.cpp"

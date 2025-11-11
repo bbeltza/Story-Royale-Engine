@@ -85,6 +85,8 @@ extern "C" {
 
 		void* target_textures; // An std::vector
 		void* loaded_textures;
+
+		void* loaded_fonts;
 	};
 
 	extern struct _engine_data __engine_data;
@@ -133,6 +135,8 @@ extern "C" {
 #define _audio_loaded static_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
 #define _audio_queue static_cast<std::unordered_set<Audio *> *>(engine.audio_queue)
 #define _audio_stopqueue static_cast<std::queue<Audio *> *>(engine.stopped_audios)
+
+#define _fonts_loaded static_cast<std::list<TTF_Font*> *>(engine.loaded_fonts)
 #endif
 
 #define engine __engine_data // Macro for easier typing

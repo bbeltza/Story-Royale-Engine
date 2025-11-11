@@ -23,11 +23,10 @@ Texture::Queue* Texture::to_load = nullptr;
 
 Texture::Texture(const char* path)
 {
-    File file;
-    file.Load(path);
+    File file(path);
 
     {
-        SDL_RWops* rw = SDL_RWFromConstMem(file.getRawData(), (int)file.getSize());
+        SDL_RWops* rw = file.toRWops();
         file_surface = IMG_Load_RW(rw, 1);
     }
     push_queue();

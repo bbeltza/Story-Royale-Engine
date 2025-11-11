@@ -7,14 +7,16 @@ _CAPI_BEGIN
 
 struct os_wrapper
 {
-	funcdef(short*, output_coordget, short buff[2]);
-	funcdef(void, output_coordset, const short coords[2]);
+	funcdef(int*, output_coordget, int buff[2]);
+	funcdef(void, output_coordset, const int coords[2]);
 
 	funcdef(int, output_getc, void);
 	funcdef(int, output_hasnline, void);
 
-	funcdef(void, delay, float);
-	funcdef(void, msdelay, unsigned);
+	funcdef(void, delay, float seconds);
+	funcdef(void, msdelay, unsigned milliseconds);
+	funcdef(void, mindelay, unsigned long long units);
+	funcdef(unsigned long long, unitspersec, void);
 };
 
 // Operating System wrapper functions/utilities that aren't usually available in the standard library

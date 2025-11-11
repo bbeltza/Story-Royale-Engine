@@ -35,7 +35,7 @@ void ALOG(const char* format, ...);
 #define LOG NLOG
 
 void DEBUG(const char* format, ...);
-void ERROR(const char* format, int level, ...);
+void ERROR(const char* format, ...);
 void WARN(const char* format, ...);
 
 _CAPI_END

@@ -10,10 +10,10 @@
 
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
-- Better error handling
-	- Errors should not crash, instead they should just inform the user that something went wrong. In case the error won't let the program continue, then crash
-
+- Better error handling on Base structures, specially the ones that rely on the filesysten
 - Have a log file opened
+
+- Enable compression for resources if they're embedded (My compiler did literally just run out of memory when compiling the resource)
 
 - Icon embedder (for the cmake configuration)
 	- a python script that takes a or multiple images to make an .ico file (this is easily possible thanks to a library called Pillow)
@@ -27,3 +27,4 @@ Less likely ideas:
 
 	- Change the pipeline:
 		- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
+	- Use Windows compiled .res files for embedded resources

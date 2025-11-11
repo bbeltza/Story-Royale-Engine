@@ -23,7 +23,7 @@ class AudioData
 	void Load();
 	void Unload();
 
-	File m_file;
+	const char* path;
 	
 	Thread thrd;
 
@@ -38,7 +38,7 @@ class AudioData
 public:
 	~AudioData();
 
-	Signal<> Loaded;
+	Signal<> Loaded{this};
 
 	inline uint32_t len() const { return m_len; }
 	inline uint32_t freq() const { return m_spec.freq; }

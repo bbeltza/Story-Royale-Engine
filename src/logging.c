@@ -29,3 +29,27 @@ void ALOG(const char* fmt, ...)
 	
 	funlockfile(stdout);
 }
+
+void WARN(const char* fmt, ...)
+{
+	flockfile(stdout);
+	if (!os.output_hasnline())
+		putchar('\n');
+	fputs("[WARNING]: ", stdout);
+
+	va_block(va, fmt, vfprintf(stdout, fmt, va));
+	
+	funlockfile(stdout);
+}
+
+void ERROR(const char* fmt, ...)
+{
+	flockfile(stdout);
+	if (!os.output_hasnline())
+		putchar('\n');
+	fputs("[ERROR]: ", stdout);
+
+	va_block(va, fmt, vfprintf(stdout, fmt, va));
+	
+	funlockfile(stdout);
+}

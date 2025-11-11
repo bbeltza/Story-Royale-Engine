@@ -16,14 +16,14 @@ function(srEngine_link_resource PROJECT)
     if ("${ARGN}" MATCHES NO_BIND)
         get_target_property(OUTPUT ${PROJECT} RUNTIME_OUTPUT_DIRECTORY)
 
-        file(MAKE_DIRECTORY ${OUTPUT}/_res)
+        file(MAKE_DIRECTORY ${OUTPUT}/__res)
         add_custom_target(
             copy_${PROJECT}
-            COMMAND ${CMAKE_COMMAND} -E rm -rf ${OUTPUT}/_res
-            COMMENT "--- Copying resources folder into ${OUTPUT}/_res..."
+            COMMAND ${CMAKE_COMMAND} -E rm -rf ${OUTPUT}/__res
+            COMMENT "--- Copying resources folder into ${OUTPUT}/__res..."
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${INPUT}
-            ${OUTPUT}/_res
+            ${OUTPUT}/__res
             )
 	message("-- ${OUTPUT}")	
         message("-- ${CMAKE_BUILD_TYPE}")

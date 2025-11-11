@@ -19,6 +19,8 @@ struct ENGINE_CONTAINERS
 	std::queue<Audio*> stopped_audios;
 
 	std::vector<SDL_Texture*> target_textures;
+
+	std::list<TTF_Font*> loaded_fonts;
 };
 
 static ENGINE_CONTAINERS* cc;
@@ -27,6 +29,8 @@ static ENGINE_CONTAINERS* cc;
 
 SDL_atomic_t SR_NUM_ALLOCATIONS;
 
+
+#ifndef NDEBUG
 void* operator new(size_t size)
 {
 	size_t* block = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
@@ -50,6 +54,7 @@ void operator delete(void* block)
 
 	free(tblock);
 }
+#endif
 
 void __init_containers()
 {
@@ -64,6 +69,8 @@ void __init_containers()
 
 	engine.target_textures = &cc->target_textures;
 
+	engine.loaded_fonts = &cc->loaded_fonts;
+
 	cc->target_textures.push_back(NULL);
 }
 
@@ -71,7 +78,12 @@ void __clean_containers()
 {
 	Thread::queue_removing();
 
-	memset(&engine.allocated_threads, 0, (&engine.target_textures - &engine.allocated_threads) * sizeof(void*));
+	memset(&engine.allocated_threads, 0, 7);
+
+	for (auto font : cc->loaded_fonts)
+	{
+		TTF_CloseFont(font);
+	}
 
 	delete cc;
 

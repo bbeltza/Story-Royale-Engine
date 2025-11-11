@@ -10,7 +10,7 @@ if (!StdOutput) return __VA_ARGS__
 
 #include "stdio.h"
 
-short* os_win_outputcoordget(short buff[2])
+int* os_win_outputcoordget(int buff[2])
 {
 	CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
 	if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConsoleInfo))
@@ -19,21 +19,23 @@ short* os_win_outputcoordget(short buff[2])
 		return NULL;
 	}
 
-	*(long*)buff = *(const long*)&ConsoleInfo.dwCursorPosition;
+	buff[0] = ConsoleInfo.dwCursorPosition.X;
+	buff[1] = ConsoleInfo.dwCursorPosition.Y;
 
 	return buff;
 }
 
-void os_win_outputcoordset(const short coords[2])
+void os_win_outputcoordset(const int coords[2])
 {
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), TO_COORDS(coords));
+	COORD _coords = { (SHORT)coords[0], (SHORT)coords[1] };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), _coords);
 }
 
 int os_win_outputgetc(void)
 {
 	getstd_win(0);
 	
-	short coords[2];
+	int coords[2];
 	if (!os_win_outputcoordget(coords)) return 0;
 
 	if (coords[0] == 0)
@@ -52,7 +54,7 @@ int os_win_outputgetc(void)
 int os_win_outputhasnline(void)
 {
 	getstd_win(0);
-	short coords[2];
+	int coords[2];
 	if (!os_win_outputcoordget(coords)) return 1;
 
 	return coords[0] == 0;

@@ -1,6 +1,7 @@
 #pragma once
 #include <standard>
-#include <SDL_atomic.h>
+
+#include <SDL_rwops.h>
 
 extern "C"
 {
@@ -9,74 +10,66 @@ extern "C"
 
 class File
 {
-public:
-enum Type: int8_t
-{
-    // Plain text or unknown type
-
-    T_UNKNOWN = -1,
-    T_TXT,
-    
-    // Image types
-
-    T_PNG,
-
-    // Sound types
-
-    T_WAV,
-    T_OGG,
-
-    // Font types (or maybe only just one type...)
-
-    T_TTF
-};
-
-private:
-struct FileInfo
+    union
     {
-        ~FileInfo() {if (data && !resbind) {delete[] data;}}
-        size_t size = 0;
-        unsigned char* data = nullptr;
-        // Whether the file points to the embedded resources or not 
-        bool resbind = false;
-
-        SDL_atomic_t ref = {0};
+        // Handles for file streaming
+        struct
+        {
+            FILE* stream;
+            const char* currmode;
+        };
+        // Handles for resource streaming
+        struct
+        {
+            const unsigned char* res_begin;
+            size_t res_pos;
+            size_t res_size;
+        };
     };
-    typedef std::unordered_map<std::string, File::FileInfo> Map;
+    const char* currpath=NULL;
+    bool isembedded=false;
 
-public:
-    File();
-    File(File&& moved);
-    File(const File& other) = delete;
-    
-    ~File();
-
-    void Load(const char* path);
-    void* GetUserData() const {return m_userdata;}
-    void* SetUserData(void* userdata) {m_userdata = userdata; return m_userdata;}
-
-    inline const FileInfo& getInfo() const {return s_loaded->at(m_filepath);}
-    inline const Type getType() const { return m_type; }
-    inline const void* getRawData() const { return (void*)getInfo().data; }
-    inline size_t getSize() const { return getInfo().size; }
-
-    inline void setType(Type type) { if (m_type < T_TXT) m_type = type; }
-
-    static inline bool areResourcesBound() { return _game_res != nullptr; }
-
-private:
-    friend class DrawingDevice;
-
-    Type m_type;
-
-    void* m_userdata = nullptr;
-    std::string m_filepath;
-
-    static Map* s_loaded;
-
-    inline FileInfo& m_info() const 
+    public:
+    struct Chunk
     {
-        if (!s_loaded) s_loaded = new Map; 
-        return (*s_loaded)[m_filepath];
-    }
+        friend class File;
+
+        const size_t size=0;
+        const char* const data=NULL;
+
+        Chunk(Chunk&& moving);
+        Chunk(const Chunk& other) = delete; // If you want to copy a chunk, use File::allocate again
+
+        ~Chunk();
+        private:
+        Chunk() {}
+        Chunk(size_t size, const void* data): size(size), data(static_cast<const char*>(data)) {}
+    };
+
+    public:
+    ~File();
+    // Create an invalid empty file stream
+    File(): stream(NULL) {}
+    File(const char* path, const char* mode=NULL);
+    
+    void reopen(const char* path, const char* mode=NULL);
+
+    Chunk allocate(size_t max_size=0);
+
+    int isValid() const { return stream != NULL; }
+
+    SDL_RWops* toRWops() const;
+
+    private:
+
+    void load_resource();
+    void load_stream();
+    void error_notfound();
+
+    static bool has_write(const char* mode);
+
+    static bool path_has_resprefix(const char* path) { return strlen(path) < 6 ? false : !strncmp(res_prefix, path, 6); };
+
+    static const char fsres_prefix[];
+    static const char res_prefix[];
 };

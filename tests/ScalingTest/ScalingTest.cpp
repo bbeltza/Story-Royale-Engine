@@ -1,6 +1,6 @@
 #include <ECS.hpp>
-#include <Display.hpp>
-#include <Input.hpp>
+#include <Base/Display.hpp>
+#include <Base/Input.hpp>
 #include <Engine.hpp>
 
 void Render()

@@ -31,7 +31,7 @@ class Font
     std::unordered_map<char, Texture> textures;
     std::unordered_map<char, Vector2i> sizes;
 
-    File m_file;
     TTF_Font* m_font;
+    SDL_RWops* m_src;
 
 };

@@ -3,15 +3,22 @@
 
 #include "Engine.hpp"
 
+#include "../internal.h"
+
 Font::Font(const char* path, int pt)
 {
-    m_file.Load(path);
-    m_font = TTF_OpenFontRW(SDL_RWFromConstMem(m_file.getRawData(), (int)m_file.getSize()), 1, pt);
+    File file(path);
+    m_font = TTF_OpenFontRW(file.toRWops(), 1, pt);
+
+    _fonts_loaded->push_front(m_font);
 }
 
 Font::~Font()
 {
-    if (TTF_WasInit()) TTF_CloseFont(m_font);
+    if (!TTF_WasInit()) return;
+
+    _fonts_loaded->remove(m_font);
+    TTF_CloseFont(m_font);
 }
 
 bool Font::PreloadTextures(const char* text)
