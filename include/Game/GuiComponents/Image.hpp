@@ -9,6 +9,8 @@ namespace GuiComponents
         public:
         Texture* CurrentImage = nullptr;
         Color4 Modulate = Color4::WHITE;
+
+        void Fit(Game::GuiObject* obj);
         protected:
         void render(Game::GuiContainer*) override;
     };
