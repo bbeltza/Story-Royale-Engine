@@ -45,6 +45,8 @@ void* operator new(size_t size)
 }
 void operator delete(void* block)
 {
+	if (!block) return;
+	
 	size_t* tblock = reinterpret_cast<size_t*>(block);
 	tblock -= 1;
 

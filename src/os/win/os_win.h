@@ -1,4 +1,6 @@
-#include "Windows.h"
+#include <Windows.h>
+
+#include "OS/win.h"
 #include "C/API.h"
 
 _CAPI_BEGIN
@@ -9,7 +11,6 @@ void os_win_outputcoordset(const int[2]);
 int os_win_outputgetc(void);
 int os_win_outputhasnline(void);
 
-void os_win_delay(float);
-void os_win_msdelay(unsigned);
+void os_win_delay(unsigned long long);
 
 _CAPI_END

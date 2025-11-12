@@ -21,7 +21,7 @@ void Thread::queue_removing()
 
 int Thread::invokethread_handler(data *_data)
 {
-    if (_data->delay) os.delay(_data->delay);
+    if (_data->delay) delay_s(_data->delay);
 
     _data->func(_data->data);
     

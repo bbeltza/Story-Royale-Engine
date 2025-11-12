@@ -36,7 +36,7 @@ static void loop()
     #endif
 
     if (engine.target_dt)
-        os.delay(engine.target_dt);
+        delay_s(engine.target_dt);
 }
 
 static int eventfilter(void* data, SDL_Event *ev)

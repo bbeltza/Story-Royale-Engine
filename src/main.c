@@ -10,7 +10,7 @@ struct _engine_data __engine_data;
 #include <signal.h>
 #include <stdio.h>
 
-static void sig_handler(int signal) {}
+static void sig_handler(int signal) {  }
 
 const arg_t SRENGINE_ARGS[] = {
     {"help", "h", "Print this message"},
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 	for (int i = 1; i < argc; i++)
         handle_arg(argv[i], argv);
 	
-	signal(SIGSEGV, sig_handler);
+	//signal(SIGSEGV, sig_handler);
 
 	__initialize_engine();
 	__run_engine();

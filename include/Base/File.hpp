@@ -50,6 +50,7 @@ class File
     ~File();
     // Create an invalid empty file stream
     File(): stream(NULL) {}
+    File(const File& other);
     File(const char* path, const char* mode=NULL);
     
     void reopen(const char* path, const char* mode=NULL);

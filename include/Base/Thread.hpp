@@ -100,7 +100,7 @@ TEMPL Thread Threads::Delay(TimeStamp Duration, _Fn &&_Fx, _Args &&..._Ax)
     auto invoke = new _Invoke(std::forward<_Fn>(_Fx), std::forward<_Args>(_Ax)...);
     auto invokefunc = Thread::get_invoke<_Invoke>(typename ut::make_sequence<sizeof...(_Args)>::type());
 
-    Thread to_move(invokefunc, (Thread::Function)invoke, Duration);
+    Thread to_move(invokefunc, invoke, Duration);
     return to_move;
 }
 TEMPL Thread Threads::Create(_Fn &&_Fx, _Args &&..._Ax)

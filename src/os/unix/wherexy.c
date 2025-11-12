@@ -1,4 +1,5 @@
 #include "os_unix.h"
+#include <signal.h>
 
 #include <stdio.h>
 #include <termios.h>
@@ -16,7 +17,7 @@ int wherexy(int *x, int *y)
     printf("\033[6n");
     scanf("\033[%d;%dR", x, y);
 
-    if (tcsetattr(STDIN_FILENO, TCSANOW, &old_termios)) abort();
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &old_termios)) kill(0, SIGABRT);
 
     return 1;
 }

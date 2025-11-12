@@ -3,7 +3,7 @@
 
 File::Chunk::Chunk(Chunk &&moving) : size(moving.size), data(moving.data)
 {
-    const_cast<const char *>(moving.data) = NULL;
+    *const_cast<const char **>(&moving.data) = NULL;
 }
 
 File::Chunk::~Chunk()
