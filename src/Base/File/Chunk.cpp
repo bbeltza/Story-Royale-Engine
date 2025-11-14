@@ -1,9 +1,20 @@
 #include "Base/File.hpp"
 #include "logging.h"
 
+
+File::Chunk& File::Chunk::operator=(Chunk&& moving)
+{
+    *const_cast<size_t*>(&this->size) = moving.size;
+    *const_cast<const char**>(&this->data) = moving.data;
+
+    *const_cast<const char**>(&moving.data) = NULL;
+
+    return *this;
+}
+
 File::Chunk::Chunk(Chunk &&moving) : size(moving.size), data(moving.data)
 {
-    *const_cast<const char **>(&moving.data) = NULL;
+    *const_cast<const char**>(&moving.data) = NULL;
 }
 
 File::Chunk::~Chunk()

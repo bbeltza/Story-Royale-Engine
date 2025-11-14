@@ -8,7 +8,7 @@ function(srEngine_link_resource PROJECT)
     get_target_property(INPUT ${PROJECT} RES_FOLDER)
 
     if(NOT INPUT)
-	srEngine_nobind(${PROJECT})
+	    srEngine_nobind(${PROJECT})
         return()
     endif()
 
@@ -25,12 +25,10 @@ function(srEngine_link_resource PROJECT)
             ${INPUT}
             ${OUTPUT}/__res
             )
-	message("-- ${OUTPUT}")	
+	    message("-- ${OUTPUT}")	
         message("-- ${CMAKE_BUILD_TYPE}")
-        
         add_dependencies(${PROJECT} copy_${PROJECT})
-	
-	srEngine_nobind(${PROJECT})
+	    srEngine_nobind(${PROJECT})
     else()
         if (WIN32)
             set(IS_WIN32 1)
@@ -46,12 +44,20 @@ function(srEngine_link_resource PROJECT)
         ${OUTPUT}
         ${IS_WIN32}
         DEPENDS ${OUTPUT}/_res.c
+        DEPENDS ${OUTPUT}/_res.dat
         )
 
         file(WRITE ${OUTPUT}/_res.c)
+        file(WRITE ${OUTPUT}/_res.dat)
+        file(WRITE ${OUTPUT}/_res.rc "GAME_RES	RCDATA	\"_res.dat\"")
         
         add_dependencies(${PROJECT} bind_${PROJECT})
 
-        target_sources(${PROJECT} PRIVATE ${OUTPUT}/_res.c)
+        if (WIN32)
+            target_sources(${PROJECT} PRIVATE ${OUTPUT}/_res.rc)
+            srEngine_nobind(${PROJECT})
+        else()
+            target_sources(${PROJECT} PRIVATE ${OUTPUT}/_res.c)
+        endif()
     endif()
 endfunction()

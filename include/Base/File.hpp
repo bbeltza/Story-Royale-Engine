@@ -5,7 +5,11 @@
 
 extern "C"
 {
-    extern const unsigned char _game_res[];
+    #ifdef WIN32
+        extern const unsigned char* _game_res;
+    #else
+        extern const unsigned char _game_res[];
+    #endif
 };
 
 class File
@@ -37,12 +41,14 @@ class File
         const size_t size=0;
         const char* const data=NULL;
 
+        Chunk() {}
         Chunk(Chunk&& moving);
         Chunk(const Chunk& other) = delete; // If you want to copy a chunk, use File::allocate again
 
+        Chunk& operator=(Chunk&& moving);
+
         ~Chunk();
         private:
-        Chunk() {}
         Chunk(size_t size, const void* data): size(size), data(static_cast<const char*>(data)) {}
     };
 
@@ -55,11 +61,24 @@ class File
     
     void reopen(const char* path, const char* mode=NULL);
 
-    Chunk allocate(size_t max_size=0);
-
     int isValid() const { return stream != NULL; }
-
+    
+    Chunk allocate(size_t max_size=0);
     SDL_RWops* toRWops() const;
+    const void* resourceData() const
+    {
+        if (!isembedded) // Could also check if the file is valid, but remember isembedded is true if the file is valid
+            return NULL;
+    
+        return this->res_begin; // Even if it wasn't valid and this passes, res_begin will be NULL
+    }
+    size_t resourceSize() const
+    {
+        if (!isembedded || !res_begin) // This time, res_size isn't garanteed to be 0, so we do both checks
+            return 0;
+        
+        return this->res_size;
+    }
 
     private:
 

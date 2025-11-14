@@ -23,14 +23,22 @@ File::File(const File& other): currpath(other.currpath), currmode(other.currmode
     load_stream();
 }
 
+#ifdef WIN32
+    extern "C" void SRE_init_resources();
+#endif
+
 File::File(const char *path, const char *mode) : stream(NULL), currmode(mode), currpath(path)
 {
+    #ifdef WIN32
+        if (!_game_res)
+            SRE_init_resources();
+    #endif
     if (path_has_resprefix(path))
     {
         if (!mode)
             this->currmode = "rb";
 
-        if (_game_res)
+        if (_game_res[0])
         {
             this->load_resource();
             return;
@@ -45,7 +53,7 @@ File::File(const char *path, const char *mode) : stream(NULL), currmode(mode), c
 
 void File::load_resource()
 {
-    if (!_game_res) // In case I call this with _game_res = NULL...
+    if (!_game_res[0]) // In case I call this with _game_res[0] = NULL...
     {
         ERROR("Misscall to load_resource() when embedded resources are disabled...");
         return;
@@ -140,8 +148,6 @@ bool File::has_write(const char *mode)
 {
     return strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w');
 }
-
-#include "SDL_config.h"
 
 static int sdlrw_close(SDL_RWops *rw)
 {
