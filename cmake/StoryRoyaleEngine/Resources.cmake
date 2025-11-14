@@ -32,15 +32,20 @@ function(srEngine_link_resource PROJECT)
 	
 	srEngine_nobind(${PROJECT})
     else()
+        if (WIN32)
+            set(IS_WIN32 1)
+        else()
+            set(IS_WIN32 0)
+        endif()
         set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}")
         add_custom_target(
         bind_${PROJECT}
         COMMENT "--- Binding source resources..."
         COMMAND ${PYTHON_COMMAND}resource_binder.py
-        ${INPUT} 1
+        ${INPUT}
         ${OUTPUT}
-        OUTPUT ${OUTPUT}/_res.c
-        DEPENDS ${INPUT}
+        ${IS_WIN32}
+        DEPENDS ${OUTPUT}/_res.c
         )
 
         file(WRITE ${OUTPUT}/_res.c)

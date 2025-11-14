@@ -1,24 +1,23 @@
+from warnings import warn
 import os
 import sys
-import shutil
+import zlib
 
-# This script should take 3 extra arguments:
-    # The resource folder to bind
-    # A character, non-zero if you're on release mode and want to bind the resources into the exe, otherwise just copy to the output directory
-    # The output directory, where the output folder should be located if on debug, or where the cpp output file will be generated
+ARG_COUNT = len(sys.argv) - 1
+REQUIRED_ARGS = 3
 
+assert ARG_COUNT >= 2, f"You need {REQUIRED_ARGS} arguments to run the script, you've only passed {ARG_COUNT}"
 
-if len(sys.argv) < 4:
-    raise Exception(f"Python script error ({__file__}): You need 3 arguments to run the script, you've only passed {len(sys.argv) - 1}")
+if ARG_COUNT > REQUIRED_ARGS:
+    _args = sys.argv.copy()
+    _args.pop(0)
+    warn(f"You've passed more than {REQUIRED_ARGS} arguments. Only using the first {REQUIRED_ARGS} arguments, args: {_args}")
 
 resDir = sys.argv[1]
-build_mode = int(sys.argv[2])
-output_folder = sys.argv[3]
+output_folder = sys.argv[2]
+is_win32 = int(sys.argv[3]).__bool__()
 
-try:
-        shutil.rmtree(output_folder + "/res")
-except FileNotFoundError:
-        pass
+compressor = zlib.compressobj(zlib.Z_NO_COMPRESSION, strategy=zlib.Z_FILTERED)
 
 def getTree(dir:str, array:list = []):
     for str in os.listdir(dir):
@@ -44,60 +43,72 @@ def write_dirs(_tree:list, prefix:str="", arr:list=[]):
                write_dirs(filename, prefix + pop, arr)
     return arr
     
-def buildresource():
-     global out_string
-     with open(output_folder + "/_res.c", "wb") as output_file:
-        tree = getTree(resDir)
+def build_resource():
+    global out_string
+    tree = getTree(resDir)
 
-        out_string = ""
-        files = write_dirs(tree)
-        out_string += "\n"
-        out_string = out_string.encode()
-        for filename in files:
-             print(filename)
-             with open(resDir + "/" + filename[0], "rb") as file:
-                  filedata = file.read()
-                  filesize = file.tell()
-                  print(f"filesize is {filesize}")
+    out_string = ""
+    files = write_dirs(tree)
+    out_string += "\n"
+    out_string = out_string.encode()
+    for filename in files:
+        print(filename)
+        with open(resDir + "/" + filename[0], "rb") as file:
+            filedata = file.read()
+            filesize = file.tell()
+            print(f"filesize is {filesize}")
 
-                  sizechars = filesize.to_bytes(4)
-                  print(sizechars)
-                  pos = len(out_string)
-                  print(f"File position is {pos}")
-                  file_size_id = filename[1]
+            sizechars = filesize.to_bytes(4)
+            print(sizechars)
+            pos = len(out_string)
+            print(f"File position is {pos}")
+            file_size_id = filename[1]
 
-                  out_string += sizechars
-                  out_string += filedata
+            out_string += sizechars
+            out_string += filedata
 
-                  pos_to_bytes = pos.to_bytes(4)
-                  print(file_size_id)
-                  out_string = out_string[:file_size_id] + pos_to_bytes + out_string[file_size_id+4:]
+            pos_to_bytes = pos.to_bytes(4)
+            print(file_size_id)
+            out_string = out_string[:file_size_id] + pos_to_bytes + out_string[file_size_id+4:]
                 
-                  file.close()
+            file.close()
 
-        
-        with open(output_folder + "/_reslogs", "wb") as logfile:
-            logfile.write(out_string)
-            logfile.seek(0, os.SEEK_SET)
-        
-        output_file.write(b"static const char s_game_res[] = {")
-        for byte in out_string:
-            output_file.write(str(byte).encode())
-            output_file.write(b",")
-        
-        output_file.seek(-1, os.SEEK_CUR)
-        output_file.write(b"}; const char* _game_res = s_game_res;")
+        #out_compressed = compressor.compress(out_string)
 
-if build_mode == 0:    
-    shutil.copytree(resDir, output_folder + "/res")
-else:
+    with open(output_folder + "/_res.dat", "wb") as logfile:
+        logfile.write(out_string)
+        logfile.seek(0, os.SEEK_SET)
+
+    # Convert raw data into C character array
+    byte_array = []
+
+    for byte in out_string:
+        res = str(byte)
+        byte_array.append(res)
+    
+    with open(output_folder + "/_res.c", "wt") as output_file:
+        output_file.write("const unsigned char _game_res[]={")
+        output_file.write(",".join(byte_array))
+        output_file.write("};")
+
+
+def main():
     success = False
     i = 0
     while not success:
         i += 1
         try:
-           buildresource()
+           build_resource()
            success = True
         except PermissionError as p:
+            print(f'Something wrong happened when trying to open one of the files: {p.winerror}')
             pass
-    print(i)
+
+WANT_PROFILE = False
+
+if WANT_PROFILE:  
+    import cProfile
+    import re
+    cProfile.run('main()')
+else:
+    main()

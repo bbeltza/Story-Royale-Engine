@@ -5,7 +5,7 @@
 
 extern "C"
 {
-    extern const unsigned char* const _game_res;
+    extern const unsigned char _game_res[];
 };
 
 class File

@@ -12,9 +12,12 @@ struct _engine_data __engine_data;
 
 static void sig_handler(int signal) {  }
 
+static const char alloc_console[] = "--alloc-console";
+static const char ac_shortcut[] = "-ac";
+
 const arg_t SRENGINE_ARGS[] = {
     {"help", "h", "Print this message"},
-    {"--alloc-console"+2, "-ac"+1, "Allocate a new console (for NO_CONSOLE programs in Windows)"},
+    {alloc_console+2, ac_shortcut+1, "Allocate a new console (for NO_CONSOLE programs in Windows)"},
     {NULL}
 };
 

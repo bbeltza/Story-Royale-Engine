@@ -72,7 +72,7 @@ set_src(Base BASE_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)
 set_src(GameLayer LAYER_SOURCES)
 
-add_library(StoryRoyaleEngine ${SOURCES})
+add_library(StoryRoyaleEngine STATIC ${SOURCES})
 
 set(CORE_SOURCES
 "Audio.cpp"
@@ -90,7 +90,7 @@ set(CORE_SOURCES
 
 set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
 
-add_library(StoryRoyaleEngineCore ${SRCORE_SOURCES} "Base/Timer.cpp")
+add_library(StoryRoyaleEngineCore STATIC ${SRCORE_SOURCES} "Base/Timer.cpp")
 target_compile_definitions(StoryRoyaleEngineCore PRIVATE INTERNAL_DEF=1)
 
 add_subdirectory("os")

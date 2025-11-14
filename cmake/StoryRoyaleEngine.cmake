@@ -6,10 +6,13 @@ include(StoryRoyaleEngine/Resources)
 include(StoryRoyaleEngine/Settings)
 
 function(srEngine_build TARGET)
-    add_executable(${TARGET} ${SOURCES})
+    if (0)
+        add_library(${TARGET} SHARED ${SOURCES})
+    else()
+        add_executable(${TARGET} ${SOURCES})
+    endif()
     
     set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
-    set_target_properties(${TARGET} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${TARGET})
 
     srEngine_link_settings(${TARGET} ${ARGN})
     srEngine_link_resource(${TARGET} ${ARGN})
@@ -21,4 +24,9 @@ function(srEngine_build TARGET)
         message("--- ${TARGET} HAS NO CONSOLE ${SR_ENGINE_NO_CONSOLE_OPTIONS}")
         target_link_options(${TARGET} PRIVATE ${SR_ENGINE_NO_CONSOLE_OPTIONS})
     endif()
+
+    # Copying all of the dynamic libraries into the bin folder
+    get_target_property(RUNTIME_OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
+    file(GLOB DLLS_TO_COPY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.so" "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dll")
+    file(INSTALL ${DLLS_TO_COPY} DESTINATION ${RUNTIME_OUTPUT_DIRECTORY})
 endfunction()

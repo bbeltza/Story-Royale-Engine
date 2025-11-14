@@ -14,6 +14,9 @@
 - Have a log file opened
 
 - Enable compression for resources if they're embedded (My compiler did literally just run out of memory when compiling the resource)
+	But before that:
+	- Make the resource generator faster (maybe switch to another language like C/C++ or system commands)
+	- Use .res files for Windows, this removes the overhead for the compiler to need to parse a giant table, but still using the same resource system
 
 - Android support
 - Engine services: Designed to replace the void* container overhead
@@ -30,4 +33,3 @@ Less likely ideas:
 
 	- Change the pipeline:
 		- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
-	- Use Windows compiled .res files for embedded resources

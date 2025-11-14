@@ -7,7 +7,11 @@ set(CMAKE_MODULE_PATH ${SRENGINE_CMAKE_MODULE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib)
 
-set(BUILD_SHARED_LIBS OFF)
+if (ANDROID)
+    set(BUILD_SHARED_LIBS ON)
+else()
+    set(BUILD_SHARED_LIBS OFF)
+endif()
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -39,13 +43,18 @@ target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_compile_features(StoryRoyaleEngine PRIVATE cxx_std_11 c_std_99)
 target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
 
+if(NOT BUILD_SHARED_LIBS)
+    set(SDL_LIB_SUFFIX "-static")
+endif()
+
 set(3RDPARTYLIBS
-SDL2::SDL2-static
-SDL2_ttf::SDL2_ttf-static
-SDL2_image::SDL2_image-static
+SDL2::SDL2${SDL_LIB_SUFFIX}
+SDL2_ttf::SDL2_ttf${SDL_LIB_SUFFIX}
+SDL2_image::SDL2_image${SDL_LIB_SUFFIX}
 
 fmt::fmt
 stb
+zlib
 )
 set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -55,6 +64,7 @@ set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_image
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stb
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib
 )
 
 target_include_directories(StoryRoyaleEngine PUBLIC ${SRENGINE_INCLUDE_DIRS})

@@ -13,6 +13,7 @@ add_subdirectory(SDL_image)
 # Rest of the libs
 add_subdirectory(fmt)
 add_subdirectory(stb)
+add_subdirectory(zlib)
 
 if (HAVE_STDIO_H)
     target_compile_definitions(StoryRoyaleEngine PUBLIC "SDL_HAVE_STDIO_H")
