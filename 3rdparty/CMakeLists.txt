@@ -11,7 +11,6 @@ add_subdirectory(SDL_ttf)
 add_subdirectory(SDL_image)
 
 # Rest of the libs
-add_subdirectory(fmt)
 add_subdirectory(stb)
 add_subdirectory(zlib)
 

@@ -55,7 +55,6 @@ SDL2::SDL2${SDL_LIB_SUFFIX}
 SDL2_ttf::SDL2_ttf${SDL_LIB_SUFFIX}
 SDL2_image::SDL2_image${SDL_LIB_SUFFIX}
 
-fmt::fmt
 stb
 zlib${ZLIB_SUFFIX}
 )
@@ -65,7 +64,6 @@ set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_ttf
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_image
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stb
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib
 )
