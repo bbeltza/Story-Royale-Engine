@@ -38,6 +38,7 @@ void WARN(const char* fmt, ...)
 	fputs("[WARNING]: ", stdout);
 
 	va_block(va, fmt, vfprintf(stdout, fmt, va));
+	fputc('\n', stdout);
 	
 	funlockfile(stdout);
 }

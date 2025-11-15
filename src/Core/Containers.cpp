@@ -30,18 +30,21 @@ static ENGINE_CONTAINERS* cc;
 SDL_atomic_t SR_NUM_ALLOCATIONS;
 
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) && WIN32 // This operator 
 void* operator new(size_t size)
 {
-	size_t* block = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
-	if (!block) abort();
+	size_t newsize = size + sizeof(size_t);
+	size_t* block = reinterpret_cast<size_t*>(malloc(newsize));
+	if (!block)
+		abort();
 
 	block[0] = size;
 	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, static_cast<int>(size));
 
 	//LOG("GOT OPERATOR NEW, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
 
-	return ++block;
+	block++;
+	return block;
 }
 void operator delete(void* block)
 {

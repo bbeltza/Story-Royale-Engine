@@ -37,9 +37,9 @@ extern "C" {
 
 		SDL_Window* sdl_windowhndl;
 		SDL_Event sdl_eventhndl;
-
+		
 		// Renderer data
-
+		
 		SDL_Renderer* sdl_rendererhndl;
 		SDL_Texture* sdl_rectTex;
 		SDL_mutex* sdl_rendermutex;
