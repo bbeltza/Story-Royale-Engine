@@ -2,6 +2,7 @@
 
 #define CENTERED SDL_WINDOWPOS_CENTERED
 
+#include <logging.h>
 void __create_window(const struct _win_settings* _win)
 {
 	engine.sdl_windowhndl = SDL_CreateWindow(

@@ -25,6 +25,12 @@ File::Chunk::~Chunk()
 
 File::Chunk File::allocate(size_t max_size)
 {
+    if (!isValid())
+    {
+        ERROR("Failed to allocate file data. File is not valid");
+        return Chunk(0, NULL);
+    }
+
     if (isembedded)
     {
         void* data = operator new(this->res_size);

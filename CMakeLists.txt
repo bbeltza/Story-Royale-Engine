@@ -46,6 +46,9 @@ target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}"
 if(NOT BUILD_SHARED_LIBS)
     set(SDL_LIB_SUFFIX "-static")
 endif()
+if (NOT BUILD_SHARED_LIBS)
+    set(ZLIB_SUFFIX "static")
+endif()
 
 set(3RDPARTYLIBS
 SDL2::SDL2${SDL_LIB_SUFFIX}
@@ -54,7 +57,7 @@ SDL2_image::SDL2_image${SDL_LIB_SUFFIX}
 
 fmt::fmt
 stb
-zlib
+zlib${ZLIB_SUFFIX}
 )
 set(SRENGINE_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include

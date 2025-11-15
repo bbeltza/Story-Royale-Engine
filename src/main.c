@@ -10,7 +10,7 @@ struct _engine_data __engine_data;
 #include <signal.h>
 #include <stdio.h>
 
-static void sig_handler(int signal) {  }
+static void sig_handler(int signal) {}
 
 static const char alloc_console[] = "--alloc-console";
 static const char ac_shortcut[] = "-ac";

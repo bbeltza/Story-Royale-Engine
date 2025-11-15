@@ -91,6 +91,7 @@ set(CORE_SOURCES
 set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
 
 add_library(StoryRoyaleEngineCore STATIC ${SRCORE_SOURCES} "Base/Timer.cpp")
+target_link_libraries(StoryRoyaleEngineCore StoryRoyaleEngine)
 target_compile_definitions(StoryRoyaleEngineCore PRIVATE INTERNAL_DEF=1)
 
 add_subdirectory("os")

@@ -49,6 +49,8 @@ Texture::~Texture()
 
 Vector2i Texture::GetSize()
 {
+    if (!file_surface)
+        return {0, 0};
     if (!texture)
         return {m_Surface->w, m_Surface->h};
 

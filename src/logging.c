@@ -44,12 +44,14 @@ void WARN(const char* fmt, ...)
 
 void ERROR(const char* fmt, ...)
 {
-	flockfile(stdout);
+	flockfile(stderr);
 	if (!os.output_hasnline())
 		putchar('\n');
-	fputs("[ERROR]: ", stdout);
+	fputs("[ERROR]: ", stderr);
 
-	va_block(va, fmt, vfprintf(stdout, fmt, va));
+	va_block(va, fmt, vfprintf(stderr, fmt, va));
+	fputc('\n', stderr);
 	
-	funlockfile(stdout);
+	funlockfile(stderr);
+	fflush(stderr);
 }

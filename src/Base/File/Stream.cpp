@@ -162,6 +162,9 @@ static int sdlrw_close(SDL_RWops *rw)
 
 SDL_RWops *File::toRWops() const
 {
+    if (!isValid())
+        return NULL;
+
     SDL_RWops *rw;
     if (isembedded)
         rw = SDL_RWFromConstMem(res_begin, static_cast<int>(res_size));

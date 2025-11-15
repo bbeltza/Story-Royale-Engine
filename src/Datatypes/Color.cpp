@@ -45,7 +45,7 @@ Color3::Color3(const char* HEX) // 12 34 56
 			
 			n |= xdigit(digit) << (4 * (1 - i));
 		}
-		(&r)[j] = n;
+		reinterpret_cast<uint8_t*>(this)[j] = n;
 	}
 }
 

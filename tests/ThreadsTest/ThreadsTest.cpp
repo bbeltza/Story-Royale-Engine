@@ -12,6 +12,6 @@ void testmyself(char a, float b) // Well it kind of doesn't work on floats. Look
 
 void Game::Initialize()
 {
-    Thread& thrd = Threads::Create(testmyself, 3, 2.0f);
+    Thread thrd = Threads::Create(testmyself, 3, 2.0f);
     LOG("Thread has been finished");
 }
