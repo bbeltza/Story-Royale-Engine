@@ -45,8 +45,6 @@ target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}"
 
 if(NOT BUILD_SHARED_LIBS)
     set(SDL_LIB_SUFFIX "-static")
-endif()
-if (NOT BUILD_SHARED_LIBS)
     set(ZLIB_SUFFIX "static")
 endif()
 

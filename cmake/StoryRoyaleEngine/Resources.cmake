@@ -30,10 +30,10 @@ function(srEngine_link_resource PROJECT)
         add_dependencies(${PROJECT} copy_${PROJECT})
 	    srEngine_nobind(${PROJECT})
     else()
-        if (WIN32)
-            set(IS_WIN32 1)
+        if (WIN32 OR UNIX)
+            set(WANT_C 0)
         else()
-            set(IS_WIN32 0)
+            set(WANT_C 1)
         endif()
         set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}")
         add_custom_target(
@@ -42,7 +42,7 @@ function(srEngine_link_resource PROJECT)
         COMMAND ${PYTHON_COMMAND}resource_binder.py
         ${INPUT}
         ${OUTPUT}
-        ${IS_WIN32}
+        ${WANT_C}
         DEPENDS ${OUTPUT}/_res.c
         DEPENDS ${OUTPUT}/_res.dat
         )

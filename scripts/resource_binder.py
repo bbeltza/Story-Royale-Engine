@@ -15,7 +15,7 @@ if ARG_COUNT > REQUIRED_ARGS:
 
 resDir = sys.argv[1]
 output_folder = sys.argv[2]
-is_win32 = int(sys.argv[3]).__bool__()
+want_c_src = int(sys.argv[3]).__bool__()
 
 compressor = zlib.compressobj(zlib.Z_NO_COMPRESSION, strategy=zlib.Z_FILTERED)
 
@@ -79,17 +79,18 @@ def build_resource():
         logfile.write(out_string)
         logfile.seek(0, os.SEEK_SET)
 
-    # Convert raw data into C character array
-    byte_array = []
+    if want_c_src:
+        # Convert raw data into C character array
+        byte_array = []
 
-    for byte in out_string:
-        res = hex(byte)
-        byte_array.append(res)
+        for byte in out_string:
+            res = hex(byte)
+            byte_array.append(res)
     
-    with open(output_folder + "/_res.c", "wt") as output_file:
-        output_file.write("const unsigned char _game_res[]={")
-        output_file.write(",".join(byte_array))
-        output_file.write("};")
+        with open(output_folder + "/_res.c", "wt") as output_file:
+            output_file.write("const unsigned char _game_res[]={")
+            output_file.write(",".join(byte_array))
+            output_file.write("};")
 
 
 def main():
