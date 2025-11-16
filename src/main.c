@@ -37,6 +37,7 @@ static void handle_arg(const char* arg, char* argv[])
         {
             if (!strcmp(arg+2, SRENGINE_ARGS[i].arg))
             {
+                SRENGINE_ARGS[i].handler(arg, argv);
                 printf("%s\n", SRENGINE_ARGS[i].arg);
                 break;
             }
@@ -48,6 +49,7 @@ static void handle_arg(const char* arg, char* argv[])
         {
             if (!strcmp(arg+1, SRENGINE_ARGS[i].shortcut))
             {
+                SRENGINE_ARGS[i].handler(arg, argv);
                 printf("%s\n", SRENGINE_ARGS[i].arg);
                 break;
             }
