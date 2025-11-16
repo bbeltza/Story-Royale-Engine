@@ -83,7 +83,7 @@ def build_resource():
     byte_array = []
 
     for byte in out_string:
-        res = str(byte)
+        res = hex(byte)
         byte_array.append(res)
     
     with open(output_folder + "/_res.c", "wt") as output_file:

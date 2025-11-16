@@ -5,7 +5,7 @@
 
 extern "C"
 {
-    #ifdef WIN32
+    #if defined(WIN32)
         extern const unsigned char* _game_res;
     #else
         extern const unsigned char _game_res[];

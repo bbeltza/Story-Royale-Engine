@@ -50,10 +50,12 @@ Texture::~Texture()
 Vector2i Texture::GetSize()
 {
     if (!texture)
+    {
         if (file_surface)
             return {m_Surface->w, m_Surface->h};
         else
             return {0, 0};
+    }
 
     int w, h;
     SDL_QueryTexture(m_Texture, NULL, NULL, &w, &h);

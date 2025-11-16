@@ -88,7 +88,7 @@ Color4::Color4(const char* HEX)
 
 			n |= xdigit(digit) << (4 * (1 - i));
 		}
-		(&r)[j] = n;
+		reinterpret_cast<uint8_t*>(this)[j] = n;
 	}
 }
 
