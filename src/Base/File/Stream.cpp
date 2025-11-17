@@ -1,7 +1,13 @@
 #include "Base/File.hpp"
-#include "logging.h"
+#include "utils/logging.h"
 
-const char File::fsres_prefix[] = "__res/";
+const char File::fsres_prefix[] =
+#ifdef ANDROID
+        "assets/"
+#else
+        "__res/"
+#endif
+        ;
 const char File::res_prefix[] = "res://";
 
 File::~File()
@@ -101,14 +107,15 @@ void File::load_stream()
     {
         const char *old = this->currpath;
 #ifndef _MSC_VER
-        char buff[strlen(this->currpath)];
+        char buff[strlen(this->currpath) + (sizeof(fsres_prefix) - sizeof(res_prefix))];
 #else
-        char *buff = static_cast<char *>(alloca(strlen(this->currpath) + 1));
+        char *buff = static_cast<char *>(alloca(strlen(this->currpath) + (1 + sizeof(fsres_prefix) - sizeof(res_prefix))));
 #endif
 
         strcpy(buff, fsres_prefix);
         strcat(buff, this->currpath + sizeof res_prefix - 1);
         this->currpath = buff;
+
 
         load_stream();
         this->currpath = old;

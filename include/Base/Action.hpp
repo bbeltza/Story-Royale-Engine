@@ -45,9 +45,9 @@ private:
 	long long press_frame = -1;
 	bool enable_touch = false;
 
-	std::unordered_map<SDL_KeyCode, bool> m_keycodes;
-	std::unordered_map<SDL_Scancode, bool> m_scancodes;
-	std::unordered_map<Input::Button, bool> m_mousebuttons;
+	std::unordered_map<int, bool> m_keycodes;
+	std::unordered_map<int, bool> m_scancodes;
+	std::unordered_map<int, bool> m_mousebuttons;
 
 	inline bool isTouchPressed() const { if (!enable_touch) return false; return Input::GetFingersPressed() != 0; }
 	inline bool isKeyCodePressed() const { for (auto& kv : m_keycodes) if (kv.second) return true; return false; }

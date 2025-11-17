@@ -2,7 +2,7 @@
 #include "internal.h"
 #include "args.h"
 
-#include "logging.h"
+#include "utils/logging.h"
 
 struct _engine_data __engine_data;
 

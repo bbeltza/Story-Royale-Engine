@@ -4,7 +4,7 @@
 #include "Base/Thread.hpp"
 
 #include "vorbis.h"
-#include "utils.h"
+#include "utils/math.h"
 #include "../internal.h"
 
 //

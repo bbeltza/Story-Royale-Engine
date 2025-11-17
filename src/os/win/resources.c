@@ -1,6 +1,6 @@
 // This file doesn't depend of any os header, but it is still OS speficic
 
-#include "logging.h"
+#include "utils/logging.h"
 #include <Windows.h>
 
 extern const unsigned char* _game_res;

@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "utils/math.h"
 #include "Game/Camera.hpp"
 
 using namespace Game;

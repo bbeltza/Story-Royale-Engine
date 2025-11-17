@@ -1,6 +1,6 @@
 #include "Base/Tween.hpp"
 
-#include "utils.h"
+#include "utils/math.h"
 
 TweenBase::Set& TweenBase::get_tweens()
 {

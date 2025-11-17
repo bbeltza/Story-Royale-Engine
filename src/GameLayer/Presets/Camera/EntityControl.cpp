@@ -1,5 +1,5 @@
 #include "Game/CameraControllers/EntityControl.hpp"
-#include "utils.h"
+#include "utils/math.h"
 
 use_namespace
 

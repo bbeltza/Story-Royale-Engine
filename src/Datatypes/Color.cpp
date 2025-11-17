@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include "utils.h"
+#include "utils/math.h"
 
 #include "Datatypes/Color.hpp"
 

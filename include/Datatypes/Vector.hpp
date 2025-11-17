@@ -2,8 +2,8 @@
 #include <math.h>
 #include <iostream>
 
-#include "logging.h"
-#include "utils.h"
+#include "utils/logging.h"
+#include "utils/math.h"
 
 template <class _Num>
 struct Vector2

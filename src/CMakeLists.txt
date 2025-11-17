@@ -9,7 +9,6 @@ endmacro()
 
 set(SOURCES 
 "main.c"
-"logging.c"
 
 "Extras/AudioFormat.c"
 "Extras/ExtraSDL.c"
@@ -66,11 +65,16 @@ set(COMPONENT_SOURCES
 "World/Sprite.cpp"
 )
 
+set(UTIL_SOURCES
+    "logging.c"
+)
+
 set_dst_src(Components COMPONENT_SOURCES LAYER_SOURCES)
 
 set_src(Base BASE_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)
 set_src(GameLayer LAYER_SOURCES)
+set_src(utils UTIL_SOURCES)
 
 add_library(StoryRoyaleEngine STATIC ${SOURCES})
 

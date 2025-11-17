@@ -2,7 +2,7 @@
 #include "../internal.h"
 
 #include "OS.h"
-#include "logging.h"
+#include "utils/logging.h"
 
 #define threads_list reinterpret_cast<std::list<Thread::data>*>(engine.allocated_threads)
 #define to_remove reinterpret_cast<std::queue<Thread::data*>*>(engine.finished_threads)

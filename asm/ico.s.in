@@ -1,0 +1,5 @@
+.section .res, "a"
+
+.global _game_ico
+_game_ico:
+    .incbin "${OUTPUT_ICON}"

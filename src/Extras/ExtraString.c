@@ -1,6 +1,6 @@
 #include <string.h>
 #include <C/extra_string.h>
-#include "utils.h"
+#include "utils/math.h"
 
 const char* strnrchr(const char* _src, int _Char, size_t _Count)
 {

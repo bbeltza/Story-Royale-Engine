@@ -72,6 +72,12 @@ target_include_directories(StoryRoyaleEngineCore PUBLIC ${SRENGINE_INCLUDE_DIRS}
 
 target_link_libraries(StoryRoyaleEngine PUBLIC ${3RDPARTYLIBS})
 target_link_libraries(StoryRoyaleEngine PRIVATE StoryRoyaleEngineCore)
+if (ANDROID)
+    target_link_libraries(StoryRoyaleEngine PUBLIC
+    android
+    log
+    )
+endif()
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     set(BUILD_TESTS ON)

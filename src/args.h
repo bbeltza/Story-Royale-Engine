@@ -9,7 +9,7 @@ typedef struct _argument
     const char* arg;
     const char* shortcut;
     const char* desc;
-    void (*handler)(const char* arg, const char* argv[]);
+    void (*handler)(const char* arg, char* argv[]);
 } arg_t;
 
 #ifdef __cplusplus

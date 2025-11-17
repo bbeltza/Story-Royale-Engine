@@ -1,12 +1,16 @@
 find_package(Python REQUIRED)
-set(PYTHON_COMMAND python ${SRENGINE_DIR}/scripts/)
+if (NOT PYTHON_EXECUTABLE)
+    set(PYTHON_EXECUTABLE python)
+endif()
+set(PYTHON_COMMAND ${PYTHON_EXECUTABLE} ${SRENGINE_DIR}/scripts/)
 
 include(StoryRoyaleEngine/Policy)
 include(StoryRoyaleEngine/Resources)
 include(StoryRoyaleEngine/Settings)
+include(StoryRoyaleEngine/Icon)
 
 function(srEngine_build TARGET)
-    if (0)
+    if (ANDROID)
         add_library(${TARGET} SHARED ${SOURCES})
     else()
         add_executable(${TARGET} ${SOURCES})
@@ -16,6 +20,7 @@ function(srEngine_build TARGET)
 
     srEngine_link_settings(${TARGET} ${ARGN})
     srEngine_link_resource(${TARGET} ${ARGN})
+    srEngine_link_icon(${TARGET})
 
     target_include_directories(${TARGET} PRIVATE StoryRoyaleEngine)
     target_link_libraries(${TARGET} PRIVATE StoryRoyaleEngine)

@@ -1,7 +1,6 @@
 macro(srEngine_nobind PROJECT)
 	message("--- Linking ${PROJECT} with a no-binder")
-	target_sources(${PROJECT} PRIVATE ${SRENGINE_DIR}/gen_src/empty_res.c)
-	# target_link_libraries(${PROJECT} no_bind)
+	target_link_libraries(${PROJECT} PUBLIC no_bind)
 endmacro()
 
 function(srEngine_link_resource PROJECT)
