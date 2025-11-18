@@ -25,10 +25,7 @@ struct ENGINE_CONTAINERS
 
 static ENGINE_CONTAINERS* cc;
 
-#define get_container(n) std::get<n>(*containers_tuple)
-
 SDL_atomic_t SR_NUM_ALLOCATIONS;
-
 
 #if !defined(NDEBUG) && WIN32 // This operator 
 void* operator new(size_t size)
@@ -111,17 +108,29 @@ void __update_classes()
 
 void __update_layer()
 {
-	if (!engine.current_guilayer) return;
-	currlayer->m_absolute.Size.X = static_cast<float>(engine.viewport.w);
-	currlayer->m_absolute.Size.Y = static_cast<float>(engine.viewport.h);
-	currlayer->_processchildren();
+	begin:
+	Game::GuiLayer* current = currlayer;
+	
+	if (!current) return;
+	current->m_absolute.Size.X = static_cast<float>(engine.viewport.w);
+	current->m_absolute.Size.Y = static_cast<float>(engine.viewport.h);
+	current->_processchildren();
+	
+	current->call_update(engine.last_dt);
+	__destroy_queue();
 
-	currlayer->call_update(engine.last_dt);
+	if (current != engine.current_guilayer) goto begin;
 }
 
 void __update_world()
 {
-	if (!engine.current_world) return;
-	currworld->call_update(engine.last_dt);
-	currworld->call_pupdate(engine.last_dt);
+	begin:
+	Game::World* current = currworld;
+	
+	if (!current) return;
+	current->call_update(engine.last_dt);
+	current->call_pupdate(engine.last_dt);
+	__destroy_queue();
+
+	if (current != engine.current_world) goto begin;
 }
