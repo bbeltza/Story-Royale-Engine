@@ -13,7 +13,9 @@ MODE_TO_BPP = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 
 def pack(output:str, files:list[str]):
     count = len(files)
 
-    with open(output, "wb") as out_file:
+    output_ico = output + "/app.ico"
+
+    with open(output_ico, "wb") as out_file:
         out_file.write(struct.pack(ICONDIR_FMT, 0, 1, count))
         offset = struct.calcsize(ICONDIR_FMT) + struct.calcsize(ICONDIRENTRY_FMT)*count
 
@@ -39,7 +41,7 @@ def pack(output:str, files:list[str]):
         
         for i in files:
             with open(i, "rb") as input_file:
-                out_file.write(open(i, "rb").read())
+                out_file.write(input_file.read())
 
 def main():
     ARG_COUNT = len(argv) - 1

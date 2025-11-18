@@ -1,109 +1,97 @@
 from warnings import warn
-import os
-import sys
+import os, sys, typing, struct
 import zlib
 
 ARG_COUNT = len(sys.argv) - 1
 REQUIRED_ARGS = 3
 
-assert ARG_COUNT >= 2, f"You need {REQUIRED_ARGS} arguments to run the script, you've only passed {ARG_COUNT}"
+assert ARG_COUNT >= REQUIRED_ARGS, f"You need {REQUIRED_ARGS} or more arguments to run the script, you've only passed {ARG_COUNT}"
 
-if ARG_COUNT > REQUIRED_ARGS:
-    _args = sys.argv.copy()
-    _args.pop(0)
-    warn(f"You've passed more than {REQUIRED_ARGS} arguments. Only using the first {REQUIRED_ARGS} arguments, args: {_args}")
-
-resDir = sys.argv[1]
+res_dir = sys.argv[1]
 output_folder = sys.argv[2]
 want_c_src = int(sys.argv[3]).__bool__()
 
-compressor = zlib.compressobj(zlib.Z_NO_COMPRESSION, strategy=zlib.Z_FILTERED)
+try:
+    ptr_size = int(sys.argv[4])
+    if ptr_size <= 2:
+        ptr_size = 2
+    elif ptr_size < 4:
+        ptr_size = 4
+    elif ptr_size > 4:
+        ptr_size = 8
+except IndexError:
+    ptr_size = sys.maxsize.bit_count() // 8 + 1
 
-def getTree(dir:str, array:list = []):
-    for str in os.listdir(dir):
-        try:
-            newarray = [str]
-            getTree(dir + f"/{str}", newarray)
-            array.append(newarray)
-        except NotADirectoryError:
-            array.append((f"{str}"))
-    return array
+try:
+    byte_order = "little" if sys.argv[5] == "LITTLE_ENDIAN" else "big" if sys.argv[5] == "BIG_ENDIAN" else None
+    if byte_order == None: raise TypeError(f"Argument 5 must be either \"LITTLE_ENDIAN\" or \"BIG_ENDIAN\", you've passed \"{sys.argv[5]}\".")
+except IndexError:
+    byte_order = sys.byteorder
 
-def write_dirs(_tree:list, prefix:str="", arr:list=[]):
-    global out_string
-    for filename in _tree:
-           if type(filename) == str:
-               arr.append([prefix + filename])
-               out_string += arr[-1][0] + "\0001111"
-               arr[-1].append(len(out_string)-4)
+I = "I" if struct.calcsize("@I") == 4 else "L"
+endianness_fmt = (">" if byte_order == "big" else "<")
 
-           elif type(filename) == list:
-               if len(filename) == 0: continue
-               pop = filename.pop(0) + "/"
-               write_dirs(filename, prefix + pop, arr)
+offset_fmt = endianness_fmt + "B" + "x" * ptr_size
+size_fmt = endianness_fmt + (I if ptr_size == 4 else "Q" if ptr_size == 8 else "H" if ptr_size == 2 else "N")
+
+#compressor = zlib.compressobj(zlib.Z_NO_COMPRESSION, strategy=zlib.Z_FILTERED)
+
+def getDirs(base:str, arr:list=[], prefix="") -> list:
+    for dir in os.listdir(base + prefix):
+        path = f"{prefix}/{dir}"
+        fullpath = f"{base}{path}"
+        if os.path.isdir(fullpath):
+            getDirs(base, arr, path)
+        elif os.path.isfile(fullpath):
+            arr.append(path.removeprefix("/"))
+        else:
+            raise FileNotFoundError(path)
+    
     return arr
-    
-def build_resource():
-    global out_string
-    tree = getTree(resDir)
 
-    out_string = ""
-    files = write_dirs(tree)
-    out_string += "\n"
-    out_string = out_string.encode()
-    for filename in files:
-        print(filename)
-        with open(resDir + "/" + filename[0], "rb") as file:
-            filedata = file.read()
-            filesize = file.tell()
-            print(f"filesize is {filesize}")
+def writeDirs(dirs:list[str], res_dat:typing.BinaryIO) -> list[int]:
+    positions = []
+    for path in dirs:
+        res_dat.write(path.encode())
+        positions.append(res_dat.tell() + 1)
+        res_dat.write(struct.pack(offset_fmt, 0))
+    return positions
 
-            sizechars = filesize.to_bytes(4)
-            print(sizechars)
-            pos = len(out_string)
-            print(f"File position is {pos}")
-            file_size_id = filename[1]
+def writeRes(base:str, dirs:list[str], res_dat:typing.BinaryIO):
+    positions = writeDirs(dirs, res_dat)
+    for i, fp in enumerate(dirs):
+        fp = f"{base}/{fp}"
+        pos = positions[i]
+        rpos = res_dat.tell()
+        res_dat.seek(pos, os.SEEK_SET)
+        res_dat.write(struct.pack(size_fmt, rpos))
+        res_dat.seek(0, os.SEEK_END)
 
-            out_string += sizechars
-            out_string += filedata
-
-            pos_to_bytes = pos.to_bytes(4)
-            print(file_size_id)
-            out_string = out_string[:file_size_id] + pos_to_bytes + out_string[file_size_id+4:]
-                
-            file.close()
-
-        #out_compressed = compressor.compress(out_string)
-
-    with open(output_folder + "/_res.dat", "wb") as logfile:
-        logfile.write(out_string)
-        logfile.seek(0, os.SEEK_SET)
-
-    if want_c_src:
-        # Convert raw data into C character array
-        byte_array = []
-
-        for byte in out_string:
-            res = hex(byte)
-            byte_array.append(res)
-    
-        with open(output_folder + "/_res.c", "wt") as output_file:
-            output_file.write("const unsigned char _game_res[]={")
-            output_file.write(",".join(byte_array))
-            output_file.write("};")
-
+        with open(fp, "rb") as resource:
+            try:
+                res_dat.write(struct.pack(size_fmt, os.path.getsize(fp)))
+            except struct.error as err:
+                raise MemoryError(f"I guess your resources are too big to support {ptr_size*8} bit files...")
+            res_dat.write(resource.read())
+        res_dat.write(b'\n')
 
 def main():
-    success = False
-    i = 0
-    while not success:
-        i += 1
-        try:
-           build_resource()
-           success = True
-        except PermissionError as p:
-            print(f'Something wrong happened when trying to open one of the files: {p.winerror}')
-            pass
+    dirs = getDirs(res_dir)
+    with open(f"{output_folder}/_res.dat", "wb") as res_dat:
+        writeRes(res_dir, dirs, res_dat)
+
+        if want_c_src:
+            # Convert raw data into C character array
+            byte_array = []
+            res_string = res_dat.read()
+            for byte in res_string:
+                b = hex(byte)
+                byte_array.append(b)
+            
+            with open(f"{output_folder}/_res.c", "wt") as output_file:
+                output_file.write("const unsigned char _game_res[]={")
+                output_file.write(",".join(byte_array))
+                output_file.write("};")
 
 WANT_PROFILE = False
 

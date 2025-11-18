@@ -1,6 +1,6 @@
 macro(srEngine_nobind PROJECT)
 	message("--- Linking ${PROJECT} with a no-binder")
-	target_link_libraries(${PROJECT} PUBLIC no_bind)
+	target_sources(${PROJECT} PUBLIC ${SRENGINE_DIR}/gen_src/empty_res.c)
 endmacro()
 
 function(srEngine_link_resource PROJECT)
@@ -42,6 +42,8 @@ function(srEngine_link_resource PROJECT)
         ${INPUT}
         ${OUTPUT}
         ${WANT_C}
+        ${CMAKE_SIZEOF_VOID_P}
+        ${CMAKE_C_BYTE_ORDER}
         DEPENDS ${OUTPUT}/_res.c
         DEPENDS ${OUTPUT}/_res.dat
         )
@@ -59,8 +61,7 @@ function(srEngine_link_resource PROJECT)
             srEngine_nobind(${PROJECT})
         elseif(UNIX)
             configure_file(${SRENGINE_DIR}/asm/res.s.in ${OUTPUT}/_res.s)
-            set_property(SOURCE ${OUTPUT}/_res.s PROPERTY LANGUAGE C)
-            target_sources(${PROJECT} PUBLIC ${OUTPUT}/_res.s)
+            target_link_libraries(${PROJECT} PUBLIC ${OUTPUT}/_res.s)
         else()
             target_sources(${PROJCET} PUBLIC ${OUTPUT}/_res.c)
         endif()

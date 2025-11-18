@@ -80,22 +80,18 @@ void File::load_resource()
         if (!cmp)
         {
             res_ptr += pathlen;
-            int32_t datapos;
-            for (uint32_t i = 0; i < sizeof(int32_t); i++)
-                reinterpret_cast<unsigned char *>(&datapos)[i] = res_ptr[sizeof(int32_t) - 1 - i];
+            size_t datapos = reinterpret_cast<const size_t*>(res_ptr)[0];
 
-            this->res_begin = _game_res + datapos + sizeof(uint32_t);
+            this->res_begin = _game_res + datapos + sizeof(size_t);
             this->res_pos = 0;
 
-            uint32_t size;
-            for (uint32_t i = 0; i < sizeof(int32_t); i++)
-                reinterpret_cast<unsigned char *>(&size)[i] = (this->res_begin - 1 - i)[0];
+            size_t size = reinterpret_cast<const size_t*>(this->res_begin)[-1];;
             this->res_size = size;
             this->isembedded = true;
 
             return;
         }
-        res_ptr += strlen((const char *)res_ptr) + 5;
+        res_ptr += strlen(reinterpret_cast<const char *>(res_ptr)) + 1 + sizeof(size_t);
     }
 
     this->error_notfound();

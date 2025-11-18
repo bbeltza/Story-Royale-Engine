@@ -15,7 +15,7 @@ function(srEngine_link_icon TARGET)
         ico_${TARGET}
         COMMENT "--- Generating app.ico..."
         COMMAND ${PYTHON_COMMAND}icon_generator.py
-        ${OUTPUT_ICON}
+        ${CMAKE_CURRENT_BINARY_DIR}
         ${IMGS}
         DEPENDS ${IMGS}
         )
@@ -26,8 +26,7 @@ function(srEngine_link_icon TARGET)
         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc "IDI_ICON  ICON  DISCARDABLE  \"app.ico\"")
         target_sources(${TARGET} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc)
     elseif(UNIX)
-        configure_file(${SRENGINE_DIR}/asm/ico.s.in ${OUTPUT}/ico.s)
-        set_property(SOURCE ${OUTPUT}/ico.s PROPERTY LANGUAGE C)
-        target_sources(${PROJECT} PUBLIC ${OUTPUT}/ico.s)
+        configure_file(${SRENGINE_DIR}/asm/ico.s.in ${CMAKE_CURRENT_BINARY_DIR}/ico.s)
+        target_link_libraries(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/ico.s)
     endif()
 endfunction()

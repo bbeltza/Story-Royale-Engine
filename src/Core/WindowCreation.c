@@ -5,7 +5,7 @@
 #include <SDL_image.h>
 #ifdef __unix__
     extern const char _game_ico[];
-    extern int _game_icosize;
+    extern const char _game_ico_end[];
 #endif
 
 void __create_window(const struct _win_settings* _win)
@@ -19,9 +19,6 @@ void __create_window(const struct _win_settings* _win)
 		_win->flags
 	);
     SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);
-    #ifdef __unix__
-        SDL_SetWindowIcon(engine.sdl_windowhndl, IMG_Load_RW(SDL_RWFromConstMem(_game_ico, _game_icosize), 1));
-    #endif
 }
 
 int __poll_events()
