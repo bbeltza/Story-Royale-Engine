@@ -1,4 +1,5 @@
 #include "../internal.h"
+#include "../internal.hpp"
 
 #include "Base/Texture.hpp"
 #include "Base/Thread.hpp"
@@ -9,90 +10,68 @@
 #include "Game/World.hpp"
 #include "Game/GuiLayer.hpp"
 
-struct ENGINE_CONTAINERS
+_containers_service::_containers_service()
 {
-	std::list<Thread::data> allocated_threads;
-	std::queue<Thread::data*> finished_threads;
-
-	std::unordered_map<std::string, std::unique_ptr<AudioData>> loaded_audios;
-	std::unordered_set<Audio*> audio_queue;
-	std::queue<Audio*> stopped_audios;
-
-	std::vector<SDL_Texture*> target_textures;
-
-	std::list<TTF_Font*> loaded_fonts;
-};
-
-static ENGINE_CONTAINERS* cc;
-
-SDL_atomic_t SR_NUM_ALLOCATIONS;
-
-#if !defined(NDEBUG) && WIN32 // This operator 
-void* operator new(size_t size)
-{
-	size_t newsize = size + sizeof(size_t);
-	size_t* block = reinterpret_cast<size_t*>(malloc(newsize));
-	if (!block)
-		abort();
-
-	block[0] = size;
-	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, static_cast<int>(size));
-
-	//LOG("GOT OPERATOR NEW, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
-
-	block++;
-	return block;
+	target_textures.push_back(NULL);
 }
-void operator delete(void* block)
+
+_containers_service::~_containers_service()
 {
-	if (!block) return;
-	
-	size_t* tblock = reinterpret_cast<size_t*>(block);
-	tblock -= 1;
+	lock();
 
-	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, -static_cast<int>(tblock[0]));
+	// Destroy all concurrency-related stuff
+	allocated_threads.clear();
 
-	//LOG("GOT OPERATOR DELETE, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
+	// Destroy SDL textures (they cannot be destroyed after SDL_Quit())
+	while (target_textures.size() > 1)
+	{
+		SDL_DestroyTexture(target_textures.back());
+		target_textures.pop_back();
+	}
+	while (!loaded_textures.empty())
+	{
+		auto& texture = loaded_textures.front();
+		if (texture->texture)
+		{
+			SDL_DestroyTexture(static_cast<SDL_Texture*>(texture->texture));
+			texture->texture = NULL;
+		}
+		loaded_textures.pop_front();
+	}
 
-	free(tblock);
+	// Destroy SDL fonts (they also cannot be destroyed after)
+	while (!loaded_fonts.empty())
+	{
+		auto& font = loaded_fonts.front();
+		if (font->m_font)
+		{
+			TTF_CloseFont(font->m_font);
+			font->m_font = NULL;
+			font->m_src = NULL;
+		}
+		loaded_fonts.pop_front();
+	}
+
+	// Nothing much more for now..
+
+	unlock();
 }
-#endif
 
 void __init_containers()
 {
-	cc = new ENGINE_CONTAINERS;
-
-	engine.allocated_threads = &cc->allocated_threads;
-	engine.finished_threads = &cc->finished_threads;
-
-	engine.loaded_audios = &cc->loaded_audios;
-	engine.audio_queue = &cc->audio_queue;
-	engine.stopped_audios = &cc->stopped_audios;
-
-	engine.target_textures = &cc->target_textures;
-
-	engine.loaded_fonts = &cc->loaded_fonts;
-
-	cc->target_textures.push_back(NULL);
+	engine.containers_service = new _containers_service;
 }
 
 void __clean_containers()
 {
-	Thread::queue_removing();
-
-	memset(&engine.allocated_threads, 0, 7);
-
-	for (auto font : cc->loaded_fonts)
-	{
-		TTF_CloseFont(font);
-	}
-
-	delete cc;
+	_containers_service* containers = _containers;
+	engine.containers_service = NULL;
+	delete containers;
 
 	if (engine.current_world)
-		delete reinterpret_cast<::Game::World*>(__engine_data.current_world);
+		delete static_cast<::Game::World*>(engine.current_world);
 	if (engine.current_guilayer)
-		delete reinterpret_cast<::Game::GuiContainer*>(__engine_data.current_guilayer);
+		delete static_cast<::Game::GuiContainer*>(engine.current_guilayer);
 
 	__destroy_queue();
 }

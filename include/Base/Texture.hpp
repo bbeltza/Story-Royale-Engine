@@ -18,10 +18,6 @@ extern "C" void __display_render();
 
 class Texture
 {
-    friend void Display::DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint);
-
-    friend void __display_render();
-    friend class TargetTexture;
     typedef std::deque<Texture*> Queue;
     static Queue* to_load;
     static void load_textures();
@@ -41,4 +37,10 @@ private:
     void* texture = nullptr;
     // Temporary SDL_Surface* used to then load the texture to the GPU. Texture creating may be multithreaded, but creating textures may not be. So the image data is instead loaded into the CPU first.
     void* file_surface = nullptr;
+
+    friend void Display::DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint);
+    friend void __display_render();
+
+    friend class TargetTexture;
+    friend struct _containers_service;
 };

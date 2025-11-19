@@ -1,4 +1,5 @@
 #include "../internal.h"
+#include "../internal.hpp"
 
 #include "GameSettings.hpp"
 
@@ -9,15 +10,17 @@
 
 #include "Base/Texture.hpp"
 
-#define t_textures reinterpret_cast<std::vector<SDL_Texture*>*>(engine.target_textures)
-
 static void reset_targets()
 {
-	while (t_textures->size() > 1)
+	_containers->lock();
+
+	while (_containers->target_textures.size() > 1)
 	{
-		SDL_DestroyTexture(t_textures->back());
-		t_textures->pop_back();
+		SDL_DestroyTexture(_containers->target_textures.back());
+		_containers->target_textures.pop_back();
 	}
+
+	_containers->unlock();
 }
 
 void __setup_renderer(uint32_t flags)
@@ -135,10 +138,13 @@ void __display_render()
 void Texture::load_textures()
 {
 	if (!to_load) return;
+	_containers->lock();
 	while (!to_load->empty())
 	{
 		Texture* tex = to_load->back();
 		to_load->pop_back();
 		tex->texture = SDL_CreateTextureFromSurface(engine.sdl_rendererhndl, reinterpret_cast<SDL_Surface*>(tex->file_surface));
+		_containers->loaded_textures.push_front(tex);
 	}
+	_containers->unlock();
 }

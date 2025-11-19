@@ -12,7 +12,6 @@ set(SOURCES
 
 "Extras/AudioFormat.c"
 "Extras/ExtraSDL.c"
-"Extras/ExtraString.c"
 )
 
 set(DATATYPES_SOURCES

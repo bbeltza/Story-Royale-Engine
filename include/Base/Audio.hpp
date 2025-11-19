@@ -15,7 +15,9 @@ __def_internal(__update_audio)
 
 class AudioData
 {
+	friend struct AudioAccess;
 	friend class Audio;
+	friend struct _containers_service;
 
 	AudioData() = delete;
 	AudioData(const char* path);

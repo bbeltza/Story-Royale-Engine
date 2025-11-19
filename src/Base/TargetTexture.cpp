@@ -4,8 +4,9 @@
 #include "Base/TargetTexture.hpp"
 
 #include "../internal.h"
+#include "../internal.hpp"
 
-#define setup_aliases   auto& target_textures = *reinterpret_cast<std::vector<SDL_Texture*>*>(engine.target_textures); \
+#define setup_aliases   auto& target_textures = _containers->target_textures; \
                         auto& targetptr = engine.targetptr; \
                         auto renderer = engine.sdl_rendererhndl;
 
@@ -17,8 +18,9 @@ TargetTexture::TargetTexture(): TargetTexture({engine.viewport.w, engine.viewpor
 
 TargetTexture::TargetTexture(const Vector2i& size)
 {
-    assert(engine.target_textures && "Target texture must NOT be created statically and shouldn't be created before initializing");
+    assert(engine.containers_service && "Target texture must NOT be created statically and shouldn't be created before initializing");
 
+    _containers->lock();
     setup_aliases
     targetptr++;
 
@@ -33,11 +35,13 @@ TargetTexture::TargetTexture(const Vector2i& size)
             ));
     
     m_handle = target_textures.at(targetptr);
+    _containers->unlock();
 
     SDL_SetTextureBlendMode(m_texture, SDL_BLENDMODE_BLEND);
     SDL_SetRenderTarget(renderer, m_texture);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
+
 }
 
 TargetTexture::~TargetTexture()

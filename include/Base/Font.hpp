@@ -34,4 +34,5 @@ class Font
     TTF_Font* m_font;
     SDL_RWops* m_src;
 
+    friend struct _containers_service;
 };

@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <chrono>
-#include <thread>
 #include <string>
 
 #include <cassert>
@@ -17,10 +16,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-extern "C"
-{
-    #include "C/extra_string.h"
-}
+#include <mutex>
 
 #ifndef _MSC_VER
 #define strcpy_s(dest, n, src) strncpy(dest, src, n)

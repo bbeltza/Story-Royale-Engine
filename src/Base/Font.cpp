@@ -4,21 +4,31 @@
 #include "Engine.hpp"
 
 #include "../internal.h"
+#include "../internal.hpp"
 
 Font::Font(const char* path, int pt)
 {
+    _containers->lock();
+
     File file(path);
     m_font = TTF_OpenFontRW(file.toRWops(), 1, pt);
+    
+    _containers->loaded_fonts.push_front(this);
 
-    _fonts_loaded->push_front(m_font);
+    _containers->unlock();
 }
 
 Font::~Font()
 {
-    if (!TTF_WasInit()) return;
+    if (!engine.containers_service) return;
 
-    _fonts_loaded->remove(m_font);
-    TTF_CloseFont(m_font);
+    _containers->lock();
+    if (m_font)
+        TTF_CloseFont(m_font);
+    
+    _containers->loaded_fonts.remove(this);
+
+    _containers->unlock();
 }
 
 bool Font::PreloadTextures(const char* text)

@@ -1,5 +1,6 @@
 #include <standard>
 #include "../internal.h"
+#include "../internal.hpp"
 
 #include "Base/Audio.hpp"
 #include "Base/Thread.hpp"
@@ -8,7 +9,7 @@
 
 void __audio_callback(void* data, uint8_t* stream, int len)
 {
-	if (!engine.audio_queue) return;
+	if (!engine.containers_service) return;
 
 	memset(stream, 0, len);
 	
@@ -22,7 +23,7 @@ void __update_audio()
 	const uint8_t channel_count = engine.audio_spec.channels;
 	const size_t sample_len = static_cast<size_t>(engine.audio_slen / 2);
 
-	for (Audio* audio : *_audio_queue)
+	for (Audio* audio : _containers->audio_queue)
 	{
 		const uint32_t loop_end = ((uint32_t)audio->Info.loop_end < audio->m_data->m_len ? audio->Info.loop_end : audio->m_data->m_len);
 
@@ -56,7 +57,7 @@ void __update_audio()
 				if (audio->m_fadevol <= 0)
 				{
 					audio->m_fadeout = false;
-					_audio_stopqueue->push(audio);
+					_containers->stopped_audios.push(audio);
 					break;
 				}
 			}
@@ -106,16 +107,16 @@ void __update_audio()
 			}
 			else if (audio->m_samplepos >= loop_end)
 			{
-				_audio_stopqueue->push(audio);
+				_containers->stopped_audios.push(audio);
 				break;
 			}
 		}
 	}
 
-	while (!_audio_stopqueue->empty())
+	while (!_containers->stopped_audios.empty())
 	{
-		_audio_stopqueue->front()->Stop();
-		_audio_stopqueue->pop();
+		_containers->stopped_audios.front()->Stop();
+		_containers->stopped_audios.pop();
 	}
 }
 

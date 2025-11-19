@@ -2,12 +2,10 @@
 #include <SDL.h>
 #include <stdint.h>
 
+#include "C/API.h"
 #include "Datatypes/TimeStamp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+_CAPI_BEGIN
 	struct _win_settings
 	{
 		const char* title;
@@ -26,8 +24,8 @@ extern "C" {
 
 		// Instance data
 
-		void* current_world; // Designed to replace Game::World::m_Current
-		void* current_guilayer; // And Game::GuiLayer::m_Current
+		void* current_world;
+		void* current_guilayer;
 
 		SDL_mutex* destroyqueue_mutex;
 
@@ -67,26 +65,7 @@ extern "C" {
 		SDL_TouchID input_last_touchid;
 		uint8_t keyboard_state[SDL_NUM_SCANCODES];
 
-		// C++ containers
-
-		// Multithreading
-
-		void* allocated_threads; // std::list
-		void* finished_threads; // std::queue of thread data
-		// void* threadid_map; // std::unordered_map to map thread ids to threads
-
-			// Audio
-
-		void* loaded_audios; // An std::unordered_map of unique pointers to AudioData structures
-		void* audio_queue; // An std::unordered_set of Audio instances
-		void* stopped_audios;
-
-			// 
-
-		void* target_textures; // An std::vector
-		void* loaded_textures;
-
-		void* loaded_fonts;
+		void* containers_service;
 	};
 
 	extern struct _engine_data __engine_data;
@@ -124,9 +103,9 @@ extern "C" {
 	extern void __display_render();
 
 	extern void __clean_containers();
-#ifdef __cplusplus
-}
+_CAPI_END
 
+#ifdef __cplusplus
 #define currworld static_cast<::Game::World*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
 #define currlayer static_cast<::Game::GuiLayer*>(engine.current_guilayer) // Same with this...
 #define flags_kbstate reinterpret_cast<::Flags8*>(engine.keyboard_state)

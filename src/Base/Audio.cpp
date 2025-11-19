@@ -5,9 +5,11 @@
 
 #include "vorbis.h"
 #include "utils/math.h"
-#include "../internal.h"
 
-//
+#include "../internal.h"
+#include "../internal.hpp"
+
+#include "list"
 
 void AudioData::Load()
 {
@@ -50,11 +52,7 @@ void AudioData::Load()
 
 void AudioData::Unload()
 {
-	for (auto &kv : *_audio_loaded)
-	{
-		if (kv.second.get() == this)
-			return (void)_audio_loaded->erase(kv.first);
-	}
+	_containers->loaded_audios.remove_if([&](const AudioAccess& _Other) -> bool { return &_Other.data == this; });;
 	abort();
 }
 
@@ -71,18 +69,11 @@ AudioData::~AudioData()
 
 AudioData& Audio::Load(const char *path)
 {
-	AudioData *audio;
+	_containers->loaded_audios.emplace_front(path);
+	AudioData& audio = _containers->loaded_audios.front().data;
+	audio.thrd = Threads::Create(threadedload, &audio);
 
-	if (_audio_loaded->count(path) == 0)
-	{
-		_audio_loaded->emplace(path, new AudioData(path));
-		audio = _audio_loaded->at(path).get();
-		audio->thrd = Threads::Create(threadedload, audio);
-	}
-	else
-		audio = _audio_loaded->at(path).get();
-
-	return *audio;
+	return audio;
 }
 
 //
@@ -112,7 +103,7 @@ void Audio::Play(bool force)
 		return;
 	}
 
-	_audio_queue->insert(this);
+	_containers->audio_queue.insert(this);
 
 	if (Info.fade_in > 0)
 	{
@@ -130,8 +121,8 @@ TimeStamp Audio::Pause()
 {
 	SDL_LockAudioDevice(engine.audio_device);
 
-	_audio_queue->erase(this);
-	if (_audio_queue->empty())
+	_containers->audio_queue.erase(this);
+	if (_containers->audio_queue.empty())
 		SDL_PauseAudioDevice(engine.audio_device, 1);
 
 	SDL_UnlockAudioDevice(engine.audio_device);
@@ -149,5 +140,5 @@ TimeStamp Audio::Stop()
 
 bool Audio::IsPlaying() const
 {
-	return _audio_queue->count(const_cast<Audio *>(this)) != 0;
+	return _containers->audio_queue.count(const_cast<Audio *>(this)) != 0;
 }

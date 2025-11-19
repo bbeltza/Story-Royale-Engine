@@ -39,15 +39,15 @@ void __initialize_engine()
 
 void __end_engine()
 {
-    SDL_DestroyWindow(engine.sdl_windowhndl);
     SDL_CloseAudioDevice(engine.audio_device);
-
+    
     __clean_containers();
-
-    SDL_DestroyMutex(engine.sdl_rendermutex);
-    SDL_DestroyMutex(engine.destroyqueue_mutex);
+    
     SDL_DetachThread(engine.entry_thread);
     SDL_DestroyTexture(engine.sdl_rectTex);
+    SDL_DestroyMutex(engine.sdl_rendermutex);
+    SDL_DestroyMutex(engine.destroyqueue_mutex);
+    SDL_DestroyWindow(engine.sdl_windowhndl);
 
     TTF_Quit();
     IMG_Quit();
