@@ -1,10 +1,11 @@
-#include <SDL.hpp>
+#include <SDL.h>
 #include "Engine.hpp"
 #include "Base/Audio.hpp"
 #include "Base/Thread.hpp"
 
 #include "vorbis.h"
 #include "utils/math.h"
+#include "utils/audioutils.h"
 
 #include "../internal.h"
 #include "../internal.hpp"
@@ -76,13 +77,10 @@ AudioData& Audio::Load(const char *path)
 	return audio;
 }
 
-//
-
-extern "C" uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t **d_input, intptr_t len_input);
 void Audio::threadedload(AudioData *audio)
 {
 	audio->Load();
-	ConvertAudioFormat(audio->m_spec.format, engine.audio_spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
+	ut_audioconvertformat(audio->m_spec.format, engine.audio_spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
 
 	audio->m_spec.format = engine.audio_spec.format;
 	audio->m_loaded = true;

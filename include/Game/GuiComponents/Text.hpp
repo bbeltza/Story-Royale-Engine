@@ -1,7 +1,6 @@
 #pragma once
 #include "Game/GuiComponent.hpp"
 #include "Base/Font.hpp"
-#include <SDL.hpp>
 
 namespace GuiComponents
 {

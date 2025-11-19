@@ -1,9 +1,8 @@
-#include "SDL.hpp"
 #include "Game/GuiComponents/Modulate.hpp"
 
 void GuiComponents::Modulate::pre_render(Game::GuiContainer* obj)
 {
-    if (*(Uint32*)&Value == UINT32_MAX) return;
+    if (*(uint32_t*)&Value == UINT32_MAX) return;
 
     Color4* _mod = getModulate(obj);
 

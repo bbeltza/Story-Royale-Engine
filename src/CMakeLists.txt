@@ -9,9 +9,6 @@ endmacro()
 
 set(SOURCES 
 "main.c"
-
-"Extras/AudioFormat.c"
-"Extras/ExtraSDL.c"
 )
 
 set(DATATYPES_SOURCES
@@ -65,6 +62,7 @@ set(COMPONENT_SOURCES
 )
 
 set(UTIL_SOURCES
+    "audioformat.c"
     "logging.c"
 )
 

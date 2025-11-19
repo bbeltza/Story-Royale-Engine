@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL.hpp>
+#include <SDL_events.h>
 #include "Datatypes/Vector.hpp"
 
 struct TouchFinger

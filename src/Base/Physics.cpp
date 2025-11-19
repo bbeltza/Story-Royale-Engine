@@ -1,5 +1,4 @@
 #include <standard>
-#include <SDL.hpp>
 
 #include "Game/World.hpp"
 #include "Game/Entity.hpp"

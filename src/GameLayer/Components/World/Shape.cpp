@@ -1,10 +1,11 @@
-#include "SDL.hpp"
 #include "Game/Components/Shape.hpp"
 
 #include "Game/Entity.hpp"
 #include "Game/World.hpp"
 
 #include "Base/Display.hpp"
+
+#include <SDL_shape.h>
 
 Components::Shape::CollisionSet* Components::Shape::collider_set = nullptr;
 

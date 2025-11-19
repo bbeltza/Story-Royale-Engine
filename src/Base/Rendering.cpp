@@ -1,5 +1,4 @@
 #include <standard>
-#include <SDL.hpp>
 #include "../internal.h"
 
 #include "Base/Display.hpp"
@@ -9,14 +8,14 @@
 
 #include "config.h"
 
-Vector2f Display::GetCenter() { return { engine.center_x, engine.center_y }; }
-Vector2i Display::GetSize() { return { engine.viewport.w, engine.viewport.h }; }
-Vector2i Display::GetAbsoluteSize() { return { engine.osize_x, engine.osize_y }; }
+Vector2f Display::GetCenter() { return {engine.center_x, engine.center_y}; }
+Vector2i Display::GetSize() { return {engine.viewport.w, engine.viewport.h}; }
+Vector2i Display::GetAbsoluteSize() { return {engine.osize_x, engine.osize_y}; }
 
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
 
-void Display::DrawLine(const Color4& Color, const Vector2f& Pt1, const Vector2f& Pt2)
+void Display::DrawLine(const Color4 &Color, const Vector2f &Pt1, const Vector2f &Pt2)
 {
     START_DRAW
 
@@ -26,17 +25,17 @@ void Display::DrawLine(const Color4& Color, const Vector2f& Pt1, const Vector2f&
     END_DRAW
 }
 
-void Display::DrawLines(const Color4& Color, int Count, const Vector2f* Pts)
+void Display::DrawLines(const Color4 &Color, int Count, const Vector2f *Pts)
 {
     START_DRAW
 
     SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
-    SDL_RenderDrawLinesF(engine.sdl_rendererhndl, reinterpret_cast<const SDL_FPoint*>(Pts), Count);
+    SDL_RenderDrawLinesF(engine.sdl_rendererhndl, reinterpret_cast<const SDL_FPoint *>(Pts), Count);
 
     END_DRAW
 }
 
-void Display::DrawRectangle(const RectF& Rectangle, const Color4& Color, const Color4& Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
+void Display::DrawRectangle(const RectF &Rectangle, const Color4 &Color, const Color4 &Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
 {
     START_DRAW
 
@@ -45,14 +44,15 @@ void Display::DrawRectangle(const RectF& Rectangle, const Color4& Color, const C
         Rectangle.Position.Y - Rectangle.Size.Y * AnchorPoint.Y,
         Rectangle.Size.X,
         Rectangle.Size.Y};
+    Color4 abs_col = Color * Modulate;
 
-    SDL_SetRenderDrawColorMod(engine.sdl_rendererhndl, (SDL_Color*)&Color, (SDL_Color*)&Modulate);
+    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, abs_col.r, abs_col.g, abs_col.b, abs_col.a);
     switch (Mode)
     {
     case dm_Stroke:
         SDL_RenderDrawRectF(engine.sdl_rendererhndl, &r);
         break;
-    
+
     default:
         SDL_RenderFillRectF(engine.sdl_rendererhndl, &r);
         break;
@@ -61,7 +61,7 @@ void Display::DrawRectangle(const RectF& Rectangle, const Color4& Color, const C
     END_DRAW
 };
 
-void Display::DrawRectangleAtWorld(RectF Rectangle, const Color4& Color, const Color4& Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
+void Display::DrawRectangleAtWorld(RectF Rectangle, const Color4 &Color, const Color4 &Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
 {
     START_DRAW
 
@@ -81,30 +81,29 @@ void Display::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle,
     switch (_dm)
     {
     case dm_Stroke:
-        {
-            Vector2f points[4] = 
+    {
+        Vector2f points[4] =
             {
                 _Rectangle.getTopLeftRotated(_angle),
                 _Rectangle.getTopRightRotated(_angle),
                 _Rectangle.getBottomRightRotated(_angle),
-                _Rectangle.getBottomLeftRotated(_angle)
-            };
-            SDL_RenderDrawLinesF(engine.sdl_rendererhndl, (SDL_FPoint*)points, 4);
-        }
-        break;
+                _Rectangle.getBottomLeftRotated(_angle)};
+        SDL_RenderDrawLinesF(engine.sdl_rendererhndl, (SDL_FPoint *)points, 4);
+    }
+    break;
     default:
-        {
-            SDL_FRect r{
+    {
+        SDL_FRect r{
             _Rectangle.getLeft(),
             _Rectangle.getTop(),
             _Rectangle.Size.X,
             _Rectangle.Size.Y};
 
-            SDL_SetTextureColorMod(engine.sdl_rectTex, _Col.r, _Col.g, _Col.b);
-            SDL_SetTextureAlphaMod(engine.sdl_rectTex, _Col.a);
-            SDL_RenderCopyExF(engine.sdl_rendererhndl, engine.sdl_rectTex, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
-        }
-        break;
+        SDL_SetTextureColorMod(engine.sdl_rectTex, _Col.r, _Col.g, _Col.b);
+        SDL_SetTextureAlphaMod(engine.sdl_rectTex, _Col.a);
+        SDL_RenderCopyExF(engine.sdl_rendererhndl, engine.sdl_rectTex, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
+    }
+    break;
     }
 
     END_DRAW
@@ -135,23 +134,49 @@ void Display::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference
     END_DRAW
 }
 
-void Display::DrawCircle(const Vector2f& _Pos, const float _Radius, const Color4& _Col, DrawingMode _dm)
+void Display::DrawCircle(const Vector2f &pos, const float radius, const Color4 &_Col, DrawingMode _dm)
 {
     START_DRAW
 
-    SDL_RenderFillCircleF(engine.sdl_rendererhndl, _Pos.X, _Pos.Y, _Radius);
+    SDL_Rect v;
+    SDL_RenderGetViewport(engine.sdl_rendererhndl, &v);
 
+    float _x = pos.X;
+    float _y = pos.Y;
+
+    if (_x + radius < 0 || _y + radius < 0 || _x - radius > v.w || _y - radius > v.h) goto end;
+    float x = radius;
+    float y = 0;
+    float radiusError = 1 - x;
+    while (x >= y)
+    {
+        SDL_RenderDrawLineF(engine.sdl_rendererhndl, x + _x, y + _y, -x + _x, y + _y);
+        SDL_RenderDrawLineF(engine.sdl_rendererhndl, y + _x, x + _y, -y + _x, x + _y);
+        SDL_RenderDrawLineF(engine.sdl_rendererhndl, -x + _x, -y + _y, x + _x, -y + _y);
+        SDL_RenderDrawLineF(engine.sdl_rendererhndl, -y + _x, -x + _y, y + _x, -x + _y);
+        y++;
+        if (radiusError < 0)
+            radiusError += 2 * y + 1;
+        else
+        {
+            x--;
+            radiusError += 2 * (y - x + 1);
+        }
+    }
+
+end:
     END_DRAW
 }
 
-void Display::DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint)
+void Display::DrawTexture(Texture &_Texture, const RectF &Rectangle, const Color4 &Modulate, const Vector2f &AnchorPoint)
 {
     START_DRAW
 
     if (Rectangle.Size.X == 0 || Rectangle.Size.Y == 0)
         return;
-    
-    if (!_Texture.texture) Texture::load_textures();
+
+    if (!_Texture.texture)
+        Texture::load_textures();
 
     float absW = abs(Rectangle.Size.X);
     float absH = abs(Rectangle.Size.Y);
@@ -164,19 +189,19 @@ void Display::DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color
     SDL_FRect render_rect{left, top, absW, absH};
     int flip = (Rectangle.Size.X < 0 ? ut_bit(0) : 0) | (Rectangle.Size.Y < 0 ? ut_bit(1) : 0);
 
-    SDL_SetTextureColorMod((SDL_Texture*)_Texture.texture, Modulate.r, Modulate.g, Modulate.b);
-    SDL_SetTextureAlphaMod((SDL_Texture*)_Texture.texture, Modulate.a);
+    SDL_SetTextureColorMod((SDL_Texture *)_Texture.texture, Modulate.r, Modulate.g, Modulate.b);
+    SDL_SetTextureAlphaMod((SDL_Texture *)_Texture.texture, Modulate.a);
     SDL_RenderCopyExF(engine.sdl_rendererhndl, (SDL_Texture *)_Texture.texture, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
 
-    #if 0
+#if 0
     SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);
     SDL_RenderDrawRectF(sdl_renderer, &render_rect);
-    #endif
+#endif
 
     END_DRAW
 }
 
-void Display::Fill(const Color4& Color)
+void Display::Fill(const Color4 &Color)
 {
     START_DRAW
 

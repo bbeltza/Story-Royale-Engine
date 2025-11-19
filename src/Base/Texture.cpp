@@ -1,6 +1,8 @@
 #include "../internal.h"
 #include "../internal.hpp"
 
+#include <SDL_image.h>
+
 #include "Engine.hpp"
 #include "Base/Texture.hpp"
 

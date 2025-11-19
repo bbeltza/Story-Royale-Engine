@@ -3,6 +3,8 @@
 #include "Base/Window.hpp"
 #include "Base/File.hpp"
 
+#include <SDL_image.h>
+
 void Window::ChangeIcon(const char* path)
 {
     File file(path);

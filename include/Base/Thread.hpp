@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL.hpp>
+#include <SDL.h>
 #include <standard>
 #define TEMPL template <class _Fn, class... _Args>
 

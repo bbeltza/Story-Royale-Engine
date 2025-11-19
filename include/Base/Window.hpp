@@ -1,6 +1,4 @@
 #pragma once
-#include <SDL.hpp>
-
 #include "Datatypes/Vector.hpp"
 #include "Datatypes/Flags.hpp"
 

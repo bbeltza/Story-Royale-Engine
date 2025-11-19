@@ -12,7 +12,7 @@ void ALOG(const char* format, ...);
 
 #define LOG NLOG
 
-void DEBUG(const char* format, ...);
+void DEBUG(const char* format, ...); // Not implemented yet. I don't find much reasons to use it over LOG for now so
 void ERROR(const char* format, ...);
 void WARN(const char* format, ...);
 

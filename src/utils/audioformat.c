@@ -1,16 +1,5 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-
-#include <SDL.h>
-
-#define defamt(m) double amt = x / (float)m
-
-#define defamt64 defamt(0x7FFFFFFFFFFFFFFF)
-#define defamt32 defamt(0x7FFFFFFF)
-#define defamt16 defamt(0x7FFF)
-#define defamt8 defamt(0x7F)
+#include "utils/audioutils.h"
+#include "utils/logging.h"
 
 #define reti8 return (int8_t)(amt * 0x7F);
 #define reti16 return (int16_t)(amt * 0x7FFF);
@@ -24,7 +13,7 @@
 #define format_i32(x, m) format_int(x, m, 0x7FFFFFFF)
 #define format_i64(x, m) format_int(x, m, 0x7FFFFFFFFFFFFFFF)
 
-uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t** data, uintptr_t len_input)
+size_t ut_audioconvertformat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, int8_t** data, size_t len_input)
 {
     if (f_input == f_output) return len_input;
 
@@ -36,7 +25,11 @@ uintptr_t ConvertAudioFormat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, 
     intptr_t len_output = (intptr_t)(len_input * fac);
 
     int8_t* out_data = malloc(len_output);
-    assert(out_data);
+    if (!out_data)
+    {
+        ERROR("ut_audioconvertformat(): Failed to allocate enough memory, heap is probably out of space, returning original block");
+        return len_input;
+    }
 
     switch (in_bitsize)
     {

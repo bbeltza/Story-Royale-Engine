@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL.hpp>
+#include <SDL_events.h>
 
 struct Key
 {
