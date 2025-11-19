@@ -11,7 +11,8 @@ namespace Game
     protected:
         ~GuiObject();
     public:
-        UDim2 position, size;
+        UDim2 position; 
+        UDim2 size{0, 100, 0, 100};
         Vector2f anchor;
         int zIndex = 0;
 

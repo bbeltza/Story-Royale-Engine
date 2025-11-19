@@ -13,18 +13,16 @@
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Have a log file opened
 
-- Enable compression for resources if they're embedded (My compiler did literally just run out of memory when compiling the resource)
-	But before that:
-	- Make the resource generator faster (maybe switch to another language like C/C++ or system commands)
-
 - Android support
 - Engine services: Designed to replace the void* container overhead
+- More datatypes: Having a sort of replacement to STL's containers
 
 - Work on the game ^^
 
-(current version: 0.011.14)
+(current version: 0.011.19)
 
 Less likely ideas:
 
 	- Change the pipeline:
 		- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
+	- Compression on resources, or adding a mask at the resources

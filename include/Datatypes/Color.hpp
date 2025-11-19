@@ -7,7 +7,7 @@ struct Color4;
 
 struct Color3
 {
-	Color3() = default;
+	Color3(): Color3(static_cast<uint8_t>(0)) {}
 	Color3(uint8_t R, uint8_t G, uint8_t B): r(R), g(G), b(B) {}
 	Color3(uint8_t RGB): r(RGB), g(RGB), b(RGB) {}
 	Color3(const Color3& other): r(other.r), g(other.g), b(other.b) {}
@@ -15,9 +15,18 @@ struct Color3
 	Color3(uint32_t HEX): r((HEX >> 16) & 0xFF), g((HEX >> 8) & 0xFF), b(HEX & 0xFF) {}
 	Color3(const char* HEX);
 
-	uint8_t r = 0;
-	uint8_t g = 0;
-	uint8_t b = 0;
+	union
+	{
+		struct
+		{
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+		};
+		uint8_t byte_data[3];
+	};
+	
+	
 
 	void Print() const { display(&ALOG); };
 	void PrintLn() const { display(&NLOG); };
@@ -58,10 +67,21 @@ struct Color4
 	Color4(uint32_t HEX): r((HEX >> 24) & 0xFF), g((HEX >> 16) & 0xFF), b((HEX >> 8) & 0xFF), a(HEX & 0xFF) {}
 	Color4(const char* HEX);
 
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-	uint8_t a;
+	union
+	{
+		struct
+		{
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+			uint8_t a;
+		};
+		uint8_t byte_data[4];
+		uint16_t short_data[2];
+		uint32_t long_data[1];
+	};
+	
+	
 
 	void Print() const { display(&ALOG); };
 	void PrintLn() const { display(&NLOG); };

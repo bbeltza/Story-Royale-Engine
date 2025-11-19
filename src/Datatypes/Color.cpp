@@ -45,7 +45,7 @@ Color3::Color3(const char* HEX) // 12 34 56
 			
 			n |= xdigit(digit) << (4 * (1 - i));
 		}
-		reinterpret_cast<uint8_t*>(this)[j] = n;
+		byte_data[j] = n;
 	}
 }
 
@@ -88,7 +88,7 @@ Color4::Color4(const char* HEX)
 
 			n |= xdigit(digit) << (4 * (1 - i));
 		}
-		reinterpret_cast<uint8_t*>(this)[j] = n;
+		byte_data[j] = n;
 	}
 }
 

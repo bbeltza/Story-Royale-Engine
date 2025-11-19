@@ -3,7 +3,7 @@
 // UDim constructors
 
 UDim::UDim():
-    Scale(1),
+    Scale(0),
     Offset(0)
 {}
 
