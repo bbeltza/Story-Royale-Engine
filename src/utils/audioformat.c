@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "utils/audioutils.h"
 #include "utils/logging.h"
 

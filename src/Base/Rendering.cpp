@@ -145,22 +145,24 @@ void Display::DrawCircle(const Vector2f &pos, const float radius, const Color4 &
     float _y = pos.Y;
 
     if (_x + radius < 0 || _y + radius < 0 || _x - radius > v.w || _y - radius > v.h) goto end;
-    float x = radius;
-    float y = 0;
-    float radiusError = 1 - x;
-    while (x >= y)
     {
-        SDL_RenderDrawLineF(engine.sdl_rendererhndl, x + _x, y + _y, -x + _x, y + _y);
-        SDL_RenderDrawLineF(engine.sdl_rendererhndl, y + _x, x + _y, -y + _x, x + _y);
-        SDL_RenderDrawLineF(engine.sdl_rendererhndl, -x + _x, -y + _y, x + _x, -y + _y);
-        SDL_RenderDrawLineF(engine.sdl_rendererhndl, -y + _x, -x + _y, y + _x, -x + _y);
-        y++;
-        if (radiusError < 0)
-            radiusError += 2 * y + 1;
-        else
+        float x = radius;
+        float y = 0;
+        float radiusError = 1 - x;
+        while (x >= y)
         {
-            x--;
-            radiusError += 2 * (y - x + 1);
+            SDL_RenderDrawLineF(engine.sdl_rendererhndl, x + _x, y + _y, -x + _x, y + _y);
+            SDL_RenderDrawLineF(engine.sdl_rendererhndl, y + _x, x + _y, -y + _x, x + _y);
+            SDL_RenderDrawLineF(engine.sdl_rendererhndl, -x + _x, -y + _y, x + _x, -y + _y);
+            SDL_RenderDrawLineF(engine.sdl_rendererhndl, -y + _x, -x + _y, y + _x, -x + _y);
+            y++;
+            if (radiusError < 0)
+                radiusError += 2 * y + 1;
+            else
+            {
+                x--;
+                radiusError += 2 * (y - x + 1);
+            }
         }
     }
 
