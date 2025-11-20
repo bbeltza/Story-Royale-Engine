@@ -1,34 +1,44 @@
 #include "Base/Input.hpp"
 #include "Game/GuiPresets/Button.hpp"
 
-void GuiPresets::Button::clickevent(void *, Button *button, const MouseButton *buttonData)
+using namespace GuiPresets;
+
+// Event functions
+
+void Button::mouse_click(void* _unused, Button* button, const MouseButton* buttonData)
 {
     if (!buttonData->pressed)
         return;
 
-    if (button->isHovering())
-        button->ButtonClick(buttonData);
+    if (button->m_hover)
+        button->OnPress(buttonData->position);
 }
 
-Connection *GuiPresets::Button::s_clickconnection = nullptr;
-
-GuiPresets::Button::Button()
+void Button::finger_touch(void* _unused, Button* button, const TouchFinger* touchData)
 {
-    m_connection = Input::MouseButton.Connect(clickevent, this);
-    addComponent(m_mod);
-}
-
-GuiPresets::Button::~Button() {}
-
-void GuiPresets::Button::Update(TimeStamp dt)
-{
-    m_hover = isHovering();
-    m_mod.enabled = m_hover;
-    if (!m_hover)
+    if (touchData->Pressed)
         return;
+    
+    if (button->m_hover)
+        button->OnPress(touchData->UV * Display::GetSize());
+}
 
-    if (Input::MouseButtonPressed())
-        m_mod.Value = {150, 150, 150, 255};
-    else
-        m_mod.Value = {200, 200, 200, 255};
+
+// Class methods
+
+Button::Button():
+    m_click_event(Input::MouseButton.Connect(mouse_click, this)),
+    m_touch_event(Input::FingerTouch.Connect(finger_touch, this))
+{
+
+}
+
+Button::~Button() {}
+
+void Button::Update(TimeStamp dt)
+{
+    bool last_hover = m_hover;
+    m_hover = isHovering();
+    if (last_hover != m_hover)
+        this->OnHover(m_hover);
 }

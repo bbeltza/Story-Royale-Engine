@@ -4,26 +4,27 @@
 
 #include "Base/Signal.hpp"
 #include "Events/Mouse.hpp"
+#include "Events/Touch.hpp"
 
 namespace GuiPresets
 {
-    class Button : protected ::Game::GuiObject
+    class Button : public ::Game::GuiObject
     {
     public:
         Button();
         ~Button();
 
-        virtual void ButtonClick(const MouseButton *Event) {}
-        virtual void MouseHover(bool hovered) {}
+        virtual void OnPress(Vector2f pos) {}
+        virtual void OnHover(bool hovered) {}
 
     private:
-        static void clickevent(void*, Button* button, const MouseButton *buttonData);
-        static Connection *s_clickconnection;
+        static void mouse_click(void* SignalData, Button* button, const MouseButton* buttonData);
+        static void finger_touch(void* SignalData, Button* button, const TouchFinger* mouseData);
 
         void Update(TimeStamp dt) override;
 
         bool m_hover = 0;
-        ConnectionHandle m_connection;
-        GuiComponents::Modulate m_mod;
+        ConnectionHandle m_click_event;
+        ConnectionHandle m_touch_event;
     };
 }
