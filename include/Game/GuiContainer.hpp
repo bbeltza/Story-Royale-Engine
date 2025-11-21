@@ -40,10 +40,10 @@ namespace Game
         inline Vector2f getAbsoluteSize() const { return m_absolute.Size; }
 
         template <class _obj=GuiObject, class... args>
-        inline _obj* addChild(args... arg)
+        inline _obj* addChild(args&&... arg)
         {
             s_targetParentContainer = this;
-            auto obj = new _obj(arg...);
+            auto obj = new _obj(std::forward<args>(arg)...);
             s_targetParentContainer = nullptr;
             
             m_children.push_back(obj);

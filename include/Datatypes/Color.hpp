@@ -7,12 +7,12 @@ struct Color4;
 
 struct Color3
 {
-	Color3(): Color3(static_cast<uint8_t>(0)) {}
-	Color3(uint8_t R, uint8_t G, uint8_t B): r(R), g(G), b(B) {}
-	Color3(uint8_t RGB): r(RGB), g(RGB), b(RGB) {}
-	Color3(const Color3& other): r(other.r), g(other.g), b(other.b) {}
+	constexpr Color3(): Color3(static_cast<uint8_t>(0)) {}
+	constexpr Color3(uint8_t R, uint8_t G, uint8_t B): r(R), g(G), b(B) {}
+	constexpr Color3(uint8_t RGB): r(RGB), g(RGB), b(RGB) {}
+	constexpr Color3(const Color3& other): r(other.r), g(other.g), b(other.b) {}
 
-	Color3(uint32_t HEX): r((HEX >> 16) & 0xFF), g((HEX >> 8) & 0xFF), b(HEX & 0xFF) {}
+	constexpr Color3(uint32_t HEX): r((HEX >> 16) & 0xFF), g((HEX >> 8) & 0xFF), b(HEX & 0xFF) {}
 	Color3(const char* HEX);
 
 	union
@@ -58,13 +58,13 @@ struct Color3
 
 struct Color4
 {
-	Color4(): r(0), g(0), b(0), a(255) {};
-	Color4(uint8_t R, uint8_t G, uint8_t B, uint8_t A=255) : r(R), g(G), b(B), a(A) {}
-	Color4(uint8_t RGB, uint8_t A=255) : r(RGB), g(RGB), b(RGB), a(A) {}
-	Color4(const Color4& other) : r(other.r), g(other.g), b(other.b), a(other.a) {}
+	constexpr Color4(): r(0), g(0), b(0), a(255) {};
+	constexpr Color4(uint8_t R, uint8_t G, uint8_t B, uint8_t A=255) : r(R), g(G), b(B), a(A) {}
+	constexpr Color4(uint8_t RGB, uint8_t A=255) : r(RGB), g(RGB), b(RGB), a(A) {}
+	constexpr Color4(const Color4& other) : r(other.r), g(other.g), b(other.b), a(other.a) {}
 
-	Color4(int32_t HEX): Color4((uint32_t)HEX) {}
-	Color4(uint32_t HEX): r((HEX >> 24) & 0xFF), g((HEX >> 16) & 0xFF), b((HEX >> 8) & 0xFF), a(HEX & 0xFF) {}
+	constexpr Color4(int32_t HEX): Color4((uint32_t)HEX) {}
+	constexpr Color4(uint32_t HEX): r((HEX >> 24) & 0xFF), g((HEX >> 16) & 0xFF), b((HEX >> 8) & 0xFF), a(HEX & 0xFF) {}
 	Color4(const char* HEX);
 
 	union

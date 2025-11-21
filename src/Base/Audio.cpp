@@ -90,8 +90,16 @@ void Audio::threadedload(AudioData *audio)
 
 void Audio::Play(bool force)
 {
+	if (!engine.containers_service) return;
+	if (!m_data)
+	{
+		ERROR("Audio::Play(): Could not play audio, no data has been attached");
+		return;
+	}
+
 	if (!m_data->m_loaded)
 		m_data->Loaded.Wait();
+	
 	SDL_LockAudioDevice(engine.audio_device);
 	if (force)
 		Stop();
@@ -138,5 +146,5 @@ TimeStamp Audio::Stop()
 
 bool Audio::IsPlaying() const
 {
-	return _containers->audio_queue.count(const_cast<Audio *>(this)) != 0;
+	return engine.containers_service && _containers->audio_queue.count(const_cast<Audio *>(this)) != 0;
 }

@@ -8,13 +8,13 @@
 template <class _Num>
 struct Vector2
 {
-    Vector2(const _Num scalar): X(scalar), Y(scalar) {}
-    Vector2(const _Num x, const _Num y): X(x), Y(y) {}
-    Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
-    Vector2(): Vector2(0, 0) {}
+    constexpr Vector2(const _Num scalar): X(scalar), Y(scalar) {}
+    constexpr Vector2(const _Num x, const _Num y): X(x), Y(y) {}
+    constexpr Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
+    constexpr Vector2(): Vector2(0, 0) {}
     
-    template <class _Num2> Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
-    template <class _Num2> Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
+    template <class _Num2> constexpr Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
+    template <class _Num2> constexpr Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
     _Num X, Y;
 

@@ -48,8 +48,8 @@ function(srEngine_link_resource PROJECT)
         DEPENDS ${OUTPUT}/_res.dat
         )
 
-        file(APPEND ${OUTPUT}/_res.c)
-        file(APPEND ${OUTPUT}/_res.dat)
+        file(TOUCH ${OUTPUT}/_res.c)
+        file(TOUCH ${OUTPUT}/_res.dat)
         if (WIN32)
             file(WRITE ${OUTPUT}/_res.rc "GAME_RES	RCDATA	\"_res.dat\"")
         endif()
