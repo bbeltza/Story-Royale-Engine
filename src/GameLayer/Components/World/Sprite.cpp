@@ -19,13 +19,10 @@ void Components::Sprite::Render(Game::Entity* entity)
     current_frame = frame;
     Texture& texture = *textures[frame];
 
-    RectF render_rect(
-        entity->getWorld()->worldToScreenSpace(entity->Position.X, entity->Position.Y),
-        texture.GetSize()
+    RectUt render_rect(
+        entity->Position + Offset,
+        texture.GetSize() * Scale
     );
 
-    render_rect.Size *= Scale;
-    render_rect.Position += Offset;
-
-    Display::DrawTexture(texture, render_rect, Modulate);
+    Display::DrawTexture(texture, render_rect, Modulate, Vector2f::CENTER, entity->getWorld());
 }

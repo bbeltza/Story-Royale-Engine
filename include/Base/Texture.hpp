@@ -9,9 +9,14 @@
 
 class Texture;
 
+namespace Game
+{
+    class World;
+}
+
 namespace Display
 {
-    void DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate = Color4::WHITE, const Vector2f& AnchorPoint = Vector2f::CENTER);
+    void DrawTexture(const Texture& _Texture, RectUt Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint, const Game::World* world);
 }
 
 extern "C" void __display_render();
@@ -38,7 +43,7 @@ private:
     // Temporary SDL_Surface* used to then load the texture to the GPU. Texture creating may be multithreaded, but creating textures may not be. So the image data is instead loaded into the CPU first.
     void* file_surface = nullptr;
 
-    friend void Display::DrawTexture(Texture& _Texture, const RectF& Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint);
+    friend void Display::DrawTexture(const Texture& _Texture, RectUt Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint, const Game::World* world);
     friend void __display_render();
 
     friend class TargetTexture;

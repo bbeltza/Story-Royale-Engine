@@ -57,7 +57,7 @@ void Game::Entity::call_render()
 
 void Game::Entity::call_pupdate(TimeStamp dt)
 {
-    *const_cast<Vector2f*>(&lastVelocity) = Position; // This isn't really stored in read-only memory, so it's more likely safe
+    *const_cast<Vector2ut*>(&lastVelocity) = Position; // This isn't really stored in read-only memory, so it's more likely safe
     for (auto component : m_Components)
     {
         check_vtablefor(pupdate)
@@ -65,7 +65,7 @@ void Game::Entity::call_pupdate(TimeStamp dt)
         component->pUpdate(this, dt);
     }
 
-    *const_cast<Vector2f*>(&lastVelocity) = Position.getSub(lastVelocity);
+    *const_cast<Vector2ut*>(&lastVelocity) = Position - lastVelocity;
 
     pUpdate(dt);
 }

@@ -4,7 +4,7 @@
 
 struct _win_settings __setup_window_data()
 {
-	Vector2i start_res(GameSettings::StartResolution ? GameSettings::StartResolution : GameSettings::ScalingResolution * 2);
+	Vector2i start_res(!GameSettings::StartResolution.isZero() ? GameSettings::StartResolution : GameSettings::ScalingResolution * 2);
 	Flags32 win_flags{};
 	Flags32 render_flags;
 	if (GameSettings::WindowOptions.Resizable)
@@ -12,8 +12,6 @@ struct _win_settings __setup_window_data()
 	if (GameSettings::WindowOptions.Hidden)
 		win_flags.ToggleOn(SDL_WINDOW_HIDDEN);
 
-	if (GameSettings::ScalingResolution)
-		engine.integer_scale = (GameSettings::StartResolution / GameSettings::ScalingResolution).getMin();
 	if (GameSettings::WindowOptions.VSync)
 		render_flags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
 

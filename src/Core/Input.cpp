@@ -29,16 +29,16 @@ void __poll_input()
     switch (event.type)
     {
     case SDL_MOUSEMOTION:
-        mMoveSignalQueue.emplace_back(&event.motion, engine.real_scale);
+        mMoveSignalQueue.emplace_back(&event.motion, engine.viewport_scale);
         break;
     case SDL_MOUSEBUTTONDOWN:
-        mButtonSignalQueue.emplace_back(&event.button, engine.real_scale);
+        mButtonSignalQueue.emplace_back(&event.button, engine.viewport_scale);
         break;
     case SDL_MOUSEBUTTONUP:
-        mButtonSignalQueue.emplace_back(&event.button, engine.real_scale);
+        mButtonSignalQueue.emplace_back(&event.button, engine.viewport_scale);
         break;
     case SDL_MOUSEWHEEL:
-        mWheelSignalQueue.emplace_back(&event.wheel, engine.real_scale);
+        mWheelSignalQueue.emplace_back(&event.wheel, engine.viewport_scale);
         break;
     case SDL_KEYDOWN:
         if (event.key.keysym.sym > SDL_NUM_SCANCODES)
@@ -83,15 +83,8 @@ void __update_input()
     int x, y;
     engine.mouse_press = SDL_GetMouseState(&x, &y);
 
-    {
-        float w, h;
-        w = static_cast<float>(engine.osize_x / engine.viewport.w);
-        h = static_cast<float>(engine.osize_y / engine.viewport.h);
-        engine.real_scale = fminf(w, h);
-    }
-
-    engine.mouse_x = x / engine.real_scale;
-    engine.mouse_y = y / engine.real_scale;
+    engine.mouse_x = x / engine.viewport_scale;
+    engine.mouse_y = y / engine.viewport_scale;
 
     processEventQueue(keySignalQueue, Input::KeyEvent)
     processEventQueue(mButtonSignalQueue, Input::MouseButton)

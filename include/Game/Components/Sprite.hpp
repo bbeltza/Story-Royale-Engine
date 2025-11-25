@@ -15,8 +15,8 @@ namespace Components
         Sprite();
         ~Sprite();
 
-        Vector2f Scale;
-        Vector2f Offset;
+        Vector2ut Scale;
+        Vector2ut Offset;
 
         Color4 Modulate = Color4::WHITE;
 

@@ -10,12 +10,12 @@ namespace Game
         friend class World;
         friend class CameraController;
 
-        float x = 0;
-        float y = 0;
-        RectF clamp = {0, 0, 0, 0};
+        Unit x = 0;
+        Unit y = 0;
+        RectUt clamp = {0, 0, 0, 0};
 
-        float ScaleX = 1;
-        float ScaleY = 1;
+        Unit ScaleX = 1;
+        Unit ScaleY = 1;
 
         inline CameraController* getController() const { return m_Controller; }
         inline void setController(CameraController* controller) { m_Controller = controller; m_Controller->m_Camera = this; }
@@ -24,5 +24,9 @@ namespace Game
         CameraController* m_Controller = nullptr;
 
         void Update(TimeStamp);
+
+        // Render positions
+        Unit rx = 0;
+        Unit ry = 0;
     };
 }

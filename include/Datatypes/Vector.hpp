@@ -16,6 +16,13 @@ struct Vector2
     template <class _Num2> constexpr Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
     template <class _Num2> constexpr Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
+    template <class _Num2> constexpr Vector2& operator =(const Vector2<_Num2>& other)
+    {
+        X = static_cast<_Num>(other.X);
+        Y = static_cast<_Num>(other.Y);
+        return *this;
+    }
+
     _Num X, Y;
 
     inline void Add(const Vector2& other) { X += other.X; Y += other.Y; }
@@ -50,9 +57,6 @@ struct Vector2
 
     inline bool isZero() const {return !(X || Y);}
 
-    inline operator bool() const {return X && Y;}
-    //template <class _Num2> inline operator Vector2<_Num2>() const { return Vector2<_Num2>(X, Y); }
-
     // A vector with its components set to 0
     static const Vector2<_Num> ZERO;
     // A vector with its components set to 1
@@ -78,22 +82,22 @@ _t const vec2 vec2::CENTER = {0.5};
 
 #define vec2op(op) { return {first.X op other.X, first.Y op other.Y}; }
 #define vec2op_num(op) { return {first.X op other, first.Y op other}; }
-#define vec2aop(op) { first.X op= other.X; first.Y op= other.Y; return first; }
+#define vec2aop(op) { first.X op other.X; first.Y op other.Y; return first; }
 
-_t inline vec2 operator +(const vec2& first, const vec2& other) vec2op(+)
-_t inline vec2 operator -(const vec2& first, const vec2& other) vec2op(-)
-_t inline vec2 operator *(const vec2& first, const vec2& other) vec2op(*)
-_t inline vec2 operator /(const vec2& first, const vec2& other) vec2op(/)
+_t2 inline vec2 operator +(const vec2& first, const Vector2<_Num2>& other) vec2op(+)
+_t2 inline vec2 operator -(const vec2& first, const Vector2<_Num2>& other) vec2op(-)
+_t2 inline vec2 operator *(const vec2& first, const Vector2<_Num2>& other) vec2op(*)
+_t2 inline vec2 operator /(const vec2& first, const Vector2<_Num2>& other) vec2op(/)
 
 _t2 inline vec2 operator +(const vec2& first, const _Num2 other) vec2op_num(+)
 _t2 inline vec2 operator -(const vec2& first, const _Num2 other) vec2op_num(-)
 _t2 inline vec2 operator *(const vec2& first, const _Num2 other) vec2op_num(*)
 _t2 inline vec2 operator /(const vec2& first, const _Num2 other) vec2op_num(/)
 
-_t inline vec2& operator +=(vec2& first, const vec2& other) { first.X += other.X; first.Y += other.Y; return first; }
-_t inline vec2& operator -=(vec2& first, const vec2& other) { first.X -= other.X; first.Y -= other.Y; return first; }
-_t inline vec2& operator *=(vec2& first, const vec2& other) { first.X *= other.X; first.Y *= other.Y; return first; }
-_t inline vec2& operator /=(vec2& first, const vec2& other) { first.X /= other.X; first.Y /= other.Y; return first; }
+_t inline vec2& operator +=(vec2& first, const vec2& other) vec2aop(+=)
+_t inline vec2& operator -=(vec2& first, const vec2& other) vec2aop(-=)
+_t inline vec2& operator *=(vec2& first, const vec2& other) vec2aop(*=)
+_t inline vec2& operator /=(vec2& first, const vec2& other) vec2aop(/=)
 
 #undef vec2op
 #undef vec2op_num

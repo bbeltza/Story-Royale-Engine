@@ -100,14 +100,20 @@ Game::World* Game::World::current() { return currworld; }
 
 static const Game::Camera zero_cam;
 
-Vector2f Game::World::screenToWorld(float x, float y, const Camera* cam)
+Vector2ut Game::World::screenToWorld(Unit x, Unit y, const Camera* cam)
 {
     if (!cam) cam = &zero_cam;
-    return Vector2f(x - engine.center_x + cam->x, y - engine.center_y + cam->y);
+
+    return {x - engine.center_x + cam->rx, y - engine.center_y + cam->ry};
 }
 
-Vector2f Game::World::worldToScreen(float x, float y, const Camera* cam)
+Vector2ut Game::World::worldToScreen(Unit x, Unit y, const Camera* cam)
 {
     if (!cam) cam = &zero_cam;
-    return Vector2f(x + engine.center_x - cam->x, y + engine.center_y - cam->y);
+
+    Vector2ut pos = {x + engine.center_x - cam->rx , y + engine.center_y - cam->ry};
+    pos.X = round(pos.X * engine.current_scale);
+    pos.Y = round(pos.Y * engine.current_scale);
+
+    return pos;
 }

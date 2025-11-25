@@ -41,26 +41,30 @@ void __setup_renderer(uint32_t flags)
 
 void __update_viewport()
 {
-	static bool has_scaling = GameSettings::ScalingResolution.operator bool();
+	static bool has_scaling = !GameSettings::ScalingResolution.isZero();
+	int integer_scale;
 
 	SDL_GetRendererOutputSize(engine.sdl_rendererhndl, &engine.osize_x, &engine.osize_y);
 	if (has_scaling)
 	{
-		engine.integer_scale = ut_min(engine.osize_x / GameSettings::ScalingResolution.X, engine.osize_y / GameSettings::ScalingResolution.Y);
-		engine.integer_scale = engine.integer_scale ? engine.integer_scale : 1;
+		integer_scale = ut_min(engine.osize_x / GameSettings::ScalingResolution.X, engine.osize_y / GameSettings::ScalingResolution.Y);
+		integer_scale = integer_scale ? integer_scale : 1;
 	}
 	else
-		engine.integer_scale = 1;
 	{
-		float fscale = static_cast<float>(engine.integer_scale);
-		SDL_RenderSetScale(engine.sdl_rendererhndl, fscale, fscale);
+		integer_scale = 1;
 	}
+
+	engine.viewport_scale = static_cast<float>(integer_scale);
+	engine.current_scale = engine.viewport_scale;
 
 	int ow = engine.viewport.w;
 	int oh = engine.viewport.h;
-	SDL_RenderGetViewport(engine.sdl_rendererhndl, &engine.viewport);
+	engine.viewport.w = (int)(engine.osize_x / engine.viewport_scale);
+	engine.viewport.h = (int)(engine.osize_y / engine.viewport_scale);
+
 	if (ow < engine.viewport.w || oh < engine.viewport.h)
-		reset_targets(); // Later on for resetting target textures
+		reset_targets();
 	engine.center_x = engine.viewport.w / 2.0f;
 	engine.center_y = engine.viewport.h / 2.0f;
 }
@@ -77,11 +81,11 @@ void __display_render()
 
 	// Render current world
 
-	if (Game::World* current = currworld)
+	if (Game::World *current = currworld)
 	{
 		//// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
-		Color3& bg = current->Background;
-		Color4& fg = current->Foreground;
+		Color3 &bg = current->Background;
+		Color4 &fg = current->Foreground;
 
 		//// Clearing the screen with the background color
 		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, bg.r, bg.g, bg.b, 255);
@@ -108,11 +112,10 @@ void __display_render()
 		Runtime::BeforeRender.Fire();
 	}
 
-
 	// Drawing the Gui layer
-	if (Game::GuiLayer* current = currlayer)
+	if (Game::GuiLayer *current = currlayer)
 	{
-		Color4& fg = current->Foreground;
+		Color4 &fg = current->Foreground;
 
 		if (fg.a < 255)
 		{
@@ -137,13 +140,14 @@ void __display_render()
 
 void Texture::load_textures()
 {
-	if (!to_load) return;
+	if (!to_load)
+		return;
 	_containers->lock();
 	while (!to_load->empty())
 	{
-		Texture* tex = to_load->back();
+		Texture *tex = to_load->back();
 		to_load->pop_back();
-		tex->texture = SDL_CreateTextureFromSurface(engine.sdl_rendererhndl, reinterpret_cast<SDL_Surface*>(tex->file_surface));
+		tex->texture = SDL_CreateTextureFromSurface(engine.sdl_rendererhndl, reinterpret_cast<SDL_Surface *>(tex->file_surface));
 		_containers->loaded_textures.push_front(tex);
 	}
 	_containers->unlock();

@@ -41,7 +41,7 @@ TargetTexture::TargetTexture(const Vector2i& size)
     SDL_SetRenderTarget(renderer, m_texture);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
-
+    engine.current_scale = 1;
 }
 
 TargetTexture::~TargetTexture()
@@ -57,6 +57,7 @@ TargetTexture::~TargetTexture()
     targetptr--;
 
     SDL_SetRenderTarget(renderer, target_textures.at(targetptr));
+    if (!targetptr) engine.current_scale = engine.viewport_scale;
 }
 
 void TargetTexture::Blit(const RectI& src, const RectF& dest, const Vector2f& anchor)

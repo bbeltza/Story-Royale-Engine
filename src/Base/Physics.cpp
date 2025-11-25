@@ -27,20 +27,20 @@ void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
         {
             if (collider_set->count(comp) == 0) continue;
 
-            RectF thisRect = getRealRect(entity),
+            RectUt thisRect = getRealRect(entity),
                  otherRect = comp->getRealRect(ent);
 
             if (comp->collidesWith(ent, thisRect))
             {
-                Vector2f distance = (thisRect.Position - otherRect.Position);
-                Vector2f radius = (otherRect.Size/2 + thisRect.Size/2);
+                Vector2ut distance = (thisRect.Position - otherRect.Position);
+                Vector2ut radius = (otherRect.Size/2 + thisRect.Size/2);
 
-                Vector2f sign = {distance.X < 0 ? -1 : 1, distance.Y < 0 ? -1 : 1};
-                Vector2f pushdist = sign * radius - distance;
+                Vector2ut sign = {distance.X < 0 ? -1 : 1, distance.Y < 0 ? -1 : 1};
+                Vector2ut pushdist = radius * sign - distance;
 
                 if (!comp->flags.Has(AnchoredFlag)) pushdist = pushdist / 2;
 
-                float absdx = abs(pushdist.X), absdy = abs(pushdist.Y);
+                Unit absdx = abs(pushdist.X), absdy = abs(pushdist.Y);
 
                 if (absdx < absdy) entity->Position.X += pushdist.X;
                 else if (absdx > absdy) entity->Position.Y += pushdist.Y;
@@ -49,5 +49,3 @@ void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
         }
     }
 }
-
-// Physics are temporarely unavaiable! Will be working on them... NOW!
