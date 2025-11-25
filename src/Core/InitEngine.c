@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <utils/logging.h>
+
 static inline void __setup_engine_data()
 {
     engine.input_last_touchid = -1;
@@ -20,7 +22,11 @@ void __initialize_engine()
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0"); // Don't interpret touch events as mouse events
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
 
-    SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
+    {
+        ERROR("SDL ERROR: Could not initialize SDL Subsystems: '%s'", SDL_GetError());
+        exit(-1);
+    }
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 

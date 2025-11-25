@@ -37,7 +37,7 @@ namespace Input
 	// Mouse functions
 	bool MouseButtonPressed(Button button = mbANY);
 	Vector2f MouseScreenPosition();
-	Vector2f MouseWorldPosition();
+	Vector2ut MouseWorldPosition();
 
 	// Touch functions
 	int GetFingersPressed(SDL_TouchID touchid = -1);

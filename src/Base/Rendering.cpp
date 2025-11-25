@@ -21,13 +21,13 @@ inline void real_coords(Vector2f& out_pos, const Vector2ut& in_pos, const Game::
 
 inline void real_coords(SDL_FRect& out_rect, const RectUt& in_rect, const Vector2f& anchor, const Game::World* world)
 {
-    out_rect.w = static_cast<float>(round(in_rect.Size.X * engine.current_scale));
-    out_rect.h = static_cast<float>(round(in_rect.Size.Y * engine.current_scale));
+    out_rect.w = static_cast<float>(floor(in_rect.Size.X * engine.current_scale));
+    out_rect.h = static_cast<float>(floor(in_rect.Size.Y * engine.current_scale));
 
     if (world == DISPLAY_DONT_CENTER)
     {
-        out_rect.x = static_cast<float>(round((in_rect.Position.X * engine.current_scale - in_rect.Size.X * anchor.X)));
-        out_rect.y = static_cast<float>(round((in_rect.Position.Y * engine.current_scale - in_rect.Size.Y * anchor.Y)));
+        out_rect.x = static_cast<float>(floor((in_rect.Position.X * engine.current_scale - in_rect.Size.X * anchor.X)));
+        out_rect.y = static_cast<float>(floor((in_rect.Position.Y * engine.current_scale - in_rect.Size.Y * anchor.Y)));
         return;
     }
     reinterpret_cast<RectF*>(&out_rect)->Position = Game::World::worldToScreen(in_rect.Position.X - in_rect.Size.X * anchor.X, in_rect.Position.Y - in_rect.Size.Y * anchor.Y, world ? &world->CurrentCamera : nullptr);
@@ -62,10 +62,10 @@ void Display::DrawLines(const Color4 &Color, int Count, const Vector2ut *Pts, co
     #ifdef _MSC_VER
     Vector2f* _pts = static_cast<Vector2f*>(alloca(Count * sizeof(SDL_FPoint)));
     #else
-    SDL_FPoint _pts[Count];
+    Vector2f _pts[Count];
     #endif
 
-    for (size_t i = 0; i < Count; i++)
+    for (int i = 0; i < Count; i++)
         real_coords(_pts[i], Pts[i], world);
 
     SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);

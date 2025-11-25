@@ -26,8 +26,8 @@ void Camera::Update(TimeStamp dt)
         y = ut_clamp(y, clamp.getTop(), clamp.getBottom());
     }
 
-    const float scale = ::Display::GetScale();
+    const Unit scale = ::Display::GetScale();
 
-    rx = round(x * scale) / scale;
-    ry = round(y * scale) / scale;
+    rx = floor(x * scale) / scale;
+    ry = floor(y * scale) / scale;
 }

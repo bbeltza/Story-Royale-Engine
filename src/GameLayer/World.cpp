@@ -112,8 +112,8 @@ Vector2ut Game::World::worldToScreen(Unit x, Unit y, const Camera* cam)
     if (!cam) cam = &zero_cam;
 
     Vector2ut pos = {x + engine.center_x - cam->rx , y + engine.center_y - cam->ry};
-    pos.X = round(pos.X * engine.current_scale);
-    pos.Y = round(pos.Y * engine.current_scale);
+    pos.X = floor(pos.X * engine.current_scale);
+    pos.Y = floor(pos.Y * engine.current_scale);
 
     return pos;
 }

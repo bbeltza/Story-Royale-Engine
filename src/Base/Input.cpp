@@ -35,7 +35,7 @@ Vector2f Input::MouseScreenPosition()
     return { engine.mouse_x, engine.mouse_y };
 }
 
-Vector2f Input::MouseWorldPosition()
+Vector2ut Input::MouseWorldPosition()
 {
     return Game::World::screenToWorld(engine.mouse_x, engine.mouse_y, Game::World::currentCamera());
 }

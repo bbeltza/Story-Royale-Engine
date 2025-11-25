@@ -16,7 +16,7 @@ struct Vector2
     template <class _Num2> constexpr Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
     template <class _Num2> constexpr Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
 
-    template <class _Num2> constexpr Vector2& operator =(const Vector2<_Num2>& other)
+    template <class _Num2> Vector2& operator =(const Vector2<_Num2>& other)
     {
         X = static_cast<_Num>(other.X);
         Y = static_cast<_Num>(other.Y);
