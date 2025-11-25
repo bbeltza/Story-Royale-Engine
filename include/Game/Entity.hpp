@@ -25,8 +25,8 @@ namespace Game
         };
 
         public:
-        Vector2f Position;
-        const Vector2f lastVelocity;
+        Vector2ut Position;
+        const Vector2ut lastVelocity;
 
         int zIndex = 0;
 

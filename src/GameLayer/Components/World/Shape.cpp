@@ -17,8 +17,7 @@ Components::Shape::Shape() :
 	if (!collider_set)
 		collider_set = new CollisionSet;
 
-	if (flags.Has(CanCollideFlag))
-		collider_set->insert(this);
+	collider_set->insert(this);
 }
 
 Components::Shape::~Shape()
@@ -50,8 +49,8 @@ bool Components::Shape::isInScreenPoint(Game::Entity* p, Vector2f pt)
 		screenSpace = w->worldToScreenSpace(p->Position.X + Rect.getLeft(), p->Position.Y + Rect.getTop());
 		r.x = screenSpace.X;
 		r.y = screenSpace.Y;
-		r.w = Rect.Size.X;
-		r.h = Rect.Size.Y;
+		r.w = static_cast<float>(Rect.Size.X);
+		r.h = static_cast<float>(Rect.Size.Y);
 		return SDL_PointInFRect(&fpt, &r);
 	case CircleShape:
 		screenSpace = w->worldToScreenSpace(p->Position.X + Rect.Position.X, p->Position.Y + Rect.Position.Y);
@@ -66,19 +65,19 @@ void Components::Shape::Render(Game::Entity* _entity)
 {
 	if (!this->flags.Has(VisibleFlag)) return;
 
+	const Game::World* world = _entity->getWorld();
 	//Engine->DrawingContext.DrawRectangleAtWorld(render_rect, {255, 0, 0, 255}, DrawingDevice::dm_Stroke);
-	Vector2f pos = _entity->getWorld()->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
-
+	Vector2ut pos = world->worldToScreenSpace(_entity->Position.X, _entity->Position.Y);
 
 	switch (shape)
 	{
 	case CircleShape:
-		Display::DrawCircle(pos, Rect.Size.X / 2, Color);
+		Display::DrawCircle(_entity->Position, Rect.Size.X / 2, Color, Display::dm_Fill, world);
 		break;
 	default:
 	{
 		RectF render_rect = getRealRect(_entity);
-		Display::DrawRectangleAtWorld(render_rect, Color);
+		Display::DrawRectangle(render_rect, Color, Vector2f::CENTER, Display::dm_Fill, world);
 		break;
 	}
 	}

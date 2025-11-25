@@ -20,7 +20,7 @@ void Camera::Update(TimeStamp dt)
     if (m_Controller && m_Controller->Enabled)
         m_Controller->Update(dt);
 
-    if (clamp.Size)
+    if (!clamp.Size.isZero())
     {
         x = ut_clamp(x, clamp.getLeft(), clamp.getRight());
         y = ut_clamp(y, clamp.getTop(), clamp.getBottom());
@@ -28,6 +28,6 @@ void Camera::Update(TimeStamp dt)
 
     const float scale = ::Display::GetScale();
 
-    rx = roundf(x * scale) / scale;
-    ry = roundf(y * scale) / scale;
+    rx = round(x * scale) / scale;
+    ry = round(y * scale) / scale;
 }

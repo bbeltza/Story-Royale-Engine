@@ -9,7 +9,7 @@ namespace Components
     class Velocity: public ::Game::Component
     {
         public:
-        Vector2f velocity;
+        Vector2ut velocity;
         
         // Normalizes the velocity and multiplies it by the speed parameter
         // @param speed the speed to multiply

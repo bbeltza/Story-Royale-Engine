@@ -73,14 +73,14 @@ namespace Game
         // Coordinate converting
 
         // @brief Converts screen coordinates to this world's coordinates
-        inline Vector2f screenToWorldSpace(const float x, const float y) { return screenToWorld(x, y, &CurrentCamera); }
+        inline Vector2ut screenToWorldSpace(const Unit x, const Unit y) const { return screenToWorld(x, y, &CurrentCamera); }
         // @brief Converts this world's coordinates into screen coordinates
-        inline Vector2f worldToScreenSpace(const float x, const float y) { return worldToScreen(x, y, &CurrentCamera); }
+        inline Vector2ut worldToScreenSpace(const Unit x, const Unit y) const { return worldToScreen(x, y, &CurrentCamera); }
 
         // Static functions that convert coordinates, without the need of a world
 
-        static Vector2f worldToScreen(const float x, const float y, const Camera *cam = nullptr);
-        static Vector2f screenToWorld(const float x, const float y, const Camera *cam = nullptr);
+        static Vector2ut worldToScreen(const Unit x, const Unit y, const Camera *cam = nullptr);
+        static Vector2ut screenToWorld(const Unit x, const Unit y, const Camera *cam = nullptr);
 
         // Get the current world's camera, or NULL if there's no world
         static Camera* currentCamera();

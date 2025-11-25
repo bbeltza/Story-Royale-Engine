@@ -32,7 +32,7 @@ namespace Components
         ~Shape();
 
         // The rect representing the area of the shape by its size, and the offset from the entity by its position
-        RectF Rect;
+        RectUt Rect;
         Color4 Color = {255, 255, 255, 255};
 
         ShapeForm shape;
@@ -44,7 +44,7 @@ namespace Components
 
         bool isInScreenPoint(::Game::Entity *, Vector2f);
 
-        inline RectF getRealRect(::Game::Entity *parent) const { return {parent->Position + Rect.Position, Rect.Size}; }
+        inline RectUt getRealRect(::Game::Entity *parent) const { return {parent->Position + Rect.Position, Rect.Size}; }
         inline bool collidesWith(::Game::Entity *parent, const RectF &other_Rect) const { return getRealRect(parent).Intersects(other_Rect); }
     };
 }

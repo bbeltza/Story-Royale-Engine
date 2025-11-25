@@ -41,7 +41,7 @@ void __setup_renderer(uint32_t flags)
 
 void __update_viewport()
 {
-	static bool has_scaling = GameSettings::ScalingResolution.operator bool();
+	static bool has_scaling = !GameSettings::ScalingResolution.isZero();
 	int integer_scale;
 
 	SDL_GetRendererOutputSize(engine.sdl_rendererhndl, &engine.osize_x, &engine.osize_y);
@@ -56,13 +56,12 @@ void __update_viewport()
 	}
 
 	engine.viewport_scale = static_cast<float>(integer_scale);
+	engine.current_scale = engine.viewport_scale;
 
 	int ow = engine.viewport.w;
 	int oh = engine.viewport.h;
 	engine.viewport.w = (int)(engine.osize_x / engine.viewport_scale);
 	engine.viewport.h = (int)(engine.osize_y / engine.viewport_scale);
-
-	SDL_RenderSetScale(engine.sdl_rendererhndl, engine.viewport_scale, engine.viewport_scale);
 
 	if (ow < engine.viewport.w || oh < engine.viewport.h)
 		reset_targets();

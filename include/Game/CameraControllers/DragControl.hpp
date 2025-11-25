@@ -19,8 +19,8 @@ namespace CameraControllers
     protected:
         void Update(TimeStamp) override;
     private:
-        Vector2f m_camSpeed;
-        Vector2f m_lastmouseDelta;
+        Vector2ut m_camSpeed;
+        Vector2ut m_lastmouseDelta;
         ConnectionHandle m_mouseConnection;
         ConnectionHandle m_touchConnection;
         const Action& m_action;

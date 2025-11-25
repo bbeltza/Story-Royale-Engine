@@ -47,6 +47,7 @@ _CAPI_BEGIN
 
 		size_t targetptr;
 
+		float current_scale;
 		float viewport_scale;
 
 		// Audio data

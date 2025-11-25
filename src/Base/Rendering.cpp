@@ -8,7 +8,32 @@
 
 #include "config.h"
 
-Vector2f Display::GetCenter() { return {engine.center_x, engine.center_y}; }
+inline void real_coords(Vector2f& out_pos, const Vector2ut& in_pos, const Game::World* world)
+{
+    if (world == DISPLAY_DONT_CENTER)
+    {
+        out_pos.X = static_cast<float>(round(in_pos.X * engine.current_scale));
+        out_pos.Y = static_cast<float>(round(in_pos.Y * engine.current_scale));
+        return;
+    }
+    out_pos = Game::World::worldToScreen(in_pos.X, in_pos.Y, world ? &world->CurrentCamera : nullptr);
+}
+
+inline void real_coords(SDL_FRect& out_rect, const RectUt& in_rect, const Vector2f& anchor, const Game::World* world)
+{
+    out_rect.w = static_cast<float>(round(in_rect.Size.X * engine.current_scale));
+    out_rect.h = static_cast<float>(round(in_rect.Size.Y * engine.current_scale));
+
+    if (world == DISPLAY_DONT_CENTER)
+    {
+        out_rect.x = static_cast<float>(round((in_rect.Position.X * engine.current_scale - in_rect.Size.X * anchor.X)));
+        out_rect.y = static_cast<float>(round((in_rect.Position.Y * engine.current_scale - in_rect.Size.Y * anchor.Y)));
+        return;
+    }
+    reinterpret_cast<RectF*>(&out_rect)->Position = Game::World::worldToScreen(in_rect.Position.X - in_rect.Size.X * anchor.X, in_rect.Position.Y - in_rect.Size.Y * anchor.Y, world ? &world->CurrentCamera : nullptr);
+}
+
+Vector2ut Display::GetCenter() { return {engine.center_x, engine.center_y}; }
 Vector2i Display::GetSize() { return {engine.viewport.w, engine.viewport.h}; }
 Vector2i Display::GetAbsoluteSize() { return {engine.osize_x, engine.osize_y}; }
 float Display::GetScale() { return engine.viewport_scale; }
@@ -16,38 +41,47 @@ float Display::GetScale() { return engine.viewport_scale; }
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
 
-void Display::DrawLine(const Color4 &Color, const Vector2f &Pt1, const Vector2f &Pt2)
+void Display::DrawLine(const Color4 &Color, const Vector2ut &Pt1, const Vector2ut &Pt2, const Game::World* world)
 {
     START_DRAW
 
+    Vector2f _pt1, _pt2;
+    real_coords(_pt1, Pt1, world);
+    real_coords(_pt2, Pt2, world);
+
     SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
-    SDL_RenderDrawLineF(engine.sdl_rendererhndl, Pt1.X, Pt1.Y, Pt2.X, Pt2.Y);
+    SDL_RenderDrawLineF(engine.sdl_rendererhndl, _pt1.X, _pt1.Y, _pt2.X, _pt2.Y);
 
     END_DRAW
 }
 
-void Display::DrawLines(const Color4 &Color, int Count, const Vector2f *Pts)
+void Display::DrawLines(const Color4 &Color, int Count, const Vector2ut *Pts, const Game::World* world)
 {
     START_DRAW
 
+    #ifdef _MSC_VER
+    Vector2f* _pts = static_cast<Vector2f*>(alloca(Count * sizeof(SDL_FPoint)));
+    #else
+    SDL_FPoint _pts[Count];
+    #endif
+
+    for (size_t i = 0; i < Count; i++)
+        real_coords(_pts[i], Pts[i], world);
+
     SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
-    SDL_RenderDrawLinesF(engine.sdl_rendererhndl, reinterpret_cast<const SDL_FPoint *>(Pts), Count);
+    SDL_RenderDrawLinesF(engine.sdl_rendererhndl, reinterpret_cast<const SDL_FPoint *>(_pts), Count);
 
     END_DRAW
 }
 
-void Display::DrawRectangle(const RectF &Rectangle, const Color4 &Color, const Color4 &Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
+void Display::DrawRectangle(const RectUt &Rectangle, const Color4 &Color, const Vector2f &AnchorPoint, DrawingMode Mode, const Game::World* world)
 {
     START_DRAW
 
-    SDL_FRect r{
-        Rectangle.Position.X - Rectangle.Size.X * AnchorPoint.X,
-        Rectangle.Position.Y - Rectangle.Size.Y * AnchorPoint.Y,
-        Rectangle.Size.X,
-        Rectangle.Size.Y};
-    Color4 abs_col = Color * Modulate;
+    SDL_FRect r;
+    real_coords(r, Rectangle, AnchorPoint, world);
 
-    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, abs_col.r, abs_col.g, abs_col.b, abs_col.a);
+    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
     switch (Mode)
     {
     case dm_Stroke:
@@ -62,43 +96,30 @@ void Display::DrawRectangle(const RectF &Rectangle, const Color4 &Color, const C
     END_DRAW
 };
 
-void Display::DrawRectangleAtWorld(RectF Rectangle, const Color4 &Color, const Color4 &Modulate, const Vector2f &AnchorPoint, DrawingMode Mode)
-{
-    START_DRAW
-
-    Rectangle.Position = Game::World::worldToScreen(Rectangle.Position.X, Rectangle.Position.Y, Game::World::currentCamera());
-    DrawRectangle(Rectangle, Color, Modulate, AnchorPoint, Mode);
-
-    END_DRAW
-}
-
-void Display::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm)
+void Display::DrawRotatedRectangle(const RectUt &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm, const Game::World* world)
 {
     START_DRAW
 
     if (_angle == 0)
-        return DrawRectangle(_Rectangle, _Col);
+        return DrawRectangle(_Rectangle, _Col, Vector2f::CENTER, _dm, world);
 
     switch (_dm)
     {
     case dm_Stroke:
     {
-        Vector2f points[4] =
+        Vector2ut points[4] =
             {
                 _Rectangle.getTopLeftRotated(_angle),
                 _Rectangle.getTopRightRotated(_angle),
                 _Rectangle.getBottomRightRotated(_angle),
                 _Rectangle.getBottomLeftRotated(_angle)};
-        SDL_RenderDrawLinesF(engine.sdl_rendererhndl, (SDL_FPoint *)points, 4);
+        DrawLines(_Col, 4, points, world);
     }
     break;
     default:
     {
-        SDL_FRect r{
-            _Rectangle.getLeft(),
-            _Rectangle.getTop(),
-            _Rectangle.Size.X,
-            _Rectangle.Size.Y};
+        SDL_FRect r;
+        real_coords(r, _Rectangle, Vector2f::CENTER, world);
 
         SDL_SetTextureColorMod(engine.sdl_rectTex, _Col.r, _Col.g, _Col.b);
         SDL_SetTextureAlphaMod(engine.sdl_rectTex, _Col.a);
@@ -110,32 +131,22 @@ void Display::DrawRotatedRectangle(const RectF &_Rectangle, const double _angle,
     END_DRAW
 }
 
-void Display::DrawRotatedRectangleAtWorld(const RectF &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm)
+void Display::DrawDebug(const Vector2ut& _pos)
 {
     START_DRAW
 
-    Vector2f target_pos(_Rectangle.Position);
-    target_pos = Game::World::worldToScreen(target_pos.X, target_pos.Y, Game::World::currentCamera());
-
-    DrawRotatedRectangle(RectF(target_pos.X, target_pos.Y, _Rectangle.Size.X, _Rectangle.Size.Y), _angle, _Col, _dm);
-
-    END_DRAW
-}
-
-void Display::DrawDebug(Vector2f pos) // Sounds weird to not pass as a reference, but it will allow us to get a copy to convert it into screen coordinates
-{
-    START_DRAW
-
-    pos = Game::World::worldToScreen(pos.X, pos.Y, Game::World::currentCamera());
+    SDL_FPoint pos;
+    real_coords(*reinterpret_cast<Vector2f*>(&pos), _pos, Game::World::Current());
 
     SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 64, 0, 255);
-    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.X - DRAW_ENTCENTER_LINESIZE, pos.Y, pos.X + DRAW_ENTCENTER_LINESIZE, pos.Y);
-    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.X, pos.Y - DRAW_ENTCENTER_LINESIZE, pos.X, pos.Y + DRAW_ENTCENTER_LINESIZE);
+    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.x - DRAW_ENTCENTER_LINESIZE, pos.y, pos.x + DRAW_ENTCENTER_LINESIZE, pos.y);
+    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.x, pos.y - DRAW_ENTCENTER_LINESIZE, pos.x, pos.y + DRAW_ENTCENTER_LINESIZE);
 
     END_DRAW
 }
 
-void Display::DrawCircle(const Vector2f &pos, const float radius, const Color4 &_Col, DrawingMode _dm)
+void Display::DrawCircle(const Vector2ut &pos, const Unit radius, const Color4 &_Col, DrawingMode _dm, const Game::World* world)
+#if 0
 {
     START_DRAW
 
@@ -170,8 +181,14 @@ void Display::DrawCircle(const Vector2f &pos, const float radius, const Color4 &
 end:
     END_DRAW
 }
+#else
+{
+    // Use dummy DrawCircle definition untill I'll need it
+    assert(0 && "Display::DrawCircle isn't implemented");
+}
+#endif
 
-void Display::DrawTexture(Texture &_Texture, const RectF &Rectangle, const Color4 &Modulate, const Vector2f &AnchorPoint)
+void Display::DrawTexture(const Texture &_Texture, RectUt Rectangle, const Color4 &Modulate, const Vector2f &AnchorPoint, const Game::World* world)
 {
     START_DRAW
 
@@ -180,21 +197,18 @@ void Display::DrawTexture(Texture &_Texture, const RectF &Rectangle, const Color
 
     if (!_Texture.texture)
         Texture::load_textures();
+        
+    SDL_FRect render_rect;
+    const int flip = (Rectangle.Size.X < 0 ? ut_bit(0) : 0) | (Rectangle.Size.Y < 0 ? ut_bit(1) : 0);
 
-    float absW = abs(Rectangle.Size.X);
-    float absH = abs(Rectangle.Size.Y);
+    Rectangle.Size.X = abs(Rectangle.Size.X);
+    Rectangle.Size.Y = abs(Rectangle.Size.Y);
 
-    float rl = Rectangle.Position.X - absW * AnchorPoint.X;
-    float rt = Rectangle.Position.Y - absH * AnchorPoint.Y;
-
-    float left = floor(rl * engine.viewport_scale) / engine.viewport_scale;
-    float top = floor(rt * engine.viewport_scale) / engine.viewport_scale;
-    SDL_FRect render_rect{left, top, absW, absH};
-    int flip = (Rectangle.Size.X < 0 ? ut_bit(0) : 0) | (Rectangle.Size.Y < 0 ? ut_bit(1) : 0);
+    real_coords(render_rect, Rectangle, AnchorPoint, world);
 
     SDL_SetTextureColorMod((SDL_Texture *)_Texture.texture, Modulate.r, Modulate.g, Modulate.b);
     SDL_SetTextureAlphaMod((SDL_Texture *)_Texture.texture, Modulate.a);
-    SDL_RenderCopyExF(engine.sdl_rendererhndl, (SDL_Texture *)_Texture.texture, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
+    SDL_RenderCopyExF(engine.sdl_rendererhndl, static_cast<SDL_Texture *>(_Texture.texture), NULL, &render_rect, 0, NULL, static_cast<SDL_RendererFlip>(flip));
 
 #if 0
     if (!SDL_GetRenderTarget(engine.sdl_rendererhndl))
