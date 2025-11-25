@@ -196,8 +196,8 @@ void Display::DrawTexture(Texture &_Texture, const RectF &Rectangle, const Color
     SDL_RenderCopyExF(engine.sdl_rendererhndl, (SDL_Texture *)_Texture.texture, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
 
 #if 0
-    SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRectF(sdl_renderer, &render_rect);
+    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 0, 0, 255);
+    SDL_RenderDrawRectF(engine.sdl_rendererhndl, &render_rect);
 #endif
 
     END_DRAW
