@@ -47,8 +47,7 @@ _CAPI_BEGIN
 
 		size_t targetptr;
 
-		unsigned int integer_scale;
-		float real_scale;
+		float viewport_scale;
 
 		// Audio data
 

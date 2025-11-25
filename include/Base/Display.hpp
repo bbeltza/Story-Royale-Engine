@@ -15,6 +15,8 @@ namespace Display
     Vector2i GetSize();
     Vector2i GetAbsoluteSize();
 
+    float GetScale();
+
     void Fill(const Color4& Color);
 
     void DrawLine(const Color4& Color, const Vector2f& Pt1, const Vector2f& Pt2);

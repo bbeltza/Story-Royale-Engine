@@ -24,5 +24,9 @@ namespace Game
         CameraController* m_Controller = nullptr;
 
         void Update(TimeStamp);
+
+        // Render positions
+        float rx = 0;
+        float ry = 0;
     };
 }

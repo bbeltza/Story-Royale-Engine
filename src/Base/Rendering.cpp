@@ -11,6 +11,7 @@
 Vector2f Display::GetCenter() { return {engine.center_x, engine.center_y}; }
 Vector2i Display::GetSize() { return {engine.viewport.w, engine.viewport.h}; }
 Vector2i Display::GetAbsoluteSize() { return {engine.osize_x, engine.osize_y}; }
+float Display::GetScale() { return engine.viewport_scale; }
 
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
@@ -186,8 +187,8 @@ void Display::DrawTexture(Texture &_Texture, const RectF &Rectangle, const Color
     float rl = Rectangle.Position.X - absW * AnchorPoint.X;
     float rt = Rectangle.Position.Y - absH * AnchorPoint.Y;
 
-    float left = roundf(rl * engine.integer_scale) / engine.integer_scale;
-    float top = roundf(rt * engine.integer_scale) / engine.integer_scale;
+    float left = floor(rl * engine.viewport_scale) / engine.viewport_scale;
+    float top = floor(rt * engine.viewport_scale) / engine.viewport_scale;
     SDL_FRect render_rect{left, top, absW, absH};
     int flip = (Rectangle.Size.X < 0 ? ut_bit(0) : 0) | (Rectangle.Size.Y < 0 ? ut_bit(1) : 0);
 
@@ -196,8 +197,11 @@ void Display::DrawTexture(Texture &_Texture, const RectF &Rectangle, const Color
     SDL_RenderCopyExF(engine.sdl_rendererhndl, (SDL_Texture *)_Texture.texture, NULL, &render_rect, 0, NULL, (SDL_RendererFlip)flip);
 
 #if 0
-    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 0, 0, 255);
-    SDL_RenderDrawRectF(engine.sdl_rendererhndl, &render_rect);
+    if (!SDL_GetRenderTarget(engine.sdl_rendererhndl))
+    {
+        SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 0, 0, 255);
+        SDL_RenderDrawRectF(engine.sdl_rendererhndl, &render_rect);
+    }
 #endif
 
     END_DRAW

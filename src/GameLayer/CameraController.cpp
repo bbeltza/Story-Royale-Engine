@@ -1,5 +1,6 @@
 #include "utils/math.h"
 #include "Game/Camera.hpp"
+#include "Base/Display.hpp"
 
 using namespace Game;
 
@@ -24,4 +25,9 @@ void Camera::Update(TimeStamp dt)
         x = ut_clamp(x, clamp.getLeft(), clamp.getRight());
         y = ut_clamp(y, clamp.getTop(), clamp.getBottom());
     }
+
+    const float scale = ::Display::GetScale();
+
+    rx = roundf(x * scale) / scale;
+    ry = roundf(y * scale) / scale;
 }

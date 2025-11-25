@@ -103,11 +103,11 @@ static const Game::Camera zero_cam;
 Vector2f Game::World::screenToWorld(float x, float y, const Camera* cam)
 {
     if (!cam) cam = &zero_cam;
-    return Vector2f(x - engine.center_x + cam->x, y - engine.center_y + cam->y);
+    return {x - engine.center_x + cam->rx, y - engine.center_y + cam->ry};
 }
 
 Vector2f Game::World::worldToScreen(float x, float y, const Camera* cam)
 {
     if (!cam) cam = &zero_cam;
-    return Vector2f(x + engine.center_x - cam->x, y + engine.center_y - cam->y);
+    return {x + engine.center_x - cam->rx , y + engine.center_y - cam->ry};
 }

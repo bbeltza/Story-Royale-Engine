@@ -12,8 +12,6 @@ struct _win_settings __setup_window_data()
 	if (GameSettings::WindowOptions.Hidden)
 		win_flags.ToggleOn(SDL_WINDOW_HIDDEN);
 
-	if (GameSettings::ScalingResolution)
-		engine.integer_scale = (GameSettings::StartResolution / GameSettings::ScalingResolution).getMin();
 	if (GameSettings::WindowOptions.VSync)
 		render_flags.ToggleOn(SDL_RENDERER_PRESENTVSYNC);
 
