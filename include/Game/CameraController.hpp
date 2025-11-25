@@ -18,6 +18,6 @@ namespace Game
         protected:
         virtual void Update(TimeStamp) = 0;
         private:
-        Camera* m_Camera;
+        Camera* m_Camera = nullptr;
     };
 }

@@ -67,3 +67,5 @@ struct Rect
 typedef Rect<int> RectI;
 // A Rect datatype composed of floats.
 typedef Rect<float> RectF;
+
+typedef Rect<Unit> RectUt;
