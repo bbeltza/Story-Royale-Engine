@@ -1,4 +1,4 @@
 #pragma once
 
 // Usually a floating point datatype that is used to describe coordinates
-typedef double Unit;
+typedef float Unit;
