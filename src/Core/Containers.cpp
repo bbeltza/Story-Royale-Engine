@@ -107,9 +107,9 @@ void __update_world()
 	Game::World* current = currworld;
 	
 	if (!current) return;
-	current->call_update(engine.last_dt);
-	current->call_pupdate(engine.last_dt);
+	current->call_update();
+	current->call_pupdate();
+	
 	__destroy_queue();
-
 	if (current != engine.current_world) goto begin;
 }

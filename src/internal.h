@@ -21,6 +21,8 @@ _CAPI_BEGIN
 		intptr_t frame;
 		TimeStamp last_dt;
 		TimeStamp target_dt;
+		TimeStamp phys_target_dt;
+		TimeStamp phys_accum_dt;
 
 		// Instance data
 

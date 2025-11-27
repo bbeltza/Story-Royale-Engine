@@ -14,7 +14,7 @@ namespace CameraControllers
         Vector2ut Bounds;
 
     protected:
-        void Update(TimeStamp) override;
+        void pUpdate(TimeStamp) override;
 
     private:
         Game::Entity *const m_Entity;

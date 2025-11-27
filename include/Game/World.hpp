@@ -103,8 +103,8 @@ namespace Game
         // Static member that tells an entity which world to be in, set to this when world->addEntity() is called
         static World* s_TargetWorld;
 
-        void call_update(TimeStamp);
-        void call_pupdate(TimeStamp);
+        void call_update();
+        void call_pupdate();
         void call_render();
         static bool cmp(const Entity*, const Entity*);
 

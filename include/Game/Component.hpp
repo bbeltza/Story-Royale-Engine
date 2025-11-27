@@ -15,6 +15,6 @@ namespace Game
         virtual void Render(Entity *) {}
         //virtual void Update(Entity *, TimeStamp) {} // Update() on components isn't implemented yet
         virtual void pUpdate(Entity *, TimeStamp) {}
-        virtual bool Query(Entity *, float* pt) { return false; } // By default it returns false, the derived component should add its own implementation
+        virtual bool Query(Entity *, float* pt) { return false; } // By default it returns false, the deriving component should add its own implementation
     };
 }

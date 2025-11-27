@@ -8,7 +8,7 @@ EntityControl::~EntityControl()
 
 }
 
-void EntityControl::Update(TimeStamp dt)
+void EntityControl::pUpdate(TimeStamp dt)
 {
     Camera& CurrentCamera = *getCamera();
 

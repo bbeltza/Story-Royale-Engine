@@ -19,6 +19,12 @@ void Camera::Update(TimeStamp dt)
 {
     if (m_Controller && m_Controller->Enabled)
         m_Controller->Update(dt);
+}
+
+void Camera::pUpdate(TimeStamp dt)
+{
+    if (m_Controller && m_Controller->Enabled)
+        m_Controller->pUpdate(dt);
 
     if (!clamp.Size.isZero())
     {

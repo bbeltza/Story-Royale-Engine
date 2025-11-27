@@ -24,6 +24,7 @@ namespace Game
         CameraController* m_Controller = nullptr;
 
         void Update(TimeStamp);
+        void pUpdate(TimeStamp);
 
         // Render positions
         Unit rx = 0;

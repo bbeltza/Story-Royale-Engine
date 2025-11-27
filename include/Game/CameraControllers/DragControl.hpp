@@ -18,6 +18,7 @@ namespace CameraControllers
         float Smoothness = 0.0f;
     protected:
         void Update(TimeStamp) override;
+        void pUpdate(TimeStamp) override;
     private:
         Vector2ut m_camSpeed;
         Vector2ut m_lastmouseDelta;

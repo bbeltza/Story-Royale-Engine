@@ -11,6 +11,8 @@
 
 static inline void __setup_engine_data()
 {
+    engine.phys_target_dt = 1.0 / 64.0;
+
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
     engine.entry_thread = SDL_CreateThread((SDL_ThreadFunction)Initialize, "Game Entry", NULL);

@@ -34,12 +34,17 @@ void DragControl::Update(TimeStamp delta)
             m_camSpeed = m_camSpeed.Lerp(Vector2f::ZERO, a);
         }
     }
-    
+
     CurrentCamera.x -= m_camSpeed.X;
     CurrentCamera.y -= m_camSpeed.Y;
-    
+
     m_lastmouseDelta.X = 0;
-    m_lastmouseDelta.Y = 0;
+    m_lastmouseDelta.Y = 0;   
+}
+
+void DragControl::pUpdate(TimeStamp delta)
+{
+    // Empty.
 }
 
 void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)
