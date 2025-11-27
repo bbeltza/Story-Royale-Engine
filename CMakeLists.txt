@@ -17,6 +17,7 @@ else()
     set(BUILD_SHARED_LIBS OFF)
 endif()
 
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -44,7 +45,6 @@ add_subdirectory(src)
 add_subdirectory(3rdparty)
 
 target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
-target_compile_features(StoryRoyaleEngine PRIVATE cxx_std_11 c_std_99)
 target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
 
 if(NOT BUILD_SHARED_LIBS)

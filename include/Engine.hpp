@@ -13,6 +13,10 @@ namespace Runtime
 
     intptr_t CurrentFrame();
     void SetFramerate(unsigned short FPS);
+    void SetPhysicsRate(unsigned short FPS);
+
+    extern const TimeStamp& delta_time;
+    extern const TimeStamp& pdelta_time;
 }
 
 #include "GameEntry.h"
