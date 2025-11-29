@@ -8,6 +8,8 @@
 
 #include "config.h"
 
+#include "utils/mem.h"
+
 inline void real_coords(Vector2f& out_pos, const Vector2ut& in_pos, const Game::World* world)
 {
     if (world == DISPLAY_DONT_CENTER)
@@ -59,11 +61,7 @@ void Display::DrawLines(const Color4 &Color, int Count, const Vector2ut *Pts, co
 {
     START_DRAW
 
-    #ifdef _MSC_VER
-    Vector2f* _pts = static_cast<Vector2f*>(alloca(Count * sizeof(SDL_FPoint)));
-    #else
-    Vector2f _pts[Count];
-    #endif
+    ut_dynsalloc(Vector2f, _pts, Count);
 
     for (int i = 0; i < Count; i++)
         real_coords(_pts[i], Pts[i], world);

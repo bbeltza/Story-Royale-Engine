@@ -25,7 +25,7 @@ void AudioData::Load()
 		size = static_cast<int>(_data_chunk.size);
 	}
 	else
-		size = static_cast<int>(_f.resourceSize());
+		size = static_cast<int>(_f.getSize());
 
     SDL_RWops *audio_rw = SDL_RWFromConstMem(data, size);
     

@@ -1,5 +1,6 @@
 #include "Base/File.hpp"
 #include "utils/logging.h"
+#include "utils/lockfile.h"
 
 
 File::Chunk& File::Chunk::operator=(Chunk&& moving)
@@ -23,7 +24,7 @@ File::Chunk::~Chunk()
         operator delete(const_cast<char *const>(data));
 }
 
-File::Chunk File::allocate(size_t max_size)
+File::Chunk File::allocate(size_t max_size) const
 {
     if (!isValid())
     {
@@ -42,26 +43,27 @@ File::Chunk File::allocate(size_t max_size)
     }
     else
     {
-        long old_pos = ftell(stream);
+        flockfile(stream);
+        long old_pos = ftell_unlocked(stream);
 
+        fseek_unlocked(stream, 0L, SEEK_END);
+        size_t file_size = ftell_unlocked(stream);
+        if (!max_size)
+            max_size = file_size;
+        else if (file_size < max_size)
         {
-            fseek(stream, 0L, SEEK_END);
-            size_t file_size = ftell(stream);
-            if (!max_size)
-                max_size = file_size;
-            else if (file_size < max_size)
-            {
-                WARN("Speficied a size higher than the file size (size: %zd & file size: %d) for %s. Using file size");
-                max_size = file_size;
-            }
+            WARN("Speficied a size higher than the file size (size: %zd & file size: %d) for %s. Using file size", max_size, file_size, currpath);
+            max_size = file_size;
         }
 
         rewind(stream);
 
         char *data = static_cast<char *>(operator new(max_size));
-        fread(const_cast<char *>(data), max_size, 1, stream);
+        fread_unlocked(data, max_size, 1, stream);
 
-        fseek(stream, old_pos, SEEK_SET);
+        fseek_unlocked(stream, old_pos, SEEK_SET);
+
+        funlockfile(stream);
 
         return Chunk(max_size, data);
     }

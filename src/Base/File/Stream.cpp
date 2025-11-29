@@ -1,5 +1,9 @@
 #include "Base/File.hpp"
 #include "utils/logging.h"
+#include "utils/mem.h"
+#include "utils/lockfile.h"
+
+#include "GameSettings.hpp"
 
 const char File::fsres_prefix[] =
 #ifdef ANDROID
@@ -9,6 +13,7 @@ const char File::fsres_prefix[] =
 #endif
         ;
 const char File::res_prefix[] = "res://";
+const char File::usr_prefix[] = "usr://";
 
 File::~File()
 {
@@ -39,7 +44,7 @@ File::File(const char *path, const char *mode) : stream(NULL), currmode(mode), c
         if (!_game_res)
             SRE_init_resources();
     #endif
-    if (path_has_resprefix(path))
+    if (path_hasprefix(path, res_prefix))
     {
         if (!mode)
             this->currmode = "rb";
@@ -99,25 +104,27 @@ void File::load_resource()
 
 void File::load_stream()
 {
-    if (path_has_resprefix(this->currpath))
+    const char* bind_prefix = NULL;
+    if (path_hasprefix(this->currpath, res_prefix))
+        bind_prefix = fsres_prefix;
+    else if (path_hasprefix(this->currpath, usr_prefix))
+        bind_prefix = SDL_GetPrefPath(NULL, GameSettings::Title);
+
+    if (bind_prefix)
     {
         const char *old = this->currpath;
-#ifndef _MSC_VER
-        char buff[strlen(this->currpath) + (sizeof(fsres_prefix) - sizeof(res_prefix))];
-#else
-        char *buff = static_cast<char *>(alloca(strlen(this->currpath) + (1 + sizeof(fsres_prefix) - sizeof(res_prefix))));
-#endif
+        ut_dynsalloc(char, buff, strlen(this->currpath) + (strlen(bind_prefix) - PREFIX_LENGTH) + 1);
 
-        strcpy(buff, fsres_prefix);
+        strcpy(buff, bind_prefix);
         strcat(buff, this->currpath + sizeof res_prefix - 1);
         this->currpath = buff;
-
 
         load_stream();
         this->currpath = old;
 
         return;
     }
+
 
     if (!this->currmode)
     {
@@ -179,7 +186,7 @@ SDL_RWops *File::toRWops() const
         if (rw)
             copy.stream = NULL;
 #else
-        Chunk chunk = const_cast<File *>(this)->allocate();
+        Chunk chunk = this->allocate();
         rw = SDL_RWFromConstMem(chunk.data, static_cast<int>(chunk.size));
         rw->close = sdlrw_close;
 
@@ -194,4 +201,73 @@ SDL_RWops *File::toRWops() const
     }
 
     return rw;
+}
+
+size_t File::stream_size() const
+{
+    assert(!isembedded);
+
+    long oldpos;
+    size_t endpos;
+
+    flockfile(stream);
+        oldpos = ftell_unlocked(stream);
+        fseek_unlocked(stream, 0, SEEK_END);
+
+        endpos = static_cast<size_t>(ftell_unlocked(stream));
+        fseek_unlocked(stream, oldpos, SEEK_SET);
+    funlockfile(stream);
+
+    return endpos;
+}
+
+size_t File::readBytes(void* buff, size_t count)
+{
+    if (isembedded)
+    {
+        const size_t max_count = res_size - res_pos;
+        if (count > max_count)
+            count = max_count;
+        memcpy(buff, res_begin + res_pos, max_count);
+        res_pos += max_count;
+        return max_count;
+    }
+    else
+        return fread(buff, count, 1, stream);
+}
+
+std::vector<uint8_t> File::readBytes(size_t max_size)
+{
+    const long curr = ftell(stream);
+    const size_t remaining = getSize() - curr;
+    if (!max_size || max_size > remaining)
+        max_size = remaining;
+
+    std::vector<uint8_t> vec;
+    vec.resize(max_size);
+    readBytes(vec.data(), max_size);
+
+    return vec;
+}
+
+int File::readF(const char* fmt, ...)
+{
+    int res;
+    va_list va;
+    va_start(va, fmt);
+    if (isembedded)
+        res = vsscanf((const char*)(res_begin + res_pos), fmt, va);
+    else
+    {
+        flockfile(stream);
+
+        long oldpos = ftell_unlocked(stream);
+        res = vfscanf(stream, fmt, va);
+        fseek_unlocked(stream, oldpos, SEEK_SET);
+
+        funlockfile(stream);
+    }
+
+    va_end(va);
+    return res;
 }
