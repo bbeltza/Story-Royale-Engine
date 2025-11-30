@@ -15,11 +15,10 @@
 
 - Android support
 - Make game settings C-Style
-- More datatypes: Having a sort of replacement to STL's containers
 
 - Work on the game ^^
 
-(current version: 0.011.19)
+(current version: 0.011.30)
 
 Less likely ideas:
 

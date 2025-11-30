@@ -62,6 +62,8 @@ private:
 template <class T>
 class Tween: public TweenBase
 {
+    static_assert(std::is_arithmetic<T>::value, "Type must be an arithmetic type");
+
     const T* m_src;
     T* m_target = nullptr;
     T m_start;

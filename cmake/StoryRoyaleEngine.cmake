@@ -15,8 +15,12 @@ function(srEngine_build TARGET)
     else()
         add_executable(${TARGET} ${SOURCES})
     endif()
-    
+
     set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
+    if (MSVC_IDE)
+        string(TOUPPER "RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE}" RUNTIME_OUTPUT_VAR_MSVC)
+        set_target_properties(${TARGET} PROPERTIES ${RUNTIME_OUTPUT_VAR_MSVC} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
+    endif()
 
     srEngine_link_settings(${TARGET} ${ARGN})
     srEngine_link_resource(${TARGET} ${ARGN})
