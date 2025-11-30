@@ -21,7 +21,7 @@ File::~File()
         fclose(this->stream);
 }
 
-File::File(const File& other): currpath(other.currpath), currmode(other.currmode), isembedded(other.isembedded), stream(NULL)
+File::File(const File& other): stream(NULL), currmode(other.currmode), currpath(other.currpath), isembedded(other.isembedded)
 {
     if (this->isembedded)
     {
