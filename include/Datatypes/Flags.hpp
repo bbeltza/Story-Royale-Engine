@@ -5,6 +5,7 @@
 template <typename _Num>
 struct Flags
 {
+    static_assert(std::is_integral<_Num>::value, "Flags object must be of an integral type: Type must be a whole number");
     using Type = _Num;
 
     Flags(): m_data((_Num)0) {}

@@ -8,6 +8,8 @@
 template <class _Num>
 struct Vector2
 {
+    static_assert(std::is_arithmetic<_Num>::value, "Vector2 datatype must be an arithmetic type: The type must represent a number");
+
     constexpr Vector2(const _Num scalar): X(scalar), Y(scalar) {}
     constexpr Vector2(const _Num x, const _Num y): X(x), Y(y) {}
     constexpr Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}

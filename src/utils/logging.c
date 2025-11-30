@@ -11,12 +11,11 @@
 void NLOG(const char* fmt, ...)
 {
 	flockfile(stdout);
-
-	if (!os.output_hasnline())
-		putchar('\n');
-	fputs("[LOG]: ", stdout);
+	if (os.output_hasnline())
+		fputs("[LOG]: ", stdout);
 
 	va_block(va, fmt, vfprintf(stdout, fmt, va));
+	putc('\n', stdout);
 
 	funlockfile(stdout);
 }
@@ -32,24 +31,28 @@ void ALOG(const char* fmt, ...)
 	funlockfile(stdout);
 }
 
+#define WARN_NEWLINE_CHECK if (!os.output_hasnline()) fputc('\n', stderr)
+
 void WARN(const char* fmt, ...)
 {
-	flockfile(stdout);
-	if (!os.output_hasnline())
-		putchar('\n');
-	fputs("[WARNING]: ", stdout);
-
-	va_block(va, fmt, vfprintf(stdout, fmt, va));
-	fputc('\n', stdout);
+	flockfile(stderr);
 	
-	funlockfile(stdout);
+	WARN_NEWLINE_CHECK;
+
+	fputs("[WARNING]: ", stderr);
+
+	va_block(va, fmt, vfprintf(stderr, fmt, va));
+	fputc('\n', stderr);
+	
+	funlockfile(stderr);
 }
 
 void ERROR(const char* fmt, ...)
 {
 	flockfile(stderr);
-	if (!os.output_hasnline())
-		putchar('\n');
+	
+	WARN_NEWLINE_CHECK;
+
 	fputs("[ERROR]: ", stderr);
 
 	va_block(va, fmt, vfprintf(stderr, fmt, va));

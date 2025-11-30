@@ -38,6 +38,9 @@
 
 #elif defined(__unix__)
 
+#define fseek_unlocked fseek
+#define ftell_unlocked ftell
+
 #else
 
 #define fclose_unlocked fclose
