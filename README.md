@@ -15,7 +15,6 @@ In order to compile and build the engine, you must have:
     - Usually **Visual Studio**'s solutions for *Windows*, or **Make** for *Linux*. I use **Ninja** which is available for both platforms.
 - A compiler: **MSVC** for *Windows* and **GCC** for *Linux* are supported. **Clang** can be used but it is not often tested.
 - **Python**: I'm not sure which version (really), but the latest version your package manager supports will do it.
-    - **Pillow**: This is used with Python and is required by the icon generator to get the size of images, not very used so I might remove the requirement for this library.
     > Python is required to run some scripts that include generating the game's settings and assets. I might reduce Python's requirements and use dummy sources if the user doesn't have it.
 - An IDE or code editor is recommended, I mostly use **Visual Studio Code** to work on, but you can just use the terminal to build (which you'll be told how) and use notepad to code in.
 

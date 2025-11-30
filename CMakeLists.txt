@@ -23,79 +23,68 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(StoryRoyaleEngine)
 
-project(StoryRoyaleEngine)
-project(StoryRoyaleEngineCore)
+project(sre)
+project(sre_core)
 
-srEngine_policy()
-
-if(MSVC)
-    set(SR_ENGINE_NO_CONSOLE_OPTIONS "/SUBSYSTEM:WINDOWS")
-    set(SR_ENGINE_COMPILER_OPTIONS "/WX")
-else()
-    if (WIN32)
-        set(SR_ENGINE_NO_CONSOLE_OPTIONS "-mwindows")
-    endif()
-    set(SR_ENGINE_COMPILER_OPTIONS "-Werror")
-endif()
+project(sre_interface)
+project(sre_noconsole)
+add_library(sre_interface INTERFACE)
+add_library(sre_noconsole INTERFACE)
 
 add_subdirectory(src)
 add_subdirectory(3rdparty)
 
-target_compile_definitions(StoryRoyaleEngine PRIVATE _CRT_SECURE_NO_WARNINGS)
-target_compile_options(StoryRoyaleEngine PRIVATE "${SR_ENGINE_COMPILER_OPTIONS}")
+list(TRANSFORM SOURCES PREPEND "src/")
+list(TRANSFORM CORE_SOURCES PREPEND "src/")
 
-if(NOT BUILD_SHARED_LIBS)
-    set(SDL_LIB_SUFFIX "-static")
-    set(ZLIB_SUFFIX "static")
+add_library(sre STATIC ${SOURCES})
+target_include_directories(sre PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(sre PUBLIC ${3RDPARTYLIBS})
+
+add_library(sre_core STATIC ${CORE_SOURCES})
+target_link_libraries(sre_core PRIVATE sre)
+target_compile_definitions(sre_core PRIVATE INTERNAL_DEF=1)
+
+target_link_libraries(sre PRIVATE sre_core)
+target_link_libraries(sre PRIVATE sre_interface)
+
+add_subdirectory(os)
+target_link_libraries(sre PUBLIC sre_os)
+
+if(MSVC)
+    target_link_options(sre_noconsole INTERFACE "/SUBSYSTEM:WINDOWS")
+    target_compile_options(sre_interface INTERFACE "/WX")
+    target_compile_definitions(sre_interface INTERFACE _CRT_SECURE_NO_WARNINGS)
+else()
+    if (WIN32)
+        target_link_options(sre_noconsole INTERFACE "-mwindows")
+    endif()
+    target_compile_options(sre_interface INTERFACE "-Werror")
 endif()
 
-set(3RDPARTYLIBS
-SDL2::SDL2${SDL_LIB_SUFFIX}
-SDL2_ttf::SDL2_ttf${SDL_LIB_SUFFIX}
-SDL2_image::SDL2_image${SDL_LIB_SUFFIX}
-
-stb
-zlib${ZLIB_SUFFIX}
-)
-set(SRENGINE_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_ttf
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/SDL_image
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/stb
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib
-)
-
-target_include_directories(StoryRoyaleEngine PUBLIC ${SRENGINE_INCLUDE_DIRS})
-target_include_directories(StoryRoyaleEngineOS PUBLIC ${SRENGINE_INCLUDE_DIRS})
-target_include_directories(StoryRoyaleEngineCore PUBLIC ${SRENGINE_INCLUDE_DIRS})
-
-target_link_libraries(StoryRoyaleEngine PUBLIC ${3RDPARTYLIBS})
-target_link_libraries(StoryRoyaleEngine PRIVATE StoryRoyaleEngineCore)
 if (ANDROID)
-    target_link_libraries(StoryRoyaleEngine PUBLIC
-    android
-    log
-    )
+    target_link_libraries(StoryRoyaleEngine PUBLIC android log)
 endif()
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    set(BUILD_TESTS ON)
-    add_subdirectory(tests/Rects)
-    add_subdirectory(tests/FileTest)
-    add_subdirectory(tests/AudioTest)
-    add_subdirectory(tests/ImageTest)
-    add_subdirectory(tests/ScalingTest)
-    add_subdirectory(tests/ThreadsTest)
-    add_subdirectory(tests/TargetTextures)
-    add_subdirectory(tests/GlyphTest)
+    set(EXAMPLE_OPTIONS ON)
 else()
-    set(SR_ENGINE_NO_CONSOLE_OPTIONS ${SR_ENGINE_NO_CONSOLE_OPTIONS} PARENT_SCOPE)
+    set(EXAMPLE_OPTIONS OFF)
+
     set(SRENGINE_DIR ${SRENGINE_DIR} PARENT_SCOPE)
-    set(SRENGINE_INCLUDE_DIRS ${SRENGINE_INCLUDE_DIRS} PARENT_SCOPE)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRENGINE_CMAKE_MODULE_PATH} PARENT_SCOPE)
     set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_COMPILE_OBJECT}" PARENT_SCOPE)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRENGINE_CMAKE_MODULE_PATH} PARENT_SCOPE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} PARENT_SCOPE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} PARENT_SCOPE)
+endif()
+
+option(WANT_EXAMPLES "Build example applications" ${EXAMPLE_OPTIONS})
+option(WANT_TESTS "Build and run tests" ON)
+
+if (WANT_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+if (WANT_TESTS)
+    add_subdirectory(tests)
 endif()

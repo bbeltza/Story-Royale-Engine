@@ -1,5 +1,0 @@
-macro(srEngine_policy)
-    cmake_policy(SET CMP0079 NEW)
-    cmake_policy(SET CMP0091 NEW)
-    cmake_policy(SET CMP0025 NEW)
-endmacro()

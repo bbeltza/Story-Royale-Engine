@@ -1,7 +1,7 @@
 # Based of another icon-generator script, SOURCE: https://gist.github.com/mmozeiko/47cf52adc39441d512c28efb2efb3a20
 
 import struct, os
-from PIL import Image
+import image_helpers
 from warnings import warn
 from sys import argv
 
@@ -21,19 +21,23 @@ def pack(output:str, files:list[str]):
 
         for i in files:
             size = os.path.getsize(i)
-            try:
-                img = Image.open(i)
-            except Image.UnidentifiedImageError as err:
-                warn(f"Skipping {i} because file is not an image")
-                continue
 
-            if img.width > 0x100 or img.height > 0x100:
+            img_dimensions = image_helpers.getbmp_dimensions(i)
+            img_dimensions = img_dimensions if img_dimensions else image_helpers.getpng_dimensions(i)
+            if not img_dimensions:
+                warn(f"Skipping {i} because file is not an image or it is not supported")
+                continue
+                
+            img_width, img_height = img_dimensions
+                
+
+            if img_width > 0x100 or img_height > 0x100:
                 warn(f"Skipping {i} because the width or the height are higher than 256, .ico files support at most 256x256 image sizes")
                 continue
-            w = 0 if img.width == 0x100 else img.width
-            h = 0 if img.height == 0x100 else img.height
+            w = 0 if img_width == 0x100 else img_width
+            h = 0 if img_height == 0x100 else img_height
 
-            out_file.write(struct.pack(ICONDIRENTRY_FMT, w, h, 0, 0, 1, MODE_TO_BPP[img.mode], size, offset))
+            out_file.write(struct.pack(ICONDIRENTRY_FMT, w, h, 0, 0, 1, 32, size, offset))
 
             old_pos = out_file.tell()
 

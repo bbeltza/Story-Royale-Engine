@@ -1,1 +1,0 @@
-add_library(StoryRoyaleEngineOS STATIC "os.c" "output.c" "wherexy.c" "sync.c")

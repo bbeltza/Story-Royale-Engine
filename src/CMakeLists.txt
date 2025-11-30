@@ -34,6 +34,7 @@ set(BASE_SOURCES
 "Thread.cpp"
 "Tween.cpp"
 "Window.cpp"
+"Timer.cpp"
 )
 
 set(LAYER_SOURCES
@@ -67,13 +68,11 @@ set(UTIL_SOURCES
 )
 
 set_dst_src(Components COMPONENT_SOURCES LAYER_SOURCES)
-
 set_src(Base BASE_SOURCES)
 set_src(Datatypes DATATYPES_SOURCES)
 set_src(GameLayer LAYER_SOURCES)
 set_src(utils UTIL_SOURCES)
-
-add_library(StoryRoyaleEngine STATIC ${SOURCES})
+set(SOURCES "${SOURCES}" PARENT_SCOPE)
 
 set(CORE_SOURCES
 "Audio.cpp"
@@ -88,11 +87,5 @@ set(CORE_SOURCES
 "Runtime.c"
 "WindowCreation.c"
 )
-
 set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
-
-add_library(StoryRoyaleEngineCore STATIC ${SRCORE_SOURCES} "Base/Timer.cpp")
-target_link_libraries(StoryRoyaleEngineCore StoryRoyaleEngine)
-target_compile_definitions(StoryRoyaleEngineCore PRIVATE INTERNAL_DEF=1)
-
-add_subdirectory("os")
+set(CORE_SOURCES ${SRCORE_SOURCES} PARENT_SCOPE)

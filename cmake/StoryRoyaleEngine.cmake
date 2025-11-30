@@ -4,7 +4,6 @@ if (NOT PYTHON_EXECUTABLE)
 endif()
 set(PYTHON_COMMAND ${PYTHON_EXECUTABLE} ${SRENGINE_DIR}/scripts/)
 
-include(StoryRoyaleEngine/Policy)
 include(StoryRoyaleEngine/Resources)
 include(StoryRoyaleEngine/Settings)
 include(StoryRoyaleEngine/Icon)
@@ -26,12 +25,12 @@ function(srEngine_build TARGET)
     srEngine_link_resource(${TARGET} ${ARGN})
     srEngine_link_icon(${TARGET})
 
-    target_include_directories(${TARGET} PRIVATE StoryRoyaleEngine)
-    target_link_libraries(${TARGET} PRIVATE StoryRoyaleEngine)
+    target_include_directories(${TARGET} PRIVATE sre)
+    target_link_libraries(${TARGET} PRIVATE sre)
 
     if ("${ARGN}" MATCHES NO_CONSOLE)
         message("--- ${TARGET} HAS NO CONSOLE ${SR_ENGINE_NO_CONSOLE_OPTIONS}")
-        target_link_options(${TARGET} PRIVATE ${SR_ENGINE_NO_CONSOLE_OPTIONS})
+        target_link_libraries(${TARGET} PRIVATE sre_noconsole)
     endif()
 
     # Copying all of the dynamic libraries into the bin folder

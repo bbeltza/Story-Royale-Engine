@@ -1,0 +1,8 @@
+add_subdirectory(AudioTest)
+add_subdirectory(FileTest)
+add_subdirectory(GlyphTest)
+add_subdirectory(ImageTest)
+add_subdirectory(Rects)
+add_subdirectory(ScalingTest)
+add_subdirectory(TargetTextures)
+add_subdirectory(ThreadsTest)
