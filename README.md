@@ -125,7 +125,8 @@ set(SOURCES "src/entry.cpp") # Note that SOURCES has to remain, this variable is
 
 srEngine_build(Game) # This function does all of the heavylifting. Taking SOURCES and making an executable out of it, with the engine linked. There are some options though that you can add as arguments:
 # NO_CONSOLE uses a Windows subsystem on Windows, that just means it doesn't include a console
-# NO_BIND is used to not embed the game assets into the executable, instead it will just put them into a single "__res/" folder in the binary's folder, this is useful for debugging as embedding resources takes some time. It was more useful back then when embedding resources took way more.
+# NO_BIND is used to not embed the game assets into the executable, instead it will just put them into a single "__res/" folder in the binary's folder, this is useful for debugging as embedding resources takes some time.
+# It was more useful back then when embedding resources took way more.
 
 ```
 
@@ -135,7 +136,7 @@ This is all you normally need to build a game with this engine, the other part c
 
 These are just settings! It's just a **JSON** file with hints to the engine on how to start your application. You don't have to modify any of your CMake if you want to add it, the next time you reconfigure your project it will automatically detect the file, that means `GameSettings.json` cannot have a different name. Here's an example with all of the available options:
 
-```json
+```jsonc
 {
     "Title": "My Game", // The title of the game, this usually sets up the title of the window and the name of the local user's data folder
     "StartResolution": [800, 600], // The start resolution of the window, pretty simple, can be [0, 0] if you've already specified a scaling resolution which comes next
@@ -148,7 +149,8 @@ These are just settings! It's just a **JSON** file with hints to the engine on h
     },
     "AudioOptions": {
         "Frequency":  44100, // The frequency of the audio
-        "Filter": "Linear" // This isn't really used, it specifies the way you want to interpolate the audio if for example a song doesn't use the same frequency as the frequency you've specified. But it is unavailable and defaults to a linear interpolation for now
+        "Filter": "Linear" // This isn't really used, it specifies the way you want to interpolate the audio if for example a song doesn't use the same frequency as the frequency you've specified.
+        // But it is unavailable and defaults to a linear interpolation for now
     },
     // Note that these two last options are used by cmake, so you'll have to reconfigure it every time you change it
     "Resources": "res", // The folder which you want your resources to be in
