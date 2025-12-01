@@ -23,7 +23,7 @@ _CAPI_END
 
 #if defined(__unix)
 	#include "OS/unix.h"
-#elif defined(WIN32)
+#elif defined(_WIN32)
 	#include "OS/win.h"
 #endif
 

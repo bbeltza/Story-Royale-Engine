@@ -1,6 +1,6 @@
 #pragma once
 #include <math.h>
-#include <iostream>
+#include <type_traits>
 
 #include "utils/logging.h"
 #include "utils/math.h"

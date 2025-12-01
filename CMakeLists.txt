@@ -79,12 +79,13 @@ else()
 endif()
 
 option(WANT_EXAMPLES "Build example applications" ${EXAMPLE_OPTIONS})
-option(WANT_TESTS "Build and run tests" ON)
+option(BUILD_TESTING "Build and run tests" ON)
 
 if (WANT_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-if (WANT_TESTS)
+if (BUILD_TESTING)
+    enable_testing()
     add_subdirectory(tests)
 endif()
