@@ -2,7 +2,7 @@ function(srEngine_link_settings TARGET)
     get_target_property(PROJECT_SRC_DIR ${TARGET} SOURCE_DIR)
     set(INPUT_SETTINGS ${PROJECT_SRC_DIR}/GameSettings.json)
 
-    set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/g_settings.cpp)
+    set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/g_settings.c)
 
     macro(gen_settings INPUT_JSON)
         if (NOT ${INPUT_JSON} EQUAL 0)

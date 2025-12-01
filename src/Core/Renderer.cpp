@@ -1,7 +1,7 @@
 #include "../internal.h"
 #include "../internal.hpp"
 
-#include "GameSettings.hpp"
+#include "GameSettings.h"
 
 #include "Game/World.hpp"
 #include "Game/GuiLayer.hpp"
@@ -23,8 +23,12 @@ static void reset_targets()
 	_containers->unlock();
 }
 
-void __setup_renderer(uint32_t flags)
+void __setup_renderer()
 {
+	uint32_t flags = 0;
+	if (sre::game_settings.WindowOptions.VSync)
+		flags |= SDL_RENDERER_PRESENTVSYNC;
+
 	engine.sdl_rendererhndl = SDL_CreateRenderer(engine.sdl_windowhndl, -1, flags);
 	SDL_SetRenderDrawBlendMode(engine.sdl_rendererhndl, SDL_BLENDMODE_BLEND);
 
@@ -36,18 +40,17 @@ void __setup_renderer(uint32_t flags)
 
 	SDL_TryLockMutex(engine.sdl_rendermutex);
 
-	Runtime::SetFramerate(GameSettings::TargetFPS);
+	Runtime::SetFramerate(sre::game_settings.WindowOptions.TargetFPS);
 }
 
 void __update_viewport()
 {
-	static bool has_scaling = !GameSettings::ScalingResolution.isZero();
 	int integer_scale;
 
 	SDL_GetRendererOutputSize(engine.sdl_rendererhndl, &engine.osize_x, &engine.osize_y);
-	if (has_scaling)
+	if (sre::game_settings.WindowOptions.Scaled)
 	{
-		integer_scale = ut_min(engine.osize_x / GameSettings::ScalingResolution.X, engine.osize_y / GameSettings::ScalingResolution.Y);
+		integer_scale = ut_min(engine.osize_x / sre::game_settings.WindowOptions.Resolution.X, engine.osize_y / sre::game_settings.WindowOptions.Resolution.Y);
 		integer_scale = integer_scale ? integer_scale : 1;
 	}
 	else

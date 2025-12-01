@@ -5,7 +5,7 @@
 #include "Base/Audio.hpp"
 #include "Base/Thread.hpp"
 
-#include "GameSettings.hpp"
+#include "GameSettings.h"
 
 void __audio_callback(void* data, uint8_t* stream, int len)
 {
@@ -125,8 +125,8 @@ void __setup_audio_device()
 	SDL_AudioSpec desiredspec{0};
 	desiredspec.callback = __audio_callback;
 
-	desiredspec.freq = GameSettings::AudioOptions.Frequency; // I should make an enum for different frequencies instead of letting the user have free choice
-	desiredspec.channels = 2 - GameSettings::AudioOptions.Mono;
+	desiredspec.freq = sre::game_settings.AudioOptions.Frequency; // I should make an enum for different frequencies instead of letting the user have free choice
+	desiredspec.channels = 2 - sre::game_settings.AudioOptions.Mono;
 	desiredspec.samples = 512;
 	desiredspec.format = AUDIO_S16;
 

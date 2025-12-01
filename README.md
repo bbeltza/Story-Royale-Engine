@@ -138,18 +138,18 @@ These are just settings! It's just a **JSON** file with hints to the engine on h
 ```jsonc
 {
     "Title": "My Game", // The title of the game, this usually sets up the title of the window and the name of the local user's data folder
-    "StartResolution": [800, 600], // The start resolution of the window, pretty simple, can be [0, 0] if you've already specified a scaling resolution which comes next
-    "ScalingResolution": [320, 180], // The target scaling resolution, it's just for pixel-art games to scale in, you can completely remove if if you want a native resolution
-    "TargetFPS": 60, // The target FPS limits of the game, can be 0 if you don't want any limits
     "WindowOptions": {
+        "Resolution": [800, 600], // The start resolution of the window, pretty simple
+        "TargetFPS": 60, // The target FPS limits of the game, can be 0 if you don't want any limits
         "VSync": true, // Pretty simple, VSync
         "Resizable": true, // If the window can be resized or not
-	    "Hidden": false // If you don't want the window to automatically show up. This is enabled in Story Royale to load first scene and then show the window 
+        "Scaled": false // Whether to enable scaling, it's just for pixel-art games to match the resolution
     },
     "AudioOptions": {
         "Frequency":  44100, // The frequency of the audio
-        "Filter": "Linear" // This isn't really used, it specifies the way you want to interpolate the audio if for example a song doesn't use the same frequency as the frequency you've specified.
+        "Filter": "Linear", // This isn't really used, it specifies the way you want to interpolate the audio if for example a song doesn't use the same frequency as the frequency you've specified.
         // But it is unavailable and defaults to a linear interpolation for now
+        "Mono": false // Enable if you only want 1 audio channel (mono audio), we usually want stereo so it is set to 'false'
     },
     // Note that these two last options are used by cmake, so you'll have to reconfigure it every time you change it
     "Resources": "res", // The folder which you want your resources to be in
@@ -164,14 +164,12 @@ These are just settings! It's just a **JSON** file with hints to the engine on h
 After you've configured everything, you're going to have to write a **C/C++** file with a `Game::Initialize()` function in it. It is required, otherwise you'll get a linking error:
 
 ```c++
-#include <Engine.hpp> // Include some base feature of the engine
+#include <Engine.hpp> // Include some base features of the engine
 #include <utils/logging.h> // Include LOG(), it's just a printf() wrapper
 
 void Game::Initialize()
 {
     LOG("Hello World!");
-
-    Window::show();
 }
 ```
 

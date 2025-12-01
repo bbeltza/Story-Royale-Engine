@@ -76,9 +76,8 @@ _CAPI_BEGIN
 	extern void __run_engine();
 	extern void __end_engine(void);
 
-	extern struct _win_settings __setup_window_data();
-	extern void __create_window(const struct _win_settings* _win);
-	extern void __setup_renderer(uint32_t flags);
+	extern void __create_window();
+	extern void __setup_renderer();
 	
 	extern void __init_containers();
 	extern void __init_actions();

@@ -9,13 +9,25 @@
 
 #include <utils/logging.h>
 
-static inline void __setup_engine_data()
+static int __invoke_entry(void* userdata)
+{
+    SDL_Event finish_event = { 0 };
+    finish_event.type = SDL_USEREVENT;
+    finish_event.user.code = 1;
+
+    Initialize();
+    SDL_PushEvent(&finish_event);
+
+    return 0;
+}
+
+inline void __setup_engine_data()
 {
     engine.phys_target_dt = 1.0 / 64.0;
 
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
-    engine.entry_thread = SDL_CreateThread((SDL_ThreadFunction)Initialize, "Game Entry", NULL);
+    engine.entry_thread = SDL_CreateThread(__invoke_entry, "Game Entry", NULL);
 }
 
 void __initialize_engine()
@@ -34,12 +46,12 @@ void __initialize_engine()
 
     __init_containers();
 
-    const struct _win_settings _win = __setup_window_data();
     __setup_audio_device();
+    __create_window();
+    __setup_renderer();
+
     __setup_engine_data();
 
-    __create_window(&_win);
-    __setup_renderer(_win.renderflags);
     __init_actions();
 
     atexit(__end_engine);

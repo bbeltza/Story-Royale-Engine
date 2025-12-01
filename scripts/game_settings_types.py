@@ -1,11 +1,20 @@
-types:dict = {
-    "Title": ["My Game", "const char*"],
-    "StartResolution": [[640, 480], "Vector2u"],
-    "ScalingResolution": [[0, 0], "Vector2u"],
-    "TargetFPS": [60, "uint16_t"],
-    "WindowOptions": [[True, True, False], "WindowOptions", ["VSync", "Resizable", "Hidden"]],
-    "AudioOptions": [[0, 0, False], "AudioOptions", ["Frequency", "Filter", "Mono"]]
-}
+types: list = [
+    ["Title", "My Game"],
+    ["WindowOptions", [
+        ["Resolution", (640, 480)],
+        ["TargetFPS", 60],
+        ["VSync", True],
+        ["Resizable", True],
+        ["Scaled", False]
+        ]
+     ],
+     ["AudioOptions", [
+         ["Frequency", 0],
+         ["Filter", 0],
+         ["Mono", False]
+         ]
+      ]
+]
 
 if __name__ == "__main__":
     from pprint import pprint

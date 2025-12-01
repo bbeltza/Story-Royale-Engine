@@ -3,7 +3,7 @@
 #include "utils/mem.h"
 #include "utils/lockfile.h"
 
-#include "GameSettings.hpp"
+#include "GameSettings.h"
 
 const char File::fsres_prefix[] =
 #ifdef ANDROID
@@ -108,7 +108,7 @@ void File::load_stream()
     if (path_hasprefix(this->currpath, res_prefix))
         bind_prefix = fsres_prefix;
     else if (path_hasprefix(this->currpath, usr_prefix))
-        bind_prefix = SDL_GetPrefPath(NULL, GameSettings::Title);
+        bind_prefix = SDL_GetPrefPath(NULL, sre::game_settings.Title);
 
     if (bind_prefix)
     {

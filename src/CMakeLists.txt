@@ -81,11 +81,10 @@ set(CORE_SOURCES
 "Input.cpp"
 "Querying.cpp"
 "Renderer.cpp"
-"WindowData.cpp"
 
 "InitEngine.c"
 "Runtime.c"
-"WindowCreation.c"
+"Window.c"
 )
 set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
 set(CORE_SOURCES ${SRCORE_SOURCES} PARENT_SCOPE)
