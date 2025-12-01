@@ -33,7 +33,7 @@ def var_tocstr(val:dict | Any, types:list | Any, _key:str=None) -> str:
             for l in types:
                 key = l[0]; assert type(key) == str
                 default = l[1]
-                result += var_tocstr(val.get(key, None) if val else {}, default, key)
+                result += var_tocstr(val.get(key, None) if val else None, default, key)
                 result += ","
         else:
             if val == None: val = types
@@ -47,7 +47,7 @@ def var_tocstr(val:dict | Any, types:list | Any, _key:str=None) -> str:
 
         result = result.removesuffix(",") + "}"
     else:
-        assert type(val) != dict, f"{_key} object must not be a dictionary"
+        assert type(val) != dict, f"{_key} object must not be a dictionary, value is {val}"
         if val == None: val = types
 
         t = type(types)
