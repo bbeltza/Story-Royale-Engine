@@ -14,11 +14,10 @@
 - Have a log file opened
 
 - Android support
-- Make game settings C-Style
 
 - Work on the game ^^
 
-(current version: 0.011.30)
+(current version: 0.012.01)
 
 Less likely ideas:
 
