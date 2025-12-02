@@ -63,7 +63,11 @@ else()
 endif()
 
 if (ANDROID)
-    target_link_libraries(StoryRoyaleEngine PUBLIC android log)
+    target_link_libraries(sre PUBLIC android log)
+endif()
+
+if (HAVE_STDIO_H)
+    target_compile_definitions(sre PUBLIC "SDL_HAVE_STDIO_H")
 endif()
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})

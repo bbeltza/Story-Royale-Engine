@@ -21,7 +21,7 @@ static int __invoke_entry(void* userdata)
     return 0;
 }
 
-inline void __setup_engine_data()
+static inline void __setup_engine_data()
 {
     engine.phys_target_dt = 1.0 / 64.0;
 

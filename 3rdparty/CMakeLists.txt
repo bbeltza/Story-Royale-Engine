@@ -14,10 +14,6 @@ add_subdirectory(SDL_image)
 add_subdirectory(stb)
 add_subdirectory(zlib)
 
-if (HAVE_STDIO_H)
-    target_compile_definitions(StoryRoyaleEngine PUBLIC "SDL_HAVE_STDIO_H")
-endif()
-
 if(NOT BUILD_SHARED_LIBS)
     set(SDL_LIB_SUFFIX "-static")
     set(ZLIB_SUFFIX "static")
