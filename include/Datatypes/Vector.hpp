@@ -70,9 +70,10 @@ struct Vector2
     void display(logfunc_t _printer) const {_printer("{ %g, %g }", (double)X, (double)Y);}
 };
 
-#define vec2 Vector2<_Num>
 #define _t template <class _Num>
-#define _t2 template <class _Num, class _Num2>
+#define _t2 template <class _Num, class _NumX>
+#define vec2 Vector2<_Num>
+#define vec2x Vector2<_NumX>
 
 // Static
 
@@ -85,21 +86,27 @@ _t const vec2 vec2::CENTER = {0.5};
 #define vec2op(op) -> Vector2<decltype(first.X op other.X)> { return {first.X op other.X, first.Y op other.Y}; }
 #define vec2op_num(op) -> Vector2<decltype(first.X op other)> { return {first.X op other, first.Y op other}; }
 #define vec2aop(op) { first.X op other.X; first.Y op other.Y; return first; }
+#define vec2aop_num(op) { first.X op other; first.Y op other; return first; }
 
-_t2 inline auto operator +(const vec2& first, const Vector2<_Num2>& other) vec2op(+)
-_t2 inline auto operator -(const vec2& first, const Vector2<_Num2>& other) vec2op(-)
-_t2 inline auto operator *(const vec2& first, const Vector2<_Num2>& other) vec2op(*)
-_t2 inline auto operator /(const vec2& first, const Vector2<_Num2>& other) vec2op(/)
+_t2 inline auto operator +(const vec2& first, const vec2x& other) vec2op(+)
+_t2 inline auto operator -(const vec2& first, const vec2x& other) vec2op(-)
+_t2 inline auto operator *(const vec2& first, const vec2x& other) vec2op(*)
+_t2 inline auto operator /(const vec2& first, const vec2x& other) vec2op(/)
 
-_t2 inline auto operator +(const vec2& first, const _Num2 other) vec2op_num(+)
-_t2 inline auto operator -(const vec2& first, const _Num2 other) vec2op_num(-)
-_t2 inline auto operator *(const vec2& first, const _Num2 other) vec2op_num(*)
-_t2 inline auto operator /(const vec2& first, const _Num2 other) vec2op_num(/)
+_t2 inline auto operator +(const vec2& first, const _NumX other) vec2op_num(+)
+_t2 inline auto operator -(const vec2& first, const _NumX other) vec2op_num(-)
+_t2 inline auto operator *(const vec2& first, const _NumX other) vec2op_num(*)
+_t2 inline auto operator /(const vec2& first, const _NumX other) vec2op_num(/)
 
-_t inline vec2& operator +=(vec2& first, const vec2& other) vec2aop(+=)
-_t inline vec2& operator -=(vec2& first, const vec2& other) vec2aop(-=)
-_t inline vec2& operator *=(vec2& first, const vec2& other) vec2aop(*=)
-_t inline vec2& operator /=(vec2& first, const vec2& other) vec2aop(/=)
+_t2 inline vec2& operator +=(vec2& first, const vec2x& other) vec2aop(+=)
+_t2 inline vec2& operator -=(vec2& first, const vec2x& other) vec2aop(-=)
+_t2 inline vec2& operator *=(vec2& first, const vec2x& other) vec2aop(*=)
+_t2 inline vec2& operator /=(vec2& first, const vec2x& other) vec2aop(/=)
+
+_t2 inline vec2& operator +=(vec2& first, const _NumX other) vec2aop_num(+=)
+_t2 inline vec2& operator -=(vec2& first, const _NumX other) vec2aop_num(-=)
+_t2 inline vec2& operator *=(vec2& first, const _NumX other) vec2aop_num(*=)
+_t2 inline vec2& operator /=(vec2& first, const _NumX other) vec2aop_num(/=)
 
 #undef vec2op
 #undef vec2op_num
