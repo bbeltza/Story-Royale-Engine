@@ -43,23 +43,23 @@ set(LAYER_SOURCES
 "World.cpp"
 "CameraController.cpp"
 
-"Presets/Gui/GuiButton.cpp"
+"presets/gui/GuiButton.cpp"
 
-"Presets/Camera/DragControl.cpp"
-"Presets/Camera/EntityControl.cpp"
+"presets/camera/DragControl.cpp"
+"presets/camera/EntityControl.cpp"
 )
 set(COMPONENT_SOURCES
-"Gui/AspectRatio.cpp"
-"Gui/Modulate.cpp"
-"Gui/Padding.cpp"
-"Gui/Image.cpp"
-"Gui/Text.cpp"
-"Gui/List.cpp"
-"Gui/Rendering.cpp"
+"gui/AspectRatio.cpp"
+"gui/Modulate.cpp"
+"gui/Padding.cpp"
+"gui/Image.cpp"
+"gui/Text.cpp"
+"gui/List.cpp"
+"gui/Rendering.cpp"
 
-"World/Shape.cpp"
-"World/Velocity.cpp"
-"World/Sprite.cpp"
+"world/Shape.cpp"
+"world/Velocity.cpp"
+"world/Sprite.cpp"
 )
 
 set(UTIL_SOURCES
@@ -67,10 +67,10 @@ set(UTIL_SOURCES
     "logging.c"
 )
 
-set_dst_src(Components COMPONENT_SOURCES LAYER_SOURCES)
-set_src(Base BASE_SOURCES)
-set_src(Datatypes DATATYPES_SOURCES)
-set_src(GameLayer LAYER_SOURCES)
+set_dst_src(components COMPONENT_SOURCES LAYER_SOURCES)
+set_src(base BASE_SOURCES)
+set_src(datatypes DATATYPES_SOURCES)
+set_src(gamelayer LAYER_SOURCES)
 set_src(utils UTIL_SOURCES)
 set(SOURCES "${SOURCES}" PARENT_SCOPE)
 
