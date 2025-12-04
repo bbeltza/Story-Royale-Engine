@@ -22,54 +22,53 @@ static std::vector<MouseButton> mButtonSignalQueue;
 static std::vector<MouseMove> mMoveSignalQueue;
 static std::vector<MouseWheel> mWheelSignalQueue;
 
-void __poll_input()
+void __poll_input(SDL_Event* event)
 {
-#define event engine.sdl_eventhndl
-#define kbstate(s) reinterpret_cast<Flags8*>(&engine.keyboard_state[event.key.keysym.s])
-    switch (event.type)
+#define kbstate(s) flags_kbstate[event->key.keysym.s]
+    switch (event->type)
     {
     case SDL_MOUSEMOTION:
-        mMoveSignalQueue.emplace_back(&event.motion, engine.viewport_scale);
+        mMoveSignalQueue.emplace_back(&event->motion, engine.viewport_scale);
         break;
     case SDL_MOUSEBUTTONDOWN:
-        mButtonSignalQueue.emplace_back(&event.button, engine.viewport_scale);
+        mButtonSignalQueue.emplace_back(&event->button, engine.viewport_scale);
         break;
     case SDL_MOUSEBUTTONUP:
-        mButtonSignalQueue.emplace_back(&event.button, engine.viewport_scale);
+        mButtonSignalQueue.emplace_back(&event->button, engine.viewport_scale);
         break;
     case SDL_MOUSEWHEEL:
-        mWheelSignalQueue.emplace_back(&event.wheel, engine.viewport_scale);
+        mWheelSignalQueue.emplace_back(&event->wheel, engine.viewport_scale);
         break;
     case SDL_KEYDOWN:
-        if (event.key.keysym.sym > SDL_NUM_SCANCODES)
-            kbstate(scancode)->ToggleOn(3);
+        if (event->key.keysym.sym > SDL_NUM_SCANCODES)
+            kbstate(scancode).ToggleOn(3);
         else
         {
-            kbstate(scancode)->ToggleOn(1);
-            kbstate(sym)->ToggleOn(2);
+            kbstate(scancode).ToggleOn(1);
+            kbstate(sym).ToggleOn(2);
         }
 
-        keySignalQueue.emplace_back(&event.key);
+        keySignalQueue.emplace_back(&event->key);
         break;
     case SDL_KEYUP:
-        if (event.key.keysym.sym > SDL_NUM_SCANCODES)
-            kbstate(scancode)->ToggleOff(3);
+        if (event->key.keysym.sym > SDL_NUM_SCANCODES)
+            kbstate(scancode).ToggleOff(3);
         else
         {
-            kbstate(scancode)->ToggleOff(1);
-            kbstate(sym)->ToggleOff(2);
+            kbstate(scancode).ToggleOff(1);
+            kbstate(sym).ToggleOff(2);
         }
-        keySignalQueue.emplace_back(&event.key);
+        keySignalQueue.emplace_back(&event->key);
         break;
     case SDL_FINGERDOWN:
-        engine.input_last_touchid = event.tfinger.touchId;
-        tFingerSignalQueue.emplace_back(&event.tfinger, true);
+        engine.input_last_touchid = event->tfinger.touchId;
+        tFingerSignalQueue.emplace_back(&event->tfinger, true);
         break;
     case SDL_FINGERUP:
-        tFingerSignalQueue.emplace_back(&event.tfinger, false);
+        tFingerSignalQueue.emplace_back(&event->tfinger, false);
         break;
     case SDL_FINGERMOTION:
-        tMotionSignalQueue.emplace_back(&event.tfinger, true);
+        tMotionSignalQueue.emplace_back(&event->tfinger, true);
         break;
     default:
         break;

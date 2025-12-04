@@ -19,7 +19,6 @@ static void loop()
 {
     ++engine.frame;
     __update_classes();
-    __update_viewport();
     __update_input();
     
     __destroy_queue();

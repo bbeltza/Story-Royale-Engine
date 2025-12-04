@@ -36,7 +36,6 @@ _CAPI_BEGIN
 		// Window data
 
 		SDL_Window* sdl_windowhndl;
-		SDL_Event sdl_eventhndl;
 		
 		// Renderer data
 		
@@ -85,7 +84,7 @@ _CAPI_BEGIN
 	extern void __setup_audio_device();
 
 	extern int __poll_events();
-	extern void __poll_input();
+	extern void __poll_input(SDL_Event* ev);
 
 	extern void __update_viewport();
 	extern void __update_input();

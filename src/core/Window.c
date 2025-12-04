@@ -29,31 +29,37 @@ void __create_window()
 
 int __poll_events()
 {
-    while (SDL_PollEvent(&engine.sdl_eventhndl) != 0)
+    SDL_Event ev;
+
+    while (SDL_PollEvent(&ev) != 0)
     {
-        switch (engine.sdl_eventhndl.type)
+        switch (ev.type)
         {
         case SDL_WINDOWEVENT:
-            switch (engine.sdl_eventhndl.window.event)
+            switch (ev.window.event)
             {
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                __update_viewport();
+                break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
                 SDL_ResetKeyboard();
                 break;
             }
             break;
         case SDL_USEREVENT:
-            switch (engine.sdl_eventhndl.user.code)
+            switch (ev.user.code)
             {
             case 1:
                 SDL_ShowWindow(engine.sdl_windowhndl);
                 SDL_RaiseWindow(engine.sdl_windowhndl);
+                __update_viewport();
                 break;
             }
             break;
         case SDL_QUIT:
             return 0;
         default:
-            __poll_input();
+            __poll_input(&ev);
             break;
         }
     }
