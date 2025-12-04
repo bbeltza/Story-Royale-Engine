@@ -10,14 +10,17 @@
 
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
+- Move classes and objects to a single namespace (e.g. sre::--)
+- Move the "Game" stuff into sre::world::-- and sre::gui::--
+
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Have a log file opened
 
 - Android support
 
-- Work on the game ^^
+(current version: pre-0.1)
 
-(current version: 0.012.01)
+- Work on the game ^^
 
 Less likely ideas:
 

@@ -86,5 +86,5 @@ set(CORE_SOURCES
 "Runtime.c"
 "Window.c"
 )
-set_dst_src(Core CORE_SOURCES SRCORE_SOURCES)
+set_dst_src(core CORE_SOURCES SRCORE_SOURCES)
 set(CORE_SOURCES ${SRCORE_SOURCES} PARENT_SCOPE)

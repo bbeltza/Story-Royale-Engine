@@ -1,6 +1,8 @@
 #pragma once
 #include <stdbool.h>
 
+#include <Datatypes/Units.h>
+
 #ifdef __cplusplus
 #include <Datatypes/Vector.hpp>
 typedef Vector2u _vec2;
@@ -30,6 +32,10 @@ struct _sre_gs_audio
 	unsigned char Filter;
 	bool Mono;
 };
+struct _sre_gs_debug
+{
+	Unit EntityDebugLineSize;
+};
 
 
 struct _sre_gs
@@ -37,6 +43,7 @@ struct _sre_gs
 	const char* Title;
 	struct _sre_gs_window WindowOptions;
 	struct _sre_gs_audio AudioOptions;
+	struct _sre_gs_debug DebugOptions;
 };
 
 #ifdef __cplusplus

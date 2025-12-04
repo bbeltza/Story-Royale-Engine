@@ -29,8 +29,6 @@ namespace Game
         ~World();
     public:
 
-        // Static
-
         /// @brief The background color that the game will have when there's a world
         Color3 Background = { 255, 149, 236 };
     private:
