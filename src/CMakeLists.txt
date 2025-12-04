@@ -37,29 +37,33 @@ set(BASE_SOURCES
 "Timer.cpp"
 )
 
-set(LAYER_SOURCES
-"Entity.cpp"
-"GuiLayer.cpp"
-"World.cpp"
-"CameraController.cpp"
-
-"presets/gui/GuiButton.cpp"
-
-"presets/camera/DragControl.cpp"
-"presets/camera/EntityControl.cpp"
+set(WORLD_SOURCES
+    "CameraController.cpp"
+    "Entity.cpp"
+    "World.cpp"
 )
-set(COMPONENT_SOURCES
-"gui/AspectRatio.cpp"
-"gui/Modulate.cpp"
-"gui/Padding.cpp"
-"gui/Image.cpp"
-"gui/Text.cpp"
-"gui/List.cpp"
-"gui/Rendering.cpp"
 
-"world/Shape.cpp"
-"world/Velocity.cpp"
-"world/Sprite.cpp"
+set(GUI_SOURCES
+    "GuiLayer.cpp"
+    #"layer.cpp"
+    #"container.cpp"
+)
+
+set(PRESET_SOURCES
+    "gui/components/AspectRatio.cpp"
+    "gui/components/Modulate.cpp"
+    "gui/components/Padding.cpp"
+    "gui/components/Image.cpp"
+    "gui/components/Text.cpp"
+    "gui/components/List.cpp"
+    "gui/components/Rendering.cpp"
+    "gui/objects/GuiButton.cpp"
+
+    "world/components/Shape.cpp"
+    "world/components/Sprite.cpp"
+    "world/components/Velocity.cpp"
+    "world/camera/DragControl.cpp"
+    "world/camera/EntityControl.cpp"
 )
 
 set(UTIL_SOURCES
@@ -70,8 +74,11 @@ set(UTIL_SOURCES
 set_dst_src(components COMPONENT_SOURCES LAYER_SOURCES)
 set_src(base BASE_SOURCES)
 set_src(datatypes DATATYPES_SOURCES)
-set_src(gamelayer LAYER_SOURCES)
 set_src(utils UTIL_SOURCES)
+
+set_src(world WORLD_SOURCES)
+set_src(gui GUI_SOURCES)
+set_src(presets PRESET_SOURCES)
 set(SOURCES "${SOURCES}" PARENT_SCOPE)
 
 set(CORE_SOURCES
