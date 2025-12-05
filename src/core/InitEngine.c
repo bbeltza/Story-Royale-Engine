@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <utils/logging.h>
 
@@ -30,9 +31,58 @@ static inline void __setup_engine_data()
     engine.entry_thread = SDL_CreateThread(__invoke_entry, "Game Entry", NULL);
 }
 
+#define SDLPCASE(x, f) case SDL_LOG_PRIORITY_##x: priority_str = #x"]: "; files[0] = f; break
+#define SDLCCASE(x) case SDL_LOG_CATEGORY_##x: category_str = "["#x" : "; break
+static void sdl_log_callback(void *userdata, int category, SDL_LogPriority priority, const char *message)
+{
+    const char *priority_str, *category_str;
+    FILE* files[] = {
+        NULL,
+        *SRE_LOGFILE,
+        NULL
+    };
+
+    switch (priority)
+    {
+        SDLPCASE(DEBUG, stdout);
+        SDLPCASE(INFO, stdout);
+        SDLPCASE(WARN, stderr);
+        SDLPCASE(ERROR, stderr);
+        SDLPCASE(CRITICAL, stderr);
+        default:
+            return;
+    }
+
+    switch (category)
+    {
+        SDLCCASE(APPLICATION);
+        SDLCCASE(ERROR);
+        SDLCCASE(ASSERT);
+        SDLCCASE(SYSTEM);
+        SDLCCASE(AUDIO);
+        SDLCCASE(VIDEO);
+        SDLCCASE(RENDER);
+        SDLCCASE(INPUT);
+        SDLCCASE(TEST);
+        SDLCCASE(CUSTOM);
+    default:
+        return;
+    }
+
+    char full_prefix[255] = "[SDL]";
+
+
+
+    strncat(full_prefix, category_str, 255 - strlen(full_prefix) - strlen(category_str));
+    strncat(full_prefix, priority_str, 255 - strlen(full_prefix) - strlen(priority_str));
+
+    CUSTOM_LOG(full_prefix, files, message, NULL, '\1');
+}
+
 void __initialize_engine()
 {
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG); // Enable SDL error logging
+    SDL_LogSetOutputFunction(sdl_log_callback, NULL);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0"); // Don't interpret touch events as mouse events
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
 
@@ -71,4 +121,7 @@ void __end_engine()
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
+
+    if (*SRE_LOGFILE)
+        fclose(*SRE_LOGFILE);
 }

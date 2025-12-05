@@ -43,6 +43,7 @@ target_link_libraries(sre PUBLIC ${3RDPARTYLIBS})
 
 add_library(sre_core STATIC ${CORE_SOURCES})
 target_link_libraries(sre_core PRIVATE sre)
+target_link_libraries(sre_core PRIVATE sre_interface)
 target_compile_definitions(sre_core PRIVATE INTERNAL_DEF=1)
 
 target_link_libraries(sre PRIVATE sre_core)

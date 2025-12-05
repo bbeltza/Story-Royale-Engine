@@ -8,58 +8,80 @@
 #include <stdio.h>
 #include "OS.h"
 
-void NLOG(const char* fmt, ...)
-{
-	flockfile(stdout);
-	if (os.output_hasnline())
-		fputs("[LOG]: ", stdout);
+#define PREFIX(x) "[" #x "]: "
 
-	va_block(va, fmt, vfprintf(stdout, fmt, va));
-	putc('\n', stdout);
+void CUSTOM_LOG(const char* prefix, FILE** files, const char* fmt, va_list args, int end)
+{
+	flockfile(stdout); // Only need to lock stdout as it would wait anyways for every file to print
+
+	int hasnline = os.output_hasnline();
+	for (size_t i = 0; files[i]; i++)
+	{
+		register FILE* file = files[i];
+		if (end == '\1')
+		{
+			if (!hasnline)
+				fputc('\n', file);
+			fputs(prefix, file);
+			vfprintf(file, fmt, args);
+			putc('\n', file);
+		}
+		else
+		{
+			if (hasnline)
+				fputs(prefix, file);
+			vfprintf(file, fmt, args);
+			putc(end, file);
+		}
+	}
 
 	funlockfile(stdout);
 }
 
+void NLOG(const char* fmt, ...)
+{
+	FILE* files[] = {
+		stdout,
+		*SRE_LOGFILE,
+		NULL
+	};
+
+	va_block(va, fmt, CUSTOM_LOG(PREFIX(LOG), files, fmt, va, '\n'));
+}
+
 void ALOG(const char* fmt, ...)
 {
-	flockfile(stdout);
-	if (os.output_hasnline())
-		fputs("[LOG]: ", stdout);
+	FILE* files[] = {
+		stdout,
+		*SRE_LOGFILE,
+		NULL
+	};
 
-	va_block(va, fmt, vfprintf(stdout, fmt, va));
-	
-	funlockfile(stdout);
+	va_block(va, fmt, CUSTOM_LOG(PREFIX(LOG), files, fmt, va, '\0'));
 }
 
 #define WARN_NEWLINE_CHECK if (!os.output_hasnline()) fputc('\n', stderr)
 
 void WARN(const char* fmt, ...)
 {
-	flockfile(stderr);
-	
-	WARN_NEWLINE_CHECK;
+	FILE* files[] = {
+		stderr,
+		*SRE_LOGFILE,
+		NULL
+	};
 
-	fputs("[WARNING]: ", stderr);
-
-	va_block(va, fmt, vfprintf(stderr, fmt, va));
-	fputc('\n', stderr);
-	
-	funlockfile(stderr);
+	va_block(va, fmt, CUSTOM_LOG(PREFIX(WARN), files, fmt, va, '\1'));
 }
 
 void ERROR(const char* fmt, ...)
 {
-	flockfile(stderr);
-	
-	WARN_NEWLINE_CHECK;
+	FILE* files[] = {
+		stderr,
+		*SRE_LOGFILE,
+		NULL
+	};
 
-	fputs("[ERROR]: ", stderr);
-
-	va_block(va, fmt, vfprintf(stderr, fmt, va));
-	fputc('\n', stderr);
-	
-	funlockfile(stderr);
-	fflush(stderr);
+	va_block(va, fmt, CUSTOM_LOG(PREFIX(ERROR), files, fmt, va, '\1'));
 }
 #else
 #include <android/log.h>

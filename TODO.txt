@@ -14,7 +14,7 @@
 - Move the "Game" stuff into sre::world::-- and sre::gui::--
 
 - Better error handling on Base structures, specially the ones that rely on the filesysten
-- Have a log file opened
+- Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 
 - Android support
 
@@ -27,3 +27,14 @@ Less likely ideas:
 	- Change the pipeline:
 		- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
 	- Compression on resources, or adding a mask at the resources
+	- Have the game run on an isolated space. I got some ideas on how this could be done and why:
+		- On Windows, you can have the game as a separate process executable, with its own memory space and have the engine create the process when running the game:
+			- This allows to garantee the engine's initialization when initializing game global variables, so it solves most static initialization and destruction overheads.
+			- It also avoids the user to touch any internal engine variables. That's what most game engine's approach is.
+			- To still have the game run on a single executable, I can use the build system to build the game executable and store it inside an array of raw bytes.
+				- However, as you cannot create processes from a data stream, I'll have to create a temporal file and write the raw data inside, and load that file with the OS api.
+			- The "game executable" can also be a DLL and I can still load it having its own memory space.
+		- However there are some difficulties:
+			- I'll have to find a way to call the engine functions used by the games to work with
+			- I'll also have to implement this for every single operating system, as it is very OS specific. However, only 2 major platforms are mostly important: Windows and POSIX (Unix like operating systems including linux, android if it works, and FreeBSD (with inherits macOS, PlayStation and many others))
+		- This would be a very heavy task that deserves its own git branch, same with implementing OpenGL

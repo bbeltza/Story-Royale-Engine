@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "args.h"
 #include "utils/logging.h"
+
+static inline void display_option(const arg_t* argument)
+{
+    fprintf(stderr, "\t--%s, -%s%s\n", argument->arg, argument->shortcut, argument->desc);
+}
 
 static void handle_ac(const char* arg, char* argv[]);
 
@@ -11,15 +17,46 @@ static void handle_help(const char* arg, char* argv[])
     fprintf(stderr, "Options:\n");
     for (size_t i = 0; SRENGINE_ARGS[i].arg; i++)
     {
-        fprintf(stderr, "\t--%s, -%s\t\t\t%s\n", SRENGINE_ARGS[i].arg, SRENGINE_ARGS[i].shortcut, SRENGINE_ARGS[i].desc);
+        display_option(SRENGINE_ARGS + i);
     }
     exit(0);
 }
 
+static FILE* logfile;
+void* const* const SRE_LOGFILE = &logfile;
+#define LOGFILE_ERROR(...) ERROR("--logfile: " __VA_ARGS__)
+
+static void handle_logfile(const char* arg, char* argv[])
+{
+    if (logfile)
+    {
+        LOGFILE_ERROR("Attempt to open log file twice! Maybe you typed --logfile twice?");
+        return;
+    }
+
+    const char* file = strchr(arg, '=');
+    if (!file)
+    {
+        display_option(SRENGINE_ARGS + 1);
+        exit(1);
+    }
+    file++;
+
+    if (!(*file))
+    {
+        LOGFILE_ERROR("Could not open log file. Path is empty");
+        return;
+    }
+
+    logfile = fopen(file, "w");
+    if (!logfile)
+        LOGFILE_ERROR("Could not open log file %s, maybe access is denied?", file);
+}
 
 const arg_t SRENGINE_ARGS[] = {
-    {"help", "h", "Print this message!", handle_help},
-    {"alloc-console", "ac", "Allocate a new console (for NO_CONSOLE programs in Windows)", handle_ac},
+    {"help", "h", "\t\t\t\tPrint this message!", handle_help},
+    {"logfile", "lf", "=[ file name ]\t\tSave logs on a file", handle_logfile},
+    {"alloc-console", "ac", "\t\t\tAllocate a new console (for NO_CONSOLE programs in Windows)", handle_ac},
     {NULL}
 };
 

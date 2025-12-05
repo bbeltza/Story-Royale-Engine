@@ -30,11 +30,25 @@ static void handle_arg(const char* arg, char* argv[])
     size_t offset = 2 - j;
     for (size_t i = 0; SRENGINE_ARGS[i].arg; i++)
     {
-        if (strcmp(arg, ((const char**)&SRENGINE_ARGS[i])[offset] )) continue;
+        const char* curr_arg = ((const char**)&SRENGINE_ARGS[i])[offset];
+        int eq = 1;
+        for (size_t i = 0; 1; i++)
+        {
+            if (!curr_arg[i] && arg[i] == '=') break;
+            if (!arg[i] && !curr_arg[i]) break;
+            if (arg[i] == curr_arg[i]) continue;
+
+            eq = 0;
+            break;
+        }
+
+        if (!eq) continue;
 
         SRENGINE_ARGS[i].handler(arg, argv);
-        break;
+        return;
     }
+
+    WARN("Unrecognized option: %s", arg-j);
 }
 
 int main(int argc, char* argv[])
