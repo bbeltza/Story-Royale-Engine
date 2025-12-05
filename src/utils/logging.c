@@ -1,11 +1,8 @@
 #define va_block(ap, x, ...) va_list ap; va_start(ap, x); __VA_ARGS__; va_end(ap)
-#include <stdarg.h>
-
 #include "utils/logging.h"
 #include "utils/lockfile.h"
 
 #ifndef ANDROID
-#include <stdio.h>
 #include "OS.h"
 
 #define PREFIX(x) "[" #x "]: "
@@ -23,14 +20,20 @@ void CUSTOM_LOG(const char* prefix, FILE** files, const char* fmt, va_list args,
 			if (!hasnline)
 				fputc('\n', file);
 			fputs(prefix, file);
-			vfprintf(file, fmt, args);
+			if (args)
+				vfprintf(file, fmt, args);
+			else
+				fputs(fmt, file);
 			putc('\n', file);
 		}
 		else
 		{
 			if (hasnline)
 				fputs(prefix, file);
-			vfprintf(file, fmt, args);
+			if (args)
+				vfprintf(file, fmt, args);
+			else
+				fputs(fmt, file);
 			putc(end, file);
 		}
 	}

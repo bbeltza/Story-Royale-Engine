@@ -71,8 +71,6 @@ static void sdl_log_callback(void *userdata, int category, SDL_LogPriority prior
 
     char full_prefix[255] = "[SDL]";
 
-
-
     strncat(full_prefix, category_str, 255 - strlen(full_prefix) - strlen(category_str));
     strncat(full_prefix, priority_str, 255 - strlen(full_prefix) - strlen(priority_str));
 

@@ -1,5 +1,7 @@
 #pragma once
 #include "C/API.h"
+#include <stdio.h>
+#include <stdarg.h>
 
 // logging function signature type
 typedef void (*logfunc_t)(const char* format, ...);
@@ -7,7 +9,7 @@ typedef void (*logfunc_t)(const char* format, ...);
 // LOG API
 _CAPI_BEGIN
 
-void CUSTOM_LOG(const char* prefix, void** files, const char* fmt, void* args, int end);
+void CUSTOM_LOG(const char* prefix, FILE** files, const char* fmt, va_list args, int end);
 
 void NLOG(const char* format, ...);
 void ALOG(const char* format, ...);
@@ -18,6 +20,6 @@ void DEBUG(const char* format, ...); // Not implemented yet. I don't find much r
 void ERROR(const char* format, ...);
 void WARN(const char* format, ...);
 
-extern void* const* const SRE_LOGFILE;
+extern FILE* const* const SRE_LOGFILE;
 
 _CAPI_END

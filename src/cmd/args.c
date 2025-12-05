@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "args.h"
@@ -23,7 +22,7 @@ static void handle_help(const char* arg, char* argv[])
 }
 
 static FILE* logfile;
-void* const* const SRE_LOGFILE = &logfile;
+FILE* const* const SRE_LOGFILE = &logfile;
 #define LOGFILE_ERROR(...) ERROR("--logfile: " __VA_ARGS__)
 
 static void handle_logfile(const char* arg, char* argv[])
