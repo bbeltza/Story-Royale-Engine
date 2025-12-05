@@ -49,7 +49,7 @@ static void handle_logfile(const char* arg, char* argv[])
 
     logfile = fopen(file, "w");
     if (!logfile)
-        LOGFILE_ERROR("Could not open log file %s, maybe access is denied?", file);
+        LOGFILE_ERROR("Could not open log file \"%s\", maybe access is denied?", file);
 }
 
 const arg_t SRENGINE_ARGS[] = {
@@ -63,7 +63,7 @@ const arg_t SRENGINE_ARGS[] = {
 #ifndef _WIN32
 static void handle_ac(const char*, char*[])
 {
-    WARN("Option \"alloc-console\" is only supported on Windows\n");
+    WARN("Option \"alloc-console\" is only supported on Windows");
     return;
 }
 #else
