@@ -9,6 +9,7 @@ endmacro()
 
 set(SOURCES 
 "main.c"
+"cmd/args.c"
 )
 
 set(DATATYPES_SOURCES

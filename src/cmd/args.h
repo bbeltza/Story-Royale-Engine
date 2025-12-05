@@ -12,6 +12,12 @@ typedef struct _argument
     void (*handler)(const char* arg, char* argv[]);
 } arg_t;
 
+extern const arg_t SRENGINE_ARGS[];
+
+#ifdef _WIN32
+    extern unsigned int winmain_enter;
+#endif
+
 #ifdef __cplusplus
 }    
 #endif
