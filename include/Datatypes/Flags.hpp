@@ -8,8 +8,8 @@ struct Flags
     static_assert(std::is_integral<_Num>::value, "Flags object must be of an integral type: Type must be a whole number");
     using Type = _Num;
 
-    Flags(): m_data((_Num)0) {}
-    Flags(_Num flags): m_data(flags) {}
+    constexpr Flags(): m_data((_Num)0) {}
+    constexpr Flags(_Num flags): m_data(flags) {}
 
     inline constexpr _Num Get() const { return m_data; }
 
@@ -22,14 +22,14 @@ struct Flags
     inline void Print() const { display(&ALOG); }
     inline void PrintLn() const { display(&NLOG); }
 
-    operator _Num() const { return Get(); }
+    constexpr operator _Num() const { return Get(); }
 
     private:
 
     _Num m_data;
 
     inline void display(logfunc_t _printer) const {
-        const size_t bitsize = sizeof(m_data) * 8;
+        constexpr size_t bitsize = sizeof(m_data) * 8;
 
         char buff[bitsize + 1] = {0};
         for (size_t i = 0; i < bitsize; i++)

@@ -9,7 +9,8 @@ namespace GuiComponents
         public:
         struct
         {
-            UDim2 topleft = UDIM2_ZERO, bottomright = UDIM2_ZERO;
+            UDim2 topleft = UDim2::ZERO;
+            UDim2 bottomright = UDim2::ZERO;
         } padding;
 
         void setPadding(const UDim&);

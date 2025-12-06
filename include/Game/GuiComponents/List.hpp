@@ -15,7 +15,7 @@ namespace GuiComponents
 
     public:
         Direction direction = dir_vertical;
-        UDim Padding = UDIM_ZERO;
+        UDim Padding = UDim::ZERO;
     protected:
         void process_children(::Game::GuiObject*, uint32_t) override;
 
