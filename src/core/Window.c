@@ -38,9 +38,6 @@ int __poll_events()
         case SDL_WINDOWEVENT:
             switch (ev.window.event)
             {
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                __update_viewport();
-                break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
                 SDL_ResetKeyboard();
                 break;
