@@ -30,7 +30,6 @@ static const component_vtable* BASE_VTABLE = component_vtable::get(&BASE_COMP);
 
 Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)
 {
-    m_world->m_Entities.push_front(this);
 }
 
 Game::Entity::~Entity()

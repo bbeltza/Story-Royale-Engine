@@ -28,9 +28,14 @@ function(srEngine_build TARGET)
     target_include_directories(${TARGET} PRIVATE sre)
     target_link_libraries(${TARGET} PRIVATE sre)
 
-    if ("${ARGN}" MATCHES NO_CONSOLE)
+    if (ARGN MATCHES NO_CONSOLE)
         message("--- ${TARGET} HAS NO CONSOLE ${SR_ENGINE_NO_CONSOLE_OPTIONS}")
         target_link_libraries(${TARGET} PRIVATE sre_noconsole)
+        endif()
+        
+    if (ARGN MATCHES USE_WX)
+        message("--- ${TARGET} HAS WX")
+        target_link_libraries(${TARGET} PRIVATE sre_werror)
     endif()
 
     # Copying all of the dynamic libraries into the bin folder

@@ -62,7 +62,7 @@ namespace Game
             auto newEntity = new _entity(args...);
             s_TargetWorld = nullptr;
 
-            Entity* implicit_check = newEntity;
+            m_Entities.push_front(newEntity);
             return newEntity;
         }
         // Gets the list of entities that the world has, templated by a derived class of your choice.
