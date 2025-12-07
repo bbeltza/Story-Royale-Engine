@@ -9,15 +9,26 @@ template <typename _Num> inline double _rad(_Num x) {return (x * (M_PI / 180));}
 template <typename _Num>
 struct Rect
 {
+    using type = _Num;
+
     void Print() const { display(&ALOG); }
     void PrintLn() const { display(&NLOG); }
 
     constexpr Rect(): Position(0, 0), Size(50, 50) {}
-    constexpr Rect(const _Num x, const _Num y, const _Num width, const _Num height): Position(x, y), Size(width, height) {}
-    constexpr Rect(const _Num xy, const _Num wh): Position(xy, xy), Size(wh, wh) {}
+    constexpr Rect(_Num x, _Num y, _Num width, _Num height): Position(x, y), Size(width, height) {}
+    constexpr Rect(_Num xy, _Num wh): Position(xy, xy), Size(wh, wh) {}
     constexpr Rect(const Vector2<_Num> &position, const Vector2<_Num> &size): Position(position), Size(size) {}
     constexpr Rect(const Rect& other): Position(other.Position), Size(other.Size) {}
-    template <class _OtherNum> constexpr Rect(const Rect<_OtherNum>& other): Position(other.Position), Size(other.Size) {}
+
+    template <class _Num2>
+    constexpr Rect(const Rect<_Num2>& other): Position(other.Position), Size(other.Size) {}
+    template <class _Num2>
+    constexpr Rect(_Num2 x, _Num2 y, _Num2 width, _Num2 height): Rect(
+        static_cast<_Num>(x),
+        static_cast<_Num>(y),
+        static_cast<_Num>(width),
+        static_cast<_Num>(height)
+    ) {}
 
     vec2 Position, Size;
     

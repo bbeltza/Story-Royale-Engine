@@ -10,19 +10,23 @@ struct Vector2
 {
     static_assert(std::is_arithmetic<_Num>::value, "Vector2 datatype must be an arithmetic type: The type must represent a number");
 
+    using type = _Num;
+
     constexpr Vector2(const _Num scalar): X(scalar), Y(scalar) {}
     constexpr Vector2(const _Num x, const _Num y): X(x), Y(y) {}
     constexpr Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
     constexpr Vector2(): Vector2(0, 0) {}
     
-    template <class _Num2> constexpr Vector2(const _Num2 x, const _Num2 y): X((_Num)x), Y((_Num)y) {}
     template <class _Num2> constexpr Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
+    template <class _Num2> constexpr Vector2(const _Num2 x, const _Num2 y): Vector2(
+        static_cast<_Num>(x),
+        static_cast<_Num>(y)
+    ) {}
 
-    template <class _Num2> Vector2& operator =(const Vector2<_Num2>& other)
+    template <class _Num2> inline void operator =(const Vector2<_Num2>& other)
     {
         X = static_cast<_Num>(other.X);
         Y = static_cast<_Num>(other.Y);
-        return *this;
     }
 
     _Num X, Y;
