@@ -14,11 +14,10 @@ namespace GuiComponents
         
         inline void assign(const char* str) {m_str = str;}
         template <class... T> inline void format(const char* fmt, T&&... args) {
-            m_str.reserve( snprintf(NULL, 0, fmt, args... ) + 1 );
+            m_str.resize(snprintf(NULL, 0, fmt, args... ) + 1 );
             sprintf(&m_str[0], fmt, args...);   // This call looks scary, but remember we already reserved enough space to format the string
                                                 // So it is garanteed to not crash unless something wrong happens
                                                 // And even if it happens then we are happy to catch another bug so...
-            m_str.assign(m_str.c_str());
         }
 
         inline int getLength() { return (int)m_str.size(); }

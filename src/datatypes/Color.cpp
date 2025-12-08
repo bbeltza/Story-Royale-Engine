@@ -29,7 +29,7 @@ uint8_t xdigit(char digit)
 }
 
 #pragma region Color3
-Color3::Color3(const char* HEX) // 12 34 56
+Color3::Color3(const char* HEX)
 {
 	size_t len = strlen(HEX);
 	assert("Too few characters to parse hexadecimal string on Color3" && !(len < 6));
@@ -45,7 +45,7 @@ Color3::Color3(const char* HEX) // 12 34 56
 			
 			n |= xdigit(digit) << (4 * (1 - i));
 		}
-		byte_data[j] = n;
+		(&r)[j] = n;
 	}
 }
 
@@ -88,7 +88,7 @@ Color4::Color4(const char* HEX)
 
 			n |= xdigit(digit) << (4 * (1 - i));
 		}
-		byte_data[j] = n;
+		(&r)[j] = n;
 	}
 }
 

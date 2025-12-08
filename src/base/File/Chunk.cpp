@@ -34,20 +34,20 @@ File::Chunk File::allocate(size_t max_size) const
 
     if (isembedded)
     {
-        void* data = operator new(this->res_size);
-        memcpy(data, this->res_begin, this->res_size);
+        void* data = operator new(this->res.size);
+        memcpy(data, this->res.begin, this->res.size);
 
         WARN("File::allocate(): Allocating embedded resource from %s. It is better to use the raw data instead (when it will be available)", this->currpath);
 
-        return Chunk(this->res_size, data);
+        return Chunk(this->res.size, data);
     }
     else
     {
-        flockfile(stream);
-        long old_pos = ftell_unlocked(stream);
+        flockfile(stream.ptr);
+        long old_pos = ftell_unlocked(stream.ptr);
 
-        fseek_unlocked(stream, 0L, SEEK_END);
-        size_t file_size = ftell_unlocked(stream);
+        fseek_unlocked(stream.ptr, 0L, SEEK_END);
+        size_t file_size = ftell_unlocked(stream.ptr);
         if (!max_size)
             max_size = file_size;
         else if (file_size < max_size)
@@ -56,14 +56,14 @@ File::Chunk File::allocate(size_t max_size) const
             max_size = file_size;
         }
 
-        rewind(stream);
+        rewind(stream.ptr);
 
         char *data = static_cast<char *>(operator new(max_size));
-        fread_unlocked(data, max_size, 1, stream);
+        fread_unlocked(data, max_size, 1, stream.ptr);
 
-        fseek_unlocked(stream, old_pos, SEEK_SET);
+        fseek_unlocked(stream.ptr , old_pos, SEEK_SET);
 
-        funlockfile(stream);
+        funlockfile(stream.ptr);
 
         return Chunk(max_size, data);
     }

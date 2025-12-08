@@ -15,19 +15,10 @@ struct Color3
 	constexpr Color3(uint32_t HEX): r((HEX >> 16) & 0xFF), g((HEX >> 8) & 0xFF), b(HEX & 0xFF) {}
 	Color3(const char* HEX);
 
-	union
-	{
-		struct
-		{
-			uint8_t r;
-			uint8_t g;
-			uint8_t b;
-		};
-		uint8_t byte_data[3];
-	};
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
 	
-	
-
 	void Print() const { display(&ALOG); };
 	void PrintLn() const { display(&NLOG); };
 
@@ -67,21 +58,11 @@ struct Color4
 	constexpr Color4(uint32_t HEX): r((HEX >> 24) & 0xFF), g((HEX >> 16) & 0xFF), b((HEX >> 8) & 0xFF), a(HEX & 0xFF) {}
 	Color4(const char* HEX);
 
-	union
-	{
-		struct
-		{
-			uint8_t r;
-			uint8_t g;
-			uint8_t b;
-			uint8_t a;
-		};
-		uint8_t byte_data[4];
-		uint16_t short_data[2];
-		uint32_t long_data[1];
-	};
-	
-	
+
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;	
 
 	void Print() const { display(&ALOG); };
 	void PrintLn() const { display(&NLOG); };

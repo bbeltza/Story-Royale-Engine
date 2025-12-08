@@ -17,17 +17,17 @@ const char File::usr_prefix[] = "usr://";
 
 File::~File()
 {
-    if (!this->isembedded && this->stream)
-        fclose(this->stream);
+    if (!this->isembedded && isValid())
+        fclose(this->stream.ptr);
 }
 
-File::File(const File& other): stream(NULL), currmode(other.currmode), currpath(other.currpath), isembedded(other.isembedded)
+File::File(const File& other): currpath(other.currpath), isembedded(other.isembedded)
 {
+    this->stream.currmode = other.stream.currmode;
+
     if (this->isembedded)
     {
-        this->res_begin = other.res_begin;
-        this->res_size = other.res_size;
-        this->res_pos = other.res_pos;
+        this->res = other.res;
         return;
     }
 
@@ -38,8 +38,10 @@ File::File(const File& other): stream(NULL), currmode(other.currmode), currpath(
     extern "C" void SRE_init_resources();
 #endif
 
-File::File(const char *path, const char *mode) : stream(NULL), currmode(mode), currpath(path)
+File::File(const char *path, const char *mode) : currpath(path)
 {
+    this->stream.currmode = mode;
+
     #ifdef WIN32
         if (!_game_res)
             SRE_init_resources();
@@ -47,7 +49,7 @@ File::File(const char *path, const char *mode) : stream(NULL), currmode(mode), c
     if (path_hasprefix(path, res_prefix))
     {
         if (!mode)
-            this->currmode = "rb";
+            this->stream.currmode = "rb";
 
         if (_game_res[0])
         {
@@ -55,7 +57,7 @@ File::File(const char *path, const char *mode) : stream(NULL), currmode(mode), c
             return;
         }
 
-        if (has_write(currmode)) // Warn the user
+        if (has_write(this->stream.currmode)) // Warn the user
             WARN("File stream with path %s is pointing to a resource with writing rights. Make sure to disable writing rights when opening resources", path);
     }
 
@@ -69,7 +71,7 @@ void File::load_resource()
         ERROR("Misscall to load_resource() when embedded resources are disabled...");
         return;
     }
-    if (has_write(this->currmode)) // You can't modify embedded resources
+    if (has_write(this->stream.currmode)) // You can't modify embedded resources
     {
         ERROR("Failed opening resource '%s', file has write access, remove write access to proceed...", this->currpath);
         return;
@@ -87,11 +89,11 @@ void File::load_resource()
             res_ptr += pathlen;
             size_t datapos = reinterpret_cast<const size_t*>(res_ptr)[0];
 
-            this->res_begin = _game_res + datapos + sizeof(size_t);
-            this->res_pos = 0;
+            this->res.begin = _game_res + datapos + sizeof(size_t);
+            this->res.pos = 0;
 
-            size_t size = reinterpret_cast<const size_t*>(this->res_begin)[-1];;
-            this->res_size = size;
+            size_t size = reinterpret_cast<const size_t*>(this->res.begin)[-1];;
+            this->res.size = size;
             this->isembedded = true;
 
             return;
@@ -126,23 +128,23 @@ void File::load_stream()
     }
 
 
-    if (!this->currmode)
+    if (!this->stream.currmode)
     {
-        this->stream = fopen(this->currpath, "r");
-        if (!this->stream)
-            this->currmode = "w+";
+        this->stream.ptr = fopen(this->currpath, "r");
+        if (!this->stream.ptr)
+            this->stream.currmode = "w+";
         else
-            this->currmode = "r";
+            this->stream.currmode = "r";
     }
 
-    if (this->stream)
-        this->stream = freopen(this->currpath, this->currmode, this->stream);
+    if (this->stream.ptr)
+        this->stream.ptr = freopen(this->currpath, this->stream.currmode, this->stream.ptr);
     else
-        this->stream = fopen(this->currpath, this->currmode);
+        this->stream.ptr = fopen(this->currpath, this->stream.currmode);
 
-    if (!this->stream)
+    if (!this->stream.ptr)
     {
-        if (has_write(currmode))
+        if (has_write(this->stream.currmode))
             ERROR("Error opening file %s for writing. File is probably already opened", this->currpath);
         else
             this->error_notfound();
@@ -177,7 +179,7 @@ SDL_RWops *File::toRWops() const
 
     SDL_RWops *rw;
     if (isembedded)
-        rw = SDL_RWFromConstMem(res_begin, static_cast<int>(res_size));
+        rw = SDL_RWFromConstMem(res.begin, static_cast<int>(res.size));
     else
     {
 #ifdef SDL_HAVE_STDIO_H
@@ -210,13 +212,13 @@ size_t File::stream_size() const
     long oldpos;
     size_t endpos;
 
-    flockfile(stream);
-        oldpos = ftell_unlocked(stream);
-        fseek_unlocked(stream, 0, SEEK_END);
+    flockfile(stream.ptr);
+        oldpos = ftell_unlocked(stream.ptr);
+        fseek_unlocked(stream.ptr, 0, SEEK_END);
 
-        endpos = static_cast<size_t>(ftell_unlocked(stream));
-        fseek_unlocked(stream, oldpos, SEEK_SET);
-    funlockfile(stream);
+        endpos = static_cast<size_t>(ftell_unlocked(stream.ptr));
+        fseek_unlocked(stream.ptr, oldpos, SEEK_SET);
+    funlockfile(stream.ptr);
 
     return endpos;
 }
@@ -225,20 +227,23 @@ size_t File::readBytes(void* buff, size_t count)
 {
     if (isembedded)
     {
-        const size_t max_count = res_size - res_pos;
+        const size_t max_count = res.size - res.pos;
         if (count > max_count)
             count = max_count;
-        memcpy(buff, res_begin + res_pos, max_count);
-        res_pos += max_count;
+        memcpy(buff, res.begin + res.pos, max_count);
+        res.pos += max_count;
         return max_count;
     }
-    else
-        return fread(buff, count, 1, stream);
+    else if (stream.ptr)
+        return fread(buff, count, 1, stream.ptr);
+    
+    ERROR("File is not valid");
+    return 0;
 }
 
 std::vector<uint8_t> File::readBytes(size_t max_size)
 {
-    const long curr = ftell(stream);
+    const long curr = ftell(stream.ptr);
     const size_t remaining = getSize() - curr;
     if (!max_size || max_size > remaining)
         max_size = remaining;
@@ -256,18 +261,43 @@ int File::readF(const char* fmt, ...)
     va_list va;
     va_start(va, fmt);
     if (isembedded)
-        res = vsscanf((const char*)(res_begin + res_pos), fmt, va);
+        res = vsscanf((const char*)(this->res.begin + this->res.pos), fmt, va);
     else
     {
-        flockfile(stream);
+        flockfile(stream.ptr);
 
-        long oldpos = ftell_unlocked(stream);
-        res = vfscanf(stream, fmt, va);
-        fseek_unlocked(stream, oldpos, SEEK_SET);
+        long oldpos = ftell_unlocked(stream.ptr);
+        res = vfscanf(stream.ptr, fmt, va);
+        fseek_unlocked(stream.ptr, oldpos, SEEK_SET);
 
-        funlockfile(stream);
+        funlockfile(stream.ptr);
     }
 
     va_end(va);
     return res;
+}
+
+//
+
+size_t File::writeBytes(const void* data, size_t size)
+{
+    if (isembedded)
+    {
+        ERROR("Cannot write to read-only embedded resources");
+        return 0;
+    }
+
+    if (!has_write(stream.currmode))
+    {
+        ERROR("Cannot write to read-only mode file");
+        return 0;
+    }
+
+    if (stream.ptr)
+    {
+        return fwrite(data, size, 1, stream.ptr);
+    }
+
+    ERROR("File is not valid for writing");
+    return 0;
 }

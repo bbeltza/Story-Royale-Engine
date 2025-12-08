@@ -2,6 +2,7 @@
 #include <standard>
 
 #include <SDL_rwops.h>
+#include <SDL_endian.h>
 #include <SDL_filesystem.h>
 
 extern "C" void ERROR(const char*, ...);
@@ -22,16 +23,17 @@ class File
 		// Handles for file streaming
 		struct
 		{
-			FILE* stream;
+			FILE* ptr;
 			const char* currmode;
-		};
+			void* _unused1;
+		} stream = { NULL };
 		// Handles for resource streaming
 		struct
 		{
-			const unsigned char* res_begin;
-			size_t res_pos;
-			size_t res_size;
-		};
+			const unsigned char* begin;
+			size_t pos;
+			size_t size;
+		} res;
 	};
 	const char* currpath = NULL;
 	bool isembedded = false;
@@ -58,13 +60,13 @@ public:
 public:
 	~File();
 	// Create an invalid empty file stream
-	File() : stream(NULL) {}
+	File() {}
 	File(const File& other);
 	File(const char* path, const char* mode = NULL);
 
 	void reopen(const char* path, const char* mode = NULL);
 
-	int isValid() const { return stream != NULL; }
+	int isValid() const { return stream.ptr != NULL; }
 
 	Chunk allocate(size_t max_size = 0) const;
 	SDL_RWops* toRWops() const;
@@ -73,7 +75,7 @@ public:
 		if (!isembedded) // Could also check if the file is valid, but remember isembedded is true if the file is valid
 			return NULL;
 
-		return this->res_begin; // Even if it wasn't valid and this passes, res_begin will be NULL
+		return res.begin; // Even if it wasn't valid and this passes, res_begin will be NULL
 	}
 
 	size_t getSize() const
@@ -90,6 +92,8 @@ public:
 			return stream_size();
 	}
 
+	// Read API
+
 	std::vector<uint8_t> readBytes(size_t max_count = 0);
 	size_t readBytes(void* buff, size_t count);
 
@@ -98,18 +102,52 @@ public:
 		uint8_t data[sizeof(T)]; // Don't call T's constructor, if it has any, just allocate raw bytes
 		readBytes(data, sizeof(T));
 
-		return *reinterpret_cast<T*>(data);
+		return std::move(*reinterpret_cast<T*>(data));
 	}
+
+	template <class T> inline T readSwapped()
+	{
+		uint8_t tmp[sizeof(T)];
+		uint8_t data[sizeof(T)];
+		readBytes(tmp, sizeof(T));
+
+		for (size_t i = 0; i < sizeof(T); i++)
+			data[i] = tmp[(sizeof(T) - 1) - i];
+		
+		return std::move(*reinterpret_cast<T*>(data));
+	}
+
+	template <class T> inline T readLE() { return LITTLE_ENDIAN ? read<T>() : readSwapped<T>(); }
+	template <class T> inline T readBE() { return BIG_ENDIAN ? read<T>() : readSwapped<T>(); }
 
 	int readF(const char* fmt, ...);
 
+	// Write API
+
+	size_t writeBytes(const void* data, size_t size);
+
+	template <class T> size_t write(T data) { return writeBytes(&data, sizeof(T)); }
+	template <class T> size_t writeSwapped(T data)
+	{
+		uint8_t swap[sizeof(T)];
+		for (size_t i = 0; i < sizeof(T); i++)
+			swap[i] = reinterpret_cast<uint8_t*>(&data)[(sizeof(T) - 1) - i];
+
+		return writeBytes(swap, sizeof(T));
+	}
+
+	template <class T> size_t writeLE(T data) { return LITTLE_ENDIAN ? write(data) : writeSwapped(data); }
+	template <class T> size_t writeBE(T data) { return BIG_ENDIAN ? write(data) : writeSwapped(data); }
+
+	static constexpr bool LITTLE_ENDIAN = SDL_BYTEORDER == SDL_LIL_ENDIAN;
+	static constexpr bool BIG_ENDIAN = SDL_BYTEORDER == SDL_BIG_ENDIAN;
 private:
 
 	size_t resource_size() const
 	{
-		assert(isembedded && res_begin);
+		assert(isembedded && res.begin);
 
-		return this->res_size;
+		return res.size;
 	}
 	size_t stream_size() const;
 
