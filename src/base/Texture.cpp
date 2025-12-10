@@ -1,11 +1,23 @@
 #include "../internal.h"
 #include "../internal.hpp"
 
-#include <SDL_image.h>
-
-#include "Engine.hpp"
 #include "Base/Texture.hpp"
 
+Texture::Texture(const sre::Image& from_image): texture(SDL_CreateTextureFromSurface(engine.sdl_rendererhndl, static_cast<SDL_Surface*>(from_image.getHandle())))
+{
+}
+
+Vector2i Texture::size() const
+{
+    if (!texture) return Vector2i::ZERO;
+
+    int w, h;
+    SDL_QueryTexture(static_cast<SDL_Texture*>(texture), NULL, NULL, &w, &h);
+
+    return { w, h };
+}
+
+/*
 Texture::Texture(Texture&& moving) noexcept: 
     texture(moving.texture),
     file_surface(moving.file_surface)
@@ -78,3 +90,4 @@ void Texture::push_queue()
     to_load = &queue;
     queue.push_back(this);
 }
+*/

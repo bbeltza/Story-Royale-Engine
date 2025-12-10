@@ -2,10 +2,7 @@
 #include "Datatypes/Vector.hpp"
 #include "Datatypes/Color.hpp"
 #include "Datatypes/Rect.hpp"
-#include "Base/File.hpp"
-
-#define m_Texture ((SDL_Texture*)texture)
-#define m_Surface ((SDL_Surface*)file_surface)
+#include "Base/Image.hpp"
 
 class Texture;
 
@@ -27,21 +24,19 @@ class Texture
     static Queue* to_load;
     static void load_textures();
 
-    Texture() = default;
-public:
     Texture(const Texture& other) = delete;
-    Texture(void* from_surface);
+public:
+    Texture() = default;
+    Texture(const sre::Image& from_image);
+
     Texture(Texture&& moving) noexcept;
-    Texture(const char* path);
     ~Texture();
 
-    Vector2i GetSize();
+    Vector2i size() const;
 private:
     void push_queue();
 
-    void* texture = nullptr;
-    // Temporary SDL_Surface* used to then load the texture to the GPU. Texture creating may be multithreaded, but creating textures may not be. So the image data is instead loaded into the CPU first.
-    void* file_surface = nullptr;
+    void* texture = NULL;
 
     friend void Display::DrawTexture(const Texture& _Texture, RectUt Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint, const Game::World* world);
     friend void __display_render();
