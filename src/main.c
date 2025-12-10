@@ -69,7 +69,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     int argc = __argc;
     char** argv = __argv;
-    SRENGINE_ARGS[1].handler(NULL, argv);
 	return main(argc, argv);
 }
 

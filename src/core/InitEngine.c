@@ -84,6 +84,10 @@ void __initialize_engine()
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0"); // Don't interpret touch events as mouse events
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
 
+#ifdef SDL_VIDEO_DRIVER_WINDOWS // Replace the "SDL_app" window class name
+    SDL_RegisterApp("Story Royale Engine", 0, NULL);
+#endif
+
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
     {
         ERROR("SDL ERROR: Could not initialize SDL Subsystems: '%s'", SDL_GetError());

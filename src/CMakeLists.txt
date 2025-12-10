@@ -25,6 +25,7 @@ set(BASE_SOURCES
 "Audio.cpp"
 "Font.cpp"
 "FontRenderer.cpp"
+"Image.cpp"
 "Input.cpp"
 "Physics.cpp"
 "Rendering.cpp"
