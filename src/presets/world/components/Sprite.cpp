@@ -21,7 +21,7 @@ void Components::Sprite::Render(Game::Entity* entity)
 
     RectUt render_rect(
         entity->Position + Offset,
-        texture.GetSize() * Scale
+        texture.size() * Scale
     );
 
     Display::DrawTexture(texture, render_rect, Modulate, Vector2f::CENTER, entity->getWorld());

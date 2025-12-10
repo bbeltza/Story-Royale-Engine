@@ -31,7 +31,6 @@ set(BASE_SOURCES
 "Rendering.cpp"
 "Runtime.cpp"
 "Signal.cpp"
-"TargetTexture.cpp"
 "Texture.cpp"
 "Thread.cpp"
 "Tween.cpp"

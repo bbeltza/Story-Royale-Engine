@@ -192,9 +192,6 @@ void Display::DrawTexture(const Texture &_Texture, RectUt Rectangle, const Color
 
     if (Rectangle.Size.X == 0 || Rectangle.Size.Y == 0)
         return;
-
-    if (!_Texture.texture)
-        Texture::load_textures();
         
     SDL_FRect render_rect;
     const int flip = (Rectangle.Size.X < 0 ? ut_bit(0) : 0) | (Rectangle.Size.Y < 0 ? ut_bit(1) : 0);

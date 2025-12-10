@@ -92,7 +92,7 @@ void Font::RenderLine(const Vector2f& start, const char* text, int count, int ac
         if (n >= scount) break;
 
         Texture& texture = textures.at(chr);
-        render_rect.Size = texture.GetSize();
+        render_rect.Size = texture.size();
 
         Display::DrawTexture(texture, render_rect, Color4::WHITE, Vector2f::ZERO, DISPLAY_DONT_CENTER);
 

@@ -10,19 +10,6 @@
 
 #include "Base/Texture.hpp"
 
-static void reset_targets()
-{
-	_containers->lock();
-
-	while (_containers->target_textures.size() > 1)
-	{
-		SDL_DestroyTexture(_containers->target_textures.back());
-		_containers->target_textures.pop_back();
-	}
-
-	_containers->unlock();
-}
-
 void __setup_renderer()
 {
 	uint32_t flags = 0;
@@ -66,8 +53,6 @@ void __update_viewport()
 	engine.viewport.w = (int)(engine.osize_x / engine.viewport_scale);
 	engine.viewport.h = (int)(engine.osize_y / engine.viewport_scale);
 
-	if (ow < engine.viewport.w || oh < engine.viewport.h)
-		reset_targets();
 	engine.center_x = engine.viewport.w / 2.0f;
 	engine.center_y = engine.viewport.h / 2.0f;
 }
@@ -75,9 +60,6 @@ void __update_viewport()
 void __display_render()
 {
 	Runtime::OnUpdate.Fire(engine.last_dt);
-
-	// Load unloaded textures
-	Texture::load_textures();
 
 	// Unlock the renderer
 	SDL_UnlockMutex(engine.sdl_rendermutex);
@@ -139,19 +121,4 @@ void __display_render()
 	SDL_LockMutex(engine.sdl_rendermutex);
 
 	SDL_RenderPresent(engine.sdl_rendererhndl);
-}
-
-void Texture::load_textures()
-{
-	if (!to_load)
-		return;
-	_containers->lock();
-	while (!to_load->empty())
-	{
-		Texture *tex = to_load->back();
-		to_load->pop_back();
-		tex->texture = SDL_CreateTextureFromSurface(engine.sdl_rendererhndl, reinterpret_cast<SDL_Surface *>(tex->file_surface));
-		_containers->loaded_textures.push_front(tex);
-	}
-	_containers->unlock();
 }

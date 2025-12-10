@@ -10,7 +10,7 @@ void Image::Fit(Game::GuiObject* obj)
         WARN("Calling Image::Fit on NULL image");
         return;
     }
-    Vector2i size = CurrentImage->GetSize();
+    Vector2i size = CurrentImage->size();
     obj->size.X.Offset = size.X;
     obj->size.Y.Offset = size.Y;
 }

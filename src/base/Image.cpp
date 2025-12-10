@@ -4,7 +4,7 @@
 
 using namespace sre;
 
-Image::Image(unsigned w, unsigned h):
+Image::Image(int w, int h):
     sdl_surface(SDL_CreateRGBSurfaceWithFormat(NULL, w, h, 0, SDL_PIXELFORMAT_RGBA8888))
 {
 }
@@ -52,4 +52,21 @@ SDL_Surface* Image::copySDLsurface(const SDL_Surface* other)
         SDL_memcpy(surface->pixels, other->pixels, surface->h * surface->pitch);
 
     return surface;
+}
+
+void Image::blit(const Image& img, const Vector2i& pos, const Vector2f& anchor)
+{
+    SDL_Rect rect = {
+        pos.X,
+        pos.Y,
+        0,
+        0
+    };
+    if (anchor.X)
+        rect.x -= static_cast<int>(img.sdl_surface->w * anchor.X);
+    if (anchor.Y)
+        rect.y -= static_cast<int>(img.sdl_surface->h * anchor.Y);
+
+
+    SDL_UpperBlit(img.sdl_surface, NULL, sdl_surface, &rect);
 }

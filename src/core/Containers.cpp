@@ -12,7 +12,6 @@
 
 _containers_service::_containers_service()
 {
-	target_textures.push_back(NULL);
 }
 
 _containers_service::~_containers_service()
@@ -21,23 +20,6 @@ _containers_service::~_containers_service()
 
 	// Destroy all concurrency-related stuff
 	allocated_threads.clear();
-
-	// Destroy SDL textures (they cannot be destroyed after SDL_Quit())
-	while (target_textures.size() > 1)
-	{
-		SDL_DestroyTexture(target_textures.back());
-		target_textures.pop_back();
-	}
-	while (!loaded_textures.empty())
-	{
-		auto& texture = loaded_textures.front();
-		if (texture->texture)
-		{
-			SDL_DestroyTexture(static_cast<SDL_Texture*>(texture->texture));
-			texture->texture = NULL;
-		}
-		loaded_textures.pop_front();
-	}
 
 	// Destroy SDL fonts (they also cannot be destroyed after)
 	while (!loaded_fonts.empty())

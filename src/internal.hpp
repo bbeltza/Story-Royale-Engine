@@ -19,9 +19,6 @@ struct _containers_service
     std::list<AudioAccess> loaded_audios;
 	std::queue<Audio*> stopped_audios;
 
-	std::vector<SDL_Texture*> target_textures;
-    std::list<Texture*> loaded_textures;
-
     std::list<Font*> loaded_fonts;
 
     _containers_service();
