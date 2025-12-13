@@ -9,6 +9,11 @@
 init;
 
 #ifdef __cplusplus
+    namespace sre
+    {
+        extern "C" void initialize();
+    }
+
     namespace Game
     {
         // The method to be defined by the game using the engine

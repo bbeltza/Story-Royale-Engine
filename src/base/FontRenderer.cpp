@@ -5,14 +5,14 @@
 static std::vector<std::string> line_buff;
 //static std::vector<int> width_buff;
 
-void Font::Render(const RectF & bounds, const char* text, int count, HAlign halignment, VAlign valignment)
+void Font::Render(const sre::rect2Dut & bounds, const char* text, int count, HAlign halignment, VAlign valignment)
 {
     if (PreloadTextures(text)) return;
     if (count == 0) return;
 
-    float line_skip = (float)TTF_FontLineSkip(m_font);
+    sre::unit line_skip = (sre::unit)TTF_FontLineSkip(m_font);
 
-    const int width = (int)bounds.Size.X;
+    const int width = (int)bounds.size.x;
     int last_begin, i = 0, done = 0;
 
     while (true)
@@ -46,13 +46,13 @@ void Font::Render(const RectF & bounds, const char* text, int count, HAlign hali
         text += last_begin;
     }
 
-    Vector2f startvec = bounds.Position;
+    sre::vec2ut startvec = bounds.position;
 
-    float yoffset = 0;
-    if (valignment != VTop) yoffset = bounds.Size.Y - line_skip * i;
+    sre::unit yoffset = 0;
+    if (valignment != VTop) yoffset = bounds.size.y - line_skip * i;
     if (valignment == VCenter) yoffset /= 2;
 
-    startvec.Y += yoffset;
+    startvec.y += yoffset;
 
     size_t n = 0;
 
@@ -63,20 +63,20 @@ void Font::Render(const RectF & bounds, const char* text, int count, HAlign hali
         int line_extent;
         TTF_MeasureText(m_font, c_str, width, &line_extent, NULL);
 
-        float xoffset = 0;
-        if (halignment != HLeft) xoffset = bounds.Size.X - line_extent;
+        sre::unit xoffset = 0;
+        if (halignment != HLeft) xoffset = bounds.size.x - line_extent;
         if (halignment == HCenter) xoffset /= 2;
 
-        startvec.X = bounds.Position.X + xoffset;
+        startvec.x = bounds.position.x + xoffset;
 
         RenderLine(startvec, c_str, count, (int)n);
 
-        startvec.Y += line_skip;
+        startvec.y += line_skip;
         n += strlen(c_str);
     }
 }
 
-void Font::RenderLine(const Vector2f& start, const char* text, int count, int acc)
+void Font::RenderLine(const sre::vec2ut& start, const char* text, int count, int acc)
 {
     if (count > 0 && count - acc <= 0) return;
 
@@ -86,17 +86,17 @@ void Font::RenderLine(const Vector2f& start, const char* text, int count, int ac
 
     char chr = text[n];
 
-    RectF render_rect(start, Vector2f::ZERO);
+    sre::rect2Dut render_rect(start, sre::vec2ut::ZERO);
     while (chr)
     {
         if (n >= scount) break;
 
         Texture& texture = textures.at(chr);
-        render_rect.Size = texture.size();
+        render_rect.size = texture.size();
 
-        Display::DrawTexture(texture, render_rect, Color4::WHITE, Vector2f::ZERO, DISPLAY_DONT_CENTER);
+        Display::DrawTexture(texture, render_rect, Color4::WHITE, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
 
-        render_rect.Position.X += render_rect.Size.X;
+        render_rect.position.x += render_rect.size.x;
 
         chr = text[++n];
     }

@@ -59,8 +59,8 @@ void Game::GuiObject::_process()
 {
     // Process the size of the UI objects first
 
-    m_absolute.Size.X = size.X.toAbsolute(m_parent->m_absolute.Size.X);
-    m_absolute.Size.Y = size.Y.toAbsolute(m_parent->m_absolute.Size.Y);
+    m_absolute.size.x = size.X.toAbsolute(m_parent->m_absolute.size.x);
+    m_absolute.size.y = size.Y.toAbsolute(m_parent->m_absolute.size.y);
 
     // Then transforming it with any components
 
@@ -68,8 +68,8 @@ void Game::GuiObject::_process()
 
     // And finally process the positions with the transformed size
 
-    m_absolute.Position.X = m_parent->m_absolute.Position.X + position.X.toAbsolute(m_parent->m_absolute.Size.X) - m_absolute.Size.X * anchor.X;
-    m_absolute.Position.Y = m_parent->m_absolute.Position.Y + position.Y.toAbsolute(m_parent->m_absolute.Size.Y) - m_absolute.Size.Y * anchor.Y;
+    m_absolute.position.x = m_parent->m_absolute.position.x + position.X.toAbsolute(m_parent->m_absolute.size.x) - m_absolute.size.x * anchor.x;
+    m_absolute.position.y = m_parent->m_absolute.position.y + position.Y.toAbsolute(m_parent->m_absolute.size.y) - m_absolute.size.y * anchor.y;
 }
 
 void Game::GuiContainer::_renderchildren()
@@ -188,8 +188,8 @@ Signal<>* Game::GuiObject::TweenSize(const TweenInfo& Info, const float* XScale,
 Signal<>* Game::GuiObject::TweenAnchor(const TweenInfo& Info, const float* X, const float* Y)
 {
     TweenBase* lastTw = nullptr;
-    checktw(X, 8, anchor.X, float)
-    checktw(Y, 9, anchor.Y, float)
+    checktw(X, 8, anchor.x, float)
+    checktw(Y, 9, anchor.y, float)
 
     return lastTw ? &lastTw->Completed : nullptr;
 }

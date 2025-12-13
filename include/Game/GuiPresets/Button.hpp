@@ -14,7 +14,7 @@ namespace GuiPresets
         Button();
         ~Button();
 
-        virtual void OnPress(Vector2f pos) {}
+        virtual void OnPress(sre::vec2ut pos) {}
         virtual void OnHover(bool hovered) {}
 
     private:

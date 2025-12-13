@@ -3,13 +3,13 @@
 
 void Components::Velocity::normalize(float speed)
 {
-    if (speed == 0.0f)
+    if (speed == 0)
     {
-        velocity = {0.0f, 0.0f};
+        velocity = velocity.ZERO;
         return;
     }
     
-    double mag = velocity.getMagnitude();
+    auto mag = velocity.magnitude();
     if (mag == 0.0) return;
 
     velocity = velocity / mag * speed;

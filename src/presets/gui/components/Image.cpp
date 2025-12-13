@@ -10,16 +10,16 @@ void Image::Fit(Game::GuiObject* obj)
         WARN("Calling Image::Fit on NULL image");
         return;
     }
-    Vector2i size = CurrentImage->size();
-    obj->size.X.Offset = size.X;
-    obj->size.Y.Offset = size.Y;
+    sre::vec2i size = CurrentImage->size();
+    obj->size.X.Offset = size.x;
+    obj->size.Y.Offset = size.y;
 }
 
 void Image::render(Game::GuiContainer* obj)
 {
     if (!CurrentImage) return;
 
-    RectF* abs = getAbsolute(obj);
+    sre::rect2Dut* abs = getAbsolute(obj);
 
-    Display::DrawTexture(*CurrentImage, *abs, Modulate, Vector2f::ZERO, DISPLAY_DONT_CENTER);
+    Display::DrawTexture(*CurrentImage, *abs, Modulate, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
 }

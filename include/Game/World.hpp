@@ -4,8 +4,8 @@
 #include "GameInstance.hpp"
 #include "Camera.hpp"
 
-#include "Datatypes/Color.hpp"
-#include "Datatypes/Vector.hpp"
+#include "datatypes/color.hpp"
+#include "datatypes/vector.hpp"
 
 #include "internal_def.hh"
 
@@ -29,13 +29,11 @@ namespace Game
         ~World();
     public:
 
-        /// @brief The background color that the game will have when there's a world
-        Color3 Background = { 255, 149, 236 };
-    private:
-        char _padding;
+        /// @brief The background color that the game will have when there's a world, the alpha component is not used
+        Color4 Background = { 255, 149, 236 };
     public:
         /// The color that the game will render on top of the world.
-        /// This acts also as the background of the GUI Layer
+        /// This also acts as the background of the GUI Layer
         Color4 Foreground = Color4::INVISIBLE;
 
         template <class _wType=World, class... _args>
@@ -71,14 +69,14 @@ namespace Game
         // Coordinate converting
 
         // @brief Converts screen coordinates to this world's coordinates
-        inline Vector2ut screenToWorldSpace(const Unit x, const Unit y) const { return screenToWorld(x, y, &CurrentCamera); }
+        inline sre::vec2ut screenToWorldSpace(const Unit x, const Unit y) const { return screenToWorld(x, y, &CurrentCamera); }
         // @brief Converts this world's coordinates into screen coordinates
-        inline Vector2ut worldToScreenSpace(const Unit x, const Unit y) const { return worldToScreen(x, y, &CurrentCamera); }
+        inline sre::vec2ut worldToScreenSpace(const Unit x, const Unit y) const { return worldToScreen(x, y, &CurrentCamera); }
 
         // Static functions that convert coordinates, without the need of a world
 
-        static Vector2ut worldToScreen(const Unit x, const Unit y, const Camera *cam = nullptr);
-        static Vector2ut screenToWorld(const Unit x, const Unit y, const Camera *cam = nullptr);
+        static sre::vec2ut worldToScreen(const Unit x, const Unit y, const Camera *cam = nullptr);
+        static sre::vec2ut screenToWorld(const Unit x, const Unit y, const Camera *cam = nullptr);
 
         // Get the current world's camera, or NULL if there's no world
         static Camera* currentCamera();

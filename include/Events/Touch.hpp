@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL_events.h>
-#include "Datatypes/Vector.hpp"
+#include "datatypes/vector.hpp"
 
 struct TouchFinger
 {
@@ -12,8 +12,8 @@ struct TouchFinger
 		Pressed(pressed)
 	{}
 
-	Vector2f UV;
-	Vector2f Delta;
+	sre::vec2f UV;
+	sre::vec2f Delta;
 	
 	// SDL Metadata
 	SDL_TouchID TouchID; SDL_FingerID FingerID;

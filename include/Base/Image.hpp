@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Datatypes/Vector.hpp>
+#include <datatypes/vector.hpp>
 #include <SDL_surface.h>
 
 namespace sre
@@ -14,13 +14,14 @@ namespace sre
 		Image() = default;
 		Image(int w, int h);
 		Image(const Image& other);
-		Image(Image&& other);
+		Image(Image&& other) noexcept;
 
 		~Image();
 
-		Image(SDL_Surface* from_surface): sdl_surface(from_surface) {}
+		explicit Image(SDL_Surface* from_surface): sdl_surface(from_surface) {}
+		explicit Image(const sre::vec2i& size): Image(size.x, size.y) {}
 
-		void blit(const Image& img, const Vector2i& pos, const Vector2f& anchor);
+		void blit(const Image& img, const sre::vec2i& pos, const sre::vec2f& anchor);
 		bool isValid() const { return sdl_surface != NULL; }
 		void* getHandle() const { return sdl_surface; }
 

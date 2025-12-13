@@ -26,14 +26,10 @@ void Camera::pUpdate(TimeStamp dt)
     if (m_Controller && m_Controller->Enabled)
         m_Controller->pUpdate(dt);
 
-    if (!clamp.Size.isZero())
-    {
-        x = ut_clamp(x, clamp.getLeft(), clamp.getRight());
-        y = ut_clamp(y, clamp.getTop(), clamp.getBottom());
-    }
+    if (clamp.size != clamp.size.ZERO) { position.setclamp(clamp.top_left(), clamp.bottom_right()); }
 
     const Unit scale = ::Display::GetScale();
 
-    rx = floor(x * scale) / scale;
-    ry = floor(y * scale) / scale;
+    rpos.x = floor(position.x * scale) / scale;
+    rpos.y = floor(position.y * scale) / scale;
 }

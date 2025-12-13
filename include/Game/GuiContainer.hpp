@@ -36,8 +36,8 @@ namespace Game
         template <class _container=GuiContainer>
         inline _container* cast() { return dynamic_cast<_container*>(this); }
 
-        inline Vector2f getAbsolutePosition() const { return m_absolute.Position; }
-        inline Vector2f getAbsoluteSize() const { return m_absolute.Size; }
+        inline sre::vec2ut getAbsolutePosition() const { return m_absolute.position; }
+        inline sre::vec2ut getAbsoluteSize() const { return m_absolute.size; }
 
         template <class _obj=GuiObject, class... args>
         inline _obj* addChild(args&&... arg)
@@ -72,7 +72,7 @@ namespace Game
         std::list<GuiComponent*> m_components;
         
         Color4 m_modulate = {255, 255, 255, 255};
-        RectF m_absolute = {0, 0, 0, 0};
+        sre::rect2Dut m_absolute = {0, 0, 0, 0};
 
         static GuiContainer* s_targetParentContainer;
 

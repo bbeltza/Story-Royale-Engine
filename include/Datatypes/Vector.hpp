@@ -1,130 +1,120 @@
 #pragma once
+#include <datatypes/common.hpp>
+#include <datatypes/units.h>
+
 #include <math.h>
 #include <type_traits>
 
-#include "utils/logging.h"
 #include "utils/math.h"
 
-template <class _Num>
-struct Vector2
+namespace sre
 {
-    static_assert(std::is_arithmetic<_Num>::value, "Vector2 datatype must be an arithmetic type: The type must represent a number");
+    template <typename T>
+    using vec_valid_t = std::is_arithmetic<T>;
 
-    using type = _Num;
-
-    constexpr Vector2(const _Num scalar): X(scalar), Y(scalar) {}
-    constexpr Vector2(const _Num x, const _Num y): X(x), Y(y) {}
-    constexpr Vector2(const Vector2& other): Vector2<_Num>(other.X, other.Y) {}
-    constexpr Vector2(): Vector2(0, 0) {}
-    
-    template <class _Num2> constexpr Vector2(const Vector2<_Num2> other): Vector2(other.X, other.Y) {}
-    template <class _Num2> constexpr Vector2(const _Num2 x, const _Num2 y): Vector2(
-        static_cast<_Num>(x),
-        static_cast<_Num>(y)
-    ) {}
-
-    template <class _Num2> inline void operator =(const Vector2<_Num2>& other)
+    template <typename T>
+    struct vec2
     {
-        X = static_cast<_Num>(other.X);
-        Y = static_cast<_Num>(other.Y);
-    }
+        SRE_IMPLEMENT_DATATYPE("{ %g, %g }", static_cast<double>(x), static_cast<double>(y))
 
-    _Num X, Y;
+        static_assert(vec_valid_t<T>::value, "sre::vec2 datatype must be an arithmetic type: The type must represent a number");
+        using type = T;
 
-    inline void Add(const Vector2& other) { X += other.X; Y += other.Y; }
-    inline void Sub(const Vector2& other) { X -= other.X; Y -= other.Y; }
-    inline void Mul(const Vector2& other) { X *= other.X; Y *= other.Y; }
-    inline void Div(const Vector2& other) { X /= other.X; Y /= other.Y; }
-    inline void Add(const _Num other) { X += other; Y += other; }
-    inline void Sub(const _Num other) { X -= other; Y -= other; }
-    inline void Mul(const _Num other) { X *= other; Y *= other; }
-    inline void Div(const _Num other) { X /= other; Y /= other; }
+        T x = 0;
+        T y = 0;
 
-    inline Vector2 getAdd(const Vector2& other) const { return {X + other.X, Y + other.Y}; }
-    inline Vector2 getSub(const Vector2& other) const { return {X - other.X, Y - other.Y}; }
-    inline Vector2 getMul(const Vector2& other) const { return {X * other.X, Y * other.Y}; }
-    inline Vector2 getDiv(const Vector2& other) const { return {X / other.X, Y / other.Y}; }
-    inline Vector2 getAdd(const _Num other) const { return {X + other, Y + other}; }
-    inline Vector2 getSub(const _Num other) const { return {X - other, Y - other}; }
-    inline Vector2 getMul(const _Num other) const { return {X * other, Y * other}; }
-    inline Vector2 getDiv(const _Num other) const { return {X / other, Y / other}; }
+        constexpr vec2() = default;
+        constexpr vec2(T x, T y): x(x), y(y) {}
+        constexpr vec2(T scalar): x(scalar), y(scalar) {}
+        constexpr vec2(const vec2& other): vec2(other.x, other.y) {}
 
-    inline void Print() const {display(&ALOG);}
-    inline void PrintLn() const {display(&NLOG);}
+        template <typename T2>
+        constexpr operator vec2<T2>() const
+        {
+            return {
+                static_cast<T2>(x),
+                static_cast<T2>(y)
+            };
+        }
 
-    inline double getMagnitude() {return sqrt(X*X + Y*Y);}
+        template <typename T2> inline void add(const vec2<T2>& other) { x += other.x; y += other.y; }
+        template <typename T2> inline void sub(const vec2<T2>& other) { x -= other.x; y -= other.y; }
+        template <typename T2> inline void mul(const vec2<T2>& other) { x *= other.x; y *= other.y; }
+        template <typename T2> inline void div(const vec2<T2>& other) { x /= other.x; y /= other.y; }
+        template <typename T2> inline void add(T2 other) { x += other; y += other; }
+        template <typename T2> inline void sub(T2 other) { x -= other; y -= other; }
+        template <typename T2> inline void mul(T2 other) { x *= other; y *= other; }
+        template <typename T2> inline void div(T2 other) { x /= other; y /= other; }
 
-    inline void LerpTo(const Vector2& other, float alpha, const Vector2& origin) { X = ut_lerp(origin.X, other.X, alpha); Y = ut_lerp(origin.Y, other.Y, alpha); }
-    inline void LerpTo(const Vector2& other, float alpha) { LerpTo(other, alpha, *this); }
-    inline Vector2 Lerp(const Vector2& other, float alpha) const {return {ut_lerp(X, other.X, alpha), ut_lerp(Y, other.Y, alpha)};}
+        template <typename T2>
+        constexpr auto getAdd(const vec2<T2>& other) const -> vec2<decltype(x + other.x)> { return { x + other.x, y + other.y }; }
+        template <typename T2>
+        constexpr auto getSub(const vec2<T2>& other) const -> vec2<decltype(x - other.x)> { return { x - other.x, y - other.y }; }
+        template <typename T2>
+        constexpr auto getMul(const vec2<T2>& other) const -> vec2<decltype(x * other.x)> { return { x * other.x, y * other.y }; }
+        template <typename T2>
+        constexpr auto getDiv(const vec2<T2>& other) const -> vec2<decltype(x / other.x)> { return { x / other.x, y / other.y }; }
 
-    inline _Num getMin() const {return X < Y ? X : Y;}
-    inline _Num getMax() const {return X > Y ? X : Y;}
+        template <typename T2>
+        constexpr auto getAdd(T2 other) const -> vec2<decltype(x + other)> { return { x + other, y + other }; }
+        template <typename T2>
+        constexpr auto getSub(T2 other) const -> vec2<decltype(x - other)> { return { x - other, y - other }; }
+        template <typename T2>
+        constexpr auto getMul(T2 other) const -> vec2<decltype(x * other)> { return { x * other, y * other }; }
+        template <typename T2>
+        constexpr auto getDiv(T2 other) const -> vec2<decltype(x / other)> { return { x / other, y / other }; }
 
-    inline bool isZero() const {return !(X || Y);}
+        constexpr T max() const { return ut_max(x, y); }
+        constexpr T min() const { return ut_min(x, y); }
+        constexpr vec2 clamp(const vec2& min, const vec2& max) const { return { ut_clamp(x, min.x, max.x), ut_clamp(y, min.y, max.y) }; }
+        constexpr vec2 lerp(const vec2& dst, double alpha) const { return { ut_lerp(x, dst.x, alpha), ut_lerp(y, dst.y, alpha) }; }
 
-    // A vector with its components set to 0
-    static const Vector2<_Num> ZERO;
-    // A vector with its components set to 1
-    static const Vector2<_Num> ONE;
-    // A vector with its components set to 0.5, however, if the vector should be composed of floating point types, otherwise the components will be rounded to 0
-    static const Vector2<_Num> CENTER;
+        template<typename test = typename std::enable_if<std::is_signed<T>::value>::type>
+        constexpr vec2 abs() const { return { std::abs(x), std::abs(y) }; }
+        template<typename test = typename std::enable_if<std::is_floating_point<T>::value>::type>
+        constexpr T dot(const vec2& other) const { return x * other.x + y * other.y; }
 
-    private:
-    void display(logfunc_t _printer) const {_printer("{ %g, %g }", (double)X, (double)Y);}
-};
+        constexpr double magnitude() const { return hypot(x, y); }
+        constexpr auto getNormalized() const { return getDiv(magnitude()); }
 
-#define _t template <class _Num>
-#define _t2 template <class _Num, class _NumX>
-#define vec2 Vector2<_Num>
-#define vec2x Vector2<_NumX>
+        inline void normalize() { div(static_cast<T>(magnitude())); }
+        inline void setclamp(const vec2& min, const vec2& max) { ut_setclamp(x, min.x, max.y); ut_setclamp(y, min.y, max.y); }
+        inline void setlerp(const vec2& dst, double alpha) { x = static_cast<T> ut_lerp(x, dst.x, alpha); y = static_cast<T> ut_lerp(y, dst.y, alpha); }
 
-// Static
+        template <typename T2> constexpr auto operator +(const vec2<T2>& other) const { return getAdd(other); }
+        template <typename T2> constexpr auto operator -(const vec2<T2>& other) const { return getSub(other); }
+        template <typename T2> constexpr auto operator *(const vec2<T2>& other) const { return getMul(other); }
+        template <typename T2> constexpr auto operator /(const vec2<T2>& other) const { return getDiv(other); }
+        template <typename T2> constexpr auto operator +(T2 other) const { return getAdd(other); }
+        template <typename T2> constexpr auto operator -(T2 other) const { return getSub(other); }
+        template <typename T2> constexpr auto operator *(T2 other) const { return getMul(other); }
+        template <typename T2> constexpr auto operator /(T2 other) const { return getDiv(other); }
 
-_t const vec2 vec2::ZERO = {0};
-_t const vec2 vec2::ONE = {1};
-_t const vec2 vec2::CENTER = {0.5};
+        template <typename T2> inline void operator +=(const vec2<T2>& other) { add(other); }
+        template <typename T2> inline void operator -=(const vec2<T2>& other) { sub(other); }
+        template <typename T2> inline void operator *=(const vec2<T2>& other) { mul(other); }
+        template <typename T2> inline void operator /=(const vec2<T2>& other) { div(other); }
+        template <typename T2> inline void operator +=(T2 other) { add(other); }
+        template <typename T2> inline void operator -=(T2 other) { sub(other); }
+        template <typename T2> inline void operator *=(T2 other) { mul(other); }
+        template <typename T2> inline void operator /=(T2 other) { div(other); }
 
-// Built-in operators
+        constexpr bool operator ==(const vec2& other) const { return x == other.x && y == other.y; }
+        constexpr bool operator !=(const vec2& other) const { return x != other.x || y != other.y; }
 
-#define vec2op(op) -> Vector2<decltype(first.X op other.X)> { return {first.X op other.X, first.Y op other.Y}; }
-#define vec2op_num(op) -> Vector2<decltype(first.X op other)> { return {first.X op other, first.Y op other}; }
-#define vec2aop(op) { first.X op other.X; first.Y op other.Y; return first; }
-#define vec2aop_num(op) { first.X op other; first.Y op other; return first; }
+        static const vec2 ZERO;
+        static const vec2 ONE;
+        static const vec2 CENTER;
+    };
 
-_t2 inline auto operator +(const vec2& first, const vec2x& other) vec2op(+)
-_t2 inline auto operator -(const vec2& first, const vec2x& other) vec2op(-)
-_t2 inline auto operator *(const vec2& first, const vec2x& other) vec2op(*)
-_t2 inline auto operator /(const vec2& first, const vec2x& other) vec2op(/)
+    template <class T> const vec2<T> vec2<T>::ZERO = { 0, 0 };
+    template <class T> const vec2<T> vec2<T>::ONE = { 1, 1 };
+    template <class T> const vec2<T> vec2<T>::CENTER = { 0.5, 0.5 };
 
-_t2 inline auto operator +(const vec2& first, const _NumX other) vec2op_num(+)
-_t2 inline auto operator -(const vec2& first, const _NumX other) vec2op_num(-)
-_t2 inline auto operator *(const vec2& first, const _NumX other) vec2op_num(*)
-_t2 inline auto operator /(const vec2& first, const _NumX other) vec2op_num(/)
+    using vec2i = vec2<int>;
+    using vec2u = vec2<unsigned>;
+    using vec2f = vec2<float>;
+    using vec2d = vec2<double>;
 
-_t2 inline vec2& operator +=(vec2& first, const vec2x& other) vec2aop(+=)
-_t2 inline vec2& operator -=(vec2& first, const vec2x& other) vec2aop(-=)
-_t2 inline vec2& operator *=(vec2& first, const vec2x& other) vec2aop(*=)
-_t2 inline vec2& operator /=(vec2& first, const vec2x& other) vec2aop(/=)
-
-_t2 inline vec2& operator +=(vec2& first, const _NumX other) vec2aop_num(+=)
-_t2 inline vec2& operator -=(vec2& first, const _NumX other) vec2aop_num(-=)
-_t2 inline vec2& operator *=(vec2& first, const _NumX other) vec2aop_num(*=)
-_t2 inline vec2& operator /=(vec2& first, const _NumX other) vec2aop_num(/=)
-
-#undef vec2op
-#undef vec2op_num
-#undef vec2
-#undef _t
-
-// Template type definitions
-
-typedef Vector2<int> Vector2i;
-typedef Vector2<float> Vector2f;
-typedef Vector2<double> Vector2d;
-
-typedef Vector2<unsigned int> Vector2u;
-
-#include "Datatypes/Units.h"
-
-typedef Vector2<Unit> Vector2ut;
+    using vec2ut = vec2<unit>;
+}

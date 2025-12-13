@@ -32,7 +32,7 @@ void GuiComponents::Text::render(Game::GuiContainer* obj)
 {
     FONTCHECK
 
-    RectF* r = getAbsolute(obj);
+    sre::rect2Dut* r = getAbsolute(obj);
 
     m_font->Render(*r, m_str.c_str(), count, h_alignment, v_alignment);
 }

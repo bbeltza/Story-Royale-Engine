@@ -1,15 +1,15 @@
 #pragma once
 #include "Game/Component.hpp"
 
-#include "Datatypes/Vector.hpp"
-#include "Datatypes/TimeStamp.h"
+#include "datatypes/vector.hpp"
+#include "datatypes/timestamp.h"
 
 namespace Components
 {
     class Velocity: public ::Game::Component
     {
         public:
-        Vector2ut velocity;
+        sre::vec2ut velocity;
         
         // Normalizes the velocity and multiplies it by the speed parameter
         // @param speed the speed to multiply

@@ -30,12 +30,12 @@ int Input::GetFingersPressed(SDL_TouchID touchid)
     return SDL_GetNumTouchFingers(touchid);
 }
 
-Vector2f Input::MouseScreenPosition()
+sre::vec2ut Input::MouseScreenPosition()
 {
     return { engine.mouse_x, engine.mouse_y };
 }
 
-Vector2ut Input::MouseWorldPosition()
+sre::vec2ut Input::MouseWorldPosition()
 {
     return Game::World::screenToWorld(engine.mouse_x, engine.mouse_y, Game::World::currentCamera());
 }

@@ -27,23 +27,23 @@ void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
         {
             if (collider_set->count(comp) == 0) continue;
 
-            RectUt thisRect = getRealRect(entity),
-                 otherRect = comp->getRealRect(ent);
+            sre::rect2Dut thisRect = getRealRect(entity),
+                          otherRect = comp->getRealRect(ent);
 
             if (comp->collidesWith(ent, thisRect))
             {
-                Vector2ut distance = (thisRect.Position - otherRect.Position);
-                Vector2ut radius = (otherRect.Size/2 + thisRect.Size/2);
+                sre::vec2ut distance = (thisRect.position - otherRect.position);
+                sre::vec2ut radius = (otherRect.size/2 + thisRect.size/2);
 
-                Vector2ut sign = {distance.X < 0 ? -1 : 1, distance.Y < 0 ? -1 : 1};
-                Vector2ut pushdist = radius * sign - distance;
+                sre::vec2ut sign = {distance.x < 0 ? -1.0_ut : 1, distance.y < 0 ? -1 : 1.0_ut};
+                sre::vec2ut pushdist = radius * sign - distance;
 
                 if (!comp->flags.Has(AnchoredFlag)) pushdist = pushdist / 2;
 
-                Unit absdx = abs(pushdist.X), absdy = abs(pushdist.Y);
+                sre::unit absdx = abs(pushdist.x), absdy = abs(pushdist.y);
 
-                if (absdx < absdy) entity->Position.X += pushdist.X;
-                else if (absdx > absdy) entity->Position.Y += pushdist.Y;
+                if (absdx < absdy) entity->Position.x += pushdist.x;
+                else if (absdx > absdy) entity->Position.y += pushdist.y;
                 else entity->Position += pushdist;
             }
         }

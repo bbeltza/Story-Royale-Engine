@@ -32,32 +32,31 @@ Components::Shape::~Shape()
 	}
 }
 
-bool Components::Shape::isInScreenPoint(Game::Entity* p, Vector2f pt)
+bool Components::Shape::isInScreenPoint(Game::Entity* p, sre::vec2ut pt)
 {
 	auto w = p->getWorld<Game::World>();
 
 	static SDL_FPoint fpt;
 	static SDL_FRect r;
-	fpt.x = pt.X;
-	fpt.y = pt.Y;
+	fpt.x = pt.x;
+	fpt.y = pt.y;
 
-	static Vector2f screenSpace;
+	sre::vec2ut screenSpace;
 
 	switch (shape)
 	{
 	case RectangleShape:
-		screenSpace = w->worldToScreenSpace(p->Position.X + Rect.getLeft(), p->Position.Y + Rect.getTop());
-		r.x = screenSpace.X;
-		r.y = screenSpace.Y;
-		r.w = static_cast<float>(Rect.Size.X);
-		r.h = static_cast<float>(Rect.Size.Y);
+		screenSpace = w->worldToScreenSpace(p->Position.x + Rect.left(), p->Position.y + Rect.top());
+		r.x = screenSpace.x;
+		r.y = screenSpace.y;
+		r.w = static_cast<float>(Rect.size.x);
+		r.h = static_cast<float>(Rect.size.y);
 		return SDL_PointInFRect(&fpt, &r);
 	case CircleShape:
-		screenSpace = w->worldToScreenSpace(p->Position.X + Rect.Position.X, p->Position.Y + Rect.Position.Y);
-		return (screenSpace - pt).getMagnitude() <= Rect.Size.X / 2;
+		screenSpace = w->worldToScreenSpace(p->Position.x + Rect.position.x, p->Position.y + Rect.position.y);
+		return (screenSpace - pt).magnitude() <= Rect.size.x / 2;
 	default:
-		return 0;
-		break;
+		return false;
 	}
 }
 
@@ -70,12 +69,12 @@ void Components::Shape::Render(Game::Entity* _entity)
 	switch (shape)
 	{
 	case CircleShape:
-		Display::DrawCircle(_entity->Position, Rect.Size.X / 2, Color, Display::dm_Fill, world);
+		Display::DrawCircle(_entity->Position, Rect.size.x / 2, Color, Display::dm_Fill, world);
 		break;
 	default:
 	{
-		RectF render_rect = getRealRect(_entity);
-		Display::DrawRectangle(render_rect, Color, Vector2f::CENTER, Display::dm_Fill, world);
+		sre::rect2Dut render_rect = getRealRect(_entity);
+		Display::DrawRectangle(render_rect, Color, sre::vec2f::CENTER, Display::dm_Fill, world);
 		break;
 	}
 	}

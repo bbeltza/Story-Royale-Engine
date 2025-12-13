@@ -40,7 +40,14 @@ bool Font::PreloadTextures(const char* text)
     while (text[n])
     {
         char c = text[n];
-        if (!textures.count(c)) {textures.emplace(c, TTF_RenderGlyph_Solid(m_font, c, Color4::WHITE)); unloaded = true;};
+        if (!textures.count(c)) 
+        {
+            textures.emplace(
+                c,
+                sre::Image{ TTF_RenderGlyph_Solid(m_font, c, Color4::WHITE) }
+            );
+            unloaded = true;
+        };
         n++;
     }
 

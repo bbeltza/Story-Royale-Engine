@@ -3,7 +3,7 @@
 #include <standard>
 
 #include "Base/Texture.hpp"
-#include "Datatypes/Rect.hpp"
+#include "datatypes/rect.hpp"
 
 class Font
 {
@@ -24,12 +24,12 @@ class Font
     Font(const char* path, int pt=12);
     ~Font();
 
-    void Render(const RectF& bounds, const char* text, int count, HAlign halignment=HLeft, VAlign valignment=VTop);
-    void RenderLine(const Vector2f& start, const char* text, int count, int acc);
+    void Render(const sre::rect2Dut& bounds, const char* text, int count, HAlign halignment=HLeft, VAlign valignment=VTop);
+    void RenderLine(const sre::vec2ut& start, const char* text, int count, int acc);
     bool PreloadTextures(const char* desired);
     private:
     std::unordered_map<char, Texture> textures;
-    std::unordered_map<char, Vector2i> sizes;
+    std::unordered_map<char, sre::vec2i> sizes;
 
     TTF_Font* m_font;
     SDL_RWops* m_src;

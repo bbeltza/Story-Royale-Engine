@@ -13,7 +13,12 @@ Texture::~Texture()
     {
         if (!SDL_WasInit(SDL_INIT_VIDEO))
         {
-            WARN("Destroying texture after SDL's deinitialization or before its initialization (Note that it shouldn't ever be possible when I rewrite the entire engine's architecture :) )");
+            static bool warned;
+            if (!warned)
+            {
+                WARN("Destroying texture after SDL's deinitialization or before its initialization (Note that it shouldn't ever be possible when I rewrite the entire engine's architecture :) )");
+                warned = true;
+            }
             return;
         }
 
@@ -23,9 +28,9 @@ Texture::~Texture()
     }
 }
 
-Vector2i Texture::size() const
+sre::vec2i Texture::size() const
 {
-    if (!texture) return Vector2i::ZERO;
+    if (!texture) return sre::vec2i::ZERO;
 
     int w, h;
     SDL_QueryTexture(static_cast<SDL_Texture*>(texture), NULL, NULL, &w, &h);

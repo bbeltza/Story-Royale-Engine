@@ -73,8 +73,8 @@ void __update_layer()
 	Game::GuiLayer* current = currlayer;
 	
 	if (!current) return;
-	current->m_absolute.Size.X = static_cast<float>(engine.viewport.w);
-	current->m_absolute.Size.Y = static_cast<float>(engine.viewport.h);
+	current->m_absolute.size.x = static_cast<sre::unit>(engine.viewport.w);
+	current->m_absolute.size.y = static_cast<sre::unit>(engine.viewport.h);
 	current->_processchildren();
 	
 	current->call_update(engine.last_dt);

@@ -19,6 +19,6 @@ namespace GuiComponents
         void process_position(::Game::GuiContainer*) override;
         void pre_render(::Game::GuiContainer*) override;
     private:
-        RectF m_oldabs;
+        sre::rect2Dut m_oldabs;
     };
 }

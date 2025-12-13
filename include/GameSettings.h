@@ -1,13 +1,13 @@
 #pragma once
 #include <stdbool.h>
 
-#include <Datatypes/Units.h>
+#include <datatypes/units.h>
 
 #ifdef __cplusplus
-#include <Datatypes/Vector.hpp>
-typedef Vector2u _vec2;
+#include <datatypes/vector.hpp>
+#define vec2u sre::vec2u
 #else
-typedef unsigned int _vec2[2];
+typedef unsigned int vec2u[2];
 #endif
 
 enum _sre_gs_interpolation
@@ -20,7 +20,7 @@ enum _sre_gs_interpolation
 
 struct _sre_gs_window
 {
-	_vec2 Resolution;
+	vec2u Resolution;
 	unsigned int TargetFPS;
 	bool VSync;
 	bool Resizable;
@@ -51,6 +51,8 @@ struct _sre_gs
 	{
 		extern "C" _sre_gs game_settings;
 	}
+
+	#undef vec2u
 #else
 	extern const struct _sre_gs game_settings;
 #endif

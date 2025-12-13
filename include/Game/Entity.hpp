@@ -3,8 +3,6 @@
 
 #include "GameInstance.hpp"
 
-#include "Datatypes/Vector.hpp"
-
 #include "Game/World.hpp"
 
 namespace Game
@@ -25,8 +23,8 @@ namespace Game
         };
 
         public:
-        Vector2ut Position;
-        const Vector2ut lastVelocity;
+        sre::vec2ut Position;
+        const sre::vec2ut lastVelocity;
 
         int zIndex = 0;
 

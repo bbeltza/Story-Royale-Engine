@@ -6,20 +6,20 @@ void GuiComponents::List::process_children(Game::GuiObject* child, uint32_t inde
     if (!index)
         m_lastsize = 0;
     
-    RectF* childabs = getAbsolute(child); 
-    RectF* parentabs = getAbsolute(child->getParent()); 
+    sre::rect2Dut* childabs = getAbsolute(child); 
+    sre::rect2Dut* parentabs = getAbsolute(child->getParent()); 
 
     switch (direction)
     {
     case dir_horizontal:
-        childabs->Position.Y = parentabs->Position.Y;
-        childabs->Position.X = parentabs->Position.X + m_lastsize;
-        m_lastsize += childabs->Size.X + Padding.toAbsolute(parentabs->Size.X);
+        childabs->position.y = parentabs->position.y;
+        childabs->position.x = parentabs->position.x + m_lastsize;
+        m_lastsize += childabs->size.x + Padding.toAbsolute(parentabs->size.x);
         break;
     default:
-        childabs->Position.X = parentabs->Position.X;
-        childabs->Position.Y = parentabs->Position.Y + m_lastsize;
-        m_lastsize += childabs->Size.Y+ Padding.toAbsolute(parentabs->Size.Y);
+        childabs->position.x = parentabs->position.x;
+        childabs->position.y = parentabs->position.y + m_lastsize;
+        m_lastsize += childabs->size.y + Padding.toAbsolute(parentabs->size.y);
         break;
     }
     

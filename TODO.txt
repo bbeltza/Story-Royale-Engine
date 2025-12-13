@@ -30,7 +30,7 @@ Less likely ideas:
 	- Have the game run on an isolated space. I got some ideas on how this could be done and why:
 		- On Windows, you can have the game as a separate process executable, with its own memory space and have the engine create the process when running the game:
 			- This allows to garantee the engine's initialization when initializing game global variables, so it solves most static initialization and destruction overheads.
-			- It also avoids the user to touch any internal engine variables. That's what most game engine's approach is.
+			- It also disallows the user to touch any internal engine variables. That's what most game engine's approach is.
 			- To still have the game run on a single executable, I can use the build system to build the game executable and store it inside an array of raw bytes.
 				- However, as you cannot create processes from a data stream, I'll have to create a temporal file and write the raw data inside, and load that file with the OS api.
 			- The "game executable" can also be a DLL and I can still load it having its own memory space.

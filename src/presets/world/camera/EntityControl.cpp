@@ -12,23 +12,17 @@ void EntityControl::pUpdate(TimeStamp dt)
 {
     Camera& CurrentCamera = *getCamera();
 
-    Vector2f diff = m_Target - m_Entity->Position;
+    sre::vec2ut diff = m_Target - m_Entity->Position;
 
-    if (abs(diff.X) > Bounds.X)
-        m_Target.X -= diff.X - Bounds.X * ut_sign(diff.X);
-    if (abs(diff.Y) > Bounds.Y)
-        m_Target.Y -= diff.Y - Bounds.Y * ut_sign(diff.Y);
+    if (abs(diff.x) > Bounds.x)
+        m_Target.x -= diff.x - Bounds.x * ut_sign(diff.x);
+    if (abs(diff.y) > Bounds.y)
+        m_Target.y -= diff.y - Bounds.y * ut_sign(diff.y);
 
 
     if (!Smoothness)
-    {
-        CurrentCamera.x = m_Target.X;
-        CurrentCamera.y = m_Target.Y;
-    }
+        CurrentCamera.position = m_Target;
     else
-    {
-        CurrentCamera.x = ut_lerp(CurrentCamera.x, m_Target.X, dt / Smoothness);
-        CurrentCamera.y = ut_lerp(CurrentCamera.y, m_Target.Y, dt / Smoothness);
-    }
+        CurrentCamera.position.setlerp(m_Target, dt / Smoothness);
     
 }

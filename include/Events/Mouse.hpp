@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL_events.h>
-#include "Datatypes/Vector.hpp"
+#include "datatypes/vector.hpp"
 
 struct MouseButton
 {
@@ -17,7 +17,7 @@ struct MouseButton
     const Uint8 button;
     const Uint8 clicks;
 
-    const Vector2f position;
+    const sre::vec2ut position;
 };
 
 struct MouseMove
@@ -32,8 +32,8 @@ struct MouseMove
     const Uint32 id;
     const Uint32 state;
 
-    const Vector2f position;
-    const Vector2f delta;
+    const sre::vec2ut position;
+    const sre::vec2ut delta;
 };
 
 struct MouseWheel
@@ -41,15 +41,15 @@ struct MouseWheel
     MouseWheel(const SDL_MouseWheelEvent* ev, float ratio):
         id(ev->which),
         amount(ev->x, ev->y),
-        p_amount(ev->preciseX, ev->preciseY),
+        precise_amount(ev->preciseX, ev->preciseY),
         position(ev->mouseX / ratio, ev->mouseY / ratio)
     {}
 
     const Uint32 id;
 
-    const Vector2i amount;
-    const Vector2f p_amount;
-    const Vector2f position;
+    const sre::vec2i amount;
+    const sre::vec2f precise_amount;
+    const sre::vec2f position;
 };
 
 #undef ratio

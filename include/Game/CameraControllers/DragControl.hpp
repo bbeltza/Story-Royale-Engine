@@ -20,8 +20,8 @@ namespace CameraControllers
         void Update(TimeStamp) override;
         void pUpdate(TimeStamp) override;
     private:
-        Vector2ut m_camSpeed;
-        Vector2ut m_lastmouseDelta;
+        sre::vec2ut m_camSpeed;
+        sre::vec2ut m_lastmouseDelta;
         ConnectionHandle m_mouseConnection;
         ConnectionHandle m_touchConnection;
         const Action& m_action;

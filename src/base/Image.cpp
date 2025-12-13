@@ -32,7 +32,7 @@ Image::Image(const Image& other): sdl_surface(copySDLsurface(other.sdl_surface))
 {
 }
 
-Image::Image(Image&& other) : sdl_surface(other.sdl_surface)
+Image::Image(Image&& other) noexcept : sdl_surface(other.sdl_surface)
 {
     other.sdl_surface = NULL;
 }
@@ -54,18 +54,18 @@ SDL_Surface* Image::copySDLsurface(const SDL_Surface* other)
     return surface;
 }
 
-void Image::blit(const Image& img, const Vector2i& pos, const Vector2f& anchor)
+void Image::blit(const Image& img, const sre::vec2i& pos, const sre::vec2f& anchor)
 {
     SDL_Rect rect = {
-        pos.X,
-        pos.Y,
+        pos.x,
+        pos.y,
         0,
         0
     };
-    if (anchor.X)
-        rect.x -= static_cast<int>(img.sdl_surface->w * anchor.X);
-    if (anchor.Y)
-        rect.y -= static_cast<int>(img.sdl_surface->h * anchor.Y);
+    if (anchor.x)
+        rect.x -= static_cast<int>(img.sdl_surface->w * anchor.x);
+    if (anchor.y)
+        rect.y -= static_cast<int>(img.sdl_surface->h * anchor.y);
 
 
     SDL_UpperBlit(img.sdl_surface, NULL, sdl_surface, &rect);

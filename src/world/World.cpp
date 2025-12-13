@@ -112,22 +112,22 @@ Game::World *Game::World::current() { return currworld; }
 
 static const Game::Camera zero_cam;
 
-Vector2ut Game::World::screenToWorld(Unit x, Unit y, const Camera *cam)
+sre::vec2ut Game::World::screenToWorld(sre::unit x, sre::unit y, const Camera *cam)
 {
     if (!cam)
         cam = &zero_cam;
 
-    return {x - engine.center_x + cam->rx, y - engine.center_y + cam->ry};
+    return sre::vec2ut{ x, y } - sre::vec2ut{engine.center_x, engine.center_y} + cam->rpos;
 }
 
-Vector2ut Game::World::worldToScreen(Unit x, Unit y, const Camera *cam)
+sre::vec2ut Game::World::worldToScreen(sre::unit x, sre::unit y, const Camera *cam)
 {
     if (!cam)
         cam = &zero_cam;
 
-    Vector2ut pos = {x + engine.center_x - cam->rx, y + engine.center_y - cam->ry};
-    pos.X = floor(pos.X * engine.current_scale);
-    pos.Y = floor(pos.Y * engine.current_scale);
+    sre::vec2ut pos = sre::vec2ut{ x, y } + sre::vec2ut{engine.center_x, engine.center_y} - cam->rpos;
+    pos.x = floor(pos.x * engine.current_scale);
+    pos.y = floor(pos.y * engine.current_scale);
 
     return pos;
 }

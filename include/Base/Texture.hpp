@@ -1,7 +1,7 @@
 #pragma once
-#include "Datatypes/Vector.hpp"
-#include "Datatypes/Color.hpp"
-#include "Datatypes/Rect.hpp"
+#include "datatypes/vector.hpp"
+#include "datatypes/color.hpp"
+#include "datatypes/rect.hpp"
 #include "Base/Image.hpp"
 
 class Texture;
@@ -13,14 +13,14 @@ namespace Game
 
 namespace Display
 {
-    void DrawTexture(const Texture& _Texture, RectUt Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint, const Game::World* world);
+    void DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const Color4& Modulate, const sre::vec2f& AnchorPoint, const Game::World* world);
 }
 
 extern "C" void __display_render();
 
 class Texture
 {
-    friend void Display::DrawTexture(const Texture& _Texture, RectUt Rectangle, const Color4& Modulate, const Vector2f& AnchorPoint, const Game::World* world);
+    friend void Display::DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const Color4& Modulate, const sre::vec2f& AnchorPoint, const Game::World* world);
     friend struct _containers_service;
 
     Texture(const Texture& other) = delete;
@@ -31,7 +31,7 @@ public:
     Texture(Texture&& moving) noexcept;
     ~Texture();
 
-    Vector2i size() const;
+    sre::vec2i size() const;
 protected: // Protected to allow custom behavior inherited texture classes
     void* texture = NULL;
 };

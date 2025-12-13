@@ -11,15 +11,15 @@ void GuiComponents::Padding::process_position(Game::GuiContainer* obj)
     auto absolute = getAbsolute(obj);
     m_oldabs = *absolute;
 
-    const float l = padding.topleft.X.toAbsolute(absolute->Size.X);
-    const float t = padding.topleft.Y.toAbsolute(absolute->Size.Y);
-    const float r = padding.bottomright.X.toAbsolute(absolute->Size.X);
-    const float b = padding.bottomright.Y.toAbsolute(absolute->Size.Y);
+    const auto l = padding.topleft.X.toAbsolute(absolute->size.x);
+    const auto t = padding.topleft.Y.toAbsolute(absolute->size.y);
+    const auto r = padding.bottomright.X.toAbsolute(absolute->size.x);
+    const auto b = padding.bottomright.Y.toAbsolute(absolute->size.y);
 
-    absolute->Position.X += l;
-    absolute->Position.Y += t;
-    absolute->Size.X -= l + r;
-    absolute->Size.Y -= t - b;
+    absolute->position.x += l;
+    absolute->position.y += t;
+    absolute->size.x -= l + r;
+    absolute->size.y -= t - b;
 }
 
 void GuiComponents::Padding::pre_render(Game::GuiContainer* obj)

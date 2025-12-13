@@ -66,7 +66,7 @@ class Tween: public TweenBase
 
     const T* m_src;
     T* m_target = nullptr;
-    T m_start;
+    T m_start{};
 
     inline void step(float alpha) override { *m_target = (T)ut_lerp(m_start, *m_src, alpha); }
     inline void start() override { if (m_target) m_start = *m_target; }

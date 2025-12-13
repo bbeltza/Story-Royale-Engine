@@ -1,8 +1,8 @@
 #pragma once
 #include "Game/Component.hpp"
 
-#include "Datatypes/Vector.hpp"
-#include "Datatypes/Color.hpp"
+#include "datatypes/vector.hpp"
+#include "datatypes/color.hpp"
 
 #include "Base/File.hpp"
 #include "Base/Texture.hpp"
@@ -15,8 +15,8 @@ namespace Components
         Sprite();
         ~Sprite();
 
-        Vector2ut Scale;
-        Vector2ut Offset;
+        sre::vec2ut Scale;
+        sre::vec2ut Offset;
 
         Color4 Modulate = Color4::WHITE;
 

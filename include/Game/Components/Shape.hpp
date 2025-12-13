@@ -2,8 +2,8 @@
 #include "Game/Component.hpp"
 #include "Game/Entity.hpp"
 
-#include "Datatypes/Rect.hpp"
-#include "Datatypes/Color.hpp"
+#include "datatypes/rect.hpp"
+#include "datatypes/color.hpp"
 
 namespace Components
 {
@@ -32,7 +32,7 @@ namespace Components
         ~Shape();
 
         // The rect representing the area of the shape by its size, and the offset from the entity by its position
-        RectUt Rect;
+        sre::rect2Dut Rect;
         Color4 Color = {255, 255, 255, 255};
 
         ShapeForm shape;
@@ -42,9 +42,9 @@ namespace Components
         void Render(::Game::Entity *) override;
         bool Query(::Game::Entity *, float*) override;
 
-        bool isInScreenPoint(::Game::Entity *, Vector2f);
+        bool isInScreenPoint(::Game::Entity *, sre::vec2ut);
 
-        inline RectUt getRealRect(::Game::Entity *parent) const { return {parent->Position + Rect.Position, Rect.Size}; }
-        inline bool collidesWith(::Game::Entity *parent, const RectF &other_Rect) const { return getRealRect(parent).Intersects(other_Rect); }
+        inline sre::rect2Dut getRealRect(::Game::Entity *parent) const { return {parent->Position + Rect.position, Rect.size}; }
+        inline bool collidesWith(::Game::Entity *parent, const sre::rect2Dut &other_Rect) const { return getRealRect(parent).intersects(other_Rect); }
     };
 }

@@ -37,7 +37,7 @@ void __update_viewport()
 	SDL_GetRendererOutputSize(engine.sdl_rendererhndl, &engine.osize_x, &engine.osize_y);
 	if (sre::game_settings.WindowOptions.Scaled)
 	{
-		integer_scale = ut_min(engine.osize_x / sre::game_settings.WindowOptions.Resolution.X, engine.osize_y / sre::game_settings.WindowOptions.Resolution.Y);
+		integer_scale = ut_min(engine.osize_x / sre::game_settings.WindowOptions.Resolution.x, engine.osize_y / sre::game_settings.WindowOptions.Resolution.y);
 		integer_scale = integer_scale ? integer_scale : 1;
 	}
 	else

@@ -21,25 +21,15 @@ void DragControl::Update(TimeStamp delta)
 
     if (m_action.isPressed())
     {
-        m_camSpeed.X = m_lastmouseDelta.X;
-        m_camSpeed.Y = m_lastmouseDelta.Y;
+        m_camSpeed = m_lastmouseDelta;
     }
+    else if (Smoothness <= 0.0f)
+        m_camSpeed = m_camSpeed.ZERO;
     else
-    {
-        if (Smoothness <= 0.0f)
-            m_camSpeed = Vector2f::ZERO;
-        else
-        {
-            float a = SDL_min(delta/Smoothness, 1.0f);
-            m_camSpeed = m_camSpeed.Lerp(Vector2f::ZERO, a);
-        }
-    }
+        m_camSpeed.setlerp(m_camSpeed.ZERO, ut_min(delta / Smoothness, 1.0f));
 
-    CurrentCamera.x -= m_camSpeed.X;
-    CurrentCamera.y -= m_camSpeed.Y;
-
-    m_lastmouseDelta.X = 0;
-    m_lastmouseDelta.Y = 0;   
+    CurrentCamera.position -= m_camSpeed;
+    m_lastmouseDelta = m_lastmouseDelta.ZERO;
 }
 
 void DragControl::pUpdate(TimeStamp delta)
@@ -49,17 +39,13 @@ void DragControl::pUpdate(TimeStamp delta)
 
 void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)
 {
-    if (event->state & SDL_BUTTON(Input::mbRight))
-    {
-        self->m_lastmouseDelta.X += event->delta.X;
-        self->m_lastmouseDelta.Y += event->delta.Y;
-    }
+    if (self->m_action.isPressed())
+        self->m_lastmouseDelta += event->delta;
 }
 
 void DragControl::touchMotionCallback(void*, DragControl* self, const TouchFinger* event)
 {
-    Vector2f screen = Display::GetSize();
+    sre::vec2ut screen = Display::GetSize();
 
-    self->m_lastmouseDelta.X += event->Delta.X * screen.X;
-    self->m_lastmouseDelta.Y += event->Delta.Y * screen.Y;
+    self->m_lastmouseDelta += event->Delta * screen;
 }

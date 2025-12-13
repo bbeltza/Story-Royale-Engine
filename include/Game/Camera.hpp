@@ -1,5 +1,5 @@
 #pragma once
-#include "Datatypes/Rect.hpp"
+#include "datatypes/rect.hpp"
 
 #include "Game/CameraController.hpp"
 
@@ -10,12 +10,9 @@ namespace Game
         friend class World;
         friend class CameraController;
 
-        Unit x = 0;
-        Unit y = 0;
-        RectUt clamp = {0, 0, 0, 0};
-
-        Unit ScaleX = 1;
-        Unit ScaleY = 1;
+        sre::vec2ut position;
+        sre::vec2ut scale;
+        sre::rect2Dut clamp = {0, 0, 0, 0};
 
         inline CameraController* getController() const { return m_Controller; }
         inline void setController(CameraController* controller) { m_Controller = controller; m_Controller->m_Camera = this; }
@@ -27,7 +24,6 @@ namespace Game
         void pUpdate(TimeStamp);
 
         // Render positions
-        Unit rx = 0;
-        Unit ry = 0;
+        sre::vec2ut rpos;
     };
 }
