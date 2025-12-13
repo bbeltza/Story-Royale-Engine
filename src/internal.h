@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "C/API.h"
-#include "Datatypes/TimeStamp.h"
+#include "datatypes/timestamp.h"
 
 _CAPI_BEGIN
 	struct _win_settings

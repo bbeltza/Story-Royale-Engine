@@ -16,6 +16,7 @@ int* os_win_outputcoordget(int buff[2])
 	if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConsoleInfo))
 	{
 		DWORD status = GetLastError();
+		(void)status;
 		return NULL;
 	}
 

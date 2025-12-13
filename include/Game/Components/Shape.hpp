@@ -3,7 +3,7 @@
 #include "Game/Entity.hpp"
 
 #include "datatypes/rect.hpp"
-#include "datatypes/color.hpp"
+#include "datatypes/Color.hpp"
 
 namespace Components
 {

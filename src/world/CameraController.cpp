@@ -28,7 +28,7 @@ void Camera::pUpdate(TimeStamp dt)
 
     if (clamp.size != clamp.size.ZERO) { position.setclamp(clamp.top_left(), clamp.bottom_right()); }
 
-    const Unit scale = ::Display::GetScale();
+    const sre::unit scale = ::Display::GetScale();
 
     rpos.x = floor(position.x * scale) / scale;
     rpos.y = floor(position.y * scale) / scale;

@@ -10,9 +10,9 @@ add_subdirectory(SDL)
 add_subdirectory(SDL_ttf)
 add_subdirectory(SDL_image)
 
-# Rest of the libs
+# Rest of the lib(s)
 add_subdirectory(stb)
-add_subdirectory(zlib)
+#add_subdirectory(zlib)
 
 if(NOT BUILD_SHARED_LIBS)
     set(SDL_LIB_SUFFIX "-static")
@@ -25,6 +25,7 @@ SDL2_ttf::SDL2_ttf${SDL_LIB_SUFFIX}
 SDL2_image::SDL2_image${SDL_LIB_SUFFIX}
 
 stb
-zlib${ZLIB_SUFFIX})
+#zlib${ZLIB_SUFFIX}
+)
 
 set(3RDPARTYLIBS ${3RDPARTYLIBS} PARENT_SCOPE)

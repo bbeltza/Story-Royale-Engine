@@ -34,7 +34,7 @@ struct _sre_gs_audio
 };
 struct _sre_gs_debug
 {
-	Unit EntityDebugLineSize;
+	sre_unit EntityDebugLineSize;
 };
 
 

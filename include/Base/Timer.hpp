@@ -2,7 +2,7 @@
 #include <standard>
 #include "Base/Signal.hpp"
 
-#include "Datatypes/TimeStamp.h"
+#include "datatypes/timestamp.h"
 
 #include "internal_def.hh"
 __def_internal(__update_classes)

@@ -1,4 +1,4 @@
-#include "Datatypes/Color.hpp"
+#include "datatypes/Color.hpp"
 #include "Base/Font.hpp"
 
 #include "Engine.hpp"

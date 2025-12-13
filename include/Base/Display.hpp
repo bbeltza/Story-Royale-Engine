@@ -1,7 +1,7 @@
 #pragma once
 #include "datatypes/vector.hpp"
 #include "datatypes/rect.hpp"
-#include "datatypes/color.hpp"
+#include "datatypes/Color.hpp"
 
 namespace Game
 {
@@ -37,7 +37,7 @@ namespace Display
     void DrawRectangle(const sre::rect2Dut& Rectangle, const Color4& Color, const sre::vec2f& AnchorPoint, DrawingMode Mode, const Game::World* world);
     void DrawRotatedRectangle(const sre::rect2Dut& _Rectangle, const double _angle, const Color4& _Col, DrawingMode _mode, const Game::World* world);
 
-    void DrawCircle(const sre::vec2ut& _Pos, const Unit _Radius, const Color4& _Col, DrawingMode _mode, const Game::World* world);
+    void DrawCircle(const sre::vec2ut& _Pos, const sre::unit _Radius, const Color4& _Col, DrawingMode _mode, const Game::World* world);
 
     void DrawDebug(const sre::vec2ut& pos);
 }

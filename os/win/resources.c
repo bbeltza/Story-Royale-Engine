@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 extern const unsigned char* _game_res;
-static const char nullbyte = '\0';
+static const unsigned char nullbyte = '\0';
 
 void SRE_init_resources()
 {

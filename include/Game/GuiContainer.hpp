@@ -2,9 +2,9 @@
 #include <standard>
 #include "Game/GameInstance.hpp"
 
-#include "Datatypes/Color.hpp"
-#include "Datatypes/Rect.hpp"
-#include "Datatypes/TimeStamp.h"
+#include "datatypes/Color.hpp"
+#include "datatypes/rect.hpp"
+#include "datatypes/timestamp.h"
 
 #include "internal_def.hh"
 

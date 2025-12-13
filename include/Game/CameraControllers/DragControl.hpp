@@ -1,7 +1,7 @@
 #pragma once
 #include "Game/CameraControllers/API"
 
-#include "Datatypes/Vector.hpp"
+#include "datatypes/vector.hpp"
 #include "Events/Mouse.hpp"
 #include "Events/Touch.hpp"
 #include "Base/Signal.hpp"

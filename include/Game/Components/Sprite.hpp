@@ -2,7 +2,7 @@
 #include "Game/Component.hpp"
 
 #include "datatypes/vector.hpp"
-#include "datatypes/color.hpp"
+#include "datatypes/Color.hpp"
 
 #include "Base/File.hpp"
 #include "Base/Texture.hpp"

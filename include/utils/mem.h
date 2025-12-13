@@ -21,7 +21,7 @@ It's discouraged to use it with numbers as numbers can be NULL too
 #define ut_array(...) {__VA_ARGS__, NULL}
 #define ut_arrcount(arr) (sizeof(arr) / sizeof(arr[0]))
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 	#define __ut_dynsalloc(t, x, c) t *x = ut_static_cast(t*, alloca((c) * sizeof(t)))
 #else
 	#define __ut_dynsalloc(t, x, c) t x[c]

@@ -1,6 +1,6 @@
 #pragma once
 #include "Game/GuiComponent.hpp"
-#include "Datatypes/UDim.hpp"
+#include "datatypes/UDim.hpp"
 
 namespace GuiComponents
 {

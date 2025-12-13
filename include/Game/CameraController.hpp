@@ -1,5 +1,5 @@
 #pragma once
-#include "Datatypes/TimeStamp.h"
+#include "datatypes/timestamp.h"
 
 namespace Game
 {

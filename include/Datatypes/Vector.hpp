@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "utils/math.h"
+#include "utils/math.hpp"
 
 namespace sre
 {
@@ -69,10 +70,9 @@ namespace sre
         constexpr vec2 clamp(const vec2& min, const vec2& max) const { return { ut_clamp(x, min.x, max.x), ut_clamp(y, min.y, max.y) }; }
         constexpr vec2 lerp(const vec2& dst, double alpha) const { return { ut_lerp(x, dst.x, alpha), ut_lerp(y, dst.y, alpha) }; }
 
-        template<typename test = typename std::enable_if<std::is_signed<T>::value>::type>
-        constexpr vec2 abs() const { return { std::abs(x), std::abs(y) }; }
-        template<typename test = typename std::enable_if<std::is_floating_point<T>::value>::type>
-        constexpr T dot(const vec2& other) const { return x * other.x + y * other.y; }
+        constexpr vec2 abs() const { return { ut::abs(x), ut::abs(y) }; }
+        template <typename T2>
+        constexpr auto dot(const vec2<T2>& other) const { return x * other.x + y * other.y; }
 
         constexpr double magnitude() const { return hypot(x, y); }
         constexpr auto getNormalized() const { return getDiv(magnitude()); }

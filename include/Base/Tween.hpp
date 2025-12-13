@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine.hpp"
-#include "Datatypes/TimeStamp.h"
+#include "datatypes/timestamp.h"
 
 enum EasingStyle
 {

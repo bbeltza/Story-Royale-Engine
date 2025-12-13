@@ -50,6 +50,9 @@ void __update_viewport()
 
 	int ow = engine.viewport.w;
 	int oh = engine.viewport.h;
+	(void)ow;
+	(void)oh;
+
 	engine.viewport.w = (int)(engine.osize_x / engine.viewport_scale);
 	engine.viewport.h = (int)(engine.osize_y / engine.viewport_scale);
 

@@ -1,13 +1,9 @@
 #pragma once
 #include "datatypes/vector.hpp"
+#include "utils/math.hpp"
 
 namespace sre
 {
-    template <typename T, typename std::enable_if<std::is_unsigned<T>::value>::type>
-    constexpr T abs(T x) { return x; }
-    template <typename T> constexpr T abs(T x) { return x < 0 ? -x : x; }
-    template <typename T> constexpr double rad(T x) { return (x * (M_PI / 180)); }
-
     template <typename T>
     struct rect2D
     {
@@ -33,28 +29,28 @@ namespace sre
         constexpr operator rect2D<T2>() const
         {
             return {
-                static_cast<rect2D<T2>::vec>(position),
-                static_cast<rect2D<T2>::vec>(size)
+                static_cast<typename rect2D<T2>::vec>(position),
+                static_cast<typename rect2D<T2>::vec>(size)
             };
         }
 
         constexpr bool intersects(const rect2D& other) const {
-            return abs(position.x - other.position.x) < size.x / 2 + other.size.x / 2 &&
-                abs(position.y - other.position.y) < size.y / 2 + other.size.y / 2;
+            return ut::abs(position.x - other.position.x) < size.x / 2 + other.size.x / 2 &&
+                ut::abs(position.y - other.position.y) < size.y / 2 + other.size.y / 2;
         }
 
-        constexpr T top() const { return position.y - abs(size.y) / 2; }
-        constexpr T bottom() const { return position.y + abs(size.y) / 2; }
-        constexpr T left() const { return position.x - abs(size.x) / 2; }
-        constexpr T right() const { return position.x + abs(size.x) / 2; }
+        constexpr T top() const { return position.y - ut::abs(size.y) / 2; }
+        constexpr T bottom() const { return position.y + ut::abs(size.y) / 2; }
+        constexpr T left() const { return position.x - ut::abs(size.x) / 2; }
+        constexpr T right() const { return position.x + ut::abs(size.x) / 2; }
 
         constexpr vec top_left() const { return {left(), top()}; }
         constexpr vec top_right() const { return {right(), top()}; }
         constexpr vec bottom_left() const { return {left(), bottom()}; }
         constexpr vec bottom_right() const { return {right(), bottom()}; }
 
-        constexpr vec xrotated_offset(double angle) const { return vec2d{ abs(size.x) / 2 * cos(rad(angle)), abs(size.x) / 2 * sin(rad(angle)) }; }
-        constexpr vec yrotated_offset(double angle) const { return vec2d{ abs(size.y) / 2 * cos(rad(angle + 90)), abs(size.y) / 2 * sin(rad(angle + 90)) }; }
+        constexpr vec xrotated_offset(double angle) const { return vec2d{ abs(size.x) / 2 * cos(ut::rad(angle)), ut::abs(size.x) / 2 * sin(ut::rad(angle)) }; }
+        constexpr vec yrotated_offset(double angle) const { return vec2d{ abs(size.y) / 2 * cos(ut::rad(angle + 90)), ut::abs(size.y) / 2 * sin(ut::rad(angle + 90)) }; }
 
         constexpr vec rotated_left(double angle) const { return position - xrotated_offset(angle); }
         constexpr vec rotated_right(double angle) const { return position + xrotated_offset(angle); }

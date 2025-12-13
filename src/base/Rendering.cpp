@@ -145,7 +145,7 @@ void Display::DrawDebug(const sre::vec2ut& _pos)
     END_DRAW
 }
 
-void Display::DrawCircle(const sre::vec2ut &pos, const Unit radius, const Color4 &_Col, DrawingMode _dm, const Game::World* world)
+void Display::DrawCircle(const sre::vec2ut &pos, const sre::unit radius, const Color4 &_Col, DrawingMode _dm, const Game::World* world)
 #if 0
 {
     START_DRAW

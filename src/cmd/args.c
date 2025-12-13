@@ -79,7 +79,7 @@ static void handle_ac(const char* arg, char* argv[])
 
     AllocConsole();
     //SOURCE: https://gist.github.com/myd7349/c9ef3ff31de458b418bbe1bd6410e0e8
-    
+
     freopen("CONIN$", "r", stdin);
     freopen("CONOUT$", "w", stderr);
     freopen("CONOUT$", "w", stdout);

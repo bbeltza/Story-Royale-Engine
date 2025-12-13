@@ -4,7 +4,7 @@
 #include "GameInstance.hpp"
 #include "Camera.hpp"
 
-#include "datatypes/color.hpp"
+#include "datatypes/Color.hpp"
 #include "datatypes/vector.hpp"
 
 #include "internal_def.hh"
@@ -69,14 +69,14 @@ namespace Game
         // Coordinate converting
 
         // @brief Converts screen coordinates to this world's coordinates
-        inline sre::vec2ut screenToWorldSpace(const Unit x, const Unit y) const { return screenToWorld(x, y, &CurrentCamera); }
+        inline sre::vec2ut screenToWorldSpace(const sre::unit x, const sre::unit y) const { return screenToWorld(x, y, &CurrentCamera); }
         // @brief Converts this world's coordinates into screen coordinates
-        inline sre::vec2ut worldToScreenSpace(const Unit x, const Unit y) const { return worldToScreen(x, y, &CurrentCamera); }
+        inline sre::vec2ut worldToScreenSpace(const sre::unit x, const sre::unit y) const { return worldToScreen(x, y, &CurrentCamera); }
 
         // Static functions that convert coordinates, without the need of a world
 
-        static sre::vec2ut worldToScreen(const Unit x, const Unit y, const Camera *cam = nullptr);
-        static sre::vec2ut screenToWorld(const Unit x, const Unit y, const Camera *cam = nullptr);
+        static sre::vec2ut worldToScreen(const sre::unit x, const sre::unit y, const Camera *cam = nullptr);
+        static sre::vec2ut screenToWorld(const sre::unit x, const sre::unit y, const Camera *cam = nullptr);
 
         // Get the current world's camera, or NULL if there's no world
         static Camera* currentCamera();
