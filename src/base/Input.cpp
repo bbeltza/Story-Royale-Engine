@@ -3,7 +3,7 @@
 #include "Base/Input.hpp"
 #include "Game/World.hpp"
 
-#include "datatypes/Flags.hpp"
+#include "datatypes/flags.hpp"
 
 bool Input::KeyPressed(SDL_KeyCode keycode)
 {

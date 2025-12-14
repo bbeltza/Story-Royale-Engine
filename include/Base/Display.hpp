@@ -1,7 +1,7 @@
 #pragma once
 #include "datatypes/vector.hpp"
 #include "datatypes/rect.hpp"
-#include "datatypes/Color.hpp"
+#include "datatypes/color.hpp"
 
 namespace Game
 {

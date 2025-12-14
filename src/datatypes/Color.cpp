@@ -3,7 +3,7 @@
 
 #include "utils/math.h"
 
-#include "datatypes/Color.hpp"
+#include "datatypes/color.hpp"
 
 #define c3getop(macro) { return Color3(macro(r), macro(g), macro(b)); }
 #define c4getop(macro) { return Color4(macro(r), macro(g), macro(b), macro(a)); }

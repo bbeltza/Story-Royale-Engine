@@ -2,7 +2,7 @@
 #include "Game/GuiContainer.hpp"
 #include "Game/GuiObject.hpp"
 
-#include "datatypes/Flags.hpp"
+#include "datatypes/flags.hpp"
 
 namespace Game
 {

@@ -4,7 +4,7 @@
 #include "GameInstance.hpp"
 #include "Camera.hpp"
 
-#include "datatypes/Color.hpp"
+#include "datatypes/color.hpp"
 #include "datatypes/vector.hpp"
 
 #include "internal_def.hh"

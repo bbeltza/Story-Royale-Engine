@@ -1,6 +1,6 @@
 #pragma once
 #include "datatypes/vector.hpp"
-#include "datatypes/Color.hpp"
+#include "datatypes/color.hpp"
 #include "datatypes/rect.hpp"
 #include "Base/Image.hpp"
 

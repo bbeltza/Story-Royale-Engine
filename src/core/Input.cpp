@@ -4,7 +4,7 @@
 
 #include "Base/Input.hpp"
 
-#include "datatypes/Flags.hpp"
+#include "datatypes/flags.hpp"
 
 Signal<const Key*> Input::KeyEvent{NULL, false};
 Signal<const TouchFinger*> Input::FingerMove{ NULL, false };

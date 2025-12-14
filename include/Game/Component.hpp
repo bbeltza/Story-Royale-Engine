@@ -1,7 +1,7 @@
 #pragma once
 #include <standard>
 
-#include "datatypes/Flags.hpp"
+#include "datatypes/flags.hpp"
 #include "datatypes/timestamp.h"
 
 namespace Game

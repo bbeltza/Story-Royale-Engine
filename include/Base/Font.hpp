@@ -4,6 +4,7 @@
 
 #include "Base/Texture.hpp"
 #include "datatypes/rect.hpp"
+#include "datatypes/color.hpp"
 
 class Font
 {
