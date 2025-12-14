@@ -35,7 +35,7 @@ int Thread::invokethread_handler(data *_data)
     return 0;
 }
 
-Thread::Thread(Function func, void* userdata, TimeStamp delay)
+Thread::Thread(Function func, void* userdata, sre::timeStamp delay)
 {
     _containers->lock();
     _containers->allocated_threads.emplace_back();

@@ -15,7 +15,7 @@ DragControl::DragControl(const Action& action): m_action(action)
 
 DragControl::~DragControl() {}
 
-void DragControl::Update(TimeStamp delta)
+void DragControl::Update(sre::timeStamp delta)
 {
     Camera& CurrentCamera = *getCamera();
 
@@ -32,9 +32,10 @@ void DragControl::Update(TimeStamp delta)
     m_lastmouseDelta = m_lastmouseDelta.ZERO;
 }
 
-void DragControl::pUpdate(TimeStamp delta)
+void DragControl::pUpdate(sre::timeStamp delta)
 {
     // Empty.
+    (void)delta;
 }
 
 void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)

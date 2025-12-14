@@ -20,8 +20,8 @@ namespace Game
         private:
         CameraController* m_Controller = nullptr;
 
-        void Update(TimeStamp);
-        void pUpdate(TimeStamp);
+        void Update(sre::timeStamp);
+        void pUpdate(sre::timeStamp);
 
         // Render positions
         sre::vec2ut rpos;

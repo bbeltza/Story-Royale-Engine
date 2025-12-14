@@ -1,7 +1,6 @@
 #pragma once
-#include "C/API.h"
-#include <stdio.h>
-#include <stdarg.h>
+#include <standard>
+#include <C/API.h>
 
 // logging function signature type
 typedef void (*logfunc_t)(const char* format, ...);

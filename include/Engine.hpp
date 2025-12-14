@@ -7,7 +7,7 @@
 
 namespace Runtime
 {
-    extern Signal<TimeStamp> OnUpdate;
+    extern Signal<sre::timeStamp> OnUpdate;
     extern Signal<> BeforeRender;
     extern Signal<> AfterRender;
 
@@ -15,8 +15,8 @@ namespace Runtime
     void SetFramerate(unsigned short FPS);
     void SetPhysicsRate(unsigned short FPS);
 
-    extern const TimeStamp& delta_time;
-    extern const TimeStamp& pdelta_time;
+    extern const sre::timeStamp& delta_time;
+    extern const sre::timeStamp& pdelta_time;
 }
 
 #include "GameEntry.h"

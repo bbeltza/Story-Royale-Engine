@@ -15,7 +15,7 @@ void Components::Velocity::normalize(float speed)
     velocity = velocity / mag * speed;
 }
 
-void Components::Velocity::pUpdate(Game::Entity* e, TimeStamp dt)
+void Components::Velocity::pUpdate(Game::Entity* e, sre::timeStamp dt)
 {
     e->Position += velocity * dt;
 }

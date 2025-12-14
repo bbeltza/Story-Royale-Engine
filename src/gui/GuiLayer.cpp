@@ -91,7 +91,7 @@ void Game::GuiContainer::_renderchildren()
     Rendered.Fire();
 }
 
-void Game::GuiContainer::call_update(TimeStamp dt)
+void Game::GuiContainer::call_update(sre::timeStamp dt)
 {
     Update(dt);
 

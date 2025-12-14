@@ -37,8 +37,8 @@ public:
     virtual ~TweenBase();
 
     void Play();
-    TimeStamp Cancel();
-    TimeStamp Pause();
+    sre::timeStamp Cancel();
+    sre::timeStamp Pause();
 
     Signal<> Completed{this};
     const TweenInfo& Info;
@@ -46,14 +46,14 @@ public:
     inline float GetAlpha() const {return Info.duration ? m_elapsed/Info.duration : 1;}
 private:
 
-    TimeStamp m_elapsed = 0;
+    sre::timeStamp m_elapsed = 0;
     bool m_Playing = false;
 
-    void base_update(TimeStamp delta);
+    void base_update(sre::timeStamp delta);
     virtual void step(float alpha) = 0;
     virtual void start() = 0;
 
-    static void global_update(TimeStamp delta);
+    static void global_update(sre::timeStamp delta);
 
     typedef std::unordered_set<TweenBase*> Set;
     static Set& get_tweens();

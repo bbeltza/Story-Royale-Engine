@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL.h>
-#include <stdint.h>
+#include <standard>
 
 #include "C/API.h"
 #include "datatypes/timestamp.h"
@@ -19,10 +19,10 @@ _CAPI_BEGIN
 		// Runtime data
 
 		intptr_t frame;
-		TimeStamp last_dt;
-		TimeStamp target_dt;
-		TimeStamp phys_target_dt;
-		TimeStamp phys_accum_dt;
+		sre_timeStamp last_dt;
+		sre_timeStamp target_dt;
+		sre_timeStamp phys_target_dt;
+		sre_timeStamp phys_accum_dt;
 
 		// Instance data
 

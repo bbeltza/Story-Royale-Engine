@@ -55,7 +55,7 @@ namespace Game
 
         bool visible = true, canQuery = true;
     private:
-        void call_update(TimeStamp dt);
+        void call_update(sre::timeStamp dt);
         
         void _processchildren();
         void _renderchildren();

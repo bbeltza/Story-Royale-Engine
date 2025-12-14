@@ -1,25 +1,30 @@
 #pragma once
 
-#include <iostream>
-#include <chrono>
-#include <string>
+#ifdef __cplusplus
+    #include <iostream>
+    #include <chrono>
+    #include <string>
 
-#include <cassert>
-#include <cstring>
-#include <cmath>
+    #include <memory>
+    #include <vector>
+    #include <queue>
+    #include <list>
+    #include <array>
 
-#include <memory>
-#include <vector>
-#include <queue>
-#include <list>
-#include <array>
+    #include <unordered_set>
+    #include <unordered_map>
 
-#include <unordered_set>
-#include <unordered_map>
+    #include <mutex>
 
-#include <mutex>
-
-#ifndef _MSC_VER
-#define strcpy_s(dest, n, src) strncpy(dest, src, n)
-#define strcat_s(dest, n, src) strncat(dest, src, n)
+    #include <cassert>
+    #include <cstring>
+    #include <cmath>
+#else
+    #include <stdlib.h>
+    #include <stdio.h>
+    #include <stdarg.h>
+    #include <stdint.h>
+    #include <string.h>
+    #include <math.h>
+    #include <assert.h>
 #endif

@@ -13,8 +13,8 @@ namespace Game
     public:
         virtual ~Component() {}
         virtual void Render(Entity *) {}
-        //virtual void Update(Entity *, TimeStamp) {} // Update() on components isn't implemented yet
-        virtual void pUpdate(Entity *, TimeStamp) {}
+        //virtual void Update(Entity *, sre::timeStamp) {} // Update() on components isn't implemented yet
+        virtual void pUpdate(Entity *, sre::timeStamp) {}
         virtual bool Query(Entity *, float* pt) { return false; } // By default it returns false, the deriving component should add its own implementation
     };
 }

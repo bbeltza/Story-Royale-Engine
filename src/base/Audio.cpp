@@ -123,7 +123,7 @@ void Audio::Play(bool force)
 	SDL_UnlockAudioDevice(engine.audio_device);
 }
 
-TimeStamp Audio::Pause()
+sre::timeStamp Audio::Pause()
 {
 	SDL_LockAudioDevice(engine.audio_device);
 
@@ -136,7 +136,7 @@ TimeStamp Audio::Pause()
 	return timePosition();
 }
 
-TimeStamp Audio::Stop()
+sre::timeStamp Audio::Stop()
 {
 	auto ts = Pause();
 	m_fsamplepos = 0;

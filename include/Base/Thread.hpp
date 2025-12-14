@@ -13,7 +13,7 @@ class Thread;
 
 namespace Threads // Designed to replace ThreadPool
 {
-    TEMPL inline Thread Delay(TimeStamp Duration, _Fn &&_Fx, _Args &&..._Ax);
+    TEMPL inline Thread Delay(sre::timeStamp Duration, _Fn &&_Fx, _Args &&..._Ax);
     TEMPL inline Thread Create(_Fn &&_Fx, _Args &&..._Ax);
 }
 
@@ -54,7 +54,7 @@ public:
         SDL_Thread *handle;
         Function func;
         void *data;
-        TimeStamp delay;
+        sre::timeStamp delay;
     } *_data = nullptr;
 
 private:
@@ -69,7 +69,7 @@ private:
     };
 
     Thread(const Thread &other) = delete;
-    Thread(Function func, void *userdata, TimeStamp delay);
+    Thread(Function func, void *userdata, sre::timeStamp delay);
 
     template <typename _Data, size_t... _Indices>
     static void _invoke(void *_rawdata)
@@ -87,12 +87,12 @@ private:
     static int invokethread_handler(data *);
     static void queue_removing();
 
-    TEMPL friend Thread Threads::Delay(TimeStamp Duration, _Fn &&_Fx, _Args &&..._Ax);
+    TEMPL friend Thread Threads::Delay(sre::timeStamp Duration, _Fn &&_Fx, _Args &&..._Ax);
     __friend_internal(__update_classes)
         __friend_internal(__clean_containers)
 };
 
-TEMPL Thread Threads::Delay(TimeStamp Duration, _Fn &&_Fx, _Args &&..._Ax)
+TEMPL Thread Threads::Delay(sre::timeStamp Duration, _Fn &&_Fx, _Args &&..._Ax)
 {
     using _Tuple = std::tuple<typename std::decay<_Args>::type...>;
     using _Invoke = Thread::invokedata<_Fn, _Tuple>;

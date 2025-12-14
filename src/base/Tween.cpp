@@ -8,7 +8,7 @@ TweenBase::Set& TweenBase::get_tweens()
     return set;
 }
 
-void TweenBase::global_update(TimeStamp delta)
+void TweenBase::global_update(sre::timeStamp delta)
 {
     for (TweenBase* tween : get_tweens())
     {
@@ -34,7 +34,7 @@ void TweenBase::Play()
     start();
 }
 
-TimeStamp TweenBase::Cancel()
+sre::timeStamp TweenBase::Cancel()
 {
     m_Playing = false;
 
@@ -43,14 +43,14 @@ TimeStamp TweenBase::Cancel()
     return elapse;
 }
 
-TimeStamp TweenBase::Pause()
+sre::timeStamp TweenBase::Pause()
 {
     m_Playing = false;
 
     return m_elapsed;
 }
 
-void TweenBase::base_update(TimeStamp delta)
+void TweenBase::base_update(sre::timeStamp delta)
 {
     float alpha;
     m_elapsed += delta;

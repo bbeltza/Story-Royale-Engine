@@ -31,7 +31,7 @@ void Game::Entity::call_render()
     }
 }
 
-void Game::Entity::call_pupdate(TimeStamp dt)
+void Game::Entity::call_pupdate(sre::timeStamp dt)
 {
     *const_cast<sre::vec2ut*>(&lastVelocity) = Position; // This isn't really stored in read-only memory, so it's more likely safe
     for (auto component : m_Components)

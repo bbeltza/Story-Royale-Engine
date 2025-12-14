@@ -17,8 +17,8 @@ namespace CameraControllers
 
         float Smoothness = 0.0f;
     protected:
-        void Update(TimeStamp) override;
-        void pUpdate(TimeStamp) override;
+        void Update(sre::timeStamp) override;
+        void pUpdate(sre::timeStamp) override;
     private:
         sre::vec2ut m_camSpeed;
         sre::vec2ut m_lastmouseDelta;

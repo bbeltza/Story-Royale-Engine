@@ -16,8 +16,8 @@ namespace Game
 
         bool Enabled = true;
         protected:
-        virtual void Update(TimeStamp) {};
-        virtual void pUpdate(TimeStamp) = 0;
+        virtual void Update(sre::timeStamp) {};
+        virtual void pUpdate(sre::timeStamp) = 0;
         private:
         Camera* m_Camera = nullptr;
     };

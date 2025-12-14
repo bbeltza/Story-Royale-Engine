@@ -2,7 +2,7 @@
 
 std::chrono::steady_clock Timer::s_global_clock;
 std::chrono::steady_clock::time_point Timer::s_last_frame_time;
-static std::chrono::duration<TimeStamp> helper_ts_duration;
+static std::chrono::duration<sre::timeStamp> helper_ts_duration;
 
 Timer::Set& Timer::get_timers()
 {
@@ -10,7 +10,7 @@ Timer::Set& Timer::get_timers()
     return timers;
 }
 
-Timer::Timer(TimeStamp duration, bool looped): Looped(looped), m_Duration(duration)
+Timer::Timer(sre::timeStamp duration, bool looped): Looped(looped), m_Duration(duration)
 {
     get_timers().insert(this);
 };
@@ -52,12 +52,12 @@ void Timer::_hit()
 
 }
 
-TimeStamp Timer::global_update()
+sre::timeStamp Timer::global_update()
 {
     helper_ts_duration = s_global_clock.now() - s_last_frame_time;
     s_last_frame_time = s_global_clock.now();
     
-    TimeStamp delta = helper_ts_duration.count();
+    auto delta = helper_ts_duration.count();
 
     for (auto timer : get_timers())
     {

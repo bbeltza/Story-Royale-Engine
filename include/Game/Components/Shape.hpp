@@ -38,7 +38,7 @@ namespace Components
         ShapeForm shape;
         Flags8 flags;
 
-        void pUpdate(::Game::Entity *, TimeStamp) override;
+        void pUpdate(::Game::Entity *, sre::timeStamp) override;
         void Render(::Game::Entity *) override;
         bool Query(::Game::Entity *, float*) override;
 

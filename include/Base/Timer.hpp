@@ -16,14 +16,14 @@ class Timer
     static Set &get_timers();
 
 public:
-    Timer(TimeStamp duration, bool looped = false);
+    Timer(sre::timeStamp duration, bool looped = false);
     ~Timer();
 
     void Start();
     void Stop();
     void Pause();
 
-    TimeStamp getCurrentTimestamp() const { return m_timestamp; };
+    sre::timeStamp getCurrentTimestamp() const { return m_timestamp; };
 
     bool Looped = false;
 
@@ -34,10 +34,10 @@ private:
     void _hit();
 
     bool m_playing = false;
-    TimeStamp m_Duration;
-    TimeStamp m_timestamp;
+    sre::timeStamp m_Duration;
+    sre::timeStamp m_timestamp;
 
-    static TimeStamp global_update();
+    static sre::timeStamp global_update();
 
     __friend_internal(__update_classes)
 };

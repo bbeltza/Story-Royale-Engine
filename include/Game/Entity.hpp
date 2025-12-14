@@ -46,7 +46,7 @@ namespace Game
         // Calls Render() to all of its components
         // Entities by default don't render itself, the components with their overritten render function do
         void call_render();
-        void call_pupdate(TimeStamp);
+        void call_pupdate(sre::timeStamp);
         bool call_query(float* pt);
 
         ParentType m_ParentType = WorldParent;

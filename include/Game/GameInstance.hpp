@@ -7,11 +7,11 @@ struct GameInstance
     GameInstance() {}
     virtual ~GameInstance();
 
-    virtual void Update(TimeStamp dt) {}
+    virtual void Update(sre::timeStamp dt) {}
     virtual void preRender() {}
     virtual void postRender() {}
 
-    Signal<TimeStamp> Updated{this};
+    Signal<sre::timeStamp> Updated{this};
     Signal<> Rendered{this};
 
     void Destroy();
@@ -20,6 +20,6 @@ struct GameInstance
 struct WorldInstance: public GameInstance
 {
     WorldInstance() {}
-    virtual void pUpdate(TimeStamp dt) {}
-    Signal<TimeStamp> pUpdated{this};
+    virtual void pUpdate(sre::timeStamp dt) {}
+    Signal<sre::timeStamp> pUpdated{this};
 };

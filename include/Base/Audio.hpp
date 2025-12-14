@@ -72,14 +72,14 @@ public:
 
 	bool IsPlaying() const;
 
-	TimeStamp timePosition() const { return static_cast<TimeStamp>(m_fsamplepos / m_data->freq()); }
-	TimeStamp timeLength() const { return static_cast<TimeStamp>(m_data->len() / (TimeStamp)m_data->freq()); }
+	sre::timeStamp timePosition() const { return static_cast<sre::timeStamp>(m_fsamplepos / m_data->freq()); }
+	sre::timeStamp timeLength() const { return static_cast<sre::timeStamp>(m_data->len() / static_cast<sre::timeStamp>(m_data->freq())); }
 
 	void Play(bool force=false);
 	void FadeOut() { m_fadeout = true; }
 
-	TimeStamp Pause();
-	TimeStamp Stop();
+	sre::timeStamp Pause();
+	sre::timeStamp Stop();
 
 private:
 	static void threadedload(AudioData* audio);

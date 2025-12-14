@@ -7,7 +7,7 @@
 
 using namespace Components;
 
-void Shape::pUpdate(::Game::Entity* entity, TimeStamp dt)
+void Shape::pUpdate(::Game::Entity* entity, sre::timeStamp dt)
 {    
     if (!collider_set) return;
     if (!flags.Has(CanCollideFlag))

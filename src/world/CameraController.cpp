@@ -15,13 +15,13 @@ CameraController::~CameraController()
         m_Camera->m_Controller = nullptr;
 }
 
-void Camera::Update(TimeStamp dt)
+void Camera::Update(sre::timeStamp dt)
 {
     if (m_Controller && m_Controller->Enabled)
         m_Controller->Update(dt);
 }
 
-void Camera::pUpdate(TimeStamp dt)
+void Camera::pUpdate(sre::timeStamp dt)
 {
     if (m_Controller && m_Controller->Enabled)
         m_Controller->pUpdate(dt);
