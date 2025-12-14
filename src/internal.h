@@ -108,8 +108,8 @@ _CAPI_END
 #ifdef __cplusplus
 #define currworld static_cast<::Game::World*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
 #define currlayer static_cast<::Game::GuiLayer*>(engine.current_guilayer) // Same with this...
-#define flags_kbstate reinterpret_cast<::Flags8*>(engine.keyboard_state)
-#define flags_mousepress (*reinterpret_cast<::Flags32*>(&engine.mouse_press))
+#define flags_kbstate reinterpret_cast<::sre::flags8*>(engine.keyboard_state)
+#define flags_mousepress (*reinterpret_cast<::sre::flags32*>(&engine.mouse_press))
 
 #define _audio_loaded static_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
 #define _audio_queue static_cast<std::unordered_set<Audio *> *>(engine.audio_queue)

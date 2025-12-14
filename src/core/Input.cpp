@@ -41,22 +41,22 @@ void __poll_input(SDL_Event* event)
         break;
     case SDL_KEYDOWN:
         if (event->key.keysym.sym > SDL_NUM_SCANCODES)
-            kbstate(scancode).ToggleOn(3);
+            kbstate(scancode).toggle_on(3);
         else
         {
-            kbstate(scancode).ToggleOn(1);
-            kbstate(sym).ToggleOn(2);
+            kbstate(scancode).toggle_on(1);
+            kbstate(sym).toggle_on(2);
         }
 
         keySignalQueue.emplace_back(&event->key);
         break;
     case SDL_KEYUP:
         if (event->key.keysym.sym > SDL_NUM_SCANCODES)
-            kbstate(scancode).ToggleOff(3);
+            kbstate(scancode).toggle_off(3);
         else
         {
-            kbstate(scancode).ToggleOff(1);
-            kbstate(sym).ToggleOff(2);
+            kbstate(scancode).toggle_off(1);
+            kbstate(sym).toggle_off(2);
         }
         keySignalQueue.emplace_back(&event->key);
         break;

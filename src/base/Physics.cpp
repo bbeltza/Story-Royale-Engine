@@ -10,14 +10,14 @@ using namespace Components;
 void Shape::pUpdate(::Game::Entity* entity, sre::timeStamp dt)
 {    
     if (!collider_set) return;
-    if (!flags.Has(CanCollideFlag))
+    if (!flags.has(CanCollideFlag))
     {
         collider_set->erase(this);
         return;
     }
     collider_set->insert(this);
 
-    if (flags.Has(AnchoredFlag)) return;
+    if (flags.has(AnchoredFlag)) return;
 
     for (auto ent : entity->getWorld()->getEntities<Game::Entity>())
     {
@@ -38,7 +38,7 @@ void Shape::pUpdate(::Game::Entity* entity, sre::timeStamp dt)
                 sre::vec2ut sign = {distance.x < 0 ? -1.0_ut : 1, distance.y < 0 ? -1 : 1.0_ut};
                 sre::vec2ut pushdist = radius * sign - distance;
 
-                if (!comp->flags.Has(AnchoredFlag)) pushdist = pushdist / 2;
+                if (!comp->flags.has(AnchoredFlag)) pushdist = pushdist / 2;
 
                 sre::unit absdx = abs(pushdist.x), absdy = abs(pushdist.y);
 

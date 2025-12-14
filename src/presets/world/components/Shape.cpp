@@ -62,7 +62,7 @@ bool Components::Shape::isInScreenPoint(Game::Entity* p, sre::vec2ut pt)
 
 void Components::Shape::Render(Game::Entity* _entity)
 {
-	if (!this->flags.Has(VisibleFlag)) return;
+	if (!this->flags.has(VisibleFlag)) return;
 
 	const Game::World* world = _entity->getWorld();
 

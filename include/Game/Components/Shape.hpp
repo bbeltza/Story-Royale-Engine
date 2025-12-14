@@ -12,12 +12,12 @@ namespace Components
         typedef std::unordered_set<Components::Shape *> CollisionSet;
 
     public: // Enums
-        enum ShapeForm : Flags8::Type
+        enum ShapeForm : sre::flags8::type
         {
             RectangleShape,
             CircleShape
         };
-        enum Flags : Flags8::Type
+        enum Flags : sre::flags8::type
         {
             VisibleFlag = ut_bit(0),
             AnchoredFlag = ut_bit(1),
@@ -36,7 +36,7 @@ namespace Components
         Color4 Color = {255, 255, 255, 255};
 
         ShapeForm shape;
-        Flags8 flags;
+        sre::flags8 flags;
 
         void pUpdate(::Game::Entity *, sre::timeStamp) override;
         void Render(::Game::Entity *) override;

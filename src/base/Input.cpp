@@ -7,19 +7,19 @@
 
 bool Input::KeyPressed(SDL_KeyCode keycode)
 {
-    return flags_kbstate[keycode & ~(1 << 30)].Has(2);
+    return flags_kbstate[keycode & ~(1 << 30)].has(2);
 }
 
 bool Input::KeyPressed(SDL_Scancode scancode)
 {
-    return flags_kbstate[scancode].Has(1);
+    return flags_kbstate[scancode].has(1);
 }
 
 bool Input::MouseButtonPressed(Button button)
 {
     if (button == mbANY)
-        return flags_mousepress.Has(mbANY);
-    return flags_mousepress.Has(SDL_BUTTON(button));
+        return flags_mousepress.has(mbANY);
+    return flags_mousepress.has(SDL_BUTTON(button));
 }
 
 int Input::GetFingersPressed(SDL_TouchID touchid)
