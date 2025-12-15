@@ -1,5 +1,17 @@
 #pragma once
 
+namespace sre
+{
+    struct udim
+    {
+
+    };
+    struct udim2
+    {
+
+    };
+}
+
 struct UDim
 {
     constexpr UDim(): Scale(0), Offset(100) {}
