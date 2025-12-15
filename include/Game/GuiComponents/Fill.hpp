@@ -6,7 +6,7 @@ namespace GuiComponents
     class Fill: public ::Game::GuiComponent
     {
     public:
-        Color4 color{255, 255, 255, 255};
+        sre::col4 color = sre::col4::WHITE;
     protected:
         void render(::Game::GuiContainer*) override;
     };

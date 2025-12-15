@@ -7,7 +7,7 @@ namespace GuiComponents
     {
     public:
         unsigned int size = 1;
-        Color4 color{0, 0, 0, 255};
+        sre::col4 color = sre::col4::BLACK;
 
     protected:
         void render(::Game::GuiContainer *) override;

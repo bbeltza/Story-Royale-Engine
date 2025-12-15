@@ -25,7 +25,7 @@ namespace GuiComponents
         int count = -1;
         unsigned int scale = 0;
 
-        Color3 color = { 0, 0, 0 };
+        sre::col3 color = sre::col3::BLACK;
 
         Font::HAlign h_alignment = Font::HLeft;
         Font::VAlign v_alignment = Font::VTop;

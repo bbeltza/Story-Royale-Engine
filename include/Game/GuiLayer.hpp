@@ -13,7 +13,7 @@ namespace Game
         ~GuiLayer();
     public:
         template <class _layer=GuiLayer> static _layer* Current() { return dynamic_cast<_layer*>(curr()); }
-        Color4 Foreground = { 0, 0, 0, 0 };
+        sre::col4 Foreground = sre::col4::INVISIBLE;
         
         bool isGuiLayer() const override { return 1; }
 

@@ -20,7 +20,7 @@ namespace Game
         virtual void process_children(GuiObject* Object, uint32_t index) {}
 
         inline sre::rect2Dut* getAbsolute(GuiContainer* container) { return &container->m_absolute; }
-        inline Color4* getModulate(GuiContainer* container) { return &container->m_modulate; }
+        inline sre::col4* getModulate(GuiContainer* container) { return &container->m_modulate; }
     private:
         friend class GuiContainer;
     };

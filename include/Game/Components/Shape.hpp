@@ -33,7 +33,7 @@ namespace Components
 
         // The rect representing the area of the shape by its size, and the offset from the entity by its position
         sre::rect2Dut Rect;
-        Color4 Color = {255, 255, 255, 255};
+        sre::col4 Color = {255, 255, 255, 255};
 
         ShapeForm shape;
         sre::flags8 flags;

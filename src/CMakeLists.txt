@@ -13,7 +13,7 @@ set(SOURCES
 )
 
 set(DATATYPES_SOURCES
-"Color.cpp"
+"color.cpp"
 "UDim.cpp"
 )
 

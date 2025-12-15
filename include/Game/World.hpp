@@ -30,11 +30,11 @@ namespace Game
     public:
 
         /// @brief The background color that the game will have when there's a world, the alpha component is not used
-        Color4 Background = { 255, 149, 236 };
+        sre::col4 Background = { 255, 149, 236 };
     public:
         /// The color that the game will render on top of the world.
         /// This also acts as the background of the GUI Layer
-        Color4 Foreground = Color4::INVISIBLE;
+        sre::col4 Foreground = sre::col4::INVISIBLE;
 
         template <class _wType=World, class... _args>
         static inline _wType *setCurrent(_args... args)

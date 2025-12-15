@@ -43,7 +43,7 @@ bool Font::PreloadTextures(const char* text)
         {
             textures.emplace(
                 c,
-                sre::Image{ TTF_RenderGlyph_Solid(m_font, c, Color4::WHITE) }
+                sre::Image{ TTF_RenderGlyph_Solid(m_font, c, sre::col4::WHITE.toSDL()) }
             );
             unloaded = true;
         };

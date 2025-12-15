@@ -94,7 +94,7 @@ void Font::RenderLine(const sre::vec2ut& start, const char* text, int count, int
         Texture& texture = textures.at(chr);
         render_rect.size = texture.size();
 
-        Display::DrawTexture(texture, render_rect, Color4::WHITE, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
+        Display::DrawTexture(texture, render_rect, sre::col4::WHITE, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
 
         render_rect.position.x += render_rect.size.x;
 

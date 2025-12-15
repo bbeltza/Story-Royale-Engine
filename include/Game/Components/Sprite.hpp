@@ -18,7 +18,7 @@ namespace Components
         sre::vec2ut Scale;
         sre::vec2ut Offset;
 
-        Color4 Modulate = Color4::WHITE;
+        sre::col4 Modulate = sre::col4::WHITE;
 
         size_t current_frame = 0;
 

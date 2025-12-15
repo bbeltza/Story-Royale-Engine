@@ -4,7 +4,7 @@ void GuiComponents::Modulate::pre_render(Game::GuiContainer* obj)
 {
     if (*(uint32_t*)&Value == UINT32_MAX) return;
 
-    Color4* _mod = getModulate(obj);
+    sre::col4* _mod = getModulate(obj);
 
     float values[4] = {
         Value.r / 255.0f,

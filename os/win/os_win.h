@@ -1,5 +1,7 @@
 #include <Windows.h>
 
+#include "OS.h"
+
 #include "OS/win.h"
 #include "C/API.h"
 
@@ -12,5 +14,9 @@ int os_win_outputgetc(void);
 int os_win_outputhasnline(void);
 
 void os_win_delay(unsigned long long);
+
+void* os_win_thread_spawn(os_thread_proc start, void* userdata, unsigned stacksize);
+int os_win_thread_detach(void* thrd);
+int os_win_thread_wait(void* thrd, unsigned* ret);
 
 _CAPI_END

@@ -43,7 +43,7 @@ float Display::GetScale() { return engine.viewport_scale; }
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
 
-void Display::DrawLine(const Color4 &Color, const sre::vec2ut &Pt1, const sre::vec2ut &Pt2, const Game::World* world)
+void Display::DrawLine(const sre::col4 &Color, const sre::vec2ut &Pt1, const sre::vec2ut &Pt2, const Game::World* world)
 {
     START_DRAW
 
@@ -57,7 +57,7 @@ void Display::DrawLine(const Color4 &Color, const sre::vec2ut &Pt1, const sre::v
     END_DRAW
 }
 
-void Display::DrawLines(const Color4 &Color, int Count, const sre::vec2ut *Pts, const Game::World* world)
+void Display::DrawLines(const sre::col4 &Color, int Count, const sre::vec2ut *Pts, const Game::World* world)
 {
     START_DRAW
 
@@ -72,7 +72,7 @@ void Display::DrawLines(const Color4 &Color, int Count, const sre::vec2ut *Pts, 
     END_DRAW
 }
 
-void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const Color4 &Color, const sre::vec2f &AnchorPoint, DrawingMode Mode, const Game::World* world)
+void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Color, const sre::vec2f &AnchorPoint, DrawingMode Mode, const Game::World* world)
 {
     START_DRAW
 
@@ -94,7 +94,7 @@ void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const Color4 &Color,
     END_DRAW
 };
 
-void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double _angle, const Color4 &_Col, DrawingMode _dm, const Game::World* world)
+void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double _angle, const sre::col4 &_Col, DrawingMode _dm, const Game::World* world)
 {
     START_DRAW
 
@@ -145,7 +145,7 @@ void Display::DrawDebug(const sre::vec2ut& _pos)
     END_DRAW
 }
 
-void Display::DrawCircle(const sre::vec2ut &pos, const sre::unit radius, const Color4 &_Col, DrawingMode _dm, const Game::World* world)
+void Display::DrawCircle(const sre::vec2ut &pos, const sre::unit radius, const sre::col4 &_Col, DrawingMode _dm, const Game::World* world)
 #if 0
 {
     START_DRAW
@@ -188,7 +188,7 @@ end:
 }
 #endif
 
-void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, const Color4 &Modulate, const sre::vec2f &AnchorPoint, const Game::World* world)
+void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, const sre::col4 &Modulate, const sre::vec2f &AnchorPoint, const Game::World* world)
 {
     START_DRAW
 
@@ -218,7 +218,7 @@ void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, cons
     END_DRAW
 }
 
-void Display::Fill(const Color4 &Color)
+void Display::Fill(const sre::col4 &Color)
 {
     START_DRAW
 

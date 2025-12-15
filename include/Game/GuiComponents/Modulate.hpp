@@ -6,7 +6,7 @@ namespace GuiComponents
     class Modulate: public ::Game::GuiComponent
     {
     public:
-        Color4 Value{255, 255, 255, 255};
+        sre::col4 Value = sre::col4::WHITE;
     protected:
         void pre_render(::Game::GuiContainer*) override;
     };

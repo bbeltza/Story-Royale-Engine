@@ -72,8 +72,8 @@ void __display_render()
 	if (Game::World *current = currworld)
 	{
 		//// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
-		Color3 &bg = current->Background;
-		Color4 &fg = current->Foreground;
+		const sre::col3& bg = current->Background;
+		const sre::col4& fg = current->Foreground;
 
 		//// Clearing the screen with the background color
 		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, bg.r, bg.g, bg.b, 255);
@@ -103,7 +103,7 @@ void __display_render()
 	// Drawing the Gui layer
 	if (Game::GuiLayer *current = currlayer)
 	{
-		Color4 &fg = current->Foreground;
+		sre::col4& fg = current->Foreground;
 
 		if (fg.a < 255)
 		{

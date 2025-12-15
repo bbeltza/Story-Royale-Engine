@@ -1,20 +1,31 @@
 #pragma once
 #include "C/API.h"
 
-#define funcdef(type, name, ...) type (*name)(__VA_ARGS__)
+#define _funcdef(type, name, ...) type (*name)(__VA_ARGS__)
 
 _CAPI_BEGIN
 
+typedef unsigned (*os_thread_proc)(void*);
+
 struct os_wrapper
 {
-	funcdef(int*, output_coordget, int buff[2]);
-	funcdef(void, output_coordset, const int coords[2]);
+	_funcdef(int*, output_coordget, int buff[2]);
+	_funcdef(void, output_coordset, const int coords[2]);
 
-	funcdef(int, output_getc, void);
-	funcdef(int, output_hasnline, void);
+	_funcdef(int, output_getc, void);
+	_funcdef(int, output_hasnline, void);
 
-	funcdef(void, delay, unsigned long long units);
+	_funcdef(void, delay, unsigned long long units);
+
+	_funcdef(void*, thread_spawn, os_thread_proc start, void* userdata, unsigned stacksize);
+	_funcdef(int, thread_detach, void* thrd);
+	_funcdef(int, thread_wait, void* thrd, unsigned* ret);
+
+	_funcdef(int, thread_suspend, void* thrd);
+	_funcdef(int, thread_resume, void* thrd);
 };
+
+#undef _funcdef
 
 // Operating System wrapper functions/utilities that aren't usually available in the standard library
 extern const struct os_wrapper os;

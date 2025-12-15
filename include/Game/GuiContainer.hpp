@@ -71,7 +71,7 @@ namespace Game
         std::list<GuiObject*> m_children;
         std::list<GuiComponent*> m_components;
         
-        Color4 m_modulate = {255, 255, 255, 255};
+        sre::col4 m_modulate = sre::col4::WHITE;
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
 
         static GuiContainer* s_targetParentContainer;
