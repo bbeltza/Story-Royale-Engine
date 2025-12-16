@@ -11,8 +11,7 @@ void Image::Fit(Game::GuiObject* obj)
         return;
     }
     sre::vec2i size = CurrentImage->size();
-    obj->size.X.Offset = size.x;
-    obj->size.Y.Offset = size.y;
+    obj->size = sre::udim2::fromoffset(size);
 }
 
 void Image::render(Game::GuiContainer* obj)

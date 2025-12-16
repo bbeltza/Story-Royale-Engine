@@ -9,11 +9,11 @@ namespace GuiComponents
         public:
         struct
         {
-            UDim2 topleft = UDim2::ZERO;
-            UDim2 bottomright = UDim2::ZERO;
+            sre::udim2 topleft;
+            sre::udim2 bottomright;
         } padding;
 
-        void setPadding(const UDim&);
+        void setPadding(const sre::udim&);
 
     protected:
         void process_position(::Game::GuiContainer*) override;

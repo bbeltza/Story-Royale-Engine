@@ -7,19 +7,19 @@ namespace GuiComponents
     class List : public ::Game::GuiComponent
     {
     public:
-        enum Direction : int
+        enum Direction
         {
-            dir_horizontal,
-            dir_vertical
+            HORIZONTAL,
+            VERTICAL
         };
 
     public:
-        Direction direction = dir_vertical;
-        UDim Padding = UDim::ZERO;
+        Direction direction = VERTICAL;
+        sre::udim Padding = sre::udim::ZERO;
     protected:
         void process_children(::Game::GuiObject*, uint32_t) override;
 
     private:
-        float m_lastsize;
+        sre::unit m_lastsize;
     };
 }

@@ -11,15 +11,15 @@ namespace Game
     protected:
         ~GuiObject();
     public:
-        UDim2 position; 
-        UDim2 size{0, 100, 0, 100};
+        sre::udim2 position;
+        sre::udim2 size = sre::udim2::fromoffset(100, 100);
         sre::vec2f anchor;
         int zIndex = 0;
 
         bool isGuiLayer() const override { return 0; }
         bool isHovering() const;
-        Signal<>* TweenPosition(const TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
-        Signal<>* TweenSize(const TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset);
+        Signal<>* TweenPosition(const TweenInfo& Info, const sre::udim::unit_type* XScale, const sre::udim::unit_type* XOffset, const sre::udim::unit_type* YScale, const sre::udim::unit_type* YOffset);
+        Signal<>* TweenSize(const TweenInfo& Info, const sre::udim::unit_type* XScale, const sre::udim::unit_type* XOffset, const sre::udim::unit_type* YScale, const sre::udim::unit_type* YOffset);
         Signal<>* TweenAnchor(const TweenInfo& Info, const float* X, const float* Y);
 
     private:

@@ -11,15 +11,15 @@ void GuiComponents::List::process_children(Game::GuiObject* child, uint32_t inde
 
     switch (direction)
     {
-    case dir_horizontal:
+    case HORIZONTAL:
         childabs->position.y = parentabs->position.y;
         childabs->position.x = parentabs->position.x + m_lastsize;
-        m_lastsize += childabs->size.x + Padding.toAbsolute(parentabs->size.x);
+        m_lastsize += childabs->size.x + Padding.to_absolute(parentabs->size.x);
         break;
     default:
         childabs->position.x = parentabs->position.x;
         childabs->position.y = parentabs->position.y + m_lastsize;
-        m_lastsize += childabs->size.y + Padding.toAbsolute(parentabs->size.y);
+        m_lastsize += childabs->size.y + Padding.to_absolute(parentabs->size.y);
         break;
     }
     

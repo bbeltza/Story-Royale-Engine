@@ -59,8 +59,7 @@ void Game::GuiObject::_process()
 {
     // Process the size of the UI objects first
 
-    m_absolute.size.x = size.X.toAbsolute(m_parent->m_absolute.size.x);
-    m_absolute.size.y = size.Y.toAbsolute(m_parent->m_absolute.size.y);
+    m_absolute.size = size.to_absolute(m_parent->m_absolute.size);
 
     // Then transforming it with any components
 
@@ -68,8 +67,7 @@ void Game::GuiObject::_process()
 
     // And finally process the positions with the transformed size
 
-    m_absolute.position.x = m_parent->m_absolute.position.x + position.X.toAbsolute(m_parent->m_absolute.size.x) - m_absolute.size.x * anchor.x;
-    m_absolute.position.y = m_parent->m_absolute.position.y + position.Y.toAbsolute(m_parent->m_absolute.size.y) - m_absolute.size.y * anchor.y;
+    m_absolute.position = m_parent->m_absolute.position + position.to_absolute(m_parent->m_absolute.size) - m_absolute.size * anchor;
 }
 
 void Game::GuiContainer::_renderchildren()
@@ -163,24 +161,24 @@ void Game::GuiContainer::_proc_children_components(uint32_t index)
     lastTw = tweens[i];                                     \
 }
 
-Signal<>* Game::GuiObject::TweenPosition(const TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
+Signal<>* Game::GuiObject::TweenPosition(const TweenInfo& Info, const sre::udim::unit_type* XScale, const sre::udim::unit_type* XOffset, const sre::udim::unit_type* YScale, const sre::udim::unit_type* YOffset)
 {
     TweenBase* lastTw = nullptr;
-    checktw(XScale, 0, position.X.Scale, float)
-    checktw(XOffset, 1, position.X.Offset, int)
-    checktw(YScale, 2, position.Y.Scale, float)
-    checktw(YOffset, 3, position.Y.Offset, int)
+    checktw(XScale, 0, position.x.scale, sre::udim::unit_type)
+    checktw(XOffset, 1, position.x.offset, sre::udim::unit_type)
+    checktw(YScale, 2, position.y.scale, sre::udim::unit_type)
+    checktw(YOffset, 3, position.y.offset, sre::udim::unit_type)
 
     return lastTw ? &lastTw->Completed : nullptr;
 }
 
-Signal<>* Game::GuiObject::TweenSize(const TweenInfo& Info, const float* XScale, const int* XOffset, const float* YScale, const int* YOffset)
+Signal<>* Game::GuiObject::TweenSize(const TweenInfo& Info, const sre::udim::unit_type* XScale, const sre::udim::unit_type* XOffset, const sre::udim::unit_type* YScale, const sre::udim::unit_type* YOffset)
 {
     TweenBase* lastTw = nullptr;
-    checktw(XScale, 4, size.X.Scale, float)
-    checktw(XOffset, 5, size.X.Offset, int)
-    checktw(YScale, 6, size.Y.Scale, float)
-    checktw(YOffset, 7, size.Y.Offset, int)
+    checktw(XScale, 4, size.x.scale, sre::udim::unit_type)
+    checktw(XOffset, 5, size.x.offset, sre::udim::unit_type)
+    checktw(YScale, 6, size.y.scale, sre::udim::unit_type)
+    checktw(YOffset, 7, size.y.offset, sre::udim::unit_type)
 
     return lastTw ? &lastTw->Completed : nullptr;
 }

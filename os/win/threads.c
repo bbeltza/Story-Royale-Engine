@@ -2,7 +2,7 @@
 
 void* os_win_thread_spawn(os_thread_proc start, void* userdata, unsigned stacksize)
 {
-	return CreateThread(NULL, stacksize, start, userdata, 0, NULL);
+	return CreateThread(NULL, stacksize, (LPTHREAD_START_ROUTINE)start, userdata, 0, NULL);
 }
 
 int os_win_thread_detach(void* thrd)

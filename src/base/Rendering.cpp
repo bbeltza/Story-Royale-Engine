@@ -207,7 +207,7 @@ void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, cons
     SDL_SetTextureAlphaMod((SDL_Texture *)_Texture.texture, Modulate.a);
     SDL_RenderCopyExF(engine.sdl_rendererhndl, static_cast<SDL_Texture *>(_Texture.texture), NULL, &render_rect, 0, NULL, static_cast<SDL_RendererFlip>(flip));
 
-#if 01
+#if 00
     if (!SDL_GetRenderTarget(engine.sdl_rendererhndl))
     {
         SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 0, 0, 255);
