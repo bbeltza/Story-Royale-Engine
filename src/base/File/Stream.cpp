@@ -184,9 +184,9 @@ SDL_RWops *File::toRWops() const
     {
 #ifdef SDL_HAVE_STDIO_H
         File copy = *this;
-        rw = SDL_RWFromFP(copy.stream, SDL_TRUE);
+        rw = SDL_RWFromFP(copy.stream.ptr, SDL_TRUE);
         if (rw)
-            copy.stream = NULL;
+            copy.stream.ptr = NULL;
 #else
         Chunk chunk = this->allocate();
         rw = SDL_RWFromConstMem(chunk.data, static_cast<int>(chunk.size));

@@ -1,5 +1,6 @@
 #pragma once
 #include <utils/logging.h>
+#include <ints.h>
 
 #define SRE_IMPLEMENT_DATATYPE_PRINT \
 inline void print() const { display(&ALOG); } \

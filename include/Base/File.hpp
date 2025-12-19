@@ -117,8 +117,8 @@ public:
 		return std::move(*reinterpret_cast<T*>(data));
 	}
 
-	template <class T> inline T readLE() { return LITTLE_ENDIAN ? read<T>() : readSwapped<T>(); }
-	template <class T> inline T readBE() { return BIG_ENDIAN ? read<T>() : readSwapped<T>(); }
+	template <class T> inline T readLE() { return IS_LITTLE_ENDIAN ? read<T>() : readSwapped<T>(); }
+	template <class T> inline T readBE() { return IS_BIG_ENDIAN ? read<T>() : readSwapped<T>(); }
 
 	int readF(const char* fmt, ...);
 
@@ -136,11 +136,11 @@ public:
 		return writeBytes(swap, sizeof(T));
 	}
 
-	template <class T> size_t writeLE(T data) { return LITTLE_ENDIAN ? write(data) : writeSwapped(data); }
-	template <class T> size_t writeBE(T data) { return BIG_ENDIAN ? write(data) : writeSwapped(data); }
+	template <class T> size_t writeLE(T data) { return IS_LITTLE_ENDIAN ? write(data) : writeSwapped(data); }
+	template <class T> size_t writeBE(T data) { return IS_BIG_ENDIAN ? write(data) : writeSwapped(data); }
 
-	static constexpr bool LITTLE_ENDIAN = SDL_BYTEORDER == SDL_LIL_ENDIAN;
-	static constexpr bool BIG_ENDIAN = SDL_BYTEORDER == SDL_BIG_ENDIAN;
+	static constexpr bool IS_LITTLE_ENDIAN = (SDL_BYTEORDER == SDL_LIL_ENDIAN);
+	static constexpr bool IS_BIG_ENDIAN = (SDL_BYTEORDER == SDL_BIG_ENDIAN);
 private:
 
 	size_t resource_size() const

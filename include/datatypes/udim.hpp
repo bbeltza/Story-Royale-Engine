@@ -41,11 +41,11 @@ namespace sre
         udim x;
         udim y;
 
-        constexpr void setscale(unit_type x, unit_type y) { this->x.scale = x; this->y.scale = y; }
-        constexpr void setscale(const vec2<unit_type>& vec) { return setscale(vec.x, vec.y); }
+        inline void setscale(unit_type x, unit_type y) { this->x.scale = x; this->y.scale = y; }
+        inline void setscale(const vec2<unit_type>& vec) { return setscale(vec.x, vec.y); }
 
-        constexpr void setoffset(unit_type x, unit_type y) { this->x.offset = x; this->y.offset = y; }
-        constexpr void setoffset(const vec2<unit_type>& vec) { return setoffset(vec.x, vec.y); }
+        inline void setoffset(unit_type x, unit_type y) { this->x.offset = x; this->y.offset = y; }
+        inline void setoffset(const vec2<unit_type>& vec) { return setoffset(vec.x, vec.y); }
 
         static constexpr udim2 fromoffset(unit_type x, unit_type y) { return udim2{ 0, x, 0, y }; }
         static constexpr udim2 fromoffset(const vec2<unit_type>& vec) { return fromoffset(vec.x, vec.y); }

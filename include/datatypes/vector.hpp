@@ -30,7 +30,7 @@ namespace sre
         constexpr vec2(const vec2& other): vec2(other.x, other.y) {}
 
         template <typename T2>
-        explicit constexpr vec2(T2 x, T2 y): vec2(static_cast<T>(x), static_cast<T>(y)) {}
+        constexpr vec2(T2 x, T2 y): vec2(static_cast<T>(x), static_cast<T>(y)) {}
 
         template <typename T2>
         explicit constexpr vec2(const vec2<T2>& other): vec2(other.x, other.y) {}
@@ -78,23 +78,23 @@ namespace sre
 
         constexpr vec2 abs() const { return { ut::abs(x), ut::abs(y) }; }
         template <typename T2>
-        constexpr auto dot(const vec2<T2>& other) const { return x * other.x + y * other.y; }
+        constexpr auto dot(const vec2<T2>& other) const -> decltype(x * other.x) { return x * other.x + y * other.y; }
 
         constexpr double magnitude() const { return hypot(x, y); }
-        constexpr auto getNormalized() const { return getDiv(magnitude()); }
+        constexpr double getNormalized() const { return getDiv(magnitude()); }
 
         inline void normalize() { div(static_cast<T>(magnitude())); }
         inline void setclamp(const vec2& min, const vec2& max) { ut_setclamp(x, min.x, max.y); ut_setclamp(y, min.y, max.y); }
         inline void setlerp(const vec2& dst, double alpha) { x = static_cast<T> ut_lerp(x, dst.x, alpha); y = static_cast<T> ut_lerp(y, dst.y, alpha); }
 
-        template <typename T2> constexpr auto operator +(const vec2<T2>& other) const { return getAdd(other); }
-        template <typename T2> constexpr auto operator -(const vec2<T2>& other) const { return getSub(other); }
-        template <typename T2> constexpr auto operator *(const vec2<T2>& other) const { return getMul(other); }
-        template <typename T2> constexpr auto operator /(const vec2<T2>& other) const { return getDiv(other); }
-        template <typename T2> constexpr auto operator +(T2 other) const { return getAdd(other); }
-        template <typename T2> constexpr auto operator -(T2 other) const { return getSub(other); }
-        template <typename T2> constexpr auto operator *(T2 other) const { return getMul(other); }
-        template <typename T2> constexpr auto operator /(T2 other) const { return getDiv(other); }
+        template <typename T2> constexpr auto operator +(const vec2<T2>& other) const -> decltype(getAdd(other)) { return getAdd(other); }
+        template <typename T2> constexpr auto operator -(const vec2<T2>& other) const -> decltype(getSub(other)) { return getSub(other); }
+        template <typename T2> constexpr auto operator *(const vec2<T2>& other) const -> decltype(getMul(other)) { return getMul(other); }
+        template <typename T2> constexpr auto operator /(const vec2<T2>& other) const -> decltype(getDiv(other)) { return getDiv(other); }
+        template <typename T2> constexpr auto operator +(T2 other) const -> decltype(getAdd(other)) { return getAdd(other); }
+        template <typename T2> constexpr auto operator -(T2 other) const -> decltype(getAdd(other)) { return getSub(other); }
+        template <typename T2> constexpr auto operator *(T2 other) const -> decltype(getAdd(other)) { return getMul(other); }
+        template <typename T2> constexpr auto operator /(T2 other) const -> decltype(getAdd(other)) { return getDiv(other); }
 
         template <typename T2> inline void operator +=(const vec2<T2>& other) { add(other); }
         template <typename T2> inline void operator -=(const vec2<T2>& other) { sub(other); }

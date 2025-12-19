@@ -21,13 +21,13 @@ namespace sre
         constexpr T get() const { return m_data; }
         constexpr bool has(T flag) const { return (m_data & flag) != 0; }
 
-        constexpr void toggle(T flag) { m_data ^= flag; }
-        constexpr void toggle_on(T flag) { m_data |= flag; }
-        constexpr void toggle_off(T flag) { m_data &= ~flag; }
+        inline void toggle(T flag) { m_data ^= flag; }
+        inline void toggle_on(T flag) { m_data |= flag; }
+        inline void toggle_off(T flag) { m_data &= ~flag; }
 
-        template <typename... Args> constexpr void toggle(Args... args) { toggle(get_pack(args...)); }
-        template <typename... Args> constexpr void toggle_on(Args... args) { toggle_on(get_pack(args...)); }
-        template <typename... Args> constexpr void toggle_off(Args... args) { toggle_off(get_pack(args...)); }
+        template <typename... Args> inline void toggle(Args... args) { toggle(get_pack(args...)); }
+        template <typename... Args> inline void toggle_on(Args... args) { toggle_on(get_pack(args...)); }
+        template <typename... Args> inline void toggle_off(Args... args) { toggle_off(get_pack(args...)); }
 
         constexpr bool operator ==(const flags& other) { return m_data == other.m_data; }
         constexpr bool operator !=(const flags& other) { return m_data != other.m_data; }

@@ -25,15 +25,15 @@ namespace sre
 		constexpr col3(T rgb): r(rgb), g(rgb), b(rgb) {}
 		constexpr col3(const col3& copy): r(copy.r), g(copy.g), b(copy.b) {}
 
-		static constexpr col3 fromHEX(unsigned long hex) { return { (hex >> 16) & 0xFF, (hex >> 8) & 0xFF, (hex >> 0) & 0xFF }; }
+		static constexpr col3 fromHEX(sre::u32 hex) { return { static_cast<T>((hex >> 16) & 0xFF), static_cast<T>((hex >> 8) & 0xFF), static_cast<T>((hex >> 0) & 0xFF) }; }
 
 		T r{0};
 		T g{0};
 		T b{0};
 
-		constexpr void add(const col3& other) { r = add_component(r, other.r); g = add_component(g, other.g); b = add_component(b, other.b); }
-		constexpr void sub(const col3& other) { r = sub_component(r, other.r); g = sub_component(g, other.g); b = sub_component(b, other.b); }
-		constexpr void mul(const col3& other) { r = mul_component(r, other.r); g = mul_component(g, other.g); b = mul_component(b, other.b); }
+		inline void add(const col3& other) { r = add_component(r, other.r); g = add_component(g, other.g); b = add_component(b, other.b); }
+		inline void sub(const col3& other) { r = sub_component(r, other.r); g = sub_component(g, other.g); b = sub_component(b, other.b); }
+		inline void mul(const col3& other) { r = mul_component(r, other.r); g = mul_component(g, other.g); b = mul_component(b, other.b); }
 
 		constexpr col3 getAdd(const col3& other) const { return { add_component(r, other.r), add_component(g, other.g), add_component(b, other.b) }; }
 		constexpr col3 getSub(const col3& other) const { return { sub_component(r, other.r), sub_component(g, other.g), sub_component(b, other.b) }; }
@@ -47,9 +47,9 @@ namespace sre
 		constexpr col3 operator -(const col3& other) const { return getSub(other); }
 		constexpr col3 operator *(const col3& other) const { return getMul(other); }
 
-		constexpr void operator +=(const col3& other) { return add(other); }
-		constexpr void operator -=(const col3& other) { return sub(other); }
-		constexpr void operator *=(const col3& other) { return mul(other); }
+		inline void operator +=(const col3& other) { return add(other); }
+		inline void operator -=(const col3& other) { return sub(other); }
+		inline void operator *=(const col3& other) { return mul(other); }
 
 		static const col3 WHITE;
 		static const col3 BLACK;
@@ -85,18 +85,16 @@ namespace sre
 
 		T a{0xFF};
 
-		constexpr void add(const col4& other) { col3::add(other); a = add_component(a, other.a); }
-		constexpr void sub(const col4& other) { col3::sub(other); a = sub_component(a, other.a); }
-		constexpr void mul(const col4& other) { col3::mul(other); a = mul_component(a, other.a); }
-
+		inline void add(const col4& other) { col3::add(other); a = add_component(a, other.a); }
+		inline void sub(const col4& other) { col3::sub(other); a = sub_component(a, other.a); }
+		inline void mul(const col4& other) { col3::mul(other); a = mul_component(a, other.a); }
+		inline void operator +=(const col4& other) { return add(other); }
+		inline void operator -=(const col4& other) { return sub(other); }
+		inline void operator *=(const col4& other) { return mul(other); }
+		
 		constexpr col4 getAdd(const col4& other) const { return { col3::getAdd(other), add_component(a, other.a) }; }
 		constexpr col4 getSub(const col4& other) const { return { col3::getSub(other), sub_component(a, other.a) }; }
 		constexpr col4 getMul(const col4& other) const { return { col3::getMul(other), mul_component(a, other.a) }; }
-
-		constexpr void operator +=(const col4& other) { return add(other); }
-		constexpr void operator -=(const col4& other) { return sub(other); }
-		constexpr void operator *=(const col4& other) { return mul(other); }
-
 		constexpr col4 operator +(const col4& other) const { return getAdd(other); }
 		constexpr col4 operator -(const col4& other) const { return getSub(other); }
 		constexpr col4 operator *(const col4& other) const { return getMul(other); }
