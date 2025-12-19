@@ -30,7 +30,13 @@ namespace sre
         constexpr vec2(const vec2& other): vec2(other.x, other.y) {}
 
         template <typename T2>
-        constexpr operator vec2<T2>() const
+        explicit constexpr vec2(T2 x, T2 y): vec2(static_cast<T>(x), static_cast<T>(y)) {}
+
+        template <typename T2>
+        explicit constexpr vec2(const vec2<T2>& other): vec2(other.x, other.y) {}
+
+        template <typename T2>
+        explicit constexpr operator vec2<T2>() const
         {
             return {
                 static_cast<T2>(x),
@@ -38,14 +44,14 @@ namespace sre
             };
         }
 
-        template <typename T2> inline void add(const vec2<T2>& other) { x += other.x; y += other.y; }
-        template <typename T2> inline void sub(const vec2<T2>& other) { x -= other.x; y -= other.y; }
-        template <typename T2> inline void mul(const vec2<T2>& other) { x *= other.x; y *= other.y; }
-        template <typename T2> inline void div(const vec2<T2>& other) { x /= other.x; y /= other.y; }
-        template <typename T2> inline void add(T2 other) { x += other; y += other; }
-        template <typename T2> inline void sub(T2 other) { x -= other; y -= other; }
-        template <typename T2> inline void mul(T2 other) { x *= other; y *= other; }
-        template <typename T2> inline void div(T2 other) { x /= other; y /= other; }
+        template <typename T2> inline void add(const vec2<T2>& other) { x += static_cast<T>(other.x); y += static_cast<T>(other.y); }
+        template <typename T2> inline void sub(const vec2<T2>& other) { x -= static_cast<T>(other.x); y -= static_cast<T>(other.y); }
+        template <typename T2> inline void mul(const vec2<T2>& other) { x *= static_cast<T>(other.x); y *= static_cast<T>(other.y); }
+        template <typename T2> inline void div(const vec2<T2>& other) { x /= static_cast<T>(other.x); y /= static_cast<T>(other.y); }
+        template <typename T2> inline void add(T2 other) { x += static_cast<T>(other); y += static_cast<T>(other); }
+        template <typename T2> inline void sub(T2 other) { x -= static_cast<T>(other); y -= static_cast<T>(other); }
+        template <typename T2> inline void mul(T2 other) { x *= static_cast<T>(other); y *= static_cast<T>(other); }
+        template <typename T2> inline void div(T2 other) { x /= static_cast<T>(other); y /= static_cast<T>(other); }
 
         template <typename T2>
         constexpr auto getAdd(const vec2<T2>& other) const -> vec2<decltype(x + other.x)> { return { x + other.x, y + other.y }; }
@@ -107,9 +113,9 @@ namespace sre
         static const vec2 CENTER;
     };
 
-    template <class T> const vec2<T> vec2<T>::ZERO = { 0, 0 };
-    template <class T> const vec2<T> vec2<T>::ONE = { 1, 1 };
-    template <class T> const vec2<T> vec2<T>::CENTER = { 0.5, 0.5 };
+    template <class T> const vec2<T> vec2<T>::ZERO{ 0, 0 };
+    template <class T> const vec2<T> vec2<T>::ONE{ 1, 1 };
+    template <class T> const vec2<T> vec2<T>::CENTER{ 0.5, 0.5 };
 
     using vec2i = vec2<int>;
     using vec2u = vec2<unsigned>;

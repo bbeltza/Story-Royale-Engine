@@ -26,7 +26,7 @@ void __query_objects()
         int finger_count = SDL_GetNumTouchFingers(engine.input_last_touchid);
         if (!finger_count) goto callsection;
 
-        sre::vec2f screensize = sre::vec2i{ engine.viewport.w, engine.viewport.h };
+        sre::vec2f screensize{ engine.viewport.w, engine.viewport.h };
         SDL_Finger* lastfinger = SDL_GetTouchFinger(engine.input_last_touchid, finger_count - 1);
 
         pt.x = lastfinger->x * screensize.x;

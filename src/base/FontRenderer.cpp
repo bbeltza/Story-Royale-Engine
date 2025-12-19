@@ -92,7 +92,7 @@ void Font::RenderLine(const sre::vec2ut& start, const char* text, int count, int
         if (n >= scount) break;
 
         Texture& texture = textures.at(chr);
-        render_rect.size = texture.size();
+        render_rect.size = sre::vec2ut{texture.size()};
 
         Display::DrawTexture(texture, render_rect, sre::col4::WHITE, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
 

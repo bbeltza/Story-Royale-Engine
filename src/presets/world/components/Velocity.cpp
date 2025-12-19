@@ -1,7 +1,7 @@
 #include "Game/Components/Velocity.hpp"
 #include "Game/Entity.hpp"
 
-void Components::Velocity::normalize(float speed)
+void Components::Velocity::normalize(sre::unit speed)
 {
     if (speed == 0)
     {
@@ -9,7 +9,7 @@ void Components::Velocity::normalize(float speed)
         return;
     }
     
-    auto mag = velocity.magnitude();
+    sre::unit mag = static_cast<sre::unit>(velocity.magnitude());
     if (mag == 0.0) return;
 
     velocity = velocity / mag * speed;

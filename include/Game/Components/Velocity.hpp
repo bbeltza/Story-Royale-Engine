@@ -13,7 +13,7 @@ namespace Components
         
         // Normalizes the velocity and multiplies it by the speed parameter
         // @param speed the speed to multiply
-        void normalize(float=1.0f);
+        void normalize(sre::unit=1.0);
         void pUpdate(::Game::Entity*, sre::timeStamp) override;
     };
 }
