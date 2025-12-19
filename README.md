@@ -45,7 +45,7 @@ cmake --preset x64-debug
 ```
 Now you have configured your project, but it not built yet. You have just created a configuration for the build program that you are using, build programs can be specified by using the `-G [generator]` flag [(Available options)](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). The generated files are located in the `build` folder, you can change "build" in the previous command by whatever folder you want, but do not change it to a folder ***that already exists***. If you've used presets, the configuration files should be located at `out/build/[preset name]`.
 
-There are multiple ways where you can build the project, you can either go to the generated folder and type the command (of your build program) that compiles it (For Visual Studio solutions there will be a .sln file there, just open it and build it with Visual Studio). Or you can just use this cmake command in the engine's folder
+There are multiple ways where you can build the project, you can either go to the generated folder and type the command (of your build program) that compiles it (For Visual Studio solutions there will be a .sln file there, just open it and build it with Visual Studio, you might need to setup the working directory if you're managing with resources). Or you can just use this cmake command in the engine's folder
 
 ```sh
 cmake --build build # build or wherever your generated files are
@@ -114,8 +114,6 @@ project(Game) # This can be anything, it's the name of the target
 # add_subdirectory(Engine)
 
 include(StoryRoyaleEngine)
-# Some errors occur when you're building inside the engine due to the policies (they're like rules) not being set outside, if it occurs, try including this macro:
-# srEngine_policy()
 
 # Add all of your C/C++ files here
 set(SOURCES "src/entry.cpp") # Note that SOURCES has to remain, this variable is used for the next line

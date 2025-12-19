@@ -53,6 +53,10 @@ namespace sre
 
 		static const col3 WHITE;
 		static const col3 BLACK;
+
+		static const col3 RED;
+		static const col3 GREEN;
+		static const col3 BLUE;
 	};
 
 	struct alignas(int) col4: public col3
@@ -104,5 +108,9 @@ namespace sre
 		static const col4 WHITE;
 		static const col4 BLACK;
 		static const col4 INVISIBLE;
+
+		static const col4 RED;
+		static const col4 GREEN;
+		static const col4 BLUE;
 	};
 }

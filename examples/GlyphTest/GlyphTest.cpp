@@ -2,15 +2,15 @@
 #include <Base/Font.hpp>
 
 Font* font;
-const RectF bounds(10, 10, 120, 30);
+const sre::rect2Dut bounds(10, 10, 120, 30);
 
 void render()
 {
     font->Render(bounds, "Hello world from Font::Render()", -1, Font::HCenter, Font::VCenter);
-    Display::DrawRectangle(bounds, {255, 0, 0, 255}, Color4::WHITE, Vector2f::ZERO, Display::dm_Stroke);
+    Display::DrawRectangle(bounds, {255, 0, 0, 255}, sre::vec2f::ZERO, Display::dm_Stroke, DISPLAY_DONT_CENTER);
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
     static Font _font("res://fonts/OpenSans-Regular.ttf", 12);
     font = &_font;

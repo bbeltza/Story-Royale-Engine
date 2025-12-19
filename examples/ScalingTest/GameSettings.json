@@ -1,4 +1,7 @@
 {
     "Title": "Scaling Test",
-    "ScalingResolution": [380, 180]
+    "WindowOptions": {
+        "Resolution": [380, 180],
+        "Scaled": true
+    }
 }

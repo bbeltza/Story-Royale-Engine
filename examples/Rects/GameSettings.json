@@ -1,6 +1,9 @@
 {
     "Title": "Rectangle Test",
-    "ScalingResolution": [480, 240],
+    "WindowOptions": {
+        "Resolution": [480, 240],
+        "Scaled": true
+    },
     "TargetFPS": 40,
     "Resources": "res"
 }

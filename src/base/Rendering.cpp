@@ -119,12 +119,16 @@ void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double
     break;
     default:
     {
+        // TODO: This doesn't center correctly on different scales, fix it for the next OpenGL renderer
         SDL_FRect r;
         real_coords(r, _Rectangle, sre::vec2f::CENTER, world);
 
         SDL_SetTextureColorMod(engine.sdl_rectTex, _Col.r, _Col.g, _Col.b);
         SDL_SetTextureAlphaMod(engine.sdl_rectTex, _Col.a);
         SDL_RenderCopyExF(engine.sdl_rendererhndl, engine.sdl_rectTex, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
+
+        SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 0, 0, 255);
+        SDL_RenderDrawPointF(engine.sdl_rendererhndl, r.x, r.y);
     }
     break;
     }

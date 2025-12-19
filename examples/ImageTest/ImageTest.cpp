@@ -19,15 +19,16 @@ static void mouse(void*, TextureEntity* ent, const MouseButton* event);
 
 struct TextureEntity : public Game::Entity
 {
-    Texture sprt1;
-    Texture sprt2;
+    sre::Image img1{"res://test_texture.png"};
+    sre::Image img2{"res://test_texture2.png"};
+
+    Texture sprt1{img1};
+    Texture sprt2{img2};
     //Texture testsprt;
 
     ConnectionHandle button_connection = Input::MouseButton.Connect(mouse, this);
 
-    TextureEntity():
-        sprt1("res://test_texture.png"),
-        sprt2("res://test_texture2.png")
+    TextureEntity()
     {
         sprite.Attach(sprt1);
         sprite.Attach(sprt2);
@@ -44,7 +45,7 @@ static void mouse(void*, TextureEntity* ent, const MouseButton* event)
     ent->sprite.current_frame %= 2;
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
     Game::World::setCurrent<TexturePalace>();
 }

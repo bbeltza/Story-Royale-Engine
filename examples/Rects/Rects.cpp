@@ -12,8 +12,9 @@ struct DisplayText: public Game::GuiLayer
     DisplayText()
     {
         auto label = addChild<Game::GuiObject>();
-        label->anchor = Vector2f(0.5, 0);
-        label->position = UDim2(0.5, 0, 0, 10);
+        label->anchor = {0.5, 0}; // NOTE: anchor to be changed to vec2ut after switching to double
+        label->position = {0.5, 0, 0, 10};
+        label->size = { 1.0, 0, 0, 50 };
         
         text.h_alignment = Font::HCenter;
         text.color = {255, 255, 255};
@@ -26,38 +27,38 @@ struct DisplayText: public Game::GuiLayer
     GuiComponents::Text text;
 
     void postRender();
-    void Update(TimeStamp delta) { rot += delta * 80; }
+    void Update(sre::timeStamp delta) { rot += delta * 80; }
 };
 
-RectF mouseRect(0, 0, 100, 50);
-RectI staticRect(0, 20, 250, 90);
+sre::rect2Dut mouseRect(0, 0, 100, 50);
+sre::rect2Dut staticRect(0, 20, 250, 90);
 
 void mousewheel(void* signal_data, void* connection_data, const MouseWheel* event)
 {
-    mouseRect.Size = mouseRect.Size + Vector2f(event->amount * 10);
+    mouseRect.size = mouseRect.size + sre::vec2ut{event->amount * 10};
 }
 
 void DisplayText::postRender()
 {
-    Color4 col;
-    if (mouseRect.Intersects(staticRect))
-        col = {0, 255, 0, 255}; // Green
+    sre::col4 col;
+    if (mouseRect.intersects(staticRect))
+        col = col.GREEN; // Green
     else
-        col = {255, 0, 0, 255}; // Red
+        col = col.RED; // Red
 
-    Vector2f mPos = Input::MouseWorldPosition();
-    mPos.PrintLn();
-    mouseRect.Position.X = mPos.X;
-    mouseRect.Position.Y = mPos.Y;
-    Display::DrawRectangleAtWorld(staticRect, {255, 255, 255, 255});
-    Display::DrawRectangleAtWorld(mouseRect, col);
-    Display::DrawDebug(mouseRect.getTopLeft());
-    Display::DrawDebug(mouseRect.getTopRight());
-    Display::DrawDebug(mouseRect.getBottomLeft());
-    Display::DrawDebug(mouseRect.getBottomRight());
+    sre::vec2ut mPos = Input::MouseWorldPosition();
+    mPos.println();
+    mouseRect.position.x = mPos.x;
+    mouseRect.position.y = mPos.y;
+    Display::DrawRectangle(staticRect, {255, 255, 255, 255}, sre::vec2f::CENTER, Display::dm_Fill, NULL);
+    Display::DrawRectangle(mouseRect, col, sre::vec2f::CENTER, Display::dm_Fill, NULL);
+    Display::DrawDebug(mouseRect.top_left());
+    Display::DrawDebug(mouseRect.top_right());
+    Display::DrawDebug(mouseRect.bottom_left());
+    Display::DrawDebug(mouseRect.bottom_right());
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
     Game::GuiLayer::setCurrent<DisplayText>();
 

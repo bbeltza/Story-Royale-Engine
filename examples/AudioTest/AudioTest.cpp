@@ -4,7 +4,7 @@
 Audio stereotest;
 Audio test1, test2, test3;
 
-void Initialize()
+void sre::initialize()
 {
     AudioData& stereotest_data = Audio::Load("res://stereotest.wav");
     AudioData& test1_data = Audio::Load("res://test1.wav");

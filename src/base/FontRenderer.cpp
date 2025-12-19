@@ -9,6 +9,7 @@ void Font::Render(const sre::rect2Dut & bounds, const char* text, int count, HAl
 {
     if (PreloadTextures(text)) return;
     if (count == 0) return;
+    if (bounds.size.x <= 0) return;
 
     sre::unit line_skip = (sre::unit)TTF_FontLineSkip(m_font);
 
