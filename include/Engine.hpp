@@ -5,8 +5,12 @@
 #include "Base/Input.hpp"
 #include "Base/Window.hpp"
 
+#include "event.hpp"
+
 namespace Runtime
 {
+    extern Signal<sre::Event> onEvent;
+
     extern Signal<sre::timeStamp> OnUpdate;
     extern Signal<> BeforeRender;
     extern Signal<> AfterRender;

@@ -4,8 +4,6 @@
 
 #include "Base/Display.hpp"
 
-#include "config.h"
-
 Game::Entity::Entity(): m_ParentType(WorldParent), m_world(World::s_TargetWorld)
 {
 }

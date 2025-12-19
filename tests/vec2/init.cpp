@@ -6,7 +6,7 @@
 
 #define TEST_FAIL "Test failed (static assertion)"
 
-void Game::Initialize()
+void sre::initialize()
 {
     using namespace sre;
     // Every single test is independent and thus will have its own scope

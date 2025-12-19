@@ -4,8 +4,6 @@
 #include "Game/GuiObject.hpp"
 #include "Game/GuiComponent.hpp"
 
-#include "config.h"
-
 #include "../internal.h"
 
 Game::GuiLayer::~GuiLayer()
@@ -75,7 +73,7 @@ void Game::GuiContainer::_renderchildren()
     _prerender_components();
     _render_components();
 
-    #ifdef DRAW_GUI_CONTAINER_BOX
+    #if 0
         Color4 r{255, 0, 0, 255};
         Display::DrawRectangle(m_absolute, r, Vector2f::ZERO, Display::dm_Stroke, DISPLAY_DONT_CENTER);
     #endif

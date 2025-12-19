@@ -16,7 +16,7 @@ static int __invoke_entry(void* userdata)
     finish_event.type = SDL_USEREVENT;
     finish_event.user.code = 1;
 
-    Initialize();
+    sre_initialize();
     SDL_PushEvent(&finish_event);
 
     return 0;

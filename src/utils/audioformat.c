@@ -3,6 +3,8 @@
 #include "utils/audioutils.h"
 #include "utils/logging.h"
 
+#include "SDL_timer.h"
+
 #define reti8 return (int8_t)(amt * 0x7F);
 #define reti16 return (int16_t)(amt * 0x7FFF);
 #define reti32 return (int32_t)(amt * 0x7FFFFFFF);
@@ -19,7 +21,7 @@ size_t ut_audioconvertformat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, 
 {
     if (f_input == f_output) return len_input;
 
-    //uint32_t start = SDL_GetTicks();
+    uint32_t start = SDL_GetTicks();
 
     int out_bitsize = SDL_AUDIO_BITSIZE(f_output), in_bitsize = SDL_AUDIO_BITSIZE(f_input);
 
@@ -61,8 +63,11 @@ size_t ut_audioconvertformat(SDL_AudioFormat f_input, SDL_AudioFormat f_output, 
     free(*data);
     *data = out_data;
 
-    //uint32_t end = SDL_GetTicks();
+    uint32_t end = SDL_GetTicks();
     //printf("Audio converted, lasted %f seconds\n", (float)(end - start)/1000);
+
+    (void)start;
+    (void)end;
 
     return len_output;
 }

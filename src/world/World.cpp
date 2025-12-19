@@ -5,8 +5,6 @@
 
 #include "Engine.hpp"
 
-#include "config.h"
-
 #include "../internal.h"
 
 Game::World *Game::World::s_TargetWorld = nullptr;

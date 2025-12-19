@@ -6,9 +6,10 @@
 
 #include "Game/World.hpp"
 
-#include "config.h"
-
 #include "utils/mem.h"
+
+#include "GameSettings.h"
+#define DRAW_ENTCENTER_LINESIZE sre::game_settings.DebugOptions.EntityDebugLineSize
 
 inline void real_coords(sre::vec2f& out_pos, const sre::vec2ut& in_pos, const Game::World* world)
 {
@@ -139,7 +140,8 @@ void Display::DrawDebug(const sre::vec2ut& _pos)
     real_coords(*reinterpret_cast<sre::vec2f*>(&pos), _pos, Game::World::Current());
 
     SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 64, 0, 255);
-    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.x - DRAW_ENTCENTER_LINESIZE, pos.y, pos.x + DRAW_ENTCENTER_LINESIZE, pos.y);
+
+    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.x - DRAW_ENTCENTER_LINESIZE , pos.y, pos.x + DRAW_ENTCENTER_LINESIZE, pos.y);
     SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.x, pos.y - DRAW_ENTCENTER_LINESIZE, pos.x, pos.y + DRAW_ENTCENTER_LINESIZE);
 
     END_DRAW

@@ -1,24 +1,19 @@
 #pragma once
 
-#ifdef __cplusplus
-#define init extern "C" void Initialize()
+#ifndef __cplusplus
+    #define sre_initialize initialize
+    extern void sre_initialize();
 #else
-#define init void Initialize();
-#endif
-
-init;
-
-#ifdef __cplusplus
     namespace sre
     {
+        // The method to be defined by the game
+        // EVERY game should have this defined, even if it's empty
+        // This is the entry point for the game, it's called after initializing the libraries, but before showing the window
         extern "C" void initialize();
     }
 
     namespace Game
     {
-        // The method to be defined by the game using the engine
-        // EVERY game should have this defined, even if it's empty
-        // This is the entry point for the game, it's called after initializing the libraries, but before creating the window
-        init;
+        
     }
 #endif
