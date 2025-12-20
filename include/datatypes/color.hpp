@@ -25,8 +25,6 @@ namespace sre
 		constexpr col3(T rgb): r(rgb), g(rgb), b(rgb) {}
 		constexpr col3(const col3& copy): r(copy.r), g(copy.g), b(copy.b) {}
 
-		static constexpr col3 fromHEX(sre::u32 hex) { return { static_cast<T>((hex >> 16) & 0xFF), static_cast<T>((hex >> 8) & 0xFF), static_cast<T>((hex >> 0) & 0xFF) }; }
-
 		T r{0};
 		T g{0};
 		T b{0};
@@ -84,9 +82,6 @@ namespace sre
 		constexpr col4(const col3& copy): col3(copy) {}
 		constexpr col4(const col3& copy, T alpha): col3(copy), a(alpha) {}
 
-		static constexpr col4 fromHEX(unsigned long hex) { return col3::fromHEX(hex); }
-		static constexpr col4 fromHEX(unsigned long hex, T alpha) { return { col3::fromHEX(hex), alpha }; }
-
 		T a{0xFF};
 
 		inline void add(const col4& other) { col3::add(other); a = add_component(a, other.a); }
@@ -113,4 +108,7 @@ namespace sre
 		static const col4 GREEN;
 		static const col4 BLUE;
 	};
+
+	constexpr col3 fromHEX(sre::u32 hex) { return { static_cast<col3::T>((hex >> 16) & 0xFF), static_cast<col3::T>((hex >> 8) & 0xFF), static_cast<col3::T>((hex >> 0) & 0xFF) }; }
+	constexpr col4 fromHEX(sre::u32 hex, sre::col4::T alpha) { return { sre::fromHEX(hex), alpha }; }
 }

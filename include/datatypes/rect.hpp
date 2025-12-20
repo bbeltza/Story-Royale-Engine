@@ -26,7 +26,10 @@ namespace sre
         constexpr rect2D(const rect2D& copy): position(copy.position), size(copy.size) {}
 
         template <typename T2>
-        constexpr operator rect2D<T2>() const
+        explicit constexpr rect2D(const rect2D<T2>& other): position(other.position), size(other.size) {}
+
+        template <typename T2>
+        explicit constexpr operator rect2D<T2>() const
         {
             return {
                 static_cast<typename rect2D<T2>::vec>(position),

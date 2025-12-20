@@ -105,14 +105,18 @@ namespace Game
         static bool cmp(const Entity*, const Entity*);
 
         friend class Entity;
-        friend class ::InputClass;
-        friend class ::DrawingDevice;
-        friend class ::EngineClass;
 
         __friend_internal(__display_render)
         __friend_internal(__update_world)
         __friend_internal(__query_objects)
         __friend_internal(__clean_containers)
+
+    public:
+        // Iterator stuff (Note that these functions ARE const meaning you cannot change the pointer that the world holds. However, you can still access and modify the entities normally)
+
+        auto begin() const -> decltype(m_Entities.begin()) { return m_Entities.begin(); }
+        auto end() const -> decltype(m_Entities.end()) { return m_Entities.end(); }
+
     };
 }
 
