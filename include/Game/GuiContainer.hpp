@@ -12,10 +12,10 @@ class DrawingDevice;
 class InputClass;
 class EngineClass;
 
-__def_internal(__update_layer)
-__def_internal(__display_render)
-__def_internal(__query_objects)
-__def_internal(__clean_containers)
+__def_internal(__update_layer);
+__def_internal(__display_render);
+__def_internal(__query_objects);
+__def_internal(__clean_containers);
 
 namespace Game
 {
@@ -79,9 +79,9 @@ namespace Game
         friend class GuiObject;
         friend class GuiComponent;
 
-        __friend_internal(__display_render)
-        __friend_internal(__update_layer)
-        __friend_internal(__query_objects)
-        __friend_internal(__clean_containers)
+        __friend_internal(__display_render);
+        __friend_internal(__update_layer);
+        __friend_internal(__query_objects);
+        __friend_internal(__clean_containers);
     };
 }

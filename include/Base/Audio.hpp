@@ -11,7 +11,7 @@
 
 #define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
 
-__def_internal(__update_audio)
+__def_internal(__update_audio);
 
 class AudioData
 {
@@ -45,7 +45,7 @@ public:
 	inline uint32_t len() const { return m_len; }
 	inline uint32_t freq() const { return m_spec.freq; }
 
-	__friend_internal(__update_audio)
+	__friend_internal(__update_audio);
 };
 
 struct AudioInfo
@@ -91,5 +91,5 @@ private:
 	bool m_fadein = false, m_fadeout = false;
 	float m_fadevol = 1;
 
-	__friend_internal(__update_audio)
+	__friend_internal(__update_audio);
 };

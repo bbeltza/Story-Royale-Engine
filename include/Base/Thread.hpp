@@ -17,10 +17,10 @@ namespace Threads // Designed to replace ThreadPool
     TEMPL inline Thread Create(_Fn &&_Fx, _Args &&..._Ax);
 }
 
-__def_internal(__update_classes)
-    __def_internal(__clean_containers)
+__def_internal(__update_classes);
+__def_internal(__clean_containers);
 
-        class Thread
+class Thread
 {
     friend class ThrdPool;
 
@@ -88,8 +88,8 @@ private:
     static void queue_removing();
 
     TEMPL friend Thread Threads::Delay(sre::timeStamp Duration, _Fn &&_Fx, _Args &&..._Ax);
-    __friend_internal(__update_classes)
-        __friend_internal(__clean_containers)
+    __friend_internal(__update_classes);
+    __friend_internal(__clean_containers);
 };
 
 TEMPL Thread Threads::Delay(sre::timeStamp Duration, _Fn &&_Fx, _Args &&..._Ax)

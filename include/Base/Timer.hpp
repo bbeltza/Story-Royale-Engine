@@ -5,7 +5,7 @@
 #include "datatypes/timestamp.h"
 
 #include "internal_def.hh"
-__def_internal(__update_classes)
+__def_internal(__update_classes);
 
 class Timer
 {
@@ -39,5 +39,5 @@ private:
 
     static sre::timeStamp global_update();
 
-    __friend_internal(__update_classes)
+    __friend_internal(__update_classes);
 };

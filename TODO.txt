@@ -12,6 +12,7 @@
 
 - Move classes and objects to a single namespace (e.g. sre::--)
 - Move the "Game" stuff into sre::world::-- and sre::gui::--
+- Add custom arena-like allocator for World and GUILayer
 
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
