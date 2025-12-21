@@ -10,6 +10,8 @@
 #include "Game/World.hpp"
 #include "Game/GuiLayer.hpp"
 
+#include "ecs/scene.hpp"
+
 _containers_service::_containers_service()
 {
 }
@@ -86,11 +88,10 @@ void __update_layer()
 void __update_world()
 {
 	begin:
-	Game::World* current = currworld;
+	sreECS::Scene* current = static_cast<sreECS::Scene*>(engine.current_world);
 	
 	if (!current) return;
 	current->call_update();
-	current->call_pupdate();
 	
 	__destroy_queue();
 	if (current != engine.current_world) goto begin;

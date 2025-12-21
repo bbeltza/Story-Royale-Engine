@@ -103,6 +103,11 @@ _CAPI_BEGIN
 	extern void __display_render();
 
 	extern void __clean_containers();
+
+	// Newer interface
+
+	extern void _srecore_callupdate();
+	extern void _srecore_callrender();
 _CAPI_END
 
 #ifdef __cplusplus

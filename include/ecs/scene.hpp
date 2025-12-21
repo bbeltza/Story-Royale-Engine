@@ -7,6 +7,10 @@
 
 #include <Game/Camera.hpp>
 
+#include <internal_def.hh>
+
+__def_internal(__update_world);
+
 namespace sreECS
 {
     class Entity;
@@ -14,6 +18,7 @@ namespace sreECS
 
     struct Scene: public sre::Object
     {
+        __friend_internal(__update_world);
         friend class Entity;
 
         Scene();
@@ -126,6 +131,8 @@ namespace sreECS
         Entity* entity_at(size_t offset) const;
 
         static _Arena* new_arena();
+    private:
+        void call_update();
     };
 }
 

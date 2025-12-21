@@ -132,3 +132,20 @@ Entity* Scene::entity_at(size_t offset) const
 
     return reinterpret_cast<Entity*>(curr->data + offset);
 }
+
+void Scene::call_update()
+{
+    { // Update phase region
+        update();
+        for (auto& ent : *this)
+            ent.update();
+        //camera.Update(engine.last_dt);
+    }
+
+    { // pUpdate phase region
+        pupdate();
+        for (auto& ent : *this)
+            ent.pupdate();
+        //camera.pUpdate(engine.phys_target_dt);
+    }
+}
