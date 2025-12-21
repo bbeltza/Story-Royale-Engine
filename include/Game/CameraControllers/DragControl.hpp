@@ -15,7 +15,7 @@ namespace CameraControllers
         DragControl(const Action& action=default_action);
         ~DragControl();
 
-        float Smoothness = 0.0f;
+        sre::unit Smoothness = 0.0_ut;
     protected:
         void Update(sre::timeStamp) override;
         void pUpdate(sre::timeStamp) override;

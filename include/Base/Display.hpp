@@ -30,8 +30,8 @@ namespace Display
     void DrawLines(const sre::col4& Color, int Count, const sre::vec2ut* Pts, const Game::World* world);
     template <typename... _Args> void DrawLines(const sre::col4& Color, const Game::World* world, _Args&... Pts)
     {
-        std::vector<sre::vec2ut> vec = {Pts...};
-        DrawLines(Color, sizeof...(Pts), vec.data(), world);
+        sre::vec2ut _pts[] = {Pts...};
+        DrawLines(Color, sizeof...(Pts), _pts, world);
     }
 
     void DrawRectangle(const sre::rect2Dut& Rectangle, const sre::col4& Color, const sre::vec2f& AnchorPoint, DrawingMode Mode, const Game::World* world);

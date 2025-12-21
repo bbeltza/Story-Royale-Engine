@@ -18,6 +18,9 @@ namespace sre
 {
     struct Object
     {
+        Object() {}
+        virtual ~Object();
+
         virtual void update() {}
         virtual void pupdate() {}
 
@@ -25,10 +28,6 @@ namespace sre
         virtual void post_render() {}
 
         void destroy();
-
-        private:
-        Object() {}
-        virtual ~Object();
     };
 }
 

@@ -23,10 +23,10 @@ void DragControl::Update(sre::timeStamp delta)
     {
         m_camSpeed = m_lastmouseDelta;
     }
-    else if (Smoothness <= 0.0f)
+    else if (Smoothness <= 0.0_ut)
         m_camSpeed = m_camSpeed.ZERO;
     else
-        m_camSpeed.setlerp(m_camSpeed.ZERO, ut_min(delta / Smoothness, 1.0f));
+        m_camSpeed.setlerp(m_camSpeed.ZERO, ut_min(delta / Smoothness, 1.0_ut));
 
     CurrentCamera.position -= m_camSpeed;
     m_lastmouseDelta = m_lastmouseDelta.ZERO;

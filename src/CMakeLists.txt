@@ -43,6 +43,11 @@ set(WORLD_SOURCES
     "World.cpp"
 )
 
+set(ECS_SOURCES
+    "scene.cpp"
+    "entity.cpp"
+)
+
 set(GUI_SOURCES
     "GuiLayer.cpp"
     #"layer.cpp"
@@ -76,6 +81,7 @@ set_src(base BASE_SOURCES)
 set_src(datatypes DATATYPES_SOURCES)
 set_src(utils UTIL_SOURCES)
 
+set_src(ecs ECS_SOURCES)
 set_src(world WORLD_SOURCES)
 set_src(gui GUI_SOURCES)
 set_src(presets PRESET_SOURCES)
