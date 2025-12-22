@@ -8,10 +8,10 @@ typedef enum
     SRE_PIPELINE_RENDER
 } sre_PipelineType;
 
-typedef struct
+typedef struct sre_Object
 {
-    void (*destroy)(sre_Object* obj);
-    void (*update)(sre_Object* obj, sre_PipelineType type);
+    void (*destroy)(struct sre_Object* obj);
+    void (*update)(struct sre_Object* obj, sre_PipelineType type);
 
     sre_Object *next;
 } sre_Object;

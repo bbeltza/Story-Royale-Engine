@@ -1,7 +1,7 @@
 #ifndef SREECS_ENTITY_HPP
 #define SREECS_ENTITY_HPP
 
-#include <Base/object.hpp>
+#include <ECS/common.hpp>
 #include <datatypes/vector.hpp>
 
 namespace sreECS
@@ -9,7 +9,7 @@ namespace sreECS
     struct Scene;
     struct Component;
 
-    class Entity : sre::Object
+    class Entity: Common
     {
         friend struct Scene;
 
@@ -94,6 +94,7 @@ namespace sreECS
             Iterator operator ++(int) { return m_ptr++; }
             Iterator operator --(int) { return m_ptr--; }
 
+            bool operator !=(const Iterator& other) const { return m_ptr != other.m_ptr; }
         private:
             Component* const* m_ptr = NULL;
         };

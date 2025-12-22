@@ -1,5 +1,6 @@
 #include <ecs/scene.hpp>
 #include <ecs/entity.hpp>
+#include <ecs/component.hpp>
 
 #include "../internal.h"
 #include "../internal.hpp"
@@ -8,7 +9,7 @@ using namespace sreECS;
 
 Scene::_Arena* Scene::new_arena()
 {
-    _Arena* buff = (_Arena*)operator new(sizeof(_Arena));
+    _Arena* buff = (_Arena*)operator new(sizeof(_Arena)); // Consider using alligned_alloc
     buff->next = NULL;
 
     return buff;
@@ -138,14 +139,22 @@ void Scene::call_update()
     { // Update phase region
         update();
         for (auto& ent : *this)
+        {
             ent.update();
+            for (auto& comp : ent)
+                comp.on_update(ent);
+        }
         //camera.Update(engine.last_dt);
     }
 
     { // pUpdate phase region
         pupdate();
         for (auto& ent : *this)
+        {
             ent.pupdate();
+            for (auto& comp : ent)
+                comp.on_pupdate(ent);
+        }
         //camera.pUpdate(engine.phys_target_dt);
     }
 }

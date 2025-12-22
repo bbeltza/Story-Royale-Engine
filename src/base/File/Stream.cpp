@@ -145,7 +145,9 @@ void File::load_stream()
     if (!this->stream.ptr)
     {
         if (has_write(this->stream.currmode))
-            ERROR("Error opening file %s for writing. File is probably already opened", this->currpath);
+        {
+            ERROR("Error opening file %s for writing: %s", this->currpath, strerror(errno));
+        }
         else
             this->error_notfound();
     }
@@ -153,7 +155,7 @@ void File::load_stream()
 
 void File::error_notfound()
 {
-    ERROR("Error opening file %s for reading, no such file or directory", this->currpath);
+    ERROR("Error opening file %s for reading: %s", this->currpath, strerror(errno));
 }
 
 bool File::has_write(const char *mode)

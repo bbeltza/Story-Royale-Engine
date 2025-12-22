@@ -1,7 +1,8 @@
 #ifndef SREECS_SCENE_HPP
 #define SREECS_SCENE_HPP
 
-#include <Base/object.hpp>
+#include <ECS/common.hpp>
+
 #include <datatypes/color.hpp>
 #include <datatypes/vector.hpp>
 
@@ -16,7 +17,7 @@ namespace sreECS
     class Entity;
     struct Camera;
 
-    struct Scene: public sre::Object
+    struct Scene: public Common
     {
         __friend_internal(__update_world);
         friend class Entity;
