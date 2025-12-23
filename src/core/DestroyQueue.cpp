@@ -1,23 +1,35 @@
 #include <standard>
 #include "../internal.h"
 
-#include "Game/GameInstance.hpp"
+#include "Base/object.hpp"
 
-#include "Base/object.h"
+#include <utils/logging.h>
 
-static std::unordered_set<GameInstance*> destroy_queue;
+static sre::Object* obj_head = NULL;
+//static size_t queue_count = 0;
 
 void __destroy_queue()
 {
 	SDL_LockMutex(engine.destroyqueue_mutex);
-	while (!destroy_queue.empty()) delete *destroy_queue.begin();
+	while (obj_head)
+		obj_head->on_destroy();
 	SDL_UnlockMutex(engine.destroyqueue_mutex);
 }
 
-GameInstance::~GameInstance() { destroy_queue.erase(this); }
-void GameInstance::Destroy()
+sre::Object::~Object() 
 {
+	if (m_nextdestroyed || obj_head == this)
+		obj_head = m_nextdestroyed;
+	//queue_count--;
+}
+void sre::Object::destroy()
+{
+	if (m_nextdestroyed || obj_head == this)
+		return; // Object is already in the queue, don't insert it again
+
 	SDL_LockMutex(engine.destroyqueue_mutex);
-	destroy_queue.insert(this);
+	m_nextdestroyed = obj_head;
+	obj_head = this;
+	//queue_count++;
 	SDL_UnlockMutex(engine.destroyqueue_mutex);
 }

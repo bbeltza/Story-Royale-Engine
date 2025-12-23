@@ -35,7 +35,7 @@ Button::Button():
 
 Button::~Button() {}
 
-void Button::Update(sre::timeStamp dt)
+void Button::update()
 {
     bool last_hover = m_hover;
     m_hover = isHovering();

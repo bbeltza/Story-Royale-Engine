@@ -10,6 +10,7 @@ namespace sreECS
 	struct Component
 	{
 		friend struct Scene;
+		bool enabled = true;
 	protected:
 		virtual ~Component() {}
 		virtual void on_render(Entity& entity) {}

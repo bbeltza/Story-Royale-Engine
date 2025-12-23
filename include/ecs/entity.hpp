@@ -9,7 +9,7 @@ namespace sreECS
     struct Scene;
     struct Component;
 
-    class Entity: Common
+    class Entity: public Common
     {
         friend struct Scene;
 
@@ -23,6 +23,7 @@ namespace sreECS
         Entity(): Entity(0, 0) {}
         Entity(sre::unit x, sre::unit y, long z_index=0);
         virtual ~Entity();
+        virtual void on_destroy() { this->~Entity(); }
     public:
         // The current position of the entity
         sre::vec2ut position;

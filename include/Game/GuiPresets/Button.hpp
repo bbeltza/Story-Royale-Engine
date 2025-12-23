@@ -21,7 +21,7 @@ namespace GuiPresets
         static void mouse_click(void* SignalData, Button* button, const MouseButton* buttonData);
         static void finger_touch(void* SignalData, Button* button, const TouchFinger* mouseData);
 
-        void Update(sre::timeStamp dt) override;
+        void update() override;
 
         bool m_hover = 0;
         ConnectionHandle m_click_event;

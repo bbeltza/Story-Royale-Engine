@@ -66,18 +66,20 @@ namespace sreECS
 
         // Iterating
 
-        struct Iterator
+        struct Iterator: public std::iterator<std::bidirectional_iterator_tag,
+                                        Entity>
         {
             Iterator() = default;
             Iterator(const size_t& ptr, const Scene* _this): m_ptr(&ptr), m_scene(_this)
             {
             }
 
-            inline Entity& operator *() const { return *m_scene->entity_at(*m_ptr); }
+            inline reference operator *() const { return *m_scene->entity_at(*m_ptr); }
 
-            inline void operator ++()
+            inline Iterator& operator ++()
             {
                 m_ptr++;
+                return *this;
             }
             inline Iterator operator ++(int)
             {
@@ -86,9 +88,10 @@ namespace sreECS
                 return tmp;
             }
 
-            inline void operator --()
+            inline Iterator& operator --()
             {
                 m_ptr--;
+                return *this;
             }
             inline Iterator operator --(int)
             {
@@ -108,12 +111,21 @@ namespace sreECS
             const size_t* m_ptr = NULL;
             const Scene* m_scene = NULL;
         };
+        using ReverseIterator = std::reverse_iterator<Iterator>;
+
 
         Iterator begin() const {
             return {*m_entities.begin(), this};
         }
         Iterator end() const {
             return {*(&m_entities.back() + 1), this};
+        }
+
+        ReverseIterator rbegin() const {
+            return ReverseIterator(end());
+        }
+        ReverseIterator rend() const {
+            return ReverseIterator(begin());
         }
 
     private:
@@ -142,7 +154,11 @@ namespace sreECS
         void call_update();
         void call_render();
         Entity* call_query(sre::vec2ut screen_coords) const;
+
+        bool list_sort(size_t a, size_t b) const;
     };
+
+    using World = Scene; // Alias for `Scene`, for now. Might be moving back to World
 }
 
 #endif

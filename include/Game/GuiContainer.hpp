@@ -1,12 +1,15 @@
 #pragma once
 #include <standard>
-#include "Game/GameInstance.hpp"
 
-#include "datatypes/color.hpp"
-#include "datatypes/rect.hpp"
-#include "datatypes/timestamp.h"
+#include <Base/object.hpp>
 
-#include "internal_def.hh"
+#include <datatypes/color.hpp>
+#include <datatypes/rect.hpp>
+#include <datatypes/timestamp.h>
+
+#include <internal_def.hh>
+
+#include <ECS/common.hpp>
 
 class DrawingDevice;
 class InputClass;
@@ -22,7 +25,7 @@ namespace Game
     class GuiComponent;
     class GuiObject;
 
-    class GuiContainer : public GameInstance
+    class GuiContainer : public sreECS::Common // Temporary, to be changes when migrating the GUI comes
     {
     public:
         GuiContainer();
@@ -55,7 +58,7 @@ namespace Game
 
         bool visible = true, canQuery = true;
     private:
-        void call_update(sre::timeStamp dt);
+        void call_update();
         
         void _processchildren();
         void _renderchildren();

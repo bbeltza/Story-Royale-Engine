@@ -23,7 +23,6 @@ _CAPI_BEGIN
 		sre_timeStamp last_dt;
 		sre_timeStamp target_dt;
 		sre_timeStamp phys_target_dt;
-		sre_timeStamp phys_accum_dt;
 
 		// Instance data
 

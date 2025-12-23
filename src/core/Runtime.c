@@ -18,14 +18,13 @@ static void loop()
     __update_classes();
     __update_input();
 
-    /*
     __destroy_queue();
-    
+
     __query_objects();
-    
-    */
     __update_world();
-   __update_layer();
+    __update_layer();
+
+   __destroy_queue();
    
     __display_render();
 

@@ -108,9 +108,9 @@ void __display_render()
 
 		if (fg.a < 255)
 		{
-			current->preRender();
+			current->pre_render();
 			current->_renderchildren();
-			current->postRender();
+			current->post_render();
 		}
 		if (fg.a)
 		{

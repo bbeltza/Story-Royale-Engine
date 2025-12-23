@@ -55,8 +55,6 @@ void __clean_containers()
 		delete static_cast<::sreECS::Scene*>(engine.current_world);
 	if (engine.current_guilayer)
 		delete static_cast<::Game::GuiContainer*>(engine.current_guilayer);
-
-	__destroy_queue();
 }
 
 void __update_classes()
@@ -78,8 +76,7 @@ void __update_layer()
 	current->m_absolute.size.y = static_cast<sre::unit>(engine.viewport.h);
 	current->_processchildren();
 	
-	current->call_update(engine.last_dt);
-	__destroy_queue();
+	current->call_update();
 
 	if (current != engine.current_guilayer) goto begin;
 }
@@ -93,8 +90,6 @@ void __update_world()
 		if (!current) return;
 			current->call_update();
 	
-		__destroy_queue();
-
 		if (current != engine.current_world) continue;
 		break;
 	};

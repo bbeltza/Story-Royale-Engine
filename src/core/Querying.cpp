@@ -33,7 +33,7 @@ void __query_objects()
 
     callsection:
 
-    queryObject = engine.current_guilayer ? currlayer->_query(reinterpret_cast<float*>(&pt)) : NULL;
+    queryObject = engine.current_guilayer ? currlayer->_query(reinterpret_cast<sre::unit*>(&pt)) : NULL;
     if (queryObject)
         return;
     queryEntity = engine.current_world ? currscn->call_query(pt) : NULL;

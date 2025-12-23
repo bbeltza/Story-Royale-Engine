@@ -145,39 +145,93 @@ void Scene::call_update()
         for (auto& ent : *this)
         {
             ent.update();
+            LOG("%zd", sizeof(ent.updated));
             for (auto& comp : ent)
+            {
+                if (comp.enabled)
                 comp.on_update(ent);
+            }
+            ent.updated.Fire();
         }
         camera.update();
     }
 
-    { // pUpdate phase region
+    static sre::timeStamp dt_accumulated;
+    dt_accumulated += engine.last_dt;
+    while (dt_accumulated > 0) { // pUpdate phase region
+        dt_accumulated -= engine.phys_target_dt;
+
         pupdate();
         for (auto& ent : *this)
         {
+            const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position;
+
             ent.pupdate();
             for (auto& comp : ent)
-                comp.on_pupdate(ent);
-        }
+            {
+                if (comp.enabled)
+                    comp.on_pupdate(ent);
+            }
 
+            const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position - ent.lastVelocity;
+        }
         camera.pupdate();
     }
+
+    updated.Fire();
 }
 
 void Scene::call_render()
 {
+    // Sort entities by z_index. Cannot use default std::sort because of the need to access the entity buffer with entity_at()
+    // So I made my own sorting algorithm :r)
+    for (auto i2 = m_entities.begin();;)
+    {
+        auto i1 = i2++;
+        if (i2 == m_entities.end())
+            break;
+
+        Entity* entity1 = entity_at(*i1);
+        Entity* entity2 = entity_at(*i2);
+
+        if (entity1->z_index > entity2->z_index)
+        {
+            *i1 ^= *i2;
+            *i2 ^= *i1;
+            *i1 ^= *i2;
+            i2--;
+        }
+    }
+
     pre_render();
 
     for (auto& ent : *this)
     {
         ent.pre_render();
         for (auto& comp : ent)
-            comp.on_render(ent);
+        {
+            if (comp.enabled)
+                comp.on_render(ent);
+        }
         ent.post_render();
-
-        Display::DrawLine(sre::col4::RED, ent.position + sre::vec2ut(0, 3), ent.position - sre::vec2ut(0, 3), NULL);
-        Display::DrawLine(sre::col4::RED, ent.position + sre::vec2ut(3, 0), ent.position - sre::vec2ut(3, 0), NULL);
     }
 
     post_render();
+
+    rendered.Fire();
+}
+
+Entity *Scene::call_query(sre::vec2ut coords) const
+{
+    for (auto it = rbegin(); it != rend(); ++it)
+    {
+        auto& entity = *it;
+        for (auto& comp : entity)
+        {
+            if (comp.on_query(entity, coords))
+                return &entity;
+        }
+    }
+
+    return nullptr;
 }
