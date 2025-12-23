@@ -6,20 +6,23 @@
 #include <datatypes/color.hpp>
 #include <datatypes/vector.hpp>
 
-#include <Game/Camera.hpp>
+#include <ECS/camera.hpp>
 
 #include <internal_def.hh>
 
+__def_internal(__query_objects);
 __def_internal(__update_world);
+__def_internal(__display_render);
 
 namespace sreECS
 {
     class Entity;
-    struct Camera;
 
     struct Scene: public Common
     {
+        __friend_internal(__query_objects);
         __friend_internal(__update_world);
+        __friend_internal(__display_render);
         friend class Entity;
 
         Scene();
@@ -32,7 +35,7 @@ namespace sreECS
         /// This also acts as the background of the GUI Layer
         sre::col4 foreground{sre::col4::INVISIBLE};
         // The camera, whence its coordinates point to the center of the screen
-        Game::Camera camera;
+        Camera camera;
     public:
         // Make the scene current, this is the equivalent of calling: `sreECS::Scene::make_current(this, destroy_old)`
         void make_current(bool destroy_old=true) { return make_current(this, destroy_old); }
@@ -57,17 +60,16 @@ namespace sreECS
         {
             static_assert(std::is_base_of<Entity, T>::value, "T must be derived from Game::Entity");
 
-            T* entity = alloc_entity(sizeof(T), NULL);
-            entity->T(std::forward(args)...);
-
-            return *entity;
+            Entity* entity = alloc_entity(sizeof(T), NULL);
+            return *::new(static_cast<void*>(entity)) T(args...);
         }
 
         // Iterating
 
         struct Iterator
         {
-            constexpr Iterator(const size_t& ptr, const Scene* _this): m_ptr(&ptr), m_scene(_this)
+            Iterator() = default;
+            Iterator(const size_t& ptr, const Scene* _this): m_ptr(&ptr), m_scene(_this)
             {
             }
 
@@ -103,12 +105,16 @@ namespace sreECS
                 return m_ptr != other.m_ptr;
             }
         private:
-            const size_t* m_ptr;
-            const Scene* m_scene;
+            const size_t* m_ptr = NULL;
+            const Scene* m_scene = NULL;
         };
 
-        Iterator begin() const { return {*m_entities.begin(), this}; }
-        Iterator end() const { return {*m_entities.end(), this}; }
+        Iterator begin() const {
+            return {*m_entities.begin(), this};
+        }
+        Iterator end() const {
+            return {*(&m_entities.back() + 1), this};
+        }
 
     private:
         struct _Arena
@@ -117,7 +123,7 @@ namespace sreECS
             static constexpr size_t SIZE = PAGE_SIZE - sizeof(_Arena*);
 
             _Arena* next;
-            sre::byte data[SIZE];
+            sre::byte data[1];
         };
         struct _FreeList
         {
@@ -134,6 +140,8 @@ namespace sreECS
         static _Arena* new_arena();
     private:
         void call_update();
+        void call_render();
+        Entity* call_query(sre::vec2ut screen_coords) const;
     };
 }
 

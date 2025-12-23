@@ -1,81 +1,104 @@
-#include "Game/Components/Shape.hpp"
-
-#include "Game/Entity.hpp"
-#include "Game/World.hpp"
+#include "ECS/components/shape.hpp"
+#include "ECS/scene.hpp"
 
 #include "Base/Display.hpp"
 
 #include <SDL_shape.h>
 
-Components::Shape::CollisionSet* Components::Shape::collider_set = nullptr;
+using namespace sreECS;
 
-Components::Shape::Shape() :
-	Rect(),
-	shape(RectangleShape),
-	flags(VisibleFlag)
+Shape::Shape() : shape(S_RECTANGLE),
+				 flags(F_VISIBLE)
 {
-	if (!collider_set)
-		collider_set = new CollisionSet;
-
-	collider_set->insert(this);
 }
 
-Components::Shape::~Shape()
+Shape::~Shape()
 {
-	if (!collider_set) return;
-
-	collider_set->erase(this);
-	if (collider_set->empty())
-	{
-		delete collider_set;
-		collider_set = nullptr;
-	}
 }
 
-bool Components::Shape::isInScreenPoint(Game::Entity* p, sre::vec2ut pt)
+bool Shape::in_screen_point(Entity &entity, sre::vec2ut pt) const
 {
-	auto w = p->getWorld<Game::World>();
-
-	static SDL_FPoint fpt;
-	static SDL_FRect r;
-	fpt.x = pt.x;
-	fpt.y = pt.y;
-
-	sre::vec2ut screenSpace;
+	const auto w = entity.get_parent();
 
 	switch (shape)
 	{
-	case RectangleShape:
-		screenSpace = w->worldToScreenSpace(p->Position.x + Rect.left(), p->Position.y + Rect.top());
-		r.x = screenSpace.x;
-		r.y = screenSpace.y;
-		r.w = static_cast<float>(Rect.size.x);
-		r.h = static_cast<float>(Rect.size.y);
-		return SDL_PointInFRect(&fpt, &r);
-	case CircleShape:
-		screenSpace = w->worldToScreenSpace(p->Position.x + Rect.position.x, p->Position.y + Rect.position.y);
-		return (screenSpace - pt).magnitude() <= Rect.size.x / 2;
+	case S_RECTANGLE:
+	{
+		sre::rect2Dut _realrect = real_rect(entity);
+		return _realrect.intersects(w->camera.toWorldSpace(pt));
+	}
+	case S_CIRCLE:
+	{
+		sre::vec2ut screenSpace = w->camera.toScreenSpace(entity.position + rect.position);
+		return (screenSpace - pt).magnitude() <= rect.size.x / 2;
+	}
 	default:
 		return false;
 	}
 }
 
-void Components::Shape::Render(Game::Entity* _entity)
+void Shape::on_render(Entity &entity)
 {
-	if (!this->flags.has(VisibleFlag)) return;
+	if (!this->flags.has(F_VISIBLE))
+		return;
 
-	const Game::World* world = _entity->getWorld();
+	const auto world = entity.get_parent();
 
 	switch (shape)
 	{
-	case CircleShape:
-		Display::DrawCircle(_entity->Position, Rect.size.x / 2, Color, Display::dm_Fill, world);
+	case S_CIRCLE:
+		Display::DrawCircle(entity.position + rect.position, rect.size.x / 2, color, Display::M_FILL, world);
 		break;
 	default:
 	{
-		sre::rect2Dut render_rect = getRealRect(_entity);
-		Display::DrawRectangle(render_rect, Color, sre::vec2f::CENTER, Display::dm_Fill, world);
+		sre::rect2Dut render_rect = real_rect(entity);
+		Display::DrawRectangle(render_rect, color, sre::vec2f::CENTER, Display::M_FILL, world);
 		break;
 	}
 	}
+}
+
+bool Shape::on_query(Entity& entity, sre::vec2ut screen_coords) const
+{
+    return in_screen_point(entity, screen_coords);
+}
+
+
+void Shape::on_pupdate(Entity& entity)
+{    
+    if (!flags.has(F_CANCOLLIDE))
+        return;
+
+    if (flags.has(F_ANCHORED)) return;
+
+    for (Entity& ent : *entity.get_parent())
+    {
+        if (&ent == &entity) continue;
+
+        for (Component& comp : ent)
+        {
+			auto& compshape = *dynamic_cast<Shape*>(&comp);
+            if (&compshape == NULL || !compshape.flags.has(F_CANCOLLIDE)) continue;
+
+            sre::rect2Dut thisRect = real_rect(entity),
+                          otherRect = compshape.real_rect(ent);
+
+            if (compshape.collides(ent, thisRect))
+            {
+                sre::vec2ut distance = (thisRect.position - otherRect.position);
+                sre::vec2ut radius = (otherRect.size/2 + thisRect.size/2);
+
+                sre::vec2ut sign = {distance.x < 0 ? -1.0_ut : 1, distance.y < 0 ? -1 : 1.0_ut};
+                sre::vec2ut pushdist = radius * sign - distance;
+
+                if (!compshape.flags.has(F_ANCHORED)) pushdist = pushdist / 2;
+
+                sre::unit absdx = abs(pushdist.x), absdy = abs(pushdist.y);
+
+                if (absdx < absdy) entity.position.x += pushdist.x;
+                else if (absdx > absdy) entity.position.y += pushdist.y;
+                else entity.position += pushdist;
+            }
+        }
+    }
 }

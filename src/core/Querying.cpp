@@ -2,24 +2,21 @@
 
 #include "Base/Input.hpp"
 
-#include "Game/World.hpp"
-#include "Game/Entity.hpp"
-#include "Game/Component.hpp"
-
 #include "Game/GuiLayer.hpp"
 #include "Game/GuiObject.hpp"
 
-#include "Game/Components/Shape.hpp"
+#include <ECS/scene.hpp>
+#include <ECS/entity.hpp>
 
 static Game::GuiObject *queryObject = nullptr;
-static Game::Entity *queryEntity = nullptr;
+static sreECS::Entity *queryEntity = nullptr;
 
 void __query_objects()
 {
     queryEntity = nullptr;
     queryObject = nullptr;
 
-    SDL_FPoint pt{engine.mouse_x, engine.mouse_y};
+    sre::vec2ut pt{engine.mouse_x, engine.mouse_y};
 
     if (engine.input_last_touchid < 0) goto callsection;
     {
@@ -36,10 +33,10 @@ void __query_objects()
 
     callsection:
 
-    queryObject = engine.current_guilayer ? currlayer->_query(reinterpret_cast<float*>(&pt)) : 0;
+    queryObject = engine.current_guilayer ? currlayer->_query(reinterpret_cast<float*>(&pt)) : NULL;
     if (queryObject)
         return;
-    queryEntity = engine.current_world ? currworld->call_query(reinterpret_cast<float*>(&pt)) : 0;
+    queryEntity = engine.current_world ? currscn->call_query(pt) : NULL;
 }
 
 bool Game::GuiObject::isHovering() const
@@ -70,9 +67,4 @@ Game::GuiObject *Game::GuiContainer::_query(float* pt)
     }
 
     return target_return;
-}
-
-bool Components::Shape::Query(Game::Entity *_entity, float* pt)
-{
-    return isInScreenPoint(_entity, {pt[0], pt[1]});
 }

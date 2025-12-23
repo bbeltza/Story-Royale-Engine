@@ -2,6 +2,8 @@
 #include <ecs/entity.hpp>
 #include <ecs/component.hpp>
 
+#include <Base/Display.hpp>
+
 #include "../internal.h"
 #include "../internal.hpp"
 
@@ -9,7 +11,7 @@ using namespace sreECS;
 
 Scene::_Arena* Scene::new_arena()
 {
-    _Arena* buff = (_Arena*)operator new(sizeof(_Arena)); // Consider using alligned_alloc
+    _Arena* buff = (_Arena*)operator new(_Arena::PAGE_SIZE); // Consider using alligned_alloc
     buff->next = NULL;
 
     return buff;
@@ -31,6 +33,8 @@ Scene::~Scene()
         m_arenabuff = next;
     } while (m_arenabuff);
     
+    if (engine.current_world == this)
+        engine.current_world = NULL;
 }
 
 void Scene::make_current(Scene* scene, bool destroy_old)
@@ -144,7 +148,7 @@ void Scene::call_update()
             for (auto& comp : ent)
                 comp.on_update(ent);
         }
-        //camera.Update(engine.last_dt);
+        camera.update();
     }
 
     { // pUpdate phase region
@@ -155,6 +159,25 @@ void Scene::call_update()
             for (auto& comp : ent)
                 comp.on_pupdate(ent);
         }
-        //camera.pUpdate(engine.phys_target_dt);
+
+        camera.pupdate();
     }
+}
+
+void Scene::call_render()
+{
+    pre_render();
+
+    for (auto& ent : *this)
+    {
+        ent.pre_render();
+        for (auto& comp : ent)
+            comp.on_render(ent);
+        ent.post_render();
+
+        Display::DrawLine(sre::col4::RED, ent.position + sre::vec2ut(0, 3), ent.position - sre::vec2ut(0, 3), NULL);
+        Display::DrawLine(sre::col4::RED, ent.position + sre::vec2ut(3, 0), ent.position - sre::vec2ut(3, 0), NULL);
+    }
+
+    post_render();
 }

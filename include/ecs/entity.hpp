@@ -19,6 +19,7 @@ namespace sreECS
         // Current scene parent
         Scene* m_parent;
 
+    protected:
         Entity(): Entity(0, 0) {}
         Entity(sre::unit x, sre::unit y, long z_index=0);
         virtual ~Entity();
@@ -34,9 +35,10 @@ namespace sreECS
         // Gets the parent scene of the entity, templated by a derived `T` type from `Scene`
         // 
         // Note that `T` has to derive from `Scene`, otherwise a compiler error is expected
+        // Note also that <ECS/scene.hpp> has to be included before using it
         // @return A pointer to the parent to the entity, or `nullptr` if the parent does not inherit `T`
         template <class T=Scene>
-        T* get_parent() const { return dynamic_cast<T>(m_parent); }
+        T* get_parent() const { return dynamic_cast<T*>(m_parent); }
 
     public:
         // Attaches components to the entity
@@ -52,7 +54,7 @@ namespace sreECS
         template <typename... Args>
         void setup_components(Component& first, Args&&... rest)
         {
-            Component& arr[] = { first, std::forward(rest)... };
+            Component* arr[] = { &first, &rest... };
             return setup_components(arr, sizeof...(rest) + 1);
         }
         // Same as setup_components(Component& first, Args...), but accepts pointers instead of references
@@ -86,7 +88,7 @@ namespace sreECS
         {
             Iterator(Component* const* ptr): m_ptr(ptr) {}
 
-            Component& operator *() const { return **m_ptr; }
+            Component& operator *() const { assert(m_ptr); return **m_ptr; }
 
             void operator ++() { ++m_ptr; }
             void operator --() { --m_ptr; }

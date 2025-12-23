@@ -7,10 +7,9 @@
 #include "Base/Tween.hpp"
 #include "Base/Timer.hpp"
 
-#include "Game/World.hpp"
 #include "Game/GuiLayer.hpp"
 
-#include "ecs/scene.hpp"
+#include "ECS/scene.hpp"
 
 _containers_service::_containers_service()
 {
@@ -53,7 +52,7 @@ void __clean_containers()
 	delete containers;
 
 	if (engine.current_world)
-		delete static_cast<::Game::World*>(engine.current_world);
+		delete static_cast<::sreECS::Scene*>(engine.current_world);
 	if (engine.current_guilayer)
 		delete static_cast<::Game::GuiContainer*>(engine.current_guilayer);
 
@@ -87,12 +86,16 @@ void __update_layer()
 
 void __update_world()
 {
-	begin:
-	sreECS::Scene* current = static_cast<sreECS::Scene*>(engine.current_world);
+	for (;;)
+	{
+		sreECS::Scene* current = static_cast<sreECS::Scene*>(engine.current_world);
 	
-	if (!current) return;
-	current->call_update();
+		if (!current) return;
+			current->call_update();
 	
-	__destroy_queue();
-	if (current != engine.current_world) goto begin;
+		__destroy_queue();
+
+		if (current != engine.current_world) continue;
+		break;
+	};
 }

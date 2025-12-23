@@ -60,6 +60,6 @@ void Game::Entity::_debugDraw()
     if (this->m_Components.empty())
 #endif
     {
-        Display::DrawDebug(Position);
+        //Display::DrawDebug(Position);
     }
 }

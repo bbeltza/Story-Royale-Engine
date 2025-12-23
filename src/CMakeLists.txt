@@ -26,7 +26,6 @@ set(BASE_SOURCES
 "FontRenderer.cpp"
 "Image.cpp"
 "Input.cpp"
-"Physics.cpp"
 "Rendering.cpp"
 "Runtime.cpp"
 "Signal.cpp"
@@ -37,13 +36,8 @@ set(BASE_SOURCES
 "Timer.cpp"
 )
 
-set(WORLD_SOURCES
-    "CameraController.cpp"
-    "Entity.cpp"
-    "World.cpp"
-)
-
 set(ECS_SOURCES
+    "camera.cpp"
     "scene.cpp"
     "entity.cpp"
 )
@@ -82,7 +76,6 @@ set_src(datatypes DATATYPES_SOURCES)
 set_src(utils UTIL_SOURCES)
 
 set_src(ecs ECS_SOURCES)
-set_src(world WORLD_SOURCES)
 set_src(gui GUI_SOURCES)
 set_src(presets PRESET_SOURCES)
 set(SOURCES "${SOURCES}" PARENT_SCOPE)

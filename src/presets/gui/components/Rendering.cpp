@@ -7,7 +7,7 @@ void GuiComponents::Fill::render(Game::GuiContainer* obj)
 {
     auto absolute = getAbsolute(obj);
 
-    Display::DrawRectangle(*absolute, color * (*getModulate(obj)), sre::vec2f::ZERO, Display::dm_Fill, DISPLAY_DONT_CENTER);
+    Display::DrawRectangle(*absolute, color * (*getModulate(obj)), sre::vec2f::ZERO, Display::M_FILL, DISPLAY_DONT_CENTER);
 }
 
 void GuiComponents::Stroke::render(Game::GuiContainer* obj)
@@ -20,6 +20,6 @@ void GuiComponents::Stroke::render(Game::GuiContainer* obj)
         absolute.position.x += i;
         absolute.position.y += i;
 
-        Display::DrawRectangle(absolute, color * (*getModulate(obj)), sre::vec2f::ZERO, Display::dm_Stroke, DISPLAY_DONT_CENTER);
+        Display::DrawRectangle(absolute, color * (*getModulate(obj)), sre::vec2f::ZERO, Display::M_STROKE, DISPLAY_DONT_CENTER);
     }
 }

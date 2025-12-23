@@ -1,28 +1,24 @@
-#include "Game/CameraControllers/EntityControl.hpp"
-#include "utils/math.h"
+#include <ECS/CameraControllers/entity.hpp>
+#include <ECS/entity.hpp>
+#include <utils/math.h>
 
-use_namespace
+#include <Engine.hpp>
 
-EntityControl::~EntityControl()
+using namespace sreECS;
+
+void EntityControl::on_pupdate(Camera& camera)
 {
+    sre::vec2ut diff = m_target - m_entity->position;
 
-}
-
-void EntityControl::pUpdate(sre::timeStamp dt)
-{
-    Camera& CurrentCamera = *getCamera();
-
-    sre::vec2ut diff = m_Target - m_Entity->Position;
-
-    if (abs(diff.x) > Bounds.x)
-        m_Target.x -= diff.x - Bounds.x * ut_sign(diff.x);
-    if (abs(diff.y) > Bounds.y)
-        m_Target.y -= diff.y - Bounds.y * ut_sign(diff.y);
+    if (abs(diff.x) > bounds.x)
+        m_target.x -= diff.x - bounds.x * ut_sign(diff.x);
+    if (abs(diff.y) > bounds.y)
+        m_target.y -= diff.y - bounds.y * ut_sign(diff.y);
 
 
-    if (!Smoothness)
-        CurrentCamera.position = m_Target;
+    if (!smoothness)
+        camera.position = m_target;
     else
-        CurrentCamera.position.setlerp(m_Target, dt / Smoothness);
+        camera.position.setlerp(m_target, Runtime::delta_time / smoothness);
     
 }

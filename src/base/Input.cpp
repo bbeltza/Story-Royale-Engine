@@ -1,9 +1,9 @@
 #include "../internal.h"
 
 #include "Base/Input.hpp"
-#include "Game/World.hpp"
-
 #include "datatypes/flags.hpp"
+
+#include "ECS/scene.hpp"
 
 bool Input::KeyPressed(SDL_KeyCode keycode)
 {
@@ -37,5 +37,5 @@ sre::vec2ut Input::MouseScreenPosition()
 
 sre::vec2ut Input::MouseWorldPosition()
 {
-    return Game::World::screenToWorld(engine.mouse_x, engine.mouse_y, Game::World::currentCamera());
+    return sreECS::Scene::current()->camera.toWorldSpace({engine.mouse_x, engine.mouse_y});
 }

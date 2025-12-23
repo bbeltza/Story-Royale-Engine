@@ -14,7 +14,7 @@ Image::Image(const char* path)
     File file(path, "rb");
     if (!file.isValid())
     {
-        ERROR("Image::Image: Could not load image %s, no such file or directory", path);
+        ERROR("Image::Image: Failed loading %s", path);
         return;
     }
 

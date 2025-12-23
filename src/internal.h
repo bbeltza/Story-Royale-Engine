@@ -3,6 +3,7 @@
 #include <standard>
 
 #include "C/API.h"
+#include "datatypes/units.h"
 #include "datatypes/timestamp.h"
 
 _CAPI_BEGIN
@@ -44,7 +45,7 @@ _CAPI_BEGIN
 		SDL_mutex* sdl_rendermutex;
 		SDL_Rect viewport;
 		int osize_x, osize_y;
-		float center_x, center_y;
+		sre_unit center_x, center_y;
 
 		size_t targetptr;
 
@@ -61,7 +62,7 @@ _CAPI_BEGIN
 
 		// Input data
 
-		float mouse_x, mouse_y;
+		sre_unit mouse_x, mouse_y;
 		uint32_t mouse_press;
 		SDL_TouchID input_last_touchid;
 		uint8_t keyboard_state[SDL_NUM_SCANCODES];
@@ -103,15 +104,10 @@ _CAPI_BEGIN
 	extern void __display_render();
 
 	extern void __clean_containers();
-
-	// Newer interface
-
-	extern void _srecore_callupdate();
-	extern void _srecore_callrender();
 _CAPI_END
 
 #ifdef __cplusplus
-#define currworld static_cast<::Game::World*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
+#define currscn static_cast<::sreECS::Scene*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
 #define currlayer static_cast<::Game::GuiLayer*>(engine.current_guilayer) // Same with this...
 #define flags_kbstate reinterpret_cast<::sre::flags8*>(engine.keyboard_state)
 #define flags_mousepress (*reinterpret_cast<::sre::flags32*>(&engine.mouse_press))

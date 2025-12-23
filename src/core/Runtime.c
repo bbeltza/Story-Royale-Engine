@@ -18,13 +18,15 @@ static void loop()
     __update_classes();
     __update_input();
 
+    /*
     __destroy_queue();
-
+    
     __query_objects();
-
+    
+    */
     __update_world();
-    __update_layer();
-
+   __update_layer();
+   
     __display_render();
 
 #ifdef __unix__ // Update console content for unix (since it only does update for every new-line)
