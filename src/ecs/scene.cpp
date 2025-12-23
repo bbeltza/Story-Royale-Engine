@@ -145,7 +145,6 @@ void Scene::call_update()
         for (auto& ent : *this)
         {
             ent.update();
-            LOG("%zd", sizeof(ent.updated));
             for (auto& comp : ent)
             {
                 if (comp.enabled)
