@@ -66,9 +66,14 @@ namespace sreECS
 
         // Iterating
 
-        struct Iterator: public std::iterator<std::bidirectional_iterator_tag,
-                                        Entity>
+        struct Iterator
         {
+            using iterator_category = std::bidirectional_iterator_tag;
+            using value_type = Entity;
+            using difference_type = std::ptrdiff_t;
+            using pointer = value_type*;
+            using reference = value_type&;
+
             Iterator() = default;
             Iterator(const size_t& ptr, const Scene* _this): m_ptr(&ptr), m_scene(_this)
             {
