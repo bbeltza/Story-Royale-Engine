@@ -1,4 +1,4 @@
-#include "ECS/Entity.hpp"
+#include "ECS/entity.hpp"
 #include "ECS/Components/velocity.hpp"
 
 #include <Engine.hpp>

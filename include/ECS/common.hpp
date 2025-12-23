@@ -2,7 +2,7 @@
 #define SREECS_COMMON_HPP
 
 #include <Base/object.hpp>
-#include <Base/signal.hpp>
+#include <Base/Signal.hpp>
 
 namespace sreECS
 {

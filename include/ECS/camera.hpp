@@ -5,6 +5,8 @@
 
 namespace sreECS
 {
+	struct Camera;
+
     struct CameraController
     {
         friend struct Camera;

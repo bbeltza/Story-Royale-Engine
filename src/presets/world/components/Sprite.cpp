@@ -1,7 +1,7 @@
 #include "ECS/entity.hpp" 
 #include "ECS/scene.hpp"
 
-#include "ECS/components/sprite.hpp"
+#include "ECS/Components/sprite.hpp"
 
 using namespace sreECS;
 
