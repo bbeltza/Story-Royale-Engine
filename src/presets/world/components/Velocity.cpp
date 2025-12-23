@@ -1,7 +1,11 @@
-#include "Game/Components/Velocity.hpp"
-#include "Game/Entity.hpp"
+#include "ECS/Entity.hpp"
+#include "ECS/Components/velocity.hpp"
 
-void Components::Velocity::normalize(sre::unit speed)
+#include <Engine.hpp>
+
+using namespace sreECS;
+
+void Velocity::normalize(sre::unit speed)
 {
     if (speed == 0)
     {
@@ -15,7 +19,7 @@ void Components::Velocity::normalize(sre::unit speed)
     velocity = velocity / mag * speed;
 }
 
-void Components::Velocity::pUpdate(Game::Entity* e, sre::timeStamp dt)
+void Velocity::on_pupdate(Entity& e)
 {
-    e->Position += velocity * dt;
+    e.position += velocity * Runtime::pdelta_time;
 }

@@ -1,5 +1,8 @@
 #include <ecs/scene.hpp>
 #include <ecs/entity.hpp>
+#include <ecs/component.hpp>
+
+#include <Base/Display.hpp>
 
 #include "../internal.h"
 #include "../internal.hpp"
@@ -8,7 +11,7 @@ using namespace sreECS;
 
 Scene::_Arena* Scene::new_arena()
 {
-    _Arena* buff = (_Arena*)operator new(sizeof(_Arena));
+    _Arena* buff = (_Arena*)operator new(_Arena::PAGE_SIZE); // Consider using alligned_alloc
     buff->next = NULL;
 
     return buff;
@@ -30,6 +33,8 @@ Scene::~Scene()
         m_arenabuff = next;
     } while (m_arenabuff);
     
+    if (engine.current_world == this)
+        engine.current_world = NULL;
 }
 
 void Scene::make_current(Scene* scene, bool destroy_old)
@@ -131,4 +136,101 @@ Entity* Scene::entity_at(size_t offset) const
     assert(curr != NULL);
 
     return reinterpret_cast<Entity*>(curr->data + offset);
+}
+
+void Scene::call_update()
+{
+    { // Update phase region
+        update();
+        for (auto& ent : *this)
+        {
+            ent.update();
+            for (auto& comp : ent)
+            {
+                if (comp.enabled)
+                comp.on_update(ent);
+            }
+            ent.updated.Fire();
+        }
+        camera.update();
+    }
+
+    static sre::timeStamp dt_accumulated;
+    dt_accumulated += engine.last_dt;
+    while (dt_accumulated > 0) { // pUpdate phase region
+        dt_accumulated -= engine.phys_target_dt;
+
+        pupdate();
+        for (auto& ent : *this)
+        {
+            const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position;
+
+            ent.pupdate();
+            for (auto& comp : ent)
+            {
+                if (comp.enabled)
+                    comp.on_pupdate(ent);
+            }
+
+            const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position - ent.lastVelocity;
+        }
+        camera.pupdate();
+    }
+
+    updated.Fire();
+}
+
+void Scene::call_render()
+{
+    // Sort entities by z_index. Cannot use default std::sort because of the need to access the entity buffer with entity_at()
+    // So I made my own sorting algorithm :r)
+    for (auto i2 = m_entities.begin();;)
+    {
+        auto i1 = i2++;
+        if (i2 == m_entities.end())
+            break;
+
+        Entity* entity1 = entity_at(*i1);
+        Entity* entity2 = entity_at(*i2);
+
+        if (entity1->z_index > entity2->z_index)
+        {
+            *i1 ^= *i2;
+            *i2 ^= *i1;
+            *i1 ^= *i2;
+            i2--;
+        }
+    }
+
+    pre_render();
+
+    for (auto& ent : *this)
+    {
+        ent.pre_render();
+        for (auto& comp : ent)
+        {
+            if (comp.enabled)
+                comp.on_render(ent);
+        }
+        ent.post_render();
+    }
+
+    post_render();
+
+    rendered.Fire();
+}
+
+Entity *Scene::call_query(sre::vec2ut coords) const
+{
+    for (auto it = rbegin(); it != rend(); ++it)
+    {
+        auto& entity = *it;
+        for (auto& comp : entity)
+        {
+            if (comp.on_query(entity, coords))
+                return &entity;
+        }
+    }
+
+    return nullptr;
 }

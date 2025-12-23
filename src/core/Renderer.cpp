@@ -3,12 +3,13 @@
 
 #include "GameSettings.h"
 
-#include "Game/World.hpp"
 #include "Game/GuiLayer.hpp"
 
 #include "Engine.hpp"
 
 #include "Base/Texture.hpp"
+
+#include "ECS/scene.hpp"
 
 void __setup_renderer()
 {
@@ -69,11 +70,11 @@ void __display_render()
 
 	// Render current world
 
-	if (Game::World *current = currworld)
+	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
 	{
 		//// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
-		const sre::col3& bg = current->Background;
-		const sre::col4& fg = current->Foreground;
+		const sre::col3& bg = current->background;
+		const sre::col4& fg = current->foreground;
 
 		//// Clearing the screen with the background color
 		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, bg.r, bg.g, bg.b, 255);
@@ -107,9 +108,9 @@ void __display_render()
 
 		if (fg.a < 255)
 		{
-			current->preRender();
+			current->pre_render();
 			current->_renderchildren();
-			current->postRender();
+			current->post_render();
 		}
 		if (fg.a)
 		{

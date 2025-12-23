@@ -1,17 +1,21 @@
-#include "ECS.hpp"
-#include "Game/Components/Sprite.hpp"
+#include "ECS/entity.hpp" 
+#include "ECS/scene.hpp"
 
-Components::Sprite::Sprite(): Scale(1, 1), Offset(0, 0) {}
-Components::Sprite::~Sprite()
+#include "ECS/components/sprite.hpp"
+
+using namespace sreECS;
+
+Sprite::Sprite(): scale(1, 1), offset(0, 0) {}
+Sprite::~Sprite()
 {
 }
 
-void Components::Sprite::Attach(Texture& texture)
+void Sprite::attach(Texture& texture)
 {
     textures.push_back(&texture);
 }
 
-void Components::Sprite::Render(Game::Entity* entity)
+void Sprite::on_render(Entity& entity)
 {
     if (textures.empty()) return;
 
@@ -20,9 +24,9 @@ void Components::Sprite::Render(Game::Entity* entity)
     Texture& texture = *textures[frame];
 
     sre::rect2Dut render_rect(
-        entity->Position + Offset,
-        texture.size() * Scale
+        entity.position + offset,
+        texture.size() * scale
     );
 
-    Display::DrawTexture(texture, render_rect, Modulate, sre::vec2f::CENTER, entity->getWorld());
+    Display::DrawTexture(texture, render_rect, modulate, sre::vec2f::CENTER, entity.get_parent());
 }

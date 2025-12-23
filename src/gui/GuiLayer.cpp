@@ -15,7 +15,7 @@ Game::GuiLayer::~GuiLayer()
 void Game::GuiLayer::set(GuiLayer* layer)
 {
     if (engine.current_guilayer)
-        currlayer->Destroy();
+        currlayer->destroy();
     engine.current_guilayer = layer;
 }
 
@@ -84,18 +84,18 @@ void Game::GuiContainer::_renderchildren()
 
         obj->_renderchildren();
     }
-    Rendered.Fire();
+    rendered.Fire();
 }
 
-void Game::GuiContainer::call_update(sre::timeStamp dt)
+void Game::GuiContainer::call_update()
 {
-    Update(dt);
+    update();
 
     for (auto obj : m_children)
     {
-        obj->call_update(dt);
+        obj->call_update();
     }
-    Updated.Fire(dt);
+    updated.Fire();
 }
 
 /*

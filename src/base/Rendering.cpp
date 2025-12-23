@@ -4,14 +4,14 @@
 #include "Base/Display.hpp"
 #include "Base/Texture.hpp"
 
-#include "Game/World.hpp"
+#include "ECS/scene.hpp"
 
 #include "utils/mem.h"
 
 #include "GameSettings.h"
 #define DRAW_ENTCENTER_LINESIZE sre::game_settings.DebugOptions.EntityDebugLineSize
 
-inline void real_coords(sre::vec2f& out_pos, const sre::vec2ut& in_pos, const Game::World* world)
+inline void real_coords(sre::vec2f& out_pos, const sre::vec2ut& in_pos, const sreECS::Scene* world)
 {
     if (world == DISPLAY_DONT_CENTER)
     {
@@ -19,10 +19,10 @@ inline void real_coords(sre::vec2f& out_pos, const sre::vec2ut& in_pos, const Ga
         out_pos.y = static_cast<float>(round(in_pos.y * engine.current_scale));
         return;
     }
-    out_pos = Game::World::worldToScreen(in_pos.x, in_pos.y, world ? &world->CurrentCamera : nullptr);
+    out_pos = world->camera.toScreenSpace(in_pos); // NOTE: World might be NULL, see definition for Camera::toScreenSpace(sre::vec2ut)
 }
 
-inline void real_coords(SDL_FRect& out_rect, const sre::rect2Dut& in_rect, const sre::vec2f& anchor, const Game::World* world)
+inline void real_coords(SDL_FRect& out_rect, const sre::rect2Dut& in_rect, const sre::vec2f& anchor, const sreECS::Scene* world)
 {
     out_rect.w = static_cast<float>(floor(in_rect.size.x * engine.current_scale));
     out_rect.h = static_cast<float>(floor(in_rect.size.y * engine.current_scale));
@@ -33,7 +33,7 @@ inline void real_coords(SDL_FRect& out_rect, const sre::rect2Dut& in_rect, const
         out_rect.y = static_cast<float>(floor((in_rect.position.y * engine.current_scale - in_rect.size.y * anchor.y)));
         return;
     }
-    reinterpret_cast<sre::rect2Df*>(&out_rect)->position = Game::World::worldToScreen(in_rect.position.x - in_rect.size.x * anchor.y, in_rect.position.y - in_rect.size.y * anchor.y, world ? &world->CurrentCamera : nullptr);
+    reinterpret_cast<sre::rect2Df*>(&out_rect)->position = world->camera.toScreenSpace(in_rect.position - in_rect.size * anchor);
 }
 
 sre::vec2ut Display::GetCenter() { return {engine.center_x, engine.center_y}; }
@@ -44,7 +44,7 @@ float Display::GetScale() { return engine.viewport_scale; }
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
 
-void Display::DrawLine(const sre::col4 &Color, const sre::vec2ut &Pt1, const sre::vec2ut &Pt2, const Game::World* world)
+void Display::DrawLine(const sre::col4 &Color, const sre::vec2ut &Pt1, const sre::vec2ut &Pt2, const sreECS::Scene* world)
 {
     START_DRAW
 
@@ -58,7 +58,7 @@ void Display::DrawLine(const sre::col4 &Color, const sre::vec2ut &Pt1, const sre
     END_DRAW
 }
 
-void Display::DrawLines(const sre::col4 &Color, int Count, const sre::vec2ut *Pts, const Game::World* world)
+void Display::DrawLines(const sre::col4 &Color, int Count, const sre::vec2ut *Pts, const sreECS::Scene* world)
 {
     START_DRAW
 
@@ -73,7 +73,7 @@ void Display::DrawLines(const sre::col4 &Color, int Count, const sre::vec2ut *Pt
     END_DRAW
 }
 
-void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Color, const sre::vec2f &AnchorPoint, DrawingMode Mode, const Game::World* world)
+void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Color, const sre::vec2f &AnchorPoint, DrawingMode Mode, const sreECS::Scene* world)
 {
     START_DRAW
 
@@ -83,7 +83,7 @@ void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Col
     SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
     switch (Mode)
     {
-    case dm_Stroke:
+    case M_STROKE:
         SDL_RenderDrawRectF(engine.sdl_rendererhndl, &r);
         break;
 
@@ -95,7 +95,7 @@ void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Col
     END_DRAW
 };
 
-void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double _angle, const sre::col4 &_Col, DrawingMode _dm, const Game::World* world)
+void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double _angle, const sre::col4 &_Col, DrawingMode _dm, const sreECS::Scene* world)
 {
     START_DRAW
 
@@ -104,7 +104,7 @@ void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double
 
     switch (_dm)
     {
-    case dm_Stroke:
+    case M_STROKE:
     {
         sre::vec2ut points[5] =
             {
@@ -136,22 +136,7 @@ void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double
     END_DRAW
 }
 
-void Display::DrawDebug(const sre::vec2ut& _pos)
-{
-    START_DRAW
-
-    SDL_FPoint pos;
-    real_coords(*reinterpret_cast<sre::vec2f*>(&pos), _pos, Game::World::Current());
-
-    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 64, 0, 255);
-
-    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.x - DRAW_ENTCENTER_LINESIZE , pos.y, pos.x + DRAW_ENTCENTER_LINESIZE, pos.y);
-    SDL_RenderDrawLineF(engine.sdl_rendererhndl, pos.x, pos.y - DRAW_ENTCENTER_LINESIZE, pos.x, pos.y + DRAW_ENTCENTER_LINESIZE);
-
-    END_DRAW
-}
-
-void Display::DrawCircle(const sre::vec2ut &pos, const sre::unit radius, const sre::col4 &_Col, DrawingMode _dm, const Game::World* world)
+void Display::DrawCircle(const sre::vec2ut &pos, const sre::unit radius, const sre::col4 &_Col, DrawingMode _dm, const sreECS::Scene* world)
 #if 0
 {
     START_DRAW
@@ -194,7 +179,7 @@ end:
 }
 #endif
 
-void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, const sre::col4 &Modulate, const sre::vec2f &AnchorPoint, const Game::World* world)
+void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, const sre::col4 &Modulate, const sre::vec2f &AnchorPoint, const sreECS::Scene* world)
 {
     START_DRAW
 

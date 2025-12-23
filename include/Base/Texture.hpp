@@ -6,21 +6,21 @@
 
 class Texture;
 
-namespace Game
+namespace sreECS
 {
-    class World;
+    struct Scene;
 }
 
 namespace Display
 {
-    void DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const sre::col4& Modulate, const sre::vec2f& AnchorPoint, const Game::World* world);
+    void DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const sre::col4& Modulate, const sre::vec2f& AnchorPoint, const sreECS::Scene* world);
 }
 
 extern "C" void __display_render();
 
 class Texture
 {
-    friend void Display::DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const sre::col4& Modulate, const sre::vec2f& AnchorPoint, const Game::World* world);
+    friend void Display::DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const sre::col4& Modulate, const sre::vec2f& AnchorPoint, const sreECS::Scene* world);
     friend struct _containers_service;
 
     Texture(const Texture& other) = delete;

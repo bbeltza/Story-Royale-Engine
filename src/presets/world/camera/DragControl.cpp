@@ -1,9 +1,8 @@
-#include "Game/CameraControllers/DragControl.hpp"
+#include <ECS/CameraControllers/drag.hpp>
 
-#include "Base/Input.hpp"
-#include "Base/Display.hpp"
+#include <Engine.hpp>
 
-use_namespace
+using namespace sreECS;
 
 Action DragControl::default_action{ true, Input::mbRight };
 
@@ -15,27 +14,24 @@ DragControl::DragControl(const Action& action): m_action(action)
 
 DragControl::~DragControl() {}
 
-void DragControl::Update(sre::timeStamp delta)
+void DragControl::on_update(Camera& camera)
 {
-    Camera& CurrentCamera = *getCamera();
-
     if (m_action.isPressed())
     {
         m_camSpeed = m_lastmouseDelta;
     }
-    else if (Smoothness <= 0.0_ut)
+    else if (smoothness <= 0.0_ut)
         m_camSpeed = m_camSpeed.ZERO;
     else
-        m_camSpeed.setlerp(m_camSpeed.ZERO, ut_min(delta / Smoothness, 1.0_ut));
+        m_camSpeed.setlerp(m_camSpeed.ZERO, ut_min(Runtime::delta_time / smoothness, 1.0_ut));
 
-    CurrentCamera.position -= m_camSpeed;
+    camera.position -= m_camSpeed;
     m_lastmouseDelta = m_lastmouseDelta.ZERO;
 }
 
-void DragControl::pUpdate(sre::timeStamp delta)
+void DragControl::on_pupdate(Camera&)
 {
     // Empty.
-    (void)delta;
 }
 
 void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)

@@ -17,7 +17,7 @@ namespace sre
         using vec = vec2<type>;
 
         vec position;
-        vec size;
+        vec size { 100, 100 };
 
         constexpr rect2D() = default;
         constexpr rect2D(T x, T y, T w, T h): position(x, y), size(w, h) {}
@@ -40,6 +40,12 @@ namespace sre
         constexpr bool intersects(const rect2D& other) const {
             return ut::abs(position.x - other.position.x) < size.x / 2 + other.size.x / 2 &&
                 ut::abs(position.y - other.position.y) < size.y / 2 + other.size.y / 2;
+        }
+
+        constexpr bool intersects(const vec pt) const {
+            const vec abs_size = size.abs() / 2;
+            return (pt.x >= position.x - abs_size.x && pt.x <= position.x + abs_size.x) &&
+                    (pt.x >= position.x - abs_size.y && pt.y <= position.y + abs_size.y);
         }
 
         constexpr T top() const { return position.y - ut::abs(size.y) / 2; }
