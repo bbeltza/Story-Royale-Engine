@@ -8,9 +8,9 @@ ConnectionHandle Action::sc_touch;
 
 extern "C" void __init_actions()
 {
-	Action::sc_mouse = Input::MouseButton.Connect(Action::sc_mouseHandle, NULL, false);
-	Action::sc_keyboard = Input::KeyEvent.Connect(Action::sc_keyboardHandle, NULL, false);
-	Action::sc_touch = Input::FingerTouch.Connect(Action::sc_touchHandle, NULL, false);
+	Action::sc_mouse = Input::MouseButton.Connect(Action::sc_mouseHandle, NULL);
+	Action::sc_keyboard = Input::KeyEvent.Connect(Action::sc_keyboardHandle, NULL);
+	Action::sc_touch = Input::FingerTouch.Connect(Action::sc_touchHandle, NULL);
 }
 
 void Action::push_self()
@@ -32,7 +32,6 @@ Action::~Action()
 	}
 }
 
-#define for_each for (auto act: *s_actions)
 #define sa_check if (!s_actions) return;
 #define act_frame act->press_frame = Runtime::CurrentFrame()
 
@@ -40,7 +39,7 @@ void Action::sc_mouseHandle(void*, void*, const MouseButton* ev)
 {
 	sa_check
 
-	for_each
+	for (auto act : *s_actions)
 	{
 		Input::Button button = (Input::Button)ev->button;
 		if (act->m_mousebuttons.count(button))
@@ -57,7 +56,7 @@ void Action::sc_keyboardHandle(void*, void*, const Key* ev)
 	sa_check
 	if (ev->repeat) return;
 
-	for_each
+	for (auto act : *s_actions)
 	{
 		if (act->m_scancodes.count(ev->scanCode))
 		{
@@ -82,7 +81,7 @@ void Action::sc_touchHandle(void*, void*, const TouchFinger* ev)
 	sa_check
 	if (ev->Pressed) return;
 
-	for_each
+	for (auto act : *s_actions)
 	{
 		if (act->enable_touch)
 			act_frame;

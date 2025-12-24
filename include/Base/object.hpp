@@ -6,6 +6,8 @@
 
 __def_internal(__destroy_queue);
 
+class Connection;
+
 namespace sre
 {
     class Object

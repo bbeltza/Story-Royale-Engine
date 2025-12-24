@@ -59,4 +59,5 @@ namespace sre
     using flags16 = flags<uint16_t>;
     using flags32 = flags<uint32_t>;
     using flags64 = flags<uint64_t>;
+    using flagsptr = flags<size_t>;
 }

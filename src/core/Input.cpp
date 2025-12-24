@@ -6,9 +6,9 @@
 
 #include "datatypes/flags.hpp"
 
-Signal<const Key*> Input::KeyEvent{NULL, false};
-Signal<const TouchFinger*> Input::FingerMove{ NULL, false };
-Signal<const MouseMove*> Input::MouseMove{NULL, false};
+Signal<const Key*> Input::KeyEvent{ NULL };
+Signal<const TouchFinger*> Input::FingerMove{ NULL };
+Signal<const MouseMove*> Input::MouseMove{ NULL };
 Signal<const MouseButton*> Input::MouseButton;
 Signal<const MouseWheel*> Input::MouseWheel;
 Signal<const TouchFinger*> Input::FingerTouch;

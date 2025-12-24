@@ -6,9 +6,9 @@
 #include "Base/Tween.hpp"
 #include "Base/Thread.hpp"
 
-Signal<sre::timeStamp> Runtime::OnUpdate{ NULL, false };
-Signal<> Runtime::BeforeRender{ NULL, false };
-Signal<> Runtime::AfterRender{ NULL, false };
+Signal<sre::timeStamp> Runtime::OnUpdate{ NULL };
+Signal<> Runtime::BeforeRender{ NULL };
+Signal<> Runtime::AfterRender{ NULL };
 
 intptr_t Runtime::CurrentFrame() { return engine.frame; }
 
