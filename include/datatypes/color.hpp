@@ -57,7 +57,7 @@ namespace sre
 		static const col3 BLUE;
 	};
 
-	struct alignas(int) col4: public col3
+	struct col4: public col3
 	{
 		SRE_IMPLEMENT_DATATYPE("{ %d, %d, %d, %d } ( %g%%, %g%%, %g%%, %g%% )",
 			r,

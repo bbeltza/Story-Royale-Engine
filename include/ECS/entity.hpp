@@ -23,7 +23,7 @@ namespace sreECS
         Entity(): Entity(0, 0) {}
         Entity(sre::unit x, sre::unit y, long z_index=0);
         virtual ~Entity();
-        virtual void on_destroy() { this->~Entity(); }
+        void operator delete(void*);
     public:
         // The current position of the entity
         sre::vec2ut position;
@@ -40,7 +40,6 @@ namespace sreECS
         // @return A pointer to the parent to the entity, or `nullptr` if the parent does not inherit `T`
         template <class T=Scene>
         T* get_parent() const { return dynamic_cast<T*>(m_parent); }
-
     public:
         // Attaches components to the entity
         // 

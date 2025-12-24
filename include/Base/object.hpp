@@ -3,6 +3,7 @@
 
 #include <internal_def.hh>
 #include <cstddef>
+#include <string>
 
 __def_internal(__destroy_queue);
 
@@ -17,7 +18,6 @@ namespace sre
         Object* m_nextdestroyed = NULL;
     protected:
         virtual ~Object();
-        virtual void on_destroy() { delete this; }
     public:
         void destroy();
     };

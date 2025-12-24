@@ -17,7 +17,7 @@ Entity::~Entity()
 		m_componentcount = 0;
 		m_components = NULL;
 
-		operator delete(ptr);
+		::operator delete(ptr);
 	}
 
 	m_parent->m_freelist.push_back({ m_offset, m_size });
@@ -28,6 +28,11 @@ Entity::~Entity()
 		m_parent->m_entities.erase(it);
 		break;
 	}
+}
+
+void Entity::operator delete(void* entity)
+{
+	static_cast<Entity*>(entity)->~Entity();
 }
 
 void Entity::setup_components(Component* const components[], size_t count)

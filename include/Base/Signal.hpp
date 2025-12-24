@@ -20,13 +20,14 @@ protected:
 	~SignalBase();
 	typedef void (*dummy_func_t)(void*, void*, ...);
 private:
-	static void static_invoker(SignalBase* sig, dummy_func_t func, void* data);
+	static void static_invoker(SignalBase* sig, void* func, void* data);
 	Connection* m_head = NULL;
 	void* m_semaphore;
 protected:
 	void base_fire();
 	void base_yield();
-	Connection* base_connect(void* fun, void* userdata, intptr_t flags);
+	Connection* base_connect(void* fun, void* userdata, uintptr_t flags);
+	template <typename _Callable> Connection* base_connect(_Callable fun, void* userdata, uintptr_t flags) { return base_connect(reinterpret_cast<void*>(fun), userdata, flags); }
 
 	virtual void invoke_func(void* func, void* data) = 0;
 public:
@@ -40,7 +41,7 @@ class Connection
 	friend class ConnectionHandle;
 	typedef SignalBase::dummy_func_t dummy_func_t;
 
-	Connection(SignalBase* signal, dummy_func_t func, void* userdata, sre::flagsptr flags);
+	Connection(SignalBase* signal, dummy_func_t func, void* userdata, uintptr_t flags);
 	~Connection();
 
 	SignalBase* m_signal;
@@ -90,13 +91,13 @@ class Signal: public SignalBase
 
 	template <size_t... _indices> void invoke(void* func, void* data, ut::sequence<_indices...>) { reinterpret_cast<DefaultCallable>(func)(this->userdata, data, std::move(std::get<_indices>(ret_args))...); }
 	void invoke_func(void* func, void* data) override { invoke(func, data, typename ut::make_sequence<sizeof...(Args)>::type {}); }
-
+	
+	#define _T1 template <typename Ret, typename ST, typename CT>
+	#define _T2 template <typename Ret>
 public:
 	Signal(void* Userdata=NULL): SignalBase(Userdata) {}
 	void Fire(Args... args) { ret_args = { args... }; base_fire(); }
 
-	#define _T1 template <typename Ret, typename ST, typename CT>
-	#define _T2 template <typename Ret>
 
 	_T1 Connection* Connect(Callable<Ret, ST, CT> function, void* userdata = NULL) { return base_connect(function, userdata, Connection::NONE); }
 	_T2 Connection* Connect(ShortCallable<Ret> function, void* userdata = NULL) { return base_connect(function, userdata, Connection::NONE); }

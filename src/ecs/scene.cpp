@@ -40,7 +40,7 @@ Scene::~Scene()
 void Scene::make_current(Scene* scene, bool destroy_old)
 {
     if (engine.current_world && destroy_old)
-        delete static_cast<Scene*>(engine.current_world);
+        static_cast<Scene*>(engine.current_world)->destroy();
     
     engine.current_world = scene;
 }

@@ -3,39 +3,40 @@
 #include "Base/Thread.hpp"
 #include "Engine.hpp"
 
-#define get_semaphore static_cast<SDL_sem*>(m_semaphore)
+#define get_semaphore static_cast<SDL_sem *>(m_semaphore)
 
-void SignalBase::static_invoker(SignalBase* sig, dummy_func_t func, void* data) { sig->invoke_func(func, data); }
+void SignalBase::static_invoker(SignalBase *sig, void *func, void *data) { sig->invoke_func(func, data); }
 
 void SignalBase::base_fire()
 {
 	SDL_SemPost(get_semaphore);
 
-	for (Connection* connection = m_head; connection; connection = connection->m_next)
+	for (Connection *connection = m_head; connection; connection = connection->m_next)
 	{
-		Connection* prev = connection->m_prev;
+		Connection *prev = connection->m_prev;
 		if (connection->flags.has(Connection::MULTITHREADED))
-			Threads::Create(static_invoker, this, connection->m_func, connection->userdata);
+			Threads::Create(static_invoker, this, reinterpret_cast<void*>(connection->m_func), connection->userdata);
 		else
-			invoke_func(connection->m_func, connection->userdata);
+			invoke_func(reinterpret_cast<void*>(connection->m_func), connection->userdata);
 
 		if (connection->flags.has(Connection::ONCE))
 			delete connection;
 	}
 }
 
-SignalBase::SignalBase(void* userdata): userdata(userdata), m_semaphore(SDL_CreateSemaphore(0)) {}
+SignalBase::SignalBase(void *userdata) : userdata(userdata), m_semaphore(SDL_CreateSemaphore(0)) {}
 
 SignalBase::~SignalBase()
 {
-	if (SDL_WasInit(0)) SDL_DestroySemaphore(get_semaphore);
+	if (SDL_WasInit(0))
+		SDL_DestroySemaphore(get_semaphore);
 	while (m_head)
 		delete m_head;
 }
 
-Connection* SignalBase::base_connect(void* _func, void* _userdata, intptr_t _flags)
+Connection *SignalBase::base_connect(void *_func, void *_userdata, uintptr_t _flags)
 {
-	Connection* ret = new Connection{ this, static_cast<dummy_func_t>(_func), _userdata, _flags };
+	Connection *ret = new Connection{this, reinterpret_cast<dummy_func_t>(_func), _userdata, _flags};
 	return ret;
 }
 
@@ -44,8 +45,7 @@ void SignalBase::base_yield()
 	SDL_SemWait(get_semaphore);
 }
 
-
-Connection::Connection(SignalBase* signal, dummy_func_t func, void* _userdata, sre::flagsptr _flags): m_signal(signal), m_func(func), userdata(_userdata), flags(_flags)
+Connection::Connection(SignalBase *signal, dummy_func_t func, void *_userdata, uintptr_t _flags) : m_signal(signal), m_func(func), userdata(_userdata), flags(_flags)
 {
 	m_next = signal->m_head;
 	signal->m_head = this;
@@ -55,7 +55,7 @@ Connection::Connection(SignalBase* signal, dummy_func_t func, void* _userdata, s
 
 Connection::~Connection()
 {
-	Connection* prev = m_prev;
+	Connection *prev = m_prev;
 	if (m_next)
 		m_next->m_prev = prev;
 	if (prev)
@@ -67,14 +67,13 @@ Connection::~Connection()
 		m_currhandle->connection = NULL;
 }
 
-
-ConnectionHandle::ConnectionHandle(ConnectionHandle&& moving) noexcept : connection(moving.connection)
+ConnectionHandle::ConnectionHandle(ConnectionHandle &&moving) noexcept : connection(moving.connection)
 {
 	moving.connection = nullptr;
 	connection->m_currhandle = this;
 }
 ConnectionHandle::~ConnectionHandle() { Disconnect(); }
-ConnectionHandle& ConnectionHandle::operator=(Connection* ptr)
+ConnectionHandle &ConnectionHandle::operator=(Connection *ptr)
 {
 	connection = ptr;
 	connection->m_currhandle = this;
