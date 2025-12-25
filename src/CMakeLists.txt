@@ -44,8 +44,7 @@ set(ECS_SOURCES
 
 set(GUI_SOURCES
     "GuiLayer.cpp"
-    #"layer.cpp"
-    #"container.cpp"
+    "object.cpp"
 )
 
 set(PRESET_SOURCES
