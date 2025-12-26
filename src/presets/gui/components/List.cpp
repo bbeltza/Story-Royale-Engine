@@ -1,26 +1,27 @@
-#include "Game/GuiObject.hpp"
-#include "Game/GuiComponents/List.hpp"
+#include <GUI/Components/list.hpp>
 
-void GuiComponents::List::process_children(Game::GuiObject* child, uint32_t index)
+using namespace sreGUI;
+
+void List::process_children(const sre::rect2Dut& parent, sre::rect2Dut children[], size_t count)
 {
-    if (!index)
-        m_lastsize = 0;
-    
-    sre::rect2Dut* childabs = getAbsolute(child); 
-    sre::rect2Dut* parentabs = getAbsolute(child->getParent()); 
+    sre::unit offs{};
 
-    switch (direction)
+    for (size_t i = 0; i < count; i++)
     {
-    case HORIZONTAL:
-        childabs->position.y = parentabs->position.y;
-        childabs->position.x = parentabs->position.x + m_lastsize;
-        m_lastsize += childabs->size.x + Padding.to_absolute(parentabs->size.x);
-        break;
-    default:
-        childabs->position.x = parentabs->position.x;
-        childabs->position.y = parentabs->position.y + m_lastsize;
-        m_lastsize += childabs->size.y + Padding.to_absolute(parentabs->size.y);
-        break;
-    }
-    
+        switch (direction)
+        {
+            case HORIZONTAL:
+                children[i].position.y = parent.position.y;
+                children[i].position.x = parent.position.x + offs;
+                offs += children[i].size.x + padding.to_absolute(parent.size.x);
+                break;
+            case VERTICAL:
+                children[i].position.x = parent.position.x;
+                children[i].position.y = parent.position.y + offs;
+                offs += children[i].size.y + padding.to_absolute(parent.size.y);
+                break;
+            default:
+                return;
+        }
+    }    
 }

@@ -1,24 +1,23 @@
-#include "Game/GuiComponents/Image.hpp"
+#include <GUI/Components/image.hpp>
+#include <GUI/Components/transform.hpp>
 #include "Engine.hpp"
 
-using namespace GuiComponents;
+using namespace sreGUI;
 
-void Image::Fit(Game::GuiObject* obj)
+void Image::fit(Transform& transform)
 {
-    if (!CurrentImage)
+    if (!texture)
     {
-        WARN("Calling Image::Fit on NULL image");
+        WARN("Calling Image::fit on NULL image");
         return;
     }
-    sre::vec2i size = CurrentImage->size();
-    obj->size = sre::udim2::fromoffset(sre::vec2ut{size});
+    sre::vec2i size = texture->size();
+    transform.size = sre::udim2::fromoffset(sre::vec2ut{size});
 }
 
-void Image::render(Game::GuiContainer* obj)
+void Image::on_render(const sre::rect2Dut &dimensions)
 {
-    if (!CurrentImage) return;
+    if (!texture) return;
 
-    sre::rect2Dut* abs = getAbsolute(obj);
-
-    Display::DrawTexture(*CurrentImage, *abs, Modulate, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
+    Display::DrawTexture(*texture, dimensions, modulate, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
 }

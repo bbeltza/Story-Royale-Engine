@@ -1,25 +1,25 @@
-#include "Game/GuiComponents/Padding.hpp"
+#include <GUI/Components/padding.hpp>
 
-void GuiComponents::Padding::setPadding(const sre::udim& value)
+using namespace sreGUI;
+
+void Padding::set_all(const sre::udim& value)
 {
-    padding.topleft = {value, value};
-    padding.bottomright = {value, value};
+    padding.top_left = {value, value};
+    padding.bottom_right = {value, value};
 }
 
-void GuiComponents::Padding::process_position(Game::GuiContainer* obj)
+sre::vec2ut Padding::process_position(const sre::rect2Dut& dimensions, sre::vec2ut)
 {
-    auto absolute = getAbsolute(obj);
-    m_oldabs = *absolute;
+    m_oldabs = dimensions;
 
-    const sre::vec2ut lt = padding.topleft.to_absolute(absolute->size);
-    const sre::vec2ut rb = padding.bottomright.to_absolute(absolute->size);
+    const sre::vec2ut lt = padding.top_left.to_absolute(dimensions.size);
+    const sre::vec2ut rb = padding.bottom_right.to_absolute(dimensions.size);
 
-    absolute->position += lt;
-    absolute->size -= lt + rb;
+    const_cast<sre::rect2Dut&>(dimensions).size -= lt + rb;
+    return dimensions.position + lt;
 }
 
-void GuiComponents::Padding::pre_render(Game::GuiContainer* obj)
+void Padding::on_prerender(sre::rect2Dut& dimensions)
 {
-    auto absolute = getAbsolute(obj);
-    *absolute = m_oldabs;
+    dimensions = m_oldabs;
 }

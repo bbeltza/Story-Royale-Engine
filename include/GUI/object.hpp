@@ -4,20 +4,39 @@
 #include <list>
 
 #include <datatypes/rect.hpp>
+#include <datatypes/flags.hpp>
 
 #include <Base/object.hpp>
 #include <Base/Signal.hpp>
 
+#include <internal_def.hh>
+
+__def_internal(__update_layer);
+__def_internal(__query_objects);
+__def_internal(__display_render);
+
 namespace sreGUI
 {
-    class Component;
+    struct Component;
 
     class Object : public ::sre::Object
     {
+        __friend_internal(__update_layer);
+        __friend_internal(__query_objects);
+        __friend_internal(__display_render);
+
         Object *m_parent;
 
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
-
+    public:
+        enum FlagsEnum
+        {
+            F_ENABLED = ut_bit(0),
+            F_QUERY = ut_bit(2)
+        };
+        // Flags that control the behavior of the object and its children
+        sre::flags32 flags = {F_ENABLED, F_QUERY};
+        int z_index = 0;
     public:
         // Instantiating
 
@@ -121,7 +140,7 @@ namespace sreGUI
         class CContainer
         {
             friend class Object;
-            Component *const *m_ptr = NULL;
+            Component **m_ptr = NULL;
             size_t m_count = 0;
 
         public:
@@ -176,12 +195,17 @@ namespace sreGUI
             Iterator begin() const { return Iterator(m_ptr); }
             Iterator end() const { return Iterator(m_ptr + m_count); }
         } components;
-
+    public:
+        bool is_hovering() const;
     protected:
         virtual void update() {}
         virtual void pre_render() {}
         virtual void post_render() {}
-
+    private:
+        const Object* call_query(sre::vec2ut pt) const;
+        void call_process();
+        void call_update();
+        void call_render();
     public:
         Signal<> updated{this};
         Signal<> rendered{this};

@@ -1,23 +1,22 @@
 #include <Engine.hpp>
-#include <ECS.hpp>
 
-#include <Game/Components/Sprite.hpp>
+#include <ECS/scene.hpp>
+#include <ECS/entity.hpp>
+
+#include <ECS/Components/sprite.hpp>
 
 struct TexturePalace;
 struct TextureEntity;
 
-struct TexturePalace : public Game::World
+struct TexturePalace : public sreECS::World
 {
-    TexturePalace()
-    {
-        auto texture = addEntity<TextureEntity>();
-    }
+    TextureEntity& texture = add_entity<TextureEntity>();
 };
 
 
 static void mouse(void*, TextureEntity* ent, const MouseButton* event);
 
-struct TextureEntity : public Game::Entity
+struct TextureEntity : public sreECS::Entity
 {
     sre::Image img1{"res://test_texture.png"};
     sre::Image img2{"res://test_texture2.png"};
@@ -30,12 +29,13 @@ struct TextureEntity : public Game::Entity
 
     TextureEntity()
     {
-        sprite.Attach(sprt1);
-        sprite.Attach(sprt2);
-        sprite.Scale = { 4, 4 };
-        addComponent(sprite);
+        sprite.attach(sprt1);
+        sprite.attach(sprt2);
+        sprite.scale = { 4, 4 };
+
+        setup_components(sprite);
     }
-    Components::Sprite sprite;
+    sreECS::Sprite sprite;
 };
 
 static void mouse(void*, TextureEntity* ent, const MouseButton* event)
@@ -47,5 +47,6 @@ static void mouse(void*, TextureEntity* ent, const MouseButton* event)
 
 void sre::initialize()
 {
-    Game::World::setCurrent<TexturePalace>();
+    auto texture_palace = new TexturePalace;
+    texture_palace->make_current();
 }

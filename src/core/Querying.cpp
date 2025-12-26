@@ -2,19 +2,18 @@
 
 #include "Base/Input.hpp"
 
-#include "Game/GuiLayer.hpp"
-#include "Game/GuiObject.hpp"
+#include "ECS/scene.hpp"
+#include "ECS/entity.hpp"
 
-#include <ECS/scene.hpp>
-#include <ECS/entity.hpp>
+#include "GUI/object.hpp"
 
-static Game::GuiObject *queryObject = nullptr;
-static sreECS::Entity *queryEntity = nullptr;
+static const sreGUI::Object *queryObject = nullptr;
+static const sreECS::Entity *queryEntity = nullptr;
 
 void __query_objects()
 {
-    queryEntity = nullptr;
-    queryObject = nullptr;
+    // queryEntity = nullptr;
+    // queryObject = nullptr;
 
     sre::vec2ut pt{engine.mouse_x, engine.mouse_y};
 
@@ -33,38 +32,15 @@ void __query_objects()
 
     callsection:
 
-    queryObject = engine.current_guilayer ? currlayer->_query(reinterpret_cast<sre::unit*>(&pt)) : NULL;
+    queryObject = engine.current_guilayer ? currlayer->call_query(pt) : NULL;
     if (queryObject)
         return;
     queryEntity = engine.current_world ? currscn->call_query(pt) : NULL;
 }
 
-bool Game::GuiObject::isHovering() const
+bool sreGUI::Object::is_hovering() const
 {
     return queryObject == this;
 }
 
 // _query(float*) functions for both UI and World bases
-
-Game::GuiObject *Game::GuiContainer::_query(float* pt)
-{
-    GuiObject *target_return = nullptr;
-
-    for (auto it = m_children.rbegin(); it != m_children.rend(); it++)
-    {
-        auto obj = *it;
-        if (!obj->canQuery)
-            continue;
-        target_return = obj->_query(pt);
-        if (target_return) return target_return;
-    }
-
-    if (!isGuiLayer())
-    {
-        SDL_FRect* r{ reinterpret_cast<SDL_FRect*>(&m_absolute)};
-        if (SDL_PointInFRect(reinterpret_cast<SDL_FPoint*>(pt), r))
-            target_return = (GuiObject *)this;
-    }
-
-    return target_return;
-}

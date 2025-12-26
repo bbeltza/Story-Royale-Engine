@@ -7,9 +7,8 @@
 #include "Base/Tween.hpp"
 #include "Base/Timer.hpp"
 
-#include "Game/GuiLayer.hpp"
-
 #include "ECS/scene.hpp"
+#include "GUI/object.hpp"
 
 _containers_service::_containers_service()
 {
@@ -54,7 +53,7 @@ void __clean_containers()
 	if (engine.current_world)
 		delete static_cast<::sreECS::Scene*>(engine.current_world);
 	if (engine.current_guilayer)
-		delete static_cast<::Game::GuiContainer*>(engine.current_guilayer);
+		delete static_cast<::sreGUI::Object*>(engine.current_guilayer);
 }
 
 void __update_classes()
@@ -69,13 +68,13 @@ void __update_classes()
 void __update_layer()
 {
 	begin:
-	Game::GuiLayer* current = currlayer;
+	sreGUI::Object* current = currlayer;
 	
 	if (!current) return;
-	current->m_absolute.size.x = static_cast<sre::unit>(engine.viewport.w);
-	current->m_absolute.size.y = static_cast<sre::unit>(engine.viewport.h);
-	current->_processchildren();
-	
+	current->m_absolute.size = sre::vec2ut{engine.viewport.w, engine.viewport.h};
+	current->m_absolute.position = sre::vec2ut::ZERO;
+
+	current->call_process();
 	current->call_update();
 
 	if (current != engine.current_guilayer) goto begin;

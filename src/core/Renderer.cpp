@@ -3,13 +3,12 @@
 
 #include "GameSettings.h"
 
-#include "Game/GuiLayer.hpp"
-
 #include "Engine.hpp"
 
 #include "Base/Texture.hpp"
 
 #include "ECS/scene.hpp"
+#include "GUI/object.hpp"
 
 void __setup_renderer()
 {
@@ -102,22 +101,8 @@ void __display_render()
 	}
 
 	// Drawing the Gui layer
-	if (Game::GuiLayer *current = currlayer)
-	{
-		sre::col4& fg = current->Foreground;
-
-		if (fg.a < 255)
-		{
-			current->pre_render();
-			current->_renderchildren();
-			current->post_render();
-		}
-		if (fg.a)
-		{
-			SDL_SetRenderDrawColor(engine.sdl_rendererhndl, fg.r, fg.g, fg.b, fg.a);
-			SDL_RenderFillRect(engine.sdl_rendererhndl, NULL);
-		}
-	}
+	if (sreGUI::Object *current = currlayer)
+		current->call_render();
 
 	Runtime::AfterRender.Fire();
 
