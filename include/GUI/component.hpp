@@ -5,17 +5,16 @@
 
 namespace sreGUI
 {
-    class Component
+    struct Component
     {
         friend class Object;
-    public:
-        virtual ~Component() {}
+        bool enabled = true;
     protected:
-        virtual void on_render(Object& object) {}
-        virtual void on_prerender(Object& object) {}
-        virtual void process_size(Object& object, sre::vec2ut& size) {}
-        virtual void process_position(Object& object, sre::vec2ut& size) {}
-        virtual void process_children(Object& object, const sre::rect2Dut& parent, sre::rect2Dut& child, size_t index) {}
+        virtual void on_render(const sre::rect2Dut& dimensions) {}
+        virtual void on_prerender(sre::rect2Dut& dimensions) {}
+        virtual sre::vec2ut process_size(const sre::rect2Dut& dimensions) {}
+        virtual sre::vec2ut process_position(const sre::rect2Dut& dimensions) {}
+        virtual void process_children(const sre::rect2Dut& parent, sre::rect2Dut* const children[]) {}
     };
 }
 
