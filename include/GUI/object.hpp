@@ -71,19 +71,20 @@ namespace sreGUI
         inline T *alloc_child()
         {
             static_assert(std::is_base_of<Object, T>::value, "T must be derived from sreGUI::Object");
-            auto ptr = static_cast<T *>(::operator new(sizeof(T)));
+            auto ptr = static_cast<Object *>(::operator new(sizeof(T)));
             ptr->m_parent = this;
-            return ptr;
+            return static_cast<T*>(ptr);
         }
 
     public:
         // Parenting
 
         // Set the object to the root one, this is the equivalent of calling: set_parent(NULL)
-        void set_root() { return set_parent(NULL); }
+        void set_root(bool destroy_old=true);
         void set_parent(Object *parent);
 
-        inline Object *get_parent() const { return m_parent; }
+        template <typename T=Object>
+        inline T *get_parent() const { return dynamic_cast<T*>(m_parent); }
 
     public:
         // Iterating

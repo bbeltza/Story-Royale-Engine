@@ -10,7 +10,9 @@ using namespace sreGUI;
 
 Object::Object()
 {
-    set_parent(m_parent);
+    if (!m_parent) return;
+
+    m_parent->children.push_back(this);
 }
 
 Object::~Object()
@@ -26,17 +28,37 @@ void Object::set_parent(Object* parent)
 {
     if (!m_parent)
     {
-        if (!parent)
-            engine.current_guilayer = this;
+        ERROR("Calling set_parent() on root Object, this is unimplemented");
         return;
     }
+    if (!parent)
+    {
+        WARN("Calling set_parent(NULL), it is not implemented, use set_root() instead");
+        return;
+    }
+    if (m_parent == parent) return;
 
     m_parent->children.remove(this);
     m_parent = parent;
-    if (parent)
-        parent->children.push_front(this);
-    else
-        engine.current_guilayer = this;
+    parent->children.push_back(this);
+}
+
+void Object::set_root(bool destroy_old)
+{
+    if (engine.current_guilayer == this)
+    {
+        WARN("Calling sreGUI::Object::set_rot() on root layer");
+        return;
+    }
+    if (m_parent)
+    {
+        m_parent->children.remove(this);
+        m_parent = NULL;
+    }
+    if (engine.current_guilayer)
+        currlayer->destroy();
+    
+    engine.current_guilayer = this;
 }
 
 void Object::CContainer::setup(Component* const components[], size_t count)
@@ -100,9 +122,15 @@ void Object::call_process()
     });
 
     for (auto& comp : components)
-        m_absolute.size = comp.process_size(m_absolute);
+    {
+        if (comp.enabled)
+            m_absolute.size = comp.process_size(m_absolute);
+    }
     for (auto& comp : components)
-        m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : sre::vec2ut(Display::GetSize()));
+    {
+        if (comp.enabled)
+            m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : sre::vec2ut(Display::GetSize()));
+    }
 
     const size_t count = children.size();
     ut_dynsalloc(sre::rect2Dut, arr, count);
@@ -120,7 +148,10 @@ void Object::call_process()
 
     // Component::process_children stage
     for (auto& comp : components)
-        comp.process_children(m_absolute, arr, count);
+    {
+        if (comp.enabled)
+            comp.process_children(m_absolute, arr, count);
+    }
     for (auto& obj : children)
     {
         if (!obj.flags.has(F_ENABLED)) continue;
@@ -128,7 +159,10 @@ void Object::call_process()
     }
     
     for (auto& comp : components)
-        comp.on_prerender(m_absolute);
+    {
+        if (comp.enabled)   
+            comp.on_prerender(m_absolute);
+    }
 }
 
 void Object::call_update()
@@ -144,7 +178,10 @@ void Object::call_render()
     pre_render();
 
     for (auto& comp : components)
-        comp.on_render(m_absolute);
+    {
+        if (comp.enabled)
+            comp.on_render(m_absolute);
+    }
     
     for (auto& obj : children)
     {
