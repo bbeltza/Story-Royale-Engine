@@ -38,14 +38,22 @@ namespace sre
         }
 
         constexpr bool intersects(const rect2D& other) const {
-            return ut::abs(position.x - other.position.x) < size.x / 2 + other.size.x / 2 &&
-                ut::abs(position.y - other.position.y) < size.y / 2 + other.size.y / 2;
+            const vec abs_size = size.abs() / 2;
+            const vec abs_othersize = other.size.abs() / 2;
+            return ut::abs(position.x - other.position.x) < abs_size.x + abs_othersize.x &&
+                ut::abs(position.y - other.position.y) < abs_size.y + abs_othersize.y;
         }
 
         constexpr bool intersects(const vec pt) const {
             const vec abs_size = size.abs() / 2;
             return (pt.x >= position.x - abs_size.x && pt.x <= position.x + abs_size.x) &&
-                    (pt.x >= position.x - abs_size.y && pt.y <= position.y + abs_size.y);
+                    (pt.y >= position.y - abs_size.y && pt.y <= position.y + abs_size.y);
+        }
+        
+        constexpr bool simple_intersects(const vec pt) const {
+            const vec abs_size = size.abs();
+            return ( pt.x >= position.x && pt.x <= position.x + abs_size.x ) &&
+                    (pt.y >= position.y && pt.y <= position.y + abs_size.y);
         }
 
         constexpr T top() const { return position.y - ut::abs(size.y) / 2; }
@@ -70,6 +78,9 @@ namespace sre
         constexpr vec rotated_topright(double angle) const { return position + xrotated_offset(angle) - yrotated_offset(angle); }
         constexpr vec rotated_bottomleft(double angle) const { return position - xrotated_offset(angle) + yrotated_offset(angle); }
         constexpr vec rotated_bottomright(double angle) const { return position + xrotated_offset(angle) + yrotated_offset(angle); }
+
+        constexpr bool operator ==(const rect2D& other) const { return position == other.position && size == other.size; }
+        constexpr bool operator !=(const rect2D& other) const { return position != other.position && size != other.size; }
     };
 
     // A rect2D datatype composed of ints.

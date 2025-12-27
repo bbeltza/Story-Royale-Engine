@@ -106,8 +106,7 @@ const Object *Object::call_query(sre::vec2ut pt) const
 
     if (m_parent)
     {
-        sre::rect2Dut centered{ m_absolute.bottom_right(), m_absolute.size };
-        if (centered.intersects(pt))
+        if (m_absolute.simple_intersects(pt))
             target_return = this;
     }
 
@@ -116,11 +115,6 @@ const Object *Object::call_query(sre::vec2ut pt) const
 
 void Object::call_process()
 {
-    children.sort([](const Object* o1, const Object* o2)
-    {
-        return o1->z_index < o2->z_index;
-    });
-
     for (auto& comp : components)
     {
         if (comp.enabled)
@@ -131,33 +125,49 @@ void Object::call_process()
         if (comp.enabled)
             m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : sre::vec2ut(Display::GetSize()));
     }
+}
 
-    const size_t count = children.size();
-    ut_dynsalloc(sre::rect2Dut, arr, count);
+void Object::call_processchildren()
+{
+    children.sort([](const Object* o1, const Object* o2)
+    {
+        return o1->z_index < o2->z_index;
+    });
+
+    size_t children_count = children.size();
     size_t i = 0;
+    ut_dynsalloc(sre::rect2Dut, arr, children_count);
+
     for (auto& obj : children)
     {
         if (!obj.flags.has(F_ENABLED)) continue;
 
         obj.m_absolute = m_absolute;
         obj.call_process();
+
         arr[i++] = obj.m_absolute;
+    }
+
+    for (auto& comp : components)
+    {
+        if (comp.enabled)
+            comp.process_children(m_absolute, arr, children_count);
     }
 
     i = 0;
 
-    // Component::process_children stage
-    for (auto& comp : components)
-    {
-        if (comp.enabled)
-            comp.process_children(m_absolute, arr, count);
-    }
     for (auto& obj : children)
     {
         if (!obj.flags.has(F_ENABLED)) continue;
+
         obj.m_absolute = arr[i++];
+        obj.call_processchildren();
+        obj.call_prerender();
     }
-    
+}
+
+void Object::call_prerender()
+{
     for (auto& comp : components)
     {
         if (comp.enabled)   

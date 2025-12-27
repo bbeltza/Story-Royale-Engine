@@ -204,9 +204,13 @@ namespace sreGUI
         virtual void post_render() {}
     private:
         const Object* call_query(sre::vec2ut pt) const;
-        void call_process();
         void call_update();
         void call_render();
+
+        void call_process();
+        void call_processchildren();
+        void call_prerender();
+
     public:
         Signal<> updated{this};
         Signal<> rendered{this};

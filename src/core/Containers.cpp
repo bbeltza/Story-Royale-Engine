@@ -75,6 +75,9 @@ void __update_layer()
 	current->m_absolute.position = sre::vec2ut::ZERO;
 
 	current->call_process();
+	current->call_processchildren();
+	current->call_prerender();
+
 	current->call_update();
 
 	if (current != engine.current_guilayer) goto begin;
