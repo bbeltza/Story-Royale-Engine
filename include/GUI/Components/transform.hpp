@@ -8,6 +8,9 @@ namespace sreGUI
 {
     struct Transform: public Component
     {
+        Transform() = default;
+        Transform(const sre::udim2& position, const sre::udim2& size, const sre::vec2ut& anchor = sre::vec2ut::ZERO): position(position), size(size), anchor(anchor) {}
+
         sre::udim2 position;
         sre::udim2 size;
         sre::vec2ut anchor;

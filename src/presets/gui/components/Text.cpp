@@ -19,5 +19,5 @@ void Text::on_render(const sre::rect2Dut& dimensions)
 
     m_font->PreloadTextures(m_str.c_str());
 
-    m_font->Render(dimensions, m_str.c_str(), count, h_alignment, v_alignment);
+    m_font->Render(dimensions, color, m_str.c_str(), count, h_alignment, v_alignment);
 }

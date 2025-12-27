@@ -5,7 +5,7 @@
 static std::vector<std::string> line_buff;
 //static std::vector<int> width_buff;
 
-void Font::Render(const sre::rect2Dut & bounds, const char* text, int count, HAlign halignment, VAlign valignment)
+void Font::Render(const sre::rect2Dut & bounds, const sre::col4& color, const char* text, int count, HAlign halignment, VAlign valignment)
 {
     if (PreloadTextures(text)) return;
     if (count == 0) return;
@@ -70,14 +70,14 @@ void Font::Render(const sre::rect2Dut & bounds, const char* text, int count, HAl
 
         startvec.x = bounds.position.x + xoffset;
 
-        RenderLine(startvec, c_str, count, (int)n);
+        RenderLine(startvec, color, c_str, count, (int)n);
 
         startvec.y += line_skip;
         n += strlen(c_str);
     }
 }
 
-void Font::RenderLine(const sre::vec2ut& start, const char* text, int count, int acc)
+void Font::RenderLine(const sre::vec2ut& start, const sre::col4& color, const char* text, int count, int acc)
 {
     if (count > 0 && count - acc <= 0) return;
 
@@ -95,7 +95,7 @@ void Font::RenderLine(const sre::vec2ut& start, const char* text, int count, int
         Texture& texture = textures.at(chr);
         render_rect.size = sre::vec2ut{texture.size()};
 
-        Display::DrawTexture(texture, render_rect, sre::col4::WHITE, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
+        Display::DrawTexture(texture, render_rect, color, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
 
         render_rect.position.x += render_rect.size.x;
 
