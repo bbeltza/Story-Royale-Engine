@@ -53,8 +53,8 @@ void __update_viewport()
 	(void)ow;
 	(void)oh;
 
-	engine.viewport.w = (int)(engine.osize_x / engine.viewport_scale);
-	engine.viewport.h = (int)(engine.osize_y / engine.viewport_scale);
+	engine.viewport.w = (int)ceilf(engine.osize_x / engine.viewport_scale);
+	engine.viewport.h = (int)ceilf(engine.osize_y / engine.viewport_scale);
 
 	engine.center_x = engine.viewport.w / 2.0f;
 	engine.center_y = engine.viewport.h / 2.0f;

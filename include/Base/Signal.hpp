@@ -95,7 +95,7 @@ class Signal: public SignalBase
 	#define _T1 template <typename Ret, typename ST, typename CT>
 	#define _T2 template <typename Ret>
 public:
-	Signal(void* Userdata=NULL): SignalBase(Userdata) {}
+	constexpr Signal(void* Userdata=NULL): SignalBase(Userdata) {}
 	void Fire(Args... args) { ret_args = { args... }; base_fire(); }
 
 
