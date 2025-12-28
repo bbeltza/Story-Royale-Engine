@@ -5,7 +5,6 @@
 #include "Base/Thread.hpp"
 #include "Base/Audio.hpp"
 #include "Base/Tween.hpp"
-#include "Base/Timer.hpp"
 
 #include "ECS/scene.hpp"
 #include "GUI/object.hpp"
@@ -59,9 +58,6 @@ void __clean_containers()
 void __update_classes()
 {
 	Thread::queue_removing();
-
-	engine.last_dt = Timer::global_update();
-
 	TweenBase::global_update(engine.last_dt);
 }
 

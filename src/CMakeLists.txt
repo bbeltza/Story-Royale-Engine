@@ -33,7 +33,6 @@ set(BASE_SOURCES
 "Thread.cpp"
 "Tween.cpp"
 "Window.cpp"
-"Timer.cpp"
 )
 
 set(ECS_SOURCES

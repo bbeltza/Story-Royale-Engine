@@ -19,6 +19,5 @@ void EntityControl::on_pupdate(Camera& camera)
     if (!smoothness)
         camera.position = m_target;
     else
-        camera.position.setlerp(m_target, Runtime::delta_time / smoothness);
-    
+        camera.position.setlerp(m_target, Runtime::pdelta_time / smoothness);
 }

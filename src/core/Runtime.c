@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "../internal.h"
 
+#include <utils/logging.h>
+
 static void loop();
 static int eventfilter(void *, SDL_Event *);
 
@@ -15,6 +17,10 @@ void __run_engine()
 static void loop()
 {
     ++engine.frame;
+    engine.frameend_time = os.clock();
+    engine.last_dt = (engine.frameend_time - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
+    engine.framestart_time = engine.frameend_time;
+
     __update_classes();
     __update_input();
 
@@ -32,8 +38,12 @@ static void loop()
     fflush(stdout);
 #endif
 
-    if (engine.target_dt)
-        delay_s(engine.target_dt);
+    sre_timeStamp elapsed;
+    elapsed = (os.clock() - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
+    elapsed = engine.target_dt - elapsed;
+
+    if (elapsed > 0)
+        delay_s(elapsed);
 }
 
 static int eventfilter(void *data, SDL_Event *ev)

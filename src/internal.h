@@ -24,6 +24,9 @@ _CAPI_BEGIN
 		sre_timeStamp target_dt;
 		sre_timeStamp phys_target_dt;
 
+		unsigned long long framestart_time;
+		unsigned long long frameend_time;
+
 		// Instance data
 
 		void* current_world;

@@ -16,6 +16,7 @@ struct os_wrapper
 	_funcdef(int, output_hasnline, void);
 
 	_funcdef(void, delay, unsigned long long units);
+	_funcdef(unsigned long long, clock, void); // Use the most precise unit to determine the current time-stamp of the program
 
 	_funcdef(void*, thread_spawn, os_thread_proc start, void* userdata, unsigned stacksize);
 	_funcdef(int, thread_detach, void* thrd);
@@ -38,5 +39,5 @@ _CAPI_END
 	#include "OS/win.h"
 #endif
 
-#define delay_s(s) os.delay((unsigned long long)(s * TICKS_PER_SEC))
-#define delay_ms(ms) os.delay(unsigned long long(s * (TICKS_PER_SEC / 1000)))
+#define delay_s(s) os.delay((unsigned long long)((s) * TICKS_PER_SEC))
+#define delay_ms(ms) os.delay(unsigned long long((s) * (TICKS_PER_SEC / 1000)))

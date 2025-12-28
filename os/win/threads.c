@@ -18,4 +18,6 @@ int os_win_thread_wait(void* thrd, unsigned* ret)
 	WaitForSingleObject((HANDLE)thrd, INFINITE);
 	GetExitCodeThread((HANDLE)thrd, ret);
 	CloseHandle((HANDLE)thrd);
+
+	return 0;
 }

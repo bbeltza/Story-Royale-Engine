@@ -62,7 +62,7 @@ namespace sreGUI
         T &add_child(Args &&...args)
         {
             auto ptr = alloc_child<T>();
-            ::new (ptr) T(args...);
+            ::new (ptr) T(std::forward<Args>(args)...);
             return *ptr;
         }
 
