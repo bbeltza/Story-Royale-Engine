@@ -63,7 +63,6 @@ set(PRESET_SOURCES
 )
 
 set(UTIL_SOURCES
-    "audioformat.c"
     "logging.c"
 )
 

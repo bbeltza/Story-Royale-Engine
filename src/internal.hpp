@@ -10,7 +10,7 @@ struct AudioAccess
     AudioData data;
 };
 
-struct _containers_service
+struct _containers_service: private std::mutex
 {
     std::list<Thread::data> allocated_threads;
     std::queue<Thread::data*> finished_threads;
@@ -24,12 +24,9 @@ struct _containers_service
     _containers_service();
     ~_containers_service();
 
-    inline void lock() { m_mutex.lock(); }
-    inline void unlock() { m_mutex.unlock(); }
-    inline bool trylock() { return m_mutex.try_lock(); }
-
-    private:
-    std::mutex m_mutex;
+    using mutex::lock;
+    using mutex::unlock;
+    using mutex::try_lock;
 };
 
 #define _containers static_cast<_containers_service*>(engine.containers_service)

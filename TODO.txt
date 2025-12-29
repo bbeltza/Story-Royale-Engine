@@ -11,15 +11,13 @@
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
 - Move classes and objects to a single namespace (e.g. sre::--)
-- Move the "Game" stuff into sre::world::-- and sre::gui::--
-- Add custom arena-like allocator for World and GUILayer
 
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 
 - Android support
 
-(current version: pre-0.1)
+(current version: 0.1 pre-release)
 
 - Work on the game ^^
 

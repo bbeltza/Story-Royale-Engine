@@ -19,7 +19,7 @@ _CAPI_BEGIN
 
 		// Runtime data
 
-		intptr_t frame;
+		size_t frame;
 		sre_timeStamp last_dt;
 		sre_timeStamp target_dt;
 		sre_timeStamp phys_target_dt;

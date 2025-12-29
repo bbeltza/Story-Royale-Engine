@@ -5,7 +5,6 @@
 
 #include "vorbis.h"
 #include "utils/math.h"
-#include "utils/audioutils.h"
 
 #include "../internal.h"
 #include "../internal.hpp"
@@ -80,8 +79,19 @@ AudioData& Audio::Load(const char *path)
 void Audio::threadedload(AudioData *audio)
 {
 	audio->Load();
-	ut_audioconvertformat(audio->m_spec.format, engine.audio_spec.format, &audio->m_data, audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format));
 
+	SDL_AudioCVT cvt;
+	SDL_BuildAudioCVT(&cvt, audio->m_spec.format, audio->m_spec.channels, audio->m_spec.freq,
+							engine.audio_spec.format, audio->m_spec.channels, audio->m_spec.freq);
+	if (!cvt.needed) goto FINISH;
+
+	cvt.len = audio->m_len * audio->m_spec.channels * AUDIO_BYTESIZE(audio->m_spec.format);
+	cvt.buf = cvt.len_mult > 1 ? static_cast<Uint8*>(realloc(audio->m_data, cvt.len * cvt.len_mult)) : reinterpret_cast<Uint8*>(audio->m_data);
+	SDL_ConvertAudio(&cvt);
+	
+	audio->m_data = cvt.len_ratio < 1.0 ? static_cast<int8_t*>(realloc(cvt.buf, cvt.len_cvt)) : reinterpret_cast<int8_t*>(cvt.buf);
+
+	FINISH:
 	audio->m_spec.format = engine.audio_spec.format;
 	audio->m_loaded = true;
 
