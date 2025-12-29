@@ -12,5 +12,6 @@ int os_unix_outputgetc(void);
 int os_unix_outputhasnline(void);
 
 void os_unix_delay(unsigned long long delay);
+unsigned long long os_unix_clock(void);
 
 _CAPI_END

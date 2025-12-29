@@ -1,16 +1,14 @@
-#pragma once
-#include "Game/GuiComponent.hpp"
-#include "Base/Font.hpp"
+#ifndef SREGUI_TEXT_HPP
+#define SREGUI_TEXT_HPP
 
-namespace GuiComponents
+#include <GUI/component.hpp>
+#include <Base/Font.hpp>
+
+namespace sreGUI
 {
-    class Text: public ::Game::GuiComponent
+    struct Text: public Component
     {
-    public:
-        Text();
-        ~Text();
-
-        void LoadFont(std::string path);
+        void load(const std::string& path);
         
         inline void assign(const char* str) {m_str = str;}
         template <class... T> inline void format(const char* fmt, T&&... args) {
@@ -20,21 +18,22 @@ namespace GuiComponents
                                                 // And even if it happens then we are happy to catch another bug so...
         }
 
-        inline int getLength() { return (int)m_str.size(); }
+        inline int length() const { return (int)m_str.size(); }
 
         int count = -1;
         unsigned int scale = 0;
 
-        sre::col3 color = sre::col3::BLACK;
+        sre::col4 color = sre::col4::BLACK;
 
         Font::HAlign h_alignment = Font::HLeft;
         Font::VAlign v_alignment = Font::VTop;
     protected:
-        void render(::Game::GuiContainer*) override;
-        void process_position(::Game::GuiContainer*) override;
+        void on_render(const sre::rect2Dut& dimensions) override;
     private:
         std::string m_str;
-        Font* m_font = nullptr;
+        Font* m_font = NULL;
         static std::unordered_map<std::string, Font> font_map;
     };
 }
+
+#endif

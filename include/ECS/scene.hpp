@@ -61,7 +61,7 @@ namespace sreECS
             static_assert(std::is_base_of<Entity, T>::value, "T must be derived from sreECS::Entity");
 
             Entity* entity = alloc_entity(sizeof(T), NULL);
-            return *::new(static_cast<void*>(entity)) T(args...);
+            return *::new(static_cast<void*>(entity)) T(std::forward<Args>(args)...);
         }
 
         // Iterating

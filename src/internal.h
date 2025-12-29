@@ -24,6 +24,9 @@ _CAPI_BEGIN
 		sre_timeStamp target_dt;
 		sre_timeStamp phys_target_dt;
 
+		unsigned long long framestart_time;
+		unsigned long long frameend_time;
+
 		// Instance data
 
 		void* current_world;
@@ -107,7 +110,7 @@ _CAPI_END
 
 #ifdef __cplusplus
 #define currscn static_cast<::sreECS::Scene*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
-#define currlayer static_cast<::Game::GuiLayer*>(engine.current_guilayer) // Same with this...
+#define currlayer static_cast<::sreGUI::Object*>(engine.current_guilayer) // Same with this...
 #define flags_kbstate reinterpret_cast<::sre::flags8*>(engine.keyboard_state)
 #define flags_mousepress (*reinterpret_cast<::sre::flags32*>(&engine.mouse_press))
 

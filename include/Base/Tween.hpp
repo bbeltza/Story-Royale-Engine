@@ -62,13 +62,11 @@ private:
 template <class T>
 class Tween: public TweenBase
 {
-    static_assert(std::is_arithmetic<T>::value, "Type must be an arithmetic type");
-
     const T* m_src;
     T* m_target = nullptr;
     T m_start{};
 
-    inline void step(float alpha) override { *m_target = (T)ut_lerp(m_start, *m_src, alpha); }
+    inline void step(float alpha) override { *m_target = ut::lerp(m_start, *m_src, alpha); }
     inline void start() override { if (m_target) m_start = *m_target; }
 public:
     Tween(const TweenInfo& info, T& target, const T& source): TweenBase(info), m_src(&source), m_target(&target) {}

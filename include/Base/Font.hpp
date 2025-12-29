@@ -25,8 +25,8 @@ class Font
     Font(const char* path, int pt=12);
     ~Font();
 
-    void Render(const sre::rect2Dut& bounds, const char* text, int count, HAlign halignment=HLeft, VAlign valignment=VTop);
-    void RenderLine(const sre::vec2ut& start, const char* text, int count, int acc);
+    void Render(const sre::rect2Dut& bounds, const sre::col4& color, const char* text, int count, HAlign halignment=HLeft, VAlign valignment=VTop);
+    void RenderLine(const sre::vec2ut& start, const sre::col4& color, const char* text, int count, int acc);
     bool PreloadTextures(const char* desired);
     private:
     std::unordered_map<char, Texture> textures;

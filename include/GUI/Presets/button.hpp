@@ -1,22 +1,22 @@
-#pragma once
-#include "Game/GuiLayer.hpp"
-#include "Game/GuiComponents/Modulate.hpp"
+#ifndef SREGUI_BUTTON_HPP
+#define SREGUI_BUTTON_HPP
 
-#include "Base/Signal.hpp"
-#include "Events/Mouse.hpp"
-#include "Events/Touch.hpp"
+#include <GUI/object.hpp>
 
-namespace GuiPresets
+#include <Base/Signal.hpp>
+#include <Events/Mouse.hpp>
+#include <Events/Touch.hpp>
+
+namespace sreGUI
 {
-    class Button : public ::Game::GuiObject
+    class Button : public Object
     {
     public:
         Button();
         ~Button();
 
-        virtual void OnPress(sre::vec2ut pos) {}
-        virtual void OnHover(bool hovered) {}
-
+        virtual void on_press(sre::vec2ut pos) {}
+        virtual void on_hover(bool hovered) {}
     private:
         static void mouse_click(void* SignalData, Button* button, const MouseButton* buttonData);
         static void finger_touch(void* SignalData, Button* button, const TouchFinger* mouseData);
@@ -28,3 +28,5 @@ namespace GuiPresets
         ConnectionHandle m_touch_event;
     };
 }
+
+#endif

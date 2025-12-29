@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include <utils/logging.h>
+#include <OS.h>
 
 static int __invoke_entry(void* userdata)
 {
@@ -25,6 +26,7 @@ static int __invoke_entry(void* userdata)
 static inline void __setup_engine_data()
 {
     engine.phys_target_dt = 1.0 / 64.0;
+    engine.framestart_time = os.clock();
 
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();

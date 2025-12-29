@@ -44,7 +44,7 @@ void __update_audio()
 
 			if (audio->m_fadein)
 			{
-				audio->m_fadevol += audio->Info.fade_in / engine.audio_spec.freq;
+				audio->m_fadevol += 1 / (audio->Info.fade_in * engine.audio_spec.freq);
 				if (audio->m_fadevol >= 1)
 				{
 					audio->m_fadein = false;
@@ -53,7 +53,7 @@ void __update_audio()
 			}
 			else if (audio->m_fadeout)
 			{
-				audio->m_fadevol -= audio->Info.fade_out / engine.audio_spec.freq;
+				audio->m_fadevol -= 1 / (audio->Info.fade_out * engine.audio_spec.freq);
 				if (audio->m_fadevol <= 0)
 				{
 					audio->m_fadeout = false;

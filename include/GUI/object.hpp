@@ -4,20 +4,39 @@
 #include <list>
 
 #include <datatypes/rect.hpp>
+#include <datatypes/flags.hpp>
 
 #include <Base/object.hpp>
 #include <Base/Signal.hpp>
 
+#include <internal_def.hh>
+
+__def_internal(__update_layer);
+__def_internal(__query_objects);
+__def_internal(__display_render);
+
 namespace sreGUI
 {
-    class Component;
+    struct Component;
 
     class Object : public ::sre::Object
     {
+        __friend_internal(__update_layer);
+        __friend_internal(__query_objects);
+        __friend_internal(__display_render);
+
         Object *m_parent;
 
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
-
+    public:
+        enum FlagsEnum
+        {
+            F_ENABLED = ut_bit(0),
+            F_QUERY = ut_bit(2)
+        };
+        // Flags that control the behavior of the object and its children
+        sre::flags32 flags = {F_ENABLED, F_QUERY};
+        int z_index = 0;
     public:
         // Instantiating
 
@@ -43,7 +62,7 @@ namespace sreGUI
         T &add_child(Args &&...args)
         {
             auto ptr = alloc_child<T>();
-            ::new (ptr) T(args...);
+            ::new (ptr) T(std::forward<Args>(args)...);
             return *ptr;
         }
 
@@ -52,19 +71,20 @@ namespace sreGUI
         inline T *alloc_child()
         {
             static_assert(std::is_base_of<Object, T>::value, "T must be derived from sreGUI::Object");
-            auto ptr = static_cast<T *>(::operator new(sizeof(T)));
+            auto ptr = static_cast<Object *>(::operator new(sizeof(T)));
             ptr->m_parent = this;
-            return ptr;
+            return static_cast<T*>(ptr);
         }
 
     public:
         // Parenting
 
         // Set the object to the root one, this is the equivalent of calling: set_parent(NULL)
-        void set_root() { return set_parent(NULL); }
+        void set_root(bool destroy_old=true);
         void set_parent(Object *parent);
 
-        inline Object *get_parent() const { return m_parent; }
+        template <typename T=Object>
+        inline T *get_parent() const { return dynamic_cast<T*>(m_parent); }
 
     public:
         // Iterating
@@ -121,7 +141,7 @@ namespace sreGUI
         class CContainer
         {
             friend class Object;
-            Component *const *m_ptr = NULL;
+            Component **m_ptr = NULL;
             size_t m_count = 0;
 
         public:
@@ -176,11 +196,20 @@ namespace sreGUI
             Iterator begin() const { return Iterator(m_ptr); }
             Iterator end() const { return Iterator(m_ptr + m_count); }
         } components;
-
+    public:
+        bool is_hovering() const;
     protected:
         virtual void update() {}
         virtual void pre_render() {}
         virtual void post_render() {}
+    private:
+        const Object* call_query(sre::vec2ut pt) const;
+        void call_update();
+        void call_render();
+
+        void call_process();
+        void call_processchildren();
+        void call_prerender();
 
     public:
         Signal<> updated{this};

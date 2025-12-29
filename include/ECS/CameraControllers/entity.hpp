@@ -10,7 +10,7 @@ namespace sreECS
     public:
         EntityControl(Entity& entity): m_entity(&entity) {}
 
-        float smoothness = 0.13f;
+        sre::unit smoothness = 0.13_ut;
         sre::vec2ut bounds;
 
     protected:

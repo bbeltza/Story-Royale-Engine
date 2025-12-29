@@ -1,7 +1,9 @@
-#include "Base/Input.hpp"
-#include "Game/GuiPresets/Button.hpp"
+#include <GUI/Presets/button.hpp>
 
-using namespace GuiPresets;
+#include <Base/Input.hpp>
+#include <Base/Display.hpp>
+
+using namespace sreGUI;
 
 // Event functions
 
@@ -11,7 +13,7 @@ void Button::mouse_click(void* _unused, Button* button, const MouseButton* butto
         return;
 
     if (button->m_hover)
-        button->OnPress(buttonData->position);
+        button->on_press(buttonData->position);
 }
 
 void Button::finger_touch(void* _unused, Button* button, const TouchFinger* touchData)
@@ -20,7 +22,7 @@ void Button::finger_touch(void* _unused, Button* button, const TouchFinger* touc
         return;
     
     if (button->m_hover)
-        button->OnPress(touchData->UV * Display::GetSize());
+        button->on_press(touchData->UV * Display::GetSize());
 }
 
 
@@ -38,7 +40,7 @@ Button::~Button() {}
 void Button::update()
 {
     bool last_hover = m_hover;
-    m_hover = isHovering();
+    m_hover = is_hovering();
     if (last_hover != m_hover)
-        this->OnHover(m_hover);
+        this->on_hover(m_hover);
 }

@@ -49,6 +49,8 @@ namespace sre
 		inline void operator -=(const col3& other) { return sub(other); }
 		inline void operator *=(const col3& other) { return mul(other); }
 
+		static constexpr col3 fromNormalized(double r, double g, double b) { return col3{ static_cast<T>(r * 255), static_cast<T>(g * 255), static_cast<T>(b * 255) }; }
+
 		static const col3 WHITE;
 		static const col3 BLACK;
 
@@ -98,7 +100,20 @@ namespace sre
 		constexpr col4 operator -(const col4& other) const { return getSub(other); }
 		constexpr col4 operator *(const col4& other) const { return getMul(other); }
 
+		constexpr col4 operator *(float) const { return col4(); }
+
+		using lerp_tag = T;
+		constexpr col4 lerp(const col4& goal, float alpha) const
+		{
+			return col4{ static_cast<T>(ut_lerp(r, goal.r, alpha)),
+				static_cast<T>(ut_lerp(g, goal.g, alpha)),
+				static_cast<T>(ut_lerp(b, goal.b, alpha)),
+				static_cast<T>(ut_lerp(a, goal.a, alpha)) };
+		}
+
 		constexpr SDL_Color toSDL() const { return { r, g, b, a }; }
+
+		static constexpr col4 fromNormalized(double r, double g, double b, double a) { return col4{ col3::fromNormalized(r, g, b), static_cast<T>(a * 255) }; }
 
 		static const col4 WHITE;
 		static const col4 BLACK;

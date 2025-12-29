@@ -33,7 +33,6 @@ set(BASE_SOURCES
 "Thread.cpp"
 "Tween.cpp"
 "Window.cpp"
-"Timer.cpp"
 )
 
 set(ECS_SOURCES
@@ -43,25 +42,24 @@ set(ECS_SOURCES
 )
 
 set(GUI_SOURCES
-    "GuiLayer.cpp"
     "object.cpp"
 )
 
 set(PRESET_SOURCES
-    "gui/components/AspectRatio.cpp"
-    "gui/components/Modulate.cpp"
-    "gui/components/Padding.cpp"
-    "gui/components/Image.cpp"
-    "gui/components/Text.cpp"
-    "gui/components/List.cpp"
-    "gui/components/Rendering.cpp"
-    "gui/objects/GuiButton.cpp"
+    "gui/components/ratio.cpp"
+    "gui/components/padding.cpp"
+    "gui/components/image.cpp"
+    "gui/components/text.cpp"
+    "gui/components/list.cpp"
+    "gui/components/fill.cpp"
+    "gui/components/transform.cpp"
+    "gui/objects/button.cpp"
 
-    "world/components/Shape.cpp"
-    "world/components/Sprite.cpp"
-    "world/components/Velocity.cpp"
-    "world/camera/DragControl.cpp"
-    "world/camera/EntityControl.cpp"
+    "ecs/components/Shape.cpp"
+    "ecs/components/Sprite.cpp"
+    "ecs/components/Velocity.cpp"
+    "ecs/camera/DragControl.cpp"
+    "ecs/camera/EntityControl.cpp"
 )
 
 set(UTIL_SOURCES
