@@ -13,18 +13,18 @@
 
 void AudioData::Load()
 {
-	File _f(path);
-	File::Chunk _data_chunk;
-	const void* data = _f.resourceData();
+	sre::File _f(path);
+	sre::Chunk _data_chunk;
+	const void* data = _f.resource_data();
 	int size;
 	if (!data)
 	{
 		_data_chunk = _f.allocate();
-		data = _data_chunk.data;
-		size = static_cast<int>(_data_chunk.size);
+		data = _data_chunk->data;
+		size = static_cast<int>(_data_chunk->size);
 	}
 	else
-		size = static_cast<int>(_f.getSize());
+		size = static_cast<int>(_f.size());
 
     SDL_RWops *audio_rw = SDL_RWFromConstMem(data, size);
     

@@ -9,7 +9,7 @@ static int eventfilter(void *, SDL_Event *);
 
 void __run_engine()
 {
-    SDL_SetEventFilter(eventfilter, NULL);
+    SDL_AddEventWatch(eventfilter, NULL);
     while (__poll_events())
         loop();
 }

@@ -1,5 +1,3 @@
-- Be able to create tweens on datatypes that will have the Lerp() function (for now it only supports for those with the used operators)
-
 - Animations/Keyframes
 
 - Audio interpolation

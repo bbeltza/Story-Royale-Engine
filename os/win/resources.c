@@ -6,11 +6,11 @@
 extern const unsigned char* _game_res;
 static const unsigned char nullbyte = '\0';
 
-void SRE_init_resources()
+void sre_win_resourceinit(void)
 {
     if (_game_res)
     {
-        WARN("SRE_init_resources(): Attempting to initialize resources again, skipping...");
+        WARN("sre_resourceinit(): Attempting to initialize resources again, skipping...");
         return;
     }
 

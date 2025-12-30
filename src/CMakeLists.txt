@@ -17,8 +17,10 @@ set(DATATYPES_SOURCES
 )
 
 set(BASE_SOURCES
-"File/Stream.cpp"
-"File/Chunk.cpp"
+"file.c"
+"resource.c"
+"chunk.cc"
+"rwops.c"
 
 "Action.cpp"
 "Audio.cpp"

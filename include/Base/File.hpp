@@ -1,7 +1,10 @@
 #pragma once
 #include <standard>
 
-#include <SDL_rwops.h>
+#include <Base/File.h>
+#include <Base/Chunk.h>
+#include <Base/RWops.h>
+
 #include <SDL_endian.h>
 #include <SDL_filesystem.h>
 
@@ -9,13 +12,46 @@ extern "C" void ERROR(const char*, ...);
 
 extern "C"
 {
-#if defined(WIN32)
+#if defined(_WIN32)
 	extern const unsigned char* _game_res;
 #else
 	extern const unsigned char _game_res[];
 #endif
 };
 
+namespace sre
+{
+	struct ChunkDeleter { void operator ()(const sre_Chunk* chunk) { return sre_chunkfree(chunk); } };
+	using Chunk = std::unique_ptr<const sre_Chunk, ChunkDeleter>;
+	class File: protected sre_File
+	{
+	public:
+		File(): sre_File{} {}
+		File(const char* path, const char* mode = NULL) { sre_fileopen(this, path, mode); }
+		~File() { sre_fileclose(this); }
+
+		inline bool valid() const { return this->fp.fp != NULL; }
+
+		inline Chunk allocate(size_t max_size=0) const { return Chunk(sre_fileallocate(this, max_size)); }
+
+		inline SDL_RWops* to_RWops() const { return sre_filetorwops(this); }
+
+		inline const byte* resource_data() const
+		{
+			if (!embedded) // Could also check if the file is valid, but remember isembedded is true if the file is valid
+				return NULL;
+
+			return res.begin; // Even if it wasn't valid and this passes, res_begin will be NULL
+		}
+
+		size_t size() const { return sre_filesize(this); }	
+	};
+}
+
+#define File _File
+#define Chunk _Chunk
+
+// Still may need content for the file class to implement the rest of the stuff
 class File
 {
 	union
@@ -164,3 +200,6 @@ private:
 
 	static bool path_hasprefix(const char* path, const char prefix[PREFIX_LENGTH]) { return !strncmp(prefix, path, PREFIX_LENGTH); }
 };
+
+#undef Chunk
+#undef File

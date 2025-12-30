@@ -9,8 +9,8 @@ Font::Font(const char* path, int pt)
 {
     _containers->lock();
 
-    File file(path);
-    m_font = TTF_OpenFontRW(file.toRWops(), 1, pt);
+    sre::File file(path);
+    m_font = TTF_OpenFontRW(file.to_RWops(), 1, pt);
     
     _containers->loaded_fonts.push_front(this);
 

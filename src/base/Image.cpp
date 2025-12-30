@@ -12,13 +12,13 @@ Image::Image(int w, int h):
 Image::Image(const char* path)
 {
     File file(path, "rb");
-    if (!file.isValid())
+    if (!file.valid())
     {
         ERROR("Image::Image: Failed loading %s", path);
         return;
     }
 
-    SDL_RWops* rw = file.toRWops();
+    SDL_RWops* rw = file.to_RWops();
     this->sdl_surface = IMG_Load_RW(rw, 1);
 
     if (!this->sdl_surface)
