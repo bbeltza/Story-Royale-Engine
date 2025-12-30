@@ -59,7 +59,7 @@ int sre_fileopen(sre_File* file, const char* path, const char* mode)
         
         if (_game_res[0])
         {
-            if (sre_modehaswrite(mode))
+            if (sre_modehaswrite(file->fp.mode))
             {
                 ERROR("sre_File: Failed opening '%s', file has write access, remove write access to proceed...", path);
                 return -1;
@@ -104,7 +104,7 @@ static int sre_fileopenfs(sre_File* file, const char* path)
         strcat(buff, path + SRE_FILEPREFIX_LENGTH);
 
         if (pref_deallocator)
-            pref_deallocator((char*)bound_prefix);
+            pref_deallocator((void*)bound_prefix);
 
         
         return sre_fileopenfs(file, buff);
@@ -115,11 +115,11 @@ static int sre_fileopenfs(sre_File* file, const char* path)
     {
         if (_access(path, 00) == 0)
         {
-            strcpy(file->fp.mode, "w+");
+            strcpy(file->fp.mode, "r");
         }
         else if (errno == ENOENT)
         {
-            strcpy(file->fp.mode, "r");
+            strcpy(file->fp.mode, "w+");
         }
         else
         {
