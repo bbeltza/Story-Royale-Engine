@@ -2,6 +2,8 @@
 #include <Base/File.h>
 #include <string.h>
 
+#include <errno.h>
+
 #include <utils/logging.h>
 #include <utils/lockfile.h>
 #include <utils/mem.h>
@@ -25,6 +27,8 @@ void sre_fileclose(sre_File* file)
     if (file->embedded) return;
     if (file->fp.fp)
         fclose(file->fp.fp);
+    if (file->fp.path)
+        free(file->fp.path);
 }
 
 static int sre_fileopenfs(sre_File* file, const char* path);
@@ -110,6 +114,19 @@ static int sre_fileopenfs(sre_File* file, const char* path)
         return sre_fileopenfs(file, buff);
     }
 
+    {
+        size_t pathlen = strlen(path) + 1;
+        if (pathlen > 261)
+        {
+            WARN("Length of the path is bigger than 260, Windows doesn't allow paths up to 260 characters");
+            pathlen = 261;
+        }
+
+
+
+        file->fp.path = malloc(pathlen);
+        strncpy(file->fp.path, path, pathlen);
+    }
 
     if (!file->fp.mode[0])
     {

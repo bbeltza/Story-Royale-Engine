@@ -22,7 +22,7 @@ set(BASE_SOURCES
 "chunk.cc"
 "rwops.c"
 
-"Action.cpp"
+"action.cpp"
 "Audio.cpp"
 "Font.cpp"
 "FontRenderer.cpp"

@@ -26,10 +26,14 @@ SDL_RWops* sre_filetorwops(const sre_File* file)
     else
     {
 #ifdef SDL_HAVE_STDIO_H
-        File copy = *this;
-        rw = SDL_RWFromFP(copy.stream.ptr, SDL_TRUE);
+        sre_File afile;
+        sre_fileopen(&afile, file->fp.path, file->fp.mode);
+        
+        rw = SDL_RWFromFP(afile.fp.fp, SDL_TRUE);
         if (rw)
-            copy.stream.ptr = NULL;
+            afile.fp.fp = NULL;
+        
+        sre_fileclose(&afile);
 #else
         const sre_Chunk* chunk = sre_fileallocate(file, 0);
         rw = SDL_RWFromConstMem(chunk->data, (int)chunk->size);

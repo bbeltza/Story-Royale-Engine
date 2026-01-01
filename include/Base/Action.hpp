@@ -9,6 +9,55 @@
 
 extern "C" void __init_actions();
 
+#define Action _Action
+
+namespace sre
+{
+	class _Action
+	{
+		static _Action* head_ptr;
+		static ConnectionHandle sc_mouse;
+		static ConnectionHandle sc_keyboard;
+		static ConnectionHandle sc_touch;
+
+		std::vector<unsigned> m_inputs;
+		int m_counter = 0;
+		int m_frame = -1;
+
+		Action* m_next = NULL;
+		Action* m_prev = NULL;
+	public:
+		Action();
+		template <typename... Args> Action(Args... inputs): Action() { add_withargs(inputs...); }
+
+		~Action();
+
+		inline void add(Input::Button button) { return add_impl(static_cast<int>(button), C_MOUSE); }
+		inline void add(SDL_Scancode button) { return add_impl(static_cast<int>(button), C_SCANCODE); }
+		inline void add(SDL_KeyCode button) { return add_impl(static_cast<int>(button), C_KEYCODE); }
+		inline void remove(Input::Button button) { return remove_impl(static_cast<int>(button), C_MOUSE); }
+		inline void remove(SDL_Scancode button) { return remove_impl(static_cast<int>(button), C_SCANCODE); }
+		inline void remove(SDL_KeyCode button) { return remove_impl(static_cast<int>(button), C_KEYCODE); }
+
+		bool pressed() const { return !(m_frame < 0); }
+		bool just_pressed() const { return m_frame == Runtime::CurrentFrame(); }
+
+	private:
+		enum Category
+		{
+			C_MOUSE,
+			C_SCANCODE,
+			C_KEYCODE
+		};
+		void add_impl(int value, int category);
+		void remove_impl(int value, int category);
+		template <typename T, typename... Args> inline void add_withargs(T first, Args... inputs) { add(first); return add_withargs(inputs...); }
+		template <typename T> inline void add_withargs(T first) { add(first); }
+	};
+}
+
+#undef Action
+
 class Action
 {
 	friend void __init_actions();

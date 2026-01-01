@@ -1,4 +1,5 @@
 #include <Base/File.h>
+#include <errno.h>
 
 #include <utils/logging.h>
 

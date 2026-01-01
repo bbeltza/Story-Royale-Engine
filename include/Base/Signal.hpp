@@ -67,7 +67,7 @@ class ConnectionHandle
 	friend class Connection;
 	Connection* connection;
 public:
-	ConnectionHandle(): connection(NULL) {}
+	constexpr ConnectionHandle(): connection(NULL) {}
 	ConnectionHandle(Connection* connection) { *this = connection; }
 	ConnectionHandle(const ConnectionHandle& other) = delete;
 	ConnectionHandle(ConnectionHandle&& moving) noexcept;

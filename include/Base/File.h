@@ -22,14 +22,14 @@ extern const char SRE_FSRES_PREFIX[];
 extern const char SRE_RES_PREFIX[SRE_FILEPREFIX_LENGTH + 1];
 extern const char SRE_USR_PREFIX[SRE_FILEPREFIX_LENGTH + 1];
 
-inline int sre_filehasprefix(const char* path, const char prefix[SRE_FILEPREFIX_LENGTH]) { return !strncmp(prefix, path, SRE_FILEPREFIX_LENGTH); }
-inline int sre_modehaswrite(const char* mode) { return strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w'); }
+static inline int sre_filehasprefix(const char* path, const char prefix[SRE_FILEPREFIX_LENGTH]) { return !strncmp(prefix, path, SRE_FILEPREFIX_LENGTH); }
+static inline int sre_modehaswrite(const char* mode) { return strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w'); }
 
 typedef struct sre_FP
 {
     FILE* fp;
     char mode[sizeof(void*)]; // The mode of the stream, picks up the size of a pointer, but it typically won't use more than 4 bytes
-    void* unused;
+    char* path;
 } sre_FP;
 
 typedef struct sre_FRES
