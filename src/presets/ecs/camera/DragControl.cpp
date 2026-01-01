@@ -4,9 +4,9 @@
 
 using namespace sreECS;
 
-Action DragControl::default_action{ true, Input::mbRight };
+sre::Action DragControl::default_action{ Input::mbRight };
 
-DragControl::DragControl(const Action& action): m_action(action)
+DragControl::DragControl(const sre::Action& action): m_action(action)
 {
     m_mouseConnection = Input::MouseMove.Connect(DragControl::mouseMoveCallback, this);
     m_touchConnection = Input::FingerMove.Connect(DragControl::touchMotionCallback, this);
@@ -16,7 +16,7 @@ DragControl::~DragControl() {}
 
 void DragControl::on_update(Camera& camera)
 {
-    if (m_action.isPressed())
+    if (m_action.pressed())
     {
         m_camSpeed = m_lastmouseDelta;
     }
@@ -36,7 +36,7 @@ void DragControl::on_pupdate(Camera&)
 
 void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)
 {
-    if (self->m_action.isPressed())
+    if (self->m_action.pressed())
         self->m_lastmouseDelta += event->delta;
 }
 

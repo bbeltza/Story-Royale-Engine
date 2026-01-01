@@ -7,19 +7,10 @@
 
 #include "Base/Input.hpp"
 
-extern "C" void __init_actions();
-
-#define Action _Action
-
 namespace sre
 {
-	class _Action
+	class Action
 	{
-		static _Action* head_ptr;
-		static ConnectionHandle sc_mouse;
-		static ConnectionHandle sc_keyboard;
-		static ConnectionHandle sc_touch;
-
 		std::vector<unsigned> m_inputs;
 		int m_counter = 0;
 		int m_frame = -1;
@@ -28,6 +19,7 @@ namespace sre
 		Action* m_prev = NULL;
 	public:
 		Action();
+		Action(const Action& other): Action() { m_inputs = other.m_inputs; }
 		template <typename... Args> Action(Args... inputs): Action() { add_withargs(inputs...); }
 
 		~Action();
@@ -49,66 +41,30 @@ namespace sre
 			C_SCANCODE,
 			C_KEYCODE
 		};
+
+		static constexpr int C_MOUSE_SHIFT = 0;
+		static constexpr int C_MOUSE_MASK = 0b111;
+		static constexpr int C_SCANCODE_SHIFT = 3;
+		static constexpr int C_SCANCODE_MASK = 0x1FF;
+		static constexpr int C_KEYCODE_SHIFT = 12;
+		static constexpr int C_KEYCODE_MASK = C_SCANCODE_MASK;
+
+
 		void add_impl(int value, int category);
 		void remove_impl(int value, int category);
+
 		template <typename T, typename... Args> inline void add_withargs(T first, Args... inputs) { add(first); return add_withargs(inputs...); }
 		template <typename T> inline void add_withargs(T first) { add(first); }
+
+		static void impl_getshiftmask(int category, int& shift, int& mask);
+	
+	private:
+		static Action* head_ptr;
+		static ConnectionHandle sc_mouse;
+		static ConnectionHandle sc_keyboard;
+		static ConnectionHandle sc_touch;
+		static void sc_handlemouse(void*, void*, const MouseButton* ev);
+		static void sc_handlekeyboard(void*, void*, const Key* ev);
+		static void sc_handletouch(void*, void*, const TouchFinger* ev);
 	};
 }
-
-#undef Action
-
-class Action
-{
-	friend void __init_actions();
-	typedef std::list<Action*> list;
-	static list* s_actions;
-	static ConnectionHandle sc_mouse;
-	static ConnectionHandle sc_keyboard;
-	static ConnectionHandle sc_touch;
-	static void sc_mouseHandle(void*, void*, const MouseButton* ev);
-	static void sc_keyboardHandle(void*, void*, const Key* ev);
-	static void sc_touchHandle(void*, void*, const TouchFinger* ev);
-
-public:
-	Action(const Action& other) : press_frame(-1), enable_touch(other.enable_touch), m_keycodes(other.m_keycodes), m_scancodes(other.m_scancodes), m_mousebuttons(other.m_mousebuttons) { push_self(); }
-	~Action();
-
-	template <typename... _Args>
-	Action(bool touch, _Args... args) : enable_touch(touch) { _addinputs_recurse(args...); push_self(); }
-	template <typename... _Args>
-	Action(_Args... args) : Action(false, args...) {}
-
-	inline void AddInput(SDL_KeyCode keyCode) { m_keycodes[keyCode] = false; }
-	inline void AddInput(SDL_Scancode scanCode) { m_scancodes[scanCode] = false; }
-	inline void AddInput(Input::Button mouseButton) { m_mousebuttons[mouseButton] = false; }
-
-	inline bool isPressed() const {
-		return (isKeyCodePressed() || isScanCodePressed() || isMousePressed() || isTouchPressed());
-	}
-	inline bool isJustPressed() const {
-		return press_frame == Runtime::CurrentFrame();
-	}
-
-private:
-	long long press_frame = -1;
-	bool enable_touch = false;
-
-	std::unordered_map<int, bool> m_keycodes;
-	std::unordered_map<int, bool> m_scancodes;
-	std::unordered_map<int, bool> m_mousebuttons;
-
-	inline bool isTouchPressed() const { if (!enable_touch) return false; return Input::GetFingersPressed() != 0; }
-	inline bool isKeyCodePressed() const { for (auto& kv : m_keycodes) if (kv.second) return true; return false; }
-	inline bool isScanCodePressed() const { for (auto& kv: m_scancodes) if (kv.second) return true; return false; }
-	inline bool isMousePressed() const { for (auto& kv: m_mousebuttons) if (kv.second) return true; return false; }
-
-	template <typename First, typename... Rest>
-	inline void _addinputs_recurse(First first, Rest... args) {
-		AddInput(first);
-		_addinputs_recurse(args...);
-	}
-	inline void _addinputs_recurse() {}
-
-	void push_self();
-};

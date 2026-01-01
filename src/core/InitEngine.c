@@ -106,8 +106,6 @@ void __initialize_engine()
 
     __setup_engine_data();
 
-    __init_actions();
-
     atexit(__end_engine);
 }
 

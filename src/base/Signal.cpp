@@ -9,7 +9,7 @@ void SignalBase::static_invoker(SignalBase *sig, void *func, void *data) { sig->
 
 void SignalBase::base_fire()
 {
-	SDL_SemPost(get_semaphore);
+	if (m_semaphore) SDL_SemPost(get_semaphore);
 
 	for (Connection *connection = m_head; connection; connection = connection->m_next)
 	{
@@ -23,8 +23,6 @@ void SignalBase::base_fire()
 			delete connection;
 	}
 }
-
-SignalBase::SignalBase(void *userdata) : userdata(userdata), m_semaphore(SDL_CreateSemaphore(0)) {}
 
 SignalBase::~SignalBase()
 {
@@ -42,6 +40,9 @@ Connection *SignalBase::base_connect(void *_func, void *_userdata, uintptr_t _fl
 
 void SignalBase::base_yield()
 {
+	if (!m_semaphore)
+		m_semaphore = SDL_CreateSemaphore(0);
+
 	SDL_SemWait(get_semaphore);
 }
 

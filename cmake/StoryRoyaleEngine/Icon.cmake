@@ -24,7 +24,7 @@ function(srEngine_link_icon TARGET)
 
     if (WIN32)
         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc "IDI_ICON  ICON  DISCARDABLE  \"app.ico\"")
-        target_sources(${TARGET} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc)
+        target_sources(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/ico.rc)
     elseif(UNIX)
         configure_file(${SRENGINE_DIR}/asm/ico.s.in ${CMAKE_CURRENT_BINARY_DIR}/ico.s)
         target_link_libraries(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/ico.s)

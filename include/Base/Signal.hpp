@@ -16,13 +16,13 @@ class SignalBase
 	friend class Connection;
 
 protected:
-	SignalBase(void*);
+	constexpr SignalBase(void *userdata) : userdata(userdata) {}
 	~SignalBase();
 	typedef void (*dummy_func_t)(void*, void*, ...);
 private:
 	static void static_invoker(SignalBase* sig, void* func, void* data);
 	Connection* m_head = NULL;
-	void* m_semaphore;
+	void* m_semaphore = NULL;
 protected:
 	void base_fire();
 	void base_yield();
@@ -95,7 +95,7 @@ class Signal: public SignalBase
 	#define _T1 template <typename Ret, typename ST, typename CT>
 	#define _T2 template <typename Ret>
 public:
-	constexpr Signal(void* Userdata=NULL): SignalBase(Userdata) {}
+	constexpr Signal(void* Userdata=NULL): SignalBase(Userdata) { }
 	void Fire(Args... args) { ret_args = { args... }; base_fire(); }
 
 
@@ -123,7 +123,7 @@ template <> class Signal<> : public SignalBase
 
 	void invoke_func(void* func, void* data) override { reinterpret_cast<DefaultCallable>(func)(this->userdata, data); }
 public:
-	Signal(void* userdata = NULL): SignalBase(userdata) {}
+	constexpr Signal(void* userdata = NULL): SignalBase(userdata) {}
 	void Fire(void) { base_fire(); }
 	void Wait(void) { base_yield(); }
 

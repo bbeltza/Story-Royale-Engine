@@ -116,11 +116,11 @@ project(Game) # This can be anything, it's the name of the target
 include(StoryRoyaleEngine)
 
 # Add all of your C/C++ files here
-set(SOURCES "src/entry.cpp") # Note that SOURCES has to remain, this variable is used for the next line
+set(SOURCES "src/entry.cpp") # You can change the SOURCES name, back then, it was required that SOURCES existed
 # If you don't want to add the sources manually, you can replace it with this line: (Note that you'll have to reconfigure your project every time you add a new source file, unless you also use the CONFIGURE_DEPENDS flag)
 # file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
-srEngine_build(Game) # This function does all of the heavylifting. Taking SOURCES and making an executable out of it, with the engine linked. There are some options though that you can add as arguments:
+srEngine_build(Game GameExecutable SOURCES) # This function does all of the heavylifting. Taking your SOURCES variable as the third argument and making an executable out of it from the second one, with the engine linked. There are some options though that you can add as arguments:
 # NO_CONSOLE uses a Windows subsystem on Windows, that just means it doesn't include a console
 # NO_BIND is used to not embed the game assets into the executable, instead it will just put them into a single "__res/" folder in the binary's folder, this is useful for debugging as embedding resources takes some time.
 # It was more useful back then when embedding resources took way more.
@@ -162,10 +162,10 @@ These are just settings! It's just a **JSON** file with hints to the engine on h
 After you've configured everything, you're going to have to write a **C/C++** file with a `Game::Initialize()` function in it. It is required, otherwise you'll get a linking error:
 
 ```c++
-#include <Engine.hpp> // Include some base features of the engine
+#include <Engine.hpp> // Include many base features of the engine
 #include <utils/logging.h> // Include LOG(), it's just a printf() wrapper
 
-void Game::Initialize()
+void sre::initialize()
 {
     LOG("Hello World!");
 }

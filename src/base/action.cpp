@@ -3,17 +3,17 @@
 
 using namespace sre;
 
-_Action* _Action::head_ptr = NULL;
-ConnectionHandle _Action::sc_mouse;
-ConnectionHandle _Action::sc_keyboard;
-ConnectionHandle _Action::sc_touch;
+Action* Action::head_ptr = NULL;
+ConnectionHandle Action::sc_mouse;
+ConnectionHandle Action::sc_keyboard;
+ConnectionHandle Action::sc_touch;
 
-_Action::_Action(): m_next(head_ptr)
+Action::Action(): m_next(head_ptr)
 {
 	if (!sc_mouse.Connected())
 	{
-		//sc_mouse = Input::MouseButton.Connect(sc_handlemouse, NULL);
-		//sc_keyboard = Input::KeyEvent.Connect(sc_handlekey, NULL);
+		sc_mouse = Input::MouseButton.Connect(sc_handlemouse, NULL);
+		sc_keyboard = Input::KeyEvent.Connect(sc_handlekeyboard, NULL);
 		//sc_touch = Input::FingerTouch.Connect(sc_handletouch, NULL);
 	}
 
@@ -21,7 +21,7 @@ _Action::_Action(): m_next(head_ptr)
 	if (m_next) m_next->m_prev = this;
 }
 
-_Action::~_Action()
+Action::~Action()
 {
 	if (m_prev)
 		m_prev->m_next = m_next;
@@ -34,121 +34,107 @@ _Action::~_Action()
 		m_next->m_prev = m_prev;
 }
 
-void _Action::add_impl(int value, int category)
+void Action::impl_getshiftmask(int category, int& shift, int& mask)
 {
-	int shift;
-	int mask;
-
 	switch (category)
 	{
 	case C_MOUSE:
-		shift = 0;
-		mask = 0b111;
+		shift = C_MOUSE_SHIFT;
+		mask = C_MOUSE_MASK;
 		break;
 	case C_SCANCODE:
-		shift = 3;
-		mask = 0x1FF;
+		shift = C_SCANCODE_SHIFT;
+		mask = C_SCANCODE_MASK;
 		break;
 	case C_KEYCODE:
-		value &= ~SDLK_SCANCODE_MASK;
-		shift = 12;
-		mask = 0x1FF;
+		shift = C_KEYCODE_SHIFT;
+		mask = C_KEYCODE_MASK;
 		break;
 	default:
 		abort();
 	}
+}
+
+void Action::add_impl(int value, int category)
+{
+	int shift;
+	int mask;
+	impl_getshiftmask(category, shift, mask);
+	value &= mask;
+
+	unsigned const ored = value << shift;
+	for (unsigned& val : m_inputs)
+	{
+		unsigned const shifted = (val >> shift) & mask;
+		if (shifted == value) return;
+		if (shifted) continue;
+
+		val |= ored;
+		return;
+	}
+
+	m_inputs.push_back(0);
+	m_inputs.back() |= ored;
+}
+
+void Action::remove_impl(int value, int category)
+{
+	int shift;
+	int mask;
+	impl_getshiftmask(category, shift, mask);
+	value &= mask;
 
 	for (unsigned& val : m_inputs)
 	{
-		if ((val >> shift) & mask) continue;
-		if (((val >> shift) & mask) == value) return;
-		val |= (value & mask) << shift;
+		unsigned const shifted = (val >> shift) & mask;
+		if (shifted != value) continue;
+
+		val &= ~mask;
+		break;
 	}
 }
 
-Action::list* Action::s_actions = nullptr;
-ConnectionHandle Action::sc_mouse;
-ConnectionHandle Action::sc_keyboard;
-ConnectionHandle Action::sc_touch;
-
-extern "C" void __init_actions()
+void Action::sc_handlekeyboard(void*, void*, const Key* ev)
 {
-	Action::sc_mouse = Input::MouseButton.Connect(Action::sc_mouseHandle, NULL);
-	Action::sc_keyboard = Input::KeyEvent.Connect(Action::sc_keyboardHandle, NULL);
-	Action::sc_touch = Input::FingerTouch.Connect(Action::sc_touchHandle, NULL);
-}
-
-void Action::push_self()
-{
-	if (!s_actions)
-	{
-		s_actions = new list;
-	}
-	s_actions->push_back(this);
-}
-
-Action::~Action()
-{
-	s_actions->remove(this);
-	if (s_actions->empty())
-	{
-		delete s_actions;
-		s_actions = nullptr;
-	}
-}
-
-#define sa_check if (!s_actions) return;
-#define act_frame act->press_frame = Runtime::CurrentFrame()
-
-void Action::sc_mouseHandle(void*, void*, const MouseButton* ev)
-{
-	sa_check
-
-	for (auto act : *s_actions)
-	{
-		Input::Button button = (Input::Button)ev->button;
-		if (act->m_mousebuttons.count(button))
-		{
-			act->m_mousebuttons.at(button) = ev->pressed;
-			if (ev->pressed)
-				act_frame;
-		}
-	}
-}
-
-void Action::sc_keyboardHandle(void*, void*, const Key* ev)
-{
-	sa_check
 	if (ev->repeat) return;
 
-	for (auto act : *s_actions)
+	const int scancode_val = ev->scanCode & C_SCANCODE_MASK;
+	const int keycode_val = ev->keyCode & C_KEYCODE_MASK;
+	const int incrementer = ev->pressed ? 1 : -1;
+
+	auto current = head_ptr;
+	while (current)
 	{
-		if (act->m_scancodes.count(ev->scanCode))
+		bool found = false;
+		for (unsigned val : current->m_inputs)
 		{
-			act->m_scancodes.at(ev->scanCode) = ev->pressed;
-			goto press_sct;
-		}
-		if (act->m_keycodes.count(ev->keyCode))
-		{
-			act->m_keycodes.at(ev->keyCode) = ev->pressed;
-			goto press_sct;
+			unsigned const shifted_scancode = (val >> C_SCANCODE_SHIFT) & C_SCANCODE_MASK;
+			unsigned const shifted_keycode = (val >> C_KEYCODE_SHIFT) & C_KEYCODE_MASK;
+			if (shifted_scancode != scancode_val && shifted_keycode != keycode_val) continue;
+
+			current->m_counter += incrementer;
+			found = true;
 		}
 
-		continue;
-		press_sct:
-		if (!ev->repeat && ev->pressed)
-			act_frame;
+		if (!found) goto END;
+
+		if (!current->m_counter)
+			current->m_frame = -1;
+		else if (ev->pressed)
+			current->m_frame = static_cast<int>(Runtime::CurrentFrame());
+		
+		END:
+		current = current->m_next;
 	}
 }
 
-void Action::sc_touchHandle(void*, void*, const TouchFinger* ev)
+void Action::sc_handlemouse(void*, void*, const MouseButton* ev)
 {
-	sa_check
-	if (ev->Pressed) return;
-
-	for (auto act : *s_actions)
+	
+	auto current = head_ptr;
+	while (current)
 	{
-		if (act->enable_touch)
-			act_frame;
+
+		current = current->m_next;
 	}
 }
