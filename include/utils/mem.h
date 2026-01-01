@@ -31,3 +31,13 @@ It's discouraged to use it with numbers as numbers can be NULL too
 // Dynamically allocates an array (x) of c elements of type t, on the stack.
 // Depending on the implementation, it may support variable length arrays (e.g. clang & gcc's extensions), or just use alloca
 #define ut_dynsalloc __ut_dynsalloc
+
+#ifdef __cplusplus
+	extern "C" {
+#endif
+		// C operator new and delete wrappers
+		extern void* sre_new(size_t size);
+		extern void sre_delete(void* block);
+#ifdef __cplusplus
+	}
+#endif

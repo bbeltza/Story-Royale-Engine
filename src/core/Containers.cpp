@@ -20,19 +20,6 @@ _containers_service::~_containers_service()
 	// Destroy all concurrency-related stuff
 	allocated_threads.clear();
 
-	// Destroy SDL fonts (they also cannot be destroyed after)
-	while (!loaded_fonts.empty())
-	{
-		auto& font = loaded_fonts.front();
-		if (font->m_font)
-		{
-			TTF_CloseFont(font->m_font);
-			font->m_font = NULL;
-			font->m_src = NULL;
-		}
-		loaded_fonts.pop_front();
-	}
-
 	// Nothing much more for now..
 
 	unlock();

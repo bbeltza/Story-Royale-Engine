@@ -2,49 +2,52 @@
 
 #include "Engine.hpp"
 
-#include "../internal.h"
-#include "../internal.hpp"
+using namespace sre;
 
-Font::Font(const char* path, int pt)
+Font::Font(const char *path, int pt)
 {
-    _containers->lock();
-
     sre::File file(path);
-    m_font = TTF_OpenFontRW(file.to_RWops(), 1, pt);
-    
-    _containers->loaded_fonts.push_front(this);
+    if (!file.valid())
+        return;
 
-    _containers->unlock();
+    m_rwops = file.to_RWops();
+    m_font = TTF_OpenFontRW(m_rwops, 1, pt);
+    if (!m_font)
+    {
+        ERROR("Font::Font() could not load font from '%s': %s", path, TTF_GetError());
+        if (m_rwops)
+        {
+            SDL_RWclose(m_rwops);
+            m_rwops = NULL;
+        }
+    }
 }
 
 Font::~Font()
 {
-    if (!engine.containers_service) return;
-
-    _containers->lock();
-    if (m_font)
+    if (m_font && TTF_WasInit())
         TTF_CloseFont(m_font);
-    
-    _containers->loaded_fonts.remove(this);
-
-    _containers->unlock();
+    else if (m_rwops)
+        SDL_RWclose(m_rwops);
 }
 
-bool Font::PreloadTextures(const char* text)
+bool Font::preload(const char *text)
 {
-    if (!text[0]) return true;
+    if (!m_font)
+        return true;
+    if (!text[0])
+        return true;
 
     bool unloaded = false;
     size_t n = 0;
     while (text[n])
     {
         char c = text[n];
-        if (!textures.count(c)) 
+        if (!textures.count(c))
         {
             textures.emplace(
                 c,
-                sre::Image{ TTF_RenderGlyph_Solid(m_font, c, sre::col4::WHITE.toSDL()) }
-            );
+                sre::Image{TTF_RenderGlyph_Solid(m_font, c, sre::col4::WHITE.toSDL())});
             unloaded = true;
         };
         n++;

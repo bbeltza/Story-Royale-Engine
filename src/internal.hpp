@@ -19,8 +19,6 @@ struct _containers_service: private std::mutex
     std::list<AudioAccess> loaded_audios;
 	std::queue<Audio*> stopped_audios;
 
-    std::list<Font*> loaded_fonts;
-
     _containers_service();
     ~_containers_service();
 

@@ -3,11 +3,13 @@
 #include "Engine.hpp"
 
 static std::vector<std::string> line_buff;
-//static std::vector<int> width_buff;
 
-void Font::Render(const sre::rect2Dut & bounds, const sre::col4& color, const char* text, int count, HAlign halignment, VAlign valignment)
+using namespace sre;
+
+void Font::render(const sre::rect2Dut & bounds, const sre::col4& color, const char* text, int count, Alignment halignment, Alignment valignment)
 {
-    if (PreloadTextures(text)) return;
+    if (preload(text)) return;
+
     if (count == 0) return;
     if (bounds.size.x <= 0) return;
 
@@ -50,8 +52,8 @@ void Font::Render(const sre::rect2Dut & bounds, const sre::col4& color, const ch
     sre::vec2ut startvec = bounds.position;
 
     sre::unit yoffset = 0;
-    if (valignment != VTop) yoffset = bounds.size.y - line_skip * i;
-    if (valignment == VCenter) yoffset /= 2;
+    if (valignment != A_TOP) yoffset = bounds.size.y - line_skip * i;
+    if (valignment == A_CENTER) yoffset /= 2;
 
     startvec.y += yoffset;
 
@@ -65,20 +67,21 @@ void Font::Render(const sre::rect2Dut & bounds, const sre::col4& color, const ch
         TTF_MeasureText(m_font, c_str, width, &line_extent, NULL);
 
         sre::unit xoffset = 0;
-        if (halignment != HLeft) xoffset = bounds.size.x - line_extent;
-        if (halignment == HCenter) xoffset /= 2;
+        if (halignment != A_LEFT) xoffset = bounds.size.x - line_extent;
+        if (halignment == A_CENTER) xoffset /= 2;
 
         startvec.x = bounds.position.x + xoffset;
 
-        RenderLine(startvec, color, c_str, count, (int)n);
+        render_line(startvec, color, c_str, count, (int)n);
 
         startvec.y += line_skip;
         n += strlen(c_str);
     }
 }
 
-void Font::RenderLine(const sre::vec2ut& start, const sre::col4& color, const char* text, int count, int acc)
+void Font::render_line(const sre::vec2ut& start, const sre::col4& color, const char* text, int count, int acc)
 {
+    assert(m_font);
     if (count > 0 && count - acc <= 0) return;
 
     count = count < 0 ? -1 : count;

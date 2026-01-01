@@ -66,6 +66,7 @@ set(PRESET_SOURCES
 
 set(UTIL_SOURCES
     "logging.c"
+    "operators.cc"
 )
 
 set_dst_src(components COMPONENT_SOURCES LAYER_SOURCES)
@@ -89,6 +90,8 @@ set(CORE_SOURCES
 "InitEngine.c"
 "Runtime.c"
 "Window.c"
+
+"HeapTracker.cpp"
 )
 set_dst_src(core CORE_SOURCES SRCORE_SOURCES)
 set(CORE_SOURCES ${SRCORE_SOURCES} PARENT_SCOPE)

@@ -2,7 +2,7 @@
 
 using namespace sreGUI;
 
-std::unordered_map<std::string, Font> Text::font_map;
+std::unordered_map<std::string, sre::Font> Text::font_map;
 
 void Text::load(const std::string& path)
 {
@@ -17,7 +17,6 @@ void Text::on_render(const sre::rect2Dut& dimensions)
 {
     FONTCHECK
 
-    m_font->PreloadTextures(m_str.c_str());
-
-    m_font->Render(dimensions, color, m_str.c_str(), count, h_alignment, v_alignment);
+    m_font->preload(m_str.c_str());
+    m_font->render(dimensions, color, m_str.c_str(), count, h_alignment, v_alignment);
 }

@@ -25,14 +25,14 @@ namespace sreGUI
 
         sre::col4 color = sre::col4::BLACK;
 
-        Font::HAlign h_alignment = Font::HLeft;
-        Font::VAlign v_alignment = Font::VTop;
+        sre::Alignment h_alignment = sre::A_LEFT;
+        sre::Alignment v_alignment = sre::A_TOP;
     protected:
         void on_render(const sre::rect2Dut& dimensions) override;
     private:
         std::string m_str;
-        Font* m_font = NULL;
-        static std::unordered_map<std::string, Font> font_map;
+        sre::Font* m_font = NULL;
+        static std::unordered_map<std::string, sre::Font> font_map;
     };
 }
 

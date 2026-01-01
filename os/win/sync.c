@@ -1,10 +1,19 @@
 #include "os_win.h"
 
+
+#include <assert.h>
 // Direct Nt call manipulation
-NTSYSCALLAPI NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
+NTSTATUS (*NtDelayExecution)(BOOLEAN Alertable, PLARGE_INTEGER DelayInterval);
 
 void os_win_delay(unsigned long long us100x)
 {
+    if (!NtDelayExecution)
+    {
+        HMODULE module = GetModuleHandle("ntdll.dll");
+        NtDelayExecution = (void*)GetProcAddress(module, "NtDelayExecution");
+    }
+    assert(NtDelayExecution);
+
     LARGE_INTEGER time;
     time.QuadPart = us100x * -1;
     NtDelayExecution(TRUE, &time);
