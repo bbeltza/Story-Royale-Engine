@@ -130,11 +130,22 @@ void Action::sc_handlekeyboard(void*, void*, const Key* ev)
 
 void Action::sc_handlemouse(void*, void*, const MouseButton* ev)
 {
-	
+	int incrementer = ev->pressed ? 1 : -1;
+
 	auto current = head_ptr;
 	while (current)
 	{
+		for (unsigned val : current->m_inputs)
+		{
+			if ((val & C_MOUSE_MASK) != ev->button) continue;
 
+			current->m_counter += incrementer;
+			if (!current->m_counter)
+				current->m_frame = -1;
+			else if (ev->pressed)
+				current->m_frame = static_cast<int>(Runtime::CurrentFrame());
+			break;
+		}
 		current = current->m_next;
 	}
 }
