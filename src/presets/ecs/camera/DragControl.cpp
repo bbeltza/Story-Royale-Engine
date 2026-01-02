@@ -42,7 +42,7 @@ void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* e
 
 void DragControl::touchMotionCallback(void*, DragControl* self, const TouchFinger* event)
 {
-    sre::vec2ut screen{Display::GetSize()};
+    sre::vec2ut screen = sre::display_size();
 
     self->m_lastmouseDelta += event->Delta * screen;
 }

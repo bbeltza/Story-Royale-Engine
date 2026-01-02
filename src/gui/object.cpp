@@ -123,7 +123,7 @@ void Object::call_process()
     for (auto& comp : components)
     {
         if (comp.enabled)
-            m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : sre::vec2ut(Display::GetSize()));
+            m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : sre::display_size());
     }
 }
 
@@ -201,7 +201,7 @@ void Object::call_render()
     }
     post_render();
 
-    /*
+    /* 
     Display::DrawRectangle(m_absolute, sre::col4::RED, sre::vec2f::ZERO, Display::M_STROKE, DISPLAY_DONT_CENTER);
     */
 

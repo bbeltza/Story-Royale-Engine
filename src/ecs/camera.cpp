@@ -21,7 +21,7 @@ void Camera::pupdate()
     if (effect && effect->enabled)
         position += effect->on_process();
     
-    const sre::unit scale = ::Display::GetScale();
+    const sre::unit scale = sre::display_scale();
 
     m_rpos.x = floor(position.x * scale) / scale;
     m_rpos.y = floor(position.y * scale) / scale;
@@ -35,7 +35,7 @@ sre::vec2ut Camera::toWorldSpace(sre::vec2ut coords) const
     if (_this <= &reinterpret_cast<Scene*>(0)->camera)
         _this = &ZERO_CAM;
 
-    return coords - Display::GetCenter() + _this->m_rpos;
+    return coords - sre::display_center() + _this->m_rpos;
 }
 
 sre::vec2ut Camera::toScreenSpace(sre::vec2ut coords) const
@@ -44,9 +44,9 @@ sre::vec2ut Camera::toScreenSpace(sre::vec2ut coords) const
     if (_this <= &reinterpret_cast<Scene*>(0)->camera)
         _this = &ZERO_CAM;
 
-    const sre::unit scale = Display::GetScale();
+    const sre::unit scale = sre::display_scale();
 
-    sre::vec2ut pos = coords + Display::GetCenter() - _this->m_rpos;
+    sre::vec2ut pos = coords + sre::display_center() - _this->m_rpos;
     pos.x = floor(pos.x * scale);
     pos.y = floor(pos.y * scale);
 

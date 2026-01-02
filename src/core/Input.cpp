@@ -77,7 +77,7 @@ void __poll_input(SDL_Event* event)
 
 void __update_input()
 {
-    if (!engine.viewport.w || !engine.viewport.h) return;
+    if (!engine.size_x || !engine.size_y) return;
 
     int x, y;
     engine.mouse_press = SDL_GetMouseState(&x, &y);

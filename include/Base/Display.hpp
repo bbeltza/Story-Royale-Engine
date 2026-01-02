@@ -10,7 +10,11 @@ namespace sreECS
 
 namespace sre
 {
-    int draw();
+    vec2ut display_size();
+    vec2ut display_center();
+    vec2i display_outputsize();
+
+    unit display_scale();
 }
 
 #define DISPLAY_DONT_CENTER reinterpret_cast<const sreECS::Scene*>(0x01)
@@ -22,12 +26,6 @@ namespace Display
         M_STROKE,
         M_FILL
     };
-
-    sre::vec2ut GetCenter();
-    sre::vec2i GetSize();
-    sre::vec2i GetAbsoluteSize();
-
-    float GetScale();
 
     void Fill(const sre::col4& Color);
 

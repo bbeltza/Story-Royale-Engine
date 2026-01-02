@@ -36,11 +36,6 @@ inline void real_coords(SDL_FRect& out_rect, const sre::rect2Dut& in_rect, const
     reinterpret_cast<sre::rect2Df*>(&out_rect)->position = world->camera.toScreenSpace(in_rect.position - in_rect.size * anchor);
 }
 
-sre::vec2ut Display::GetCenter() { return {engine.center_x, engine.center_y}; }
-sre::vec2i Display::GetSize() { return {engine.viewport.w, engine.viewport.h}; }
-sre::vec2i Display::GetAbsoluteSize() { return {engine.osize_x, engine.osize_y}; }
-float Display::GetScale() { return engine.viewport_scale; }
-
 #define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
 #define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
 

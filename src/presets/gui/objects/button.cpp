@@ -22,7 +22,7 @@ void Button::finger_touch(void* _unused, Button* button, const TouchFinger* touc
         return;
     
     if (button->m_hover)
-        button->on_press(touchData->UV * Display::GetSize());
+        button->on_press(touchData->UV * sre::display_size());
 }
 
 

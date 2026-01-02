@@ -44,19 +44,19 @@ void __update_viewport()
 		integer_scale = 1;
 	}
 
-	engine.viewport_scale = static_cast<float>(integer_scale);
+	engine.viewport_scale = static_cast<sre::unit>(integer_scale);
 	engine.current_scale = engine.viewport_scale;
 
-	int ow = engine.viewport.w;
-	int oh = engine.viewport.h;
+	sre::unit ow = engine.size_x;
+	sre::unit oh = engine.size_y;
 	(void)ow;
 	(void)oh;
 
-	engine.viewport.w = (int)ceilf(engine.osize_x / engine.viewport_scale);
-	engine.viewport.h = (int)ceilf(engine.osize_y / engine.viewport_scale);
+	engine.size_x = engine.osize_x / engine.viewport_scale;
+	engine.size_y = engine.osize_y / engine.viewport_scale;
 
-	engine.center_x = engine.viewport.w / 2.0f;
-	engine.center_y = engine.viewport.h / 2.0f;
+	engine.center_x = engine.size_x / 2.0_ut;
+	engine.center_y = engine.size_y / 2.0_ut;
 }
 
 void __display_render()

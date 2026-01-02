@@ -45,14 +45,14 @@ _CAPI_BEGIN
 		SDL_Renderer* sdl_rendererhndl;
 		SDL_Texture* sdl_rectTex;
 		SDL_mutex* sdl_rendermutex;
-		SDL_Rect viewport;
 		int osize_x, osize_y;
+		sre_unit size_x, size_y;
 		sre_unit center_x, center_y;
 
 		size_t targetptr;
 
-		float current_scale;
-		float viewport_scale;
+		sre_unit current_scale;
+		sre_unit viewport_scale;
 
 		// Audio data
 
