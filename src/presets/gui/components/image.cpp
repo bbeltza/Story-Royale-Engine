@@ -1,6 +1,6 @@
 #include <GUI/Components/image.hpp>
 #include <GUI/Components/transform.hpp>
-#include "Engine.hpp"
+#include <Base/Display.hpp>
 
 using namespace sreGUI;
 

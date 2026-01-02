@@ -1,7 +1,7 @@
-#include "ECS/entity.hpp"
-#include "ECS/Components/velocity.hpp"
+#include <ECS/entity.hpp>
+#include <ECS/Components/velocity.hpp>
 
-#include <Engine.hpp>
+#include <Base/Runtime.hpp>
 
 using namespace sreECS;
 
@@ -21,5 +21,5 @@ void Velocity::normalize(sre::unit speed)
 
 void Velocity::on_pupdate(Entity& e)
 {
-    e.position += velocity * Runtime::pdelta_time;
+    e.position += velocity * sre::pdt;
 }

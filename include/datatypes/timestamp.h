@@ -12,4 +12,7 @@ typedef float sre_timeStamp;
 
     constexpr sre::timeStamp operator ""_ts(long double n) { return static_cast<sre::timeStamp>(n); }
 
+    #define SRE_TS(x) x##_ts
+#else
+    #define SRE_TS(x) (sre_timeStamp)x
 #endif

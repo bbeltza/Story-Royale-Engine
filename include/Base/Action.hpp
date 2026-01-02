@@ -1,11 +1,8 @@
-#pragma once
-#include "Engine.hpp"
+#ifndef SRE_ACTION_HPP
+#define SRE_ACTION_HPP
 
-#include "Events/Key.hpp"
-#include "Events/Mouse.hpp"
-#include "Events/Touch.hpp"
-
-#include "Base/Input.hpp"
+#include <Base/Input.hpp>
+#include <Base/Runtime.hpp>
 
 namespace sre
 {
@@ -32,7 +29,7 @@ namespace sre
 		inline void remove(SDL_KeyCode button) { return remove_impl(static_cast<int>(button), C_KEYCODE); }
 
 		bool pressed() const { return !(m_frame < 0); }
-		bool just_pressed() const { return m_frame == Runtime::CurrentFrame(); }
+		bool just_pressed() const { return m_frame == sre::current_frame(); }
 
 	private:
 		enum Category
@@ -68,3 +65,5 @@ namespace sre
 		static void sc_handletouch(void*, void*, const TouchFinger* ev);
 	};
 }
+
+#endif

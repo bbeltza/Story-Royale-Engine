@@ -1,6 +1,9 @@
-#pragma once
-#include "Engine.hpp"
-#include "datatypes/timestamp.h"
+#ifndef SRE_TWEEN_HPP
+#define SRE_TWEEN_HPP
+
+#include <Base/Signal.hpp>
+#include <datatypes/timestamp.h>
+#include <utils/math.hpp>
 
 enum EasingStyle
 {
@@ -74,3 +77,4 @@ public:
     void setTarget(T& target) { m_target = &target; }
 };
 
+#endif

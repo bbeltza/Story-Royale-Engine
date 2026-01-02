@@ -1,7 +1,6 @@
 #include <SDL.h>
 #include "Base/Signal.hpp"
 #include "Base/Thread.hpp"
-#include "Engine.hpp"
 
 #define get_semaphore static_cast<SDL_sem *>(m_semaphore)
 

@@ -1,14 +1,13 @@
 #include "../internal.h"
 #include "../internal.hpp"
 
-#include "GameSettings.h"
+#include <GameSettings.h>
 
-#include "Engine.hpp"
+#include <Base/Texture.hpp>
+#include <Base/Runtime.hpp>
 
-#include "Base/Texture.hpp"
-
-#include "ECS/scene.hpp"
-#include "GUI/object.hpp"
+#include <ECS/scene.hpp>
+#include <GUI/object.hpp>
 
 void __setup_renderer()
 {
@@ -27,7 +26,7 @@ void __setup_renderer()
 
 	SDL_TryLockMutex(engine.sdl_rendermutex);
 
-	Runtime::SetFramerate(sre::game_settings.WindowOptions.TargetFPS);
+	sre::set_framerate(sre::game_settings.WindowOptions.TargetFPS);
 }
 
 void __update_viewport()
@@ -62,7 +61,7 @@ void __update_viewport()
 
 void __display_render()
 {
-	Runtime::OnUpdate.Fire(engine.last_dt);
+	sre::onUpdate.Fire();
 
 	// Unlock the renderer
 	SDL_UnlockMutex(engine.sdl_rendermutex);
@@ -79,7 +78,7 @@ void __display_render()
 		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, bg.r, bg.g, bg.b, 255);
 		SDL_RenderClear(engine.sdl_rendererhndl);
 
-		Runtime::BeforeRender.Fire();
+		sre::beforeRender.Fire();
 
 		//// Drawing all the entities (doesn't run if the foreground is full opaque)
 		if (fg.a < 255)
@@ -97,14 +96,14 @@ void __display_render()
 	{
 		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 0, 0, 0, 0);
 		SDL_RenderClear(engine.sdl_rendererhndl);
-		Runtime::BeforeRender.Fire();
+		sre::beforeRender.Fire();
 	}
 
 	// Drawing the Gui layer
 	if (sreGUI::Object *current = currlayer)
 		current->call_render();
 
-	Runtime::AfterRender.Fire();
+	sre::afterRender.Fire();
 
 	// Present the screen
 	SDL_LockMutex(engine.sdl_rendermutex);

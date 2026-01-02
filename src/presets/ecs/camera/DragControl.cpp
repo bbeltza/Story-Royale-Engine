@@ -1,6 +1,6 @@
 #include <ECS/CameraControllers/drag.hpp>
-
-#include <Engine.hpp>
+#include <Base/Display.hpp>
+#include <Base/Runtime.hpp>
 
 using namespace sreECS;
 
@@ -23,7 +23,7 @@ void DragControl::on_update(Camera& camera)
     else if (smoothness <= 0.0_ut)
         m_camSpeed = m_camSpeed.ZERO;
     else
-        m_camSpeed.setlerp(m_camSpeed.ZERO, ut_min(Runtime::delta_time / smoothness, 1.0_ut));
+        m_camSpeed.setlerp(m_camSpeed.ZERO, ut_min(sre::dt / smoothness, 1.0_ut));
 
     camera.position -= m_camSpeed;
     m_lastmouseDelta = m_lastmouseDelta.ZERO;

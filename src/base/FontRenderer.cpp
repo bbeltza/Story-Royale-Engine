@@ -1,6 +1,5 @@
-#include "Base/Font.hpp"
-
-#include "Engine.hpp"
+#include <Base/Display.hpp>
+#include <Base/Font.hpp>
 
 static std::vector<std::string> line_buff;
 

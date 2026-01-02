@@ -1,5 +1,4 @@
-#include "Base/Action.hpp"
-#include "Engine.hpp"
+#include <Base/Action.hpp>
 
 using namespace sre;
 
@@ -121,7 +120,7 @@ void Action::sc_handlekeyboard(void*, void*, const Key* ev)
 		if (!current->m_counter)
 			current->m_frame = -1;
 		else if (ev->pressed)
-			current->m_frame = static_cast<int>(Runtime::CurrentFrame());
+			current->m_frame = static_cast<int>(sre::current_frame());
 		
 		END:
 		current = current->m_next;
@@ -143,7 +142,7 @@ void Action::sc_handlemouse(void*, void*, const MouseButton* ev)
 			if (!current->m_counter)
 				current->m_frame = -1;
 			else if (ev->pressed)
-				current->m_frame = static_cast<int>(Runtime::CurrentFrame());
+				current->m_frame = static_cast<int>(sre::current_frame());
 			break;
 		}
 		current = current->m_next;

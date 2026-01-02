@@ -8,6 +8,11 @@ namespace sreECS
     struct Scene;
 }
 
+namespace sre
+{
+    int draw();
+}
+
 #define DISPLAY_DONT_CENTER reinterpret_cast<const sreECS::Scene*>(0x01)
 
 namespace Display

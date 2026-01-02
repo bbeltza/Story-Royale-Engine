@@ -201,7 +201,9 @@ void Object::call_render()
     }
     post_render();
 
+    /*
     Display::DrawRectangle(m_absolute, sre::col4::RED, sre::vec2f::ZERO, Display::M_STROKE, DISPLAY_DONT_CENTER);
+    */
 
     rendered.Fire();
 }

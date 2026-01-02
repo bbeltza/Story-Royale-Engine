@@ -1,15 +1,12 @@
 #include <SDL.h>
-#include "Engine.hpp"
-#include "Base/Audio.hpp"
-#include "Base/Thread.hpp"
+#include <Base/Audio.hpp>
+#include <Base/Thread.hpp>
 
-#include "vorbis.h"
-#include "utils/math.h"
+#include <vorbis.h>
+#include <utils/math.h>
 
 #include "../internal.h"
 #include "../internal.hpp"
-
-#include "list"
 
 void AudioData::Load()
 {

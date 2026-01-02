@@ -2,7 +2,7 @@
 #include <SDL_image.h>
 #include "../internal.h"
 
-#include "GameEntry.h"
+#include <Entry.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,7 +25,7 @@ static int __invoke_entry(void* userdata)
 
 static inline void __setup_engine_data()
 {
-    engine.phys_target_dt = 1.0 / 64.0;
+    engine.phys_target_dt = 1 / 128.0;
     engine.framestart_time = os.clock();
 
     engine.input_last_touchid = -1;

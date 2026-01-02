@@ -162,18 +162,29 @@ These are just settings! It's just a **JSON** file with hints to the engine on h
 After you've configured everything, you're going to have to write a **C/C++** file with a `Game::Initialize()` function in it. It is required, otherwise you'll get a linking error:
 
 ```c++
-#include <Engine.hpp> // Include many base features of the engine
+// Include runtime features of the engine
+#include <Base/Runtime.hpp>
+#include <Entry.h> // Include the entry point declaration (sre::initialize())
 #include <utils/logging.h> // Include LOG(), it's just a printf() wrapper
+
+void myUpdateFunction()
+{
+    LOG("My framerate is: %g", 1 / sre::dt); // Print the framerate into the console
+                                            // Should be around 39.-- if you set the framerate to 40
+}
 
 void sre::initialize()
 {
     LOG("Hello World!");
+    sre::onUpdate.Connect(myUpdateFunction, NULL); // Connect myUpdateFunction to a Signal that will be run every frame
+    // Signals are objects that store functions to be called when fired 
+    // sre::onUpdate is a signal that fires once every frame
 }
 ```
 
->This is the most simple a program with this engine can get, there are essential features such as *Worlds* and *Entities* that aren't used there, and can be used to define the game. But more on that later...
+>This is what a simple program with this engine can be, there are essential features such as the *ECS* (Entity Component System) that aren't used there, and can be used to define the game. But more on that later...
 
-Once you've compiled your source file, you should be able to see `Hello World!` on the console (assuming you didn't use the NO_CONSOLE flag on Windows)
+Once you've compiled your source file, you should be able to see `Hello World!` on the console and get `My framerate is: xx.xx` printed every frame (assuming you didn't use the NO_CONSOLE flag on Windows)
 
 #
 

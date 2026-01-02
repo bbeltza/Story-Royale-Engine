@@ -2,7 +2,7 @@
 #include <ECS/entity.hpp>
 #include <utils/math.h>
 
-#include <Engine.hpp>
+#include <Base/Runtime.hpp>
 
 using namespace sreECS;
 
@@ -19,5 +19,5 @@ void EntityControl::on_pupdate(Camera& camera)
     if (!smoothness)
         camera.position = m_target;
     else
-        camera.position.setlerp(m_target, Runtime::pdelta_time / smoothness);
+        camera.position.setlerp(m_target, sre::pdt / smoothness);
 }
