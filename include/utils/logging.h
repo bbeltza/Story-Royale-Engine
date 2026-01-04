@@ -1,12 +1,12 @@
 #pragma once
 #include <standard>
-#include <C/API.h>
+#include <C_API.h>
 
 // logging function signature type
 typedef void (*logfunc_t)(const char* format, ...);
 
 // LOG API
-_CAPI_BEGIN
+SRE_CAPI_BEGIN
 
 void CUSTOM_LOG(const char* prefix, FILE** files, const char* fmt, va_list args, int end);
 
@@ -21,4 +21,4 @@ void WARN(const char* format, ...);
 
 extern FILE* const* const SRE_LOGFILE;
 
-_CAPI_END
+SRE_CAPI_END

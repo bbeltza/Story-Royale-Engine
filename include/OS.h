@@ -1,9 +1,9 @@
 #pragma once
-#include "C/API.h"
+#include "C_API.h"
 
 #define _funcdef(type, name, ...) type (*name)(__VA_ARGS__)
 
-_CAPI_BEGIN
+SRE_CAPI_BEGIN
 
 typedef unsigned (*os_thread_proc)(void*);
 
@@ -31,7 +31,7 @@ struct os_wrapper
 // Operating System wrapper functions/utilities that aren't usually available in the standard library
 extern const struct os_wrapper os;
 
-_CAPI_END
+SRE_CAPI_END
 
 #if defined(__unix)
 	#include "OS/unix.h"

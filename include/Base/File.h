@@ -1,11 +1,11 @@
 #ifndef SRE_FILE_H
 #define SRE_FILE_H
-#include <C/API.h>
+#include <C_API.h>
 #include <ints.h>
 #include <stdio.h>
 #include <string.h>
 
-_CAPI_BEGIN
+SRE_CAPI_BEGIN
 
 #if defined(_WIN32)
 	extern const sre_byte *_game_res;
@@ -55,6 +55,6 @@ extern size_t sre_filesize(const sre_File* file);
 
 extern const sre_byte* sre_getresource(const char* path, size_t* size_output);
 
-_CAPI_END
+SRE_CAPI_END
 
 #endif

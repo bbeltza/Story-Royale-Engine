@@ -2,11 +2,14 @@
 #include <SDL.h>
 #include <standard>
 
-#include "C/API.h"
-#include "datatypes/units.h"
-#include "datatypes/timestamp.h"
+#include <C_API.h>
+#include <datatypes/units.h>
+#include <datatypes/timestamp.h>
+#include <ints.h>
 
-_CAPI_BEGIN
+SRE_CAPI_BEGIN
+	typedef struct _ sre_videodriver;
+
 	struct _win_settings
 	{
 		const char* title;
@@ -42,8 +45,12 @@ _CAPI_BEGIN
 		
 		// Renderer data
 		
+		sre_videodriver* video;
+		//
 		SDL_Renderer* sdl_rendererhndl;
 		SDL_Texture* sdl_rectTex;
+		//
+
 		SDL_mutex* sdl_rendermutex;
 		int osize_x, osize_y;
 		sre_unit size_x, size_y;
@@ -59,7 +66,7 @@ _CAPI_BEGIN
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
-		unsigned char* audio_stream;
+		sre_byte* audio_stream;
 		int audio_slen; // in bytes
 
 		// Input data
@@ -95,7 +102,6 @@ _CAPI_BEGIN
 
 	extern void __destroy_queue();
 
-	extern void __update_timers();
 	extern void __update_classes();
 	extern void __update_world();
 	extern void __update_layer();
@@ -105,7 +111,7 @@ _CAPI_BEGIN
 	extern void __display_render();
 
 	extern void __clean_containers();
-_CAPI_END
+SRE_CAPI_END
 
 #ifdef __cplusplus
 #define currscn static_cast<::sreECS::Scene*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED

@@ -11,9 +11,4 @@
         // This is the entry point for the game, it's called after initializing the libraries, but before showing the window
         extern "C" void initialize();
     }
-
-    namespace Game
-    {
-        
-    }
 #endif

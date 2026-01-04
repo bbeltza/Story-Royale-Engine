@@ -25,7 +25,7 @@ set(BASE_SOURCES
 "action.cpp"
 "Audio.cpp"
 "display.cpp"
-"draw.cpp"
+"draw.cc"
 "Font.cpp"
 "FontRenderer.cpp"
 "Image.cpp"
@@ -81,6 +81,7 @@ set_src(gui GUI_SOURCES)
 set_src(presets PRESET_SOURCES)
 set(SOURCES "${SOURCES}" PARENT_SCOPE)
 
+add_subdirectory(core)
 set(CORE_SOURCES
 "Audio.cpp"
 "Containers.cpp"

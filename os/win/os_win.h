@@ -1,11 +1,12 @@
+#ifndef OS_WIN_H
+#define OS_WIN_H
+
 #include <Windows.h>
 
-#include "OS.h"
+#include <OS.h>
+#include <OS/win.h>
 
-#include "OS/win.h"
-#include "C/API.h"
-
-_CAPI_BEGIN
+SRE_CAPI_BEGIN
 
 int* os_win_outputcoordget(int[2]);
 void os_win_outputcoordset(const int[2]);
@@ -20,4 +21,6 @@ void* os_win_thread_spawn(os_thread_proc start, void* userdata, unsigned stacksi
 int os_win_thread_detach(void* thrd);
 int os_win_thread_wait(void* thrd, unsigned* ret);
 
-_CAPI_END
+SRE_CAPI_END
+
+#endif
