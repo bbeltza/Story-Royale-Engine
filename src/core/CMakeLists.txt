@@ -1,4 +1,6 @@
 set(CORE_SOURCES
+"draw.c"
+
 "Audio.cpp"
 "Containers.cpp"
 "DestroyQueue.cpp"

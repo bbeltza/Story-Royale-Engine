@@ -4,6 +4,7 @@
 #include <ints.h>
 
 #include <datatypes/units.h>
+#include <utils/math.h>
 
 SRE_CAPI_BEGIN
 
@@ -23,9 +24,9 @@ typedef enum
 
 typedef enum
 {
-    SRE_DRAWMODE_FILL,
-    SRE_DRAWMODE_STROKE
-} sre_DrawMode;
+    SRE_DRAWFLAGS_USECAM = ut_bit(0), // Use the current camera coordinates to determine the final position of the object to draw
+    SRE_DRAWFLAGS_STROKE = ut_bit(1) // Used by some types (Like DDRect), draw the contour of the object to draw instead of filling it
+} sre_DrawFlags;
 
 /*
  * Structure representing the data to fill the screen, used with `sre_draw(SRE_DRAW_FILL)`
@@ -41,9 +42,9 @@ typedef struct
  */
 typedef struct
 {
-    const void* world;
+    sre_u32 flags;
     sre_u8 color[4];
-    sre_unit thickness; // The thickness of the line, it is currently unavailable for future use
+    //sre_unit thickness; // The thickness of the line, it is currently unavailable for future use
 
     sre_unit pt1_x;
     sre_unit pt1_y;
@@ -57,20 +58,18 @@ typedef struct
  */
 typedef struct
 {
-    const void* world;
+    sre_u32 flags;
     sre_u8 color[4];
-    sre_unit thickness;
+    //sre_unit thickness;
 
     sre_usize count;
-    sre_unit *(pts[2]);
+    sre_unit (*pts)[2];
 } sre_DDLines;
 
 typedef struct 
 {
-    const void* world;
+    sre_u32 flags;
     sre_u8 color[4];
-
-    sre_DrawMode mode;
 
     sre_unit pos_x;
     sre_unit pos_y;
@@ -84,13 +83,13 @@ typedef struct
 typedef struct
 {
     sre_DDRect rect;
-    double angle;
+    float angle;
 } sre_DDRRect;
 
 typedef struct
 {
-    const void* world;
-    const void* texture;
+    sre_u32 flags;
+    sre_s32 texture;
     
     sre_unit pos_x;
     sre_unit pos_y;
@@ -106,7 +105,7 @@ typedef struct
 typedef struct
 {
     sre_DDTexture texture;
-    double angle;
+    float angle;
 } sre_DDRTexture;
 
 /*
@@ -118,7 +117,7 @@ typedef struct
  * @param type The type of the command, one of the `SRE_DRAW_XX` enums
  * @param data A pointer to the data to draw, one of the `sre_DDXx` structs, depending on `type`
  * 
- * Passing something else or the wrong struct to the wrong type is undefined behavior 
+ * Passing something else or the wrong struct to the wrong `type` is undefined behavior 
  */
 int sre_draw(sre_DrawType type, const void* data);
 

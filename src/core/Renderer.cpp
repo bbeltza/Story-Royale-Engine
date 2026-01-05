@@ -17,8 +17,8 @@ void __setup_renderer()
 	if (sre::game_settings.WindowOptions.VSync)
 		engine.video->vsync(1);
 
-	engine.sdl_rendererhndl = sre_SDLRendererDriver.renderer;
-	engine.sdl_rectTex = sre_SDLRendererDriver.rect_tex;
+	engine.sdl_rendererhndl = sresdlrenderer_driver.renderer;
+	engine.sdl_rectTex = sresdlrenderer_driver.rect_tex;
 
 	SDL_TryLockMutex(engine.sdl_rendermutex);
 

@@ -1,12 +1,19 @@
 #include <utils/logging.h>
 #include "sdl_renderer.h"
 
-sre_sdlrenderer sre_SDLRendererDriver;
+sre_sdlrenderer sresdlrenderer_driver = {
+    {
+        .vsync = sresdlrenderer_vsync,
+        .present = sresdlrenderer_present,
+
+        .draw_fill = sresdlrenderer_draw_fill,
+        .draw_line = sresdlrenderer_draw_line,
+        .draw_lines = sresdlrenderer_draw_lines
+    }
+};
 
 sre_videodriver* sresdlrenderer_init(SDL_Window *window)
 {
-    LOG("HELLO DRIVERS");
-
     SDL_Renderer* const renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
@@ -15,15 +22,18 @@ sre_videodriver* sresdlrenderer_init(SDL_Window *window)
         SDL_UpdateTexture(rect_texture, NULL, &WHITE, 1);
     }
 
-    sre_SDLRendererDriver.video.vsync = sresdlrenderer_vsync;
+    sresdlrenderer_driver.renderer = renderer;
+    sresdlrenderer_driver.rect_tex = rect_texture;
 
-    sre_SDLRendererDriver.renderer = renderer;
-    sre_SDLRendererDriver.rect_tex = rect_texture;
-
-    return &sre_SDLRendererDriver.video;
+    return &sresdlrenderer_driver.video;
 }
 
 int sresdlrenderer_vsync(int vsync)
 {
-    return SDL_RenderSetVSync(sre_SDLRendererDriver.renderer, vsync);
+    return SDL_RenderSetVSync(sresdlrenderer_driver.renderer, vsync);
+}
+
+void sresdlrenderer_present()
+{
+    SDL_RenderPresent(sresdlrenderer_driver.renderer);
 }

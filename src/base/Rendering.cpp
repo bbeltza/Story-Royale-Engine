@@ -204,12 +204,11 @@ void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, cons
     END_DRAW
 }
 
-void Display::Fill(const sre::col4 &Color)
+// Already testing current available draw functions
+
+#include <Base/Draw.hpp>
+
+void Display::Fill(const sre::col4 &color)
 {
-    START_DRAW
-
-    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
-    SDL_RenderFillRectF(engine.sdl_rendererhndl, NULL);
-
-    END_DRAW
+    sre_draw(SRE_DRAW_FILL, &color);
 }
