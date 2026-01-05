@@ -9,7 +9,20 @@ static inline int sresdlrender_color(const sre_u8 color[4])
 
 static inline void sresdlrender_coords(int cam, const sre_unit xy[2], float out[2])
 {
+	sre_unit camcoords[2];
+	if (cam)
+	{
+		camcoords[0] = sresdlrenderer_driver.video.camera_x;
+		camcoords[1] = sresdlrenderer_driver.video.camera_y;
+	}
+	else
+	{
+		camcoords[0] = 0;
+		camcoords[1] = 0;
+	}
 
+	out[0] = (float)(int)((xy[0] - camcoords[0]) * sresdlrenderer_driver.video.scale);
+	out[1] = (float)(int)((xy[1] - camcoords[1]) * sresdlrenderer_driver.video.scale);
 }
 
 //
