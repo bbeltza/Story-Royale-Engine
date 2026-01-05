@@ -1,5 +1,6 @@
 #include "../internal.h"
 #include "../internal.hpp"
+#include <sdl_renderer/sdl_renderer.h>
 
 #include <GameSettings.h>
 
@@ -11,18 +12,13 @@
 
 void __setup_renderer()
 {
-	uint32_t flags = 0;
+	engine.video = sresdlrenderer_init(engine.sdl_windowhndl);
+
 	if (sre::game_settings.WindowOptions.VSync)
-		flags |= SDL_RENDERER_PRESENTVSYNC;
+		engine.video->vsync(1);
 
-	engine.sdl_rendererhndl = SDL_CreateRenderer(engine.sdl_windowhndl, -1, flags);
-	SDL_SetRenderDrawBlendMode(engine.sdl_rendererhndl, SDL_BLENDMODE_BLEND);
-
-	engine.sdl_rectTex = SDL_CreateTexture(engine.sdl_rendererhndl, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 1, 1);
-	{
-		uint64_t WHITE = UINT64_MAX;
-		SDL_UpdateTexture(engine.sdl_rectTex, NULL, &WHITE, 4);
-	}
+	engine.sdl_rendererhndl = sre_SDLRendererDriver.renderer;
+	engine.sdl_rectTex = sre_SDLRendererDriver.rect_tex;
 
 	SDL_TryLockMutex(engine.sdl_rendermutex);
 

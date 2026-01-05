@@ -82,19 +82,5 @@ set_src(presets PRESET_SOURCES)
 set(SOURCES "${SOURCES}" PARENT_SCOPE)
 
 add_subdirectory(core)
-set(CORE_SOURCES
-"Audio.cpp"
-"Containers.cpp"
-"DestroyQueue.cpp"
-"Input.cpp"
-"Querying.cpp"
-"Renderer.cpp"
-
-"InitEngine.c"
-"Runtime.c"
-"Window.c"
-
-"HeapTracker.cpp"
-)
 set_dst_src(core CORE_SOURCES SRCORE_SOURCES)
 set(CORE_SOURCES ${SRCORE_SOURCES} PARENT_SCOPE)

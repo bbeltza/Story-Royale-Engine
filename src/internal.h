@@ -8,7 +8,7 @@
 #include <ints.h>
 
 SRE_CAPI_BEGIN
-	typedef struct _ sre_videodriver;
+	typedef struct sre_videodriver sre_videodriver;
 
 	struct _win_settings
 	{

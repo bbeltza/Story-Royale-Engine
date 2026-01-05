@@ -2,9 +2,9 @@
 #define SRE_DRIVERS_H
 #include <SDL.h>
 
-typedef struct
+typedef struct sre_videodriver
 {
-	int (*init)(SDL_Window* window);
+	int (*vsync)(int vsync);
 	int (*quit)();
 	int (*viewport)(int w, int h);
 
