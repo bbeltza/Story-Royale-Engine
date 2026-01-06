@@ -182,39 +182,30 @@ end:
 }
 #endif
 
-void Display::DrawTexture(const Texture &_Texture, sre::rect2Dut Rectangle, const sre::col4 &Modulate, const sre::vec2f &AnchorPoint, const sreECS::Scene* world)
+void Display::DrawTexture(const Texture &texture, sre::rect2Dut rect, const sre::col4 &mod, const sre::vec2f &anchor, const sreECS::Scene* world)
 {
     START_DRAW
 
-    if (Rectangle.size.x == 0 || Rectangle.size.y == 0)
-        return;
-        
-    SDL_FRect render_rect;
-    const int flip = (Rectangle.size.x < 0 ? ut_bit(0) : 0) | (Rectangle.size.y < 0 ? ut_bit(1) : 0);
+    sre_DDTexture data;
+    data.flags = (world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0) | (rect.size.x < 0 ? SRE_DRAWFLAGS_FLIPX : 0) | (rect.size.y < 0 ? SRE_DRAWFLAGS_FLIPY : 0);
+    data.anchor_x = anchor.x;
+    data.anchor_y = anchor.y;
+    data.modulate[0] = mod.r;
+    data.modulate[1] = mod.g;
+    data.modulate[2] = mod.b;
+    data.modulate[3] = mod.a;
+    data.texture = *reinterpret_cast<void*const*>(&texture); // Silly way to get the texture on a function that's a friend of Texture!
+    data.pos_x = rect.position.x;
+    data.pos_y = rect.position.y;
+    data.size_x = abs(rect.size.x);
+    data.size_y = abs(rect.size.y);
 
-    Rectangle.size.x = abs(Rectangle.size.x);
-    Rectangle.size.y = abs(Rectangle.size.y);
-
-    real_coords(render_rect, Rectangle, AnchorPoint, world);
-
-    SDL_SetTextureColorMod((SDL_Texture *)_Texture.texture, Modulate.r, Modulate.g, Modulate.b);
-    SDL_SetTextureAlphaMod((SDL_Texture *)_Texture.texture, Modulate.a);
-    SDL_RenderCopyExF(engine.sdl_rendererhndl, static_cast<SDL_Texture *>(_Texture.texture), NULL, &render_rect, 0, NULL, static_cast<SDL_RendererFlip>(flip));
-
-#if 00
-    if (!SDL_GetRenderTarget(engine.sdl_rendererhndl))
-    {
-        SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 0, 0, 255);
-        SDL_RenderDrawRectF(engine.sdl_rendererhndl, &render_rect);
-    }
-#endif
+    sre_draw(SRE_DRAW_TEXTURE, &data);
 
     END_DRAW
 }
 
 // Already testing current available draw functions
-
-#include <Base/Draw.hpp>
 
 void Display::Fill(const sre::col4 &color)
 {

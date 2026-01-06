@@ -25,7 +25,9 @@ typedef enum
 typedef enum
 {
     SRE_DRAWFLAGS_USECAM = ut_bit(0), // Use the current camera coordinates to determine the final position of the object to draw
-    SRE_DRAWFLAGS_STROKE = ut_bit(1) // Used by some types (Like DDRect), draw the contour of the object to draw instead of filling it
+    SRE_DRAWFLAGS_STROKE = ut_bit(1), // Used by some types (Like DDRect), draw the contour of the object to draw instead of filling it
+    SRE_DRAWFLAGS_FLIPX = ut_bit(2), // Used only by textures for now, to determine how to flip the content to render
+    SRE_DRAWFLAGS_FLIPY = ut_bit(3)
 } sre_DrawFlags;
 
 /*
@@ -89,7 +91,7 @@ typedef struct
 typedef struct
 {
     sre_u32 flags;
-    sre_s32 texture;
+    sre_u8 modulate[4];
     
     sre_unit pos_x;
     sre_unit pos_y;
@@ -99,7 +101,7 @@ typedef struct
     sre_unit anchor_x;
     sre_unit anchor_y;
 
-    sre_u8 modulate[4];
+    void* texture; // Texture identifier to draw, can be a pointer to a SDL_Texture or a pointer to a sre::Texture which works aswell
 } sre_DDTexture;
 
 typedef struct

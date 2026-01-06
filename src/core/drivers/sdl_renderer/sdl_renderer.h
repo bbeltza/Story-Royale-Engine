@@ -23,6 +23,9 @@ extern int sresdlrenderer_draw_fill(const sre_DDFill* data);
 extern int sresdlrenderer_draw_line(const sre_DDLine* data);
 extern int sresdlrenderer_draw_lines(const sre_DDLines* data);
 extern int sresdlrenderer_draw_rect(const sre_DDRect* data);
+extern int sresdlrenderer_draw_rrect(const sre_DDRRect* data);
+extern int sresdlrenderer_draw_texture(const sre_DDTexture* data);
+extern int sresdlrenderer_draw_rtexture(const sre_DDRTexture* data);
 
 SRE_CAPI_END
 

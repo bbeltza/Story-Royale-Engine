@@ -11,6 +11,10 @@ int sre_draw(sre_DrawType type, const void* data)
 
 	switch (type)
 	{
+	case SRE_DRAW_CIRCLE:
+		ERROR("sre_draw: Unavailable option 'SRE_DRAW_CIRCLE'");
+		ret = -1;
+		break;
 	case SRE_DRAW_FILL:
 		ret = engine.video->draw_fill(data);
 		break;
@@ -24,11 +28,12 @@ int sre_draw(sre_DrawType type, const void* data)
 		ret = engine.video->draw_rect(data);
 		break;
 	case SRE_DRAW_RRECTANGLE:
+		ret = engine.video->draw_rrect(data);
 	case SRE_DRAW_TEXTURE:
+		ret = engine.video->draw_texture(data);
+		break;
 	case SRE_DRAW_RTEXTURE:
-	case SRE_DRAW_CIRCLE:
-		ERROR("sre_draw: Unavailable option 'SRE_DRAW_CIRCLE'");
-		ret = -1;
+		ret = engine.video->draw_rtexture(data);
 		break;
 	default:
 		ERROR("sre_draw: Invalid type");

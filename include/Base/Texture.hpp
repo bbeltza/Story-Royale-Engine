@@ -32,6 +32,7 @@ public:
     ~Texture();
 
     sre::vec2i size() const;
+
 protected: // Protected to allow custom behavior inherited texture classes
     void* texture = NULL;
 };

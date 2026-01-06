@@ -3,7 +3,7 @@
 
 #include <assert.h>
 // Direct Nt call manipulation
-NTSTATUS (*NtDelayExecution)(BOOLEAN Alertable, PLARGE_INTEGER DelayInterval);
+NTSTATUS (NTAPI *NtDelayExecution)(BOOLEAN Alertable, PLARGE_INTEGER DelayInterval);
 
 void os_win_delay(unsigned long long us100x)
 {
