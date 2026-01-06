@@ -44,12 +44,17 @@ void Display::DrawLine(const sre::col4 &Color, const sre::vec2ut &Pt1, const sre
 {
     START_DRAW
 
-    sre::vec2f _pt1, _pt2;
-    real_coords(_pt1, Pt1, world);
-    real_coords(_pt2, Pt2, world);
-
-    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
-    SDL_RenderDrawLineF(engine.sdl_rendererhndl, _pt1.x, _pt1.y, _pt2.x, _pt2.y);
+    sre_DDLine data;
+    data.color[0] = Color.r;
+    data.color[1] = Color.g;
+    data.color[2] = Color.b;
+    data.color[3] = Color.a;
+    data.pt1_x = Pt1.x;
+    data.pt1_y = Pt1.y;
+    data.pt2_x = Pt2.x;
+    data.pt2_y = Pt2.y;
+    data.flags = world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0;
+    sre_draw(SRE_DRAW_LINE, &data);
 
     END_DRAW
 }
@@ -58,13 +63,16 @@ void Display::DrawLines(const sre::col4 &Color, int Count, const sre::vec2ut *Pt
 {
     START_DRAW
 
-    ut_dynsalloc(sre::vec2f, _pts, Count);
+    sre_DDLines data;
+    data.count = Count;
+    data.color[0] = Color.r;
+    data.color[1] = Color.g;
+    data.color[2] = Color.b;
+    data.color[3] = Color.a;
+    data.pts = reinterpret_cast<const sre::unit(*)[2]>(Pts);
+    data.flags = (world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0);
 
-    for (int i = 0; i < Count; i++)
-        real_coords(_pts[i], Pts[i], world);
-
-    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
-    SDL_RenderDrawLinesF(engine.sdl_rendererhndl, reinterpret_cast<const SDL_FPoint *>(_pts), Count);
+    sre_draw(SRE_DRAW_LINES, &data);
 
     END_DRAW
 }

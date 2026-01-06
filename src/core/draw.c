@@ -23,6 +23,13 @@ int sre_draw(sre_DrawType type, const void* data)
 	case SRE_DRAW_RECTANGLE:
 		ret = engine.video->draw_rect(data);
 		break;
+	case SRE_DRAW_RRECTANGLE:
+	case SRE_DRAW_TEXTURE:
+	case SRE_DRAW_RTEXTURE:
+	case SRE_DRAW_CIRCLE:
+		ERROR("sre_draw: Unavailable option 'SRE_DRAW_CIRCLE'");
+		ret = -1;
+		break;
 	default:
 		ERROR("sre_draw: Invalid type");
 		ret = -1;

@@ -63,7 +63,7 @@ typedef struct
 
     int count;
     int _unused;
-    sre_unit (*pts)[2];
+    const sre_unit (*pts)[2];
 } sre_DDLines;
 
 typedef struct 
@@ -118,6 +118,8 @@ typedef struct
  * @param data A pointer to the data to draw, one of the `sre_DDXx` structs, depending on `type`
  * 
  * Passing something else or the wrong struct to the wrong `type` is undefined behavior 
+ * 
+ * @return 0 on success, -1 on error
  */
 int sre_draw(sre_DrawType type, const void* data);
 
