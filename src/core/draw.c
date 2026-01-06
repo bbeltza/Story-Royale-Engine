@@ -17,6 +17,12 @@ int sre_draw(sre_DrawType type, const void* data)
 	case SRE_DRAW_LINE:
 		ret = engine.video->draw_line(data);
 		break;
+	case SRE_DRAW_LINES:
+		ret = engine.video->draw_lines(data);
+		break;
+	case SRE_DRAW_RECTANGLE:
+		ret = engine.video->draw_rect(data);
+		break;
 	default:
 		ERROR("sre_draw: Invalid type");
 		ret = -1;

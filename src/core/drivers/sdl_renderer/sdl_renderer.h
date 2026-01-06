@@ -22,6 +22,7 @@ extern void sresdlrenderer_present();
 extern int sresdlrenderer_draw_fill(const sre_DDFill* data);
 extern int sresdlrenderer_draw_line(const sre_DDLine* data);
 extern int sresdlrenderer_draw_lines(const sre_DDLines* data);
+extern int sresdlrenderer_draw_rect(const sre_DDRect* data);
 
 SRE_CAPI_END
 

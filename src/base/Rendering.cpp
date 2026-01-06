@@ -1,6 +1,7 @@
 #include <standard>
 #include "../internal.h"
 
+#include "Base/Draw.hpp"
 #include "Base/Display.hpp"
 #include "Base/Texture.hpp"
 
@@ -72,20 +73,19 @@ void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Col
 {
     START_DRAW
 
-    SDL_FRect r;
-    real_coords(r, Rectangle, AnchorPoint, world);
-
-    SDL_SetRenderDrawColor(engine.sdl_rendererhndl, Color.r, Color.g, Color.b, Color.a);
-    switch (Mode)
-    {
-    case M_STROKE:
-        SDL_RenderDrawRectF(engine.sdl_rendererhndl, &r);
-        break;
-
-    default:
-        SDL_RenderFillRectF(engine.sdl_rendererhndl, &r);
-        break;
-    }
+    sre_DDRect data;
+    data.anchor_x = AnchorPoint.x;
+    data.anchor_y = AnchorPoint.y;
+    data.color[0] = Color.r;
+    data.color[1] = Color.g;
+    data.color[2] = Color.b;
+    data.color[3] = Color.a;
+    data.pos_x = Rectangle.position.x;
+    data.pos_y = Rectangle.position.y;
+    data.size_x = Rectangle.size.x;
+    data.size_y = Rectangle.size.y;
+    data.flags = (Mode == Display::M_STROKE ? SRE_DRAWFLAGS_STROKE : 0) | (world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0);
+    sre_draw(SRE_DRAW_RECTANGLE, &data);
 
     END_DRAW
 };

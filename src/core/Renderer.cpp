@@ -20,7 +20,8 @@ void __setup_renderer()
 	engine.sdl_rendererhndl = sresdlrenderer_driver.renderer;
 	engine.sdl_rectTex = sresdlrenderer_driver.rect_tex;
 
-	SDL_TryLockMutex(engine.sdl_rendermutex);
+	int locked = SDL_TryLockMutex(engine.sdl_rendermutex);
+	assert(!locked);
 
 	sre::set_framerate(sre::game_settings.WindowOptions.TargetFPS);
 }
@@ -43,16 +44,15 @@ void __update_viewport()
 	engine.viewport_scale = static_cast<sre::unit>(integer_scale);
 	engine.current_scale = engine.viewport_scale;
 
-	sre::unit ow = engine.size_x;
-	sre::unit oh = engine.size_y;
-	(void)ow;
-	(void)oh;
-
 	engine.size_x = engine.osize_x / engine.viewport_scale;
 	engine.size_y = engine.osize_y / engine.viewport_scale;
 
 	engine.center_x = engine.size_x / 2.0_ut;
 	engine.center_y = engine.size_y / 2.0_ut;
+
+	engine.video->scale = engine.viewport_scale;
+	engine.video->center_x = engine.center_x;
+	engine.video->center_y = engine.center_y;
 }
 
 void __display_render()
@@ -66,7 +66,10 @@ void __display_render()
 
 	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
 	{
-		//// Aliases for the background and the foreground (so that typing Game::currentWorld wouldn't be necessary)
+		engine.video->camera_x = current->camera.position.x;
+		engine.video->camera_y = current->camera.position.y;
+
+		//// Aliases for the background and the foreground (kind of old)
 		const sre::col3& bg = current->background;
 		const sre::col4& fg = current->foreground;
 
@@ -81,7 +84,6 @@ void __display_render()
 			current->call_render();
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
-		// printf("%u, %u, %u, %u / %u, %u, %u\n", fg.r, fg.g, fg.b, fg.a, bg.r, bg.g, bg.b);
 		if (fg.a)
 		{
 			SDL_SetRenderDrawColor(engine.sdl_rendererhndl, fg.r, fg.g, fg.b, fg.a);
@@ -90,6 +92,9 @@ void __display_render()
 	}
 	else
 	{
+		engine.video->camera_x = 0;
+		engine.video->camera_y = 0;
+
 		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 0, 0, 0, 0);
 		SDL_RenderClear(engine.sdl_rendererhndl);
 		sre::beforeRender.Fire();

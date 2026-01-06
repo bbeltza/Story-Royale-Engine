@@ -8,7 +8,8 @@ sre_sdlrenderer sresdlrenderer_driver = {
 
         .draw_fill = sresdlrenderer_draw_fill,
         .draw_line = sresdlrenderer_draw_line,
-        .draw_lines = sresdlrenderer_draw_lines
+        .draw_lines = sresdlrenderer_draw_lines,
+        .draw_rect = sresdlrenderer_draw_rect
     }
 };
 

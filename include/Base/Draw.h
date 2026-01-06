@@ -60,9 +60,9 @@ typedef struct
 {
     sre_u32 flags;
     sre_u8 color[4];
-    //sre_unit thickness;
 
-    sre_usize count;
+    int count;
+    int _unused;
     sre_unit (*pts)[2];
 } sre_DDLines;
 
