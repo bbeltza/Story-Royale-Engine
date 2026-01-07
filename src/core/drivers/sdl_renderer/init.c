@@ -13,7 +13,9 @@ sre_sdlrenderer sresdlrenderer_driver = {
         .draw_rect = sresdlrenderer_draw_rect,
         .draw_rrect = sresdlrenderer_draw_rrect,
         .draw_texture = sresdlrenderer_draw_texture,
-        .draw_rtexture = sresdlrenderer_draw_rtexture
+        .draw_rtexture = sresdlrenderer_draw_rtexture,
+
+        .quit = sresdlrenderer_quit
     }
 };
 
@@ -25,6 +27,12 @@ sre_videodriver* sresdlrenderer_init(SDL_Window *window)
     sresdlrenderer_driver.renderer = renderer;
 
     return &sresdlrenderer_driver.video;
+}
+
+void sresdlrenderer_quit()
+{
+    SDL_DestroyRenderer(sresdlrenderer_driver.renderer);
+    sresdlrenderer_driver.renderer = NULL;
 }
 
 int sresdlrenderer_vsync(int vsync)

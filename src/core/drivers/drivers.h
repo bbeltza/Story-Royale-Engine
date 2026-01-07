@@ -15,8 +15,9 @@
 
 typedef struct sre_videodriver
 {
+	void (*quit)();
+	
 	int (*vsync)(int vsync);
-	int (*quit)();
 	int (*viewport)(int w, int h);
 
 	void (*present)();

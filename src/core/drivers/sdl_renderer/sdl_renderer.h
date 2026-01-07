@@ -18,6 +18,8 @@ extern sre_videodriver* sresdlrenderer_init(SDL_Window*);
 extern int sresdlrenderer_vsync(int vsync);
 extern void sresdlrenderer_present();
 
+extern void sresdlrenderer_quit();
+
 extern int sresdlrenderer_draw_clear(const sre_u8 color[4]);
 extern int sresdlrenderer_draw_fill(const sre_DDFill* data);
 extern int sresdlrenderer_draw_line(const sre_DDLine* data);
