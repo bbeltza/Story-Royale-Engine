@@ -1,5 +1,7 @@
 #include <Base/File.hpp>
-#include <Engine.hpp>
+#include <Entry.h>
+
+#include <utils/logging.h>
 
 void sre::initialize()
 {

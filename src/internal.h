@@ -48,7 +48,6 @@ SRE_CAPI_BEGIN
 		sre_videodriver* video;
 		//
 		SDL_Renderer* sdl_rendererhndl;
-		SDL_Texture* sdl_rectTex;
 		//
 
 		SDL_mutex* sdl_rendermutex;

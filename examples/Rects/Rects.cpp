@@ -1,11 +1,15 @@
-#include <Engine.hpp>
-
 #include <Events/Mouse.hpp>
 
 #include <GUI/object.hpp>
 #include <GUI/Components/transform.hpp>
 #include <GUI/Components/text.hpp>
 #include <GUI/Components/fill.hpp>
+
+#include <Base/Runtime.hpp>
+#include <Base/Input.hpp>
+#include <Base/Display.hpp>
+
+#include <Entry.h>
 
 static double rot = 0;
 
@@ -17,7 +21,7 @@ struct DisplayText: public sreGUI::Object
         transform.position = {0.5, 0, 0, 10};
         transform.size = { 0.9, 0, 0, 50 };
         
-        text.h_alignment = Font::HCenter;
+        text.h_alignment = sre::A_CENTER;
         text.color = {255, 255, 255};
         text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can resize the rectangle with your mouse wheel");
         text.load("res://fonts/OpenSans-Regular.ttf");
@@ -29,7 +33,7 @@ struct DisplayText: public sreGUI::Object
     sreGUI::Text text;
 
     void post_render() override;
-    void update() override { rot += Runtime::delta_time * 80; }
+    void update() override { rot += sre::dt * 80; }
 };
 
 sre::rect2Dut mouseRect(0, 0, 100, 50);

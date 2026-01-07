@@ -98,45 +98,23 @@ void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Col
     END_DRAW
 };
 
-void Display::DrawRotatedRectangle(const sre::rect2Dut &_Rectangle, const double _angle, const sre::col4 &_Col, DrawingMode _dm, const sreECS::Scene* world)
+void Display::DrawRotatedRectangle(const sre::rect2Dut &rectangle, const double angle, const sre::col4 &col, DrawingMode mode, const sreECS::Scene* world)
 {
-    START_DRAW
+    sre_DDRRect data;
+    data.rect = { 
+        (mode == Display::M_STROKE ? SRE_DRAWFLAGS_STROKE : 0) | (world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0),
+        {col.r, col.g, col.b, col.a},
 
-    if (_angle == 0)
-        return DrawRectangle(_Rectangle, _Col, sre::vec2f::CENTER, _dm, world);
+        rectangle.position.x,
+        rectangle.position.y,
+        rectangle.size.x,
+        rectangle.size.y,
+        0.5_ut,
+        0.5_ut
+    };
+    data.angle = static_cast<float>(angle);
 
-    switch (_dm)
-    {
-    case M_STROKE:
-    {
-        sre::vec2ut points[5] =
-            {
-                _Rectangle.rotated_topleft(_angle),
-                _Rectangle.rotated_topright(_angle),
-                _Rectangle.rotated_bottomright(_angle),
-                _Rectangle.rotated_bottomleft(_angle),
-                points[0]
-        };
-        DrawLines(_Col, 5, points, world);
-    }
-    break;
-    default:
-    {
-        // TODO: This doesn't center correctly on different scales, fix it for the next OpenGL renderer
-        SDL_FRect r;
-        real_coords(r, _Rectangle, sre::vec2f::CENTER, world);
-
-        SDL_SetTextureColorMod(engine.sdl_rectTex, _Col.r, _Col.g, _Col.b);
-        SDL_SetTextureAlphaMod(engine.sdl_rectTex, _Col.a);
-        SDL_RenderCopyExF(engine.sdl_rendererhndl, engine.sdl_rectTex, NULL, &r, _angle, NULL, SDL_FLIP_NONE);
-
-        SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 255, 0, 0, 255);
-        SDL_RenderDrawPointF(engine.sdl_rendererhndl, r.x, r.y);
-    }
-    break;
-    }
-
-    END_DRAW
+    sre_draw(SRE_DRAW_RRECTANGLE, &data);
 }
 
 void Display::DrawCircle(const sre::vec2ut &pos, const sre::unit radius, const sre::col4 &_Col, DrawingMode _dm, const sreECS::Scene* world)

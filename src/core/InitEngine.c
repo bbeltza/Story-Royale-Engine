@@ -2,6 +2,8 @@
 #include <SDL_image.h>
 #include "../internal.h"
 
+#include "drivers/drivers.h"
+
 #include <Entry.h>
 
 #include <stdlib.h>
@@ -113,9 +115,10 @@ void __end_engine()
 {
     __clean_containers();    
     
+    engine.video->quit();
+
     SDL_CloseAudioDevice(engine.audio_device);
     SDL_DetachThread(engine.entry_thread);
-    SDL_DestroyTexture(engine.sdl_rectTex);
     SDL_DestroyMutex(engine.sdl_rendermutex);
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);

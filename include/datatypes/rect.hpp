@@ -66,8 +66,8 @@ namespace sre
         constexpr vec bottom_left() const { return {left(), bottom()}; }
         constexpr vec bottom_right() const { return {right(), bottom()}; }
 
-        constexpr vec xrotated_offset(double angle) const { return vec{ abs(size.x) / 2 * cos(ut::rad(angle)), ut::abs(size.x) / 2 * sin(ut::rad(angle)) }; }
-        constexpr vec yrotated_offset(double angle) const { return vec{ abs(size.y) / 2 * cos(ut::rad(angle + 90)), ut::abs(size.y) / 2 * sin(ut::rad(angle + 90)) }; }
+        constexpr vec xrotated_offset(double angle) const { return vec{ ut::abs(size.x) / 2 * cos(ut::rad(angle)), ut::abs(size.x) / 2 * sin(ut::rad(angle)) }; }
+        constexpr vec yrotated_offset(double angle) const { return vec{ ut::abs(size.y) / 2 * cos(ut::rad(angle + 90)), ut::abs(size.y) / 2 * sin(ut::rad(angle + 90)) }; }
 
         constexpr vec rotated_left(double angle) const { return position - xrotated_offset(angle); }
         constexpr vec rotated_right(double angle) const { return position + xrotated_offset(angle); }

@@ -23,6 +23,8 @@ typedef struct sre_videodriver
 
 	const char* error;
 
+	SRE_DRAW_FUNC(draw_clear, const sre_u8 col[4]);
+	
 	SRE_DRAW_FUNC(draw_fill, const sre_DDFill* data);
 	SRE_DRAW_FUNC(draw_line, const sre_DDLine* data);
 	SRE_DRAW_FUNC(draw_lines, const sre_DDLines* data);

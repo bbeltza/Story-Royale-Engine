@@ -6,6 +6,7 @@ sre_sdlrenderer sresdlrenderer_driver = {
         .vsync = sresdlrenderer_vsync,
         .present = sresdlrenderer_present,
 
+        .draw_clear = sresdlrenderer_draw_clear,
         .draw_fill = sresdlrenderer_draw_fill,
         .draw_line = sresdlrenderer_draw_line,
         .draw_lines = sresdlrenderer_draw_lines,
@@ -21,13 +22,7 @@ sre_videodriver* sresdlrenderer_init(SDL_Window *window)
     SDL_Renderer* const renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    SDL_Texture* const rect_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STATIC, 1, 1);
-    { uint8_t WHITE = 0xFF;
-        SDL_UpdateTexture(rect_texture, NULL, &WHITE, 1);
-    }
-
     sresdlrenderer_driver.renderer = renderer;
-    sresdlrenderer_driver.rect_tex = rect_texture;
 
     return &sresdlrenderer_driver.video;
 }

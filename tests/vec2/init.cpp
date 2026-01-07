@@ -1,7 +1,7 @@
 #ifdef NDEBUG
     #undef NDEBUG // Tests should be interpreted as in debug mode, even on release
 #endif
-#include <Engine.hpp>
+#include <Entry.h>
 #include <datatypes/vector.hpp>
 
 #define TEST_FAIL "Test failed (static assertion)"

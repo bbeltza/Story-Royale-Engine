@@ -44,7 +44,7 @@ typedef struct
  */
 typedef struct
 {
-    sre_u32 flags;
+    sre_s32 flags;
     sre_u8 color[4];
     //sre_unit thickness; // The thickness of the line, it is currently unavailable for future use
 
@@ -60,7 +60,7 @@ typedef struct
  */
 typedef struct
 {
-    sre_u32 flags;
+    sre_s32 flags;
     sre_u8 color[4];
 
     int count;
@@ -70,7 +70,7 @@ typedef struct
 
 typedef struct 
 {
-    sre_u32 flags;
+    sre_s32 flags;
     sre_u8 color[4];
 
     sre_unit pos_x;
@@ -90,7 +90,7 @@ typedef struct
 
 typedef struct
 {
-    sre_u32 flags;
+    sre_s32 flags;
     sre_u8 modulate[4];
     
     sre_unit pos_x;

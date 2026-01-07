@@ -13,7 +13,7 @@ namespace ut
     constexpr abs_utype<T> abs(T x) { return x; }
     template <typename T>
     constexpr abs_stype<T> abs(T x) { return x < 0 ? -x : x; }
-    template <typename T> constexpr double rad(T x) { return (x * (UT_PI / 180)); }
+    template <typename T> constexpr double rad(T x) { return ut_rad(x); }
 
     template <typename T>
     constexpr auto lerp(T src, T goal, float alpha) -> decltype(src.lerp(goal, alpha)) { return src.lerp(goal, alpha); }

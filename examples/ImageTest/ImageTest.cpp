@@ -1,9 +1,10 @@
-#include <Engine.hpp>
-
 #include <ECS/scene.hpp>
 #include <ECS/entity.hpp>
 
 #include <ECS/Components/sprite.hpp>
+
+#include <Base/Input.hpp>
+#include <Entry.h>
 
 struct TexturePalace;
 struct TextureEntity;

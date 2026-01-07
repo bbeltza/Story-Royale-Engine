@@ -1,6 +1,7 @@
 #include <Base/Display.hpp>
+#include <Base/Runtime.hpp>
 #include <Base/Input.hpp>
-#include <Engine.hpp>
+#include <Entry.h>
 
 void Render()
 {
@@ -11,5 +12,5 @@ void Render()
 
 void sre::initialize()
 {
-    Runtime::BeforeRender.Connect(Render, nullptr);
+    beforeRender.Connect(Render, nullptr);
 }

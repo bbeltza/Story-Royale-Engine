@@ -29,6 +29,7 @@ int sre_draw(sre_DrawType type, const void* data)
 		break;
 	case SRE_DRAW_RRECTANGLE:
 		ret = engine.video->draw_rrect(data);
+		break;
 	case SRE_DRAW_TEXTURE:
 		ret = engine.video->draw_texture(data);
 		break;

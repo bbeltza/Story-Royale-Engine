@@ -1,5 +1,5 @@
 #include <Base/Thread.hpp>
-#include <GameEntry.h>
+#include <Entry.h>
 
 #include <utils/logging.h>
 

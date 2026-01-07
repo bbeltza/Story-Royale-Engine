@@ -2,6 +2,7 @@
 
 #include <utils/logging.h>
 #include <utils/mem.h>
+#include <utils/math.h>
 
 static inline int sresdlrender_color(const sre_u8 color[4])
 {
@@ -58,6 +59,18 @@ static inline void sresdlrender_coordsr(int cam, const sre_unit xywh[4], SDL_FRe
 
 //
 
+int sresdlrenderer_draw_clear(const sre_u8 color[4])
+{
+	static const uint8_t BLACK[4] = { 0, 0, 0, 0 };
+	if (!color)
+		color = BLACK;
+	
+	if (SDL_SetRenderDrawColor(sresdlrenderer_driver.renderer, color[0], color[1], color[2], color[3])) return -1;
+	return SDL_RenderClear(sresdlrenderer_driver.renderer);
+}
+
+//
+
 int sresdlrenderer_draw_fill(const sre_DDFill* data)
 {
 	if (sresdlrender_color(data->color)) return -1;
@@ -99,25 +112,39 @@ int sresdlrenderer_draw_rect(const sre_DDRect* data)
 	sresdlrender_coordsr(usecam, &data->pos_x, &render_rect, data->anchor_x, data->anchor_y);
 
 	if (usestroke)
-		return SDL_RenderDrawRectF(sresdlrenderer_driver.renderer, &render_rect);
+		return SDL_RenderDrawRectsF(sresdlrenderer_driver.renderer, &render_rect, 1);
 	else
-		return SDL_RenderFillRectF(sresdlrenderer_driver.renderer, &render_rect);
+		return SDL_RenderFillRectsF(sresdlrenderer_driver.renderer, &render_rect, 1);
 }
 
 int sresdlrenderer_draw_rrect(const sre_DDRRect* data)
 {
+	if (data->angle / 360 == (int)data->angle / 360)
+		return sresdlrenderer_draw_rect(&data->rect);
+
 	if (sresdlrender_color(data->rect.color)) return -1;
 
 	int usecam = data->rect.flags & SRE_DRAWFLAGS_USECAM;
 	int usestroke = data->rect.flags & SRE_DRAWFLAGS_STROKE;
+
+	const double rads = ut_rad(data->angle);
+	const double rads90 = ut_rad(data->angle + 90);
+	sre_unit hsize_x = data->rect.size_x / 2;
+	sre_unit hsize_y = data->rect.size_y / 2;
+
+	sre_unit xoffset_x = (sre_unit)(hsize_x * cos(rads));
+	sre_unit xoffset_y = (sre_unit)(hsize_x * sin(rads));
+	sre_unit yoffset_x = (sre_unit)(hsize_y * cos(rads90));
+	sre_unit yoffset_y = (sre_unit)(hsize_y * sin(rads90));
+
+	sre_unit pts_units[4][2] = {
+		{data->rect.pos_x - xoffset_x - yoffset_x, data->rect.pos_y - xoffset_y - yoffset_y},
+		{data->rect.pos_x + xoffset_x - yoffset_x, data->rect.pos_y + xoffset_y - yoffset_y},
+		{data->rect.pos_x + xoffset_x + yoffset_x, data->rect.pos_y + xoffset_y + yoffset_y},
+		{data->rect.pos_x - xoffset_x + yoffset_x, data->rect.pos_y - xoffset_y + yoffset_y}
+	};
 	if (usestroke)
 	{
-		sre_unit pts_units[4][2] = { // TODO: Finish this :)
-			{0, 0},
-			{0, 0},
-			{0, 0},
-			{0, 0}
-		};
 		SDL_FPoint pts[5];
 		sresdlrender_coords(usecam, 4, pts_units[0], (float*)pts);
 
@@ -126,10 +153,14 @@ int sresdlrenderer_draw_rrect(const sre_DDRRect* data)
 	}
 	else
 	{
-		SDL_FRect render_rect;
-		sresdlrender_coordsr(usecam, &data->rect.pos_x, &render_rect, data->rect.anchor_x, data->rect.anchor_y);
-																				/// ^^^ TODO: Fix rotation anchor issues, calculate the top-left position correctly
-		return SDL_RenderCopyExF(sresdlrenderer_driver.renderer, sresdlrenderer_driver.rect_tex, NULL, &render_rect, data->angle, NULL, 0);
+		float vertices[4][2];
+		sresdlrender_coords(usecam, 4, pts_units[0], vertices[0]);
+
+		sre_u8 indices[6] = {
+			0, 1, 2,
+			0, 2, 3
+		};
+		return SDL_RenderGeometryRaw(sresdlrenderer_driver.renderer, NULL, vertices[0], sizeof(float) * 2, (const SDL_Color*)data->rect.color, 0, NULL, 0, 4, indices, 6, 1);
 	}
 }
 

@@ -18,7 +18,6 @@ void __setup_renderer()
 		engine.video->vsync(1);
 
 	engine.sdl_rendererhndl = sresdlrenderer_driver.renderer;
-	engine.sdl_rectTex = sresdlrenderer_driver.rect_tex;
 
 	int locked = SDL_TryLockMutex(engine.sdl_rendermutex);
 	assert(!locked);
@@ -70,12 +69,11 @@ void __display_render()
 		engine.video->camera_y = current->camera.position.y;
 
 		//// Aliases for the background and the foreground (kind of old)
-		const sre::col3& bg = current->background;
+		const sre::col4 bg{current->background};
 		const sre::col4& fg = current->foreground;
 
 		//// Clearing the screen with the background color
-		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, bg.r, bg.g, bg.b, 255);
-		SDL_RenderClear(engine.sdl_rendererhndl);
+		engine.video->draw_clear(reinterpret_cast<const sre_u8*>(&bg));
 
 		sre::beforeRender.Fire();
 
@@ -85,18 +83,14 @@ void __display_render()
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
-		{
-			SDL_SetRenderDrawColor(engine.sdl_rendererhndl, fg.r, fg.g, fg.b, fg.a);
-			SDL_RenderFillRect(engine.sdl_rendererhndl, NULL);
-		}
+			engine.video->draw_fill(reinterpret_cast<const sre_DDFill*>(&fg));
 	}
 	else
 	{
 		engine.video->camera_x = 0;
 		engine.video->camera_y = 0;
 
-		SDL_SetRenderDrawColor(engine.sdl_rendererhndl, 0, 0, 0, 0);
-		SDL_RenderClear(engine.sdl_rendererhndl);
+		engine.video->draw_clear(NULL);
 		sre::beforeRender.Fire();
 	}
 
@@ -109,5 +103,5 @@ void __display_render()
 	// Present the screen
 	SDL_LockMutex(engine.sdl_rendermutex);
 
-	SDL_RenderPresent(engine.sdl_rendererhndl);
+	engine.video->present();
 }
