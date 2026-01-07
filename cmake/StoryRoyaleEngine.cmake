@@ -32,9 +32,9 @@ function(srEngine_build TARGET EXE SRCS)
     srEngine_link_resource(${TARGET} ${ARGN})
     srEngine_link_icon(${TARGET})
 
-    target_include_directories(${TARGET} PRIVATE sre)
-    target_link_libraries(${TARGET} PRIVATE sre)
-    target_link_libraries(${EXE} PRIVATE ${TARGET})
+    target_link_libraries(${TARGET} PUBLIC sre)
+    target_link_libraries(${EXE} PUBLIC ${TARGET})
+    target_include_directories(${TARGET} PUBLIC sre)
 
     if (ARGN MATCHES NO_CONSOLE)
         message("--- ${TARGET} HAS NO CONSOLE ${SR_ENGINE_NO_CONSOLE_OPTIONS}")
@@ -44,6 +44,10 @@ function(srEngine_build TARGET EXE SRCS)
     if (ARGN MATCHES USE_WX)
         message("--- ${TARGET} HAS WX")
         target_link_libraries(${TARGET} PRIVATE sre_werror)
+    endif()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_options(${EXE} PRIVATE "-Wl,--start-group")
     endif()
 
     # Copying all of the dynamic libraries into the bin folder

@@ -36,7 +36,7 @@ static inline void sresdlrender_coords(int cam, size_t count, const sre_unit* xy
 	}
 }
 
-static inline void sresdlrender_coordsr(int cam, const sre_unit xywh[4], SDL_FRect* out, sre_unit anchor_x, sre_unit anchor_y)
+static inline void sresdlrender_coordsr(int cam, const sre_unit* xywh, SDL_FRect* out, sre_unit anchor_x, sre_unit anchor_y)
 {
 	sre_unit camcoords[2];
 	if (cam)

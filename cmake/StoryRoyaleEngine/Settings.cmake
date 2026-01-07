@@ -9,7 +9,7 @@ function(srEngine_link_settings TARGET)
             set(DEPEND DEPENDS ${INPUT_JSON})
         endif()
 
-        message("-.- ${DEPEND}")
+        message("--- ${DEPEND}")
         add_custom_command(
             OUTPUT ${OUTPUT_FILE}
             ${DEPEND}
@@ -18,7 +18,7 @@ function(srEngine_link_settings TARGET)
             ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "--- Generating game settings for ${TARGET}...")
 
-        target_sources(${TARGET} PRIVATE ${OUTPUT_FILE})
+        target_sources(${TARGET} PUBLIC ${OUTPUT_FILE})
     endmacro()
 
     if(EXISTS ${INPUT_SETTINGS})

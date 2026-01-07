@@ -35,6 +35,7 @@ It's discouraged to use it with numbers as numbers can be NULL too
 #ifdef __cplusplus
 	extern "C" {
 #endif
+		#include <stddef.h>
 		// C operator new and delete wrappers
 		extern void* sre_new(size_t size);
 		extern void sre_delete(void* block);
