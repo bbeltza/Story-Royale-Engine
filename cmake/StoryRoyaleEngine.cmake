@@ -18,6 +18,7 @@ function(srEngine_build TARGET EXE SRCS)
 
         add_executable(${EXE} "${CMAKE_BINARY_DIR}/empty.c")
         add_library(${TARGET} STATIC ${${SRCS}})
+        set_target_properties(${TARGET} PROPERTIES EXE ${EXE})
     endif()
 
     set_target_properties(${EXE} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})

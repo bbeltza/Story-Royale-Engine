@@ -10,40 +10,9 @@
 #include "utils/mem.h"
 
 #include "GameSettings.h"
-#define DRAW_ENTCENTER_LINESIZE sre::game_settings.DebugOptions.EntityDebugLineSize
-
-inline void real_coords(sre::vec2f& out_pos, const sre::vec2ut& in_pos, const sreECS::Scene* world)
-{
-    if (world == DISPLAY_DONT_CENTER)
-    {
-        out_pos.x = static_cast<float>(round(in_pos.x * engine.current_scale));
-        out_pos.y = static_cast<float>(round(in_pos.y * engine.current_scale));
-        return;
-    }
-    out_pos = world->camera.toScreenSpace(in_pos); // NOTE: World might be NULL, see definition for Camera::toScreenSpace(sre::vec2ut)
-}
-
-inline void real_coords(SDL_FRect& out_rect, const sre::rect2Dut& in_rect, const sre::vec2f& anchor, const sreECS::Scene* world)
-{
-    out_rect.w = static_cast<float>(floor(in_rect.size.x * engine.current_scale));
-    out_rect.h = static_cast<float>(floor(in_rect.size.y * engine.current_scale));
-
-    if (world == DISPLAY_DONT_CENTER)
-    {
-        out_rect.x = static_cast<float>(floor((in_rect.position.x * engine.current_scale - in_rect.size.x * anchor.x)));
-        out_rect.y = static_cast<float>(floor((in_rect.position.y * engine.current_scale - in_rect.size.y * anchor.y)));
-        return;
-    }
-    reinterpret_cast<sre::rect2Df*>(&out_rect)->position = world->camera.toScreenSpace(in_rect.position - in_rect.size * anchor);
-}
-
-#define START_DRAW SDL_LockMutex(engine.sdl_rendermutex);
-#define END_DRAW SDL_UnlockMutex(engine.sdl_rendermutex);
 
 void Display::DrawLine(const sre::col4 &Color, const sre::vec2ut &Pt1, const sre::vec2ut &Pt2, const sreECS::Scene* world)
 {
-    START_DRAW
-
     sre_DDLine data;
     data.color[0] = Color.r;
     data.color[1] = Color.g;
@@ -55,14 +24,10 @@ void Display::DrawLine(const sre::col4 &Color, const sre::vec2ut &Pt1, const sre
     data.pt2_y = Pt2.y;
     data.flags = world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0;
     sre_draw(SRE_DRAW_LINE, &data);
-
-    END_DRAW
 }
 
 void Display::DrawLines(const sre::col4 &Color, int Count, const sre::vec2ut *Pts, const sreECS::Scene* world)
 {
-    START_DRAW
-
     sre_DDLines data;
     data.count = Count;
     data.color[0] = Color.r;
@@ -73,14 +38,10 @@ void Display::DrawLines(const sre::col4 &Color, int Count, const sre::vec2ut *Pt
     data.flags = (world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0);
 
     sre_draw(SRE_DRAW_LINES, &data);
-
-    END_DRAW
 }
 
 void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Color, const sre::vec2f &AnchorPoint, DrawingMode Mode, const sreECS::Scene* world)
 {
-    START_DRAW
-
     sre_DDRect data;
     data.anchor_x = AnchorPoint.x;
     data.anchor_y = AnchorPoint.y;
@@ -94,8 +55,6 @@ void Display::DrawRectangle(const sre::rect2Dut &Rectangle, const sre::col4 &Col
     data.size_y = Rectangle.size.y;
     data.flags = (Mode == Display::M_STROKE ? SRE_DRAWFLAGS_STROKE : 0) | (world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0);
     sre_draw(SRE_DRAW_RECTANGLE, &data);
-
-    END_DRAW
 };
 
 void Display::DrawRotatedRectangle(const sre::rect2Dut &rectangle, const double angle, const sre::col4 &col, DrawingMode mode, const sreECS::Scene* world)
@@ -162,8 +121,6 @@ end:
 
 void Display::DrawTexture(const Texture &texture, sre::rect2Dut rect, const sre::col4 &mod, const sre::vec2f &anchor, const sreECS::Scene* world)
 {
-    START_DRAW
-
     sre_DDTexture data;
     data.flags = (world != DISPLAY_DONT_CENTER ? SRE_DRAWFLAGS_USECAM : 0) | (rect.size.x < 0 ? SRE_DRAWFLAGS_FLIPX : 0) | (rect.size.y < 0 ? SRE_DRAWFLAGS_FLIPY : 0);
     data.anchor_x = anchor.x;
@@ -179,8 +136,6 @@ void Display::DrawTexture(const Texture &texture, sre::rect2Dut rect, const sre:
     data.size_y = abs(rect.size.y);
 
     sre_draw(SRE_DRAW_TEXTURE, &data);
-
-    END_DRAW
 }
 
 // Already testing current available draw functions

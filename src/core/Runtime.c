@@ -58,7 +58,7 @@ static int eventfilter(void *data, SDL_Event *ev)
                 break;
         #endif
             case SDL_WINDOWEVENT_SIZE_CHANGED:
-                __update_viewport();
+                __update_viewport(ev->window.data1, ev->window.data2);
                 break;
         }
     }

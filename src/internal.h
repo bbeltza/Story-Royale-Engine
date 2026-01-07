@@ -46,19 +46,9 @@ SRE_CAPI_BEGIN
 		// Renderer data
 		
 		sre_videodriver* video;
-		//
-		SDL_Renderer* sdl_rendererhndl;
-		//
 
 		SDL_mutex* sdl_rendermutex;
 		int osize_x, osize_y;
-		sre_unit size_x, size_y;
-		sre_unit center_x, center_y;
-
-		size_t targetptr;
-
-		sre_unit current_scale;
-		sre_unit viewport_scale;
 
 		// Audio data
 
@@ -94,7 +84,7 @@ SRE_CAPI_BEGIN
 	extern int __poll_events();
 	extern void __poll_input(SDL_Event* ev);
 
-	extern void __update_viewport();
+	extern void __update_viewport(int w, int h);
 	extern void __update_input();
 
 	extern void __query_objects();

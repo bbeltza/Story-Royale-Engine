@@ -1,8 +1,10 @@
 #include <standard>
 
 #include "../internal.h"
+#include "drivers/drivers.h"
 
 #include "Base/Input.hpp"
+#include "Base/Display.hpp"
 
 #include "datatypes/flags.hpp"
 
@@ -28,16 +30,16 @@ void __poll_input(SDL_Event* event)
     switch (event->type)
     {
     case SDL_MOUSEMOTION:
-        mMoveSignalQueue.emplace_back(&event->motion, engine.viewport_scale);
+        mMoveSignalQueue.emplace_back(&event->motion, engine.video->scale);
         break;
     case SDL_MOUSEBUTTONDOWN:
-        mButtonSignalQueue.emplace_back(&event->button, engine.viewport_scale);
+        mButtonSignalQueue.emplace_back(&event->button, engine.video->scale);
         break;
     case SDL_MOUSEBUTTONUP:
-        mButtonSignalQueue.emplace_back(&event->button, engine.viewport_scale);
+        mButtonSignalQueue.emplace_back(&event->button, engine.video->scale);
         break;
     case SDL_MOUSEWHEEL:
-        mWheelSignalQueue.emplace_back(&event->wheel, engine.viewport_scale);
+        mWheelSignalQueue.emplace_back(&event->wheel, engine.video->scale);
         break;
     case SDL_KEYDOWN:
         if (event->key.keysym.sym > SDL_NUM_SCANCODES)
@@ -77,13 +79,13 @@ void __poll_input(SDL_Event* event)
 
 void __update_input()
 {
-    if (!engine.size_x || !engine.size_y) return;
+    if (!engine.video->size_y || !engine.video->size_y) return;
 
     int x, y;
     engine.mouse_press = SDL_GetMouseState(&x, &y);
 
-    engine.mouse_x = x / engine.viewport_scale;
-    engine.mouse_y = y / engine.viewport_scale;
+    engine.mouse_x = x / engine.video->scale;
+    engine.mouse_y = y / engine.video->scale;
 
     processEventQueue(keySignalQueue, Input::KeyEvent)
     processEventQueue(mButtonSignalQueue, Input::MouseButton)

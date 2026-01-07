@@ -16,7 +16,7 @@
 typedef struct sre_videodriver
 {
 	void (*quit)();
-	
+
 	int (*vsync)(int vsync);
 	int (*viewport)(int w, int h);
 
@@ -33,6 +33,9 @@ typedef struct sre_videodriver
 	SRE_DRAW_FUNC(draw_rrect, const sre_DDRRect* data);
 	SRE_DRAW_FUNC(draw_texture, const sre_DDTexture* data);
 	SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
+
+	sre_unit size_x;
+	sre_unit size_y;
 
 	sre_unit camera_x;
 	sre_unit camera_y;

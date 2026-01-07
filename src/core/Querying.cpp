@@ -1,6 +1,7 @@
 #include "../internal.h"
 
 #include "Base/Input.hpp"
+#include "Base/Display.hpp"
 
 #include "ECS/scene.hpp"
 #include "ECS/entity.hpp"
@@ -22,11 +23,10 @@ void __query_objects()
         int finger_count = SDL_GetNumTouchFingers(engine.input_last_touchid);
         if (!finger_count) goto callsection;
 
-        sre::vec2f screensize{ engine.size_x, engine.size_y };
+        
         SDL_Finger* lastfinger = SDL_GetTouchFinger(engine.input_last_touchid, finger_count - 1);
 
-        pt.x = lastfinger->x * screensize.x;
-        pt.y = lastfinger->y * screensize.y;
+        pt = sre::display_size() * sre::vec2ut{ lastfinger->x, lastfinger->y };
     }
 
 

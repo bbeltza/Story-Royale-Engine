@@ -1,6 +1,7 @@
 #include "../internal.h"
 #include "../internal.hpp"
 
+#include "Base/Display.hpp"
 #include "Base/Texture.hpp"
 #include "Base/Thread.hpp"
 #include "Base/Audio.hpp"
@@ -54,7 +55,7 @@ void __update_layer()
 	sreGUI::Object* current = currlayer;
 	
 	if (!current) return;
-	current->m_absolute.size = sre::vec2ut{engine.size_x, engine.size_y};
+	current->m_absolute.size = sre::display_size();
 	current->m_absolute.position = sre::vec2ut::ZERO;
 
 	current->call_process();

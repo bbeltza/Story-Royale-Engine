@@ -13,11 +13,15 @@
 void __setup_renderer()
 {
 	engine.video = sresdlrenderer_init(engine.sdl_windowhndl);
+	if (!engine.video)
+	{
+		ERROR("Failed initializing the render driver");
+		exit(-1);
+	}
+
 
 	if (sre::game_settings.WindowOptions.VSync)
 		engine.video->vsync(1);
-
-	engine.sdl_rendererhndl = sresdlrenderer_driver.renderer;
 
 	int locked = SDL_TryLockMutex(engine.sdl_rendermutex);
 	assert(!locked);
@@ -25,14 +29,13 @@ void __setup_renderer()
 	sre::set_framerate(sre::game_settings.WindowOptions.TargetFPS);
 }
 
-void __update_viewport()
+void __update_viewport(int w, int h)
 {
 	int integer_scale;
 
-	SDL_GetRendererOutputSize(engine.sdl_rendererhndl, &engine.osize_x, &engine.osize_y);
 	if (sre::game_settings.WindowOptions.Scaled)
 	{
-		integer_scale = ut_min(engine.osize_x / sre::game_settings.WindowOptions.Resolution.x, engine.osize_y / sre::game_settings.WindowOptions.Resolution.y);
+		integer_scale = ut_min(w / sre::game_settings.WindowOptions.Resolution.x, h / sre::game_settings.WindowOptions.Resolution.y);
 		integer_scale = integer_scale ? integer_scale : 1;
 	}
 	else
@@ -40,18 +43,21 @@ void __update_viewport()
 		integer_scale = 1;
 	}
 
-	engine.viewport_scale = static_cast<sre::unit>(integer_scale);
-	engine.current_scale = engine.viewport_scale;
+	sre::unit scale = static_cast<sre::unit>(integer_scale);
+	sre::vec2ut size = sre::vec2ut{ w, h } / scale;
 
-	engine.size_x = engine.osize_x / engine.viewport_scale;
-	engine.size_y = engine.osize_y / engine.viewport_scale;
+	sre::vec2ut center = size / 2.0_ut;
 
-	engine.center_x = engine.size_x / 2.0_ut;
-	engine.center_y = engine.size_y / 2.0_ut;
+	engine.osize_x = w;
+	engine.osize_y = h;
+	engine.video->scale = scale;
+	engine.video->size_x = size.x;
+	engine.video->size_y = size.y;
+	engine.video->center_x = center.x;
+	engine.video->center_y = center.y;
 
-	engine.video->scale = engine.viewport_scale;
-	engine.video->center_x = engine.center_x;
-	engine.video->center_y = engine.center_y;
+	if (engine.video->viewport)
+		engine.video->viewport(w, h);
 }
 
 void __display_render()

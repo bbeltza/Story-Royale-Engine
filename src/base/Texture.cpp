@@ -1,9 +1,15 @@
 #include "../internal.h"
 #include "../internal.hpp"
+#include "../core/drivers/drivers.h" // TODO: Add driver speficic texture creation
 
 #include "Base/Texture.hpp"
 
-Texture::Texture(const sre::Image& from_image): texture(SDL_CreateTextureFromSurface(engine.sdl_rendererhndl, static_cast<SDL_Surface*>(from_image.getHandle())))
+Texture::Texture(const sre::Image& from_image): texture(SDL_CreateTextureFromSurface(*reinterpret_cast<SDL_Renderer**>(engine.video + 1), static_cast<SDL_Surface*>(from_image.getHandle())))
+                                                                                                                                // ^^^
+                                                                                                                                // This is the very silly way to take once for all the renderer
+                                                                                                                                // Since I know it is located there
+                                                                                                                                // But once I start to add multiple video drivers like OpenGL...
+                                                                                                                                // It's not going to work out, a custom texture handler is needed
 {
 }
 

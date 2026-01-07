@@ -25,6 +25,8 @@ void __create_window()
 		flags
 	);
     SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);
+    engine.osize_x = w;
+    engine.osize_y = h;
 }
 
 int __poll_events()
@@ -49,7 +51,7 @@ int __poll_events()
             case 1:
                 SDL_ShowWindow(engine.sdl_windowhndl);
                 SDL_RaiseWindow(engine.sdl_windowhndl);
-                __update_viewport();
+                __update_viewport(engine.osize_x, engine.osize_y);
                 break;
             }
             break;
