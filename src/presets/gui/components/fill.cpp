@@ -1,10 +1,20 @@
 #include <GUI/Components/fill.hpp>
 
-#include "Base/Display.hpp"
+#include "Base/Draw.hpp"
 
 using namespace sreGUI;
 
 void Fill::on_render(const sre::rect2Dut& dimensions)
 {
-    Display::DrawRectangle(dimensions, *this, sre::vec2f::ZERO, Display::M_FILL, DISPLAY_DONT_CENTER);
+    sre::draw(sre::DDRect{
+        0,
+        { r, g, b, a },
+
+        dimensions.position.x,
+        dimensions.position.y,
+        dimensions.size.x,
+        dimensions.size.y,
+        0,
+        0
+    });
 }

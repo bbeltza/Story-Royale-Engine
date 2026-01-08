@@ -1,4 +1,4 @@
-#include <Base/Display.hpp>
+#include <Base/Draw.hpp>
 #include <Base/Font.hpp>
 
 static std::vector<std::string> line_buff;
@@ -97,7 +97,20 @@ void Font::render_line(const sre::vec2ut& start, const sre::col4& color, const c
         Texture& texture = textures.at(chr);
         render_rect.size = sre::vec2ut{texture.size()};
 
-        Display::DrawTexture(texture, render_rect, color, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
+        draw(DDTexture{
+            0,
+            { color.r, color.g, color.b, color.a },
+
+            render_rect.position.x,
+            render_rect.position.y,
+            render_rect.size.x,
+            render_rect.size.y,
+
+            0,
+            0,
+
+            texture.handle()
+        });
 
         render_rect.position.x += render_rect.size.x;
 

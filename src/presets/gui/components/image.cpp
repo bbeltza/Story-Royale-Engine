@@ -1,6 +1,6 @@
 #include <GUI/Components/image.hpp>
 #include <GUI/Components/transform.hpp>
-#include <Base/Display.hpp>
+#include <Base/Draw.hpp>
 
 using namespace sreGUI;
 
@@ -19,5 +19,18 @@ void Image::on_render(const sre::rect2Dut &dimensions)
 {
     if (!texture) return;
 
-    Display::DrawTexture(*texture, dimensions, modulate, sre::vec2f::ZERO, DISPLAY_DONT_CENTER);
+    sre::draw(sre::DDTexture{
+        0,
+        { modulate.r, modulate.g, modulate.b, modulate.a },
+
+        dimensions.position.x,
+        dimensions.position.y,
+        dimensions.size.x,
+        dimensions.size.y,
+        
+        0,
+        0,
+
+        texture->handle()
+    });
 }

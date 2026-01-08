@@ -11,16 +11,10 @@ namespace sreECS
     struct Scene;
 }
 
-namespace Display
-{
-    void DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const sre::col4& Modulate, const sre::vec2f& AnchorPoint, const sreECS::Scene* world);
-}
-
 extern "C" void __display_render();
 
 class Texture
 {
-    friend void Display::DrawTexture(const Texture& _Texture, sre::rect2Dut Rectangle, const sre::col4& Modulate, const sre::vec2f& AnchorPoint, const sreECS::Scene* world);
     friend struct _containers_service;
 
     Texture(const Texture& other) = delete;
@@ -32,6 +26,8 @@ public:
     ~Texture();
 
     sre::vec2i size() const;
+
+    void* handle() const { return texture; }
 
 protected: // Protected to allow custom behavior inherited texture classes
     void* texture = NULL;

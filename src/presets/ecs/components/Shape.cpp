@@ -1,7 +1,7 @@
 #include "ECS/Components/shape.hpp"
 #include "ECS/scene.hpp"
 
-#include "Base/Display.hpp"
+#include "Base/Draw.hpp"
 
 #include <SDL_shape.h>
 
@@ -47,12 +47,20 @@ void Shape::on_render(Entity &entity)
 	switch (shape)
 	{
 	case S_CIRCLE:
-		Display::DrawCircle(entity.position + rect.position, rect.size.x / 2, color, Display::M_FILL, world);
+		sre_draw(SRE_DRAW_CIRCLE, NULL);
 		break;
 	default:
 	{
 		sre::rect2Dut render_rect = real_rect(entity);
-		Display::DrawRectangle(render_rect, color, sre::vec2f::CENTER, Display::M_FILL, world);
+		sre::draw(sre::DDRect{SRE_DRAWFLAGS_USECAM,
+			{ color.r, color.g, color.b, color.a },
+			render_rect.position.x,
+			render_rect.position.y,
+			render_rect.size.x,
+			render_rect.size.y,
+			0.5_ut,
+			0.5_ut
+		});
 		break;
 	}
 	}
