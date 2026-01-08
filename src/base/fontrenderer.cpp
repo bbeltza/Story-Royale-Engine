@@ -99,16 +99,9 @@ void Font::render_line(const sre::vec2ut& start, const sre::col4& color, const c
 
         draw(DDTexture{
             0,
-            { color.r, color.g, color.b, color.a },
-
-            render_rect.position.x,
-            render_rect.position.y,
-            render_rect.size.x,
-            render_rect.size.y,
-
-            0,
-            0,
-
+            color,
+            render_rect,
+            sre::vec2ut::ZERO,
             texture.handle()
         });
 

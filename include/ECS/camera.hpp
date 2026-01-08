@@ -44,9 +44,6 @@ namespace sreECS
     private:
         void update();
         void pupdate();
-
-        // Render position
-        sre::vec2ut m_rpos;
     };
 }
 

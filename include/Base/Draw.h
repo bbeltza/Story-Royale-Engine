@@ -6,6 +6,45 @@
 #include <datatypes/units.h>
 #include <utils/math.h>
 
+#ifdef __cplusplus
+    #include <Datatypes/Vector.hpp>
+    #include <Datatypes/Rect.hpp>
+    #include <datatypes/Color.hpp>
+
+    using sre_col4 = sre::col4;
+    using sre_vec2ut = sre::vec2ut;
+    using sre_rect2Dut = sre::rect2Dut;
+#else
+    typedef struct
+    {
+        sre_u8 r;
+        sre_u8 g;
+        sre_u8 b;
+        sre_u8 a;
+    } sre_col4;
+
+    typedef struct
+    {
+        sre_unit x;
+        sre_unit y;
+    } sre_vec2ut; // TODO: Add C compatible vec2 templates (with macros)
+    typedef union
+    {
+        struct
+        {
+            sre_unit x;
+            sre_unit y;
+            sre_unit w;
+            sre_unit h;
+        };
+        struct
+        {
+            sre_vec2ut position;
+            sre_vec2ut size;
+        };
+    } sre_rect2Dut;
+#endif
+
 SRE_CAPI_BEGIN
 
 extern const void *const SRE_DRAW_DONT_CENTER;
@@ -36,7 +75,7 @@ typedef enum
  */
 typedef struct
 {
-    sre_u8 color[4];
+    sre_col4 color;
 } sre_DDFill;
 
 /*
@@ -45,14 +84,11 @@ typedef struct
 typedef struct
 {
     sre_s32 flags;
-    sre_u8 color[4];
+    sre_col4 color;
     //sre_unit thickness; // The thickness of the line, it is currently unavailable for future use
 
-    sre_unit pt1_x;
-    sre_unit pt1_y;
-
-    sre_unit pt2_x;
-    sre_unit pt2_y;
+    sre_vec2ut pt1;
+    sre_vec2ut pt2;
 } sre_DDLine;
 
 /*
@@ -61,45 +97,35 @@ typedef struct
 typedef struct
 {
     sre_s32 flags;
-    sre_u8 color[4];
+    sre_col4 color;
 
     int count;
     int _unused;
-    const sre_unit (*pts)[2];
+    const sre_vec2ut *pts;
 } sre_DDLines;
 
 typedef struct 
 {
     sre_s32 flags;
-    sre_u8 color[4];
+    sre_col4 color;
 
-    sre_unit pos_x;
-    sre_unit pos_y;
-    sre_unit size_x;
-    sre_unit size_y;
-
-    sre_unit anchor_x;
-    sre_unit anchor_y;
+    sre_rect2Dut rect;
+    sre_vec2ut anchor;
 } sre_DDRect;
 
 typedef struct
 {
     sre_DDRect rect;
-    float angle;
+    double angle;
 } sre_DDRRect;
 
 typedef struct
 {
     sre_s32 flags;
-    sre_u8 modulate[4];
+    sre_col4 modulate;
     
-    sre_unit pos_x;
-    sre_unit pos_y;
-    sre_unit size_x;
-    sre_unit size_y;
-    
-    sre_unit anchor_x;
-    sre_unit anchor_y;
+    sre_rect2Dut rect;
+    sre_vec2ut anchor;
 
     void* texture; // Texture identifier to draw, can be a pointer to a SDL_Texture or a pointer to a sre::Texture which works aswell
 } sre_DDTexture;
@@ -107,7 +133,7 @@ typedef struct
 typedef struct
 {
     sre_DDTexture texture;
-    float angle;
+    double angle;
 } sre_DDRTexture;
 
 /*

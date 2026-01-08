@@ -21,15 +21,9 @@ void Image::on_render(const sre::rect2Dut &dimensions)
 
     sre::draw(sre::DDTexture{
         0,
-        { modulate.r, modulate.g, modulate.b, modulate.a },
-
-        dimensions.position.x,
-        dimensions.position.y,
-        dimensions.size.x,
-        dimensions.size.y,
-        
-        0,
-        0,
+        modulate,
+        dimensions,
+        sre::vec2ut::ZERO,
 
         texture->handle()
     });

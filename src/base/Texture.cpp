@@ -4,12 +4,11 @@
 
 #include "Base/Texture.hpp"
 
-Texture::Texture(const sre::Image& from_image): texture(SDL_CreateTextureFromSurface(*reinterpret_cast<SDL_Renderer**>(engine.video + 1), static_cast<SDL_Surface*>(from_image.getHandle())))
-                                                                                                                                // ^^^
-                                                                                                                                // This is the very silly way to take once for all the renderer
-                                                                                                                                // Since I know it is located there
-                                                                                                                                // But once I start to add multiple video drivers like OpenGL...
-                                                                                                                                // It's not going to work out, a custom texture handler is needed
+Texture::Texture(const sre::Image& from_image): texture(SDL_CreateTextureFromSurface(static_cast<SDL_Renderer*>(engine.video->userdata), static_cast<SDL_Surface*>(from_image.getHandle())))
+                                                                                                                            // ^^^
+                                                                                                                            // This is now slightly better
+                                                                                                                            // Still need to make a custom texture handler
+                                                                                                                            // Because userdata isn't going to be a "SDL_Renderer" in every driver
 {
 }
 

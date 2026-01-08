@@ -12,8 +12,9 @@
 
 void __setup_renderer()
 {
-	engine.video = sresdlrenderer_init(engine.sdl_windowhndl);
-	if (!engine.video)
+	engine.video = static_cast<sre_videodriver*>(calloc(1, sizeof(sre_videodriver)));
+	assert(engine.video);
+	if (sresdlrenderer_init(engine.video, engine.sdl_windowhndl) < 0)
 	{
 		ERROR("Failed initializing the render driver");
 		exit(-1);
@@ -21,7 +22,7 @@ void __setup_renderer()
 
 
 	if (sre::game_settings.WindowOptions.VSync)
-		engine.video->vsync(1);
+		engine.video->vsync(engine.video, 1);
 
 	int locked = SDL_TryLockMutex(engine.sdl_rendermutex);
 	assert(!locked);
@@ -51,13 +52,11 @@ void __update_viewport(int w, int h)
 	engine.osize_x = w;
 	engine.osize_y = h;
 	engine.video->scale = scale;
-	engine.video->size_x = size.x;
-	engine.video->size_y = size.y;
-	engine.video->center_x = center.x;
-	engine.video->center_y = center.y;
+	engine.video->size = size;
+	engine.video->center = center;
 
 	if (engine.video->viewport)
-		engine.video->viewport(w, h);
+		engine.video->viewport(engine.video, w, h);
 }
 
 void __display_render()
@@ -71,15 +70,14 @@ void __display_render()
 
 	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
 	{
-		engine.video->camera_x = current->camera.position.x;
-		engine.video->camera_y = current->camera.position.y;
+		engine.video->camera = current->camera.position;
 
 		//// Aliases for the background and the foreground (kind of old)
 		const sre::col4 bg{current->background};
 		const sre::col4& fg = current->foreground;
 
 		//// Clearing the screen with the background color
-		engine.video->draw_clear(reinterpret_cast<const sre_u8*>(&bg));
+		engine.video->draw_clear(engine.video, &bg);
 
 		sre::beforeRender.Fire();
 
@@ -89,14 +87,14 @@ void __display_render()
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
-			engine.video->draw_fill(reinterpret_cast<const sre_DDFill*>(&fg));
+			engine.video->draw_fill(engine.video, reinterpret_cast<const sre_DDFill*>(&fg));
 	}
 	else
 	{
-		engine.video->camera_x = 0;
-		engine.video->camera_y = 0;
+		engine.video->camera.x = 0;
+		engine.video->camera.y = 0;
 
-		engine.video->draw_clear(NULL);
+		engine.video->draw_clear(engine.video, NULL);
 		sre::beforeRender.Fire();
 	}
 
@@ -109,5 +107,5 @@ void __display_render()
 	// Present the screen
 	SDL_LockMutex(engine.sdl_rendermutex);
 
-	engine.video->present();
+	engine.video->present(engine.video);
 }

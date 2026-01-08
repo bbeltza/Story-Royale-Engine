@@ -79,7 +79,7 @@ void __poll_input(SDL_Event* event)
 
 void __update_input()
 {
-    if (!engine.video->size_y || !engine.video->size_y) return;
+    if (!engine.osize_x || !engine.osize_y) return;
 
     int x, y;
     engine.mouse_press = SDL_GetMouseState(&x, &y);

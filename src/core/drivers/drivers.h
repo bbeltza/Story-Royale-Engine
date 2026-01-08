@@ -11,20 +11,22 @@
 // @param signature the parameter to take in, these functions do only take a single argument, there might be an additional parameter for the video driver pointer too
 //
 // @return the value to return in `sre_draw()`: Usually 0 on success or -1 on error
-#define SRE_DRAW_FUNC(name, signature) int (*name)(signature)
+#define SRE_DRAW_FUNC(name, signature) int (*name)(const sre_videodriver* video, signature)
+
+typedef struct sre_videodriver sre_videodriver;
+
+typedef int (*sre_videoinit_func)(sre_videodriver* video, SDL_Window* window);
 
 typedef struct sre_videodriver
 {
-	void (*quit)();
+	void (*quit)(sre_videodriver* video);
+	void (*present)(const sre_videodriver* video);
 
-	int (*vsync)(int vsync);
-	int (*viewport)(int w, int h);
+	int (*vsync)(const sre_videodriver* video, int vsync);
+	int (*viewport)(const sre_videodriver* video, int w, int h);
 
-	void (*present)();
 
-	const char* error;
-
-	SRE_DRAW_FUNC(draw_clear, const sre_u8 col[4]);
+	SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
 	
 	SRE_DRAW_FUNC(draw_fill, const sre_DDFill* data);
 	SRE_DRAW_FUNC(draw_line, const sre_DDLine* data);
@@ -34,13 +36,12 @@ typedef struct sre_videodriver
 	SRE_DRAW_FUNC(draw_texture, const sre_DDTexture* data);
 	SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
 
-	sre_unit size_x;
-	sre_unit size_y;
+	const char* error;
+	void* userdata;
 
-	sre_unit camera_x;
-	sre_unit camera_y;
-	sre_unit center_x;
-	sre_unit center_y;
+	sre_vec2ut size;
+	sre_vec2ut center;
+	sre_vec2ut camera;
 	sre_unit scale;
 } sre_videodriver;
 

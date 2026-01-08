@@ -29,19 +29,14 @@ void Sprite::on_render(Entity& entity)
         entity.position + offset,
         texture.size() * scale
     );
+    sre::s32 flags = SRE_DRAWFLAGS_USECAM | (render_rect.size.x < 0 ? SRE_DRAWFLAGS_FLIPX : 0) | (render_rect.size.y < 0 ? SRE_DRAWFLAGS_FLIPY : 0);
+    render_rect.size = render_rect.size.abs();
 
     sre::draw(sre::DDTexture{
-        SRE_DRAWFLAGS_USECAM | (render_rect.size.x < 0 ? SRE_DRAWFLAGS_FLIPX : 0) | (render_rect.size.y < 0 ? SRE_DRAWFLAGS_FLIPY : 0),
-        { modulate.r, modulate.g, modulate.b, modulate.a },
-
-        render_rect.position.x,
-        render_rect.position.y,
-        abs(render_rect.size.x),
-        abs(render_rect.size.y),
-
-        0.5,
-        0.5,
-
+        flags,
+        modulate,
+        render_rect,
+        sre::vec2ut::CENTER,
         texture.handle()
     });
 }

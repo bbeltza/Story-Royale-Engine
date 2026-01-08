@@ -115,7 +115,8 @@ void __end_engine()
 {
     __clean_containers();    
     
-    engine.video->quit();
+    engine.video->quit(engine.video);
+    free(engine.video);
 
     SDL_CloseAudioDevice(engine.audio_device);
     SDL_DetachThread(engine.entry_thread);

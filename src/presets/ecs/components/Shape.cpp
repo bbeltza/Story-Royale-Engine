@@ -52,14 +52,11 @@ void Shape::on_render(Entity &entity)
 	default:
 	{
 		sre::rect2Dut render_rect = real_rect(entity);
-		sre::draw(sre::DDRect{SRE_DRAWFLAGS_USECAM,
-			{ color.r, color.g, color.b, color.a },
-			render_rect.position.x,
-			render_rect.position.y,
-			render_rect.size.x,
-			render_rect.size.y,
-			0.5_ut,
-			0.5_ut
+		sre::draw(sre::DDRect{
+			SRE_DRAWFLAGS_USECAM,
+			color,
+			render_rect,
+			sre::vec2ut::CENTER
 		});
 		break;
 	}
