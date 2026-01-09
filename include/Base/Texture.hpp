@@ -1,17 +1,45 @@
 #pragma once
-#include "datatypes/vector.hpp"
-#include "datatypes/color.hpp"
-#include "datatypes/rect.hpp"
-#include "Base/Image.hpp"
+#include <datatypes/vector.hpp>
+#include <datatypes/color.hpp>
+#include <datatypes/rect.hpp>
+#include <Base/Image.hpp>
 
-class Texture;
+#include <Base/Texture.h>
 
-namespace sreECS
+namespace sre
 {
-    struct Scene;
-}
+    using TextureId = sre_Texture;
 
-extern "C" void __display_render();
+    #define Texture _Texture
+    class Texture
+    {
+        Texture(const Texture& other) = delete;
+        
+    protected:
+        TextureId m_handle = 0;
+    public:
+        Texture() = default;
+        Texture(const Image& from_image): m_handle( sre_tex_gen() )
+        {
+            sre_tex_bind(
+                m_handle,
+                static_cast<SDL_Surface*>(from_image.getHandle()),
+                true
+            );
+        }
+
+        Texture(Texture&& moving): m_handle(moving.m_handle) { moving.m_handle = 0; }
+        ~Texture() { sre_tex_destroy(m_handle); }
+
+        sre::vec2i size() const
+        {
+            int _size[2];
+            sre_tex_size(m_handle, _size + 0, _size + 1);
+            return { _size[0], _size[1] };
+        }
+    };
+    #undef Texture
+}
 
 class Texture
 {

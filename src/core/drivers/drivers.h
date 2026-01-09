@@ -13,6 +13,8 @@
 // @return the value to return in `sre_draw()`: Usually 0 on success or -1 on error
 #define SRE_DRAW_FUNC(name, signature) int (*name)(const sre_videodriver* video, signature)
 
+#define SRE_TEXTURE_BASECOUNT 24
+
 typedef struct sre_videodriver sre_videodriver;
 
 typedef int (*sre_videoinit_func)(sre_videodriver* video, SDL_Window* window);
@@ -36,8 +38,22 @@ typedef struct sre_videodriver
 	SRE_DRAW_FUNC(draw_texture, const sre_DDTexture* data);
 	SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
 
+	int (*tex_gen)(const sre_videodriver* video, void* texture);
+	int (*tex_update)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
+	void (*tex_destroy)(const sre_videodriver* video, void* texture);
+
 	const char* error;
 	void* userdata;
+
+	void* const textures;
+	/* These are 'const' members, they aren't meant to be modified by the driver */
+	/* They are used by the engine to send the correct texture pointer to the driver, based on a texture id */
+	sre_usize texture_size; // Size in bytes of a driver-speficic texture
+	const sre_usize textures_count;
+	const sre_usize textures_capacity;
+	const sre_u32* const texture_fl; // Texture free list
+	const sre_usize texture_flcount;
+	const sre_usize texture_flcapacity;
 
 	sre_vec2ut size;
 	sre_vec2ut center;

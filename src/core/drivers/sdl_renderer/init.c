@@ -21,6 +21,8 @@ int sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
     video->draw_rrect = sresdlrenderer_draw_rrect;
     video->draw_texture = sresdlrenderer_draw_texture;
     video->draw_rtexture = sresdlrenderer_draw_rtexture;
+
+    video->texture_size = sizeof(SDL_Texture*);
     return 0;
 }
 

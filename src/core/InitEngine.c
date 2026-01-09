@@ -116,6 +116,8 @@ void __end_engine()
     __clean_containers();    
     
     engine.video->quit(engine.video);
+    free((void*)engine.video->texture_fl);
+    free(engine.video->textures);
     free(engine.video);
 
     SDL_CloseAudioDevice(engine.audio_device);

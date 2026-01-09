@@ -20,6 +20,16 @@ void __setup_renderer()
 		exit(-1);
 	}
 
+	if (engine.video->texture_size)
+	{
+		const_cast<void*>(engine.video->textures) = calloc(SRE_TEXTURE_BASECOUNT, engine.video->texture_size);
+		const_cast<sre_usize&>(engine.video->textures_capacity) = SRE_TEXTURE_BASECOUNT;
+
+		const_cast<sre_u32* &>(engine.video->texture_fl) = static_cast<sre_u32*>(calloc(SRE_TEXTURE_BASECOUNT, sizeof(sre_u32)));
+		const_cast<sre_usize&>(engine.video->texture_flcapacity) = SRE_TEXTURE_BASECOUNT;
+
+		assert(engine.video->textures && engine.video->texture_fl);
+	}
 
 	if (sre::game_settings.WindowOptions.VSync)
 		engine.video->vsync(engine.video, 1);
