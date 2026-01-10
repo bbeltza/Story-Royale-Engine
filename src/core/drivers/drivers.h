@@ -39,7 +39,9 @@ typedef struct sre_videodriver
 	SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
 
 	int (*tex_gen)(const sre_videodriver* video, void* texture);
-	int (*tex_update)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
+	int (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
+	int (*tex_bind)(const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format);
+	int (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
 	void (*tex_destroy)(const sre_videodriver* video, void* texture);
 
 	const char* error;

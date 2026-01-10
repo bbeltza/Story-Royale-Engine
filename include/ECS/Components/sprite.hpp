@@ -23,10 +23,10 @@ namespace sreECS
         size_t current_frame = 0;
 
         
-        void attach(Texture&);
+        void attach(sre::Texture&);
     private:
         void on_render(Entity&) override;
 
-        std::vector<Texture*> textures;
+        std::vector<sre::Texture*> textures;
     };
 }

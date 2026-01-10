@@ -12,7 +12,7 @@ Sprite::~Sprite()
 {
 }
 
-void Sprite::attach(Texture& texture)
+void Sprite::attach(sre::Texture& texture)
 {
     textures.push_back(&texture);
 }
@@ -23,7 +23,7 @@ void Sprite::on_render(Entity& entity)
 
     auto frame = ut_min(current_frame, textures.size() - 1);
     current_frame = frame;
-    Texture& texture = *textures[frame];
+    sre::Texture& texture = *textures[frame];
 
     sre::rect2Dut render_rect(
         entity.position + offset,

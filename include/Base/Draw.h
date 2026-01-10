@@ -3,9 +3,11 @@
 #include <C_API.h>
 #include <ints.h>
 
-#include <datatypes/units.h>
+#include <Base/Texture.h>
+
 #include <utils/math.h>
 
+#include <Datatypes/Units.h>
 #ifdef __cplusplus
     #include <Datatypes/Vector.hpp>
     #include <Datatypes/Rect.hpp>
@@ -127,7 +129,7 @@ typedef struct
     sre_rect2Dut rect;
     sre_vec2ut anchor;
 
-    void* texture; // Texture identifier to draw, can be a pointer to a SDL_Texture or a pointer to a sre::Texture which works aswell
+    sre_Texture texture; // Texture identifier to draw, can be a pointer to a SDL_Texture or a pointer to a sre::Texture which works aswell
 } sre_DDTexture;
 
 typedef struct

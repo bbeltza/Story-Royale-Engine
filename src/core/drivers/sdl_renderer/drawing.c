@@ -167,7 +167,9 @@ int sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DDRRect* d
 
 int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTexture* data)
 {
-	if (!data->texture) return -1;
+	SDL_Texture* texture = *(SDL_Texture**)sre_get_texture(data->texture);
+
+	if (!texture) return -1;
 	if (data->rect.h == 0 || data->rect.h == 0) return 0;
 	if (data->rect.w < 0 || data->rect.h < 0) return -1; // Drawing with negative sizes to flip the texture if no longer supported, use SDL_DRAWFLAGS_FLIP
 
@@ -176,19 +178,21 @@ int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTextur
 	SDL_FRect render_rect;
 	sresdlrender_coordsr(video, usecam, &data->rect, &render_rect, data->anchor);
 
-	if (SDL_SetTextureColorMod(data->texture, data->modulate.r, data->modulate.g, data->modulate.b)) return -1;
-	if (SDL_SetTextureAlphaMod(data->texture, data->modulate.a)) return -1;
+	if (SDL_SetTextureColorMod(texture, data->modulate.r, data->modulate.g, data->modulate.b)) return -1;
+	if (SDL_SetTextureAlphaMod(texture, data->modulate.a)) return -1;
 
 	if (flip == SDL_FLIP_NONE) // SDL has to check for rotation too if using RenderCopy instead of RenderCopyEx, since we don't need it here, we do the check ourselves
-		return SDL_RenderCopyF(video->userdata, data->texture, NULL, &render_rect);
+		return SDL_RenderCopyF(video->userdata, texture, NULL, &render_rect);
 	else															       // ^^^^
 																		   // TODO: Support source coordinates for the texture
-		return SDL_RenderCopyExF(video->userdata, data->texture, NULL, &render_rect, 0, NULL, flip);
+		return SDL_RenderCopyExF(video->userdata, texture, NULL, &render_rect, 0, NULL, flip);
 }
 
 int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data)
 {
-	if (!data->texture.texture) return -1;
+	SDL_Texture* texture = *(SDL_Texture**)sre_get_texture(data->texture.texture);
+
+	if (!texture) return -1;
 	if (data->texture.rect.w == 0 || data->texture.rect.h == 0) return 0;
 	if (data->texture.rect.w < 0 || data->texture.rect.h < 0) return -1;
 
@@ -199,8 +203,8 @@ int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRText
 	SDL_FRect render_rect;
 	sresdlrender_coordsr(video, usecam, &data->texture.rect, &render_rect, ZERO);
 
-	if (SDL_SetTextureColorMod(data->texture.texture, data->texture.modulate.r, data->texture.modulate.g, data->texture.modulate.b)) return -1;
-	if (SDL_SetTextureAlphaMod(data->texture.texture, data->texture.modulate.a)) return -1;
+	if (SDL_SetTextureColorMod(texture, data->texture.modulate.r, data->texture.modulate.g, data->texture.modulate.b)) return -1;
+	if (SDL_SetTextureAlphaMod(texture, data->texture.modulate.a)) return -1;
 
-	return SDL_RenderCopyExF(video->userdata, data->texture.texture, NULL, &render_rect, data->angle, NULL, flip);
+	return SDL_RenderCopyExF(video->userdata, texture, NULL, &render_rect, data->angle, NULL, flip);
 }

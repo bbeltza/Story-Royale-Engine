@@ -120,6 +120,8 @@ void __end_engine()
     free(engine.video->textures);
     free(engine.video);
 
+    engine.video = NULL;
+
     SDL_CloseAudioDevice(engine.audio_device);
     SDL_DetachThread(engine.entry_thread);
     SDL_DestroyMutex(engine.sdl_rendermutex);

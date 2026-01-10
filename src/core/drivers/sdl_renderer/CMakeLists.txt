@@ -1,5 +1,5 @@
 project(sre_sdlrenderer)
 
-add_library(sre_sdlrenderer "init.c" "drawing.c")
+add_library(sre_sdlrenderer "init.c" "drawing.c" "textures.c")
 
 target_link_libraries(sre_sdlrenderer PRIVATE sre_driverinterface)

@@ -31,7 +31,6 @@ set(BASE_SOURCES
 "Input.cpp"
 "runtime.cpp"
 "Signal.cpp"
-"Texture.cpp"
 "Thread.cpp"
 "Tween.cpp"
 "Window.cpp"
