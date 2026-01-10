@@ -32,7 +32,7 @@ set(BASE_SOURCES
 "runtime.cpp"
 "Signal.cpp"
 "Thread.cpp"
-"Tween.cpp"
+"tween.cpp"
 "Window.cpp"
 )
 

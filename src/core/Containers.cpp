@@ -5,7 +5,6 @@
 #include "Base/Texture.hpp"
 #include "Base/Thread.hpp"
 #include "Base/Audio.hpp"
-#include "Base/Tween.hpp"
 
 #include "ECS/scene.hpp"
 #include "GUI/object.hpp"
@@ -46,7 +45,6 @@ void __clean_containers()
 void __update_classes()
 {
 	Thread::queue_removing();
-	TweenBase::global_update(engine.last_dt);
 }
 
 void __update_layer()
