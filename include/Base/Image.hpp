@@ -1,6 +1,6 @@
 #pragma once
 
-#include <datatypes/vector.hpp>
+#include <Datatypes/Vector.hpp>
 #include <SDL_surface.h>
 
 namespace sre

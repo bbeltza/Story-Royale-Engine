@@ -2,9 +2,9 @@
 #include <ECS/component.hpp>
 #include <ECS/entity.hpp>
 
-#include <datatypes/rect.hpp>
-#include <datatypes/color.hpp>
-#include <datatypes/flags.hpp>
+#include <Datatypes/Rect.hpp>
+#include <Datatypes/Color.hpp>
+#include <Datatypes/Flags.hpp>
 
 namespace sreECS
 {

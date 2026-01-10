@@ -3,8 +3,8 @@
 
 #include <list>
 
-#include <datatypes/rect.hpp>
-#include <datatypes/flags.hpp>
+#include <Datatypes/Rect.hpp>
+#include <Datatypes/Flags.hpp>
 
 #include <Base/object.hpp>
 #include <Base/Signal.hpp>

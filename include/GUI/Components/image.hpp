@@ -3,6 +3,7 @@
 
 #include <GUI/component.hpp>
 #include <Base/Texture.hpp>
+#include <Datatypes/Color.hpp>
 
 namespace sreGUI
 {

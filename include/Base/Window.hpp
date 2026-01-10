@@ -1,6 +1,6 @@
 #pragma once
-#include "datatypes/vector.hpp"
-#include "datatypes/flags.hpp"
+#include "Datatypes/Vector.hpp"
+#include "Datatypes/Flags.hpp"
 
 namespace Window
 {

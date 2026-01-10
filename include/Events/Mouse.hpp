@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL_events.h>
-#include "datatypes/vector.hpp"
+#include "Datatypes/Vector.hpp"
 
 struct MouseButton
 {

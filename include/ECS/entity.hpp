@@ -2,7 +2,7 @@
 #define SREECS_ENTITY_HPP
 
 #include <ECS/common.hpp>
-#include <datatypes/vector.hpp>
+#include <Datatypes/Vector.hpp>
 
 namespace sreECS
 {

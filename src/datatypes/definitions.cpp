@@ -1,5 +1,5 @@
-#include <datatypes/color.hpp>
-#include <datatypes/udim.hpp>
+#include <Datatypes/Color.hpp>
+#include <Datatypes/UDim.hpp>
 
 using namespace sre;
 

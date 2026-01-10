@@ -1,8 +1,8 @@
 #pragma once
 #include <ECS/component.hpp>
 
-#include <datatypes/vector.hpp>
-#include <datatypes/timestamp.h>
+#include <Datatypes/Vector.hpp>
+#include <Datatypes/TimeStamp.h>
 
 namespace sreECS
 {

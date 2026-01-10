@@ -3,8 +3,8 @@
 #include <standard>
 
 #include "Base/Texture.hpp"
-#include "datatypes/rect.hpp"
-#include "datatypes/color.hpp"
+#include "Datatypes/Rect.hpp"
+#include "Datatypes/Color.hpp"
 
 namespace sre
 {

@@ -3,8 +3,8 @@
 
 #include <ECS/common.hpp>
 
-#include <datatypes/color.hpp>
-#include <datatypes/vector.hpp>
+#include <Datatypes/Color.hpp>
+#include <Datatypes/Vector.hpp>
 
 #include <ECS/camera.hpp>
 

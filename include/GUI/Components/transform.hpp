@@ -2,7 +2,7 @@
 #define SREGUI_TRANSFORM_HPP
 
 #include <GUI/component.hpp>
-#include <datatypes/udim.hpp>
+#include <Datatypes/UDim.hpp>
 
 namespace sreGUI
 {

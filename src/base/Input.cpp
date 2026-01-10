@@ -1,7 +1,7 @@
 #include "../internal.h"
 
 #include "Base/Input.hpp"
-#include "datatypes/flags.hpp"
+#include "Datatypes/Flags.hpp"
 
 #include "ECS/scene.hpp"
 

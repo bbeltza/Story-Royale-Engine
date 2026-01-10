@@ -1,7 +1,7 @@
 #ifndef SREGUI_COMPONENT_HPP
 #define SREGUI_COMPONENT_HPP
 
-#include <datatypes/rect.hpp>
+#include <Datatypes/Rect.hpp>
 
 namespace sreGUI
 {

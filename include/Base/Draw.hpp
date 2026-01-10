@@ -3,8 +3,8 @@
 
 #include <Base/Draw.h>
 
-#include <datatypes/rect.hpp>
-#include <datatypes/color.hpp>
+#include <Datatypes/Rect.hpp>
+#include <Datatypes/Color.hpp>
 
 namespace sre
 {
@@ -26,8 +26,8 @@ namespace sre
 
     inline int draw_fill(const col4& color) { return sre_draw(SRE_DRAW_FILL, &color); }
 
-    template <typename Args>
-    inline int draw_lines(const col4& color, bool use_camera, Args&& pts_args...)
+    template <typename... Args>
+    inline int draw_lines(const col4& color, bool use_camera, Args&&... pts_args)
     {
         vec2ut pts[] = { pts_args... };
         return draw(DDLines{use_camera ? SRE_DRAWFLAGS_USECAM : 0, { color.r, color.g, color.b, color.a }, sizeof...(pts_args), 0, pts});

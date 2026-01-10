@@ -1,10 +1,10 @@
 #pragma once
 #include <stdbool.h>
 
-#include <datatypes/units.h>
+#include <Datatypes/Units.h>
 
 #ifdef __cplusplus
-#include <datatypes/vector.hpp>
+#include <Datatypes/Vector.hpp>
 #define vec2u sre::vec2u
 #else
 typedef unsigned int vec2u[2];

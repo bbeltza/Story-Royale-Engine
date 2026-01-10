@@ -3,8 +3,8 @@
 #include <standard>
 
 #include <C_API.h>
-#include <datatypes/units.h>
-#include <datatypes/timestamp.h>
+#include <Datatypes/Units.h>
+#include <Datatypes/TimeStamp.h>
 #include <ints.h>
 
 SRE_CAPI_BEGIN

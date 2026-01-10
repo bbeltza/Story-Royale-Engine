@@ -1,6 +1,6 @@
 #pragma once
 #include <standard>
-#include <datatypes/flags.hpp>
+#include <Datatypes/Flags.hpp>
 #include <Base/object.hpp>
 
 #include <utils/sequence.hpp>

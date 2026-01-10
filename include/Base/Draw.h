@@ -11,7 +11,7 @@
 #ifdef __cplusplus
     #include <Datatypes/Vector.hpp>
     #include <Datatypes/Rect.hpp>
-    #include <datatypes/Color.hpp>
+    #include <Datatypes/Color.hpp>
 
     using sre_col4 = sre::col4;
     using sre_vec2ut = sre::vec2ut;

@@ -3,7 +3,7 @@
 #include "Base/Signal.hpp"
 #include "Base/Thread.hpp"
 
-#include "datatypes/timestamp.h"
+#include "Datatypes/TimeStamp.h"
 
 #include "internal_def.hh"
 

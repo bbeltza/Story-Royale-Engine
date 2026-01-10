@@ -2,7 +2,7 @@
 #define SRE_TWEEN_HPP
 
 #include <Base/Signal.hpp>
-#include <datatypes/timestamp.h>
+#include <Datatypes/TimeStamp.h>
 #include <utils/math.hpp>
 
 enum EasingStyle

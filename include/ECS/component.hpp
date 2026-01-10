@@ -1,7 +1,7 @@
 #ifndef SREECS_COMPONENT_HPP
 #define SREECS_COMPONENT_HPP
 
-#include <datatypes/vector.hpp>
+#include <Datatypes/Vector.hpp>
 
 namespace sreECS
 {

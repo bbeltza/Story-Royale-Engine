@@ -3,7 +3,7 @@
 #include <standard>
 #define TEMPL template <class _Fn, class... _Args>
 
-#include "datatypes/timestamp.h"
+#include "Datatypes/TimeStamp.h"
 
 #include "internal_def.hh"
 

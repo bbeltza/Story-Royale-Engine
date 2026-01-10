@@ -4,7 +4,7 @@
 
 #include <Base/Draw.h>
 #include <Base/Texture.h>
-#include <datatypes/units.h>
+#include <Datatypes/Units.h>
 
 // Function signature macro for declaring drawing command function pointers
 // Used by `sre_videodriver` for every drawing command

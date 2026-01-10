@@ -1,5 +1,5 @@
 #pragma once
-#include "datatypes/vector.hpp"
+#include "Datatypes/Vector.hpp"
 
 namespace sre
 {

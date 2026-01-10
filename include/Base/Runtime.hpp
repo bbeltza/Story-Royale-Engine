@@ -3,7 +3,7 @@
 #include <Base/Signal.hpp>
 #include <Base/Event.hpp>
 
-#include <datatypes/timestamp.h>
+#include <Datatypes/TimeStamp.h>
 
 namespace sre
 {

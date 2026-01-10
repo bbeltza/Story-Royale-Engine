@@ -1,7 +1,7 @@
 #ifndef SREECS_CAMERA_HPP
 #define SREECS_CAMERA_HPP
 
-#include <datatypes/rect.hpp>
+#include <Datatypes/Rect.hpp>
 
 namespace sreECS
 {

@@ -22,7 +22,7 @@ void __setup_renderer()
 
 	if (engine.video->texture_size)
 	{
-		const_cast<void*>(engine.video->textures) = calloc(SRE_TEXTURE_BASECOUNT, engine.video->texture_size);
+		const_cast<void*&>(engine.video->textures) = calloc(SRE_TEXTURE_BASECOUNT, engine.video->texture_size);
 		const_cast<sre_usize&>(engine.video->textures_capacity) = SRE_TEXTURE_BASECOUNT;
 
 		const_cast<sre_u32* &>(engine.video->texture_fl) = static_cast<sre_u32*>(calloc(SRE_TEXTURE_BASECOUNT, sizeof(sre_u32)));

@@ -1,8 +1,8 @@
 #pragma once
 #include <ECS/component.hpp>
 
-#include <datatypes/vector.hpp>
-#include <datatypes/color.hpp>
+#include <Datatypes/Vector.hpp>
+#include <Datatypes/Color.hpp>
 
 #include <Base/File.hpp>
 #include <Base/Texture.hpp>
