@@ -101,17 +101,12 @@ void sre_tex_destroy(sre_Texture id)
     SDL_UnlockMutex(engine.sdl_rendermutex);
 }
 
-int sre_tex_bind(sre_Texture id, const SDL_Surface* surface, int copy_pixels)
+int sre_tex_bind(sre_Texture id, const SDL_Surface* surface)
 {
     void* texture = sre_get_texture(id);
     if (!texture) return -1;
 
-    if (engine.video->tex_bind(engine.video, texture, surface->w, surface->h, (SDL_PixelFormatEnum)surface->format->format) < 0) return -1;
-
-    if (copy_pixels)
-        return engine.video->tex_update(engine.video, texture, surface->pixels, surface->pitch);
-    
-    return 0;
+    return engine.video->tex_bind(engine.video, texture, surface);
 }
 
 int sre_tex_update(sre_Texture id, const void* pixels, int pitch)
@@ -120,6 +115,14 @@ int sre_tex_update(sre_Texture id, const void* pixels, int pitch)
     if (!texture) return -1;
 
     return engine.video->tex_update(engine.video, texture, pixels, pitch);
+}
+
+SDL_PixelFormatEnum sre_tex_format(sre_Texture id)
+{
+    void* texture = sre_get_texture(id);
+    if (!texture) return SDL_PIXELFORMAT_UNKNOWN;
+
+    return engine.video->tex_format(engine.video, texture);
 }
 
 int sre_tex_size(sre_Texture id, int* w, int* h)

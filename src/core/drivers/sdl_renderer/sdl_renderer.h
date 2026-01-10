@@ -22,8 +22,9 @@ extern int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_
 
 extern int sresdlrenderer_tex_gen(const sre_videodriver* video, void* texture);
 extern int sresdlrenderer_tex_update(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
-extern int sresdlrenderer_tex_bind(const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format);
+extern int sresdlrenderer_tex_bind(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
 extern int sresdlrenderer_tex_size(const sre_videodriver* video, void* texture, int* w, int* h);
+extern SDL_PixelFormatEnum sresdlrenderer_tex_format(const sre_videodriver* video, void* texture);
 extern void sresdlrenderer_tex_destroy(const sre_videodriver* video, void* texture);
 
 SRE_CAPI_END

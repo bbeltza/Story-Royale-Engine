@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #include <Base/Draw.h>
+#include <Base/Texture.h>
 #include <datatypes/units.h>
 
 // Function signature macro for declaring drawing command function pointers
@@ -40,8 +41,9 @@ typedef struct sre_videodriver
 
 	int (*tex_gen)(const sre_videodriver* video, void* texture);
 	int (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
-	int (*tex_bind)(const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format);
+	int (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
 	int (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
+	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
 	void (*tex_destroy)(const sre_videodriver* video, void* texture);
 
 	const char* error;
@@ -53,7 +55,7 @@ typedef struct sre_videodriver
 	sre_usize texture_size; // Size in bytes of a driver-speficic texture
 	const sre_usize textures_count;
 	const sre_usize textures_capacity;
-	const sre_u32* const texture_fl; // Texture free list
+	const sre_Texture* const texture_fl; // Texture free list
 	const sre_usize texture_flcount;
 	const sre_usize texture_flcapacity;
 

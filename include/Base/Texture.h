@@ -12,9 +12,10 @@ SRE_CAPI_BEGIN
 typedef sre_u32 sre_Texture;
 
 sre_Texture sre_tex_gen();
-int sre_tex_bind(sre_Texture id, const SDL_Surface* surface, int copy_pixels);
+int sre_tex_bind(sre_Texture id, const SDL_Surface* surface);
 int sre_tex_update(sre_Texture id, void* pixels, int pitch);
 int sre_tex_size(sre_Texture id, int* w, int* h);
+SDL_PixelFormatEnum sre_tex_format(sre_Texture id);
 void sre_tex_destroy(sre_Texture id);
 
 // Get driver-speficic pointer to a texture id
