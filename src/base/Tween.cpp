@@ -25,6 +25,7 @@ void TweenServer::update()
             tw->m_state = 0;
             tw->completed.Fire();
             m_tweens.erase(m_tweens.begin() + i);
+            i--;
         }
     }
 }
