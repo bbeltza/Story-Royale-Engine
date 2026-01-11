@@ -27,7 +27,7 @@ namespace sre
 
             if (sre_tex_bind(
                 m_handle,
-                static_cast<SDL_Surface*>(from_image.getHandle())
+                static_cast<SDL_Surface*>(from_image.handle())
             ) < 0) ERROR("Texture::Texture(): Failed to create texture on sre_tex_bind()");
         }
 

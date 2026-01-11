@@ -8,6 +8,8 @@ Signal<> sre::beforeRender{ NULL };
 Signal<> sre::afterRender{ NULL };
 
 intptr_t sre::current_frame() { return engine.frame; }
+unsigned current_framerate() { return 1/engine.target_dt; };
+unsigned current_tickrate() { return 1/engine.phys_target_dt; }
 
 void sre::set_framerate(unsigned FPS) { engine.target_dt = FPS ? 1.0_ts / FPS : 0.0_ts; }
 void sre::set_tickrate(unsigned FPS) { assert(FPS != 0); engine.phys_target_dt = 1.0_ts / FPS; }

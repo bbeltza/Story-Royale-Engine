@@ -27,7 +27,7 @@ set(BASE_SOURCES
 "display.cpp"
 "font.cpp"
 "fontrenderer.cpp"
-"Image.cpp"
+"image.cpp"
 "Input.cpp"
 "runtime.cpp"
 "Signal.cpp"
