@@ -46,7 +46,7 @@ namespace sre
             for (size_t i = 0; i < bitsize; i++)
                 buff[(sizeof(m_data) - 1) - i / 8][7 - i % 8] = '0' + ((m_data >> i) & 1);
 
-            for (size_t i = 0; i < sizeof(m_data) - 1; i++)
+            for (int i = 0; i < sizeof(m_data) - 1; i++)
                 buff[i][8] = ' ';
 
             _printer("{ %s (0x%x) }", buff, m_data);

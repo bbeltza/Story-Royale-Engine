@@ -18,8 +18,8 @@ namespace sreGUI
         virtual void on_press(sre::vec2ut pos) {}
         virtual void on_hover(bool hovered) {}
     private:
-        static void mouse_click(void* SignalData, Button* button, const MouseButton* buttonData);
-        static void finger_touch(void* SignalData, Button* button, const TouchFinger* mouseData);
+        static void mouse_click(void* SignalData, Button* button, MouseButton buttonData);
+        static void finger_touch(void* SignalData, Button* button, TouchFinger mouseData);
 
         void update() override;
 

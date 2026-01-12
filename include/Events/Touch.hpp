@@ -4,6 +4,7 @@
 
 struct TouchFinger
 {
+	TouchFinger() = default;
 	TouchFinger(const SDL_TouchFingerEvent* ev, int pressed):
 		UV(ev->x, ev->y),
 		Delta(ev->dx, ev->dy),

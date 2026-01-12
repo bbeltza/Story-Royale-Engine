@@ -9,7 +9,6 @@ namespace sre
 {
     using ::Signal;
 
-    extern sre::Signal<sre::Event> onEvent;
     extern sre::Signal<> onUpdate;
     extern sre::Signal<> beforeRender;
     extern sre::Signal<> afterRender;

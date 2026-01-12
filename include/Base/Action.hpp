@@ -60,9 +60,9 @@ namespace sre
 		static ConnectionHandle sc_mouse;
 		static ConnectionHandle sc_keyboard;
 		static ConnectionHandle sc_touch;
-		static void sc_handlemouse(void*, void*, const MouseButton* ev);
-		static void sc_handlekeyboard(void*, void*, const Key* ev);
-		static void sc_handletouch(void*, void*, const TouchFinger* ev);
+		static void sc_handlemouse(void*, void*, MouseButton ev);
+		static void sc_handlekeyboard(void*, void*, Key ev);
+		static void sc_handletouch(void*, void*, TouchFinger ev);
 	};
 }
 

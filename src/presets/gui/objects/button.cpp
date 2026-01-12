@@ -7,22 +7,22 @@ using namespace sreGUI;
 
 // Event functions
 
-void Button::mouse_click(void* _unused, Button* button, const MouseButton* buttonData)
+void Button::mouse_click(void* _unused, Button* button, MouseButton buttonData)
 {
-    if (!buttonData->pressed)
+    if (!buttonData.pressed)
         return;
 
     if (button->m_hover)
-        button->on_press(buttonData->position);
+        button->on_press(buttonData.position);
 }
 
-void Button::finger_touch(void* _unused, Button* button, const TouchFinger* touchData)
+void Button::finger_touch(void* _unused, Button* button, TouchFinger touchData)
 {
-    if (touchData->Pressed)
+    if (touchData.Pressed)
         return;
     
     if (button->m_hover)
-        button->on_press(touchData->UV * sre::display_size());
+        button->on_press(touchData.UV * sre::display_size());
 }
 
 

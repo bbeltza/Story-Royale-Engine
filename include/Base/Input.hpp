@@ -621,12 +621,12 @@ namespace Input
 {
 	// Signals
 
-	extern Signal<const ::Key *> KeyEvent;
-	extern Signal<const ::MouseButton *> MouseButton;
-	extern Signal<const ::MouseWheel *> MouseWheel;
-	extern Signal<const ::MouseMove *> MouseMove;
-	extern Signal<const ::TouchFinger *> FingerTouch;
-	extern Signal<const ::TouchFinger *> FingerMove;
+	extern Signal<::Key> KeyEvent;
+	extern Signal<::MouseButton> MouseButton;
+	extern Signal<::MouseWheel> MouseWheel;
+	extern Signal<::MouseMove> MouseMove;
+	extern Signal<::TouchFinger> FingerTouch;
+	extern Signal<::TouchFinger> FingerMove;
 
 	// Mouse button enum
 

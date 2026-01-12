@@ -34,15 +34,15 @@ void DragControl::on_pupdate(Camera&)
     // Empty.
 }
 
-void DragControl::mouseMoveCallback(void*, DragControl* self, const MouseMove* event)
+void DragControl::mouseMoveCallback(void*, DragControl* self, MouseMove event)
 {
     if (self->m_action.pressed())
-        self->m_lastmouseDelta += event->delta;
+        self->m_lastmouseDelta += event.delta;
 }
 
-void DragControl::touchMotionCallback(void*, DragControl* self, const TouchFinger* event)
+void DragControl::touchMotionCallback(void*, DragControl* self, TouchFinger event)
 {
     sre::vec2ut screen = sre::display_size();
 
-    self->m_lastmouseDelta += event->Delta * screen;
+    self->m_lastmouseDelta += event.Delta * screen;
 }

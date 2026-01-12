@@ -31,7 +31,7 @@ namespace sre
             ) < 0) ERROR("Texture::Texture(): Failed to create texture on sre_tex_bind()");
         }
 
-        Texture(Texture&& moving): m_handle(moving.m_handle) { moving.m_handle = 0; }
+        Texture(Texture&& moving) noexcept: m_handle(moving.m_handle) { moving.m_handle = 0; }
         ~Texture() { sre_tex_destroy(m_handle); }
 
         sre::vec2i size() const

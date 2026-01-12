@@ -1,17 +1,16 @@
 #ifndef SRE_EVENT_HPP
 #define SRE_EVENT_HPP
 
+#include <Base/Signal.hpp>
+
 namespace sre
 {
-    enum EventType
-    {
-        
-    };
+	struct Event
+	{
 
-    struct Event
-    {
+	};
 
-    };
+	extern Signal<sre::Event> onEvent;
 }
 
 #endif

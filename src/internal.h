@@ -83,6 +83,7 @@ SRE_CAPI_BEGIN
 
 	extern int __poll_events();
 	extern void __poll_input(SDL_Event* ev);
+	extern int __signal_events(void* data, SDL_Event* ev);
 
 	extern void __update_viewport(int w, int h);
 	extern void __update_input();

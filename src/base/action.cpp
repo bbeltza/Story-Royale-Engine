@@ -93,13 +93,13 @@ void Action::remove_impl(int value, int category)
 	}
 }
 
-void Action::sc_handlekeyboard(void*, void*, const Key* ev)
+void Action::sc_handlekeyboard(void*, void*, Key ev)
 {
-	if (ev->repeat) return;
+	if (ev.repeat) return;
 
-	const int scancode_val = ev->scanCode & C_SCANCODE_MASK;
-	const int keycode_val = ev->keyCode & C_KEYCODE_MASK;
-	const int incrementer = ev->pressed ? 1 : -1;
+	const int scancode_val = ev.scanCode & C_SCANCODE_MASK;
+	const int keycode_val = ev.keyCode & C_KEYCODE_MASK;
+	const int incrementer = ev.pressed ? 1 : -1;
 
 	auto current = head_ptr;
 	while (current)
@@ -119,7 +119,7 @@ void Action::sc_handlekeyboard(void*, void*, const Key* ev)
 
 		if (!current->m_counter)
 			current->m_frame = -1;
-		else if (ev->pressed)
+		else if (ev.pressed)
 			current->m_frame = static_cast<int>(sre::current_frame());
 		
 		END:
@@ -127,21 +127,21 @@ void Action::sc_handlekeyboard(void*, void*, const Key* ev)
 	}
 }
 
-void Action::sc_handlemouse(void*, void*, const MouseButton* ev)
+void Action::sc_handlemouse(void*, void*, MouseButton ev)
 {
-	int incrementer = ev->pressed ? 1 : -1;
+	int incrementer = ev.pressed ? 1 : -1;
 
 	auto current = head_ptr;
 	while (current)
 	{
 		for (unsigned val : current->m_inputs)
 		{
-			if ((val & C_MOUSE_MASK) != ev->button) continue;
+			if ((val & C_MOUSE_MASK) != ev.button) continue;
 
 			current->m_counter += incrementer;
 			if (!current->m_counter)
 				current->m_frame = -1;
-			else if (ev->pressed)
+			else if (ev.pressed)
 				current->m_frame = static_cast<int>(sre::current_frame());
 			break;
 		}

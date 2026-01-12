@@ -26,8 +26,8 @@ namespace sreECS
         ConnectionHandle m_touchConnection;
         const sre::Action& m_action;
 
-        static void mouseMoveCallback(void*, DragControl*, const MouseMove*);
-        static void touchMotionCallback(void*, DragControl*, const TouchFinger*);
+        static void mouseMoveCallback(void*, DragControl*, MouseMove);
+        static void touchMotionCallback(void*, DragControl*, TouchFinger);
         static sre::Action default_action;
     };
 }
