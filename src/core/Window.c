@@ -31,6 +31,8 @@ void __create_window()
 
 int __poll_events()
 {
+    engine.frame++;
+
     SDL_Event ev;
 
     while (SDL_PollEvent(&ev) != 0)

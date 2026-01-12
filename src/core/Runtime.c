@@ -17,7 +17,6 @@ void __run_engine()
 
 static void loop()
 {
-    ++engine.frame;
     engine.frameend_time = os.clock();
     engine.last_dt = (engine.frameend_time - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
     engine.framestart_time = engine.frameend_time;
@@ -55,6 +54,7 @@ static int eventfilter(void *data, SDL_Event *ev)
         {
         #ifdef _WIN32
             case SDL_WINDOWEVENT_EXPOSED:
+                engine.frame++;
                 loop();
                 break;
         #endif
