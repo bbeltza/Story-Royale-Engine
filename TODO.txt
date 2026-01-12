@@ -10,6 +10,8 @@
 
 - Move classes and objects to a single namespace (e.g. sre::--)
 
+- Move some of the include stuff from base to a new core folder like Texture.h (and maybe move some base sources to core too)
+
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 

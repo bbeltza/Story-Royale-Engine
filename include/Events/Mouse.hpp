@@ -12,7 +12,7 @@ struct MouseButton
         clicks(ev->clicks),
         position(ev->x / ratio, ev->y / ratio)
     {}
-
+    
     bool pressed;
     Uint32 id;
     Uint8 button;

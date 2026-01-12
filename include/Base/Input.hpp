@@ -614,7 +614,7 @@ namespace sre
 		NUM_SCANCODES = KBSCANCODE_COUNT
 	};
 
-
+	using keyMod = SDL_Keymod;
 }
 
 namespace Input
