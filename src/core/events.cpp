@@ -29,14 +29,14 @@ int __signal_events(void* data, SDL_Event* ev)
         current.mouse_button.button = ev->button.button;
         current.mouse_button.clicks = ev->button.clicks;
         current.mouse_button.pressed = ev->button.state;
-        current.mouse_button.position = sre::vec2ut{ ev->button.x, ev->button.y } / engine.video->scale;
+        current.mouse_button.position = sre::vec2ut{ ev->button.x, ev->button.y } * engine.scale_ratio;
         break;
     case SDL_MOUSEMOTION:
         current.type = sre::EVENT_MOUSEMOVE;
         current.mouse_move.id = ev->motion.which;
         current.mouse_move.button_state = ev->motion.state;
-        current.mouse_move.position = sre::vec2ut{ ev->motion.x, ev->motion.y } / engine.video->scale;
-        current.mouse_move.delta = sre::vec2ut{ ev->motion.xrel, ev->motion.yrel } / engine.video->scale;
+        current.mouse_move.position = sre::vec2ut{ ev->motion.x, ev->motion.y } * engine.scale_ratio;
+        current.mouse_move.delta = sre::vec2ut{ ev->motion.xrel, ev->motion.yrel } * engine.scale_ratio;
         break;
     case SDL_FINGERUP:
     case SDL_FINGERDOWN:

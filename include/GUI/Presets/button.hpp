@@ -3,9 +3,7 @@
 
 #include <GUI/object.hpp>
 
-#include <Base/Signal.hpp>
-#include <Events/Mouse.hpp>
-#include <Events/Touch.hpp>
+#include <Base/Event.hpp>
 
 namespace sreGUI
 {
@@ -18,14 +16,12 @@ namespace sreGUI
         virtual void on_press(sre::vec2ut pos) {}
         virtual void on_hover(bool hovered) {}
     private:
-        static void mouse_click(void* SignalData, Button* button, MouseButton buttonData);
-        static void finger_touch(void* SignalData, Button* button, TouchFinger mouseData);
+        static void handle_event(void* signalData, Button* button, sre::Event eventData);
 
         void update() override;
 
         bool m_hover = 0;
-        ConnectionHandle m_click_event;
-        ConnectionHandle m_touch_event;
+        ConnectionHandle m_event;
     };
 }
 

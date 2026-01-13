@@ -617,39 +617,14 @@ namespace sre
 	using keyMod = SDL_Keymod;
 }
 
-namespace Input
+namespace sre
 {
-	// Signals
+	bool key_pressed(sre::keyCode code);
+	bool key_pressed(sre::scanCode code);
 
-	extern Signal<::Key> KeyEvent;
-	extern Signal<::MouseButton> MouseButton;
-	extern Signal<::MouseWheel> MouseWheel;
-	extern Signal<::MouseMove> MouseMove;
-	extern Signal<::TouchFinger> FingerTouch;
-	extern Signal<::TouchFinger> FingerMove;
+	bool button_pressed(sre::mouseButton button);
 
-	// Mouse button enum
+	sre::vec2ut mouse_screencoords();
 
-	enum Button : Uint8
-	{
-		mbLeft = SDL_BUTTON_LEFT,
-		mbMiddle = SDL_BUTTON_MIDDLE,
-		mbRight = SDL_BUTTON_RIGHT,
-		mbX1 = SDL_BUTTON_X1,
-		mbX2 = SDL_BUTTON_X2,
-
-		mbANY = UINT8_MAX
-	};
-
-	// Keyboard functions
-	bool KeyPressed(SDL_KeyCode keycode);
-	bool KeyPressed(SDL_Scancode scancode);
-
-	// Mouse functions
-	bool MouseButtonPressed(Button button = mbANY);
-	sre::vec2ut MouseScreenPosition();
-	sre::vec2ut MouseWorldPosition();
-
-	// Touch functions
-	int GetFingersPressed(SDL_TouchID touchid = -1);
+	int fingers_pressed();
 }

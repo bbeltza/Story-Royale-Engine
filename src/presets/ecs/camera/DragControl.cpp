@@ -6,10 +6,8 @@ using namespace sreECS;
 
 sre::Action DragControl::default_action{ sre::MB_RIGHT };
 
-DragControl::DragControl(const sre::Action& action): m_action(action)
+DragControl::DragControl(const sre::Action& action): m_action(action), m_eventconnection(sre::onEvent.Connect(handle_event, this))
 {
-    m_mouseConnection = Input::MouseMove.Connect(DragControl::mouseMoveCallback, this);
-    m_touchConnection = Input::FingerMove.Connect(DragControl::touchMotionCallback, this);
 }
 
 DragControl::~DragControl() {}
@@ -34,15 +32,15 @@ void DragControl::on_pupdate(Camera&)
     // Empty.
 }
 
-void DragControl::mouseMoveCallback(void*, DragControl* self, MouseMove event)
+void DragControl::handle_event(void*, DragControl* self, sre::Event ev)
 {
-    if (self->m_action.pressed())
-        self->m_lastmouseDelta += event.delta;
-}
-
-void DragControl::touchMotionCallback(void*, DragControl* self, TouchFinger event)
-{
-    sre::vec2ut screen = sre::display_size();
-
-    self->m_lastmouseDelta += event.Delta * screen;
+    switch (ev.type)
+    {
+    case sre::EVENT_MOUSEMOVE:
+        if (self->m_action.pressed()) self->m_lastmouseDelta += ev.mouse_move.delta;
+        break;
+    case sre::EVENT_TOUCH:
+        self->m_lastmouseDelta += ev.touch.delta * sre::display_size();
+        break;
+    }
 }

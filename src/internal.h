@@ -62,8 +62,9 @@ SRE_CAPI_BEGIN
 
 		sre_unit mouse_x, mouse_y;
 		uint32_t mouse_press;
+		sre_unit scale_ratio; // 1 / video->scale
 		SDL_TouchID input_last_touchid;
-		uint8_t keyboard_state[SDL_NUM_SCANCODES];
+		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 
 		void* containers_service;
 	};
@@ -106,14 +107,10 @@ SRE_CAPI_END
 #ifdef __cplusplus
 #define currscn static_cast<::sreECS::Scene*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
 #define currlayer static_cast<::sreGUI::Object*>(engine.current_guilayer) // Same with this...
-#define flags_kbstate reinterpret_cast<::sre::flags8*>(engine.keyboard_state)
-#define flags_mousepress (*reinterpret_cast<::sre::flags32*>(&engine.mouse_press))
 
 #define _audio_loaded static_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
 #define _audio_queue static_cast<std::unordered_set<Audio *> *>(engine.audio_queue)
 #define _audio_stopqueue static_cast<std::queue<Audio *> *>(engine.stopped_audios)
-
-#define _fonts_loaded static_cast<std::list<TTF_Font*> *>(engine.loaded_fonts)
 #endif
 
 #define engine __engine_data // Macro for easier typing

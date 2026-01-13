@@ -2,9 +2,6 @@
 #include <ECS/camera.hpp>
 
 #include <Datatypes/Vector.hpp>
-#include <Events/Mouse.hpp>
-#include <Events/Touch.hpp>
-#include <Base/Signal.hpp>
 #include <Base/Action.hpp>
 
 namespace sreECS
@@ -22,12 +19,10 @@ namespace sreECS
     private:
         sre::vec2ut m_camSpeed;
         sre::vec2ut m_lastmouseDelta;
-        ConnectionHandle m_mouseConnection;
-        ConnectionHandle m_touchConnection;
+        ConnectionHandle m_eventconnection;
         const sre::Action& m_action;
 
-        static void mouseMoveCallback(void*, DragControl*, MouseMove);
-        static void touchMotionCallback(void*, DragControl*, TouchFinger);
+        static void handle_event(void* signalData, DragControl* self, sre::Event ev);
         static sre::Action default_action;
     };
 }

@@ -61,6 +61,7 @@ void __update_viewport(int w, int h)
 
 	engine.osize_x = w;
 	engine.osize_y = h;
+	engine.scale_ratio = 1 / scale;
 	engine.video->scale = scale;
 	engine.video->size = size;
 	engine.video->center = center;

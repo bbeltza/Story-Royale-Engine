@@ -1,7 +1,7 @@
 #ifndef SRE_ACTION_HPP
 #define SRE_ACTION_HPP
 
-#include <Base/Input.hpp>
+#include <Base/Event.hpp>
 #include <Base/Runtime.hpp>
 
 namespace sre
@@ -9,6 +9,13 @@ namespace sre
 	class Action
 	{
 		std::vector<unsigned> m_inputs;
+
+		// For a little later: Mouse inputs don't really need to be stored inside the vector
+		// So I can just use a bitmask to determine which mouse inputs the action has
+			u8 m_mouse;
+			u8 m_touch; // For touch, I might add support for different touch gestures, so I can use a u8 (or even a u16) instead of a bool
+		//
+
 		int m_counter = 0;
 		int m_frame = -1;
 
@@ -61,13 +68,7 @@ namespace sre
 	private:
 		static Action* head_ptr;
 		static ConnectionHandle sc_event;
-		static ConnectionHandle sc_mouse;
-		static ConnectionHandle sc_keyboard;
-		static ConnectionHandle sc_touch;
 		static void sc_eventhandler(void*, void*, Event ev);
-		static void sc_handlemouse(void*, void*, MouseButton ev);
-		static void sc_handlekeyboard(void*, void*, Key ev);
-		static void sc_handletouch(void*, void*, TouchFinger ev);
 	};
 }
 

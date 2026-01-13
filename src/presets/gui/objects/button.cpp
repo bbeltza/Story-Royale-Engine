@@ -1,36 +1,29 @@
 #include <GUI/Presets/button.hpp>
 
-#include <Base/Input.hpp>
+#include <Base/Event.hpp>
 #include <Base/Display.hpp>
 
 using namespace sreGUI;
 
-// Event functions
-
-void Button::mouse_click(void* _unused, Button* button, MouseButton buttonData)
+void Button::handle_event(void*, Button* button, sre::Event ev)
 {
-    if (!buttonData.pressed)
-        return;
+    if (!button->flags.has(F_ENABLED)) return;
 
-    if (button->m_hover)
-        button->on_press(buttonData.position);
+    switch (ev.type)
+    {
+    case sre::EVENT_MOUSEBUTTON:
+        if (!ev.mouse_button.pressed) return;
+        if (button->m_hover) button->on_press(ev.mouse_button.position);
+        break;
+    case sre::EVENT_TOUCH:
+        if (ev.touch.pressed) return;
+        if (button->m_hover) button->on_press(ev.touch.uv * sre::display_size());
+        break;
+    }
 }
-
-void Button::finger_touch(void* _unused, Button* button, TouchFinger touchData)
-{
-    if (touchData.Pressed)
-        return;
-    
-    if (button->m_hover)
-        button->on_press(touchData.UV * sre::display_size());
-}
-
-
-// Class methods
 
 Button::Button():
-    m_click_event(Input::MouseButton.Connect(mouse_click, this)),
-    m_touch_event(Input::FingerTouch.Connect(finger_touch, this))
+    m_event(sre::onEvent.Connect(handle_event, this))
 {
 
 }
