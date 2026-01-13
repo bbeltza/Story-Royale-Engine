@@ -19,8 +19,6 @@ int __signal_events(void* data, SDL_Event* ev)
         current.key_press.keymod = static_cast<sre::keyMod>(ev->key.keysym.mod);
 
         current.key_press.press = ev->key.state + ev->key.repeat;
-
-        sre::onEvent.Fire(current);
         break;
     case SDL_MOUSEBUTTONUP:
     case SDL_MOUSEBUTTONDOWN:

@@ -3,11 +3,14 @@
 #include <ECS/component.hpp>
 
 #include <Base/Display.hpp>
+#include <Base/Input.hpp>
 
 #include "../internal.h"
 #include "../internal.hpp"
 
 using namespace sreECS;
+
+sre::vec2ut sreECS::mouse_worldcoords() { return Scene::current()->camera.toWorldSpace(sre::mouse_screencoords()); }
 
 Scene::_Arena* Scene::new_arena()
 {

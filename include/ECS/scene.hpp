@@ -164,6 +164,8 @@ namespace sreECS
     };
 
     using World = Scene; // Alias for `Scene`, for now. Might be moving back to World
+
+    extern sre::vec2ut mouse_worldcoords(); // Helper to determine mouse world coordinates
 }
 
 #endif
