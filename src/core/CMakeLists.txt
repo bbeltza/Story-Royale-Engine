@@ -6,9 +6,9 @@ set(CORE_SOURCES
 "Audio.cpp"
 "Containers.cpp"
 "DestroyQueue.cpp"
-"Input.cpp"
+"input.cpp"
 "Querying.cpp"
-"Renderer.cpp"
+"renderer.cpp"
 
 "InitEngine.c"
 "Runtime.c"

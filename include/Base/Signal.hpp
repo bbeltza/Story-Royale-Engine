@@ -96,7 +96,7 @@ class Signal: public SignalBase
 	#define _T2 template <typename Ret>
 public:
 	constexpr Signal(void* Userdata=NULL): SignalBase(Userdata) { }
-	void Fire(Args... args) { ret_args.swap(std::tuple<Args...>( args... )); base_fire(); }
+	void Fire(Args... args) { ret_args = std::make_tuple( args... ); base_fire(); }
 
 
 	_T1 Connection* Connect(Callable<Ret, ST, CT> function, void* userdata = NULL) { return base_connect(function, userdata, Connection::NONE); }

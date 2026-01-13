@@ -9,8 +9,20 @@
 
 namespace sre
 {
-	enum eventType;
+	enum eventType
+	{
+		EVENT_DEFAULT,
 
+		EVENT_MOUSEBUTTON,
+		EVENT_MOUSEWHEEL,
+		EVENT_MOUSEMOVE,
+		EVENT_KEYPRESS,
+		EVENT_TOUCH
+	};
+}
+
+namespace sre
+{
 	namespace events
 	{
 		struct Common
@@ -64,17 +76,6 @@ namespace sre
 
 namespace sre
 {
-	enum eventType
-	{
-		EVENT_DEFAULT,
-
-		EVENT_MOUSEBUTTON,
-		EVENT_MOUSEWHEEL,
-		EVENT_MOUSEMOVE,
-		EVENT_KEYPRESS,
-		EVENT_TOUCH
-	};
-
 	union Event
 	{
 		Event() {}
