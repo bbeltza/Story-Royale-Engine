@@ -4,7 +4,7 @@
 
 using namespace sreECS;
 
-sre::Action DragControl::default_action{ Input::mbRight };
+sre::Action DragControl::default_action{ sre::MB_RIGHT };
 
 DragControl::DragControl(const sre::Action& action): m_action(action)
 {

@@ -21,18 +21,21 @@ namespace sre
 
 		~Action();
 
-		inline void add(Input::Button button) { return add_impl(static_cast<int>(button), C_MOUSE); }
-		inline void add(SDL_Scancode button) { return add_impl(static_cast<int>(button), C_SCANCODE); }
-		inline void add(SDL_KeyCode button) { return add_impl(static_cast<int>(button), C_KEYCODE); }
-		inline void remove(Input::Button button) { return remove_impl(static_cast<int>(button), C_MOUSE); }
-		inline void remove(SDL_Scancode button) { return remove_impl(static_cast<int>(button), C_SCANCODE); }
-		inline void remove(SDL_KeyCode button) { return remove_impl(static_cast<int>(button), C_KEYCODE); }
+		inline void add(mouseButton button) { return add_impl(static_cast<int>(button), C_MOUSE); }
+		inline void add(scanCode button) { return add_impl(static_cast<int>(button), C_SCANCODE); }
+		inline void add(keyCode button) { return add_impl(static_cast<int>(button), C_KEYCODE); }
+		inline void remove(mouseButton button) { return remove_impl(static_cast<int>(button), C_MOUSE); }
+		inline void remove(scanCode button) { return remove_impl(static_cast<int>(button), C_SCANCODE); }
+		inline void remove(keyCode button) { return remove_impl(static_cast<int>(button), C_KEYCODE); }
+
+		template <class T> inline void add(T) { static_assert(0, "Type must be either mouseButton, or scanCode, or keyCode"); }
+		template <class T> inline void remove(T) { static_assert(0, "Type must be either mouseButton, or scanCode, or keyCode"); }
 
 		bool pressed() const { return !(m_frame < 0); }
 		bool just_pressed() const { return m_frame == sre::current_frame(); }
 
 	private:
-		enum Category
+		enum
 		{
 			C_MOUSE,
 			C_SCANCODE,
@@ -57,9 +60,11 @@ namespace sre
 	
 	private:
 		static Action* head_ptr;
+		static ConnectionHandle sc_event;
 		static ConnectionHandle sc_mouse;
 		static ConnectionHandle sc_keyboard;
 		static ConnectionHandle sc_touch;
+		static void sc_eventhandler(void*, void*, Event ev);
 		static void sc_handlemouse(void*, void*, MouseButton ev);
 		static void sc_handlekeyboard(void*, void*, Key ev);
 		static void sc_handletouch(void*, void*, TouchFinger ev);

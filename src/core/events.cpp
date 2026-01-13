@@ -26,7 +26,7 @@ int __signal_events(void* data, SDL_Event* ev)
     case SDL_MOUSEBUTTONDOWN:
         current.type = sre::EVENT_MOUSEBUTTON;
         current.mouse_button.id = ev->button.which;
-        current.mouse_button.button = ev->button.button - 1; // sre::mouseButton starts at 0
+        current.mouse_button.button = ev->button.button;
         current.mouse_button.clicks = ev->button.clicks;
         current.mouse_button.pressed = ev->button.state;
         current.mouse_button.position = sre::vec2ut{ ev->button.x, ev->button.y } / engine.video->scale;
