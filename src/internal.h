@@ -26,11 +26,13 @@ SRE_CAPI_BEGIN
 		sre_timeStamp last_dt;
 		sre_timeStamp target_dt;
 		sre_timeStamp phys_target_dt;
+		SDL_threadID main_thrd;
 
 		unsigned long long framestart_time;
 		unsigned long long frameend_time;
 
 		void* defer_head;
+		void* retdefer_head;
 
 		// Instance data
 

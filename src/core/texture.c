@@ -1,4 +1,6 @@
 #include <Base/Texture.h>
+#include <Base/Defer.h>
+
 #include "drivers/drivers.h"
 #include "../internal.h"
 
@@ -101,12 +103,26 @@ void sre_tex_destroy(sre_Texture id)
     SDL_UnlockMutex(engine.sdl_rendermutex);
 }
 
+struct defer_texbind
+{
+    void* texture;
+    const SDL_Surface* surface;
+};
+
+int deferred_texbind(struct defer_texbind* texbind) { return engine.video->tex_bind(engine.video, texbind->texture, texbind->surface); }
+
 int sre_tex_bind(sre_Texture id, const SDL_Surface* surface)
 {
     void* texture = sre_get_texture(id);
     if (!texture) return -1;
 
-    return engine.video->tex_bind(engine.video, texture, surface);
+    struct defer_texbind texbind = {
+        .texture = texture,
+        .surface = surface
+    };
+
+    void* res = sre_defer_response((sre_deferResponseFunction)deferred_texbind, &texbind);
+    return *(int*)&res;
 }
 
 int sre_tex_update(sre_Texture id, const void* pixels, int pitch)

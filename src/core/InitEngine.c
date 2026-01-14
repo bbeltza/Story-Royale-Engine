@@ -32,6 +32,7 @@ static inline void __setup_engine_data()
 
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
+    engine.main_thrd = SDL_ThreadID();
     engine.entry_thread = SDL_CreateThread(__invoke_entry, "Game Entry", NULL);
 }
 
