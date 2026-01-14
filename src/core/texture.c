@@ -121,8 +121,8 @@ int sre_tex_bind(sre_Texture id, const SDL_Surface* surface)
         .surface = surface
     };
 
-    void* res = sre_defer_response((sre_deferResponseFunction)deferred_texbind, &texbind);
-    return *(int*)&res;
+    sre_sptr res = sre_defer_response((sre_deferResponseFunction)deferred_texbind, &texbind);
+    return (int)res;
 }
 
 int sre_tex_update(sre_Texture id, const void* pixels, int pitch)

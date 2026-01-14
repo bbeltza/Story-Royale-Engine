@@ -1,14 +1,21 @@
 #pragma once
 #include <SDL.h>
 #include <standard>
+
+#include <Datatypes/TimeStamp.h>
+#include <internal_def.hh>
+#include <utils/sequence.hpp>
+
+#include <ints.h>
+
+namespace sre
+{
+    enum class thread: uptr
+    {
+    };
+};
+
 #define TEMPL template <class _Fn, class... _Args>
-
-#include "Datatypes/TimeStamp.h"
-
-#include "internal_def.hh"
-
-#include "utils/sequence.hpp"
-
 class Thread;
 
 namespace Threads // Designed to replace ThreadPool

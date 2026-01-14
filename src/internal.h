@@ -34,6 +34,9 @@ SRE_CAPI_BEGIN
 		void* defer_head;
 		void* retdefer_head;
 
+		void* threads_bucket; // "Hash" map of the threads
+		#define SRE_THREADS_BUCKETSIZE 32
+
 		// Instance data
 
 		void* current_world;

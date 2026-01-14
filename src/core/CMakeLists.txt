@@ -3,6 +3,7 @@ set(CORE_SOURCES
 "texture.c"
 "defer.c"
 "events.cpp"
+"thread.c"
 
 "Audio.cpp"
 "Containers.cpp"
