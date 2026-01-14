@@ -30,6 +30,8 @@ SRE_CAPI_BEGIN
 		unsigned long long framestart_time;
 		unsigned long long frameend_time;
 
+		void* defer_head;
+
 		// Instance data
 
 		void* current_world;
@@ -92,6 +94,7 @@ SRE_CAPI_BEGIN
 	extern void __query_objects();
 
 	extern void __destroy_queue();
+	extern void __call_deferred();
 
 	extern void __update_classes();
 	extern void __update_world();

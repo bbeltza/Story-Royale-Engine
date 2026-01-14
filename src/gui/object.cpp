@@ -22,11 +22,13 @@ Object::~Object()
     
     while (!children.empty())
         delete children.front();
+    
+    if (engine.current_guilayer == this) engine.current_guilayer = NULL;
 }
 
 void Object::set_parent(Object* parent)
 {
-    if (!m_parent)
+    if (engine.current_guilayer == this)
     {
         ERROR("Calling set_parent() on root Object, this is unimplemented");
         return;
@@ -38,7 +40,7 @@ void Object::set_parent(Object* parent)
     }
     if (m_parent == parent) return;
 
-    m_parent->children.remove(this);
+    if (m_parent) m_parent->children.remove(this);
     m_parent = parent;
     parent->children.push_back(this);
 }
@@ -55,10 +57,17 @@ void Object::set_root(bool destroy_old)
         m_parent->children.remove(this);
         m_parent = NULL;
     }
-    if (engine.current_guilayer)
+    if (engine.current_guilayer && destroy_old)
         currlayer->destroy();
     
     engine.current_guilayer = this;
+}
+
+void Object::remove_root(bool destroy_old)
+{
+    if (engine.current_guilayer && destroy_old)
+        currlayer->destroy();
+    engine.current_guilayer = NULL;
 }
 
 void Object::CContainer::setup(Component* const components[], size_t count)

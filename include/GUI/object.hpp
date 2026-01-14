@@ -83,6 +83,9 @@ namespace sreGUI
         void set_root(bool destroy_old=true);
         void set_parent(Object *parent);
 
+        // Removes the current root object and destroys/cleans it if `destroy_old` is set to `true`
+        static void remove_root(bool destroy_old=true);
+
         template <typename T=Object>
         inline T *get_parent() const { return dynamic_cast<T*>(m_parent); }
 

@@ -11,6 +11,8 @@ static size_t queue_count = 0;
 
 void __destroy_queue()
 {
+	__call_deferred();
+
 	SDL_LockMutex(engine.destroyqueue_mutex);
 	while (obj_head != PTR_MAX)
 		delete obj_head;
