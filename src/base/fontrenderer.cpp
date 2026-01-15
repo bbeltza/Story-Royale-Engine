@@ -99,7 +99,7 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
     size_t scount = (size_t)count, n = 0;
     scount -= acc;
 
-    char utf8[8] = { 0 };
+    char utf8[8];
     int inc = str_to_utf8chr(text, utf8);
 
     sre::rect2Dut render_rect(start, sre::vec2ut::ZERO);
