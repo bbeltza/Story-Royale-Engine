@@ -5,12 +5,15 @@ static std::vector<std::string> line_buff;
 
 using namespace sre;
 
-void Font::render(const sre::rect2Dut & bounds, const sre::col4& color, const char* text, int count, Alignment halignment, Alignment valignment)
+void Font::render(const sre::rect2Dut &bounds, const sre::col4 &color, const char *text, int count, Alignment halignment, Alignment valignment)
 {
-    if (preload(text)) return;
+    if (preload(text))
+        return;
 
-    if (count == 0) return;
-    if (bounds.size.x <= 0) return;
+    if (count == 0)
+        return;
+    if (bounds.size.x <= 0)
+        return;
 
     sre::unit line_skip = (sre::unit)TTF_FontLineSkip(m_font);
 
@@ -19,7 +22,8 @@ void Font::render(const sre::rect2Dut & bounds, const sre::col4& color, const ch
 
     while (true)
     {
-        if (line_buff.size() <= (size_t)i) line_buff.resize(i+1);
+        if (line_buff.size() <= (size_t)i)
+            line_buff.resize(i + 1);
 
         TTF_MeasureText(m_font, text, width, NULL, &last_begin);
         int end = last_begin;
@@ -28,22 +32,25 @@ void Font::render(const sre::rect2Dut & bounds, const sre::col4& color, const ch
             char chr = text[j];
             if (chr == '\n')
             {
-                last_begin = j+1;
+                last_begin = j + 1;
                 break;
             }
             else if (chr == ' ')
-                last_begin = j+1;
-            else if (!text[j+1]) {
+                last_begin = j + 1;
+            else if (!text[j + 1])
+            {
                 last_begin = end;
                 done = 1;
             }
         }
         int diff = 0;
-        if (text[last_begin - 1] == '\n') diff = 1;
+        if (text[last_begin - 1] == '\n')
+            diff = 1;
 
         line_buff[i].assign(text, last_begin - diff);
         i++;
-        if (done) break;
+        if (done)
+            break;
 
         text += last_begin;
     }
@@ -51,8 +58,10 @@ void Font::render(const sre::rect2Dut & bounds, const sre::col4& color, const ch
     sre::vec2ut startvec = bounds.position;
 
     sre::unit yoffset = 0;
-    if (valignment != A_TOP) yoffset = bounds.size.y - line_skip * i;
-    if (valignment == A_CENTER) yoffset /= 2;
+    if (valignment != A_TOP)
+        yoffset = bounds.size.y - line_skip * i;
+    if (valignment == A_CENTER)
+        yoffset /= 2;
 
     startvec.y += yoffset;
 
@@ -60,14 +69,16 @@ void Font::render(const sre::rect2Dut & bounds, const sre::col4& color, const ch
 
     for (int j = 0; j < i; j++)
     {
-        const char* c_str = line_buff[j].c_str();
+        const char *c_str = line_buff[j].c_str();
 
         int line_extent;
         TTF_MeasureText(m_font, c_str, width, &line_extent, NULL);
 
         sre::unit xoffset = 0;
-        if (halignment != A_LEFT) xoffset = bounds.size.x - line_extent;
-        if (halignment == A_CENTER) xoffset /= 2;
+        if (halignment != A_LEFT)
+            xoffset = bounds.size.x - line_extent;
+        if (halignment == A_CENTER)
+            xoffset /= 2;
 
         startvec.x = bounds.position.x + xoffset;
 
@@ -78,23 +89,26 @@ void Font::render(const sre::rect2Dut & bounds, const sre::col4& color, const ch
     }
 }
 
-void Font::render_line(const sre::vec2ut& start, const sre::col4& color, const char* text, int count, int acc)
+void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const char *text, int count, int acc)
 {
     assert(m_font);
-    if (count > 0 && count - acc <= 0) return;
+    if (count > 0 && count - acc <= 0)
+        return;
 
     count = count < 0 ? -1 : count;
     size_t scount = (size_t)count, n = 0;
     scount -= acc;
 
-    char chr = text[n];
+    char utf8[8] = { 0 };
+    int inc = str_to_utf8chr(text, utf8);
 
     sre::rect2Dut render_rect(start, sre::vec2ut::ZERO);
-    while (chr)
+    while (inc)
     {
-        if (n >= scount) break;
+        if (n >= scount)
+            break;
 
-        Texture& texture = textures.at(chr);
+        Texture &texture = textures.at(*reinterpret_cast<int*>(utf8));
         render_rect.size = sre::vec2ut{texture.size()};
 
         draw(DDTexture{
@@ -102,11 +116,11 @@ void Font::render_line(const sre::vec2ut& start, const sre::col4& color, const c
             color,
             render_rect,
             sre::vec2ut::ZERO,
-            texture.handle()
-        });
+            texture.handle()});
 
         render_rect.position.x += render_rect.size.x;
 
-        chr = text[++n];
+        n += inc;
+        inc = str_to_utf8chr(text + n, utf8);
     }
 }

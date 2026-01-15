@@ -41,16 +41,58 @@ bool Font::preload(const char *text)
     size_t n = 0;
     while (text[n])
     {
-        char c = text[n];
-        if (!textures.count(c))
+        char utf8[8] = { 0 };
+        n += str_to_utf8chr(text + n, utf8);
+
+        if (!textures.count(*reinterpret_cast<int*>(utf8)))
         {
+            
             textures.emplace(
-                c,
-                sre::Image{TTF_RenderGlyph_Solid(m_font, c, sre::col4::WHITE.toSDL())});
+                *reinterpret_cast<int*>(utf8),
+                sre::Image{TTF_RenderUTF8_Solid(m_font, utf8, sre::col4::WHITE.toSDL())});
             unloaded = true;
         };
-        n++;
     }
 
     return unloaded;
+}
+
+int Font::str_to_utf8chr(const char* str, char* dst)
+{
+    register int inc = 0;
+    if (!str[0]) goto END;
+
+    if (str[0] > 0)
+    {
+        dst[0] = str[0];
+        inc = 1;
+    }
+    else if (str[0] < -64) assert(0 && "Broken UTF-8 codepoint");
+    else if (str[0] < -32)
+    {
+        dst[0] = str[0];
+        dst[1] = str[1];
+        inc = 2;
+    }
+    else if (str[0] >= -16)
+    {
+        dst[0] = str[0];
+        dst[1] = str[1];
+        dst[2] = str[2];
+        inc = 3;
+    }
+    else
+    {
+        dst[0] = str[0];
+        dst[1] = str[1];
+        dst[2] = str[2];
+        dst[3] = str[3];
+        inc = 4;
+    }    
+    
+    assert(inc && "Broken UTF-8 Codepoint");
+
+    END:
+    dst[inc] = '\0';
+    return inc;
 }

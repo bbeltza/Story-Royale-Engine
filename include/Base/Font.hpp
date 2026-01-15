@@ -29,9 +29,12 @@ namespace sre
 
         bool preload(const char *desired);
         bool valid() const { return m_font != NULL; }
+
+        // Converts `src` utf-8 string into null terminated utf-8 codepoint into `dst`
+        // And returns the size of the codepoint
+        static int str_to_utf8chr(const char* src, char* dst);
     private:
         std::unordered_map<int, Texture> textures;
-        std::unordered_map<int, sre::vec2i> sizes;
 
         TTF_Font *m_font = NULL;
         SDL_RWops *m_rwops = NULL;

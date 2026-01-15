@@ -24,6 +24,8 @@ namespace sre
                 ERROR("Texture::Texture(): Failed to create texture on sre_tex_gen()");
                 return;
             }
+            if (!from_image.valid())
+                return;
 
             if (sre_tex_bind(
                 m_handle,

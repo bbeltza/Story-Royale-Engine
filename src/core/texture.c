@@ -4,9 +4,9 @@
 #include "drivers/drivers.h"
 #include "../internal.h"
 
-int sre_isinfreelist(sre_Texture id)
+size_t sre_isinfreelist(sre_Texture id)
 {
-    for (int i = 0; i < engine.video->texture_flcount; i++)
+    for (size_t i = 0; i < engine.video->texture_flcount; i++)
         if (engine.video->texture_fl[i] == id) return i;
     return -1;
 }
@@ -14,7 +14,7 @@ int sre_isinfreelist(sre_Texture id)
 void* sre_get_texture(sre_Texture id)
 {
     if (!id) return NULL;
-    if (sre_isinfreelist(id) >= 0) return NULL;
+    if (sre_isinfreelist(id) != -1) return NULL;
 
     id--;
     if (id > engine.video->textures_count) return NULL;
@@ -26,7 +26,7 @@ sre_Texture sre_tex_gen()
     SDL_LockMutex(engine.sdl_rendermutex);
 
     sre_Texture id = 0;
-    for (int i = 0; i < engine.video->texture_flcount; i++)
+    for (size_t i = 0; i < engine.video->texture_flcount; i++)
     {
         if (!engine.video->texture_fl[i]) continue;
 
@@ -69,16 +69,16 @@ void sre_tex_destroy(sre_Texture id)
 {
     if (!id) return;
     if (!engine.video) return;
-    int target = -1;
+    size_t target = -1;
 
     SDL_LockMutex(engine.sdl_rendermutex);
-    for (int i = 0; i < engine.video->texture_flcount; i++)
+    for (size_t i = 0; i < engine.video->texture_flcount; i++)
     {
         if (!engine.video->texture_fl[i]) target = i;
         else if (engine.video->texture_fl[i] == id) goto RET;
     }
 
-    if (target < 0)
+    if (target == -1)
     {
         if (engine.video->texture_flcount >= engine.video->texture_flcapacity)
         {

@@ -40,4 +40,4 @@ SRE_CAPI_END
 #endif
 
 #define delay_s(s) os.delay((unsigned long long)((s) * TICKS_PER_SEC))
-#define delay_ms(ms) os.delay(unsigned long long((s) * (TICKS_PER_SEC / 1000)))
+#define delay_ms(ms) os.delay(unsigned long long((ms) * (TICKS_PER_SEC / 1000)))
