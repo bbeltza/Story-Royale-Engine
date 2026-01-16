@@ -21,8 +21,7 @@ static void loop()
     engine.last_dt = (engine.frameend_time - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
     engine.framestart_time = engine.frameend_time;
 
-    __cleanup_threads();
-    __update_classes();
+    __update_threads();
     __update_input();
 
     __destroy_queue();

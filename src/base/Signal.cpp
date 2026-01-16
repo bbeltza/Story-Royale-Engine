@@ -4,7 +4,7 @@
 
 #define get_semaphore static_cast<SDL_sem *>(m_semaphore)
 
-void SignalBase::static_invoker(SignalBase *sig, void *func, void *data) { sig->invoke_func(func, data); }
+sre::Thread::result_type SignalBase::static_invoker(SignalBase* sig, void* func, void* data) { sig->invoke_func(func, data); return 0; }
 
 void SignalBase::base_fire()
 {
@@ -14,7 +14,7 @@ void SignalBase::base_fire()
 	{
 		Connection *prev = connection->m_prev;
 		if (connection->flags.has(Connection::MULTITHREADED))
-			Threads::Create(static_invoker, this, reinterpret_cast<void*>(connection->m_func), connection->userdata);
+			sre::Thread(static_invoker, this, reinterpret_cast<void*>(connection->m_func), connection->userdata);
 		else
 			invoke_func(reinterpret_cast<void*>(connection->m_func), connection->userdata);
 

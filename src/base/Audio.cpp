@@ -59,7 +59,7 @@ AudioData::AudioData(const char *path): path(path)
 
 AudioData::~AudioData()
 {
-    thrd.Detach();
+    thrd.detach();
     if (m_data)
         free((void *)m_data);
 }
@@ -68,12 +68,12 @@ AudioData& Audio::Load(const char *path)
 {
 	_containers->loaded_audios.emplace_front(path);
 	AudioData& audio = _containers->loaded_audios.front().data;
-	audio.thrd = Threads::Create(threadedload, &audio);
+	audio.thrd = sre::Thread(threadedload, &audio);
 
 	return audio;
 }
 
-void Audio::threadedload(AudioData *audio)
+sre::sptr Audio::threadedload(AudioData *audio)
 {
 	audio->Load();
 
@@ -93,6 +93,8 @@ void Audio::threadedload(AudioData *audio)
 	audio->m_loaded = true;
 
 	audio->Loaded.Fire();
+
+	return 0;
 }
 
 void Audio::Play(bool force)

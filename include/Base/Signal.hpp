@@ -20,7 +20,7 @@ protected:
 	~SignalBase();
 	typedef void (*dummy_func_t)(void*, void*, ...);
 private:
-	static void static_invoker(SignalBase* sig, void* func, void* data);
+	static sre_sptr static_invoker(SignalBase* sig, void* func, void* data);
 	Connection* m_head = NULL;
 	void* m_semaphore = NULL;
 protected:

@@ -17,10 +17,7 @@ _containers_service::~_containers_service()
 {
 	lock();
 
-	// Destroy all concurrency-related stuff
-	allocated_threads.clear();
-
-	// Nothing much more for now..
+	// Nothing anymore...
 
 	unlock();
 }
@@ -40,11 +37,6 @@ void __clean_containers()
 		delete static_cast<::sreECS::Scene*>(engine.current_world);
 	if (engine.current_guilayer)
 		delete static_cast<::sreGUI::Object*>(engine.current_guilayer);
-}
-
-void __update_classes()
-{
-	Thread::queue_removing();
 }
 
 void __update_layer()

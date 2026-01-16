@@ -27,7 +27,7 @@ class AudioData
 
 	const char* path;
 	
-	Thread thrd;
+	sre::Thread thrd;
 
 	int8_t* m_data = nullptr;
 	uint32_t m_len;
@@ -82,7 +82,7 @@ public:
 	sre::timeStamp Stop();
 
 private:
-	static void threadedload(AudioData* audio);
+	static sre::sptr threadedload(AudioData* audio);
 	AudioData* m_data = nullptr;
 
 	double m_fsamplepos = 0;  // The position of the sample with subsample precition

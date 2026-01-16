@@ -12,9 +12,6 @@ struct AudioAccess
 
 struct _containers_service: private std::mutex
 {
-    std::list<Thread::data> allocated_threads;
-    std::queue<Thread::data*> finished_threads;
-
     std::unordered_set<Audio*> audio_queue;
     std::list<AudioAccess> loaded_audios;
 	std::queue<Audio*> stopped_audios;

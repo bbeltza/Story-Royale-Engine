@@ -34,8 +34,8 @@ SRE_CAPI_BEGIN
 		void* defer_head;
 		void* retdefer_head;
 
-		void* threads_bucket; // "Hash" map of the threads
 		#define SRE_THREADS_BUCKETSIZE 32
+		void* threads_bucket[SRE_THREADS_BUCKETSIZE]; // "Hash" map of the threads
 
 		// Instance data
 
@@ -102,8 +102,8 @@ SRE_CAPI_BEGIN
 	extern void __call_deferred();
 
 	extern void __cleanup_threads();
+	extern void __update_threads();
 
-	extern void __update_classes();
 	extern void __update_world();
 	extern void __update_layer();
 

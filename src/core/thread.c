@@ -20,7 +20,7 @@ typedef struct sre_threadinst
     sre_timeStamp delay;
 } sre_threadinst;
 
-void __cleanup_threads()
+void __update_threads()
 {
     if (!engine.threads_bucket) return;
 
@@ -53,6 +53,24 @@ void __cleanup_threads()
     }
 }
 
+void __cleanup_threads()
+{
+    for (size_t i = 0; i < SRE_THREADS_BUCKETSIZE; i++)
+    {
+        sre_threadinst* curr = thread_bucket[i];
+        while (curr)
+        {
+            SDL_DetachThread(curr->handle);
+
+            void* ptr = curr;
+            curr = curr->next;
+
+            sre_delete(ptr);
+        }
+        thread_bucket[i] = NULL;
+    }
+}
+
 static sre_sptr thread_entry(sre_threadinst* inst)
 {
     sre_sptr id = SDL_ThreadID();
@@ -81,12 +99,6 @@ static sre_sptr thread_entry(sre_threadinst* inst)
 
 sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay, sre_usize stacksize)
 {
-    if (!engine.threads_bucket)
-    {
-        engine.threads_bucket = sre_new(sizeof(sre_threadinst*) * SRE_THREADS_BUCKETSIZE);
-        memset(engine.threads_bucket, 0, sizeof(sre_threadinst*) * SRE_THREADS_BUCKETSIZE);
-    }
-
     sre_threadinst* inst = sre_new(sizeof(sre_threadinst));
     inst->id = 0;
     inst->next = NULL;
