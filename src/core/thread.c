@@ -2,6 +2,7 @@
 #include <utils/mem.h>
 
 #include "../internal.h"
+#define thread_bucket ((sre_threadinst**)engine.threads_bucket)
 
 #include <OS.h>
 
@@ -10,28 +11,70 @@ typedef struct sre_threadinst
     sre_sptr id;
 
     SDL_Thread* handle;
+
     sre_sptr (*function)(void* data);
     void* data;
 
     struct sre_threadinst* next;
+
+    sre_timeStamp delay;
 } sre_threadinst;
+
+void __cleanup_threads()
+{
+    if (!engine.threads_bucket) return;
+
+    for (size_t i = 0; i < SRE_THREADS_BUCKETSIZE; i++)
+    {
+        sre_threadinst* prev = NULL;
+        sre_threadinst* curr = thread_bucket[i];
+        if (curr == NULL) continue;
+
+        do
+        {
+            if (curr->function) // curr->function == NULL means the thread has finished executing its function and is now to be joined
+            {
+                prev = curr;
+                curr = curr->next;
+                continue;
+            }
+
+            if (prev)
+                prev->next = curr->next;
+            else
+                thread_bucket[i] = curr->next;
+
+            sre_threadinst* tmpcurr = curr;
+            curr = curr->next;
+
+            SDL_WaitThread(tmpcurr->handle, NULL);
+            sre_delete(tmpcurr);
+        } while (curr);
+    }
+}
 
 static sre_sptr thread_entry(sre_threadinst* inst)
 {
     sre_sptr id = SDL_ThreadID();
 
-    sre_threadinst** current = &((sre_threadinst**)engine.threads_bucket)[id % SRE_THREADS_BUCKETSIZE];
-    if (!*current) *current = inst;
+    const size_t index = id % SRE_THREADS_BUCKETSIZE;
+
+    sre_threadinst* current = thread_bucket[index];
+    if (!current) thread_bucket[index] = inst;
     else
     {
-        while ((*current)->next)
-            current = &(*current)->next;
-        *current = inst;
+        while (current->next)
+            current = current->next;
+        current->next = inst;
     }
+    
+    inst->id = id;
+
+    if (inst->delay)
+        delay_s(inst->delay);
 
     sre_sptr res = inst->function(inst->data);
-
-    // Perform some cleanup...
+    inst->function = NULL;
 
     return res;
 }
@@ -44,11 +87,85 @@ sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), voi
         memset(engine.threads_bucket, 0, sizeof(sre_threadinst*) * SRE_THREADS_BUCKETSIZE);
     }
 
-    sre_threadinst* inst = sre_new(sizeof(sre_threadinst*));
+    sre_threadinst* inst = sre_new(sizeof(sre_threadinst));
+    inst->id = 0;
     inst->next = NULL;
     inst->function = function;
     inst->data = data;
+    inst->delay = delay;
     inst->handle = SDL_CreateThreadWithStackSize((SDL_ThreadFunction)thread_entry, "Story Royale Engine Thread", stacksize, inst);
 
-    return SRE_INVALIDTHREAD;
+    if (!inst->handle)
+    {
+        sre_delete(inst);
+        return SRE_INVALIDTHREAD;
+    }
+    
+    sre_Thread id;
+    // Busy wait until id is set (it shouldn't take a lot so it's generally cheaper than suspending the thread through a system call)
+    do
+        id = inst->id;
+    while (!id);
+     
+    return id;
+}
+
+sre_sptr sre_threadjoin(sre_Thread thrd, int* succeeded)
+{
+    if (!thrd) goto FAIL;
+
+    sre_threadinst* prev = NULL;
+    sre_threadinst* curr = thread_bucket[thrd % SRE_THREADS_BUCKETSIZE];
+    while (curr)
+    {
+        if (curr->id != thrd)
+        {
+            prev = curr;
+            curr = curr->next;
+            continue;
+        }
+        int status;
+        SDL_Thread* handle = curr->handle;
+
+        if (prev)
+            prev->next = curr->next;
+        else
+            thread_bucket[thrd % SRE_THREADS_BUCKETSIZE] = curr->next;
+
+        sre_delete(curr);
+
+        SDL_WaitThread(handle, &status);
+        return status;
+    }
+
+FAIL:
+    if (succeeded) *succeeded = 0;
+    return -1;
+}
+void sre_threaddetach(sre_Thread thrd)
+{
+    if (!thrd) return;
+
+    sre_threadinst* prev = NULL;
+    sre_threadinst* curr = thread_bucket[thrd % SRE_THREADS_BUCKETSIZE];
+    while (curr)
+    {
+        if (curr->id != thrd)
+        {
+            prev = curr;
+            curr = curr->next;
+            continue;
+        }
+        SDL_Thread* handle = curr->handle;
+
+        if (prev)
+            prev->next = curr->next;
+        else
+            thread_bucket[thrd % SRE_THREADS_BUCKETSIZE] = curr->next;
+
+        sre_delete(curr);
+
+        SDL_DetachThread(handle);
+        return;
+    }
 }

@@ -101,6 +101,8 @@ SRE_CAPI_BEGIN
 	extern void __destroy_queue();
 	extern void __call_deferred();
 
+	extern void __cleanup_threads();
+
 	extern void __update_classes();
 	extern void __update_world();
 	extern void __update_layer();

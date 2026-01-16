@@ -7,11 +7,55 @@
 #include <utils/sequence.hpp>
 
 #include <ints.h>
+#include <Base/Thread.h>
 
 namespace sre
 {
-    enum class thread: uptr
+    using ThreadID = sre_Thread;
+    class Thread
     {
+        ThreadID m_id = SRE_INVALIDTHREAD;
+    public:
+        using result_type = sptr;
+    private:
+        template <typename Data, size_t... indices>
+        static result_type invoke(void* rawdata)
+        {
+            auto data = static_cast<Data*>(rawdata);
+            result_type ret = data->fn(std::move(std::get<indices>(data->tuple))...);
+            delete data;
+
+            return ret;
+        }
+        template <typename Data, size_t... indices>
+        static decltype(invoke<Data, indices...>) get_invoke(ut::sequence<indices...>) { return &invoke<Data, indices...>; }
+
+        template <typename Fn, typename Tuple>
+        struct invokedata
+        {
+            Fn fn;
+            Tuple tuple;
+
+            template <typename... Args>
+            invokedata(Fn&& func, Args &&...args) : fn(std::forward<Fn>(func)), tuple(std::forward<Args>(args)...) {}
+        };
+    public:
+        template <typename Fn, typename... Args>
+        Thread(Fn &&func, Args&&... args)
+        {
+            using tuple = std::tuple<typename std::decay<Args>::type...>;
+            using invoker = Thread::invokedata<Fn, tuple>;
+
+            auto invoke = new invoker(std::forward<Fn>(func), std::forward<Args>(args)...);
+            auto invokefunc = get_invoke<invoker>(typename ut::make_sequence<sizeof...(Args)>::type());
+
+            m_id = sre_threadcreate(invokefunc, invoke);
+        }
+
+        Thread() = default;
+
+        result_type join();
+        void detach();
     };
 };
 
@@ -68,7 +112,7 @@ private:
     template <typename _Fx, typename _Tuple>
     struct invokedata
     {
-        _Fx &&fn;
+        _Fx fn;
         _Tuple tuple;
 
         template <typename... _Args>
