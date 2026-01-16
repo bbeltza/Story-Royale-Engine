@@ -5,6 +5,7 @@
 #define thread_bucket ((sre_threadinst**)engine.threads_bucket)
 
 #include <OS.h>
+#include <utils/logging.h>
 
 typedef struct sre_threadinst
 {
@@ -90,6 +91,8 @@ static sre_sptr thread_entry(sre_threadinst* inst)
 
     if (inst->delay)
         delay_s(inst->delay);
+    
+    assert(inst->function);
 
     sre_sptr res = inst->function(inst->data);
     inst->function = NULL;
@@ -144,9 +147,8 @@ sre_sptr sre_threadjoin(sre_Thread thrd, int* succeeded)
         else
             thread_bucket[thrd % SRE_THREADS_BUCKETSIZE] = curr->next;
 
+        SDL_WaitThread(handle, &status);    
         sre_delete(curr);
-
-        SDL_WaitThread(handle, &status);
         return status;
     }
 
@@ -174,8 +176,6 @@ void sre_threaddetach(sre_Thread thrd)
             prev->next = curr->next;
         else
             thread_bucket[thrd % SRE_THREADS_BUCKETSIZE] = curr->next;
-
-        sre_delete(curr);
 
         SDL_DetachThread(handle);
         return;
