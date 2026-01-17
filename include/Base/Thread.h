@@ -7,7 +7,12 @@
 
 SRE_CAPI_BEGIN
 
-typedef enum sre_Thread { SRE_INVALIDTHREAD = 0 } sre_Thread;
+#ifdef __cplusplus
+    enum sre_Thread: sre_uptr { SRE_INVALIDTHREAD = 0 };
+#else
+    #define SRE_INVALIDTHREAD 0
+    typedef sre_uptr sre_Thread;
+#endif
 
 // This is the function that holds the actual implementation for creating a thread
 sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay, sre_usize stacksize);

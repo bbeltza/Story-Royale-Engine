@@ -9,8 +9,7 @@
 
 typedef struct sre_threadinst
 {
-    sre_sptr id;
-
+    sre_Thread id;
     SDL_Thread* handle;
 
     sre_sptr (*function)(void* data);
@@ -74,7 +73,7 @@ void __cleanup_threads()
 
 static sre_sptr thread_entry(sre_threadinst* inst)
 {
-    sre_sptr id = SDL_ThreadID();
+    SDL_threadID id = SDL_ThreadID();
 
     const size_t index = id % SRE_THREADS_BUCKETSIZE;
 

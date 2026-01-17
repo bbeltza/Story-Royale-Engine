@@ -26,7 +26,7 @@ namespace sre
             return data->fn(std::move(std::get<indices>(data->tuple))...);
         }
         template <typename Data, size_t... indices>
-        static decltype(invoke<Data, indices...>) get_invoke(ut::sequence<indices...>) { return &invoke<Data, indices...>; }
+        static decltype(&invoke<Data, indices...>) get_invoke(ut::sequence<indices...>) { return &invoke<Data, indices...>; }
 
         template <typename Fn, typename Tuple>
         struct invokedata

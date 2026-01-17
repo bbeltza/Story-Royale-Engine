@@ -23,15 +23,16 @@ set(BASE_SOURCES
 "rwops.c"
 
 "action.cpp"
-"Audio.cpp"
 "display.cpp"
 "font.cpp"
 "fontrenderer.cpp"
 "image.cpp"
 "runtime.cpp"
-"Signal.cpp"
-"Thread.cpp"
+"thread.cpp"
 "tween.cpp"
+
+"Audio.cpp"
+"Signal.cpp"
 "Window.cpp"
 )
 

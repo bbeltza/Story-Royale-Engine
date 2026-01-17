@@ -114,16 +114,16 @@ void __initialize_engine()
 
 void __end_engine()
 {
-    __cleanup_threads();
     __clean_containers();  
+    __cleanup_threads();
     
     engine.video->quit(engine.video);
     free((void*)engine.video->texture_fl);
     free(engine.video->textures);
     free(engine.video);
-
+    
     engine.video = NULL;
-
+    
     SDL_CloseAudioDevice(engine.audio_device);
     SDL_DetachThread(engine.entry_thread);
     SDL_DestroyMutex(engine.sdl_rendermutex);
