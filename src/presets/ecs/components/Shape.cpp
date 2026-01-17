@@ -83,7 +83,9 @@ void Shape::on_pupdate(Entity& entity)
         for (Component& comp : ent)
         {
 			auto& compshape = *dynamic_cast<Shape*>(&comp);
-            if (&compshape == NULL || !compshape.flags.has(F_CANCOLLIDE)) continue;
+			if (&compshape == NULL) continue;
+			if (!compshape.enabled) continue;
+            if (!compshape.flags.has(F_CANCOLLIDE)) continue;
 
             sre::rect2Dut thisRect = real_rect(entity),
                           otherRect = compshape.real_rect(ent);

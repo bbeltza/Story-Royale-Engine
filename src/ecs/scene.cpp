@@ -151,7 +151,7 @@ void Scene::call_update()
             for (auto& comp : ent)
             {
                 if (comp.enabled)
-                comp.on_update(ent);
+                    comp.on_update(ent);
             }
             ent.updated.Fire();
         }
