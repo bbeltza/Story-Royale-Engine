@@ -101,7 +101,7 @@ static sre_sptr thread_entry(sre_threadinst* inst)
 
 sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay, sre_usize stacksize)
 {
-    sre_threadinst* inst = sre_new(sizeof(sre_threadinst));
+    sre_threadinst* volatile inst = sre_new(sizeof(sre_threadinst));
     inst->id = 0;
     inst->next = NULL;
     inst->function = function;
@@ -115,11 +115,10 @@ sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), voi
         return SRE_INVALIDTHREAD;
     }
     
-    sre_Thread id;
     // Busy wait until id is set (it shouldn't take a lot so it's generally cheaper than suspending the thread through a system call)
-    do
+    sre_Thread id = 0;
+    while (!id)
         id = inst->id;
-    while (!id);
      
     return id;
 }
