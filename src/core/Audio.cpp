@@ -1,6 +1,5 @@
 #include <standard>
 #include "../internal.h"
-#include "../internal.hpp"
 
 #include "Base/Audio.hpp"
 #include "Base/Thread.hpp"
@@ -9,8 +8,6 @@
 
 void __audio_callback(void* data, uint8_t* stream, int len)
 {
-	if (!engine.containers_service) return;
-
 	memset(stream, 0, len);
 	
 	engine.audio_stream = stream;
@@ -18,6 +15,7 @@ void __audio_callback(void* data, uint8_t* stream, int len)
 	__update_audio();
 }
 
+/*
 void __update_audio()
 {
 	const uint8_t channel_count = engine.audio_spec.channels;
@@ -119,3 +117,4 @@ void __update_audio()
 		_containers->stopped_audios.pop();
 	}
 }
+	*/

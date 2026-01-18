@@ -101,8 +101,6 @@ void __initialize_engine()
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 
-    __init_containers();
-
     __setup_audio_device();
     __create_window();
     __setup_renderer();

@@ -19,8 +19,9 @@ set(DATATYPES_SOURCES
 set(BASE_SOURCES
 "file.c"
 "resource.c"
-"chunk.cc"
+"chunk.c"
 "rwops.c"
+"audiochunk.c"
 
 "action.cpp"
 "display.cpp"

@@ -1,95 +1,57 @@
 #pragma once
-#include "Base/File.hpp"
-#include "Base/Signal.hpp"
-#include "Base/Thread.hpp"
+#include <Datatypes/AudioStyle.h>
+#include <Base/AudioChunk.h>
 
-#include "Datatypes/TimeStamp.h"
-
-#include "internal_def.hh"
-
-#include <SDL.h>
-
-#define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
-
-__def_internal(__update_audio);
-
-class AudioData
+namespace sre
 {
-	friend struct AudioAccess;
-	friend class Audio;
-	friend struct _containers_service;
+	class File;
 
-	AudioData() = delete;
-	AudioData(const char* path);
-
-	void Load();
-	void Unload();
-
-	const char* path;
-	
-	sre::Thread thrd;
-
-	int8_t* m_data = nullptr;
-	uint32_t m_len;
-	SDL_AudioSpec m_spec;
-
-	SDL_RWops* m_rw;
-
-	bool m_loaded = false;
-
-public:
-	~AudioData();
-
-	Signal<> Loaded{this};
-
-	inline uint32_t len() const { return m_len; }
-	inline uint32_t freq() const { return m_spec.freq; }
-
-	__friend_internal(__update_audio);
-};
-
-struct AudioInfo
-{
-	int loop_start = 0, loop_end = -1;
-	bool looped = false;
-
-	float fade_in = 0, fade_out = 0;
-	float speed = 1;
-	float volume = 1;
-};
-
-class Audio
-{
-public:
-	AudioInfo Info;
-public:
-	static AudioData& Load(const char* path);
-	AudioData& Attach(AudioData& data)
+	class Audio
 	{
-		m_data = &data;
-		return data;
-	}
+		const sre_AudioChunk* m_chunk = NULL;
+	public:
+		const audiostyle* style;
 
-	bool IsPlaying() const;
+		sre::timeStamp speed = 1;
+	private:
+		int m_id = 0;
+		double m_fsamplepos = 0;  // The position of the sample with subsample precision
+		uint32_t m_samplepos = 0; // The position (in samples) of the audio sample
 
-	sre::timeStamp timePosition() const { return static_cast<sre::timeStamp>(m_fsamplepos / m_data->freq()); }
-	sre::timeStamp timeLength() const { return static_cast<sre::timeStamp>(m_data->len() / static_cast<sre::timeStamp>(m_data->freq())); }
+		float m_fadevol = 1;
+		short m_fading = 0; // Fading state
+		short m_playing = 0; // Playing state
+	public:
+		static const audiostyle DEFAULT_STYLE;
+	private:
+		static int audio_callback(void* userdata, sre_u8* samples, sre_usize len);
+	public:
+		constexpr Audio(const audiostyle& style = DEFAULT_STYLE): style(&style) {}
+		Audio(const sre_AudioChunk* chunk, const audiostyle& style = DEFAULT_STYLE): m_chunk(chunk), style(&style) {}
 
-	void Play(bool force=false);
-	void FadeOut() { m_fadeout = true; }
+		constexpr Audio(const Audio& copy): style(copy.style), m_chunk(copy.m_chunk) {}
 
-	sre::timeStamp Pause();
-	sre::timeStamp Stop();
+		void attach_chunk(const sre_AudioChunk* chunk) { m_chunk = chunk; }
 
-private:
-	static sre::sptr threadedload(AudioData* audio);
-	AudioData* m_data = nullptr;
+		void play();
+		sre::timeStamp pause();
+		sre::timeStamp stop();
 
-	double m_fsamplepos = 0;  // The position of the sample with subsample precition
-	uint32_t m_samplepos = 0; // The position (in samples) of the audio sample
+		void fade_out() { m_fading = 1; }
 
-	bool m_fadein = false, m_fadeout = false;
-	float m_fadevol = 1;
+		sre::timeStamp time_pos() const
+		{
+			if (!m_chunk) return 0;
 
-	__friend_internal(__update_audio);
-};
+			return static_cast<sre::timeStamp>(m_fsamplepos / m_chunk->frequency);
+		}
+		sre::timeStamp time_len() const
+		{
+			if (!m_chunk) return 0;
+			return static_cast<sre::timeStamp>(m_chunk->sample_count) / m_chunk->frequency;
+		}
+
+		const sre_AudioChunk* load(const char* from_path);
+		const sre_AudioChunk* load(const File& from_file);
+	};
+}

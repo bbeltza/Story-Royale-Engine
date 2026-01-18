@@ -6,9 +6,6 @@ sre::Thread::result_type sre::Thread::join()
     int success;
     result_type ret = sre_threadjoin(m_id, &success);
 
-    if (!success)
-        ERROR("Thread::join() failed");
-
     m_id = SRE_INVALIDTHREAD;
     return ret;
 }

@@ -3,7 +3,7 @@
 
 #include <utils/logging.h>
 
-#if !defined(NDEBUG) && _WIN32 // This operator is broken on Linux so for safety only override for Windows
+#if !defined(NDEBUG) && _WIN32 && 0 // This operator is broken on Linux so for safety only override for Windows
 SDL_atomic_t SR_NUM_ALLOCATIONS;
 
 void* operator new(size_t size)

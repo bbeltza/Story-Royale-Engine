@@ -6,7 +6,6 @@
 #include <Base/Input.hpp>
 
 #include "../internal.h"
-#include "../internal.hpp"
 
 using namespace sreECS;
 

@@ -1,5 +1,4 @@
 #include "../internal.h"
-#include "../internal.hpp"
 #include <sdl_renderer/sdl_renderer.h>
 
 #include <GameSettings.h>

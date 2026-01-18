@@ -44,7 +44,13 @@ namespace sre
 			return res.begin; // Even if it wasn't valid and this passes, res_begin will be NULL
 		}
 
-		size_t size() const { return sre_filesize(this); }	
+		size_t size() const { return sre_filesize(this); }
+
+		template <typename Fn, typename... Args>
+		auto call_cfunc(Fn func, Args&&... args) { return func(static_cast<sre_File*>(this), std::forward<Args>(args)...); }
+
+		template <typename Fn, typename... Args>
+		auto call_cfunc(Fn func, Args&&... args) const { return func(static_cast<const sre_File*>(this), std::forward<Args>(args)...); }
 	};
 }
 

@@ -66,7 +66,7 @@ SRE_CAPI_BEGIN
 		sre_usize audio_queuesize;
 		sre_usize audio_queuecap;
 		int last_audioid;
-		
+
 		int audio_master;
 
 		sre_byte* audio_stream;
@@ -79,8 +79,6 @@ SRE_CAPI_BEGIN
 		sre_unit scale_ratio; // 1 / video->scale
 		SDL_TouchID input_last_touchid;
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
-
-		void* containers_service;
 	};
 
 	extern struct _engine_data __engine_data;
@@ -92,8 +90,6 @@ SRE_CAPI_BEGIN
 	extern void __create_window();
 	extern void __setup_renderer();
 	
-	extern void __init_containers();
-
 	extern void __setup_audio_device();
 
 	extern int __poll_events();
