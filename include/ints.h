@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "stddef.h"
+#include "stdbool.h"
 
 typedef int8_t sre_s8;
 typedef int16_t sre_s16;

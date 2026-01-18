@@ -119,20 +119,3 @@ void __update_audio()
 		_containers->stopped_audios.pop();
 	}
 }
-
-void __setup_audio_device()
-{
-	SDL_AudioSpec desiredspec{0};
-	desiredspec.callback = __audio_callback;
-
-	desiredspec.freq = sre::game_settings.AudioOptions.Frequency; // I should make an enum for different frequencies instead of letting the user have free choice
-	desiredspec.channels = 2 - sre::game_settings.AudioOptions.Mono;
-	desiredspec.samples = 512;
-	desiredspec.format = AUDIO_S16;
-
-	int CHANGES = 0;
-	if (!desiredspec.freq)
-		CHANGES |= SDL_AUDIO_ALLOW_FREQUENCY_CHANGE;
-
-	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, CHANGES);
-}

@@ -1,14 +1,16 @@
 set(CORE_SOURCES
+"audio.c"
 "draw.c"
 "texture.c"
 "defer.c"
-"events.cpp"
 "thread.c"
+
+"events.cpp"
+"input.cpp"
 
 "Audio.cpp"
 "Containers.cpp"
 "DestroyQueue.cpp"
-"input.cpp"
 "Querying.cpp"
 "renderer.cpp"
 

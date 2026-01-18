@@ -62,6 +62,13 @@ SRE_CAPI_BEGIN
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
+		void* audio_queue;
+		sre_usize audio_queuesize;
+		sre_usize audio_queuecap;
+		int last_audioid;
+		
+		int audio_master;
+
 		sre_byte* audio_stream;
 		int audio_slen; // in bytes
 
