@@ -5,6 +5,11 @@
 
 #include <utils/sequence.hpp>
 
+namespace sre
+{
+	
+}
+
 #define _make_t template <typename... Args>
 
 class Connection;

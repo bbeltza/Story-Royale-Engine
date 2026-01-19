@@ -53,7 +53,7 @@ namespace sre
         template <typename Fn, typename... Args>
         Thread(Fn &&func, Args&&... args)
         {
-            using func_restype = std::result_of<Fn(Args&&...)>::type;
+            using func_restype = typename std::result_of<Fn(Args&&...)>::type;
             static_assert(!std::is_void<func_restype>::value, "Fn &&func must return a value");
 
             using tuple = std::tuple<typename std::decay<Args>::type...>;

@@ -34,7 +34,6 @@ set(BASE_SOURCES
 "tween.cpp"
 
 "Signal.cpp"
-"Window.cpp"
 )
 
 set(ECS_SOURCES

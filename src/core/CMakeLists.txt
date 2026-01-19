@@ -15,7 +15,8 @@ set(CORE_SOURCES
 
 "InitEngine.c"
 "Runtime.c"
-"Window.c"
+"window.c"
+"window.cpp"
 
 "HeapTracker.cpp"
 PARENT_SCOPE)
