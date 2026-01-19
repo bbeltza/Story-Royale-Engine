@@ -20,7 +20,7 @@ void Audio::play()
 		return;
 	}
 	if (!m_id)
-		m_id = sre_audiocallbackqueue(audio_callback, this);
+		m_id = audio_callbackqueue(audio_callback, this);
 
 	m_state = STATE_PLAYING;
 }
@@ -62,7 +62,7 @@ AudioChunk Audio::load(const File& from_file)
 		return NULL;
 	}
 
-	chunk = sre_convertchunk(chunk.get(), false);
+	chunk = sre::convertchunk(chunk);
 	if (!chunk)
 	{
 		WARN("Audio::load() failed converting the audio file to the engine's format");
@@ -73,17 +73,16 @@ AudioChunk Audio::load(const File& from_file)
 	return chunk;
 }
 
-int Audio::audio_callback(void* userdata, sre_u8* _samples, sre_usize len)
+int Audio::audio_callback(Audio* audio, sre_u8* _samples, sre_usize len)
 {
-	Audio* audio = static_cast<Audio*>(userdata);
 	if (!audio->m_state) return 0;
 
 	s16* samples = reinterpret_cast<s16*>(_samples);
 	len >>= 1;
 
 	const int channels = audio->m_chunk->channels;
-	const int freq = sre_audiofreq();
-	const timeStamp freqratio = static_cast<timeStamp>(sre_audiofreqratio(audio->m_chunk->frequency));
+	const int freq = audio_frequency();
+	const timeStamp freqratio = static_cast<timeStamp>(audio_freqratio(audio->m_chunk->frequency));
 	
 	for (sre_usize i = 0; i < len; i += channels)
 	{
@@ -92,7 +91,7 @@ int Audio::audio_callback(void* userdata, sre_u8* _samples, sre_usize len)
 
 		if (audio->m_fading)
 		{
-			audio->m_fadevol += 1 / (audio->m_fading * sre_audiofreq());
+			audio->m_fadevol += 1 / (audio->m_fading * freq);
 			if (audio->m_fadevol >= 1)
 			{
 				audio->m_fadevol = 1;

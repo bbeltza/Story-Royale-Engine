@@ -1,10 +1,27 @@
 #pragma once
 #include <Base/AudioChunk.h>
+#include <Base/Audio.h>
 #include <Datatypes/TimeStamp.h>
 
 namespace sre
 {
-	// Audio.h wrappers here :3
+	inline AudioChunk convertchunk(const AudioChunk& chunk)
+	{
+		AudioChunk converted = chunk;
+		converted = sre_convertchunk(chunk.get(), false);
+		return converted;
+	}
+
+	template <typename Cls>
+	inline int audio_callbackqueue(int (*callback)(Cls* userdata, byte* samples, usize size), Cls* userdata)
+	{
+		return sre_audiocallbackqueue(reinterpret_cast<int(*)(void*, byte*, usize)>(callback), userdata);
+	}
+	inline int audio_callbackqueue(int (*callback)(void* userdata, byte* samples, usize size), void* userdata) { return sre_audiocallbackqueue(callback, userdata); }
+	inline void audio_callbackremove(int id) { return sre_audiocallbackremove(id); }
+
+	inline int audio_frequency() { return sre_audiofreq(); }
+	inline double audio_freqratio(int freq) { return sre_audiofreqratio(freq); }
 }
 
 namespace sre
@@ -38,7 +55,7 @@ namespace sre
 
 		int m_state = 0; // Playing state
 	private:
-		static int audio_callback(void* userdata, sre_u8* samples, sre_usize len);
+		static int audio_callback(Audio* audio, sre_u8* samples, sre_usize len);
 	public:
 		constexpr Audio() = default;
 		Audio(const AudioChunk& chunk): m_chunk(chunk) {}
