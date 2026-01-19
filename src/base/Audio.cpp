@@ -4,10 +4,9 @@
 #include <Base/Thread.hpp>
 
 #include <utils/logging.h>
+#include <utils/math.hpp>
 
 using namespace sre;
-
-const audiostyle Audio::DEFAULT_STYLE;
 
 void Audio::play()
 {
@@ -18,24 +17,30 @@ void Audio::play()
 	}
 	if (!m_id)
 		m_id = sre_audiocallbackqueue(audio_callback, this);
-	
-	m_playing = 1;
-	m_fading = 2;
+
+	m_state = STATE_PLAYING;
+}
+
+void Audio::replay()
+{
+	m_samplepos = 0;
+	m_subsample = 0;
+	play();
 }
 
 sre::timeStamp Audio::stop()
 {
-	sre::timeStamp ts = pause();
+	pause();
+	sre::timeStamp ts = time_pos();
 	m_samplepos = 0;
-	m_fsamplepos = 0;
-	
+	m_subsample = 0;
+
 	return ts;
 }
 
-sre::timeStamp Audio::pause()
+void Audio::pause()
 {
-	m_playing = 0;
-	return time_pos();
+	m_state = STATE_STOPPED;
 }
 
 const sre_AudioChunk* Audio::load(const char* from_path)
@@ -66,24 +71,64 @@ const sre_AudioChunk* Audio::load(const File& from_file)
 
 int Audio::audio_callback(void* userdata, sre_u8* _samples, sre_usize len)
 {
-	Audio* _this = static_cast<Audio*>(userdata);
-	if (!_this->m_playing) return 0;
+	Audio* audio = static_cast<Audio*>(userdata);
+	if (!audio->m_state) return 0;
 
-	sre_s16* samples = reinterpret_cast<sre_s16*>(_samples);
+	s16* samples = reinterpret_cast<s16*>(_samples);
 	len >>= 1;
 
-	for (sre_usize i = 0; i < len; i++)
+	const int channels = audio->m_chunk->channels;
+	const int freq = sre_audiofreq();
+	const timeStamp freqratio = static_cast<timeStamp>(sre_audiofreqratio(audio->m_chunk->frequency));
+	
+	for (sre_usize i = 0; i < len; i += channels)
 	{
-		samples[i] = _this->m_chunk->samples[_this->m_samplepos];
-		
-		_this->m_samplepos++;
-		if (_this->m_samplepos >= _this->m_chunk->sample_count)
+		u32 sampleindex = audio->m_samplepos * channels;
+		const s16* const chunksamples = audio->m_chunk->samples + sampleindex;
+
+		if (audio->m_fading)
 		{
-			_this->m_playing = 0;
-			_this->m_samplepos = 0;
-			break;
+			audio->m_fadevol += 1 / (audio->m_fading * sre_audiofreq());
+			if (audio->m_fadevol >= 1)
+			{
+				audio->m_fadevol = 1;
+				audio->m_fading = 0;
+			}
+			else if (audio->m_fadevol <= 0)
+			{
+				audio->m_fadevol = 1;
+				audio->m_fading = 0;
+				goto STOP_SECTION;
+			}
 		}
+
+		for (int c = 0; c < channels; c++)
+			samples[i + c] = static_cast<s16>(chunksamples[c] * audio->m_fadevol);
+
+		if (!audio->m_subsample) goto DONT_INTERPOLATE;
+		for (int c = 0; c < channels; c++)
+		{
+			s16 nextsample = static_cast<s16>(chunksamples[c + channels] * audio->m_fadevol);
+			samples[i + c] = ut::lerp(samples[i + c], nextsample, audio->m_subsample);
+		}
+
+		DONT_INTERPOLATE:
+
+		audio->m_subsample += freqratio * audio->speed;
+		{
+			u32 truncated_subsample = static_cast<u32>(audio->m_subsample);
+			audio->m_samplepos += truncated_subsample;
+			audio->m_subsample -= truncated_subsample;
+		}
+		if (audio->m_samplepos >= audio->m_chunk->sample_count) goto STOP_SECTION;
+		continue;
+
+		STOP_SECTION:
+		audio->m_state = STATE_STOPPED;
+		audio->m_samplepos = 0;
+		audio->m_subsample = 0;
+		break;
 	}
 
-	return 128;
+	return static_cast<int>(audio->volume * 128);
 }

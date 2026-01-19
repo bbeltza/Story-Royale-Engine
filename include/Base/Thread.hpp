@@ -18,12 +18,24 @@ namespace sre
     public:
         using result_type = sptr;
     private:
+        template <typename Ret, typename Cls, typename... Args>
+        static typename std::result_of<Ret (Cls::*)(Args&&...)>::type function_invoke(Ret (Cls::*&&fn)(Args&&...), Cls*&& cls, Args&&... args)
+        {
+            return (cls->*fn)(std::forward<Args>(args)...);
+        }
+
+        template <typename Fn, typename... Args>
+        static typename std::result_of<Fn(Args&&...)>::type function_invoke(Fn&& fn, Args&&... args)
+        {
+            return fn(std::forward<Args>(args)...);
+        }
+
         template <typename Data, size_t... indices>
         static result_type invoke(void* rawdata)
         {
             std::unique_ptr<Data> data(static_cast<Data*>(rawdata));
 
-            return data->fn(std::move(std::get<indices>(data->tuple))...);
+            return function_invoke(data->fn, std::move(std::get<indices>(data->tuple))...);
         }
         template <typename Data, size_t... indices>
         static decltype(&invoke<Data, indices...>) get_invoke(ut::sequence<indices...>) { return &invoke<Data, indices...>; }
@@ -41,7 +53,8 @@ namespace sre
         template <typename Fn, typename... Args>
         Thread(Fn &&func, Args&&... args)
         {
-            static_assert(!std::is_void<decltype(func(std::forward<Args>(args)...))>::value, "Fn &&func must return a value");
+            using func_restype = std::result_of<Fn(Args&&...)>::type;
+            static_assert(!std::is_void<func_restype>::value, "Fn &&func must return a value");
 
             using tuple = std::tuple<typename std::decay<Args>::type...>;
             using invoker = Thread::invokedata<Fn, tuple>;

@@ -6,7 +6,7 @@
 
 SRE_CAPI_BEGIN
 
-typedef unsigned short sre_sample;
+typedef signed short sre_sample;
 
 typedef struct sre_AudioChunk
 {

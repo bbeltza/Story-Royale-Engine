@@ -6,6 +6,13 @@
 
 #include "../internal.h"
 
+int sre_audiofreq() { return engine.audio_spec.freq; }
+double sre_audiofreqratio(int freq)
+{
+    return !engine.audio_spec.freq ? 0 : // Handle division by zero (As the audio engine may have not be initialized)
+    (double)freq / (double)engine.audio_spec.freq;
+}
+
 struct sre_audiocallback
 {
     int id;
