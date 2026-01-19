@@ -135,7 +135,7 @@ const sre_AudioChunk* sre_convertchunk(const sre_AudioChunk* chunk, bool freechu
     newchunk->size = cvt.len_cvt;
 
     if (freechunk)
-        sre_delete((void*)chunk);
+        sre_audioclose(chunk);
 
     return newchunk;
 }

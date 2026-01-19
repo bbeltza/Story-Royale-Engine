@@ -24,6 +24,7 @@ set(BASE_SOURCES
 "audiochunk.c"
 
 "action.cpp"
+"audio.cpp"
 "display.cpp"
 "font.cpp"
 "fontrenderer.cpp"
@@ -32,7 +33,6 @@ set(BASE_SOURCES
 "thread.cpp"
 "tween.cpp"
 
-"Audio.cpp"
 "Signal.cpp"
 "Window.cpp"
 )

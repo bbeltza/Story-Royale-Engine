@@ -30,4 +30,38 @@ const sre_AudioChunk* sre_audiofromfile(const sre_File* file);
 
 SRE_CAPI_END
 
+#ifdef __cplusplus
+#include <memory>
+
+namespace sre
+{
+    class File;
+    // Holder class for the audio chunk (sre_AudioChunk shared pointer wrapper)
+	class AudioChunk
+	{
+		std::shared_ptr<const sre_AudioChunk> m_ptr;
+		struct ChunkDeleter
+		{
+			void operator ()(const sre_AudioChunk* chunk) { sre_audioclose(chunk); }
+		};
+
+	public:
+		constexpr AudioChunk() = default;
+		AudioChunk(const sre_AudioChunk* chunk): m_ptr(chunk, ChunkDeleter{}) {}
+
+		void operator =(const sre_AudioChunk* chunk) { if (get() != chunk) m_ptr.reset(chunk, ChunkDeleter{}); }
+		void operator =(const AudioChunk& chunk) { m_ptr = chunk.m_ptr; }
+
+		const sre_AudioChunk* operator ->() const { return m_ptr.operator->(); }
+		operator bool() const { return m_ptr.operator bool(); }
+
+        const sre_AudioChunk* get() const { return m_ptr.get(); }
+	public:
+		AudioChunk(size_t size, const byte* rawdata): AudioChunk(sre_audioload(size, rawdata)) {}
+		AudioChunk(const File& file);
+	};
+}
+
+#endif
+
 #endif

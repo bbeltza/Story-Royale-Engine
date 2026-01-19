@@ -8,7 +8,6 @@ set(CORE_SOURCES
 "events.cpp"
 "input.cpp"
 
-"Audio.cpp"
 "Containers.cpp"
 "DestroyQueue.cpp"
 "Querying.cpp"

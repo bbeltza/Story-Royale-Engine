@@ -8,6 +8,10 @@
 
 using namespace sre;
 
+AudioChunk::AudioChunk(const File& from_file): AudioChunk(from_file.call_cfunc(sre_audiofromfile))
+{
+}
+
 void Audio::play()
 {
 	if (!m_chunk)
@@ -43,22 +47,22 @@ void Audio::pause()
 	m_state = STATE_STOPPED;
 }
 
-const sre_AudioChunk* Audio::load(const char* from_path)
+AudioChunk Audio::load(const char* from_path)
 {
 	File file(from_path);
 	return load(file);
 }
 
-const sre_AudioChunk* Audio::load(const File& from_file)
+AudioChunk Audio::load(const File& from_file)
 {
-	const sre_AudioChunk* chunk = from_file.call_cfunc(sre_audiofromfile);
+	AudioChunk chunk{from_file};
 	if (!chunk)
 	{
 		WARN("Audio::load() failed loading the audio file");
 		return NULL;
 	}
 
-	chunk = sre_convertchunk(chunk, true);
+	chunk = sre_convertchunk(chunk.get(), false);
 	if (!chunk)
 	{
 		WARN("Audio::load() failed converting the audio file to the engine's format");
@@ -120,7 +124,14 @@ int Audio::audio_callback(void* userdata, sre_u8* _samples, sre_usize len)
 			audio->m_samplepos += truncated_subsample;
 			audio->m_subsample -= truncated_subsample;
 		}
-		if (audio->m_samplepos >= audio->m_chunk->sample_count) goto STOP_SECTION;
+
+		if (audio->m_samplepos >= audio->m_chunk->sample_count)
+		{
+			if (audio->loop_point > audio->m_chunk->sample_count)
+				goto STOP_SECTION;
+			
+			audio->m_samplepos = audio->loop_point;
+		}
 		continue;
 
 		STOP_SECTION:

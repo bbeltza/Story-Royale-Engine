@@ -14,11 +14,9 @@ namespace sre
 	// The `-1` unsigned int bit representation is `0xFFFFFFFF`, the highest unsigned number so it can be used to indicate that.
 	constexpr unsigned AUDIO_DONTLOOP = -1;
 
-	class File;
-
 	class Audio
 	{
-		const sre_AudioChunk* m_chunk = NULL;
+		AudioChunk m_chunk;
 	public:
 		enum playingState
 		{
@@ -43,11 +41,11 @@ namespace sre
 		static int audio_callback(void* userdata, sre_u8* samples, sre_usize len);
 	public:
 		constexpr Audio() = default;
-		Audio(const sre_AudioChunk* chunk): m_chunk(chunk) {}
+		Audio(const AudioChunk& chunk): m_chunk(chunk) {}
 
-		constexpr Audio(const Audio& copy): m_chunk(copy.m_chunk) {}
+		Audio(const Audio& copy): m_chunk(copy.m_chunk) {}
 
-		void attach_chunk(const sre_AudioChunk* chunk) { m_chunk = chunk; }
+		void attach_chunk(const AudioChunk& chunk) { m_chunk = chunk; }
 
 		void play();
 		void replay();
@@ -80,7 +78,7 @@ namespace sre
 			return static_cast<sre::timeStamp>(m_chunk->sample_count) / m_chunk->frequency;
 		}
 
-		const sre_AudioChunk* load(const char* from_path);
-		const sre_AudioChunk* load(const File& from_file);
+		AudioChunk load(const char* from_path);
+		AudioChunk load(const File& from_file);
 	};
 }
