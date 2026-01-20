@@ -3,7 +3,7 @@
 
 #include <Base/Event.hpp>
 
-Signal<sre::Event> sre::onEvent;
+sre::Signal<sre::Event> sre::onEvent;
 
 int __signal_events(void* data, SDL_Event* ev)
 {
@@ -36,6 +36,12 @@ int __signal_events(void* data, SDL_Event* ev)
         current.mouse_move.position = sre::vec2ut{ ev->motion.x, ev->motion.y } * engine.scale_ratio;
         current.mouse_move.delta = sre::vec2ut{ ev->motion.xrel, ev->motion.yrel } * engine.scale_ratio;
         break;
+    case SDL_MOUSEWHEEL:
+        current.type = sre::EVENT_MOUSEWHEEL;
+        current.mouse_wheel.id = ev->wheel.which;
+        current.mouse_wheel.position = sre::vec2ut{ ev->wheel.mouseX, ev->wheel.mouseY } * engine.scale_ratio;
+        current.mouse_wheel.amount = sre::vec2i{ ev->wheel.x, ev->wheel.y };
+        break;        
     case SDL_FINGERUP:
     case SDL_FINGERDOWN:
     case SDL_FINGERMOTION:
@@ -48,7 +54,7 @@ int __signal_events(void* data, SDL_Event* ev)
     default:
         return 1;
     }
-    sre::onEvent.Fire(current);
+    sre::onEvent.fire(current);
 
     return 1;
 }

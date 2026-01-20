@@ -23,7 +23,7 @@ void TweenServer::update()
         if (tw->m_elapsed >= duration)
         {
             tw->m_state = 0;
-            tw->completed.Fire();
+            tw->completed.fire();
             m_tweens.erase(m_tweens.begin() + i);
             i--;
         }

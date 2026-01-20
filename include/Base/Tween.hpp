@@ -13,7 +13,7 @@ namespace sre
     {
     public:
         const TweenStyle& style;
-        Signal<> completed{this};
+        sre::Signal<empty_t> completed{this};
     private:
         sre::timeStamp m_elapsed = 0;
         int m_state = 0;

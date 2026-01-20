@@ -14,8 +14,8 @@ namespace sreECS
         virtual void pre_render() {}
         virtual void post_render() {}
     public:
-        Signal<> updated{this};
-        Signal<> rendered{this};
+        sre::Signal<sre::empty_t> updated{this};
+        sre::Signal<sre::empty_t> rendered{this};
     };
 }
 

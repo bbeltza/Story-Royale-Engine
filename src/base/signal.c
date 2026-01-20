@@ -28,12 +28,15 @@ struct sre_Connection
     sre_signalfunction function;
 
     sre_uptr flags;
+
+    SDL_atomic_t reference;
 };
 
 enum sre_ConnectionFlags
 {
     SRE_CONNECTION_NONE,
-    SRE_CONNECTION_HASDATA
+    SRE_CONNECTION_HASDATA,
+    SRE_CONNECTION_ONCE
 };
 
 sre_Signal* sre_signalcreate(void* userdata)
@@ -66,7 +69,15 @@ void sre_signaldestroy(sre_Signal* signal)
     {
         sre_Connection* current = signal->connection_head;
         signal->connection_head = current->next;
-        sre_delete(current);
+        
+        if (!SDL_AtomicGet(&current->reference))
+            sre_delete(current);
+        else
+        {
+            current->next = NULL;
+            current->prev = NULL;
+            current->signal = NULL;
+        }
     }
 
     sre_delete(signal);
@@ -80,6 +91,7 @@ sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction funct
     connection->signal = signal;
     connection->next = signal->connection_head;
     connection->prev = NULL;
+    connection->reference.value = 0;
 
     if (signal->connection_head)
         signal->connection_head->prev = connection;
@@ -100,6 +112,7 @@ sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction funct
 void sre_signaldisconnect(sre_Connection* connection)
 {
     if (!connection) return;
+    if (!connection->signal) return;
 
     if (connection->next) connection->next->prev = connection->prev;
     if (connection->prev) connection->prev->next = connection->next;
@@ -108,7 +121,23 @@ void sre_signaldisconnect(sre_Connection* connection)
         connection->signal->connection_head = connection->next;
     }
 
-    sre_delete(connection);
+    connection->signal = NULL;
+    if (connection->reference.value <= 0) sre_delete(connection);
+}
+
+sre_Connection* sre_signalaquire(sre_Connection* connection)
+{
+    assert(connection);
+
+    SDL_AtomicAdd(&connection->reference, 1);
+    return connection;
+}
+
+void sre_signalunaquire(sre_Connection* connection)
+{
+    if (!connection) return;
+    if (SDL_AtomicAdd(&connection->reference, -1) <= 1 && !connection->signal)
+        sre_delete(connection);
 }
 
 void* sre_signalwait(sre_Signal* signal, unsigned timeout)

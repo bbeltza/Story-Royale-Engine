@@ -3,9 +3,9 @@
 #include <Base/Runtime.hpp>
 #include "Base/Thread.hpp"
 
-Signal<> sre::onUpdate{ NULL };
-Signal<> sre::beforeRender{ NULL };
-Signal<> sre::afterRender{ NULL };
+sre::Signal<sre::empty_t> sre::onUpdate{ NULL };
+sre::Signal<sre::empty_t> sre::beforeRender{ NULL };
+sre::Signal<sre::empty_t> sre::afterRender{ NULL };
 
 intptr_t sre::current_frame() { return engine.frame; }
 unsigned current_framerate() { return static_cast<unsigned>(1/engine.target_dt); };

@@ -67,7 +67,7 @@ namespace sre
 	
 	private:
 		static Action* head_ptr;
-		static ConnectionHandle sc_event;
+		static Connection sc_event;
 		static void sc_eventhandler(void*, void*, Event ev);
 	};
 }

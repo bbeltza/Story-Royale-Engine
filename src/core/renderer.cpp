@@ -71,7 +71,7 @@ void __update_viewport(int w, int h)
 
 void __display_render()
 {
-	sre::onUpdate.Fire();
+	sre::onUpdate.fire();
 
 	// Unlock the renderer
 	SDL_UnlockMutex(engine.sdl_rendermutex);
@@ -89,7 +89,7 @@ void __display_render()
 		//// Clearing the screen with the background color
 		engine.video->draw_clear(engine.video, &bg);
 
-		sre::beforeRender.Fire();
+		sre::beforeRender.fire();
 
 		//// Drawing all the entities (doesn't run if the foreground is full opaque)
 		if (fg.a < 255)
@@ -105,14 +105,14 @@ void __display_render()
 		engine.video->camera.y = 0;
 
 		engine.video->draw_clear(engine.video, NULL);
-		sre::beforeRender.Fire();
+		sre::beforeRender.fire();
 	}
 
 	// Drawing the Gui layer
 	if (sreGUI::Object *current = currlayer)
 		current->call_render();
 
-	sre::afterRender.Fire();
+	sre::afterRender.fire();
 
 	// Present the screen
 	SDL_LockMutex(engine.sdl_rendermutex);

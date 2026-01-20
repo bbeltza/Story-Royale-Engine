@@ -24,7 +24,7 @@ void sre_audiocallbackremove(int id);
 // Return the sample-rate of the audio engine
 int sre_audiofreq();
 
-// Return `sre_audiofreq()` / `freq`
+// Return `freq` / `sre_audiofreq()`
 double sre_audiofreqratio(int freq);
 
 void sre_audiosetmaster(unsigned vol);

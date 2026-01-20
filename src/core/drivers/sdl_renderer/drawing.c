@@ -20,9 +20,7 @@ static inline void sresdlrender_coords(const sre_videodriver* video, int cam, si
 		camcoords[1] = 0;
 	}
 
-	count *= 2;
-
-	for (size_t i = 0; i < count; i += 2)
+	for (size_t i = 0; i < count; i++)
 	{
 		out[i].x = (float)(int)(coords[i].x * video->scale - camcoords[0]);
 		out[i].y = (float)(int)(coords[i].y * video->scale - camcoords[1]);
@@ -161,7 +159,7 @@ int sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DDRRect* d
 			0, 1, 2,
 			0, 2, 3
 		};
-		return SDL_RenderGeometryRaw(video->userdata, NULL, (float*)vertices, sizeof(float) * 2, (const SDL_Color*)&data->rect.color, 0, NULL, 0, 4, indices, 6, 1);
+		return SDL_RenderGeometryRaw(video->userdata, NULL, (const float*)vertices, sizeof(float) * 2, (const SDL_Color*)&data->rect.color, 0, NULL, 0, 4, indices, 6, 1);
 	}
 }
 

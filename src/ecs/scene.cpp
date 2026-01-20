@@ -152,7 +152,7 @@ void Scene::call_update()
                 if (comp.enabled)
                     comp.on_update(ent);
             }
-            ent.updated.Fire();
+            ent.updated.fire();
         }
         camera.update();
     }
@@ -179,7 +179,7 @@ void Scene::call_update()
         camera.pupdate();
     }
 
-    updated.Fire();
+    updated.fire();
 }
 
 void Scene::call_render()
@@ -219,7 +219,7 @@ void Scene::call_render()
 
     post_render();
 
-    rendered.Fire();
+    rendered.fire();
 }
 
 Entity *Scene::call_query(sre::vec2ut coords) const

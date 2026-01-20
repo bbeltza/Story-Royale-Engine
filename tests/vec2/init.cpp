@@ -44,5 +44,5 @@ void sre::initialize()
         static constexpr vec2i constexprtest{100, 100};
         static_assert(constexprtest.x == 100 && constexprtest.y == 100, TEST_FAIL);
     }
-    exit(0);
+    //sre::exit(0);
 }

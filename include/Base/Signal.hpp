@@ -14,9 +14,21 @@ namespace sre
 		void operator ()(sre_Connection* ptr) { sre_signaldisconnect(ptr); }
 	};
 
-	#define Signal _Signal
-	#define Connection _Connection
-	using Connection = std::unique_ptr<sre_Connection, ConnectionDeleter>;
+	#define Signal Signal
+	#define Connection Connection
+	class Connection
+	{
+		sre_Connection* m_ptr=NULL;
+	public:
+		using ptr = sre_Connection*;
+	public:
+		constexpr Connection() = default;
+		Connection(sre_Connection* ptr): m_ptr(sre_signalaquire(ptr)) {}
+		~Connection() { sre_signalunaquire(m_ptr); }
+
+		void disconnect() { sre_signalunaquire(m_ptr); sre_signaldisconnect(m_ptr); m_ptr = NULL; }
+		bool connected() { return m_ptr != NULL; }
+	};
 
 	template <typename... Args>
 	class Signal
@@ -28,6 +40,12 @@ namespace sre
 		Signal(void* userdata=NULL): m_ptr(sre_signalcreate(userdata)) {}
 		~Signal() { sre_signaldestroy(m_ptr); }
 
+		void fire(Args... args)
+		{
+			TupleType tuple{args...};
+			sre_signalfire(m_ptr, &tuple);
+		}
+		
 		void fire(Args&&... args)
 		{
 			TupleType tuple{std::forward<Args>(args)...};
@@ -41,7 +59,7 @@ namespace sre
 		}
 
 		template <typename Fn, typename S, typename C>
-		Connection::pointer connect(Fn fn(S*, C*, Args...), void* userdata)
+		Connection::ptr connect(Fn fn(S*, C*, Args...), void* userdata)
 		{
 			void** data;
 			sre_Connection* connection = sre_signalconnectEx(
@@ -64,11 +82,11 @@ namespace sre
 			struct ConnectionData
 			{
 				Fn (*fn)(S*, C*, Args...);
-				void* data;
+				C* data;
 			} *data = static_cast<ConnectionData*>(connection_data);
 
 			auto tuple = static_cast<TupleType*>(fire_data);
-			return data->fn(static_cast<S*>(signal_data), static_cast<C*>(connection_data), std::get<Indices>(*tuple)...);
+			return data->fn(static_cast<S*>(signal_data), data->data, std::get<Indices>(*tuple)...);
 		}
 
 		template <typename Fn, typename S, typename C, size_t... Indices>
@@ -87,11 +105,11 @@ namespace sre
 		T* wait(unsigned timeout=-1) { return static_cast<T*>(sre_signalwait(m_ptr, timeout)); }
 
 		template <typename Fn, typename S, typename C>
-		Connection::pointer connect(Fn fn(S*, C*, T*), void* userdata) { return sre_signalconnect(m_ptr, userdata, reinterpret_cast<sre_signalfunction>(fn)); }
+		Connection::ptr connect(Fn fn(S*, C*, T*), void* userdata) { return sre_signalconnect(m_ptr, userdata, reinterpret_cast<sre_signalfunction>(fn)); }
 		template <typename Fn, typename S, typename C>
-		Connection::pointer connect(Fn fn(S*, C*), void* userdata) { return connect(reinterpret_cast<Fn(*)(S*, C*, T*)>(fn), userdata); }
+		Connection::ptr connect(Fn fn(S*, C*), void* userdata) { return connect(reinterpret_cast<Fn(*)(S*, C*, T*)>(fn), userdata); }
 		template <typename Fn>
-		Connection::pointer connect(Fn fn(), void* userdata) { return connect(reinterpret_cast<sre_signalfunction>(fn), userdata); }
+		Connection::ptr connect(Fn fn(), void* userdata) { return connect(reinterpret_cast<Fn(*)(void*, void*, T*)>(fn), userdata); }
 	};
 
 	using empty_t = nullptr_t*;
@@ -101,6 +119,7 @@ namespace sre
 	#undef Connection
 }
 
+/*
 #define _make_t template <typename... Args>
 
 class Connection;
@@ -238,3 +257,5 @@ public:
 #undef _T1
 #undef _T2
 #undef _make_t
+
+*/

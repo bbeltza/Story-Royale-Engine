@@ -7,7 +7,9 @@
 
 #include <Base/Runtime.hpp>
 #include <Base/Input.hpp>
-#include <Base/Display.hpp>
+#include <Base/Draw.hpp>
+
+#include <ECS/scene.hpp>
 
 #include <Entry.h>
 
@@ -36,28 +38,49 @@ struct DisplayText: public sreGUI::Object
     void update() override { rot += sre::dt * 80; }
 };
 
-sre::rect2Dut mouseRect(0, 0, 100, 50);
-sre::rect2Dut staticRect(0, 20, 250, 90);
+sre::DDRect mouseRect{
+    SRE_DRAWFLAGS_USECAM,
+    { 0, 0, 0, 255 },
 
-void mousewheel(void* signal_data, void* connection_data, const MouseWheel* event)
+    {0, 0, 100, 50},
+    sre::vec2ut::CENTER
+};
+
+const sre::DDRect staticRect{
+    SRE_DRAWFLAGS_USECAM,
+    { 255, 255, 255, 255 }, // REMARK: using sre::col4::WHITE causes it to be black as sre::col4::WHITE hasn't been initialized yet
+                            // That is a problem...
+
+    {0, 20, 250, 90},
+    sre::vec2ut::CENTER
+};
+
+void handle_events(void* signal_data, void* connection_data, sre::Event event)
 {
-    mouseRect.size = mouseRect.size + sre::vec2ut{event->amount * 10};
+    switch (event.type)
+    {
+        case sre::EVENT_MOUSEWHEEL:
+            mouseRect.rect.size += sre::vec2ut{event.mouse_wheel.amount * 10};
+            break;
+    }
+    
 }
 
 void DisplayText::post_render()
 {
-    sre::col4 col;
-    if (mouseRect.intersects(staticRect))
-        col = col.GREEN; // Green
+    if (mouseRect.rect.intersects(staticRect.rect))
+        mouseRect.color = sre::col4::GREEN; // Green
     else
-        col = col.RED; // Red
+        mouseRect.color = sre::col4::RED; // Red
 
-    sre::vec2ut mPos = Input::MouseWorldPosition();
-    mPos.println();
-    mouseRect.position.x = mPos.x;
-    mouseRect.position.y = mPos.y;
-    Display::DrawRectangle(staticRect, {255, 255, 255, 255}, sre::vec2f::CENTER, Display::M_FILL, NULL);
-    Display::DrawRectangle(mouseRect, col, sre::vec2f::CENTER, Display::M_FILL, NULL);
+    sre::vec2ut mPos = sreECS::mouse_worldcoords();
+    mouseRect.rect.position = mPos;
+    //mPos.println();
+
+    staticRect.color.println();
+    staticRect.rect.println();
+    sre::draw(staticRect);
+    sre::draw(mouseRect);
     /*
     Display::DrawDebug(mouseRect.top_left());
     Display::DrawDebug(mouseRect.top_right());
@@ -71,5 +94,5 @@ void sre::initialize()
     auto display_text = new DisplayText;
     display_text->set_root();
 
-    Input::MouseWheel.Connect(mousewheel, nullptr);
+    sre::onEvent.connect(handle_events, nullptr);
 }

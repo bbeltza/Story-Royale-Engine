@@ -19,7 +19,7 @@ namespace sreECS
     private:
         sre::vec2ut m_camSpeed;
         sre::vec2ut m_lastmouseDelta;
-        ConnectionHandle m_eventconnection;
+        sre::Connection m_eventconnection;
         const sre::Action& m_action;
 
         static void handle_event(void* signalData, DragControl* self, sre::Event ev);

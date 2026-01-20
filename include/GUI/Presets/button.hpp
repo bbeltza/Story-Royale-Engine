@@ -21,7 +21,7 @@ namespace sreGUI
         void update() override;
 
         bool m_hover = 0;
-        ConnectionHandle m_event;
+        sre::Connection m_event;
     };
 }
 

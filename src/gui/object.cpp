@@ -189,7 +189,7 @@ void Object::call_update()
     update();
     for (auto& obj : children)
         obj.call_update();
-    updated.Fire();
+    updated.fire();
 }
 
 void Object::call_render()
@@ -214,5 +214,5 @@ void Object::call_render()
     Display::DrawRectangle(m_absolute, sre::col4::RED, sre::vec2f::ZERO, Display::M_STROKE, DISPLAY_DONT_CENTER);
     */
 
-    rendered.Fire();
+    rendered.fire();
 }

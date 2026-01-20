@@ -7,11 +7,9 @@
 
 namespace sre
 {
-    using ::Signal;
-
-    extern sre::Signal<> onUpdate;
-    extern sre::Signal<> beforeRender;
-    extern sre::Signal<> afterRender;
+    extern sre::Signal<sre::empty_t> onUpdate;
+    extern sre::Signal<sre::empty_t> beforeRender;
+    extern sre::Signal<sre::empty_t> afterRender;
 
     intptr_t current_frame();
     unsigned current_framerate();

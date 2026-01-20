@@ -215,8 +215,8 @@ namespace sreGUI
         void call_prerender();
 
     public:
-        Signal<> updated{this};
-        Signal<> rendered{this};
+        sre::Signal<sre::empty_t> updated{this};
+        sre::Signal<sre::empty_t> rendered{this};
     };
 }
 

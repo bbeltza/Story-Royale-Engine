@@ -4,12 +4,12 @@ using namespace sre;
 
 Action* Action::head_ptr = NULL;
 
-ConnectionHandle Action::sc_event;
+Connection Action::sc_event;
 
 Action::Action(): m_next(head_ptr)
 {
-	if (!sc_event.Connected())
-		sc_event = sre::onEvent.Connect(sc_eventhandler, NULL);
+	if (!sc_event.connected())
+		sc_event = sre::onEvent.connect(sc_eventhandler, NULL);
 
 	head_ptr = this;
 	if (m_next) m_next->m_prev = this;

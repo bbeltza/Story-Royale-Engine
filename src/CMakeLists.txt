@@ -33,8 +33,6 @@ set(BASE_SOURCES
 "runtime.cpp"
 "thread.cpp"
 "tween.cpp"
-
-"Signal.cpp"
 )
 
 set(ECS_SOURCES

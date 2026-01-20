@@ -23,7 +23,7 @@ void Button::handle_event(void*, Button* button, sre::Event ev)
 }
 
 Button::Button():
-    m_event(sre::onEvent.Connect(handle_event, this))
+    m_event(sre::onEvent.connect(handle_event, this))
 {
 
 }

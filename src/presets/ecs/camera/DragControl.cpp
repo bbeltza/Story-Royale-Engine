@@ -6,7 +6,7 @@ using namespace sreECS;
 
 sre::Action DragControl::default_action{ sre::MB_RIGHT };
 
-DragControl::DragControl(const sre::Action& action): m_action(action), m_eventconnection(sre::onEvent.Connect(handle_event, this))
+DragControl::DragControl(const sre::Action& action): m_action(action), m_eventconnection(sre::onEvent.connect(handle_event, this))
 {
 }
 
