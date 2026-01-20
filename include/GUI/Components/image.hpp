@@ -2,7 +2,7 @@
 #define SREGUI_IMAGE_HPP
 
 #include <GUI/component.hpp>
-#include <Base/Texture.hpp>
+#include <Core/Texture.hpp>
 #include <Datatypes/Color.hpp>
 
 namespace sreGUI

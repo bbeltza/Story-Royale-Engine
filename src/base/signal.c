@@ -62,7 +62,11 @@ void sre_signaldestroy(sre_Signal* signal)
 {
     if (!signal) return;
 
-    if (signal->cond) SDL_DestroyCond(signal->cond);
+    if (signal->cond)
+    {
+        SDL_CondBroadcast(signal->cond);
+        SDL_DestroyCond(signal->cond);
+    }
     if (signal->mutex) SDL_DestroyMutex(signal->mutex);
 
     while (signal->connection_head)
@@ -190,7 +194,7 @@ void sre_signalconnectwrapper(void* signal_data, void* connection_data, void* fi
 sre_Connection* sre_signalconnect(sre_Signal* signal, void* userdata, sre_signalfunction function)
 {
     struct sre_signalconnectwrapper* data;
-    sre_Connection* connection = sre_signalconnectEx(signal, sre_signalconnectwrapper, sizeof(struct sre_signalconnectwrapper), &data);
+    sre_Connection* connection = sre_signalconnectEx(signal, sre_signalconnectwrapper, sizeof(struct sre_signalconnectwrapper), (void**)&data);
     if (!connection) return NULL;
 
     data->func = function;

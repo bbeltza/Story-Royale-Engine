@@ -1,7 +1,7 @@
 #pragma once
 #include <Base/Image.hpp>
 
-#include <Base/Texture.h>
+#include <Core/Texture.h>
 
 namespace sre
 {

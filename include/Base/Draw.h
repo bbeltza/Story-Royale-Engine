@@ -3,7 +3,7 @@
 #include <C_API.h>
 #include <ints.h>
 
-#include <Base/Texture.h>
+#include <Core/Texture.h>
 
 #include <utils/math.h>
 

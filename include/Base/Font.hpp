@@ -2,7 +2,7 @@
 #include <SDL_ttf.h>
 #include <standard>
 
-#include "Base/Texture.hpp"
+#include "Core/Texture.hpp"
 #include "Datatypes/Rect.hpp"
 #include "Datatypes/Color.hpp"
 

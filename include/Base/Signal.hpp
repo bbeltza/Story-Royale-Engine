@@ -69,7 +69,7 @@ namespace sre
 				reinterpret_cast<void**>(&data)
 			);
 
-			data[0] = fn;
+			data[0] = reinterpret_cast<void*>(fn);
 			data[1] = userdata;
 
 			return connection;

@@ -3,7 +3,7 @@
 #include <SDL.h>
 
 #include <Base/Draw.h>
-#include <Base/Texture.h>
+#include <Core/Texture.h>
 #include <Datatypes/Units.h>
 
 // Function signature macro for declaring drawing command function pointers

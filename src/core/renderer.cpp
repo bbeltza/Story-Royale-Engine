@@ -3,7 +3,7 @@
 
 #include <GameSettings.h>
 
-#include <Base/Texture.hpp>
+#include <Core/Texture.hpp>
 #include <Base/Runtime.hpp>
 
 #include <ECS/scene.hpp>

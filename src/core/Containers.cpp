@@ -1,7 +1,7 @@
 #include "../internal.h"
 
 #include "Base/Display.hpp"
-#include "Base/Texture.hpp"
+#include "Core/Texture.hpp"
 #include "Base/Thread.hpp"
 #include "Base/Audio.hpp"
 

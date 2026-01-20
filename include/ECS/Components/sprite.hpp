@@ -5,7 +5,7 @@
 #include <Datatypes/Color.hpp>
 
 #include <Base/File.hpp>
-#include <Base/Texture.hpp>
+#include <Core/Texture.hpp>
 
 namespace sreECS
 {
