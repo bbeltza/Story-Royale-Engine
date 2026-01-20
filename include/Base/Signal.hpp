@@ -5,9 +5,100 @@
 
 #include <utils/sequence.hpp>
 
+#include <Base/Signal.h>
+
 namespace sre
 {
-	
+	struct ConnectionDeleter
+	{
+		void operator ()(sre_Connection* ptr) { sre_signaldisconnect(ptr); }
+	};
+
+	#define Signal _Signal
+	#define Connection _Connection
+	using Connection = std::unique_ptr<sre_Connection, ConnectionDeleter>;
+
+	template <typename... Args>
+	class Signal
+	{
+		sre_Signal* m_ptr;
+	public:
+		using TupleType = std::tuple<Args...>;
+	public:
+		Signal(void* userdata=NULL): m_ptr(sre_signalcreate(userdata)) {}
+		~Signal() { sre_signaldestroy(m_ptr); }
+
+		void fire(Args&&... args)
+		{
+			TupleType tuple{std::forward<Args>(args)...};
+			sre_signalfire(m_ptr, &tuple);
+		}
+
+		TupleType wait(unsigned timeout=-1)
+		{
+			auto arg = static_cast<TupleType*>(sre_signalwait(m_ptr, timeout));
+			return *arg;
+		}
+
+		template <typename Fn, typename S, typename C>
+		Connection::pointer connect(Fn fn(S*, C*, Args...), void* userdata)
+		{
+			void** data;
+			sre_Connection* connection = sre_signalconnectEx(
+				m_ptr,
+				get_invoke<Fn, S, C>(typename ut::make_sequence<sizeof...(Args)>::type {}),
+				sizeof(void*) * 2,
+				reinterpret_cast<void**>(&data)
+			);
+
+			data[0] = fn;
+			data[1] = userdata;
+
+			return connection;
+		}
+
+	private:
+		template <typename Fn, typename S, typename C, size_t... Indices>
+		static void invoke(void* signal_data, void* connection_data, void* fire_data)
+		{
+			struct ConnectionData
+			{
+				Fn (*fn)(S*, C*, Args...);
+				void* data;
+			} *data = static_cast<ConnectionData*>(connection_data);
+
+			auto tuple = static_cast<TupleType*>(fire_data);
+			return data->fn(static_cast<S*>(signal_data), static_cast<C*>(connection_data), std::get<Indices>(*tuple)...);
+		}
+
+		template <typename Fn, typename S, typename C, size_t... Indices>
+		sre_signalfunction get_invoke(ut::sequence<Indices...>) { return &invoke<Fn, S, C, Indices...>; }
+	};
+
+	template <typename T>
+	class Signal<T*>
+	{
+		sre_Signal* m_ptr;
+	public:
+		Signal(void* userdata=NULL): m_ptr(sre_signalcreate(userdata)) {}
+		~Signal() { sre_signaldestroy(m_ptr); }
+
+		void fire(T* arg=NULL) { sre_signalfire(m_ptr, arg); }
+		T* wait(unsigned timeout=-1) { return static_cast<T*>(sre_signalwait(m_ptr, timeout)); }
+
+		template <typename Fn, typename S, typename C>
+		Connection::pointer connect(Fn fn(S*, C*, T*), void* userdata) { return sre_signalconnect(m_ptr, userdata, reinterpret_cast<sre_signalfunction>(fn)); }
+		template <typename Fn, typename S, typename C>
+		Connection::pointer connect(Fn fn(S*, C*), void* userdata) { return connect(reinterpret_cast<Fn(*)(S*, C*, T*)>(fn), userdata); }
+		template <typename Fn>
+		Connection::pointer connect(Fn fn(), void* userdata) { return connect(reinterpret_cast<sre_signalfunction>(fn), userdata); }
+	};
+
+	using empty_t = nullptr_t*;
+	using EmptySignal = Signal<empty_t>;
+
+	#undef Signal
+	#undef Connection
 }
 
 #define _make_t template <typename... Args>
@@ -102,7 +193,6 @@ class Signal: public SignalBase
 public:
 	constexpr Signal(void* Userdata=NULL): SignalBase(Userdata) { }
 	void Fire(Args... args) { ret_args = std::make_tuple( args... ); base_fire(); }
-
 
 	_T1 Connection* Connect(Callable<Ret, ST, CT> function, void* userdata = NULL) { return base_connect(function, userdata, Connection::NONE); }
 	_T2 Connection* Connect(ShortCallable<Ret> function, void* userdata = NULL) { return base_connect(function, userdata, Connection::NONE); }

@@ -27,6 +27,9 @@ int sre_audiofreq();
 // Return `sre_audiofreq()` / `freq`
 double sre_audiofreqratio(int freq);
 
+void sre_audiosetmaster(unsigned vol);
+int sre_audiogetmaster();
+
 SRE_CAPI_END
 
 #endif

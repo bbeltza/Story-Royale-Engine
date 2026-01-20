@@ -22,6 +22,15 @@ namespace sre
 
 	inline int audio_frequency() { return sre_audiofreq(); }
 	inline double audio_freqratio(int freq) { return sre_audiofreqratio(freq); }
+
+	inline void audio_setmaster(unsigned vol) { return sre_audiosetmaster(vol); }
+	inline void audio_setmaster(float vol) { return sre_audiosetmaster(static_cast<unsigned>(128 * vol)); }
+
+	inline int audio_getmaster() { return sre_audiogetmaster(); }
+	template <typename T>
+	inline T audio_getmaster() { static_assert(0, "Invalid use of audio_getmaster<T>(), use audio_getmaster<float>() instead"); }
+	template <>
+	inline float audio_getmaster<float>() { return sre_audiogetmaster() / 128.0f; }
 }
 
 namespace sre

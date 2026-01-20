@@ -22,6 +22,7 @@ set(BASE_SOURCES
 "chunk.c"
 "rwops.c"
 "audiochunk.c"
+"signal.c"
 
 "action.cpp"
 "audio.cpp"
