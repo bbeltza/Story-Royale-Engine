@@ -10,3 +10,11 @@ void os_unix_delay(unsigned long long delay)
 
     nanosleep(&ts, NULL);
 }
+
+unsigned long long os_unix_clock(void)
+{
+    struct timespec ts;
+    if (clock_gettime(CLOCK_REALTIME, &ts) < 0) return 0;
+
+    return ts.tv_sec * CLOCK_FREQUENCY + ts.tv_nsec;
+}

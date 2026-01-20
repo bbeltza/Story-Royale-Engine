@@ -3,4 +3,4 @@ project(AudioTest)
 
 set(SOURCES AudioTest.cpp)
 
-srEngine_build(AudioTest NO_BIND)
+srEngine_build(AudioTest audio SOURCES NO_BIND)

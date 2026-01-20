@@ -1,17 +1,21 @@
 #include <Base/Thread.hpp>
-#include <GameEntry.h>
+#include <Entry.h>
 
-#include <logging.h>
+#include <utils/logging.h>
 
-void testmyself(char a, float b) // Well it kind of doesn't work on floats. Looking for a fix (Like for Signals)
+#include <OS.h>
+
+int testmyself(char a, float b)
 {
-    LOG("a is %d and b is %f!", a, b); // It worked... I did magic! I'm a wizard!!!!.....
-    SDL_Delay(1000);
+    LOG("a is %d and b is %f!", a, b);
+    delay_s(1);
     LOG("a is again... %d and b is %f!", a, b);
+
+    return 0;
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
-    Thread thrd = Threads::Create(testmyself, 3, 2.0f);
+    sre::Thread thrd(testmyself, 3, 2.0f);
     LOG("Thread has been finished");
 }

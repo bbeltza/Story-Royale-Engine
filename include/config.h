@@ -1,9 +1,0 @@
-#define DO_IT_ANYWAY 0
-
-#if defined(DEBUG) || DO_IT_ANYWAY
-    #define DRAW_GUI_CONTAINER_BOX
-    #define DRAW_ENTITY_CENTER
-#endif
-
-#define DRAW_ENTCENTER_ONLYEMPTY 0
-#define DRAW_ENTCENTER_LINESIZE 3

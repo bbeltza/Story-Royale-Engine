@@ -1,11 +1,15 @@
 #pragma once
 #include <SDL.h>
-#include <stdint.h>
+#include <standard>
 
-#include "C/API.h"
-#include "datatypes/timestamp.h"
+#include <C_API.h>
+#include <Datatypes/Units.h>
+#include <Datatypes/TimeStamp.h>
+#include <ints.h>
 
-_CAPI_BEGIN
+SRE_CAPI_BEGIN
+	typedef struct sre_videodriver sre_videodriver;
+
 	struct _win_settings
 	{
 		const char* title;
@@ -18,11 +22,20 @@ _CAPI_BEGIN
 
 		// Runtime data
 
-		intptr_t frame;
-		TimeStamp last_dt;
-		TimeStamp target_dt;
-		TimeStamp phys_target_dt;
-		TimeStamp phys_accum_dt;
+		size_t frame;
+		sre_timeStamp last_dt;
+		sre_timeStamp target_dt;
+		sre_timeStamp phys_target_dt;
+		SDL_threadID main_thrd;
+
+		unsigned long long framestart_time;
+		unsigned long long frameend_time;
+
+		void* defer_head;
+		void* retdefer_head;
+
+		#define SRE_THREADS_BUCKETSIZE 32
+		void* threads_bucket[SRE_THREADS_BUCKETSIZE]; // "Hash" map of the threads
 
 		// Instance data
 
@@ -39,34 +52,33 @@ _CAPI_BEGIN
 		
 		// Renderer data
 		
-		SDL_Renderer* sdl_rendererhndl;
-		SDL_Texture* sdl_rectTex;
+		sre_videodriver* video;
+
 		SDL_mutex* sdl_rendermutex;
-		SDL_Rect viewport;
 		int osize_x, osize_y;
-		float center_x, center_y;
-
-		size_t targetptr;
-
-		float current_scale;
-		float viewport_scale;
 
 		// Audio data
 
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
-		unsigned char* audio_stream;
+		void* audio_queue;
+		sre_usize audio_queuesize;
+		sre_usize audio_queuecap;
+		int last_audioid;
+
+		int audio_master;
+
+		sre_byte* audio_stream;
 		int audio_slen; // in bytes
 
 		// Input data
 
-		float mouse_x, mouse_y;
+		sre_unit mouse_x, mouse_y;
 		uint32_t mouse_press;
+		sre_unit scale_ratio; // 1 / video->scale
 		SDL_TouchID input_last_touchid;
-		uint8_t keyboard_state[SDL_NUM_SCANCODES];
-
-		void* containers_service;
+		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 	};
 
 	extern struct _engine_data __engine_data;
@@ -78,23 +90,23 @@ _CAPI_BEGIN
 	extern void __create_window();
 	extern void __setup_renderer();
 	
-	extern void __init_containers();
-	extern void __init_actions();
-
 	extern void __setup_audio_device();
 
 	extern int __poll_events();
 	extern void __poll_input(SDL_Event* ev);
+	extern int __signal_events(void* data, SDL_Event* ev);
 
-	extern void __update_viewport();
+	extern void __update_viewport(int w, int h);
 	extern void __update_input();
 
 	extern void __query_objects();
 
 	extern void __destroy_queue();
+	extern void __call_deferred();
 
-	extern void __update_timers();
-	extern void __update_classes();
+	extern void __cleanup_threads();
+	extern void __update_threads();
+
 	extern void __update_world();
 	extern void __update_layer();
 
@@ -103,19 +115,15 @@ _CAPI_BEGIN
 	extern void __display_render();
 
 	extern void __clean_containers();
-_CAPI_END
+SRE_CAPI_END
 
 #ifdef __cplusplus
-#define currworld static_cast<::Game::World*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
-#define currlayer static_cast<::Game::GuiLayer*>(engine.current_guilayer) // Same with this...
-#define flags_kbstate reinterpret_cast<::Flags8*>(engine.keyboard_state)
-#define flags_mousepress (*reinterpret_cast<::Flags32*>(&engine.mouse_press))
+#define currscn static_cast<::sreECS::Scene*>(engine.current_world) // ONLY USE IT WHEN YOU HAVE THE CLASS INCLUDED
+#define currlayer static_cast<::sreGUI::Object*>(engine.current_guilayer) // Same with this...
 
 #define _audio_loaded static_cast<std::unordered_map<std::string, std::unique_ptr<AudioData>> *>(engine.loaded_audios)
 #define _audio_queue static_cast<std::unordered_set<Audio *> *>(engine.audio_queue)
 #define _audio_stopqueue static_cast<std::queue<Audio *> *>(engine.stopped_audios)
-
-#define _fonts_loaded static_cast<std::list<TTF_Font*> *>(engine.loaded_fonts)
 #endif
 
 #define engine __engine_data // Macro for easier typing

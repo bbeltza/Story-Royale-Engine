@@ -1,7 +1,10 @@
 #pragma once
 #include <standard>
 
-#include <SDL_rwops.h>
+#include <Base/File.h>
+#include <Base/Chunk.h>
+#include <Base/RWops.h>
+
 #include <SDL_endian.h>
 #include <SDL_filesystem.h>
 
@@ -9,13 +12,52 @@ extern "C" void ERROR(const char*, ...);
 
 extern "C"
 {
-#if defined(WIN32)
+#if defined(_WIN32)
 	extern const unsigned char* _game_res;
 #else
 	extern const unsigned char _game_res[];
 #endif
 };
 
+namespace sre
+{
+	struct ChunkDeleter { void operator ()(const sre_Chunk* chunk) { return sre_chunkfree(chunk); } };
+	using Chunk = std::unique_ptr<const sre_Chunk, ChunkDeleter>;
+	class File: protected sre_File
+	{
+	public:
+		File(): sre_File{} {}
+		File(const char* path, const char* mode = NULL) { sre_fileopen(this, path, mode); }
+		~File() { sre_fileclose(this); }
+
+		inline bool valid() const { return this->fp.fp != NULL; }
+
+		inline Chunk allocate(size_t max_size=0) const { return Chunk(sre_fileallocate(this, max_size)); }
+
+		inline SDL_RWops* to_RWops() const { return sre_filetorwops(this); }
+
+		inline const byte* resource_data() const
+		{
+			if (!embedded) // Could also check if the file is valid, but remember isembedded is true if the file is valid
+				return NULL;
+
+			return res.begin; // Even if it wasn't valid and this passes, res_begin will be NULL
+		}
+
+		size_t size() const { return sre_filesize(this); }
+
+		template <typename Fn, typename... Args>
+		auto call_cfunc(Fn func, Args&&... args) -> decltype(func(this, args...)) { return func(static_cast<sre_File*>(this), std::forward<Args>(args)...); }
+
+		template <typename Fn, typename... Args>
+		auto call_cfunc(Fn func, Args&&... args) const -> decltype(func(this, args...)) { return func(static_cast<const sre_File*>(this), std::forward<Args>(args)...); }
+	};
+}
+
+#define File _File
+#define Chunk _Chunk
+
+// Still may need content for the file class to implement the rest of the stuff
 class File
 {
 	union
@@ -117,8 +159,8 @@ public:
 		return std::move(*reinterpret_cast<T*>(data));
 	}
 
-	template <class T> inline T readLE() { return LITTLE_ENDIAN ? read<T>() : readSwapped<T>(); }
-	template <class T> inline T readBE() { return BIG_ENDIAN ? read<T>() : readSwapped<T>(); }
+	template <class T> inline T readLE() { return IS_LITTLE_ENDIAN ? read<T>() : readSwapped<T>(); }
+	template <class T> inline T readBE() { return IS_BIG_ENDIAN ? read<T>() : readSwapped<T>(); }
 
 	int readF(const char* fmt, ...);
 
@@ -136,11 +178,11 @@ public:
 		return writeBytes(swap, sizeof(T));
 	}
 
-	template <class T> size_t writeLE(T data) { return LITTLE_ENDIAN ? write(data) : writeSwapped(data); }
-	template <class T> size_t writeBE(T data) { return BIG_ENDIAN ? write(data) : writeSwapped(data); }
+	template <class T> size_t writeLE(T data) { return IS_LITTLE_ENDIAN ? write(data) : writeSwapped(data); }
+	template <class T> size_t writeBE(T data) { return IS_BIG_ENDIAN ? write(data) : writeSwapped(data); }
 
-	static constexpr bool LITTLE_ENDIAN = SDL_BYTEORDER == SDL_LIL_ENDIAN;
-	static constexpr bool BIG_ENDIAN = SDL_BYTEORDER == SDL_BIG_ENDIAN;
+	static constexpr bool IS_LITTLE_ENDIAN = (SDL_BYTEORDER == SDL_LIL_ENDIAN);
+	static constexpr bool IS_BIG_ENDIAN = (SDL_BYTEORDER == SDL_BIG_ENDIAN);
 private:
 
 	size_t resource_size() const
@@ -164,3 +206,6 @@ private:
 
 	static bool path_hasprefix(const char* path, const char prefix[PREFIX_LENGTH]) { return !strncmp(prefix, path, PREFIX_LENGTH); }
 };
+
+#undef Chunk
+#undef File

@@ -8,5 +8,6 @@ const struct os_wrapper os = {
 	os_unix_outputgetc,
 	os_unix_outputhasnline,
 
-	os_unix_delay
+	os_unix_delay,
+	os_unix_clock
 };

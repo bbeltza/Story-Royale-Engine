@@ -1,5 +1,3 @@
-- Be able to create tweens on datatypes that will have the Lerp() function (for now it only supports for those with the used operators)
-
 - Animations/Keyframes
 
 - Audio interpolation
@@ -11,14 +9,31 @@
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
 - Move classes and objects to a single namespace (e.g. sre::--)
-- Move the "Game" stuff into sre::world::-- and sre::gui::--
+
+- Move some of the include stuff from Base to a new Core folder (and maybe move some base sources to core too)
+	This includes:
+		- Audio.h
+		- Defer.h
+		- Display.hpp
+		- Draw.h and perhaps .hpp
+		- Event.hpp
+		- Input.hpp
+		- object.h and .hpp (This is an incomplete feature, it still uses the core engine data and I still expect it to use it)
+		- Runtime.hpp
+		- Texture.h like Draw
+		- Thread.h and maybe .hpp like Draw and Texture
+		- Window.hpp
+	It's basically every header that contains functions that use __engine_data from internal.h
+	Some .h files have also a C++ version of it and they are just wrappers around the C version so they don't use the engine data
+	directly and that's why I might keep it from Base, but the include tree would completely be messed up so it's still more convenient
+	to put it in Core  
 
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 
 - Android support
 
-(current version: pre-0.1)
+(current version: 0.1 pre-release)
 
 - Work on the game ^^
 

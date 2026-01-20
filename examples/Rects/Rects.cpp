@@ -1,65 +1,98 @@
-#include <Engine.hpp>
-#include <ECS.hpp>
-#include <GUI.hpp>
-
 #include <Events/Mouse.hpp>
-#include <Game/GuiComponents/Text.hpp>
+
+#include <GUI/object.hpp>
+#include <GUI/Components/transform.hpp>
+#include <GUI/Components/text.hpp>
+#include <GUI/Components/fill.hpp>
+
+#include <Base/Runtime.hpp>
+#include <Base/Input.hpp>
+#include <Base/Draw.hpp>
+
+#include <ECS/scene.hpp>
+
+#include <Entry.h>
 
 static double rot = 0;
 
-struct DisplayText: public Game::GuiLayer
+struct DisplayText: public sreGUI::Object
 {
     DisplayText()
     {
-        auto label = addChild<Game::GuiObject>();
-        label->anchor = Vector2f(0.5, 0);
-        label->position = UDim2(0.5, 0, 0, 10);
+        transform.anchor = {0.5, 0}; // NOTE: anchor to be changed to vec2ut after switching to double
+        transform.position = {0.5, 0, 0, 10};
+        transform.size = { 0.9, 0, 0, 50 };
         
-        text.h_alignment = Font::HCenter;
+        text.h_alignment = sre::A_CENTER;
         text.color = {255, 255, 255};
-        text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can change the size of the rectangle with your mouse wheel");
-        text.LoadFont("res://fonts/OpenSans-Regular.ttf");
+        text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can resize the rectangle with your mouse wheel");
+        text.load("res://fonts/OpenSans-Regular.ttf");
 
-        label->addComponent(text);
+        components.setup(transform, text);
     }
 
-    GuiComponents::Text text;
+    sreGUI::Transform transform;
+    sreGUI::Text text;
 
-    void postRender();
-    void Update(TimeStamp delta) { rot += delta * 80; }
+    void post_render() override;
+    void update() override { rot += sre::dt * 80; }
 };
 
-RectF mouseRect(0, 0, 100, 50);
-RectI staticRect(0, 20, 250, 90);
+sre::DDRect mouseRect{
+    SRE_DRAWFLAGS_USECAM,
+    { 0, 0, 0, 255 },
 
-void mousewheel(void* signal_data, void* connection_data, const MouseWheel* event)
+    {0, 0, 100, 50},
+    sre::vec2ut::CENTER
+};
+
+const sre::DDRect staticRect{
+    SRE_DRAWFLAGS_USECAM,
+    { 255, 255, 255, 255 }, // REMARK: using sre::col4::WHITE causes it to be black as sre::col4::WHITE hasn't been initialized yet
+                            // That is a problem...
+
+    {0, 20, 250, 90},
+    sre::vec2ut::CENTER
+};
+
+void handle_events(void* signal_data, void* connection_data, sre::Event event)
 {
-    mouseRect.Size = mouseRect.Size + Vector2f(event->amount * 10);
+    switch (event.type)
+    {
+        case sre::EVENT_MOUSEWHEEL:
+            mouseRect.rect.size += sre::vec2ut{event.mouse_wheel.amount * 10};
+            break;
+    }
+    
 }
 
-void DisplayText::postRender()
+void DisplayText::post_render()
 {
-    Color4 col;
-    if (mouseRect.Intersects(staticRect))
-        col = {0, 255, 0, 255}; // Green
+    if (mouseRect.rect.intersects(staticRect.rect))
+        mouseRect.color = sre::col4::GREEN; // Green
     else
-        col = {255, 0, 0, 255}; // Red
+        mouseRect.color = sre::col4::RED; // Red
 
-    Vector2f mPos = Input::MouseWorldPosition();
-    mPos.PrintLn();
-    mouseRect.Position.X = mPos.X;
-    mouseRect.Position.Y = mPos.Y;
-    Display::DrawRectangleAtWorld(staticRect, {255, 255, 255, 255});
-    Display::DrawRectangleAtWorld(mouseRect, col);
-    Display::DrawDebug(mouseRect.getTopLeft());
-    Display::DrawDebug(mouseRect.getTopRight());
-    Display::DrawDebug(mouseRect.getBottomLeft());
-    Display::DrawDebug(mouseRect.getBottomRight());
+    sre::vec2ut mPos = sreECS::mouse_worldcoords();
+    mouseRect.rect.position = mPos;
+    //mPos.println();
+
+    staticRect.color.println();
+    staticRect.rect.println();
+    sre::draw(staticRect);
+    sre::draw(mouseRect);
+    /*
+    Display::DrawDebug(mouseRect.top_left());
+    Display::DrawDebug(mouseRect.top_right());
+    Display::DrawDebug(mouseRect.bottom_left());
+    Display::DrawDebug(mouseRect.bottom_right());
+    */
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
-    Game::GuiLayer::setCurrent<DisplayText>();
+    auto display_text = new DisplayText;
+    display_text->set_root();
 
-    Input::MouseWheel.Connect(mousewheel, nullptr);
+    sre::onEvent.connect(handle_events, nullptr);
 }

@@ -48,6 +48,8 @@ target_link_libraries(sre_core PRIVATE sre)
 target_link_libraries(sre_core PRIVATE sre_interface)
 target_compile_definitions(sre_core PRIVATE INTERNAL_DEF=1)
 
+target_link_libraries(sre_core PRIVATE sre_driverinterface)
+
 target_link_libraries(sre PRIVATE sre_core)
 target_link_libraries(sre PRIVATE sre_interface)
 target_link_libraries(sre_interface INTERFACE sre_werror)

@@ -22,6 +22,7 @@ It's discouraged to use it with numbers as numbers can be NULL too
 #define ut_arrcount(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #if defined(_MSC_VER) && !defined(__clang__)
+	#include <malloc.h>
 	#define __ut_dynsalloc(t, x, c) t *x = ut_static_cast(t*, alloca((c) * sizeof(t)))
 #else
 	#define __ut_dynsalloc(t, x, c) t x[c]
@@ -30,3 +31,14 @@ It's discouraged to use it with numbers as numbers can be NULL too
 // Dynamically allocates an array (x) of c elements of type t, on the stack.
 // Depending on the implementation, it may support variable length arrays (e.g. clang & gcc's extensions), or just use alloca
 #define ut_dynsalloc __ut_dynsalloc
+
+#ifdef __cplusplus
+	extern "C" {
+#endif
+		#include <stddef.h>
+		// C operator new and delete wrappers
+		extern void* sre_new(size_t size);
+		extern void sre_delete(void* block);
+#ifdef __cplusplus
+	}
+#endif

@@ -1,14 +1,14 @@
 #include <Base/File.hpp>
-#include <Engine.hpp>
+#include <Entry.h>
 
-void Game::Initialize(void)
+#include <utils/logging.h>
+
+void sre::initialize()
 {
-    /*
-    LOG("Game res: %s\n", _game_res);
     File f("res://hello.txt");
-    const char* data = (const char*)f.resourceData();
-    size_t size = f.resourceSize();
-    LOG("%s\n", data);
-    LOG("%zd\n", size);
-    */
+    LOG("Game res: %s", _game_res);
+    const char* data = (const char*)f.resource_data();
+    size_t size = f.size();
+    LOG("%s", data);
+    LOG("%zd", size);
 }

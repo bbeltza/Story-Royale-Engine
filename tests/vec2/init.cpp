@@ -1,12 +1,12 @@
 #ifdef NDEBUG
     #undef NDEBUG // Tests should be interpreted as in debug mode, even on release
 #endif
-#include <Engine.hpp>
+#include <Entry.h>
 #include <datatypes/vector.hpp>
 
 #define TEST_FAIL "Test failed (static assertion)"
 
-void Game::Initialize()
+void sre::initialize()
 {
     using namespace sre;
     // Every single test is independent and thus will have its own scope
@@ -44,5 +44,5 @@ void Game::Initialize()
         static constexpr vec2i constexprtest{100, 100};
         static_assert(constexprtest.x == 100 && constexprtest.y == 100, TEST_FAIL);
     }
-    exit(0);
+    //sre::exit(0);
 }

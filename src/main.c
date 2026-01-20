@@ -6,10 +6,6 @@
 
 struct _engine_data __engine_data;
 
-#include <string.h>
-#include <signal.h>
-#include <stdio.h>
-
 #ifndef __clang__ 
 static void sig_handler(int signal) {}
 #endif

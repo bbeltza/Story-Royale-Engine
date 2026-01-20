@@ -2,21 +2,24 @@
 #include <SDL_image.h>
 #include "../internal.h"
 
-#include "GameEntry.h"
+#include "drivers/drivers.h"
+
+#include <Entry.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <utils/logging.h>
+#include <OS.h>
 
 static int __invoke_entry(void* userdata)
 {
     SDL_Event finish_event = { 0 };
     finish_event.type = SDL_USEREVENT;
     finish_event.user.code = 1;
-
-    Initialize();
+    
+    sre_initialize();
     SDL_PushEvent(&finish_event);
 
     return 0;
@@ -24,10 +27,12 @@ static int __invoke_entry(void* userdata)
 
 static inline void __setup_engine_data()
 {
-    engine.phys_target_dt = 1.0 / 64.0;
+    engine.phys_target_dt = 1 / 128.0;
+    engine.framestart_time = os.clock();
 
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
+    engine.main_thrd = SDL_ThreadID();
     engine.entry_thread = SDL_CreateThread(__invoke_entry, "Game Entry", NULL);
 }
 
@@ -96,26 +101,29 @@ void __initialize_engine()
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 
-    __init_containers();
-
     __setup_audio_device();
     __create_window();
     __setup_renderer();
 
     __setup_engine_data();
 
-    __init_actions();
-
     atexit(__end_engine);
 }
 
 void __end_engine()
 {
-    __clean_containers();    
+    __clean_containers();  
+    __cleanup_threads();
+    
+    engine.video->quit(engine.video);
+    free((void*)engine.video->texture_fl);
+    free(engine.video->textures);
+    free(engine.video);
+    
+    engine.video = NULL;
     
     SDL_CloseAudioDevice(engine.audio_device);
     SDL_DetachThread(engine.entry_thread);
-    SDL_DestroyTexture(engine.sdl_rectTex);
     SDL_DestroyMutex(engine.sdl_rendermutex);
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);

@@ -1,16 +1,28 @@
-#include <ECS.hpp>
-#include <Base/Display.hpp>
+#include <Base/Draw.hpp>
+#include <Base/Runtime.hpp>
 #include <Base/Input.hpp>
-#include <Engine.hpp>
+#include <Entry.h>
 
 void Render()
 {
-    Vector2f mpos = Input::MouseScreenPosition();
-    mpos.PrintLn();
-    Display::DrawRotatedRectangle(RectF(mpos.X, mpos.Y, 10, 10), 45, {255, 255, 255, 255});
+    static double t = 0;
+    sre::vec2ut mpos = sre::mouse_screencoords();
+    mpos.println();
+    
+    sre::draw(sre::DDRRect{
+        {
+            SRE_DRAWFLAGS_STROKE & 0,
+            sre::col4::WHITE,
+            { mpos, {10, 10} },
+            sre::vec2ut::CENTER
+        },
+        t
+    });
+
+    t += 1;
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
-    Runtime::BeforeRender.Connect(Render, nullptr);
+    beforeRender.connect(Render, nullptr);
 }

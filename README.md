@@ -45,7 +45,7 @@ cmake --preset x64-debug
 ```
 Now you have configured your project, but it not built yet. You have just created a configuration for the build program that you are using, build programs can be specified by using the `-G [generator]` flag [(Available options)](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). The generated files are located in the `build` folder, you can change "build" in the previous command by whatever folder you want, but do not change it to a folder ***that already exists***. If you've used presets, the configuration files should be located at `out/build/[preset name]`.
 
-There are multiple ways where you can build the project, you can either go to the generated folder and type the command (of your build program) that compiles it (For Visual Studio solutions there will be a .sln file there, just open it and build it with Visual Studio). Or you can just use this cmake command in the engine's folder
+There are multiple ways where you can build the project, you can either go to the generated folder and type the command (of your build program) that compiles it (For Visual Studio solutions there will be a .sln file there, just open it and build it with Visual Studio, you might need to setup the working directory if you're managing with resources). Or you can just use this cmake command in the engine's folder
 
 ```sh
 cmake --build build # build or wherever your generated files are
@@ -114,15 +114,13 @@ project(Game) # This can be anything, it's the name of the target
 # add_subdirectory(Engine)
 
 include(StoryRoyaleEngine)
-# Some errors occur when you're building inside the engine due to the policies (they're like rules) not being set outside, if it occurs, try including this macro:
-# srEngine_policy()
 
 # Add all of your C/C++ files here
-set(SOURCES "src/entry.cpp") # Note that SOURCES has to remain, this variable is used for the next line
+set(SOURCES "src/entry.cpp") # You can change the SOURCES name, back then, it was required that SOURCES existed
 # If you don't want to add the sources manually, you can replace it with this line: (Note that you'll have to reconfigure your project every time you add a new source file, unless you also use the CONFIGURE_DEPENDS flag)
 # file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
-srEngine_build(Game) # This function does all of the heavylifting. Taking SOURCES and making an executable out of it, with the engine linked. There are some options though that you can add as arguments:
+srEngine_build(Game GameExecutable SOURCES) # This function does all of the heavylifting. Taking your SOURCES variable as the third argument and making an executable out of it from the second one, with the engine linked. There are some options though that you can add as arguments:
 # NO_CONSOLE uses a Windows subsystem on Windows, that just means it doesn't include a console
 # NO_BIND is used to not embed the game assets into the executable, instead it will just put them into a single "__res/" folder in the binary's folder, this is useful for debugging as embedding resources takes some time.
 # It was more useful back then when embedding resources took way more.
@@ -164,18 +162,29 @@ These are just settings! It's just a **JSON** file with hints to the engine on h
 After you've configured everything, you're going to have to write a **C/C++** file with a `Game::Initialize()` function in it. It is required, otherwise you'll get a linking error:
 
 ```c++
-#include <Engine.hpp> // Include some base features of the engine
+// Include runtime features of the engine
+#include <Base/Runtime.hpp>
+#include <Entry.h> // Include the entry point declaration (sre::initialize())
 #include <utils/logging.h> // Include LOG(), it's just a printf() wrapper
 
-void Game::Initialize()
+void myUpdateFunction()
+{
+    LOG("My framerate is: %g", 1 / sre::dt); // Print the framerate into the console
+                                            // Should be around 39.-- if you set the framerate to 40
+}
+
+void sre::initialize()
 {
     LOG("Hello World!");
+    sre::onUpdate.Connect(myUpdateFunction, NULL); // Connect myUpdateFunction to a Signal that will be run every frame
+    // Signals are objects that store functions to be called when fired 
+    // sre::onUpdate is a signal that fires once every frame
 }
 ```
 
->This is the most simple a program with this engine can get, there are essential features such as *Worlds* and *Entities* that aren't used there, and can be used to define the game. But more on that later...
+>This is what a simple program with this engine can be, there are essential features such as the *ECS* (Entity Component System) that aren't used there, and can be used to define the game. But more on that later...
 
-Once you've compiled your source file, you should be able to see `Hello World!` on the console (assuming you didn't use the NO_CONSOLE flag on Windows)
+Once you've compiled your source file, you should be able to see `Hello World!` on the console and get `My framerate is: xx.xx` printed every frame (assuming you didn't use the NO_CONSOLE flag on Windows)
 
 #
 

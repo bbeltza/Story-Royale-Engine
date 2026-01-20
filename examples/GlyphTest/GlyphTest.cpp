@@ -1,19 +1,24 @@
-#include <Engine.hpp>
+#include <Base/Runtime.hpp>
+#include <Base/Draw.hpp>
 #include <Base/Font.hpp>
+#include <Entry.h>
 
-Font* font;
-const RectF bounds(10, 10, 120, 30);
+const sre::DDRect bounds = {
+    SRE_DRAWFLAGS_STROKE,
+    {255, 0, 0, 128},
+
+    {10, 10, 120, 30},
+    sre::vec2ut::ZERO
+};
 
 void render()
 {
-    font->Render(bounds, "Hello world from Font::Render()", -1, Font::HCenter, Font::VCenter);
-    Display::DrawRectangle(bounds, {255, 0, 0, 255}, Color4::WHITE, Vector2f::ZERO, Display::dm_Stroke);
+    static sre::Font font("res://fonts/OpenSans-Regular.ttf", 12);
+    font.render(bounds.rect, sre::col4::WHITE,"Hello world from Font::Render()", -1, sre::A_CENTER, sre::A_CENTER);
+    sre::draw(bounds);
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
-    static Font _font("res://fonts/OpenSans-Regular.ttf", 12);
-    font = &_font;
-
-    Runtime::BeforeRender.Connect(render, nullptr);
+    sre::beforeRender.connect(render, nullptr);
 }

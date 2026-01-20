@@ -3,4 +3,4 @@ project(ImageTest)
 
 set(SOURCES ImageTest.cpp)
 
-srEngine_build(ImageTest)
+srEngine_build(ImageTest images SOURCES)

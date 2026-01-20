@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <SDL.h>
 
-#if !defined(NDEBUG) && _WIN32 // This operator is broken on Linux so for safety only override for Windows
+#include <utils/logging.h>
+
+#if !defined(NDEBUG) && _WIN32 && 0 // This operator is broken on Linux so for safety only override for Windows
 SDL_atomic_t SR_NUM_ALLOCATIONS;
 
 void* operator new(size_t size)
@@ -14,7 +16,7 @@ void* operator new(size_t size)
 	block[0] = size;
 	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, static_cast<int>(size));
 
-	//LOG("GOT OPERATOR NEW, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
+	//LOG("GOT OPERATOR NEW, NOW CURRENT SIZE: %zd, %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS), size);
 
 	block++;
 	return block;
@@ -28,7 +30,7 @@ void operator delete(void* block)
 
 	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, -static_cast<int>(tblock[0]));
 
-	//LOG("GOT OPERATOR DELETE, NOW CURRENT SIZE: %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS));
+	//LOG("GOT OPERATOR DELETE, NOW CURRENT SIZE: %zd %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS), tblock[0]);
 
 	free(tblock);
 }

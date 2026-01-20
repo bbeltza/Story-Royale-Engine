@@ -1,95 +1,110 @@
 #pragma once
-#include "Base/File.hpp"
-#include "Base/Signal.hpp"
-#include "Base/Thread.hpp"
+#include <Base/AudioChunk.h>
+#include <Base/Audio.h>
+#include <Datatypes/TimeStamp.h>
 
-#include "datatypes/timestamp.h"
-
-#include "internal_def.hh"
-
-#include <SDL.h>
-
-#define AUDIO_BYTESIZE(x) (SDL_AUDIO_BITSIZE(x)/8)
-
-__def_internal(__update_audio)
-
-class AudioData
+namespace sre
 {
-	friend struct AudioAccess;
-	friend class Audio;
-	friend struct _containers_service;
-
-	AudioData() = delete;
-	AudioData(const char* path);
-
-	void Load();
-	void Unload();
-
-	const char* path;
-	
-	Thread thrd;
-
-	int8_t* m_data = nullptr;
-	uint32_t m_len;
-	SDL_AudioSpec m_spec;
-
-	SDL_RWops* m_rw;
-
-	bool m_loaded = false;
-
-public:
-	~AudioData();
-
-	Signal<> Loaded{this};
-
-	inline uint32_t len() const { return m_len; }
-	inline uint32_t freq() const { return m_spec.freq; }
-
-	__friend_internal(__update_audio)
-};
-
-struct AudioInfo
-{
-	int loop_start = 0, loop_end = -1;
-	bool looped = false;
-
-	float fade_in = 0, fade_out = 0;
-	float speed = 1;
-	float volume = 1;
-};
-
-class Audio
-{
-public:
-	AudioInfo Info;
-public:
-	static AudioData& Load(const char* path);
-	AudioData& Attach(AudioData& data)
+	inline AudioChunk convertchunk(const AudioChunk& chunk)
 	{
-		m_data = &data;
-		return data;
+		AudioChunk converted = chunk;
+		converted = sre_convertchunk(chunk.get(), false);
+		return converted;
 	}
 
-	bool IsPlaying() const;
+	template <typename Cls>
+	inline int audio_callbackqueue(int (*callback)(Cls* userdata, byte* samples, usize size), Cls* userdata)
+	{
+		return sre_audiocallbackqueue(reinterpret_cast<int(*)(void*, byte*, usize)>(callback), userdata);
+	}
+	inline int audio_callbackqueue(int (*callback)(void* userdata, byte* samples, usize size), void* userdata) { return sre_audiocallbackqueue(callback, userdata); }
+	inline void audio_callbackremove(int id) { return sre_audiocallbackremove(id); }
 
-	TimeStamp timePosition() const { return static_cast<TimeStamp>(m_fsamplepos / m_data->freq()); }
-	TimeStamp timeLength() const { return static_cast<TimeStamp>(m_data->len() / (TimeStamp)m_data->freq()); }
+	inline int audio_frequency() { return sre_audiofreq(); }
+	inline double audio_freqratio(int freq) { return sre_audiofreqratio(freq); }
 
-	void Play(bool force=false);
-	void FadeOut() { m_fadeout = true; }
+	inline void audio_setmaster(unsigned vol) { return sre_audiosetmaster(vol); }
+	inline void audio_setmaster(float vol) { return sre_audiosetmaster(static_cast<unsigned>(128 * vol)); }
 
-	TimeStamp Pause();
-	TimeStamp Stop();
+	inline int audio_getmaster() { return sre_audiogetmaster(); }
+	template <typename T>
+	inline T audio_getmaster() { static_assert(0, "Invalid use of audio_getmaster<T>(), use audio_getmaster<float>() instead"); }
+	template <>
+	inline float audio_getmaster<float>() { return sre_audiogetmaster() / 128.0f; }
+}
 
-private:
-	static void threadedload(AudioData* audio);
-	AudioData* m_data = nullptr;
+namespace sre
+{
+	// Constant to indicate that an audio should not loop.
+	// Any value higher than the sample length of the audio indicates that the audio won't loop.
+	// The `-1` unsigned int bit representation is `0xFFFFFFFF`, the highest unsigned number so it can be used to indicate that.
+	constexpr unsigned AUDIO_DONTLOOP = -1;
 
-	double m_fsamplepos = 0;  // The position of the sample with subsample precition
-	uint32_t m_samplepos = 0; // The position (in samples) of the audio sample
+	class Audio
+	{
+		AudioChunk m_chunk;
+	public:
+		enum playingState
+		{
+			STATE_STOPPED,
+			STATE_PLAYING
+		};
+	public:
+		unsigned loop_point = AUDIO_DONTLOOP;
+		
+		float volume = 1;
+		timeStamp speed = 1;
+	private:
+		u32 m_samplepos = 0;
+		timeStamp m_subsample = 0;
+		int m_id = 0;
 
-	bool m_fadein = false, m_fadeout = false;
-	float m_fadevol = 1;
+		float m_fadevol = 1;
+		float m_fading = 0; // Fading state
 
-	__friend_internal(__update_audio)
-};
+		int m_state = 0; // Playing state
+	private:
+		static int audio_callback(Audio* audio, sre_u8* samples, sre_usize len);
+	public:
+		constexpr Audio() = default;
+		Audio(const AudioChunk& chunk): m_chunk(chunk) {}
+
+		Audio(const Audio& copy): m_chunk(copy.m_chunk) {}
+
+		void attach_chunk(const AudioChunk& chunk) { m_chunk = chunk; }
+
+		void play();
+		void replay();
+		void pause();
+		sre::timeStamp stop();
+
+		void fade_in(float fade)
+		{
+			// Guess let's just try this...
+			auto bits = ~(1 << (sizeof(fade) - 1));
+			bits &= reinterpret_cast<int&>(fade);
+			m_fading = reinterpret_cast<float&>(bits);
+			m_fadevol = 0;
+			play();
+		}
+		void fade_out(float fade)
+		{
+			int bits = reinterpret_cast<int&>(fade) | 0x80000000;
+			m_fading = reinterpret_cast<float&>(bits);
+		}
+
+		sre::timeStamp time_pos() const
+		{
+			if (!m_chunk) return 0;
+			return static_cast<sre::timeStamp>((m_samplepos + m_subsample) / m_chunk->frequency);
+		}
+		sre::timeStamp time_len() const
+		{
+			if (!m_chunk) return 0;
+			return static_cast<sre::timeStamp>(m_chunk->sample_count) / m_chunk->frequency;
+		}
+
+		AudioChunk load(const char* from_path);
+		AudioChunk load(const File& from_file);
+	};
+}

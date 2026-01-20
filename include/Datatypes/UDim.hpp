@@ -1,38 +1,59 @@
 #pragma once
+#include <Datatypes/Vector.hpp>
+#include <Datatypes/Units.h>
 
-struct UDim
+namespace sre
 {
-    constexpr UDim(): Scale(0), Offset(100) {}
-    constexpr UDim(float scale, int offset): Scale(scale), Offset(offset) {}
-    constexpr UDim(const UDim& other): Scale(other.Scale), Offset(other.Offset) {}
+    struct udim
+    {
+        using unit_type = ::sre::unit;
 
-    inline constexpr float toAbsolute(int relative) const { return relative * Scale + Offset; };
-    inline constexpr float toAbsolute(float relative) const { return relative * Scale + Offset; };
+        constexpr udim() = default;
+        constexpr udim(unit_type scale, unit_type offset): scale(scale), offset(offset) {}
+        constexpr udim(const udim& copy): scale(copy.scale), offset(copy.offset) {}
 
-    float Scale;
-    int Offset;
+        template <typename TS, typename TO>
+        constexpr udim(TO scale, TS offset): udim( static_cast<unit_type>(scale), static_cast<unit_type>(offset) ) {}
 
-    static const UDim ZERO;
-};
+        unit_type scale = 0;
+        unit_type offset = 0;
 
-struct UDim2
-{
-    constexpr UDim2() = default;
-    constexpr UDim2(float xScale, int xOffset, float yScale, int yOffset): X(xScale, xOffset), Y(yScale, yOffset) {}
-    constexpr UDim2(const UDim& X, const UDim& Y): X(X), Y(Y) {}
-    constexpr UDim2(const UDim2& other): X(other.X), Y(other.Y) {}
+        constexpr ::sre::unit to_absolute(unit_type relative) const { return relative * scale + offset; }
 
-    template <typename T1, typename T2, typename T3, typename T4>
-    constexpr UDim2(T1 xScale, T2 xOffset, T3 yScale, T4 yOffset): UDim2(
-        static_cast<float>(xScale),
-        static_cast<int>(xOffset),
-        static_cast<float>(yScale),
-        static_cast<int>(yOffset)
-    ) {}
+        static const udim ZERO;
+        static const udim FULL;
+    };
+    struct udim2
+    {
+        using unit_type = udim::unit_type;
 
-    UDim X;
-    UDim Y;
+        constexpr udim2() = default;
+        constexpr udim2(const udim& x, const udim& y): x(x), y(y) {}
+        constexpr udim2(unit_type xscale, unit_type xoffset, unit_type yscale, unit_type yoffset) : x(xscale, xoffset), y(yscale, yoffset) {}
+        constexpr udim2(const udim2& copy): x(copy.x), y(copy.y) {}
 
-    static constexpr UDim2 FromOffset(int x, int y) { return { 0, x, 0, y }; }
-    static const UDim2 ZERO;
-};
+        template <typename TXS, typename TXO, typename TYS, typename TYO>
+        constexpr udim2(TXS xscale, TXO xoffset, TYS yscale, TYO yoffset): x(xscale, xoffset), y(yscale, yoffset) {}
+
+        constexpr vec2ut to_absolute(unit_type xrelative, unit_type yrelative) { return { x.to_absolute(xrelative), y.to_absolute(yrelative) }; }
+        constexpr vec2ut to_absolute(vec2<unit_type> relative) { return udim2::to_absolute(relative.x, relative.y); }
+
+        udim x;
+        udim y;
+
+        inline void setscale(unit_type x, unit_type y) { this->x.scale = x; this->y.scale = y; }
+        inline void setscale(const vec2<unit_type>& vec) { return setscale(vec.x, vec.y); }
+
+        inline void setoffset(unit_type x, unit_type y) { this->x.offset = x; this->y.offset = y; }
+        inline void setoffset(const vec2<unit_type>& vec) { return setoffset(vec.x, vec.y); }
+
+        static constexpr udim2 fromoffset(unit_type x, unit_type y) { return udim2{ 0, x, 0, y }; }
+        static constexpr udim2 fromoffset(const vec2<unit_type>& vec) { return fromoffset(vec.x, vec.y); }
+
+        static constexpr udim2 fromscale(unit_type x, unit_type y) { return udim2{ x, 0, y, 0 }; }
+        static constexpr udim2 fromscale(const vec2<unit_type>& vec) { return fromscale(vec.x, vec.y); }
+
+        static const udim2 ZERO;
+        static const udim2 FULL;
+    };
+}

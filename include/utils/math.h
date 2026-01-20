@@ -11,6 +11,8 @@
 #define ut_clamp(x, min, max) (((x) > (max)) ? (max) : ((x) < (min)) ? (min) : (x))
 #define ut_setclamp(x, min, max) x = ut_clamp(x, min, max)
 
+#define ut_rad(x) ((x) * UT_PI_180)
+
 // Math macro defines
 #define UT_E        2.71828182845904523536   // e
 #define UT_LOG2E    1.44269504088896340736   // log2(e)
@@ -25,3 +27,5 @@
 #define UT_2_SQRTPI 1.12837916709551257390   // 2/sqrt(pi)
 #define UT_SQRT2    1.41421356237309504880   // sqrt(2)
 #define UT_SQRT1_2  0.707106781186547524401  // 1/sqrt(2)
+#define UT_PI_180   0.0174532925199432957692 // pi/180
+#define UT_RAD_1DEG UT_PI_180                // Radians in a dregree (just pi/180)

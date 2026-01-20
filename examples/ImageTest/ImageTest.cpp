@@ -1,50 +1,58 @@
-#include <Engine.hpp>
-#include <ECS.hpp>
+#include <ECS/scene.hpp>
+#include <ECS/entity.hpp>
 
-#include <Game/Components/Sprite.hpp>
+#include <ECS/Components/sprite.hpp>
+
+#include <Base/Event.hpp>
+#include <Entry.h>
 
 struct TexturePalace;
 struct TextureEntity;
 
-struct TexturePalace : public Game::World
+struct TexturePalace : public sreECS::World
 {
-    TexturePalace()
-    {
-        auto texture = addEntity<TextureEntity>();
-    }
+    TextureEntity& texture = add_entity<TextureEntity>();
 };
 
 
-static void mouse(void*, TextureEntity* ent, const MouseButton* event);
+static void mouse(void*, TextureEntity* ent, sre::Event event);
 
-struct TextureEntity : public Game::Entity
+struct TextureEntity : public sreECS::Entity
 {
-    Texture sprt1;
-    Texture sprt2;
-    //Texture testsprt;
+    sre::Image img1{"res://test_texture.png"};
+    sre::Image img2{"res://test_texture2.png"};
 
-    ConnectionHandle button_connection = Input::MouseButton.Connect(mouse, this);
+    sre::Texture sprt1{img1};
+    sre::Texture sprt2{img2};
+    //sre::Texture testsprt;
 
-    TextureEntity():
-        sprt1("res://test_texture.png"),
-        sprt2("res://test_texture2.png")
+    sre::Connection button_connection = sre::onEvent.connect(mouse, this);
+
+    TextureEntity()
     {
-        sprite.Attach(sprt1);
-        sprite.Attach(sprt2);
-        sprite.Scale = { 4, 4 };
-        addComponent(sprite);
+        sprite.attach(sprt1);
+        sprite.attach(sprt2);
+        sprite.scale = { 4, 4 };
+
+        setup_components(sprite);
     }
-    Components::Sprite sprite;
+    sreECS::Sprite sprite;
 };
 
-static void mouse(void*, TextureEntity* ent, const MouseButton* event)
+static void mouse(void*, TextureEntity* ent, sre::Event event)
 {
-    if (event->pressed && event->button == 1)
-    ent->sprite.current_frame++;
-    ent->sprite.current_frame %= 2;
+    switch (event.type)
+    {
+        case sre::EVENT_MOUSEBUTTON:
+        if (event.mouse_button.pressed && event.mouse_button.button == sre::MB_LEFT)
+            ent->sprite.current_frame++;
+            ent->sprite.current_frame %= 2;
+        break;
+    }
 }
 
-void Game::Initialize()
+void sre::initialize()
 {
-    Game::World::setCurrent<TexturePalace>();
+    auto texture_palace = new TexturePalace;
+    texture_palace->make_current();
 }

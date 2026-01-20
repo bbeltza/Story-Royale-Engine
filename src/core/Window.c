@@ -1,8 +1,6 @@
 #include "../internal.h"
 #include "GameSettings.h"
 
-#define CENTERED SDL_WINDOWPOS_CENTERED
-
 void __create_window()
 {
     uint32_t flags = 0;
@@ -16,19 +14,25 @@ void __create_window()
     if (game_settings.WindowOptions.Resizable)
         flags |= SDL_WINDOW_RESIZABLE;
 
+        
 	engine.sdl_windowhndl = SDL_CreateWindow(
 		game_settings.Title,
-		CENTERED,
-		CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
 		w,
 		h,
 		flags
 	);
+
     SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);
+    engine.osize_x = w;
+    engine.osize_y = h;
 }
 
 int __poll_events()
 {
+    engine.frame++;
+
     SDL_Event ev;
 
     while (SDL_PollEvent(&ev) != 0)
@@ -49,7 +53,7 @@ int __poll_events()
             case 1:
                 SDL_ShowWindow(engine.sdl_windowhndl);
                 SDL_RaiseWindow(engine.sdl_windowhndl);
-                __update_viewport();
+                __update_viewport(engine.osize_x, engine.osize_y);
                 break;
             }
             break;
