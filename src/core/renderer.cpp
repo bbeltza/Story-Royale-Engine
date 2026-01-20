@@ -4,7 +4,7 @@
 #include <GameSettings.h>
 
 #include <Core/Texture.hpp>
-#include <Base/Runtime.hpp>
+#include <Core/Runtime.hpp>
 
 #include <ECS/scene.hpp>
 #include <GUI/object.hpp>

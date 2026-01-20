@@ -1,7 +1,7 @@
 #include <ECS/entity.hpp>
 #include <ECS/Components/velocity.hpp>
 
-#include <Base/Runtime.hpp>
+#include <Core/Runtime.hpp>
 
 using namespace sreECS;
 

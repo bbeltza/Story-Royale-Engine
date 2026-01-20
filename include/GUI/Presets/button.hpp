@@ -3,7 +3,7 @@
 
 #include <GUI/object.hpp>
 
-#include <Base/Event.hpp>
+#include <Core/Event.hpp>
 
 namespace sreGUI
 {

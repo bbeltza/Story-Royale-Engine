@@ -1,9 +1,7 @@
 #include "../internal.h"
 
-#include "Base/Window.hpp"
-#include "Base/File.hpp"
-
-#include <SDL_image.h>
+#include <Core/Window.hpp>
+#include <Base/Image.hpp>
 
 bool sre::window_seticon(const sre::Image& img)
 {

@@ -1,6 +1,6 @@
 #include <ECS/CameraControllers/drag.hpp>
-#include <Base/Display.hpp>
-#include <Base/Runtime.hpp>
+#include <Core/Display.hpp>
+#include <Core/Runtime.hpp>
 
 using namespace sreECS;
 

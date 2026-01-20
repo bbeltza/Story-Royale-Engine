@@ -1,21 +1,12 @@
-#pragma once
-#include <standard>
-#include <Datatypes/Flags.hpp>
-#include <Base/object.hpp>
-
-#include <utils/sequence.hpp>
-
+#ifndef SRE_SIGNAL_HPP
+#define SRE_SIGNAL_HPP
 #include <Base/Signal.h>
+#include <Datatypes/Flags.hpp>
+#include <utils/sequence.hpp>
+#include <standard>
 
 namespace sre
 {
-	struct ConnectionDeleter
-	{
-		void operator ()(sre_Connection* ptr) { sre_signaldisconnect(ptr); }
-	};
-
-	#define Signal Signal
-	#define Connection Connection
 	class Connection
 	{
 		sre_Connection* m_ptr=NULL;
@@ -114,10 +105,9 @@ namespace sre
 
 	using empty_t = nullptr_t*;
 	using EmptySignal = Signal<empty_t>;
-
-	#undef Signal
-	#undef Connection
 }
+
+#endif
 
 /*
 #define _make_t template <typename... Args>

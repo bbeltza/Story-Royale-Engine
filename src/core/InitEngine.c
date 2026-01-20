@@ -112,8 +112,8 @@ void __initialize_engine()
 
 void __end_engine()
 {
-    __clean_containers();  
     __cleanup_threads();
+    __clean_containers();  
     
     engine.video->quit(engine.video);
     free((void*)engine.video->texture_fl);

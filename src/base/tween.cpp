@@ -1,7 +1,7 @@
-#include "Base/Runtime.hpp"
-#include "Base/Tween.hpp"
+#include <Core/Runtime.hpp>
+#include <Base/Tween.hpp>
 
-#include "utils/math.h"
+#include <utils/math.h>
 
 using namespace sre;
 

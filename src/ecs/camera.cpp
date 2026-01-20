@@ -1,7 +1,7 @@
 #include <ECS/scene.hpp>
 #include <ECS/camera.hpp>
 
-#include <Base/Display.hpp>
+#include <Core/Display.hpp>
 
 using namespace sreECS;
 

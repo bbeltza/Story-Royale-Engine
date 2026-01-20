@@ -1,5 +1,5 @@
 #include "../internal.h"
-#include "GameSettings.h"
+#include <GameSettings.h>
 
 void __create_window()
 {

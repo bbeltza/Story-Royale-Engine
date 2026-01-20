@@ -1,6 +1,6 @@
 #include <GUI/object.hpp>
 #include <GUI/component.hpp>
-#include <Base/Display.hpp>
+#include <Core/Display.hpp>
 
 #include <utils/mem.h>
 

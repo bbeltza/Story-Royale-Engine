@@ -2,7 +2,7 @@
 #include <ECS/entity.hpp>
 #include <utils/math.h>
 
-#include <Base/Runtime.hpp>
+#include <Core/Runtime.hpp>
 
 using namespace sreECS;
 

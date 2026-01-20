@@ -1,7 +1,7 @@
-#include <Base/Audio.hpp>
-#include <Base/Audio.h>
+#include <Core/Audio.hpp>
+#include <Core/Audio.h>
+#include <Core/Thread.hpp>
 #include <Base/File.hpp>
-#include <Base/Thread.hpp>
 
 #include <utils/logging.h>
 #include <utils/math.hpp>

@@ -67,7 +67,11 @@ void sre_signaldestroy(sre_Signal* signal)
         SDL_CondBroadcast(signal->cond);
         SDL_DestroyCond(signal->cond);
     }
-    if (signal->mutex) SDL_DestroyMutex(signal->mutex);
+    if (signal->mutex)
+    {
+        SDL_LockMutex(signal->mutex);
+        SDL_DestroyMutex(signal->mutex);
+    }
 
     while (signal->connection_head)
     {

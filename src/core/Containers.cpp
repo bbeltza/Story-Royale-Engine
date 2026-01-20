@@ -1,12 +1,12 @@
 #include "../internal.h"
 
-#include "Base/Display.hpp"
-#include "Core/Texture.hpp"
-#include "Base/Thread.hpp"
-#include "Base/Audio.hpp"
+#include <Core/Display.hpp>
+#include <Core/Texture.hpp>
+#include <Core/Thread.hpp>
+#include <Core/Audio.hpp>
 
-#include "ECS/scene.hpp"
-#include "GUI/object.hpp"
+#include <ECS/scene.hpp>
+#include <GUI/object.hpp>
 
 void __clean_containers()
 {

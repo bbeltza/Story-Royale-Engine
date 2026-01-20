@@ -1,11 +1,12 @@
-#pragma once
-#include "Datatypes/Vector.hpp"
-#include "Datatypes/Flags.hpp"
-
-#include <Base/Image.hpp>
+#ifndef SRE_WINDOW_HPP
+#define SRE_WINDOW_HPP
+#include <Datatypes/Vector.hpp>
+#include <Datatypes/Flags.hpp>
 
 namespace sre
 {
+    class Image;
+
     bool window_seticon(const sre::Image& img);
     bool window_togglefullscreen();
 
@@ -23,3 +24,5 @@ namespace sre
     bool window_isfullscreen();
     bool window_ishidden();
 }
+
+#endif

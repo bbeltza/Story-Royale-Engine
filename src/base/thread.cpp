@@ -1,4 +1,4 @@
-#include <Base/Thread.hpp>
+#include <Core/Thread.hpp>
 #include <utils/logging.h>
 
 sre::Thread::result_type sre::Thread::join()

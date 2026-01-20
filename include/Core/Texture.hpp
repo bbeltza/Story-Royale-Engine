@@ -1,6 +1,6 @@
-#pragma once
+#ifndef SRE_TEXTURE_HPP
+#define SRE_TEXTURE_HPP
 #include <Base/Image.hpp>
-
 #include <Core/Texture.h>
 
 namespace sre
@@ -46,3 +46,5 @@ namespace sre
         TextureId handle() const { return m_handle; }
     };
 }
+
+#endif

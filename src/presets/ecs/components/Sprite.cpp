@@ -1,9 +1,9 @@
-#include <Base/Draw.hpp>
+#include <Core/Draw.hpp>
 
-#include "ECS/entity.hpp" 
-#include "ECS/scene.hpp"
+#include <ECS/entity.hpp>
+#include <ECS/scene.hpp>
 
-#include "ECS/Components/sprite.hpp"
+#include <ECS/Components/sprite.hpp>
 
 using namespace sreECS;
 

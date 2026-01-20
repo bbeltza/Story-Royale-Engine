@@ -6,7 +6,7 @@
 #include <Datatypes/Rect.hpp>
 #include <Datatypes/Flags.hpp>
 
-#include <Base/object.hpp>
+#include <Core/object.hpp>
 #include <Base/Signal.hpp>
 
 #include <internal_def.hh>

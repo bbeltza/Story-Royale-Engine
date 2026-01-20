@@ -1,7 +1,7 @@
-#include "ECS/Components/shape.hpp"
-#include "ECS/scene.hpp"
+#include <ECS/Components/shape.hpp>
+#include <ECS/scene.hpp>
 
-#include "Base/Draw.hpp"
+#include <Core/Draw.hpp>
 
 #include <SDL_shape.h>
 

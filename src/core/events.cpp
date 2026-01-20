@@ -1,7 +1,7 @@
 #include "../internal.h"
 #include "drivers/drivers.h"
 
-#include <Base/Event.hpp>
+#include <Core/Event.hpp>
 
 sre::Signal<sre::Event> sre::onEvent;
 

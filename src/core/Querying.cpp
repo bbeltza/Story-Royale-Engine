@@ -1,20 +1,16 @@
 #include "../internal.h"
 
-#include "Base/Input.hpp"
-#include "Base/Display.hpp"
+#include <Core/Input.hpp>
+#include <Core/Display.hpp>
 
-#include "ECS/scene.hpp"
-#include "ECS/entity.hpp"
+#include <ECS/scene.hpp>
+#include <ECS/entity.hpp>
 
-#include "GUI/object.hpp"
-
-static const sreGUI::Object *queryObject = nullptr;
-static const sreECS::Entity *queryEntity = nullptr;
+#include <GUI/object.hpp>
 
 void __query_objects()
 {
-    // queryEntity = nullptr;
-    // queryObject = nullptr;
+    if (!engine.current_guilayer && !engine.current_world) return;
 
     sre::vec2ut pt{engine.mouse_x, engine.mouse_y};
 
@@ -32,15 +28,10 @@ void __query_objects()
 
     callsection:
 
-    queryObject = engine.current_guilayer ? currlayer->call_query(pt) : NULL;
-    if (queryObject)
-        return;
-    queryEntity = engine.current_world ? currscn->call_query(pt) : NULL;
-}
-
-bool sreGUI::Object::is_hovering() const
-{
-    return queryObject == this;
+    if (
+        engine.current_guilayer && currlayer->call_query(pt) &&
+        engine.current_world && currscn->call_query(pt)
+            ) (void)0;
 }
 
 // _query(float*) functions for both UI and World bases

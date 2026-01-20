@@ -1,10 +1,7 @@
-#include <standard>
-
 #include "../internal.h"
 #include "drivers/drivers.h"
 
-#include "Base/Input.hpp"
-#include "Base/Display.hpp"
+#include <Core/Input.hpp>
 
 void __poll_input(SDL_Event* event)
 {

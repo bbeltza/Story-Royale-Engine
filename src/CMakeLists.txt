@@ -26,7 +26,6 @@ set(BASE_SOURCES
 
 "action.cpp"
 "audio.cpp"
-"display.cpp"
 "font.cpp"
 "fontrenderer.cpp"
 "image.cpp"

@@ -2,8 +2,8 @@
 #include <ECS/entity.hpp>
 #include <ECS/component.hpp>
 
-#include <Base/Display.hpp>
-#include <Base/Input.hpp>
+#include <Core/Display.hpp>
+#include <Core/Input.hpp>
 
 #include "../internal.h"
 

@@ -1,7 +1,7 @@
 #include <GUI/Presets/button.hpp>
 
-#include <Base/Event.hpp>
-#include <Base/Display.hpp>
+#include <Core/Event.hpp>
+#include <Core/Display.hpp>
 
 using namespace sreGUI;
 

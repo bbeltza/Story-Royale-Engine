@@ -1,8 +1,8 @@
 #ifndef SRE_ACTION_HPP
 #define SRE_ACTION_HPP
 
-#include <Base/Event.hpp>
-#include <Base/Runtime.hpp>
+#include <Core/Event.hpp>
+#include <Core/Runtime.hpp>
 
 namespace sre
 {
