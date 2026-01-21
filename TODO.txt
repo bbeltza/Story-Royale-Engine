@@ -8,6 +8,10 @@
 
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
+- File flags instead of a poor little "mode"
+- Even better log support!
+- And error state support (Maybe using SDL's errors)
+
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 

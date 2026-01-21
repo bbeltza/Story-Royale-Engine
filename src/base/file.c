@@ -190,3 +190,40 @@ size_t sre_filesize(const sre_File* file)
     else
         return sre_filesizefs(file);
 }
+
+//
+
+long sre_fileseek(const sre_File* file, long offset, int origin)
+{
+    if (!file) goto ERROR;
+    if (!file->fp.fp) goto ERROR;
+
+    if (file->embedded)
+    {
+        switch (origin)
+        {
+            case SEEK_CUR:
+            *(size_t*)file->res.pos += offset;
+            break;
+            case SEEK_END:
+            *(size_t*)file->res.pos = file->res.size - offset;
+            break;
+            case SEEK_SET:
+            *(size_t*)file->res.pos = offset;
+            break;
+        }
+
+        if (file->res.pos < 0) *(size_t*)file->res.pos = 0;
+        else if (file->res.pos > file->res.size) *(size_t*)file->res.pos = file->res.size;
+
+        return (long)file->res.pos;
+    }
+    else
+    {
+        if (fseek(file->fp.fp, offset, origin) < 0) goto ERROR;
+        return ftell(file->fp.fp);
+    }
+
+    ERROR:
+    return -1;
+}

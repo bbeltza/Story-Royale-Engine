@@ -8,30 +8,31 @@ macro(set_src FLDR SRCS)
 endmacro()
 
 set(SOURCES 
-"main.c"
-"cmd/args.c"
+    "main.c"
+    "cmd/args.c"
 )
 
 set(DATATYPES_SOURCES
-"definitions.cpp"
+    "definitions.cpp"
 )
 
 set(BASE_SOURCES
-"file.c"
-"resource.c"
-"chunk.c"
-"rwops.c"
-"audiochunk.c"
-"signal.c"
+    "file.c"
+    "resource.c"
+    "chunk.c"
+    "rwops.c"
+    "audiochunk.c"
+    "signal.c"
 
-"action.cpp"
-"audio.cpp"
-"font.cpp"
-"fontrenderer.cpp"
-"image.cpp"
-"runtime.cpp"
-"thread.cpp"
-"tween.cpp"
+    "action.cpp"
+    "audio.cpp"
+    "font.cpp"
+    "fontrenderer.cpp"
+    "image.cpp"
+    "ini.cpp"
+    "runtime.cpp"
+    "thread.cpp"
+    "tween.cpp"
 )
 
 set(ECS_SOURCES

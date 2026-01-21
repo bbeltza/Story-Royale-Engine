@@ -41,7 +41,15 @@ const sre_Chunk *sre_fileallocate(const sre_File* file, size_t max_size)
 
         sre_Chunk *data = sre_new(sizeof(size_t) + max_size);
         data->size = max_size;
-        fread_unlocked(data->data, max_size, 1, file->fp.fp);
+
+        if (sre_modehasbyte(file->fp.mode))
+            fread_unlocked(data->data, max_size, 1, file->fp.fp);
+        else
+        {
+            char* str = (char*)data->data;
+            while (fgets(str, (int)max_size, file->fp.fp))
+                str += strlen(str);
+        }
 
         fseek_unlocked(file->fp.fp , old_pos, SEEK_SET);
 

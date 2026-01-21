@@ -24,6 +24,7 @@ extern const char SRE_USR_PREFIX[SRE_FILEPREFIX_LENGTH + 1];
 
 static inline int sre_filehasprefix(const char* path, const char prefix[SRE_FILEPREFIX_LENGTH]) { return !strncmp(prefix, path, SRE_FILEPREFIX_LENGTH); }
 static inline int sre_modehaswrite(const char* mode) { return strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w'); }
+static inline int sre_modehasbyte(const char* mode) { return strchr(mode, 'b') != NULL; }
 
 typedef struct sre_FP
 {
@@ -54,6 +55,9 @@ extern void sre_fileclose(sre_File* file);
 extern size_t sre_filesize(const sre_File* file);
 
 extern const sre_byte* sre_getresource(const char* path, size_t* size_output);
+
+extern long sre_fileseek(const sre_File* file, long offset, int origin);
+#define sre_filerewind(file) (sre_fileseek(file, 0, SEEK_SET) == 0);
 
 SRE_CAPI_END
 

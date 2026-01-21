@@ -23,6 +23,7 @@ namespace sre
 {
 	struct ChunkDeleter { void operator ()(const sre_Chunk* chunk) { return sre_chunkfree(chunk); } };
 	using Chunk = std::unique_ptr<const sre_Chunk, ChunkDeleter>;
+
 	class File: protected sre_File
 	{
 	public:
@@ -51,6 +52,11 @@ namespace sre
 
 		template <typename Fn, typename... Args>
 		auto call_cfunc(Fn func, Args&&... args) const -> decltype(func(this, args...)) { return func(static_cast<const sre_File*>(this), std::forward<Args>(args)...); }
+
+		public:
+
+		inline long seek(long offset, int origin) const { return sre_fileseek(this, offset, origin); }
+		inline bool rewind() const { return sre_filerewind(this); }
 	};
 }
 
