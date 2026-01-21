@@ -12,10 +12,11 @@ function(srEngine_link_icon TARGET)
 
     set(OUTPUT_ICON "${CMAKE_CURRENT_BINARY_DIR}/app.ico")
 
+    # Make this for windows only
     add_custom_target(
         ico_${TARGET}
         COMMENT "--- Generating app.ico..."
-        COMMAND ${PYTHON_COMMAND}icon_generator.py
+        COMMAND ${PYTHON_COMMAND}win32icon.py
         ${CMAKE_CURRENT_BINARY_DIR}
         ${IMGS}
         DEPENDS ${IMGS}

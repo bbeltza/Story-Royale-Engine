@@ -23,6 +23,7 @@ void Audio::play()
 		m_id = audio_callbackqueue(audio_callback, this);
 
 	m_state = STATE_PLAYING;
+	if (m_fading < 0) m_fading = 0;
 }
 
 void Audio::replay()

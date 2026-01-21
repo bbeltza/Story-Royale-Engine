@@ -69,6 +69,7 @@ void sre_signaldestroy(sre_Signal* signal)
     }
     if (signal->mutex)
     {
+        while (SDL_AtomicGet(&signal->yielding_threads));
         SDL_LockMutex(signal->mutex);
         SDL_DestroyMutex(signal->mutex);
     }

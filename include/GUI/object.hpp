@@ -25,6 +25,7 @@ namespace sreGUI
         __friend_internal(__query_objects);
         __friend_internal(__display_render);
 
+        static const Object *s_querying;
         Object *m_parent;
 
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
@@ -200,13 +201,13 @@ namespace sreGUI
             Iterator end() const { return Iterator(m_ptr + m_count); }
         } components;
     public:
-        bool is_hovering() const;
+        bool is_hovering() const { return s_querying == this; }
     protected:
         virtual void update() {}
         virtual void pre_render() {}
         virtual void post_render() {}
     private:
-        const Object* call_query(sre::vec2ut pt) const;
+        bool call_query(sre::vec2ut pt) const;
         void call_update();
         void call_render();
 

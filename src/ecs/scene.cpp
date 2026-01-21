@@ -7,9 +7,11 @@
 
 #include "../internal.h"
 
+sre::vec2ut sreECS::mouse_worldcoords() { return Scene::current()->camera.toWorldSpace(sre::mouse_screencoords()); }
+
 using namespace sreECS;
 
-sre::vec2ut sreECS::mouse_worldcoords() { return Scene::current()->camera.toWorldSpace(sre::mouse_screencoords()); }
+const Entity* Scene::s_querying = NULL;
 
 Scene::_Arena* Scene::new_arena()
 {
@@ -222,17 +224,19 @@ void Scene::call_render()
     rendered.fire();
 }
 
-Entity *Scene::call_query(sre::vec2ut coords) const
+bool Scene::call_query(sre::vec2ut coords) const
 {
+    s_querying = NULL;
+
     for (auto it = rbegin(); it != rend(); ++it)
     {
         auto& entity = *it;
         for (auto& comp : entity)
         {
             if (comp.on_query(entity, coords))
-                return &entity;
+                return s_querying = &entity;
         }
     }
 
-    return nullptr;
+    return NULL;
 }

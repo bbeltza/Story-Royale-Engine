@@ -8,9 +8,16 @@
 
 using namespace sreGUI;
 
+const Object* Object::s_querying = NULL;
+
 Object::Object()
 {
-    if (!m_parent) return;
+    if (!m_parent)
+    {
+        // Root objects couldn't be queries before, so they are have the query flag disabled by default now as they can be hovered
+        flags.toggle_off(F_QUERY);
+        return;
+    }
 
     m_parent->children.push_back(this);
 }
@@ -98,9 +105,9 @@ void Object::CContainer::setup(Component* const components[], size_t count)
 
 //
 
-const Object *Object::call_query(sre::vec2ut pt) const
+bool Object::call_query(sre::vec2ut pt) const
 {
-    const Object *target_return = nullptr;
+    s_querying = NULL;
 
     for (auto it = children.rbegin(); it != children.rend(); it++)
     {
@@ -109,17 +116,14 @@ const Object *Object::call_query(sre::vec2ut pt) const
             continue;
         if (!obj->flags.has(F_QUERY))
             continue;
-        target_return = obj->call_query(pt);
-        if (target_return) return target_return;
+        
+        if (obj->call_query(pt)) return true;
     }
 
-    if (m_parent)
-    {
-        if (m_absolute.simple_intersects(pt))
-            target_return = this;
-    }
+    if (m_absolute.simple_intersects(pt))
+        return s_querying = this;
 
-    return target_return;
+    return false;
 }
 
 void Object::call_process()

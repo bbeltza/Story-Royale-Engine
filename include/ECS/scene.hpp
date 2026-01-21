@@ -28,6 +28,7 @@ namespace sreECS
         Scene();
         ~Scene();
 
+        static const Entity* s_querying;
     public:
         /// The background color that the game will have when there's a world, the alpha component is not used
         sre::col4 background{255, 149, 236};
@@ -158,9 +159,7 @@ namespace sreECS
     private:
         void call_update();
         void call_render();
-        Entity* call_query(sre::vec2ut screen_coords) const;
-
-        bool list_sort(size_t a, size_t b) const;
+        bool call_query(sre::vec2ut screen_coords) const;
     };
 
     using World = Scene; // Alias for `Scene`, for now. Might be moving back to World
