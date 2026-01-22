@@ -59,6 +59,8 @@ extern const sre_byte* sre_getresource(const char* path, size_t* size_output);
 extern long sre_fileseek(const sre_File* file, long offset, int origin);
 #define sre_filerewind(file) (sre_fileseek(file, 0, SEEK_SET) == 0);
 
+extern bool sre_filewrite(const sre_File* file, const void* rawdata, size_t size);
+
 SRE_CAPI_END
 
 #endif

@@ -227,3 +227,13 @@ long sre_fileseek(const sre_File* file, long offset, int origin)
     ERROR:
     return -1;
 }
+
+bool sre_filewrite(const sre_File* file, const void* rawdata, size_t size)
+{
+    if (file->embedded || !file->fp.fp)
+        return false;
+    if (size == 0)
+        return true;
+
+    return fwrite(rawdata, size, 1, file->fp.fp) == 1;
+}

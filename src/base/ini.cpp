@@ -8,9 +8,7 @@ enum IniTokenType
 {
     TOKEN_NONE = 0,
     TOKEN_SECTION,
-    TOKEN_VAR,
-    TOKEN_VALUE,
-    TOKEN_COMMENT
+    TOKEN_ASSIGNMENT
 };
 
 struct IniToken
@@ -43,7 +41,6 @@ bool IniFile::load_text(const char* text)
     if (!text) return false;
 
     std::queue<IniToken> tokens;
-    IniToken current_token{TOKEN_NONE};
 
     for (const char* current = text; current - 1; current = strchr(current, '\n') + 1)
     {
@@ -74,20 +71,104 @@ bool IniFile::load_text(const char* text)
         else if (*current == ';');
         else
         {
+            const char* end = strchr(current, ';');
+            end = end ? end : strchr(current, '\n');
+            end = end ? end : strchr(current, '\0');
+            assert(end != NULL);
             
+            IniToken token { TOKEN_ASSIGNMENT };
+            token.value.assign(current, end - current);
+            tokens.push(std::move(token));
         }
-        LOG("%c", *current);
 
         LOOPEND:
         continue;
     }
 
+    string current_section;
+
     while (!tokens.empty())
     {
-        LOG("%d %s", tokens.front().type, tokens.front().value.c_str());
+        IniToken& token = tokens.front();
+        switch (token.type)
+        {
+        case TOKEN_SECTION:
+            assert(token.value.front() == '[' && token.value.back() == ']');
+            token.value.pop_back();
+            current_section.assign(token.value.begin() + 1, token.value.end());
+            LOG("%s %s", "TOKEN_SECTION", current_section.c_str());
+            break;
+        case TOKEN_ASSIGNMENT:
+            {
+                size_t offs = token.value.find('=');
+                if (offs == token.value.npos)
+                {
+                    ERROR("Bad assignment in line '%d', could not find assignment operator", 'X');
+                    break;
+                }
+                if (offs == 0)
+                {
+                    ERROR("Bad assignment in line '%d, there's no text before assignment operator", 'X');
+                    break;
+                }
+
+                string key(token.value.c_str(), offs);
+                string value(token.value.begin() + offs + 1, token.value.end());
+                const char* value_cstr = value.c_str();
+                while (*value_cstr == ' ')
+                    value_cstr++;
+
+                while (key.back() == ' ')
+                    key.pop_back();
+                while (value.back() == ' ')
+                    value.pop_back();
+
+                sections[current_section][key] = value_cstr;
+                LOG("%s - '%s' '%s'", "TOKEN_ASSIGNMENT", key.c_str(), value_cstr);
+            }
+            break;
+        default:
+            break;
+        }
         tokens.pop();
     }
 
 
     return false;
+}
+
+bool IniFile::save(const char* path)
+{
+    string text;
+    text.reserve(24);
+
+    for (auto& section : sections)
+    {
+        text.push_back('[');
+        text.append(section.first);
+        text.append("]\n");
+
+        for (auto& vars : section.second)
+        {
+            text.append(vars.first);
+            text.append(" = ");
+
+            // Check if variable contains spaces
+            if (vars.second.find(' ') != string::npos)
+            {
+                text.push_back('\'');
+                text.append(vars.second);
+                text.push_back('\'');
+            }
+            else
+                text.append(vars.second);
+            
+            text.push_back('\n');
+        }
+
+        text.push_back('\n');
+    }
+
+    File file(path, "w");
+    return file.write(text.data(), text.size());
 }

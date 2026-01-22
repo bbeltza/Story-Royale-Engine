@@ -57,6 +57,8 @@ namespace sre
 
 		inline long seek(long offset, int origin) const { return sre_fileseek(this, offset, origin); }
 		inline bool rewind() const { return sre_filerewind(this); }
+
+		bool write(const void* rawdata, size_t size) const { return sre_filewrite(this, rawdata, size); }
 	};
 }
 
