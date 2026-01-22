@@ -15,7 +15,7 @@ enum IniTokenType
 
 struct IniToken
 {
-    int type;
+    IniTokenType type;
     IniFile::string value;
 };
 
@@ -125,6 +125,7 @@ bool IniFile::load_text(const char* text)
         }
     }
 
+    /*
     for (auto& token : tokens._Get_container()) // Only works on MSVC I guess, don't worry it's just to debug...
     {
         const char* type;
@@ -141,99 +142,65 @@ bool IniFile::load_text(const char* text)
     }
     
     LOG("");
-    
+    */
 
-    for (const char* current = text; current - 1; current = strchr(current, '\n') + 1)
-    {
-        do
-        {
-            if (*current == '\n')
-                goto LOOPEND;
-            if (*current == ' ' || *current == '\t')
-                *current++;
-            else
-                break;
-        }
-        while (true);
-            
-        if (*current == '[')
-        {
-            const char* section_end = strchr(current, ']');
-            if (!section_end)
-            {
-                ERROR("IniFile::load_text(): Invalid section end at line %d", 'X');
-                continue;
-            }
-
-            IniToken token { 0 };
-            token.value.assign(current, section_end - current + 1);
-            tokens.push(std::move(token));
-        }
-        else if (*current == ';');
-        else
-        {
-            const char* end = strchr(current, ';');
-            end = end ? end : strchr(current, '\n');
-            end = end ? end : strchr(current, '\0');
-            assert(end != NULL);
-            
-            IniToken token { 1 };
-            token.value.assign(current, end - current);
-            tokens.push(std::move(token));
-        }
-
-        LOOPEND:
-        continue;
-    }
-
+    IniTokenType current_type = TOKEN_NEWLINE;
     string current_section;
+    string current_key;
 
     while (!tokens.empty())
     {
         IniToken& token = tokens.front();
-        switch (token.type)
+        
+        switch (current_type)
         {
-        case 0:
-            assert(token.value.front() == '[' && token.value.back() == ']');
-            token.value.pop_back();
-            current_section.assign(token.value.begin() + 1, token.value.end());
-            LOG("%s %s", "TOKEN_SECTION", current_section.c_str());
+        case TOKEN_SECTION:
+            // Should except TOKEN_NEWLINE, otherwise drop error
+            if (token.type != TOKEN_NEWLINE)
+                break;
+            
+            current_type = TOKEN_NEWLINE;
             break;
-        case 1:
+        case TOKEN_WORD:
+            // TOKEN_WORD is only current_type when parsing the variable name, so it should only expect TOKEN_ASSIGN
+            if (token.type != TOKEN_ASSIGN)
+                break;
+            
+            current_type = TOKEN_ASSIGN;
+            break;
+        case TOKEN_ASSIGN:
+            if (token.type == TOKEN_WORD)
             {
-                size_t offs = token.value.find('=');
-                if (offs == token.value.npos)
-                {
-                    ERROR("Bad assignment in line '%d', could not find assignment operator", 'X');
-                    break;
-                }
-                if (offs == 0)
-                {
-                    ERROR("Bad assignment in line '%d, there's no text before assignment operator", 'X');
-                    break;
-                }
-
-                string key(token.value.c_str(), offs);
-                string value(token.value.begin() + offs + 1, token.value.end());
-                const char* value_cstr = value.c_str();
-                while (*value_cstr == ' ')
-                    value_cstr++;
-
-                while (key.back() == ' ')
-                    key.pop_back();
-                while (value.back() == ' ')
-                    value.pop_back();
-
-                sections[current_section][key] = value_cstr;
-                LOG("%s - '%s' '%s'", "TOKEN_ASSIGNMENT", key.c_str(), value_cstr);
+                string& val = sections[current_section][current_key];
+                if (!val.empty())
+                    val.push_back(' ');
+                val.append(std::move(token.value));
             }
+            else if (token.type == TOKEN_NEWLINE)
+                current_type = TOKEN_NEWLINE;
+            else
+                ;// Drop error...
             break;
         default:
+            switch (token.type)
+            {
+            case TOKEN_SECTION:
+                current_section = std::move(token.value);
+                break;
+            case TOKEN_ASSIGN:
+                // TOKEN_ASSIGN is not expected here, so drop error
+                break;
+            case TOKEN_WORD:
+                current_key = std::move(token.value);
+            default:
+                current_type = token.type;
+                break;
+            }
             break;
         }
+
         tokens.pop();
     }
-
 
     return false;
 }

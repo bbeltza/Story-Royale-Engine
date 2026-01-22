@@ -26,8 +26,11 @@ def getbmp_dimensions(path: str) -> tuple[int, int] | None:
             return None
         return struct.unpack("<II", file.read(8))
 
+def test_helpers():
+    from sys import argv
+    for i in range(1, len(argv)):
+        print(getpng_dimensions(argv[i]))
+        print(getbmp_dimensions(argv[i]))
+
 if __name__ == "__main__":
-    import sys
-    for i in range(1, len(sys.argv)):
-        print(getpng_dimensions(sys.argv[i]))
-        print(getbmp_dimensions(sys.argv[i]))
+    test_helpers()
