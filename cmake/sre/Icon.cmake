@@ -4,31 +4,47 @@ function(srEngine_link_icon TARGET)
     if (NOT ICO_FOLDER)
         return()
     endif()
+
     file(GLOB IMGS "${ICO_FOLDER}/*.png")
     if (NOT IMGS)
         message(AUTHOR_WARNING "GameSettings.json for ${TARGET} has speficied a folder for the icons, but the folder is empty. Skipping...")
         return()
     endif()
 
-    set(OUTPUT_ICON "${CMAKE_CURRENT_BINARY_DIR}/app.ico")
+    set(OUTPUT_GROUP "${CMAKE_CURRENT_BINARY_DIR}/icons")
 
     # Make this for windows only
     add_custom_target(
-        ico_${TARGET}
+        icowin32_${TARGET}
         COMMENT "--- Generating app.ico..."
         COMMAND ${PYTHON_COMMAND}win32icon.py
         ${CMAKE_CURRENT_BINARY_DIR}
         ${IMGS}
         DEPENDS ${IMGS}
-        )
-    
-    add_dependencies(${TARGET} ico_${TARGET})
+     )
+
+     add_custom_target(
+         icogroup_${TARGET}
+         COMMENT "--- Grouping icons..."
+         COMMAND ${PYTHON_COMMAND}icon_grouper.py
+         ${OUTPUT_GROUP}
+         ${IMGS}
+         DEPENDS ${IMGS}
+     )    
 
     if (WIN32)
+        add_dependencies(${TARGET} icowin32_${TARGET})
         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc "IDI_ICON  ICON  DISCARDABLE  \"app.ico\"")
         target_sources(${EXE} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc)
-    elseif(UNIX)
-        configure_file(${SRENGINE_DIR}/asm/ico.s ${CMAKE_CURRENT_BINARY_DIR}/ico.s)
-        target_link_libraries(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/ico.s)
+    else()
+        add_dependencies(icogroup_${TARGET})
+        find_program(HAVE_XDG xdg_desktop_menu)
+        if (HAVE_XDG)
+            foreach(X 16 24 32 48 64 128)
+                if (EXISTS ${OUTPUT_GROUP}/${X}x${X}.png)
+                    file(INSTALL ${OUTPUT_GROUP}/${X}x${X}.png DESTINATION "~/.share/icons/hicolor/${X}x${X}/${EXE}.png")
+                endif()
+            endforeach()
+        endif()
     endif()
 endfunction()
