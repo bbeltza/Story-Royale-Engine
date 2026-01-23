@@ -10,7 +10,8 @@ enum IniTokenType
     TOKEN_NEWLINE,
     TOKEN_SECTION,
     TOKEN_ASSIGN,
-    TOKEN_WORD
+    TOKEN_WORD,
+    TOKEN_QUOTE
 };
 
 struct IniToken
@@ -49,9 +50,15 @@ bool IniFile::load_text(const char* text)
         if ((chr == '"' || chr == '\''))
         {
             if (in_quotes == chr)
+            {
                 in_quotes = 0;
+                chr = ' ';
+            }
             else if (in_quotes == 0)
+            {
                 in_quotes = chr;
+                chr = ' ';
+            }
         }
         else if (chr == ';' && !in_quotes)
             in_quotes = ';';
@@ -73,11 +80,11 @@ bool IniFile::load_text(const char* text)
 
     std::vector<char*> words;
     char* context;
-    char* tk = strtok_s(&str_text.at(0), " \"", &context);
+    char* tk = strtok_s(&str_text.at(0), " ", &context);
     while (tk != NULL)
     {
         words.push_back(tk);
-        tk = strtok_s(NULL, " \"", &context);
+        tk = strtok_s(NULL, " ", &context);
     }
 
     std::queue<IniToken> tokens;
@@ -214,7 +221,7 @@ bool IniFile::save(const char* path)
     {
         text.push_back('[');
         text.append(section.first);
-        text.append("]\n");
+        text.append("]\n\n");
 
         for (auto& vars : section.second)
         {
@@ -224,9 +231,9 @@ bool IniFile::save(const char* path)
             // Check if variable contains spaces
             if (vars.second.find(' ') != string::npos)
             {
-                text.push_back('\'');
+                text.push_back('\"');
                 text.append(vars.second);
-                text.push_back('\'');
+                text.push_back('\"');
             }
             else
                 text.append(vars.second);
