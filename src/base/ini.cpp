@@ -202,7 +202,7 @@ bool IniFile::load_text(const char* text)
         tokens.pop();
     }
 
-    return false;
+    return true;
 }
 
 bool IniFile::save(const char* path)
