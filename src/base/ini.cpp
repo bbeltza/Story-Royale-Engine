@@ -2,6 +2,10 @@
 #include <Base/File.hpp>
 #include <utils/logging.h>
 
+#if HAVE_STRTOK_R
+    #define strtok_s strtok_r
+#endif
+
 using namespace sre;
 
 enum IniTokenType
