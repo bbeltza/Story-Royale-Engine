@@ -90,7 +90,9 @@ namespace sre
 		sre_Signal* m_ptr;
 	public:
 		Signal(void* userdata=NULL): m_ptr(sre_signalcreate(userdata)) {}
-		~Signal() { sre_signaldestroy(m_ptr); }
+		~Signal() { release(); }
+
+		void release() { sre_signaldestroy(m_ptr); m_ptr = NULL; }
 
 		void fire(T* arg=NULL) { sre_signalfire(m_ptr, arg); }
 		T* wait(unsigned timeout=-1) { return static_cast<T*>(sre_signalwait(m_ptr, timeout)); }

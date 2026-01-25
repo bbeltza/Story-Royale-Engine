@@ -23,11 +23,18 @@ void Sprite::on_render(Entity& entity)
 
     auto frame = ut_min(current_frame, textures.size() - 1);
     current_frame = frame;
-    sre::Texture& texture = *textures[frame];
+    const sre::Texture& texture = *textures[frame];
+    sre::vec2i texture_size = texture.size();
+
+    if (region.size.x)
+        texture_size.x = region.size.x;
+
+    if (region.size.y)
+        texture_size.y = region.size.y;
 
     sre::rect2Dut render_rect(
         entity.position + offset,
-        texture.size() * scale
+        texture_size * scale
     );
     sre::s32 flags = SRE_DRAWFLAGS_USECAM | (render_rect.size.x < 0 ? SRE_DRAWFLAGS_FLIPX : 0) | (render_rect.size.y < 0 ? SRE_DRAWFLAGS_FLIPY : 0);
     render_rect.size = render_rect.size.abs();
@@ -37,6 +44,7 @@ void Sprite::on_render(Entity& entity)
         modulate,
         render_rect,
         sre::vec2ut::CENTER,
-        texture.handle()
+        texture.handle(),
+        region
     });
 }

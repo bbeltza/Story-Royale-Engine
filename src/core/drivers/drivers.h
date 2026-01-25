@@ -6,7 +6,7 @@
 #include <Core/Texture.h>
 #include <Datatypes/Units.h>
 
-// Function signature macro for declaring drawing command function pointers
+// Function signature macro for declaring drawing command function pointers.
 // Used by `sre_videodriver` for every drawing command
 // @param name the name of the function, in `sre_videodriver`, it's one of the `draw_xx` functions
 // @param signature the parameter to take in, these functions do only take a single argument, there might be an additional parameter for the video driver pointer too

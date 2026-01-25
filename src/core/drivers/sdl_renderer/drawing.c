@@ -175,15 +175,18 @@ int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTextur
 	SDL_RendererFlip flip = (data->flags & SRE_DRAWFLAGS_FLIPX ? SDL_FLIP_HORIZONTAL : 0) | (data->flags & SRE_DRAWFLAGS_FLIPY ? SDL_FLIP_VERTICAL : 0);
 	SDL_FRect render_rect;
 	sresdlrender_coordsr(video, usecam, &data->rect, &render_rect, data->anchor);
-
+	
 	if (SDL_SetTextureColorMod(texture, data->modulate.r, data->modulate.g, data->modulate.b)) return -1;
 	if (SDL_SetTextureAlphaMod(texture, data->modulate.a)) return -1;
+	
+	SDL_Rect region = data->region;
+	if (!region.w && SDL_QueryTexture(texture, NULL, NULL, &region.w, NULL) < 0) return -1;
+	if (!region.h && SDL_QueryTexture(texture, NULL, NULL, NULL, &region.h) < 0) return -1;
 
 	if (flip == SDL_FLIP_NONE) // SDL has to check for rotation too if using RenderCopy instead of RenderCopyEx, since we don't need it here, we do the check ourselves
-		return SDL_RenderCopyF(video->userdata, texture, NULL, &render_rect);
-	else															       // ^^^^
-																		   // TODO: Support source coordinates for the texture
-		return SDL_RenderCopyExF(video->userdata, texture, NULL, &render_rect, 0, NULL, flip);
+		return SDL_RenderCopyF(video->userdata, texture, &region, &render_rect);
+	else															       
+		return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, 0, NULL, flip);
 }
 
 int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data)
@@ -204,5 +207,9 @@ int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRText
 	if (SDL_SetTextureColorMod(texture, data->texture.modulate.r, data->texture.modulate.g, data->texture.modulate.b)) return -1;
 	if (SDL_SetTextureAlphaMod(texture, data->texture.modulate.a)) return -1;
 
-	return SDL_RenderCopyExF(video->userdata, texture, NULL, &render_rect, data->angle, NULL, flip);
+	SDL_Rect region = data->texture.region;
+	if (!region.w && SDL_QueryTexture(texture, NULL, NULL, &region.w, NULL) < 0) return -1;
+	if (!region.h && SDL_QueryTexture(texture, NULL, NULL, NULL, &region.h) < 0) return -1;
+
+	return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, data->angle, NULL, flip);
 }

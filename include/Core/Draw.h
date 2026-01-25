@@ -14,6 +14,7 @@
     using sre_col4 = sre::col4;
     using sre_vec2ut = sre::vec2ut;
     using sre_rect2Dut = sre::rect2Dut;
+    using sre_rect2Di = sre::rect2Di;
 #else
     typedef struct
     {
@@ -43,6 +44,7 @@
             sre_vec2ut size;
         };
     } sre_rect2Dut;
+    typedef SDL_Rect sre_rect2Di;
 #endif
 
 SRE_CAPI_BEGIN
@@ -127,7 +129,12 @@ typedef struct
     sre_rect2Dut rect;
     sre_vec2ut anchor;
 
-    sre_Texture texture; // Texture identifier to draw, can be a pointer to a SDL_Texture or a pointer to a sre::Texture which works aswell
+    sre_Texture texture; // Texture identifier to draw
+    sre_rect2Di region // Region in the texture to render. Set the size to 0 in order to render the entire texture
+    #ifdef __cplusplus
+    = { 0, 0, 0, 0 }
+    #endif
+    ;
 } sre_DDTexture;
 
 typedef struct
