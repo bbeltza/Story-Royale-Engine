@@ -41,11 +41,9 @@ sre::vec2ut Camera::toScreenSpace(sre::vec2ut coords) const
     if (_this <= &reinterpret_cast<Scene*>(0)->camera)
         _this = &ZERO_CAM;
 
-    const sre::unit scale = sre::display_scale();
+    //const sre::unit scale = sre::display_scale();
 
     sre::vec2ut pos = coords + sre::display_center() - _this->position;
-    pos.x = floor(pos.x * scale);
-    pos.y = floor(pos.y * scale);
 
     return pos;
 }

@@ -52,6 +52,7 @@ namespace sre
         template <typename T2> inline void sub(T2 other) { x -= static_cast<T>(other); y -= static_cast<T>(other); }
         template <typename T2> inline void mul(T2 other) { x *= static_cast<T>(other); y *= static_cast<T>(other); }
         template <typename T2> inline void div(T2 other) { x /= static_cast<T>(other); y /= static_cast<T>(other); }
+        inline void inverse() { x -=; y -=; }
 
         template <typename T2>
         constexpr auto getAdd(const vec2<T2>& other) const -> vec2<decltype(x + other.x)> { return { x + other.x, y + other.y }; }
@@ -70,6 +71,8 @@ namespace sre
         constexpr auto getMul(T2 other) const -> vec2<decltype(x * other)> { return { x * other, y * other }; }
         template <typename T2>
         constexpr auto getDiv(T2 other) const -> vec2<decltype(x / other)> { return { x / other, y / other }; }
+
+        constexpr auto getInverse() const -> vec2 { return { -x, -y }; }
 
         constexpr T max() const { return ut_max(x, y); }
         constexpr T min() const { return ut_min(x, y); }
@@ -104,6 +107,8 @@ namespace sre
         template <typename T2> inline void operator -=(T2 other) { sub(other); }
         template <typename T2> inline void operator *=(T2 other) { mul(other); }
         template <typename T2> inline void operator /=(T2 other) { div(other); }
+
+        inline vec2 operator -() const { return getInverse(); }
 
         constexpr bool operator ==(const vec2& other) const { return x == other.x && y == other.y; }
         constexpr bool operator !=(const vec2& other) const { return x != other.x || y != other.y; }
