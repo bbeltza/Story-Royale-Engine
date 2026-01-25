@@ -4,15 +4,15 @@ macro(srEngine_nobind PROJECT)
 endmacro()
 
 function(srEngine_link_resource PROJECT)
-    get_target_property(INPUT ${PROJECT} RES_FOLDER)
+    get_target_property(PWDRES ${PROJECT} RES_FOLDER)
     get_target_property(EXE ${PROJECT} EXE)
 
-    if(NOT INPUT)
+    if(NOT PWDRES)
 	    srEngine_nobind(${PROJECT})
-        return()
-    endif()
-
-    if ("${ARGN}" MATCHES NO_BIND)
+    elseif ("${ARGN}" MATCHES RES_DEBUG)
+        set(_PWDRES "${PWDRES}/")
+        srEngine_nobind(${PROJECT})
+    elseif ("${ARGN}" MATCHES NO_BIND)
         get_target_property(OUTPUT ${PROJECT} RUNTIME_OUTPUT_DIRECTORY)
 
         file(MAKE_DIRECTORY ${OUTPUT}/__res)
@@ -21,7 +21,7 @@ function(srEngine_link_resource PROJECT)
             COMMAND ${CMAKE_COMMAND} -E rm -rf ${OUTPUT}/__res
             COMMENT "--- Copying resources folder into ${OUTPUT}/__res..."
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${INPUT}
+            ${PWDRES}
             ${OUTPUT}/__res
             )
 	    message("-- ${OUTPUT}")	
@@ -39,7 +39,7 @@ function(srEngine_link_resource PROJECT)
         bind_${PROJECT}
         COMMENT "--- Binding source resources..."
         COMMAND ${PYTHON_COMMAND}resource_binder.py
-        ${INPUT}
+        ${PWDRES}
         ${OUTPUT}
         ${WANT_C}
         ${CMAKE_SIZEOF_VOID_P}
@@ -66,4 +66,7 @@ function(srEngine_link_resource PROJECT)
             target_sources(${PROJECT} PUBLIC ${OUTPUT}/_res.c)
         endif()
     endif()
+
+    configure_file(${SRE_DIR}/gen_src/pwd.c.in ${CMAKE_CURRENT_BINARY_DIR}/pwd.c)
+    target_sources(${PROJECT} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/pwd.c)
 endfunction()

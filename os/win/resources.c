@@ -4,7 +4,6 @@
 #include <Windows.h>
 
 extern const unsigned char* _game_res;
-static const unsigned char nullbyte = '\0';
 
 void sre_win_resourceinit(void)
 {
@@ -17,6 +16,7 @@ void sre_win_resourceinit(void)
     HRSRC res = FindResourceA(NULL, "GAME_RES", MAKEINTRESOURCE(RT_RCDATA));
     if (!res)
     {
+        static const UCHAR nullbyte = '\0';
         _game_res = &nullbyte;
         return;
     }

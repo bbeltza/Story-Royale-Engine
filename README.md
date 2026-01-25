@@ -123,7 +123,8 @@ set(SOURCES "src/entry.cpp") # You can change the SOURCES name, back then, it wa
 srEngine_build(Game GameExecutable SOURCES) # This function does all of the heavylifting. Taking your SOURCES variable as the third argument and making an executable out of it from the second one, with the engine linked. There are some options though that you can add as arguments:
 # NO_CONSOLE uses a Windows subsystem on Windows, that just means it doesn't include a console
 # NO_BIND is used to not embed the game assets into the executable, instead it will just put them into a single "__res/" folder in the binary's folder, this is useful for debugging as embedding resources takes some time.
-# It was more useful back then when embedding resources took way more.
+  # It was more useful back then when embedding resources took way more.
+# RES_DEBUG can be used to point your resources to the source directory's original resources, and not make a copy of it. This allows for changing your assets without having to rebuild the game, but it is meant for debugging, do not expect to be able to run the .exe on another computer with that option
 
 ```
 
@@ -159,11 +160,11 @@ These are just settings! It's just a **JSON** file with hints to the engine on h
 
 ### Writing a game
 
-After you've configured everything, you're going to have to write a **C/C++** file with a `Game::Initialize()` function in it. It is required, otherwise you'll get a linking error:
+After you've configured everything, you're going to have to write a **C/C++** file with a `sre::initialize()` function in it. It is required, otherwise you'll get a linking error:
 
 ```c++
 // Include runtime features of the engine
-#include <Base/Runtime.hpp>
+#include <Core/Runtime.hpp>
 #include <Entry.h> // Include the entry point declaration (sre::initialize())
 #include <utils/logging.h> // Include LOG(), it's just a printf() wrapper
 
@@ -176,7 +177,7 @@ void myUpdateFunction()
 void sre::initialize()
 {
     LOG("Hello World!");
-    sre::onUpdate.Connect(myUpdateFunction, NULL); // Connect myUpdateFunction to a Signal that will be run every frame
+    sre::onUpdate.connect(myUpdateFunction, NULL); // Connect myUpdateFunction to a Signal that will be run every frame
     // Signals are objects that store functions to be called when fired 
     // sre::onUpdate is a signal that fires once every frame
 }

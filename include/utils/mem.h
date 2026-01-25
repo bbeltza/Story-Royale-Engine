@@ -16,7 +16,7 @@
 /*
 Creates a null terminated array, of anything, takes any argument to put into an array in which will add NULL at the end, to be able to iterate without having to speficy a size.
 
-It's discouraged to use it with numbers as numbers can be NULL too
+It's discouraged to use it with numbers as numbers can be 0
 */
 #define ut_array(...) {__VA_ARGS__, NULL}
 #define ut_arrcount(arr) (sizeof(arr) / sizeof(arr[0]))

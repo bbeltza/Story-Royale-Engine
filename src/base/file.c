@@ -12,10 +12,12 @@
 
 #if defined(_WIN32)
     #include <io.h>
-#else
+#elif __unix__
     #include <unistd.h>
     #define _access access
 #endif
+
+extern const char __game_pwdres[];
 
 const char SRE_FSRES_PREFIX[] = "__res/";
 const char SRE_RES_PREFIX[] = "res://";
@@ -93,7 +95,13 @@ static int sre_fileopenfs(sre_File* file, const char* path)
     const char* bound_prefix = NULL;
     void (*pref_deallocator)(void*) = NULL;
     if (sre_filehasprefix(path, SRE_RES_PREFIX))
-        bound_prefix = SRE_FSRES_PREFIX;
+    {
+        if (__game_pwdres[0])
+            bound_prefix = __game_pwdres;
+        else
+            bound_prefix = SRE_FSRES_PREFIX;
+
+    }
     else if (sre_filehasprefix(path, SRE_USR_PREFIX))
     {
         bound_prefix = SDL_GetPrefPath(NULL, game_settings.Title);
