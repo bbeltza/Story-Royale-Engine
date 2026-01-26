@@ -24,7 +24,12 @@ namespace sre
 
         void operator =(Texture&& moving) noexcept { sre_tex_destroy(m_handle); m_handle = moving.m_handle; moving.m_handle = 0; }
         void operator =(const Image* from_image) { operator =(*from_image); }
-        void operator =(const Image& from_image) { create(from_image); }
+        void operator =(const Image& from_image)
+        {
+            if (!m_handle)
+                m_handle = sre_tex_gen();
+            create(from_image);
+        }
 
         sre::vec2i size() const
         {
@@ -37,7 +42,7 @@ namespace sre
 
     private:
         void create(const Image& from_image)
-        {
+        {            
             if (!m_handle)
             {
                 ERROR("Texture::Texture(): Failed to create texture on sre_tex_gen()");

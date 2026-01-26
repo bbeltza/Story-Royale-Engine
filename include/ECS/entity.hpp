@@ -24,6 +24,9 @@ namespace sreECS
         Entity(sre::unit x, sre::unit y, long z_index=0);
         virtual ~Entity();
         void operator delete(void*);
+
+        Entity(const Entity& copy) = delete;
+        Entity(Entity&& moving); // For world reparenting, might start using it I don't know..
     public:
         // The current position of the entity
         sre::vec2ut position;

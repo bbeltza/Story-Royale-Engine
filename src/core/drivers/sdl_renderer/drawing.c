@@ -4,7 +4,14 @@
 #include <utils/mem.h>
 #include <utils/math.h>
 
-	#define sresdlrender_color(col) if (SDL_SetRenderDrawColor(video->userdata, col.r, col.g, col.b, col.a) < 0) return -1
+#define sresdlrender_color(col) if (SDL_SetRenderDrawColor(video->userdata, col.r, col.g, col.b, col.a) < 0) return -1
+#define sresdlrender_texture(tex) \
+SDL_Texture* texture;			   \
+{									\
+	SDL_Texture** tex_ptr = (SDL_Texture**)sre_get_texture(tex);	\
+	texture = tex_ptr ? *tex_ptr : NULL;									 \
+}
+
 
 static inline void sresdlrender_coords(const sre_videodriver* video, int cam, size_t count, const sre_vec2ut* coords, SDL_FPoint* out)
 {
@@ -165,7 +172,7 @@ int sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DDRRect* d
 
 int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTexture* data)
 {
-	SDL_Texture* texture = *(SDL_Texture**)sre_get_texture(data->texture);
+	sresdlrender_texture(data->texture)
 
 	if (!texture) return -1;
 	if (data->rect.h == 0 || data->rect.h == 0) return 0;
@@ -191,7 +198,7 @@ int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTextur
 
 int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data)
 {
-	SDL_Texture* texture = *(SDL_Texture**)sre_get_texture(data->texture.texture);
+	sresdlrender_texture(data->texture.texture)
 
 	if (!texture) return -1;
 	if (data->texture.rect.w == 0 || data->texture.rect.h == 0) return 0;
