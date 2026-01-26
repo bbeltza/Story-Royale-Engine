@@ -75,7 +75,7 @@ typedef enum
  * Structure representing the data to fill the screen, used with `sre_draw(SRE_DRAW_FILL)`
  * It's just a color struct, so you can still pass a color struct into `sre_draw`
  */
-typedef struct
+typedef struct sre_DDFill
 {
     sre_col4 color;
 } sre_DDFill;
@@ -83,7 +83,7 @@ typedef struct
 /*
  * Structure representing the data to draw a line, used with `sre_draw(SRE_DRAW_LINE)`
  */
-typedef struct
+typedef struct sre_DDLine
 {
     sre_s32 flags;
     sre_col4 color;
@@ -96,7 +96,7 @@ typedef struct
 /*
  * Structure representing the data to draw multiple lines, used with `sre_draw(SRE_DRAW_LINES, &x)` 
  */
-typedef struct
+typedef struct sre_DDLines
 {
     sre_s32 flags;
     sre_col4 color;
@@ -106,7 +106,7 @@ typedef struct
     const sre_vec2ut *pts;
 } sre_DDLines;
 
-typedef struct 
+typedef struct sre_DDRect
 {
     sre_s32 flags;
     sre_col4 color;
@@ -115,13 +115,13 @@ typedef struct
     sre_vec2ut anchor;
 } sre_DDRect;
 
-typedef struct
+typedef struct sre_DDRRect
 {
     sre_DDRect rect;
     double angle;
 } sre_DDRRect;
 
-typedef struct
+typedef struct sre_DDTexture
 {
     sre_s32 flags;
     sre_col4 modulate;
@@ -130,14 +130,14 @@ typedef struct
     sre_vec2ut anchor;
 
     sre_Texture texture; // Texture identifier to draw
-    sre_rect2Di region // Region in the texture to render. Set the size to 0 in order to render the entire texture
+    sre_rect2Di region // Region of the texture to render. Set the size to 0 to render the entire texture
     #ifdef __cplusplus
     = { 0, 0, 0, 0 }
     #endif
     ;
 } sre_DDTexture;
 
-typedef struct
+typedef struct sre_DDRTexture
 {
     sre_DDTexture texture;
     double angle;
