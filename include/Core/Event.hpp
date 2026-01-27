@@ -19,6 +19,13 @@ namespace sre
 		EVENT_KEYPRESS,
 		EVENT_TOUCH
 	};
+
+	enum keyPress
+	{
+		KEY_RELEASED = 0,
+		KEY_PRESSED = 1,
+		KEY_REPEATED = 2
+	};
 }
 
 namespace sre

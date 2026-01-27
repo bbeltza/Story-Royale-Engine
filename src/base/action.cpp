@@ -95,7 +95,7 @@ void Action::sc_eventhandler(void*, void*, Event ev)
 	switch (ev.type)
 	{
 	case EVENT_KEYPRESS:
-		if (ev.key_press.press == 2) return;
+		if (ev.key_press.press == KEY_REPEATED) return;
 		{
 			const int scancode_val = ev.key_press.scancode & C_SCANCODE_MASK;
 			const int keycode_val = ev.key_press.keycode & C_KEYCODE_MASK;
