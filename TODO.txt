@@ -15,9 +15,28 @@
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 
+- Coroutines (Cooperative multitasking):
+	- Cooperative multitasking is a way of multitasking (doing multiple operations simultaneously)
+	  in which YOU decide when to switch to the next task by calling a special function without finishing the function.
+	- You will be able to for example wait for V seconds and not block anything else
+	- It's like multithreading but usually more synchronized, tasks will run on one thread (separate from the main one) or perhaps on a thread pool.
+	- But if you do the infamous "while (true)" non exiting loop then you'll block the thread and thus there won't be any coroutines that can run
+	  (Well unless I go with the thread pool in which there will be less threads left and the blocking thread will burn the entire CPU)
+	- Might also be a Core feature, or from Base if it can be run without any of the engine
+
+	- The reason why I want this: It's messy to be creating multiple threads in my game to do one thing like transitioning from one scene to another
+								  and thus having to figure out how to avoid the thread without crashing when the game closes because it's using a pointer
+								  to X that has already been cleaned up
+	- I did not add this before because it's so complex, context switching is literally implemented at the assembly level so I have to do this for every
+	  architecture and OS that I have to support. Win32 has Fibers, they do what I want, and that's what I got inspired of to have this idea. So implementing
+	  coroutines on Windows would be pretty easy, I saw some of the desassembly of the Fiber API and yet it has to save the state of every register and there's
+	  no quick system/Nt call for that (It only uses them to setup the stacks), what a silly thing to make for every architecture!
+	  I saw that linux has something about contexts, I still don't know exactly how to use them so I still need to see
+
+
 - Android support
 
-(current version: 0.100)
+(current version: 0.100.28)
 
 - Work on the game ^^
 
