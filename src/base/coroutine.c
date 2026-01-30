@@ -11,7 +11,7 @@
 
 /* The following implementation files in src/base/coroutine should contain the following symbols: */
     // A typedef to a `coroutine_native`, it's the struct containing platform-speficic data
-    // An #include to a header called "internal.h". It contains common internal declarations
+    // An #include to a header called "internal.h" (Maybe not for now). It contains common internal declarations
     // bool sys_coroutinecreate(coroutine_native* coroutine) -> Setup to the coroutine (using CreateFiber on win32 for example)
     // void sys_coroutineswitch(coroutine_native* coroutine) -> Switch to the following coroutine
                                                         //     -> It doesn't return, if it returns then you could assume there's an error
@@ -22,7 +22,7 @@
     #error "Make an implementation!! Lazy..."
 #endif
 
-static bool sys_coroutinecreate(coroutine_native* coroutine);
+static bool sys_coroutinecreate(coroutine_native* coroutine, sre_coroutineFunction func, void* userdata);
 static void sys_coroutineswitch(coroutine_native* coroutine);
 
 struct sre_coroutine
@@ -38,7 +38,7 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     sre_coroutine* coroutine = sre_new(sizeof(sre_coroutine));
     memset(coroutine, 0, sizeof(coroutine));
 
-    if (!sys_coroutinecreate(&coroutine->native))
+    if (!sys_coroutinecreate(&coroutine->native, function, userdata))
     {
         sre_delete(coroutine);
         return NULL;
