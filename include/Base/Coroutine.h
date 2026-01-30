@@ -15,7 +15,8 @@ typedef enum
 {
     SRE_COROUTINESTATE_INVALID,
     SRE_COROUTINESTATE_RUNNING,
-    SRE_COROUTINESTATE_SUSPENDED
+    SRE_COROUTINESTATE_SUSPENDED,
+    SRE_COROUTINESTATE_CANCELLED
     // There might be `CANCELLED` and `FINISHED` too
 } sre_coroutineState;
 
@@ -24,8 +25,10 @@ typedef enum
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata);
 
 bool sre_coroutineresume(sre_coroutine* coroutine);
-bool sre_coroutinesuspend(sre_coroutine* coroutine);
-bool sre_coroutineyield(sre_coroutine* coroutine, sre_timeStamp time);
+
+// Note that these 2 functions don't yield if the calling coroutine is in a `CANCELLED` state
+bool sre_coroutinesuspend(); // Suspend calling coroutine
+bool sre_coroutineyield(sre_timeStamp time); // Yield current coroutine for `time` seconds
 
 sre_coroutineState sre_coroutinestate(const sre_coroutine* coroutine);
 
@@ -33,8 +36,6 @@ sre_coroutineState sre_coroutinestate(const sre_coroutine* coroutine);
 // Nothing will ever yield the coroutine and the thread running the coroutine will block until the coroutine has finished
 // You may use some upcoming helper macros to avoid doing some operations if the coroutine is cancelled
 void sre_coroutinecancel(sre_coroutine* coroutine);
-// Close and free coroutine
-void sre_coroutineclose(sre_coroutine* coroutine);
 
 SRE_CAPI_END
 
@@ -46,16 +47,17 @@ namespace sre
     {
         COROUTINESTATE_INVALID = SRE_COROUTINESTATE_INVALID,
         COROUTINESTATE_RUNNING = SRE_COROUTINESTATE_RUNNING,
-        COROUTINESTATE_SUSPENDED = SRE_COROUTINESTATE_SUSPENDED
+        COROUTINESTATE_SUSPENDED = SRE_COROUTINESTATE_SUSPENDED,
+        COROUTINESTATE_CANCELLED = SRE_COROUTINESTATE_CANCELLED
     };
 
-    // RAII coroutine object (Only contains a few functions)
+    // RAII coroutine object
     class Coroutine
     {
         sre_coroutine* m_coroutine = NULL;
     public:
         constexpr Coroutine() = default;
-        ~Coroutine() { sre_coroutineclose(m_coroutine); }
+        ~Coroutine() { sre_coroutinecancel(m_coroutine); }
 
         template <typename Ret, typename Ptr>
         Coroutine(bool suspended, Ret fx(Ptr* data), void* userdata):
@@ -63,13 +65,11 @@ namespace sre
         {}
     public:
         bool resume() { return sre_coroutineresume(m_coroutine); }
-        bool suspend() { return sre_coroutinesuspend(m_coroutine); }
-        bool yield(sre::timeStamp time) { return sre_coroutineyield(m_coroutine, time); }
         coroutineState state() const { return static_cast<coroutineState>(sre_coroutinestate(m_coroutine)); }
     };
 
-    // Current coroutine access
-    extern Coroutine coroutine;
+    inline bool coroutine_suspend() { return sre_coroutinesuspend(); }
+    inline bool coroutine_yield(sre::timeStamp time) { return sre_coroutineyield(time); }
 }
 
 #endif

@@ -1,6 +1,8 @@
 #include <Base/Coroutine.h>
 #include <utils/mem.h>
 
+#include <SDL_thread.h>
+
 /* A short explanation about coroutine's implementation... */
 /* There's a folder in src/base called `coroutine`, it contains every single needed 
    OS/architecture implementation for coroutines to work */
@@ -15,6 +17,10 @@
     // bool sys_coroutinecreate(coroutine_native* coroutine) -> Setup to the coroutine (using CreateFiber on win32 for example)
     // void sys_coroutineswitch(coroutine_native* coroutine) -> Switch to the following coroutine
                                                         //     -> It doesn't return, if it returns then you could assume there's an error
+
+/* There will also be two functions used by the engine that are not included in `Coroutine.h` to initialize and deinitialize the coroutine engine */
+    // sre_coroutinecoreinit()
+    // sre_coroutinecorequit()
 
 #if defined(_WIN32)
     #include "coroutine/win32.c"
@@ -32,6 +38,30 @@ struct sre_coroutine
 
     coroutine_native native;
 };
+
+static int SDLCALL poolthread_proc(void* userdata)
+{
+    return -1;
+}
+
+static SDL_Thread* pool_thrd;
+static sre_coroutine* coroutine_head;
+
+bool sre_coroutinecoreinit()
+{
+    assert(pool_thrd == NULL /* Cannot call sre_coroutinecoreinit() twice!! */);
+    
+    pool_thrd = SDL_CreateThread(poolthread_proc, "Coroutine pool", NULL);
+    if (!pool_thrd)
+        return false;
+    
+    return true;
+}
+
+void sre_coroutinequit()
+{
+
+}
 
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata)
 {
@@ -53,11 +83,11 @@ bool sre_coroutineresume(sre_coroutine* coroutine)
 {
     return false;
 }
-bool sre_coroutinesuspend(sre_coroutine* coroutine)
+bool sre_coroutinesuspend(coroutine)
 {
     return false;
 }
-bool sre_coroutineyield(sre_coroutine* coroutine, sre_timeStamp time)
+bool sre_coroutineyield(sre_timeStamp time)
 {
     return false;
 }

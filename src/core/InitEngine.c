@@ -13,7 +13,10 @@
 #include <utils/logging.h>
 #include <OS.h>
 
-static int __invoke_entry(void* userdata)
+extern bool sre_coroutinecoreinit();
+extern void sre_coroutinecorequit();
+
+static int __invoke_entry(void* userdata) // Invoking the entry point won't be a thread anymore. It'll actually be a coroutine
 {
     SDL_Event finish_event = { 0 };
     finish_event.type = SDL_USEREVENT;
@@ -100,6 +103,7 @@ void __initialize_engine()
     }
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
+    //sre_coroutinecoreinit();
 
     __setup_audio_device();
     __create_window();
@@ -112,6 +116,7 @@ void __initialize_engine()
 
 void __end_engine()
 {
+    //sre_coroutinecorequit();
     __cleanup_threads();
     __clean_containers();  
     
