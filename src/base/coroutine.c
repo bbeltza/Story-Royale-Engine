@@ -1,12 +1,29 @@
 #include <Base/Coroutine.h>
 #include <utils/mem.h>
 
+/* A short explanation about coroutine's implementation... */
+/* There's a folder in src/base called `coroutine`, it contains every single needed 
+   OS/architecture implementation for coroutines to work */
+/* Depending on the OS, or perhaps even the architecture, this file will include the corresponding
+   source file in src/base/coroutine to define the correct functions */
+/* They are included using #include, they are NOT added in cmake, making this a little more build-system
+   independent while still being flexible */
+
+/* The following implementation files in src/base/coroutine should contain the following symbols: */
+    // A typedef to a `coroutine_native`, it's the struct containing platform-speficic data
+    // An #include to a header called "internal.h". It contains common internal declarations
+    // bool sys_coroutinecreate(coroutine_native* coroutine) -> Setup to the coroutine (using CreateFiber on win32 for example)
+    // void sys_coroutineswitch(coroutine_native* coroutine) -> Switch to the following coroutine
+                                                        //     -> It doesn't return, if it returns then you could assume there's an error
+
 #if defined(_WIN32)
-    #include <Windows.h>
-    typedef LPVOID coroutine_native;
+    #include "coroutine/win32.c"
 #else
-    typedef void* coroutine_native;
+    #error "Make an implementation!! Lazy..."
 #endif
+
+static bool sys_coroutinecreate(coroutine_native* coroutine);
+static void sys_coroutineswitch(coroutine_native* coroutine);
 
 struct sre_coroutine
 {
@@ -21,8 +38,15 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     sre_coroutine* coroutine = sre_new(sizeof(sre_coroutine));
     memset(coroutine, 0, sizeof(coroutine));
 
-    coroutine->native = CreateFiber(0, (LPFIBER_START_ROUTINE)function, (LPVOID)userdata);
-    return NULL;
+    if (!sys_coroutinecreate(&coroutine->native))
+    {
+        sre_delete(coroutine);
+        return NULL;
+    }
+    
+    coroutine->state = suspended ? SRE_COROUTINESTATE_SUSPENDED : SRE_COROUTINESTATE_RUNNING;
+
+    return coroutine;
 }
 
 bool sre_coroutineresume(sre_coroutine* coroutine)
