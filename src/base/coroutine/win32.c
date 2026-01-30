@@ -1,5 +1,5 @@
 #ifndef _WIN32
-    #error "Can only compile for Windows!"
+    #error "Can only compile for Windows!!"
 #endif
 #include <utils/logging.h>
 #include <Windows.h>
