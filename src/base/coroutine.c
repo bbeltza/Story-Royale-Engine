@@ -71,6 +71,8 @@ struct coroutine_data
 {
     sre_coroutineFunction func;
     void* userdata;
+
+    sre_coroutineState* stateptr;
 };
 
 static struct coroutine_instance inst;
@@ -98,7 +100,7 @@ static int SDLCALL poolthread_proc(void* _inst)
                     goto ENDLOOP;
             }
 
-            // Code to perform the OS switch
+            // Code to perform the "OS" switch
                 sys_coroutineswitch(&inst->current->native);
                 if (inst->current->state == SRE_COROUTINESTATE_CANCELLED)
                 {
@@ -153,6 +155,7 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     coroutine_data* data = sre_new(sizeof(coroutine_data));
     data->func = function;
     data->userdata = userdata;
+    data->stateptr = &coroutine->state;
 
     if (!sys_coroutinecreate(&coroutine->native, data))
     {
@@ -232,9 +235,15 @@ void COROUTINE_CALL fiber_entry(void* _data)
     register coroutine_data* data = _data;
 
     sre_coroutineFunction func = data->func;
+    sre_coroutineState* stateptr = data->stateptr;
     void* userdata = data->userdata;
     sre_delete(data);
 
     func(userdata);
+
+    *stateptr = SRE_COROUTINESTATE_CANCELLED;
     sys_coroutineswitch(&inst.thread_native);
+
+    // Right now when a coroutine finishes without closing then it reaches this line
+    assert("This location should NOT be reached" && NULL);
 }

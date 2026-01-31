@@ -36,7 +36,7 @@ static void sys_coroutineswitch(const coroutine_native* coroutine)
     assert(coroutine != NULL);
 
     LPVOID fiber = *coroutine;
-    if (fiber == NULL) return;
+    assert(fiber != NULL);
 
     SwitchToFiber(fiber);
 }

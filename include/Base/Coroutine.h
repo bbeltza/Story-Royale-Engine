@@ -57,7 +57,7 @@ namespace sre
     {
         sre_coroutine* m_coroutine = NULL;
     public:
-        constexpr Coroutine() = default;
+        Coroutine() = delete;
         ~Coroutine() { sre_coroutinecancel(m_coroutine); }
 
         template <typename Ret, typename Ptr>
