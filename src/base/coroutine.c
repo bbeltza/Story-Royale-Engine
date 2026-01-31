@@ -16,10 +16,13 @@
     // A typedef to a `coroutine_native`, it's the struct containing platform-speficic data
     // An #include to a header called "internal.h" (Maybe not for now). It contains common internal declarations
     // A set of `sys` functions below, all commented
+    // Perhaps a #define to the entry point's calling convention, it's optional
 
 /* There will also be two functions used by the engine that are not included in `Coroutine.h` to initialize and deinitialize the coroutine engine */
     // sre_coroutinecoreinit()
     // sre_coroutinecorequit()
+    
+typedef struct coroutine_data coroutine_data;
 
 #if defined(_WIN32)
     #include "coroutine/win32.c"
@@ -27,9 +30,13 @@
     #error "Make an implementation!! Lazy..."
 #endif
 
+#ifndef COROUTINE_CALL
+    #define COROUTINE_CALL
+#endif
+
 /* `sys_` functions */
 // Setup to the coroutine (using CreateFiber on win32 for example)
-static bool sys_coroutinecreate(coroutine_native* coroutine, sre_coroutineFunction func, void* userdata);
+static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_data* data);
 // Setup the thread pool context coroutine (On win32 it will just call SwitchThreadToFiber once if what's in `pool` is NULL)
 // `pool` is automatically initialized to `NULL` for the first time
 static bool sys_coroutinepoolsetup(coroutine_native* pool);
@@ -40,6 +47,8 @@ struct sre_coroutine
 {
     sre_coroutine* next;
     sre_coroutineState state;
+
+    Uint64 resume_tick;
 
     coroutine_native native;
 };
@@ -54,6 +63,14 @@ struct coroutine_instance
     sre_coroutine* head;
 
     coroutine_native thread_native;
+
+    bool running;
+};
+
+struct coroutine_data
+{
+    sre_coroutineFunction func;
+    void* userdata;
 };
 
 static struct coroutine_instance inst;
@@ -62,22 +79,47 @@ static int SDLCALL poolthread_proc(void* _inst)
 {
     struct coroutine_instance* inst = _inst;
     inst->thread_id = SDL_ThreadID();
+    inst->running = true;
 
-    while (true)
+    sys_coroutinepoolsetup(&inst->thread_native);
+
+    while (inst->running)
     {
-        sre_coroutine* current = inst->head;
-        while (current)
+        sre_coroutine* prev = NULL;
+        inst->current = inst->head;
+        while (inst->current)
         {
-            assert(current->state != SRE_COROUTINESTATE_INVALID);
-            if (current->state == SRE_COROUTINESTATE_SUSPENDED) goto ENDLOOP;
+            assert(inst->current->state != SRE_COROUTINESTATE_INVALID);
+            if (inst->current->state == SRE_COROUTINESTATE_SUSPENDED)
+            {
+                if (inst->current->resume_tick && inst->current->resume_tick <= SDL_GetTicks64())
+                    inst->current->state = SRE_COROUTINESTATE_RUNNING;
+                else
+                    goto ENDLOOP;
+            }
 
             // Code to perform the OS switch
-                sys_coroutinepoolsetup(&inst->thread_native);
-                sys_coroutineswitch(&current->native);
+                sys_coroutineswitch(&inst->current->native);
+                if (inst->current->state == SRE_COROUTINESTATE_CANCELLED)
+                {
+                    sre_coroutine* curr = inst->current;
+                    if (prev)
+                        prev->next = curr->next;
+                    else
+                        inst->head = curr->next;
+                    
+                    inst->current = curr->next;
+
+                    sys_coroutineclose(&curr->native);
+                    sre_delete(curr);
+
+                    continue;
+                }
             //
 
             ENDLOOP:
-            current = current->next;
+            prev = inst->current;
+            inst->current = inst->current->next;
         }
 
         SDL_Delay(1);
@@ -99,7 +141,8 @@ bool sre_coroutinecoreinit()
 
 void sre_coroutinecorequit()
 {
-    SDL_DetachThread(inst.thread);
+    inst.running = false;
+    SDL_WaitThread(inst.thread, NULL);
 }
 
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata)
@@ -107,7 +150,11 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     sre_coroutine* coroutine = sre_new(sizeof(sre_coroutine));
     memset(coroutine, 0, sizeof(coroutine));
 
-    if (!sys_coroutinecreate(&coroutine->native, function, userdata))
+    coroutine_data* data = sre_new(sizeof(coroutine_data));
+    data->func = function;
+    data->userdata = userdata;
+
+    if (!sys_coroutinecreate(&coroutine->native, data))
     {
         sre_delete(coroutine);
         return NULL;
@@ -127,13 +174,22 @@ bool sre_coroutineresume(sre_coroutine* coroutine)
     return true;
 }
 
+bool sre_coroutinerunning()
+{
+    if (SDL_ThreadID() != inst.thread_id) return true;
+    assert(inst.current != NULL);
+
+    return inst.current->state == SRE_COROUTINESTATE_RUNNING;
+}
+
 bool sre_coroutinesuspend()
 {
     if (SDL_ThreadID() != inst.thread_id) return false;
-
     assert(inst.current != NULL);
+
+    if (inst.current->state == SRE_COROUTINESTATE_CANCELLED) return true;
     inst.current->state = SRE_COROUTINESTATE_SUSPENDED;
-    
+    inst.current->resume_tick = 0;
     sys_coroutineswitch(&inst.thread_native);
 
     return true;
@@ -141,20 +197,44 @@ bool sre_coroutinesuspend()
 
 bool sre_coroutineyield(sre_timeStamp time)
 {
-    return false;
+    if (SDL_ThreadID() != inst.thread_id) return false;
+    assert(inst.current != NULL);
+
+    if (inst.current->state == SRE_COROUTINESTATE_CANCELLED) return true;
+    if (time > 0) // Passing a `time` of zero (or a value lower than 0 if you'd like to shake your head and risk an assertion)
+                  // will simply switch execution to other coroutines
+    {
+        inst.current->state = SRE_COROUTINESTATE_SUSPENDED;
+        inst.current->resume_tick = (unsigned long)(SDL_GetTicks64() + (Uint64)(time * 1000));
+    }
+    sys_coroutineswitch(&inst.thread_native);
+
+    return true;
 }
 
 sre_coroutineState sre_coroutinestate(const sre_coroutine* coroutine)
 {
-    return SRE_COROUTINESTATE_INVALID;
+    return !coroutine ? SRE_COROUTINESTATE_INVALID : coroutine->state;
 }
 
 void sre_coroutinecancel(sre_coroutine* coroutine)
 {
+    if (!coroutine) return;
 
+    coroutine->state = SRE_COROUTINESTATE_CANCELLED;
+    
+    // No need to cleanup anything else, the coroutine will automatically be cleaned up :)
+    // Maybe I'll need to wait until the coroutine cleans up?
 }
 
-void sre_coroutineclose(sre_coroutine* coroutine)
+void COROUTINE_CALL fiber_entry(void* _data)
 {
+    register coroutine_data* data = _data;
 
+    sre_coroutineFunction func = data->func;
+    void* userdata = data->userdata;
+    sre_delete(data);
+
+    func(userdata);
+    sys_coroutineswitch(&inst.thread_native);
 }

@@ -4,31 +4,15 @@
 #include <utils/logging.h>
 #include <Windows.h>
 
+#define COROUTINE_CALL WINAPI
 typedef LPVOID coroutine_native;
+static VOID COROUTINE_CALL fiber_entry(LPVOID lpFiberParameter); // lpStartAddress is __stdcall while sre_coroutineFunction isn't. Use wrapper then...
 
-struct FIBER_PARAMETER
-{
-    sre_coroutineFunction func;
-    void* data;
-};
-
-static VOID WINAPI fiber_entry(LPVOID lpFiberParameter) // lpStartAddress is __stdcall while sre_coroutineFunction isn't. Use wrapper then...
-{
-    ((struct FIBER_PARAMETER*)lpFiberParameter)->func(((struct FIBER_PARAMETER*)lpFiberParameter)->data);
-    HeapFree(GetProcessHeap(), 0, lpFiberParameter);
-}
-
-static bool sys_coroutinecreate(coroutine_native* coroutine, sre_coroutineFunction func, void* userdata) // Hmm... Intellisense doesn't seem to recognize the types defined in coroutine.c...
+static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_data* data) // Hmm... Intellisense doesn't seem to recognize the types defined in coroutine.c...
 {
     LOG("Called this: sys_coroutinecreate() Ready to make a fiber!");
 
-    struct FIBER_PARAMETER* params = HeapAlloc(GetProcessHeap(), 0, sizeof(struct FIBER_PARAMETER));
-    if (!params)
-        return false;
-
-    params->func = func;
-    params->data = userdata;
-    LPVOID fiber = CreateFiber(0, fiber_entry, params);
+    LPVOID fiber = CreateFiber(0, fiber_entry, (LPVOID)data);
     if (!fiber)
         return false;
     
@@ -39,15 +23,11 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, sre_coroutineFuncti
 static bool sys_coroutinepoolsetup(coroutine_native* pool)
 {
     assert(pool != NULL);
+    assert(*pool == NULL);
 
-    LPVOID fiber = *pool;
-    if (fiber)
-        return true;
+    *pool = ConvertThreadToFiber(NULL); // Uhh I don't know what to do with lpParameter it's probably not any important
+    if (!*pool) return false;
 
-    fiber = ConvertThreadToFiber(NULL); // Uhh I don't know what to do with lpParameter it's probably not any important
-    if (!fiber) return false;
-
-    *pool = fiber;
     return true;
 }
 
@@ -58,6 +38,12 @@ static void sys_coroutineswitch(const coroutine_native* coroutine)
     LPVOID fiber = *coroutine;
     if (fiber == NULL) return;
 
-    LPVOID thrd = ConvertThreadToFiber(NULL);
     SwitchToFiber(fiber);
+}
+
+static void sys_coroutineclose(coroutine_native* coroutine)
+{
+    assert(coroutine != NULL);
+
+    DeleteFiber(*coroutine);
 }

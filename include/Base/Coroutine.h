@@ -31,6 +31,7 @@ bool sre_coroutinesuspend(); // Suspend calling coroutine
 bool sre_coroutineyield(sre_timeStamp time); // Yield current coroutine for `time` seconds
 
 sre_coroutineState sre_coroutinestate(const sre_coroutine* coroutine);
+bool sre_coroutinerunning(); // Check if current coroutine is running
 
 // Set the state of the coroutine to `CANCELLED` and let the coroutine cleanup
 // Nothing will ever yield the coroutine and the thread running the coroutine will block until the coroutine has finished
@@ -68,6 +69,7 @@ namespace sre
         coroutineState state() const { return static_cast<coroutineState>(sre_coroutinestate(m_coroutine)); }
     };
 
+    inline bool coroutine_running() { return sre_coroutinerunning(); }
     inline bool coroutine_suspend() { return sre_coroutinesuspend(); }
     inline bool coroutine_yield(sre::timeStamp time) { return sre_coroutineyield(time); }
 }
