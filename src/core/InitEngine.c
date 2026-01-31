@@ -103,7 +103,7 @@ void __initialize_engine()
     }
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
-    //sre_coroutinecoreinit();
+    sre_coroutinecoreinit();
 
     __setup_audio_device();
     __create_window();
@@ -116,7 +116,7 @@ void __initialize_engine()
 
 void __end_engine()
 {
-    //sre_coroutinecorequit();
+    sre_coroutinecorequit();
     __cleanup_threads();
     __clean_containers();  
     
