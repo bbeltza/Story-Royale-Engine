@@ -34,7 +34,7 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, sre_coroutineFuncti
 // `pool` is automatically initialized to `NULL` for the first time
 static bool sys_coroutinepoolsetup(coroutine_native* pool);
 // Switch to the following coroutine
-static void sys_coroutineswitch(coroutine_native* coroutine);
+static void sys_coroutineswitch(const coroutine_native* coroutine);
 
 struct sre_coroutine
 {
@@ -44,55 +44,35 @@ struct sre_coroutine
     coroutine_native native;
 };
 
-struct coroutine_TLS
+// Data containing the necessary stuff to run the coroutine
+struct coroutine_instance
 {
-    const void* magic;
-    sre_coroutine* coroutine;
+    SDL_Thread* thread;
+    SDL_threadID thread_id;
+
+    sre_coroutine* current;
+    sre_coroutine* head;
+
+    coroutine_native thread_native;
 };
 
-static const char cTLSmagic;
+static struct coroutine_instance inst;
 
-static int SDLCALL poolthread_proc(void* head)
+static int SDLCALL poolthread_proc(void* _inst)
 {
-    // Thread will contain two TLS values:
-        // - The native coroutine data for this thread (The state or currently `pool_native`)
-        // - The current running coroutine, it's usefull in order to retrieve the current coroutine
-        //   in functions like `sre_coroutinesuspend()` and `sre_coroutineyield`
-
-        // - I might just add another TLS containing the magic address (&cTLSmagic) and then assume the other ids are
-        //   what I expect
-
-    SDL_TLSID current_coroutineTLS = SDL_TLSCreate();
-    SDL_TLSID pool_nativeTLS = SDL_TLSCreate();
-
-    {
-        struct coroutine_TLS* c_TLS = sre_new(sizeof(struct coroutine_TLS));
-        c_TLS->magic = &cTLSmagic;
-        c_TLS->coroutine = NULL;
-        SDL_TLSSet(current_coroutineTLS, c_TLS, sre_delete);
-    }
-
-    // Let's print the tls ids first. Okay so it's supposed to be 4 and 5
-    LOG("%u %u", current_coroutineTLS, pool_nativeTLS);
-
-    // Maybe it is not always 4 and 5 on every system?
-    assert(current_coroutineTLS == 4);
-    assert(pool_nativeTLS == 5);
-
-    coroutine_native pool_native;
-    memset(&pool_native, 0, sizeof(coroutine_native));
-    SDL_TLSSet(pool_nativeTLS, &pool_native, NULL);
+    struct coroutine_instance* inst = _inst;
+    inst->thread_id = SDL_ThreadID();
 
     while (true)
     {
-        sre_coroutine* current = *(sre_coroutine**)head;
+        sre_coroutine* current = inst->head;
         while (current)
         {
             assert(current->state != SRE_COROUTINESTATE_INVALID);
             if (current->state == SRE_COROUTINESTATE_SUSPENDED) goto ENDLOOP;
 
             // Code to perform the OS switch
-                sys_coroutinepoolsetup(&pool_native);
+                sys_coroutinepoolsetup(&inst->thread_native);
                 sys_coroutineswitch(&current->native);
             //
 
@@ -106,15 +86,12 @@ static int SDLCALL poolthread_proc(void* head)
     return 0;
 }
 
-static SDL_Thread* pool_thrd;
-static sre_coroutine* coroutine_head;
-
 bool sre_coroutinecoreinit()
 {
-    assert(pool_thrd == NULL /* Cannot call sre_coroutinecoreinit() twice!! */);
+    assert(inst.thread == NULL /* Cannot call sre_coroutinecoreinit() twice!! */);
     
-    pool_thrd = SDL_CreateThread(poolthread_proc, "Coroutine pool", &coroutine_head);
-    if (!pool_thrd)
+    inst.thread = SDL_CreateThread(poolthread_proc, "Coroutine pool", &inst);
+    if (!inst.thread)
         return false;
     
     return true;
@@ -122,8 +99,7 @@ bool sre_coroutinecoreinit()
 
 void sre_coroutinecorequit()
 {
-    if (!pool_thrd) return;
-    SDL_DetachThread(pool_thrd);
+    SDL_DetachThread(inst.thread);
 }
 
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata)
@@ -138,8 +114,8 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     }
     
     coroutine->state = suspended ? SRE_COROUTINESTATE_SUSPENDED : SRE_COROUTINESTATE_RUNNING;
-    coroutine->next = coroutine_head;
-    coroutine_head = coroutine;
+    coroutine->next = inst.head;
+    inst.head = coroutine;
 
     return coroutine;
 }
@@ -150,17 +126,19 @@ bool sre_coroutineresume(sre_coroutine* coroutine)
     coroutine->state = SRE_COROUTINESTATE_RUNNING;
     return true;
 }
+
 bool sre_coroutinesuspend()
 {
-    struct coroutine_TLS* current = SDL_TLSGet(4);
-    if (!current || current->magic != &cTLSmagic)
-        return false;
+    if (SDL_ThreadID() != inst.thread_id) return false;
+
+    assert(inst.current != NULL);
+    inst.current->state = SRE_COROUTINESTATE_SUSPENDED;
     
-    assert(current->coroutine != NULL);
-    current->coroutine->state = SRE_COROUTINESTATE_SUSPENDED;
+    sys_coroutineswitch(&inst.thread_native);
 
     return true;
 }
+
 bool sre_coroutineyield(sre_timeStamp time)
 {
     return false;

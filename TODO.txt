@@ -33,10 +33,22 @@
 	  no quick system/Nt call for that (It only uses them to setup the stacks), what a silly thing to make for every architecture!
 	  I saw that linux has something about contexts, I still don't know exactly how to use them so I still need to see
 
+- Use virtual tables for files (I mean it's not meant to fully support file inheritance)
+	- It will solve most file embedded checks for sure
+	- It will also be more convenient for supporting android which requires the use of its JNI API to work
+	- If you don't get it, it's like how SDL's RWops has different function pointers for their operations.
+	  You can say it's the same, just that the function pointers aren't stored in the file, the file just stores a pointer to them.
 
 - Android support
 
-(current version: 0.100.28)
+- Remove GameSettings:
+	- Yeah, I'm planning to remove the game settings and whatever is used in the json file by cmake put it inside the project's properties
+	- Why? I have realized, if I just make a lot options then it would give me a lot of overhead, not only to implement whatever setting
+	  in the python script and in the GameSettings C header, but to also being able to change the value in runtime which is not implemented
+	  for every single option. I find it better to just be able to change whatever option in runtime and to just set whatever the
+	  GameSettings.json did set in the game's entry point.
+
+(current version: 0.100.31 (experimental coroutines))
 
 - Work on the game ^^
 
