@@ -2,7 +2,7 @@
 #include <SDL.h>
 
 #include <utils/logging.h>
-#define ENABLE_LOGGING 01
+#define ENABLE_LOGGING 0
 
 #if !ENABLE_LOGGING
 	#undef LOG

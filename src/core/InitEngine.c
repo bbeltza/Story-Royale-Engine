@@ -138,7 +138,7 @@ void __end_engine()
     IMG_Quit();
     SDL_Quit();
 
-    LOG("SDL_GetNumAllocations(): %d", SDL_GetNumAllocations());
+    //LOG("SDL_GetNumAllocations(): %d", SDL_GetNumAllocations());
 
     if (*SRE_LOGFILE)
         fclose(*SRE_LOGFILE);
