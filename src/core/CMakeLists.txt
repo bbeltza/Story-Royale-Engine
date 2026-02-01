@@ -18,8 +18,6 @@ set(CORE_SOURCES
 "display.cpp"
 "window.c"
 "window.cpp"
-
-"HeapTracker.cpp"
 PARENT_SCOPE)
 
 add_subdirectory(drivers)

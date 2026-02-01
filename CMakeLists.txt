@@ -54,6 +54,8 @@ target_link_libraries(sre PRIVATE sre_core)
 target_link_libraries(sre PRIVATE sre_interface)
 target_link_libraries(sre_interface INTERFACE sre_werror)
 
+target_sources(sre PUBLIC "src/heap.cpp")
+
 add_subdirectory(os)
 target_link_libraries(sre PUBLIC sre_os)
 
