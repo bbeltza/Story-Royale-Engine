@@ -11,12 +11,13 @@
 #include <string.h>
 
 #include <utils/logging.h>
+#include <utils/mem.h>
 #include <OS.h>
 
 extern bool sre_coroutinecoreinit();
 extern void sre_coroutinecorequit();
 
-static int __invoke_entry(void* userdata) // Invoking the entry point won't be a thread anymore. It'll actually be a coroutine
+static int __invoke_entry(void* userdata) // Invoking the entry-point won't be a thread anymore. It'll actually be a coroutine
 {
     SDL_Event finish_event = { 0 };
     finish_event.type = SDL_USEREVENT;
@@ -121,9 +122,9 @@ void __end_engine()
     __clean_containers();  
     
     engine.video->quit(engine.video);
-    free((void*)engine.video->texture_fl);
-    free(engine.video->textures);
-    free(engine.video);
+    sre_delete((void*)engine.video->texture_fl);
+    sre_delete(engine.video->textures);
+    sre_delete(engine.video);
     
     engine.video = NULL;
     
@@ -136,6 +137,8 @@ void __end_engine()
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
+
+    LOG("SDL_GetNumAllocations(): %d", SDL_GetNumAllocations());
 
     if (*SRE_LOGFILE)
         fclose(*SRE_LOGFILE);

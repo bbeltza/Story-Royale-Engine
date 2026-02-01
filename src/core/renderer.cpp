@@ -9,10 +9,12 @@
 #include <ECS/scene.hpp>
 #include <GUI/object.hpp>
 
+#include <utils/mem.h>
+
 void __setup_renderer()
 {
-	engine.video = static_cast<sre_videodriver*>(calloc(1, sizeof(sre_videodriver)));
-	assert(engine.video);
+	engine.video = new sre_videodriver{};
+
 	if (sresdlrenderer_init(engine.video, engine.sdl_windowhndl) < 0)
 	{
 		ERROR("Failed initializing the render driver");
@@ -21,13 +23,11 @@ void __setup_renderer()
 
 	if (engine.video->texture_size)
 	{
-		const_cast<void*&>(engine.video->textures) = calloc(SRE_TEXTURE_BASECOUNT, engine.video->texture_size);
-		const_cast<sre_usize&>(engine.video->textures_capacity) = SRE_TEXTURE_BASECOUNT;
-
-		const_cast<sre_u32* &>(engine.video->texture_fl) = static_cast<sre_u32*>(calloc(SRE_TEXTURE_BASECOUNT, sizeof(sre_u32)));
-		const_cast<sre_usize&>(engine.video->texture_flcapacity) = SRE_TEXTURE_BASECOUNT;
-
-		assert(engine.video->textures && engine.video->texture_fl);
+		const_cast<void* &>(engine.video->textures) = new sre::byte[SRE_TEXTURE_BASECOUNT * engine.video->texture_size] {};
+		const_cast<sre_u32* &>(engine.video->texture_fl) = new sre::u32[SRE_TEXTURE_BASECOUNT] {};
+		
+		const_cast<sre_usize &>(engine.video->textures_capacity) = SRE_TEXTURE_BASECOUNT;
+		const_cast<sre_usize &>(engine.video->texture_flcapacity) = SRE_TEXTURE_BASECOUNT;
 	}
 
 	if (sre::game_settings.WindowOptions.VSync)

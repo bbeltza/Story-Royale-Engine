@@ -32,13 +32,11 @@ It's discouraged to use it with numbers as numbers can be 0
 // Depending on the implementation, it may support variable length arrays (e.g. clang & gcc's extensions), or just use alloca
 #define ut_dynsalloc __ut_dynsalloc
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-		#include <stddef.h>
-		// C operator new and delete wrappers
-		extern void* sre_new(size_t size);
-		extern void sre_delete(void* block);
-#ifdef __cplusplus
-	}
+#if !defined(__cplusplus)
+	#include <stddef.h>
+	// C operator new and delete wrappers
+	extern void* sre_new(size_t size);
+	extern void sre_delete(void* block);
+
+	#define sre_newclear(size) memset(sre_new(size), 0, size)
 #endif

@@ -1,10 +1,17 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <SDL.h>
 
 #include <utils/logging.h>
+#define ENABLE_LOGGING 01
+
+#if !ENABLE_LOGGING
+	#undef LOG
+	#define LOG(...)
+#endif
 
 #if !defined(NDEBUG)
-SDL_atomic_t SR_NUM_ALLOCATIONS;
+SDL_atomic_t SR_ALLOCATED_SIZE;
+SDL_atomic_t SR_ALLOCATED_BLOCKS;
 
 void* operator new(size_t size)
 {
@@ -14,9 +21,10 @@ void* operator new(size_t size)
 		std::terminate();
 
 	block[0] = size;
-	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, static_cast<int>(size));
+	SDL_AtomicAdd(&SR_ALLOCATED_SIZE, static_cast<int>(size));
+	SDL_AtomicAdd(&SR_ALLOCATED_BLOCKS, 1);
 
-	LOG("GOT OPERATOR NEW, NOW CURRENT SIZE: %zd, %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS), size);
+	LOG("operator new(%zd): %zd, %zd", size, SDL_AtomicGet(&SR_ALLOCATED_SIZE), SDL_AtomicGet(&SR_ALLOCATED_BLOCKS));
 
 	#ifdef __unix__ // Uhmmm I think new/delete blocks are aligned to 2 pointers on unix-like systems
 					// I'll try whatever number to align it correctly
@@ -38,9 +46,10 @@ void operator delete(void* block)
 		tblock--;
 	#endif
 
-	SDL_AtomicAdd(&SR_NUM_ALLOCATIONS, -static_cast<int>(tblock[0]));
+	SDL_AtomicAdd(&SR_ALLOCATED_SIZE, -static_cast<int>(tblock[0]));
+	SDL_AtomicAdd(&SR_ALLOCATED_BLOCKS, -1);
 
-	LOG("GOT OPERATOR DELETE, NOW CURRENT SIZE: %zd %zd", SDL_AtomicGet(&SR_NUM_ALLOCATIONS), tblock[0]);
+	LOG("operator delete(%zd): %zd, %zd", *tblock, SDL_AtomicGet(&SR_ALLOCATED_SIZE), SDL_AtomicGet(&SR_ALLOCATED_BLOCKS));
 
 	free(tblock);
 }

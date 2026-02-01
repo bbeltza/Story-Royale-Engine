@@ -4,6 +4,8 @@
 #include "drivers/drivers.h"
 #include "../internal.h"
 
+#include <utils/mem.h>
+
 size_t sre_isinfreelist(sre_Texture id)
 {
     for (size_t i = 0; i < engine.video->texture_flcount; i++)
@@ -40,8 +42,7 @@ sre_Texture sre_tex_gen()
         if (engine.video->textures_count >= engine.video->textures_capacity)
         {
             sre_usize new_capacity = engine.video->textures_capacity * 2;
-            void* ptr = calloc(new_capacity, engine.video->texture_size);
-            if (!ptr) goto FINISH_OR_FAIL;
+            void* ptr = sre_newclear(new_capacity * engine.video->texture_size);
 
             ptr = memcpy(ptr, engine.video->textures, engine.video->textures_capacity * engine.video->texture_size);
             if (!ptr) goto FINISH_OR_FAIL;
@@ -83,8 +84,7 @@ void sre_tex_destroy(sre_Texture id)
         if (engine.video->texture_flcount >= engine.video->texture_flcapacity)
         {
             sre_usize new_capacity = engine.video->texture_flcapacity * 2;
-            void* ptr = calloc(new_capacity, sizeof(sre_Texture));
-            assert(ptr);
+            void* ptr = sre_newclear(new_capacity * sizeof(sre_Texture));
 
             ptr = memcpy(ptr, engine.video->texture_fl, engine.video->texture_flcapacity * sizeof(sre_Texture));
             assert(ptr);
