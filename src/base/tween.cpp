@@ -11,7 +11,16 @@ void TweenServer::update()
     {
         auto& tw = m_tweens.at(i);
 
-        if (!tw->m_state) continue;
+        if (!tw->m_state)
+        {
+            if (tw.unique())
+            {
+                tw.swap(m_tweens.back());
+                m_tweens.pop_back();
+                i--;
+            }
+            continue;
+        }
         const timeStamp duration = tw->style.duration;
 
         tw->m_elapsed += sre::dt;
@@ -23,11 +32,8 @@ void TweenServer::update()
         if (tw->m_elapsed >= duration)
         {
             tw->m_state = 0;
+            tw->m_elapsed = 0;
             tw->completed.fire();
-
-            m_tweens.at(i).swap(m_tweens.back());
-            m_tweens.pop_back();
-            i--;
         }
     }
 }

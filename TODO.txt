@@ -48,7 +48,7 @@
 	  for every single option. I find it better to just be able to change whatever option in runtime and to just set whatever the
 	  GameSettings.json did set in the game's entry point.
 
-(current version: 0.100.31 (experimental coroutines))
+(current version: 0.101.01 (experimental coroutines))
 
 - Work on the game ^^
 
