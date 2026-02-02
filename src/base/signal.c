@@ -1,4 +1,5 @@
 #include <Base/Signal.h>
+#include <Base/Coroutine.h>
 
 #include <utils/mem.h>
 
@@ -14,9 +15,9 @@ struct sre_Signal
 
     SDL_cond* cond;
     SDL_mutex* mutex;
-    SDL_atomic_t yielding_threads;
-
-    void* fire_data;
+    sre_coroutine** coroutines;
+    sre_u32 coroutines_capacity;
+    sre_u32 coroutines_size;
 };
 
 struct sre_Connection
@@ -27,8 +28,7 @@ struct sre_Connection
 
     sre_signalfunction function;
 
-    sre_uptr flags;
-
+    sre_u32 flags;
     SDL_atomic_t reference;
 };
 
@@ -48,7 +48,11 @@ sre_Signal* sre_signalcreate(void* userdata)
 
     signal->cond = SDL_CreateCond();
     signal->mutex = SDL_CreateMutex();
-    signal->yielding_threads.value = 0;
+
+    signal->coroutines_capacity = 16;
+    signal->coroutines_size = 16;
+    signal->coroutines = sre_newclear(sizeof(signal->coroutines) * 16);
+
     if (!signal->cond || !signal->mutex) goto ERROR_CLEANUP;
 
     return signal;
@@ -69,7 +73,6 @@ void sre_signaldestroy(sre_Signal* signal)
     }
     if (signal->mutex)
     {
-        while (SDL_AtomicGet(&signal->yielding_threads));
         SDL_LockMutex(signal->mutex);
         SDL_DestroyMutex(signal->mutex);
     }
@@ -89,6 +92,7 @@ void sre_signaldestroy(sre_Signal* signal)
         }
     }
 
+    sre_delete(signal->coroutines);
     sre_delete(signal);
 }
 
@@ -149,35 +153,31 @@ void sre_signalunaquire(sre_Connection* connection)
         sre_delete(connection);
 }
 
-void* sre_signalwait(sre_Signal* signal, unsigned timeout)
+void* sre_signalwait(sre_Signal* signal)
 {
-    void* result;
+    if (signal->coroutines_size <= signal->coroutines_size)
+    {
+        signal->coroutines_capacity *= 2;
 
-    SDL_LockMutex(signal->mutex);
-    SDL_AtomicAdd(&signal->yielding_threads, 1);
-    SDL_CondWaitTimeout(signal->cond, signal->mutex, timeout);
-    result = signal->fire_data;
+        sre_coroutine** new_block = sre_new(sizeof(sre_coroutine*) * signal->coroutines_capacity);
+        new_block = memcpy(new_block, signal->coroutines, sizeof(sre_coroutine*) * signal->coroutines_capacity);
+        assert(new_block != NULL);
 
-    SDL_UnlockMutex(signal->mutex);
-    SDL_AtomicAdd(&signal->yielding_threads, -1);
-
-    return result;
+        sre_delete(signal->coroutines);
+        signal->coroutines = new_block;
+    }
+    return sre_coroutinesuspendEx(&signal->coroutines[signal->coroutines_size++]);
 }
 
-#include <SDL_log.h>
 bool sre_signalfire(sre_Signal* signal, void* data)
 {
     if (!signal) return false;
 
-    SDL_LockMutex(signal->mutex);
-    signal->fire_data = data;
-    SDL_CondBroadcast(signal->cond);
-    SDL_UnlockMutex(signal->mutex);
+    while (signal->coroutines_size)
+        sre_coroutineresume(signal->coroutines[--signal->coroutines_size], data);
     
     for (sre_Connection* connection = signal->connection_head; connection != NULL; connection = connection->next)
         connection->function(signal->userdata, connection->flags & SRE_CONNECTION_HASDATA ? (void**)(connection + 1) : NULL, data);
-    
-    while (SDL_AtomicGet(&signal->yielding_threads));
 
     return true;
 }

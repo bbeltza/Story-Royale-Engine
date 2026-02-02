@@ -34,6 +34,7 @@ It's discouraged to use it with numbers as numbers can be 0
 
 #if !defined(__cplusplus)
 	#include <stddef.h>
+	#include <string.h>
 	// C operator new and delete wrappers
 	extern void* sre_new(size_t size);
 	extern void sre_delete(void* block);

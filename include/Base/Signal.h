@@ -24,7 +24,7 @@ sre_Connection* sre_signalaquire(sre_Connection* connection);
 // Decrement the reference count of the connection and delete it if the reference count is 0
 void sre_signalunaquire(sre_Connection* connection);
 
-void* sre_signalwait(sre_Signal* signal, unsigned timeout);
+void* sre_signalwait(sre_Signal* signal);
 
 bool sre_signalfire(sre_Signal* signal, void* data);
 

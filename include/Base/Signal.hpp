@@ -95,7 +95,7 @@ namespace sre
 		void release() { sre_signaldestroy(m_ptr); m_ptr = NULL; }
 
 		void fire(T* arg=NULL) { sre_signalfire(m_ptr, arg); }
-		T* wait(unsigned timeout=-1) { return static_cast<T*>(sre_signalwait(m_ptr, timeout)); }
+		T* wait() { return static_cast<T*>(sre_signalwait(m_ptr)); }
 
 		template <typename Fn, typename S, typename C>
 		Connection::ptr connect(Fn fn(S*, C*, T*), void* userdata) { return sre_signalconnect(m_ptr, userdata, reinterpret_cast<sre_signalfunction>(fn)); }

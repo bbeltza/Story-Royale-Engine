@@ -24,11 +24,14 @@ typedef enum
 // @return Handle to the coroutine, or `NULL` if creation fails
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata);
 
-bool sre_coroutineresume(sre_coroutine* coroutine);
+bool sre_coroutineresume(sre_coroutine* coroutine, void* data);
 
 // Note that these 2 functions don't yield if the calling coroutine is in a `CANCELLED` state
 bool sre_coroutinesuspend(); // Suspend calling coroutine
 bool sre_coroutineyield(sre_timeStamp time); // Yield current coroutine for `time` seconds
+
+// Retrieve the current coroutine, suspend the coroutine and retrieve data from it
+void* sre_coroutinesuspendEx(sre_coroutine** current);
 
 sre_coroutineState sre_coroutinestate(const sre_coroutine* coroutine);
 bool sre_coroutinerunning(); // Check if current coroutine is running
@@ -65,7 +68,7 @@ namespace sre
             m_coroutine(sre_coroutinecreate(suspended, reinterpret_cast<sre_coroutineFunction>(fx), userdata))
         {}
     public:
-        bool resume() { return sre_coroutineresume(m_coroutine); }
+        bool resume(void* data=NULL) { return sre_coroutineresume(m_coroutine, data); }
         coroutineState state() const { return static_cast<coroutineState>(sre_coroutinestate(m_coroutine)); }
     };
 

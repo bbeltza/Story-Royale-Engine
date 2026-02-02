@@ -48,9 +48,10 @@ struct sre_coroutine
     sre_coroutine* next;
     sre_coroutineState state;
 
-    Uint64 resume_tick;
+    void* data;
 
     coroutine_native native;
+    Uint64 resume_tick;
 };
 
 // Data containing the necessary stuff to run the coroutine
@@ -181,10 +182,14 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     return coroutine;
 }
 
-bool sre_coroutineresume(sre_coroutine* coroutine)
+bool sre_coroutineresume(sre_coroutine* coroutine, void* data)
 {
     if (!coroutine) return false;
-    coroutine->state = SRE_COROUTINESTATE_RUNNING;
+    if (coroutine->state == SRE_COROUTINESTATE_SUSPENDED)
+    {
+        coroutine->data = data;
+        coroutine->state = SRE_COROUTINESTATE_RUNNING;
+    }
     return true;
 }
 
@@ -198,15 +203,31 @@ bool sre_coroutinerunning()
 
 bool sre_coroutinesuspend()
 {
-    if (SDL_ThreadID() != inst.thread_id) return false;
-    assert(inst.current != NULL);
+    sre_coroutine* current;
+    sre_coroutinesuspendEx(&current);
+    return current != NULL;
+}
 
-    if (inst.current->state == SRE_COROUTINESTATE_CANCELLED) return true;
+void* sre_coroutinesuspendEx(sre_coroutine** current)
+{
+    static sre_coroutine* dummy;
+    if (!current) current = &dummy;
+
+    if (SDL_ThreadID() != inst.thread_id)
+    {
+        *current = NULL;
+        return NULL;
+    }
+    assert(inst.current != NULL);
+    *current = inst.current;
+
+    if (inst.current->state == SRE_COROUTINESTATE_CANCELLED) goto END_FUNC;
     inst.current->state = SRE_COROUTINESTATE_SUSPENDED;
     inst.current->resume_tick = 0;
     sys_coroutineswitch(&inst.thread_native);
 
-    return true;
+    END_FUNC:
+    return inst.current->data;
 }
 
 bool sre_coroutineyield(sre_timeStamp time)
