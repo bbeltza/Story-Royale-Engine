@@ -61,6 +61,7 @@ struct coroutine_instance
 
     sre_coroutine* current;
     sre_coroutine* head;
+    sre_coroutine* end;
 
     coroutine_native thread_native;
 
@@ -109,6 +110,9 @@ static int SDLCALL poolthread_proc(void* _inst)
                         prev->next = curr->next;
                     else
                         inst->head = curr->next;
+
+                    if (curr == inst->end)
+                        inst->end = prev;
                     
                     inst->current = curr->next;
 
@@ -149,8 +153,7 @@ void sre_coroutinecorequit()
 
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata)
 {
-    sre_coroutine* coroutine = sre_new(sizeof(sre_coroutine));
-    memset(coroutine, 0, sizeof(coroutine));
+    sre_coroutine* coroutine = sre_newclear(sizeof(sre_coroutine));
 
     coroutine_data* data = sre_new(sizeof(coroutine_data));
     data->func = function;
@@ -164,8 +167,16 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     }
     
     coroutine->state = suspended ? SRE_COROUTINESTATE_SUSPENDED : SRE_COROUTINESTATE_RUNNING;
-    coroutine->next = inst.head;
-    inst.head = coroutine;
+    if (inst.end)
+    {
+        inst.end->next = coroutine;
+    }
+    else
+    {
+        assert(inst.head == NULL);
+        inst.head = coroutine;
+    }
+    inst.end = coroutine;
 
     return coroutine;
 }
