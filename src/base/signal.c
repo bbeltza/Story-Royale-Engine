@@ -13,9 +13,11 @@ struct sre_Signal
     sre_Connection* connection_head;
     void* userdata;
 
-    SDL_cond* cond;
-    SDL_mutex* mutex;
     sre_coroutine** coroutines;
+    // If you're asking why the size and capacity are 32 bit integers and not "size" integers
+    // We AIN'T having more than 2^32 coroutines, nor even 65536 are we? so I could make this be 16 bit integers
+    // But at this point using 16 bit register instructions is considered larger and thus slower
+
     sre_u32 coroutines_capacity;
     sre_u32 coroutines_size;
 };
@@ -46,36 +48,16 @@ sre_Signal* sre_signalcreate(void* userdata)
     signal->connection_head = NULL;
     signal->userdata = userdata;
 
-    signal->cond = SDL_CreateCond();
-    signal->mutex = SDL_CreateMutex();
-
     signal->coroutines_capacity = 16;
     signal->coroutines_size = 16;
     signal->coroutines = sre_newclear(sizeof(signal->coroutines) * 16);
 
-    if (!signal->cond || !signal->mutex) goto ERROR_CLEANUP;
-
     return signal;
-
-    ERROR_CLEANUP:
-    sre_signaldestroy(signal);
-    return NULL;
 }
 
 void sre_signaldestroy(sre_Signal* signal)
 {
     if (!signal) return;
-
-    if (signal->cond)
-    {
-        SDL_CondBroadcast(signal->cond);
-        SDL_DestroyCond(signal->cond);
-    }
-    if (signal->mutex)
-    {
-        SDL_LockMutex(signal->mutex);
-        SDL_DestroyMutex(signal->mutex);
-    }
 
     while (signal->connection_head)
     {
