@@ -25,6 +25,7 @@ void Image::on_render(const sre::rect2Dut &dimensions)
         dimensions,
         sre::vec2ut::ZERO,
 
-        texture->handle()
+        texture->handle(),
+        { 0, 0, 0, 0 }
     });
 }

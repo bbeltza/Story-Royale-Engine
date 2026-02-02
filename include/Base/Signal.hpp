@@ -43,9 +43,9 @@ namespace sre
 			sre_signalfire(m_ptr, &tuple);
 		}
 
-		TupleType wait(unsigned timeout=-1)
+		TupleType wait()
 		{
-			auto arg = static_cast<TupleType*>(sre_signalwait(m_ptr, timeout));
+			auto arg = static_cast<TupleType*>(sre_signalwait(m_ptr));
 			return *arg;
 		}
 

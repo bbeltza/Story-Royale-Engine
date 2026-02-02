@@ -130,11 +130,7 @@ typedef struct sre_DDTexture
     sre_vec2ut anchor;
 
     sre_Texture texture; // Texture identifier to draw
-    sre_rect2Di region // Region of the texture to render. Set the size to 0 to render the entire texture
-    #ifdef __cplusplus
-    = { 0, 0, 0, 0 }
-    #endif
-    ;
+    sre_rect2Di region; // Region of the texture to render. Set the size to 0 to render the entire texture
 } sre_DDTexture;
 
 typedef struct sre_DDRTexture

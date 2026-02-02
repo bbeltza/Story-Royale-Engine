@@ -6,11 +6,11 @@
 
 #define COROUTINE_CALL WINAPI
 typedef LPVOID coroutine_native;
-static VOID COROUTINE_CALL fiber_entry(LPVOID lpFiberParameter); // lpStartAddress is __stdcall while sre_coroutineFunction isn't. Use wrapper then...
+static VOID COROUTINE_CALL coroutine_entry(LPVOID lpFiberParameter); // lpStartAddress is __stdcall while sre_coroutineFunction isn't. Use wrapper then...
 
 static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_data* data) // Hmm... Intellisense doesn't seem to recognize the types defined in coroutine.c...
 {
-    LPVOID fiber = CreateFiber(0, fiber_entry, (LPVOID)data);
+    LPVOID fiber = CreateFiber(0, coroutine_entry, (LPVOID)data);
     if (!fiber)
         return false;
     
@@ -29,7 +29,7 @@ static bool sys_coroutinepoolsetup(coroutine_native* pool)
     return true;
 }
 
-static void sys_coroutineswitch(const coroutine_native* coroutine)
+static void sys_coroutineswitch(coroutine_native* coroutine)
 {
     assert(coroutine != NULL);
 

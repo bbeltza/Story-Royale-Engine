@@ -52,7 +52,7 @@ namespace sre
         template <typename T2> inline void sub(T2 other) { x -= static_cast<T>(other); y -= static_cast<T>(other); }
         template <typename T2> inline void mul(T2 other) { x *= static_cast<T>(other); y *= static_cast<T>(other); }
         template <typename T2> inline void div(T2 other) { x /= static_cast<T>(other); y /= static_cast<T>(other); }
-        inline void inverse() { x -=; y -=; }
+        inline void inverse() { x = -x; y = -y; }
 
         template <typename T2>
         constexpr auto getAdd(const vec2<T2>& other) const -> vec2<decltype(x + other.x)> { return { x + other.x, y + other.y }; }

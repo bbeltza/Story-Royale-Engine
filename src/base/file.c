@@ -48,7 +48,7 @@ int sre_fileopen(sre_File* file, const char* path, const char* mode)
             return -1;
         }
         
-        strncpy(file->fp.mode, mode, 8);
+        strncpy(file->fp.mode, mode, sizeof(file->fp.mode));
     }
     else
         file->fp.mode[0] = '\0';

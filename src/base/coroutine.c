@@ -4,6 +4,8 @@
 #include <SDL_thread.h>
 #include <SDL_timer.h>
 
+#include <assert.h>
+
 /* A short explanation about coroutine's implementation... */
 /* There's a folder in src/base called `coroutine`, it contains every single needed 
    OS/architecture implementation for coroutines to work */
@@ -26,7 +28,10 @@ typedef struct coroutine_data coroutine_data;
 
 #if defined(_WIN32)
     #include "coroutine/win32.c"
+#elif __has_include("ucontext.h")
+    #include "coroutine/ucontext.c"
 #else
+    #include "coroutine/dummy.c"
     #error "Make an implementation!! Lazy..."
 #endif
 
@@ -41,7 +46,9 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_dat
 // `pool` is automatically initialized to `NULL` for the first time
 static bool sys_coroutinepoolsetup(coroutine_native* pool);
 // Switch to the following coroutine
-static void sys_coroutineswitch(const coroutine_native* coroutine);
+static void sys_coroutineswitch(coroutine_native* coroutine);
+
+static void sys_coroutineclose(coroutine_native* coroutine);
 
 struct sre_coroutine
 {
@@ -269,7 +276,7 @@ void sre_coroutinecancel(sre_coroutine* coroutine)
     // Maybe I'll need to wait until the coroutine cleans up?
 }
 
-void COROUTINE_CALL fiber_entry(void* _data)
+void COROUTINE_CALL coroutine_entry(void* _data)
 {
     register coroutine_data* data = _data;
 

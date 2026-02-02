@@ -15,7 +15,11 @@ SDL_atomic_t SR_ALLOCATED_BLOCKS;
 
 void* operator new(size_t size)
 {
-	size_t newsize = size + sizeof(size_t);
+	size_t newsize = size + sizeof(size_t)
+	#ifdef __unix__
+	* 2
+	#endif
+	;
 	size_t* block = reinterpret_cast<size_t*>(malloc(newsize));
 	if (!block)
 		std::terminate();
@@ -35,13 +39,13 @@ void* operator new(size_t size)
 	return block;
 }
 
-void operator delete(void* block)
+void operator delete(void* block) noexcept
 {
 	if (!block) return;
 	
 	size_t* tblock = reinterpret_cast<size_t*>(block);
 	#ifdef __unix__
-		tblock += 2;
+		tblock -= 2;
 	#else
 		tblock--;
 	#endif

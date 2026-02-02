@@ -20,7 +20,7 @@ typedef struct sre_videodriver sre_videodriver;
 
 typedef int (*sre_videoinit_func)(sre_videodriver* video, SDL_Window* window);
 
-typedef struct sre_videodriver
+struct sre_videodriver
 {
 	void (*quit)(sre_videodriver* video);
 	void (*present)(const sre_videodriver* video);
@@ -63,6 +63,6 @@ typedef struct sre_videodriver
 	sre_vec2ut center;
 	sre_vec2ut camera;
 	sre_unit scale;
-} sre_videodriver;
+};
 
 #endif
