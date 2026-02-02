@@ -10,8 +10,6 @@ static VOID COROUTINE_CALL fiber_entry(LPVOID lpFiberParameter); // lpStartAddre
 
 static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_data* data) // Hmm... Intellisense doesn't seem to recognize the types defined in coroutine.c...
 {
-    LOG("Called this: sys_coroutinecreate() Ready to make a fiber!");
-
     LPVOID fiber = CreateFiber(0, fiber_entry, (LPVOID)data);
     if (!fiber)
         return false;

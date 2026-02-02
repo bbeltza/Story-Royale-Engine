@@ -1,4 +1,4 @@
-include(StoryRoyaleEngine)
+include(sre)
 project(SRE_EXAMPLES_AUDIOCALLBACK)
 
 set(SOURCES audio_callback.c)

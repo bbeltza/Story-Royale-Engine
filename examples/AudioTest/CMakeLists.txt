@@ -1,4 +1,4 @@
-include(StoryRoyaleEngine)
+include(sre)
 project(AudioTest)
 
 set(SOURCES AudioTest.cpp)

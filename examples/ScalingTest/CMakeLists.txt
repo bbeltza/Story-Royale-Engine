@@ -1,4 +1,4 @@
-include(StoryRoyaleEngine)
+include(sre)
 project(ScalingTest)
 
 set(SOURCES ScalingTest.cpp)

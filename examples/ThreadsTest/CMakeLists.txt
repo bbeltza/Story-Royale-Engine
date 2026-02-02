@@ -1,4 +1,4 @@
-include(StoryRoyaleEngine)
+include(sre)
 project(ThreadsTest)
 
 set(SOURCES ThreadsTest.cpp)

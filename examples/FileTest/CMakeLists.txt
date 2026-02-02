@@ -1,4 +1,4 @@
-include(StoryRoyaleEngine)
+include(sre)
 project(FileTest)
 
 set(SOURCES FileTest.cpp)

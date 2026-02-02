@@ -3,17 +3,10 @@
 
 #include <ECS/Components/sprite.hpp>
 
-#include <Base/Event.hpp>
+#include <Core/Event.hpp>
 #include <Entry.h>
 
-struct TexturePalace;
 struct TextureEntity;
-
-struct TexturePalace : public sreECS::World
-{
-    TextureEntity& texture = add_entity<TextureEntity>();
-};
-
 
 static void mouse(void*, TextureEntity* ent, sre::Event event);
 
@@ -53,6 +46,7 @@ static void mouse(void*, TextureEntity* ent, sre::Event event)
 
 void sre::initialize()
 {
-    auto texture_palace = new TexturePalace;
+    auto texture_palace = new sreECS::Scene;
+    texture_palace->add_entity<TextureEntity>();
     texture_palace->make_current();
 }

@@ -1,4 +1,4 @@
-include(StoryRoyaleEngine)
+include(sre)
 project(RectsTest)
 
 set(SOURCES Rects.cpp)
