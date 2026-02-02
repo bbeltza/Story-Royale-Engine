@@ -16,7 +16,7 @@ struct sre_Signal
     sre_coroutine** coroutines;
     // If you're asking why the size and capacity are 32 bit integers and not "size" integers
     // We AIN'T having more than 2^32 coroutines, nor even 65536 are we? so I could make this be 16 bit integers
-    // But at this point using 16 bit register instructions is considered larger and thus slower
+    // But at this point using 16 bit register instructions is considered heavier and thus slower
 
     sre_u32 coroutines_capacity;
     sre_u32 coroutines_size;
