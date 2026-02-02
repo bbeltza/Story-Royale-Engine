@@ -7,7 +7,9 @@ typedef ucontext_t coroutine_native;
 static coroutine_native* current_context;
 static void coroutine_entry(void* data);
 
-#define UC_STACKSIZE (10 * 1024 * 1024)
+
+#define UC_STACKSIZE (8 * 1024 * 1024) // Hmm maybe using a constant for the stack size isn't the best idea
+                                        // I just don't know a less platform-speficic way to determine the current stack size
 
 static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_data* data)
 {

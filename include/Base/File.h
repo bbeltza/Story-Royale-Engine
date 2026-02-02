@@ -7,6 +7,22 @@
 
 SRE_CAPI_BEGIN
 
+typedef struct sre_File sre_File;
+
+// File virtual function table structure
+struct sre_FVFT
+{
+    bool (*read)(sre_File* file, void* data, sre_usize size);
+    bool (*write)(sre_File* file, const void* data, sre_usize size);
+    bool (*close)(sre_File* file);
+};
+
+struct _sre_File
+{
+    const struct sre_FVFT* vfptr;
+    void* data[4];
+};
+
 #if defined(_WIN32)
 	extern const sre_byte *_game_res;
 #else
