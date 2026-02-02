@@ -44,7 +44,7 @@ SRE_CAPI_BEGIN
 
 		SDL_mutex* destroyqueue_mutex;
 
-		SDL_Thread* entry_thread;
+		void* entry_thread;
 
 		// Window data
 

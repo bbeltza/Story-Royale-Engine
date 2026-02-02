@@ -87,7 +87,7 @@ static int SDLCALL poolthread_proc(void* _inst)
 
     sys_coroutinepoolsetup(&inst->thread_native);
 
-    while (inst->running)
+    while (inst->running || inst->current)
     {
         sre_coroutine* prev = NULL;
         inst->current = inst->head;
@@ -148,6 +148,13 @@ bool sre_coroutinecoreinit()
 
 void sre_coroutinecorequit()
 {
+    sre_coroutine* current = inst.head;
+    while (current)
+    {
+        current->state = SRE_COROUTINESTATE_CANCELLED;
+        current = current->next;
+    }
+
     inst.running = false;
     SDL_WaitThread(inst.thread, NULL);
 }

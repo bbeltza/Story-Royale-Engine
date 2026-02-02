@@ -14,10 +14,12 @@
 #include <utils/mem.h>
 #include <OS.h>
 
+#include <Base/Coroutine.h>
+
 extern bool sre_coroutinecoreinit();
 extern void sre_coroutinecorequit();
 
-static int __invoke_entry(void* userdata) // Invoking the entry-point won't be a thread anymore. It'll actually be a coroutine
+static void __invoke_entry(void* userdata) // Invoking the entry-point won't be a thread anymore. It'll actually be a coroutine
 {
     SDL_Event finish_event = { 0 };
     finish_event.type = SDL_USEREVENT;
@@ -25,8 +27,6 @@ static int __invoke_entry(void* userdata) // Invoking the entry-point won't be a
     
     sre_initialize();
     SDL_PushEvent(&finish_event);
-
-    return 0;
 }
 
 static inline void __setup_engine_data()
@@ -37,7 +37,7 @@ static inline void __setup_engine_data()
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
     engine.main_thrd = SDL_ThreadID();
-    engine.entry_thread = SDL_CreateThread(__invoke_entry, "Game Entry", NULL);
+    engine.entry_thread = sre_coroutinecreate(false, __invoke_entry, NULL);
 }
 
 #define SDLPCASE(x, f) case SDL_LOG_PRIORITY_##x: priority_str = #x"]: "; files[0] = f; break
@@ -129,7 +129,6 @@ void __end_engine()
     engine.video = NULL;
     
     SDL_CloseAudioDevice(engine.audio_device);
-    SDL_DetachThread(engine.entry_thread);
     SDL_DestroyMutex(engine.sdl_rendermutex);
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
