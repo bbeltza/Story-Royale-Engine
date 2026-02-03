@@ -1,1 +1,2 @@
 const char __game_pwdres[] = "${_PWDRES}";
+const unsigned __game_lenres = sizeof(__game_pwdres);

@@ -11,7 +11,7 @@ Image::Image(int w, int h):
 
 Image::Image(const char* path)
 {
-    File file(path, "rb");
+    File file(path, FILE_READ);
     if (!file.valid())
     {
         ERROR("Image::Image: Failed loading %s", path);

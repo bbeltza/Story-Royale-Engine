@@ -32,6 +32,7 @@ const sre_byte* sre_getresource(const char* path, size_t* size_output)
 
 #if _WIN32
 #include <Resapi.h> // Only include Resapi.h, we don't need the whole Windows header...
+#undef ERROR
 
 void sre_win_resourceinit(void)
 {
@@ -48,3 +49,128 @@ void sre_win_resourceinit(void)
     _game_res = LockResource(hglobal);
 }
 #endif
+
+struct impl_Res
+{
+    const sre_byte* begin;
+    sre_usize size;
+    sre_usize pos;
+};
+
+//
+
+static bool resource_open(sre_FileImpl* impl, const char* path, int flags)
+{
+    if (flags == SRE_FILE_DEFAULT)
+        flags = SRE_FILE_READ;
+    
+    if (flags & SRE_FILE_WRITE)
+    {
+        errno = EACCES;
+        return false;
+    }
+
+    if (!(flags & SRE_FILE_READ))
+    {
+        errno = EINVAL;
+        return false;
+    }
+
+    const sre_byte* begin;
+    sre_usize size;
+
+    begin = sre_getresource(path, &size);
+    if (!begin)
+        return false;
+
+    struct impl_Res* res = sre_new(sizeof(struct impl_Res));
+    res->pos = 0;
+    res->size = size;
+    res->begin = begin;
+
+    *impl = res;
+    return true;
+}
+
+static void resource_close(sre_FileImpl impl)
+{
+    sre_delete(impl);
+}
+
+//
+
+static sre_usize resource_read(sre_FileImpl _impl, void* data, sre_usize size)
+{
+    struct impl_Res* impl = _impl;
+    
+    {
+        sre_usize remaining_size = impl->size - impl->pos;
+        size = remaining_size < size ? remaining_size : size;
+    }
+
+    if (!memcpy(data, impl->begin + impl->pos, size))
+        return 0;
+    impl->pos += size;
+    return size;
+}
+
+static sre_usize resource_write(sre_FileImpl _impl, const void* data, sre_usize size)
+{
+    (void)_impl;
+    (void)data;
+    (void)size;
+
+    return 0;
+}
+
+static bool resource_seek(sre_FileImpl _impl, long offset, sre_seek origin)
+{
+    struct impl_Res* impl = _impl;
+    switch (origin)
+    {
+        case SRE_SEEK_SET:
+            impl->pos = offset;
+            break;
+        case SRE_SEEK_CUR:
+            impl->pos += offset;
+            break;
+        case SRE_SEEK_END:
+            impl->pos = impl->size - offset;
+            break;
+    }
+
+    impl->pos = impl->pos > impl->size ? impl->size : (impl->pos < 0 ? 0 : impl->pos);
+    return true;
+}
+
+static long resource_tell(sre_FileImpl _impl)
+{
+    struct impl_Res* impl = _impl;
+    return (long)impl->pos;
+}
+
+static sre_usize resource_size(sre_FileImpl _impl)
+{
+    struct impl_Res* impl = _impl;
+    return impl->size;
+}
+
+static const sre_byte* resource_begin(sre_FileImpl _impl)
+{
+    struct impl_Res* impl = _impl;
+    return impl->begin;
+}
+
+const sre_FVFT SRE_RESOURCE_VFT = {
+    resource_open,
+    resource_close,
+
+    resource_read,
+    resource_write,
+    
+    resource_seek,
+    resource_tell,
+
+    resource_size,
+    resource_begin
+};

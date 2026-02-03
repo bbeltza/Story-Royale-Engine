@@ -31,7 +31,7 @@ bool IniFile::load(const char* from_path)
     if (!extension || strcmp(extension, ".ini"))
         WARN("IniFile::load(): Path '%s' does not have the '.ini' extension. Is it intended?", from_path);
 
-    File f(from_path, "r");
+    File f(from_path, FILE_READ | FILE_TEXT);
     return load(f);
 }
 
@@ -248,6 +248,6 @@ bool IniFile::save(const char* path)
         text.push_back('\n');
     }
 
-    File file(path, "w");
+    File file(path, FILE_WRITE | FILE_TEXT);
     return file.write(text.data(), text.size());
 }

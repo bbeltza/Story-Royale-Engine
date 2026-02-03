@@ -28,6 +28,8 @@ SDL_RWops* sre_filetorwops(const sre_File* file)
         rw = SDL_RWFromConstMem(begin, (int)size);
     else
     {
+        // I think it's a better idea to not support stdio for reading only
+        // since it's slower and heavier than to just allocate a simple chunk
         const sre_Chunk* chunk = sre_fileallocate(file, 0);
         rw = SDL_RWFromConstMem(chunk->data, (int)chunk->size);
         rw->close = sdlrw_close;

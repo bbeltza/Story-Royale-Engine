@@ -81,8 +81,9 @@ void sre_audioclose(const sre_AudioChunk* chunk)
 const sre_AudioChunk* sre_audiofromfile(const sre_File* file)
 {
     if (!file) return NULL;
-    if (file->embedded)
-        return sre_audioload(file->res.size, file->res.begin);
+    const sre_byte* file_data = sre_filebegin(file);
+    if (file_data)
+        return sre_audioload(sre_filesize(file), file_data);
     
     const sre_Chunk *fchunk = sre_fileallocate(file, 0);
     if (!fchunk) return NULL;

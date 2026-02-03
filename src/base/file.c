@@ -10,7 +10,7 @@
 
 struct sre_FVFT
 {
-	bool (*open)(sre_FileImpl* file, const char* path, sre_fileFlags flags);
+	bool (*open)(sre_FileImpl* file, const char* path, int flags);
 	void (*close)(sre_FileImpl file);
 
 	sre_usize (*read)(sre_FileImpl file, void* data, sre_usize size);
@@ -84,7 +84,7 @@ bool sre_fileopen(sre_File* file, const char* path, sre_fileFlags flags)
 		{
 			const char* relpath = path + SRE_FILEPREFIX_LENGTH;
 			char* fullpath = SDL_GetPrefPath(NULL, game_settings.Title);
-			fullpath = SDL_realloc(path, strlen(path) + strlen(relpath) + 1);
+			fullpath = SDL_realloc(fullpath, strlen(fullpath) + strlen(relpath) + 1);
 			strcat(fullpath, relpath);
 			
 			ret = file->vfptr->open(&file->impl, fullpath, flags);
@@ -151,4 +151,13 @@ sre_usize sre_filesize(const sre_File* file)
 	assert(file->vfptr != NULL);
 
 	return file->vfptr->size(file->impl);
+}
+
+const sre_byte* sre_filebegin(const sre_File* file)
+{
+	if (!file) return NULL;
+	if (!file->impl) return NULL;
+	assert(file->vfptr != NULL);
+
+	return file->vfptr->begin(file->impl);
 }

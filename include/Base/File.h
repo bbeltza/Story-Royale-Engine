@@ -18,7 +18,7 @@ typedef struct sre_FVFT sre_FVFT;
 struct sre_File
 {
     const struct sre_FVFT* vfptr;
-    sre_FileImpl* impl;
+    sre_FileImpl impl;
     // Maybe add some data like the path of the file?
 };
 
@@ -37,7 +37,7 @@ enum sre_seek
     SRE_SEEK_END
 };
 
-bool sre_fileopen(sre_File* file, const char* path, sre_fileFlags flags);
+bool sre_fileopen(sre_File* file, const char* path, int flags);
 void sre_fileclose(sre_File* file);
 
 sre_usize sre_fileread(const sre_File* file, void* data, sre_usize size);
@@ -47,6 +47,8 @@ bool sre_fileseek(const sre_File* file, long offset, sre_seek origin);
 long sre_filetell(const sre_File* file);
 
 sre_usize sre_filesize(const sre_File* file);
+const sre_byte* sre_filebegin(const sre_File* file);
+
 /*
 
 enum sre_fileConstants

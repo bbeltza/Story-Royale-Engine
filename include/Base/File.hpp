@@ -31,7 +31,7 @@ namespace sre
 	{
 	public:
 		constexpr File(): sre_File{} {}
-		File(const char* path, fileFlags flags = FILE_DEFAULT) { sre_fileopen(this, path, static_cast<sre_fileFlags>(flags)); }
+		File(const char* path, int flags = FILE_DEFAULT) { sre_fileopen(this, path, flags); }
 		~File() { sre_fileclose(this); }
 
 		inline bool valid() const { return this->impl != NULL; }
