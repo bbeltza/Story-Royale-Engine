@@ -6,9 +6,6 @@
 
 SRE_CAPI_BEGIN
 
-typedef enum sre_fileFlags sre_fileFlags;
-typedef enum sre_seek sre_seek;
-
 typedef struct sre_File sre_File;
 typedef void* sre_FileImpl; // File implementation type (it's just a void* to not be confused with the other vftable parameters)
 
@@ -30,12 +27,12 @@ enum sre_fileFlags
     SRE_FILE_TEXT = (1 << 2)
 };
 
-enum sre_seek
+typedef enum sre_seek
 {
     SRE_SEEK_SET,
     SRE_SEEK_CUR,
     SRE_SEEK_END
-};
+} sre_seek;
 
 bool sre_fileopen(sre_File* file, const char* path, int flags);
 void sre_fileclose(sre_File* file);

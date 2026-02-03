@@ -2,6 +2,7 @@
 #include <Base/File.h>
 
 #include <assert.h>
+#include <errno.h>
 
 #include <utils/logging.h>
 #include <utils/mem.h>
@@ -42,7 +43,7 @@ extern const sre_FVFT SRE_RESOURCE_VFT;
 #include "file/resource.c"
 #include "file/stdio.c"
 
-bool sre_fileopen(sre_File* file, const char* path, sre_fileFlags flags)
+bool sre_fileopen(sre_File* file, const char* path, int flags)
 {
 	if (!file) return false;
 	memset(file, 0, sizeof(*file));

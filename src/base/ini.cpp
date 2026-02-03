@@ -76,7 +76,7 @@ bool IniFile::load_text(const char* text)
         }
         else if (chr == '\\' && !in_quotes)
         {
-            const char* lineend = strchr(&chr, '\n\r');
+            const char* lineend = strchr(&chr, '\n');
             if (lineend)
                 memset(&chr, ' ', lineend - &chr + 1);
         }
