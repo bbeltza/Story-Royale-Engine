@@ -10,55 +10,50 @@
 
 extern "C" void ERROR(const char*, ...);
 
-extern "C"
+namespace sre
 {
-#if defined(_WIN32)
-	extern const unsigned char* _game_res;
-#else
-	extern const unsigned char _game_res[];
-#endif
-};
+	enum fileFlags
+	{
+		FILE_DEFAULT = SRE_FILE_DEFAULT,
+		FILE_READ = SRE_FILE_READ,
+		FILE_WRITE = SRE_FILE_WRITE,
+		FILE_TEXT = SRE_FILE_TEXT
+	};
+	using seek = sre_seek;
+}
 
 namespace sre
 {
 	struct ChunkDeleter { void operator ()(const sre_Chunk* chunk) { return sre_chunkfree(chunk); } };
 	using Chunk = std::unique_ptr<const sre_Chunk, ChunkDeleter>;
 
-	class File: protected sre_File
+	class File: private sre_File
 	{
 	public:
-		File(): sre_File{} {}
-		File(const char* path, const char* mode = NULL) { sre_fileopen(this, path, mode); }
+		constexpr File(): sre_File{} {}
+		File(const char* path, fileFlags flags = FILE_DEFAULT) { sre_fileopen(this, path, static_cast<sre_fileFlags>(flags)); }
 		~File() { sre_fileclose(this); }
 
-		inline bool valid() const { return this->fp.fp != NULL; }
+		inline bool valid() const { return this->impl != NULL; }
 
 		inline Chunk allocate(size_t max_size=0) const { return Chunk(sre_fileallocate(this, max_size)); }
 
 		inline SDL_RWops* to_RWops() const { return sre_filetorwops(this); }
 
-		inline const byte* resource_data() const
-		{
-			if (!embedded) // Could also check if the file is valid, but remember isembedded is true if the file is valid
-				return NULL;
-
-			return res.begin; // Even if it wasn't valid and this passes, res_begin will be NULL
-		}
-
-		size_t size() const { return sre_filesize(this); }
+		sre::usize size() const { return sre_filesize(this); }
 
 		template <typename Fn, typename... Args>
 		auto call_cfunc(Fn func, Args&&... args) -> decltype(func(this, args...)) { return func(static_cast<sre_File*>(this), std::forward<Args>(args)...); }
-
 		template <typename Fn, typename... Args>
 		auto call_cfunc(Fn func, Args&&... args) const -> decltype(func(this, args...)) { return func(static_cast<const sre_File*>(this), std::forward<Args>(args)...); }
 
 		public:
 
-		inline long seek(long offset, int origin) const { return sre_fileseek(this, offset, origin); }
-		inline bool rewind() const { return sre_filerewind(this); }
+		inline bool seek(long offset, sre::seek origin) const { return sre_fileseek(this, offset, origin); }
+		inline bool rewind() const { return seek(0, SRE_SEEK_SET); }
 
-		bool write(const void* rawdata, size_t size) const { return sre_filewrite(this, rawdata, size); }
+		inline sre::usize write(const void* rawdata, sre::usize size) const { return sre_filewrite(this, rawdata, size); }
+		inline sre::usize read(void* data, sre::usize size) { return sre_fileread(this, data, size); }
 	};
 }
 

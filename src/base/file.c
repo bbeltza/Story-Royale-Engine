@@ -1,247 +1,155 @@
 #include <GameSettings.h>
 #include <Base/File.h>
-#include <string.h>
 
-#include <errno.h>
+#include <assert.h>
 
 #include <utils/logging.h>
-#include <utils/lockfile.h>
 #include <utils/mem.h>
 
 #include <SDL_filesystem.h>
 
-#if defined(_WIN32)
-    #include <io.h>
-#elif __unix__
-    #include <unistd.h>
-    #define _access access
+struct sre_FVFT
+{
+	bool (*open)(sre_FileImpl* file, const char* path, sre_fileFlags flags);
+	void (*close)(sre_FileImpl file);
+
+	sre_usize (*read)(sre_FileImpl file, void* data, sre_usize size);
+	sre_usize (*write)(sre_FileImpl file, const void* data, sre_usize size);
+
+	bool (*seek)(sre_FileImpl file, long offset, sre_seek origin);
+	long (*tell)(sre_FileImpl file);
+
+	sre_usize (*size)(sre_FileImpl file);
+};
+
+#if _WIN32
+	extern const sre_byte* _game_res;
+#else
+	extern const sre_byte _game_res[];
 #endif
-
 extern const char __game_pwdres[];
+extern const unsigned __game_lenres;
 
-const char SRE_FSRES_PREFIX[] = "__res/";
 const char SRE_RES_PREFIX[] = "res://";
 const char SRE_USR_PREFIX[] = "usr://";
 
+#define SRE_FILEPREFIX_LENGTH (sizeof(SRE_RES_PREFIX) - 1)
+
+extern const sre_FVFT SRE_STDIO_VFT;
+extern const sre_FVFT SRE_RESOURCE_VFT;
+
+#include "file/resource.c"
+#include "file/stdio.c"
+
+bool sre_fileopen(sre_File* file, const char* path, sre_fileFlags flags)
+{
+	if (!file) return false;
+	memset(file, 0, sizeof(*file));
+
+	if (!path) return false;
+
+#if _WIN32
+	if (!_game_res)
+		sre_win_resourceinit();
+#endif
+
+	bool ret = false;
+	if (!strncmp(path, SRE_RES_PREFIX, SRE_FILEPREFIX_LENGTH))
+	{
+		assert(_game_res != NULL);
+
+		const char* const relpath = path + SRE_FILEPREFIX_LENGTH;
+		if (_game_res[0])
+		{
+			file->vfptr = &SRE_RESOURCE_VFT;
+			ret = file->vfptr->open(&file->impl, relpath, flags);
+		}
+		else
+		{
+			file->vfptr = &SRE_STDIO_VFT;
+
+			sre_usize pathlen = strlen(relpath) + __game_lenres;
+			ut_dynsalloc(char, fullpath, pathlen);
+			strcpy(fullpath, __game_pwdres);
+			strcat(fullpath, relpath);
+
+			ret = file->vfptr->open(&file->impl, fullpath, flags);
+		}
+	}
+	else
+	{
+		file->vfptr = &SRE_STDIO_VFT;
+		if (!strncmp(path, SRE_USR_PREFIX, SRE_FILEPREFIX_LENGTH))
+		{
+			const char* relpath = path + SRE_FILEPREFIX_LENGTH;
+			char* fullpath = SDL_GetPrefPath(NULL, game_settings.Title);
+			fullpath = SDL_realloc(path, strlen(path) + strlen(relpath) + 1);
+			strcat(fullpath, relpath);
+			
+			ret = file->vfptr->open(&file->impl, fullpath, flags);
+
+			SDL_free(fullpath);
+		}
+		else
+		{
+			ret = file->vfptr->open(&file->impl, path, flags);
+		}
+	}
+
+	if (!ret)
+		ERROR("Could not open file '%s': %s", path, strerror(errno));
+	return ret;
+}
+
 void sre_fileclose(sre_File* file)
 {
-    if (!file) return;
-    if (file->embedded) return;
-    if (file->fp.fp)
-        fclose(file->fp.fp);
-    if (file->fp.path)
-        free(file->fp.path);
+	if (!file || !file->impl) return;
+	assert(file->vfptr != NULL);
+
+	file->vfptr->close(file->impl);
 }
 
-static int sre_fileopenfs(sre_File* file, const char* path);
-extern void sre_win_resourceinit(void);
-
-int sre_fileopen(sre_File* file, const char* path, const char* mode)
+sre_usize sre_fileread(const sre_File* file, void* data, sre_usize size)
 {
-    memset(file, 0, sizeof(*file));
+	if (!file || !data || !size) return 0;
+	if (!file->impl) return 0;
+	assert(file->vfptr != NULL);
 
-    if (mode)
-    {
-        if (strnlen(mode, sizeof(file->fp.mode)) >= 8)
-        {
-            ERROR("sre_File: Invalid and/or unknown mode for '%s': %s", path, mode);
-            return -1;
-        }
-        
-        strncpy(file->fp.mode, mode, sizeof(file->fp.mode));
-    }
-    else
-        file->fp.mode[0] = '\0';
-    
-    #ifdef _WIN32
-        if (!_game_res)
-            sre_win_resourceinit();
-    #endif
-
-    if (sre_filehasprefix(path, SRE_RES_PREFIX))
-    {
-        if (!file->fp.mode[0])
-            strcpy(file->fp.mode, "rb");
-        
-        if (_game_res[0])
-        {
-            if (sre_modehaswrite(file->fp.mode))
-            {
-                ERROR("sre_File: Failed opening '%s', file has write access, remove write access to proceed...", path);
-                return -1;
-            }
-
-            file->res.begin = sre_getresource(path + SRE_FILEPREFIX_LENGTH, &file->res.size);
-            if (!file->res.begin)
-            {
-                ERROR("sre_File: Could not open file '%s': %s", path, strerror(errno));
-                return -1;
-            }
-
-            file->embedded = 1;
-            file->res.pos = 0;
-            return 0;
-        }
-
-        if (sre_modehaswrite(file->fp.mode))
-             WARN("File stream with path '%s' is pointing to a resource with writing rights. Make sure to disable writing rights when opening resources", path);
-    }
-
-    return sre_fileopenfs(file, path);
+	return file->vfptr->read(file->impl, data, size);
 }
 
-static int sre_fileopenfs(sre_File* file, const char* path)
+sre_usize sre_filewrite(const sre_File* file, const void* data, sre_usize size)
 {
-    const char* bound_prefix = NULL;
-    void (*pref_deallocator)(void*) = NULL;
-    if (sre_filehasprefix(path, SRE_RES_PREFIX))
-    {
-        if (__game_pwdres[0])
-            bound_prefix = __game_pwdres;
-        else
-            bound_prefix = SRE_FSRES_PREFIX;
+	if (!file || !data || !size) return 0;
+	if (!file->impl) return 0;
+	assert(file->vfptr != NULL);
 
-    }
-    else if (sre_filehasprefix(path, SRE_USR_PREFIX))
-    {
-        bound_prefix = SDL_GetPrefPath(NULL, game_settings.Title);
-        pref_deallocator = SDL_free;
-    }
-
-    if (bound_prefix)
-    {
-        ut_dynsalloc(char, buff, strlen(path) + (strlen(bound_prefix) - SRE_FILEPREFIX_LENGTH) + 1);
-
-        strcpy(buff, bound_prefix);
-        strcat(buff, path + SRE_FILEPREFIX_LENGTH);
-
-        if (pref_deallocator)
-            pref_deallocator((void*)bound_prefix);
-
-        
-        return sre_fileopenfs(file, buff);
-    }
-
-    {
-        size_t pathlen = strlen(path) + 1;
-        if (pathlen > 261)
-        {
-            WARN("Length of the path is bigger than 260, Windows doesn't allow paths up to 260 characters");
-            pathlen = 261;
-        }
-
-
-
-        file->fp.path = malloc(pathlen);
-        strncpy(file->fp.path, path, pathlen);
-    }
-
-    if (!file->fp.mode[0])
-    {
-        if (_access(path, 00) == 0)
-        {
-            strcpy(file->fp.mode, "r");
-        }
-        else if (errno == ENOENT)
-        {
-            strcpy(file->fp.mode, "w+");
-        }
-        else
-        {
-            ERROR("sre_File: Error opening file '%s': %s", path, strerror(errno));
-            return -1;
-        }
-    }
-
-    if (file->fp.fp)
-        file->fp.fp = freopen(path, file->fp.mode, file->fp.fp);
-    else
-        file->fp.fp = fopen(path, file->fp.mode);
-
-    if (!file->fp.fp)
-    {
-        ERROR("sre_FILE: Failed opening file '%s': %s", path, strerror(errno));
-        return -1;
-    }
-
-    return 0;
+	return file->vfptr->write(file->impl, data, size);
 }
 
-static size_t sre_filesizefs(const sre_File* file)
+bool sre_fileseek(const sre_File* file, long offset, sre_seek origin)
 {
-    assert(!file->embedded);
+	if (!file) return false;
+	if (!file->impl) return false;
+	assert(file->vfptr != NULL);
 
-    long oldpos;
-    size_t endpos;
-
-    flockfile(file->fp.fp);
-        oldpos = ftell_unlocked(file->fp.fp);
-        fseek_unlocked(file->fp.fp, 0, SEEK_END);
-
-        endpos = (size_t)ftell_unlocked(file->fp.fp);
-        fseek_unlocked(file->fp.fp, oldpos, SEEK_SET);
-    funlockfile(file->fp.fp);
-
-    return endpos;
+	return file->vfptr->seek(file->impl, offset, origin);
 }
 
-size_t sre_filesize(const sre_File* file)
+long sre_filetell(const sre_File* file)
 {
-    if (!file->fp.fp)
-    {
-		ERROR("sre_filesize(): could not tell the size of the File, file is not valid.");
-        return 0;
-    }
+	if (!file) return -1;
+	if (!file->impl) return -1;
+	assert(file->vfptr != NULL);
 
-    if (file->embedded)
-        return file->res.size;
-    else
-        return sre_filesizefs(file);
+	return file->vfptr->tell(file->impl);
 }
 
-//
-
-long sre_fileseek(const sre_File* file, long offset, int origin)
+sre_usize sre_filesize(const sre_File* file)
 {
-    if (!file) goto ERROR;
-    if (!file->fp.fp) goto ERROR;
+	if (!file) return 0;
+	if (!file->impl) return 0;
+	assert(file->vfptr != NULL);
 
-    if (file->embedded)
-    {
-        switch (origin)
-        {
-            case SEEK_CUR:
-            *(size_t*)file->res.pos += offset;
-            break;
-            case SEEK_END:
-            *(size_t*)file->res.pos = file->res.size - offset;
-            break;
-            case SEEK_SET:
-            *(size_t*)file->res.pos = offset;
-            break;
-        }
-
-        if (file->res.pos < 0) *(size_t*)file->res.pos = 0;
-        else if (file->res.pos > file->res.size) *(size_t*)file->res.pos = file->res.size;
-
-        return (long)file->res.pos;
-    }
-    else
-    {
-        if (fseek(file->fp.fp, offset, origin) < 0) goto ERROR;
-        return ftell(file->fp.fp);
-    }
-
-    ERROR:
-    return -1;
-}
-
-bool sre_filewrite(const sre_File* file, const void* rawdata, size_t size)
-{
-    if (file->embedded || !file->fp.fp)
-        return false;
-    if (size == 0)
-        return true;
-
-    return fwrite(rawdata, size, 1, file->fp.fp) == 1;
+	return file->vfptr->size(file->impl);
 }

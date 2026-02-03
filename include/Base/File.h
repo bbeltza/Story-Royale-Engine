@@ -2,34 +2,54 @@
 #define SRE_FILE_H
 #include <C_API.h>
 #include <ints.h>
-#include <stdio.h>
 #include <string.h>
 
 SRE_CAPI_BEGIN
 
+typedef enum sre_fileFlags sre_fileFlags;
+typedef enum sre_seek sre_seek;
+
 typedef struct sre_File sre_File;
+typedef void* sre_FileImpl; // File implementation type (it's just a void* to not be confused with the other vftable parameters)
 
 // File virtual function table structure
-struct sre_FVFT
-{
-    bool (*read)(sre_File* file, void* data, sre_usize size);
-    bool (*write)(sre_File* file, const void* data, sre_usize size);
-    bool (*close)(sre_File* file);
-};
+typedef struct sre_FVFT sre_FVFT;
 
-struct _sre_File
+struct sre_File
 {
     const struct sre_FVFT* vfptr;
-    void* data[4];
+    sre_FileImpl* impl;
+    // Maybe add some data like the path of the file?
 };
 
-#if defined(_WIN32)
-	extern const sre_byte *_game_res;
-#else
-	extern const sre_byte _game_res[];
-#endif
+enum sre_fileFlags
+{
+    SRE_FILE_DEFAULT = 0,
+    SRE_FILE_READ = (1 << 0),
+    SRE_FILE_WRITE = (1 << 1),
+    SRE_FILE_TEXT = (1 << 2)
+};
 
-enum sre_FileConstants
+enum sre_seek
+{
+    SRE_SEEK_SET,
+    SRE_SEEK_CUR,
+    SRE_SEEK_END
+};
+
+bool sre_fileopen(sre_File* file, const char* path, sre_fileFlags flags);
+void sre_fileclose(sre_File* file);
+
+sre_usize sre_fileread(const sre_File* file, void* data, sre_usize size);
+sre_usize sre_filewrite(const sre_File* file, const void* data, sre_usize size);
+
+bool sre_fileseek(const sre_File* file, long offset, sre_seek origin);
+long sre_filetell(const sre_File* file);
+
+sre_usize sre_filesize(const sre_File* file);
+/*
+
+enum sre_fileConstants
 {
     SRE_FILEPREFIX_LENGTH = 6
 };
@@ -37,34 +57,6 @@ enum sre_FileConstants
 extern const char SRE_FSRES_PREFIX[];
 extern const char SRE_RES_PREFIX[SRE_FILEPREFIX_LENGTH + 1];
 extern const char SRE_USR_PREFIX[SRE_FILEPREFIX_LENGTH + 1];
-
-static inline int sre_filehasprefix(const char* path, const char prefix[SRE_FILEPREFIX_LENGTH]) { return !strncmp(prefix, path, SRE_FILEPREFIX_LENGTH); }
-static inline int sre_modehaswrite(const char* mode) { return strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w'); }
-static inline int sre_modehasbyte(const char* mode) { return strchr(mode, 'b') != NULL; }
-
-typedef struct sre_FP
-{
-    FILE* fp;
-    char mode[sizeof(void*)]; // The mode of the stream, picks up the size of a pointer, but it typically won't use more than 4 bytes
-    char* path;
-} sre_FP;
-
-typedef struct sre_FRES
-{
-    const sre_byte* begin;
-    size_t pos;
-    size_t size;
-} sre_FRES;
-
-typedef struct sre_File
-{
-    union
-    {
-        sre_FP fp;
-        sre_FRES res;
-    };
-    int embedded;
-} sre_File;
 
 extern int sre_fileopen(sre_File* file, const char* path, const char* mode);
 extern void sre_fileclose(sre_File* file);
@@ -76,6 +68,8 @@ extern long sre_fileseek(const sre_File* file, long offset, int origin);
 #define sre_filerewind(file) (sre_fileseek(file, 0, SEEK_SET) == 0);
 
 extern bool sre_filewrite(const sre_File* file, const void* rawdata, size_t size);
+
+*/
 
 SRE_CAPI_END
 
