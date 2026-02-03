@@ -36,7 +36,7 @@ bool IniFile::load(const char* from_path)
 }
 
 bool IniFile::load(const File& from_file)
-{    
+{   
     Chunk chunk = from_file.allocate();
     if (!chunk) return false;
 
@@ -76,7 +76,7 @@ bool IniFile::load_text(const char* text)
         }
         else if (chr == '\\' && !in_quotes)
         {
-            const char* lineend = strchr(&chr, '\n');
+            const char* lineend = strchr(&chr, '\n\r');
             if (lineend)
                 memset(&chr, ' ', lineend - &chr + 1);
         }

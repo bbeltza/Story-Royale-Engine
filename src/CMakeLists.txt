@@ -18,7 +18,6 @@ set(DATATYPES_SOURCES
 
 set(BASE_SOURCES
     "file.c"
-    "resource.c"
     "chunk.c"
     "coroutine.c"
     "rwops.c"

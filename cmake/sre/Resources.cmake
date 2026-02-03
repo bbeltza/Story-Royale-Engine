@@ -7,6 +7,7 @@ function(srEngine_link_resource PROJECT)
     get_target_property(PWDRES ${PROJECT} RES_FOLDER)
     get_target_property(EXE ${PROJECT} EXE)
 
+    set(_PWDRES "__res/")
     if(NOT PWDRES)
 	    srEngine_nobind(${PROJECT})
     elseif ("${ARGN}" MATCHES RES_DEBUG)

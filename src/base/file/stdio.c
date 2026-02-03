@@ -2,11 +2,42 @@
 
 static bool stdio_open(sre_FileImpl* impl, const char* path, int flags)
 {
-    char mode[8] = "r+b";
+    FILE* file;
+    if (!flags)
+    {
+        file = fopen(path, "rb");
+        if (file) goto FINISH;
+    }
 
-    FILE* file = fopen(path, mode);
+    char mode[8] = "\0\0\0\0\0\0\0";
+    {
+        bool has_read = flags & SRE_FILE_READ;
+        bool has_write = flags & SRE_FILE_WRITE;
+        bool has_text = flags & SRE_FILE_TEXT;
+
+        if (has_read)
+        {
+            mode[0] = 'r';
+            if (has_write)
+            {
+                mode[1] = '+';
+                mode[2] = has_text ? '\0' : 'b';
+            }
+            else
+                mode[1] = has_text ? '\0' : 'b';
+        }
+        else if (has_write)
+        {
+            mode[0] = 'w';
+            mode[1] = has_text ? '\0' : 'b';
+        }
+    }
+    
+
+    file = fopen(path, mode);
     if (!file) return false;
 
+    FINISH:
     *impl = file;
     return true;
 }

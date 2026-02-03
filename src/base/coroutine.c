@@ -28,7 +28,7 @@ typedef struct coroutine_data coroutine_data;
 
 #if defined(_WIN32)
     #include "coroutine/win32.c"
-#elif __has_include("ucontext.h")
+#elif defined(HAVE_UCONTEXT_H)
     #include "coroutine/ucontext.c"
 #else
     #include "coroutine/dummy.c"

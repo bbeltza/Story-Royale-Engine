@@ -21,6 +21,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(CheckIncludeFile)
 include(sre)
 
 project(sre)
@@ -78,8 +79,9 @@ if (ANDROID)
     target_link_libraries(sre PUBLIC android log)
 endif()
 
-if (HAVE_STDIO_H)
-    target_compile_definitions(sre PUBLIC "SDL_HAVE_STDIO_H")
+check_include_file(ucontext.h HAVE_UCONTEXT_H)
+if (HAVE_UCONTEXT_H)
+    target_compile_definitions(sre PUBLIC "HAVE_UCONTEXT_H")
 endif()
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
