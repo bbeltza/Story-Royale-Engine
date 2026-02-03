@@ -20,6 +20,7 @@ struct sre_FVFT
 	long (*tell)(sre_FileImpl file);
 
 	sre_usize (*size)(sre_FileImpl file);
+	const sre_byte* (*begin)(sre_FileImpl file); // Get beginning of file, returns NULL on stdio's implementation
 };
 
 #if _WIN32
@@ -91,9 +92,7 @@ bool sre_fileopen(sre_File* file, const char* path, sre_fileFlags flags)
 			SDL_free(fullpath);
 		}
 		else
-		{
 			ret = file->vfptr->open(&file->impl, path, flags);
-		}
 	}
 
 	if (!ret)

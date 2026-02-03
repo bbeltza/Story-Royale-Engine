@@ -17,29 +17,22 @@ static int sdlrw_close(SDL_RWops *rw)
 
 SDL_RWops* sre_filetorwops(const sre_File* file)
 {
-    if (!file->fp.fp)
-        return NULL;
+    if (!file) return NULL;
+    if (!file->impl) return NULL;
 
     SDL_RWops *rw;
-    if (file->embedded)
-        rw = SDL_RWFromConstMem(file->res.begin, (int)file->res.size);
+    sre_usize size = sre_filesize(file);
+    const sre_byte* begin = sre_filebegin(file);
+
+    if (begin)
+        rw = SDL_RWFromConstMem(begin, (int)size);
     else
     {
-#ifdef SDL_HAVE_STDIO_H
-        sre_File afile;
-        sre_fileopen(&afile, file->fp.path, file->fp.mode);
-        
-        rw = SDL_RWFromFP(afile.fp.fp, SDL_TRUE);
-        if (rw)
-            afile.fp.fp = NULL;
-        
-        sre_fileclose(&afile);
-#else
         const sre_Chunk* chunk = sre_fileallocate(file, 0);
         rw = SDL_RWFromConstMem(chunk->data, (int)chunk->size);
         rw->close = sdlrw_close;
-#endif
     }
+
     if (!rw)
     {
         ERROR("Failed to create RWops structure from File: %s", SDL_GetError());
