@@ -15,7 +15,7 @@ In order to compile and build the engine, you must have:
     - Usually **Visual Studio**'s solutions for *Windows*, or **Make** for *Linux*. I use **Ninja** which is available for both platforms.
 - A compiler: **MSVC** for *Windows* and **GCC** for *Linux* are supported. **Clang** can be used but it is not often tested.
 - **Python**: I'm not sure which version (really), but the latest version your package manager supports will do it.
-    > Python is required to run some scripts that include generating the game's settings and assets. I might reduce Python's requirements and use dummy sources if the user doesn't have it.
+    > Python is needed if you are willing to embed your game's resources, or/and to embed the icon for Windows. Otherwise, you can go without it. 
 - An IDE or code editor is recommended, I mostly use **Visual Studio Code** to work on, but you can just use the terminal to build (which you'll be told how) and use notepad to code in.
 
 - And finally, a copy to the engine, so you must have **git**. Although you can just download the .zip archive of the engine, you'll have to create a local repository and figure out how to import the required libraries (because libraies such as SDL will be shown as empty folders by just downloading this repository, that's how git's submodules work), so just use git, with the `--recursive` flag:
@@ -75,9 +75,9 @@ My Collection # Being the root directory where you configure CMake in build/
 ├───Engine # The engine
 └───My Game # Your game
     │   CMakeLists.txt
-    │   GameSettings.json
     │
-    └───src
+    └───src # All of your sources (.c, .cpp, ...)
+        
 ```
 
 > The `CMakeLists.txt` from the root directory should include both directories, like this:
@@ -93,8 +93,7 @@ Or, you can just have your game as the root directory and place the engine insid
 
 ```sh
 My Game
-│   CMakeLists.txt # We will discuss about these two files next
-│   GameSettings.json # Both files allow you to configure the game
+│   CMakeLists.txt
 │
 ├───Engine
 └───src
@@ -120,6 +119,13 @@ set(SOURCES "src/entry.cpp") # You can change the SOURCES name, back then, it wa
 # If you don't want to add the sources manually, you can replace it with this line: (Note that you'll have to reconfigure your project every time you add a new source file, unless you also use the CONFIGURE_DEPENDS flag)
 # file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
+srEngine_property(Game PROPERTIES TITLE "My Game") # This function does add some additional data for your game, like the title...
+                                                   # It is followed by `PROPERTIES` and then anything that you can add in this pattern: [NAME] <VALUE> ...
+                                                   # There are currently two more supported properties:
+                                                        # ICONS: Speficy where the icons are stored
+                                                        # RESOURCES: Speficy where the resources are stored
+
+
 srEngine_build(Game GameExecutable SOURCES) # This function does all of the heavylifting. Taking your SOURCES variable as the third argument and making an executable out of it from the second one, with the engine linked. There are some options though that you can add as arguments:
 # NO_CONSOLE uses a Windows subsystem on Windows, that just means it doesn't include a console
 # NO_BIND is used to not embed the game assets into the executable, instead it will just put them into a single "__res/" folder in the binary's folder, this is useful for debugging as embedding resources takes some time.
@@ -128,36 +134,6 @@ srEngine_build(Game GameExecutable SOURCES) # This function does all of the heav
 
 ```
 
-This is all you normally need to build a game with this engine, the other part can be done with the `GameSettings.json` file.
-
-### The GameSettings.json
-
-These are just settings! It's just a **JSON** file with hints to the engine on how to start your application. You don't have to modify any of your CMake if you want to add it, the next time you reconfigure your project it will automatically detect the file, that means `GameSettings.json` cannot have a different name. Here's an example with all of the available options:
-
-```jsonc
-{
-    "Title": "My Game", // The title of the game, this usually sets up the title of the window and the name of the local user's data folder
-    "WindowOptions": {
-        "Resolution": [800, 600], // The start resolution of the window, pretty simple
-        "TargetFPS": 60, // The target FPS limits of the game, can be 0 if you don't want any limits
-        "VSync": true, // Pretty simple, VSync
-        "Resizable": true, // If the window can be resized or not
-        "Scaled": false // Whether to enable scaling, it's just for pixel-art games to match the resolution
-    },
-    "AudioOptions": {
-        "Frequency":  44100, // The frequency of the audio
-        "Filter": "Linear", // This isn't really used, it specifies the way you want to interpolate the audio if for example a song doesn't use the same frequency as the frequency you've specified.
-        // But it is unavailable and defaults to a linear interpolation for now
-        "Mono": false // Enable if you only want 1 audio channel (mono audio), we usually want stereo so it is set to 'false'
-    },
-    // Note that these two last options are used by cmake, so you'll have to reconfigure it every time you change it
-    "Resources": "res", // The folder which you want your resources to be in
-    "Icon": "icon" // The folder that contains all of the different icons (must be either .bmp or .png) depending on the size
-}
-```
-
-> *You don't have to add every single option in them, there are default values for the options that you did not set*
-
 ### Writing a game
 
 After you've configured everything, you're going to have to write a **C/C++** file with a `sre::initialize()` function in it. It is required, otherwise you'll get a linking error:
@@ -165,6 +141,7 @@ After you've configured everything, you're going to have to write a **C/C++** fi
 ```c++
 // Include runtime features of the engine
 #include <Core/Runtime.hpp>
+#include <Core/Window.hpp>
 #include <Entry.h> // Include the entry point declaration (sre::initialize())
 #include <utils/logging.h> // Include LOG(), it's just a printf() wrapper
 
@@ -176,16 +153,22 @@ void myUpdateFunction()
 
 void sre::initialize()
 {
+    sre::window_setresizable(true); // Most function names in this API follow a similar pattern:
+                                        // The topic of the function (in this case "window") followed by an underscore
+                                        // And the action of the function ("setresizable" in this case)
+                                    // Call this with `true` if you want to have some fun resizing your window...
+
     LOG("Hello World!");
     sre::onUpdate.connect(myUpdateFunction, NULL); // Connect myUpdateFunction to a Signal that will be run every frame
     // Signals are objects that store functions to be called when fired 
     // sre::onUpdate is a signal that fires once every frame
+    // The parameter `NULL` is for an address passed by the connection, in this case, we do not need it.
 }
 ```
 
 >This is what a simple program with this engine can be, there are essential features such as the *ECS* (Entity Component System) that aren't used there, and can be used to define the game. But more on that later...
 
-Once you've compiled your source file, you should be able to see `Hello World!` on the console and get `My framerate is: xx.xx` printed every frame (assuming you didn't use the NO_CONSOLE flag on Windows)
+Once you've compiled your source file, you should be able to see a resizable window with `Hello World!` on the console and get `My framerate is: xx.xx` printed on every frame (assuming you didn't use the NO_CONSOLE flag on Windows)
 
 #
 
