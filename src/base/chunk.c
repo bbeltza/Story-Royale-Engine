@@ -31,6 +31,8 @@ const sre_Chunk *sre_fileallocate(const sre_File* file, size_t max_size)
     if (!sre_fileread(file, data->data, filesize))
         goto CLEANUP_FAIL;
 
+    memset(data->data + filesize, 0, sizeof(data->data));
+
     return data;
 
 CLEANUP_FAIL:

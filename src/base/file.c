@@ -11,7 +11,7 @@
 
 struct sre_FVFT
 {
-	bool (*open)(sre_FileImpl* file, const char* path, int flags);
+	bool (*open)(sre_FileImpl* file, const char* path, int mode);
 	void (*close)(sre_FileImpl file);
 
 	sre_usize (*read)(sre_FileImpl file, void* data, sre_usize size);
@@ -43,7 +43,7 @@ extern const sre_FVFT SRE_RESOURCE_VFT;
 #include "file/resource.c"
 #include "file/stdio.c"
 
-bool sre_fileopen(sre_File* file, const char* path, int flags)
+bool sre_fileopen(sre_File* file, const char* path, int mode)
 {
 	if (!file) return false;
 	memset(file, 0, sizeof(*file));
@@ -64,7 +64,7 @@ bool sre_fileopen(sre_File* file, const char* path, int flags)
 		if (_game_res[0])
 		{
 			file->vfptr = &SRE_RESOURCE_VFT;
-			ret = file->vfptr->open(&file->impl, relpath, flags);
+			ret = file->vfptr->open(&file->impl, relpath, mode);
 		}
 		else
 		{
@@ -75,7 +75,7 @@ bool sre_fileopen(sre_File* file, const char* path, int flags)
 			strcpy(fullpath, __game_pwdres);
 			strcat(fullpath, relpath);
 
-			ret = file->vfptr->open(&file->impl, fullpath, flags);
+			ret = file->vfptr->open(&file->impl, fullpath, mode);
 		}
 	}
 	else
@@ -88,12 +88,12 @@ bool sre_fileopen(sre_File* file, const char* path, int flags)
 			fullpath = SDL_realloc(fullpath, strlen(fullpath) + strlen(relpath) + 1);
 			strcat(fullpath, relpath);
 			
-			ret = file->vfptr->open(&file->impl, fullpath, flags);
+			ret = file->vfptr->open(&file->impl, fullpath, mode);
 
 			SDL_free(fullpath);
 		}
 		else
-			ret = file->vfptr->open(&file->impl, path, flags);
+			ret = file->vfptr->open(&file->impl, path, mode);
 	}
 
 	if (!ret)

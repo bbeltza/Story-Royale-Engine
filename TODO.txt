@@ -15,30 +15,6 @@
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 
-- Coroutines (Cooperative multitasking):
-	- Cooperative multitasking is a way of multitasking (doing multiple operations simultaneously)
-	  in which YOU decide when to switch to the next task by calling a special function without finishing the function.
-	- You will be able to for example wait for V seconds and not block anything else
-	- It's like multithreading but usually more synchronized, tasks will run on one thread (separate from the main one) or perhaps on a thread pool.
-	- But if you do the infamous "while (true)" non exiting loop then you'll block the thread and thus there won't be any coroutines that can run
-	  (Well unless I go with the thread pool in which there will be less threads left and the blocking thread will burn the entire CPU)
-	- Might also be a Core feature, or from Base if it can be run without any of the engine
-
-	- The reason why I want this: It's messy to be creating multiple threads in my game to do one thing like transitioning from one scene to another
-								  and thus having to figure out how to avoid the thread without crashing when the game closes because it's using a pointer
-								  to X that has already been cleaned up
-	- I did not add this before because it's so complex, context switching is literally implemented at the assembly level so I have to do this for every
-	  architecture and OS that I have to support. Win32 has Fibers, they do what I want, and that's what I got inspired of to have this idea. So implementing
-	  coroutines on Windows would be pretty easy, I saw some of the desassembly of the Fiber API and yet it has to save the state of every register and there's
-	  no quick system/Nt call for that (It only uses them to setup the stacks), what a silly thing to make for every architecture!
-	  I saw that linux has something about contexts, I still don't know exactly how to use them so I still need to see
-
-- Use virtual tables for files (I mean it's not meant to fully support file inheritance)
-	- It will solve most file embedded checks for sure
-	- It will also be more convenient for supporting android which requires the use of its JNI API to work
-	- If you don't get it, it's like how SDL's RWops has different function pointers for their operations.
-	  You can say it's the same, just that the function pointers aren't stored in the file, the file just stores a pointer to them.
-
 - Android support
 
 - Remove GameSettings:
@@ -48,15 +24,18 @@
 	  for every single option. I find it better to just be able to change whatever option in runtime and to just set whatever the
 	  GameSettings.json did set in the game's entry point.
 
-(current version: 0.101.01 (experimental coroutines))
+- Change the pipeline (Finally onto this idea, it was considered as a "less likely" one before):
+		- The idea is that you got a thread that does all of the update calling, and could eventually send some messages
+		  to tell the main thread that the game has to render
+		- It might actually not send any message, it's just to avoid the choppy window resizing/moving on Windows
+		  and for more safety (So that the game gets to be less in the main thread)
+
+(current version: 0.101.04 (experimental coroutines))
 
 - Work on the game ^^
 
 Less likely ideas:
-
-	- Change the pipeline:
-		- Make the update and pupdate pipelines run on a separate thread and only run the input processing and render pipelines on the main one
-	- Compression on resources, or adding a mask at the resources
+	- Compression on resources, or adding a bitmask at the resources
 	- Have the game run on an isolated space. I got some ideas on how this could be done and why:
 		- On Windows, you can have the game as a separate process executable, with its own memory space and have the engine create the process when running the game:
 			- This allows to garantee the engine's initialization when initializing game global variables, so it solves most static initialization and destruction overheads.

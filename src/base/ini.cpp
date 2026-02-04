@@ -31,13 +31,14 @@ bool IniFile::load(const char* from_path)
     if (!extension || strcmp(extension, ".ini"))
         WARN("IniFile::load(): Path '%s' does not have the '.ini' extension. Is it intended?", from_path);
 
-    File f(from_path, FILE_READ | FILE_TEXT);
+    File f(from_path, FILE_READ);
     return load(f);
 }
 
 bool IniFile::load(const File& from_file)
 {   
     Chunk chunk = from_file.allocate();
+    LOG("%s", chunk->data);
     if (!chunk) return false;
 
     return load_text(reinterpret_cast<const char*>(chunk->data));
@@ -248,6 +249,6 @@ bool IniFile::save(const char* path)
         text.push_back('\n');
     }
 
-    File file(path, FILE_WRITE | FILE_TEXT);
+    File file(path, FILE_WRITE);
     return file.write(text.data(), text.size());
 }

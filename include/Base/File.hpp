@@ -6,18 +6,18 @@
 #include <Base/RWops.h>
 
 #include <SDL_endian.h>
-#include <SDL_filesystem.h>
 
 extern "C" void ERROR(const char*, ...);
 
 namespace sre
 {
-	enum fileFlags
+	enum fileMode
 	{
 		FILE_DEFAULT = SRE_FILE_DEFAULT,
 		FILE_READ = SRE_FILE_READ,
-		FILE_WRITE = SRE_FILE_WRITE,
-		FILE_TEXT = SRE_FILE_TEXT
+    	FILE_WRITE = SRE_FILE_WRITE,
+    	FILE_READWRITE = SRE_FILE_READWRITE,
+    	FILE_READWRITE_CREATE = SRE_FILE_READWRITE_CREATE
 	};
 	using seek = sre_seek;
 }
@@ -31,7 +31,7 @@ namespace sre
 	{
 	public:
 		constexpr File(): sre_File{} {}
-		File(const char* path, int flags = FILE_DEFAULT) { sre_fileopen(this, path, flags); }
+		File(const char* path, int mode = FILE_DEFAULT) { sre_fileopen(this, path, mode); }
 		~File() { sre_fileclose(this); }
 
 		inline bool valid() const { return this->impl != NULL; }

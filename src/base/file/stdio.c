@@ -1,43 +1,32 @@
 #include <stdio.h>
+#include <stdbool.h>
 
-static bool stdio_open(sre_FileImpl* impl, const char* path, int flags)
+#include <Base/File.h>
+
+static const char* map_modetostr(int mode)
 {
-    FILE* file;
-    if (!flags)
+    assert(mode != SRE_FILE_DEFAULT);
+
+    switch (mode)
     {
-        file = fopen(path, "rb");
-        if (file) goto FINISH;
+    case SRE_FILE_READ: return "rb";
+    case SRE_FILE_WRITE: return "wb";
+    case SRE_FILE_READWRITE: return "r+";
+    case SRE_FILE_READWRITE_CREATE: return "w+";
+    default: return NULL;
     }
+}
 
-    char mode[8] = "\0\0\0\0\0\0\0";
-    {
-        bool has_read = flags & SRE_FILE_READ;
-        bool has_write = flags & SRE_FILE_WRITE;
-        bool has_text = flags & SRE_FILE_TEXT;
+static bool stdio_open(sre_FileImpl* impl, const char* path, int mode)
+{
+    mode = mode != SRE_FILE_DEFAULT ? mode : SRE_FILE_READ; // Just set the mode to read by default
 
-        if (has_read)
-        {
-            mode[0] = 'r';
-            if (has_write)
-            {
-                mode[1] = '+';
-                mode[2] = has_text ? '\0' : 'b';
-            }
-            else
-                mode[1] = has_text ? '\0' : 'b';
-        }
-        else if (has_write)
-        {
-            mode[0] = 'w';
-            mode[1] = has_text ? '\0' : 'b';
-        }
-    }
-    
+    const char* mode_str = map_modetostr(mode);
+    assert(mode_str != NULL);
 
-    file = fopen(path, mode);
+    FILE* file = fopen(path, mode_str);
     if (!file) return false;
 
-    FINISH:
     *impl = file;
     return true;
 }

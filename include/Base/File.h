@@ -19,12 +19,13 @@ struct sre_File
     // Maybe add some data like the path of the file?
 };
 
-enum sre_fileFlags
+enum sre_fileMode
 {
     SRE_FILE_DEFAULT = 0,
-    SRE_FILE_READ = (1 << 0),
-    SRE_FILE_WRITE = (1 << 1),
-    SRE_FILE_TEXT = (1 << 2)
+    SRE_FILE_READ,
+    SRE_FILE_WRITE,
+    SRE_FILE_READWRITE,
+    SRE_FILE_READWRITE_CREATE
 };
 
 typedef enum sre_seek
@@ -34,7 +35,7 @@ typedef enum sre_seek
     SRE_SEEK_END
 } sre_seek;
 
-bool sre_fileopen(sre_File* file, const char* path, int flags);
+bool sre_fileopen(sre_File* file, const char* path, int mode);
 void sre_fileclose(sre_File* file);
 
 sre_usize sre_fileread(const sre_File* file, void* data, sre_usize size);

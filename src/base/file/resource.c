@@ -1,3 +1,5 @@
+#include <Base/File.h>
+
 const sre_byte* sre_getresource(const char* path, size_t* size_output)
 {
     assert(_game_res[0] != '\0');
@@ -59,20 +61,12 @@ struct impl_Res
 
 //
 
-static bool resource_open(sre_FileImpl* impl, const char* path, int flags)
+static bool resource_open(sre_FileImpl* impl, const char* path, int mode)
 {
-    if (flags == SRE_FILE_DEFAULT)
-        flags = SRE_FILE_READ;
-    
-    if (flags & SRE_FILE_WRITE)
+    mode = mode != SRE_FILE_DEFAULT ? mode : SRE_FILE_READ;
+    if (mode != SRE_FILE_READ) // Make sure you only state the READ mode to load resources...
     {
         errno = EACCES;
-        return false;
-    }
-
-    if (!(flags & SRE_FILE_READ))
-    {
-        errno = EINVAL;
         return false;
     }
 
