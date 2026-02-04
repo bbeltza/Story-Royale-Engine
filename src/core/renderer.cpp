@@ -1,8 +1,6 @@
 #include "../internal.h"
 #include <sdl_renderer/sdl_renderer.h>
 
-#include <GameSettings.h>
-
 #include <Core/Texture.hpp>
 #include <Core/Runtime.hpp>
 
@@ -31,32 +29,31 @@ void __setup_renderer()
 		const_cast<sre_usize &>(engine.video->texture_flcapacity) = SRE_TEXTURE_BASECOUNT;
 	}
 
-	if (sre::game_settings.WindowOptions.VSync)
-		engine.video->vsync(engine.video, 1);
+	engine.video->vsync(engine.video, 1);
 
 	int locked = SDL_TryLockMutex(engine.sdl_rendermutex);
 	assert(!locked);
 
-	sre::set_framerate(sre::game_settings.WindowOptions.TargetFPS);
+	engine.video->scale = 1;
 }
 
 void __update_viewport(int w, int h)
 {
 	int integer_scale;
 
-	if (sre::game_settings.WindowOptions.Scaled)
+	if (engine.auto_scalex && engine.auto_scaley)
 	{
-		integer_scale = ut_min(w / sre::game_settings.WindowOptions.Resolution.x, h / sre::game_settings.WindowOptions.Resolution.y);
+		integer_scale = ut_min(w / engine.auto_scalex, h / engine.auto_scaley);
 		integer_scale = integer_scale ? integer_scale : 1;
 	}
 	else
 	{
-		integer_scale = 1;
+		integer_scale = static_cast<int>(engine.video->scale);
 	}
 
 	sre::unit scale = static_cast<sre::unit>(integer_scale);
 	sre::vec2ut size = sre::vec2ut{ w, h } / scale;
-
+	
 	sre::vec2ut center = size / 2.0_ut;
 
 	engine.osize_x = w;

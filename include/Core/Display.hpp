@@ -9,6 +9,10 @@ namespace sre
     sre::vec2i display_outputsize();
 
     sre::unit display_scale();
+
+    bool display_setscale(int scale); // Set display scale
+    void display_autoscale_on(int target_w, int target_h); // Set automatic scaling, targeting a resolution
+    void display_autoscale_off(); // Disable automatic scaling
 }
 
 #endif

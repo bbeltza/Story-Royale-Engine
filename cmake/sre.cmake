@@ -14,10 +14,15 @@ function(srEngine_build TARGET EXE SRCS)
     if (ANDROID)
         add_library(${TARGET} SHARED ${SOURCES})
     else()
-        file(TOUCH "${CMAKE_BINARY_DIR}/empty.c")
-
-        add_executable(${EXE} "${CMAKE_BINARY_DIR}/empty.c")
         add_library(${TARGET} STATIC ${${SRCS}})
+
+        get_target_property(GAME_TITLE ${TARGET} TITLE)
+        if(NOT GAME_TITLE)
+            set(GAME_TITLE ${TARGET}) # Set the title to the TARGET name if no title property is set
+        endif()
+        configure_file(${SRE_DIR}/gen_src/title.c.in ${CMAKE_CURRENT_BINARY_DIR}/title.c)
+        add_executable(${EXE} "${CMAKE_CURRENT_BINARY_DIR}/title.c")
+
         set_target_properties(${TARGET} PROPERTIES EXE ${EXE})
     endif()
 

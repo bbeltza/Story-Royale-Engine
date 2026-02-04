@@ -31,7 +31,6 @@ set(BASE_SOURCES
     "fontrenderer.cpp"
     "image.cpp"
     "ini.cpp"
-    "runtime.cpp"
     "thread.cpp"
     "tween.cpp"
 )

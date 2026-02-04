@@ -25,7 +25,7 @@
 	  GameSettings.json did set in the game's entry point.
 
 - Change the pipeline (Finally onto this idea, it was considered as a "less likely" one before):
-		- The idea is that you got a thread that does all of the update calling, and could eventually send some messages
+		- The idea is that you got a thread that does all of the update loop, and could eventually send some messages
 		  to tell the main thread that the game has to render
 		- It might actually not send any message, it's just to avoid the choppy window resizing/moving on Windows
 		  and for more safety (So that the game gets to be less in the main thread)
