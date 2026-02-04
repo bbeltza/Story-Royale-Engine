@@ -18,6 +18,7 @@ namespace sre
     void window_maximize();
 
     void window_setsize(int w, int h);
+    void window_setresizable(bool resizable);
 
     bool window_flash();
     bool window_quickflash();

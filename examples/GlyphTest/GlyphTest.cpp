@@ -1,5 +1,6 @@
-#include <Base/Runtime.hpp>
-#include <Base/Draw.hpp>
+#include <Core/Runtime.hpp>
+#include <Core/Window.hpp>
+#include <Core/Draw.hpp>
 #include <Base/Font.hpp>
 #include <Entry.h>
 
@@ -20,5 +21,6 @@ void render()
 
 void sre::initialize()
 {
+    sre::window_setsize(140, 50);
     sre::beforeRender.connect(render, nullptr);
 }

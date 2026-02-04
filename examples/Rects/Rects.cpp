@@ -5,9 +5,11 @@
 #include <GUI/Components/text.hpp>
 #include <GUI/Components/fill.hpp>
 
-#include <Base/Runtime.hpp>
-#include <Base/Input.hpp>
-#include <Base/Draw.hpp>
+#include <Core/Runtime.hpp>
+#include <Core/Display.hpp>
+#include <Core/Window.hpp>
+#include <Core/Input.hpp>
+#include <Core/Draw.hpp>
 
 #include <ECS/scene.hpp>
 
@@ -89,8 +91,22 @@ void DisplayText::post_render()
     */
 }
 
+const int START_WIDTH = 480;
+const int START_HEIGHT = 240;
+const int START_FRAMERATE = 40;
+
+void setup_settings()
+{
+    sre::window_setresizable(true);
+    sre::window_setsize(START_WIDTH * 2, START_HEIGHT * 2);
+    sre::display_autoscale_on(START_WIDTH, START_HEIGHT);
+    sre::set_framerate(START_FRAMERATE);
+}
+
 void sre::initialize()
 {
+    setup_settings();
+
     auto display_text = new DisplayText;
     display_text->set_root();
 

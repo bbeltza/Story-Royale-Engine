@@ -37,10 +37,10 @@ namespace sre
 		inline bool valid() const { return this->impl != NULL; }
 
 		inline Chunk allocate(size_t max_size=0) const { return Chunk(sre_fileallocate(this, max_size)); }
-
 		inline SDL_RWops* to_RWops() const { return sre_filetorwops(this); }
 
 		sre::usize size() const { return sre_filesize(this); }
+		const sre::byte* begin() const { return sre_filebegin(this); }
 
 		template <typename Fn, typename... Args>
 		auto call_cfunc(Fn func, Args&&... args) -> decltype(func(this, args...)) { return func(static_cast<sre_File*>(this), std::forward<Args>(args)...); }
@@ -53,7 +53,7 @@ namespace sre
 		inline bool rewind() const { return seek(0, SRE_SEEK_SET); }
 
 		inline sre::usize write(const void* rawdata, sre::usize size) const { return sre_filewrite(this, rawdata, size); }
-		inline sre::usize read(void* data, sre::usize size) { return sre_fileread(this, data, size); }
+		inline sre::usize read(void* data, sre::usize size) const { return sre_fileread(this, data, size); }
 	};
 }
 

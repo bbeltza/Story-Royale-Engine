@@ -1,13 +1,15 @@
-#include <Base/Draw.hpp>
-#include <Base/Runtime.hpp>
-#include <Base/Input.hpp>
+#include <Core/Runtime.hpp>
+#include <Core/Display.hpp>
+#include <Core/Window.hpp>
+#include <Core/Draw.hpp>
+#include <Core/Input.hpp>
+
 #include <Entry.h>
 
 void Render()
 {
     static double t = 0;
     sre::vec2ut mpos = sre::mouse_screencoords();
-    mpos.println();
     
     sre::draw(sre::DDRRect{
         {
@@ -24,5 +26,8 @@ void Render()
 
 void sre::initialize()
 {
+    sre::window_setresizable(true);
+    sre::display_autoscale_on(380, 180);
+
     beforeRender.connect(Render, nullptr);
 }

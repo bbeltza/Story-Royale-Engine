@@ -6,14 +6,14 @@ void __create_window()
 {
     static const DEFAULT_WIDTH = 640;
     static const DEFAULT_HEIGHT = 480;
-        
+    
 	engine.sdl_windowhndl = SDL_CreateWindow(
 		__game_title,
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		DEFAULT_WIDTH,
 		DEFAULT_HEIGHT,
-		SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE
+		SDL_WINDOW_HIDDEN
 	);
 
     SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);
