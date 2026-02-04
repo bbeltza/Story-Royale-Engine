@@ -5,8 +5,15 @@ endif()
 set(PYTHON_COMMAND ${PYTHON_EXECUTABLE} ${SRE_DIR}/scripts/)
 
 include(sre/Resources)
-include(sre/Settings)
 include(sre/Icon)
+
+function(srEngine_property TARGET)
+    set(INT ${TARGET}_PROPERTY_INTERFACE)
+    project(${INT})
+    add_library(${INT} INTERFACE)
+
+    set_target_properties(${INT} ${ARGN})
+endfunction()
 
 function(srEngine_build TARGET EXE SRCS)
     project(${EXE})
@@ -16,13 +23,25 @@ function(srEngine_build TARGET EXE SRCS)
     else()
         add_library(${TARGET} STATIC ${${SRCS}})
 
-        get_target_property(GAME_TITLE ${TARGET} TITLE)
+        set(INT ${TARGET}_PROPERTY_INTERFACE)
+        if (TARGET ${INT})
+            get_target_property(GAME_TITLE ${INT} TITLE)
+            get_target_property(GAME_ICONS ${INT} ICONS)
+            get_target_property(GAME_RESOURCES ${INT} RESOURCES)
+            target_link_libraries(${TARGET} PUBLIC ${INT})
+        endif()
         if(NOT GAME_TITLE)
             set(GAME_TITLE ${TARGET}) # Set the title to the TARGET name if no title property is set
         endif()
         configure_file(${SRE_DIR}/gen_src/title.c.in ${CMAKE_CURRENT_BINARY_DIR}/title.c)
         add_executable(${EXE} "${CMAKE_CURRENT_BINARY_DIR}/title.c")
-
+        
+        if (GAME_RESOURCES)
+            set_target_properties(${TARGET} PROPERTIES RES_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/${GAME_RESOURCES})
+        endif()
+        if (GAME_ICONS)
+            set_target_properties(${TARGET} PROPERTIES ICO_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/${GAME_ICONS})
+        endif()
         set_target_properties(${TARGET} PROPERTIES EXE ${EXE})
     endif()
 
@@ -33,7 +52,6 @@ function(srEngine_build TARGET EXE SRCS)
         set_target_properties(${EXE} PROPERTIES ${RUNTIME_OUTPUT_VAR_MSVC} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
     endif()
 
-    srEngine_link_settings(${TARGET} ${ARGN})
     srEngine_link_resource(${TARGET} ${ARGN})
     srEngine_link_icon(${TARGET})
 
