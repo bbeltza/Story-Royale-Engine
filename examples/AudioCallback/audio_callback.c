@@ -1,4 +1,4 @@
-#include <Base/Audio.h>
+#include <Core/Audio.h>
 #include <Base/AudioChunk.h>
 #include <Entry.h>
 
@@ -46,7 +46,7 @@ int audio_callback(void* userdata, sre_u8* _samples, sre_usize size)
     {
         const double tt = sre_audiofreqratio(*t);
         double v;
-        v = 1 - *t / (double)speed;
+        v = 1 - *t / (double)speed * tt;
         v /= freqs;
 
         samples[i] = (sre_s16)(sawtooth(tt * UT_PI * freq1) * 0x7FFF * v);
@@ -65,5 +65,6 @@ int audio_callback(void* userdata, sre_u8* _samples, sre_usize size)
 
 void sre_initialize()
 {
+    sre_audioconfigure(false, 9000);
     sre_audiocallbackqueue(audio_callback, &data);
 }

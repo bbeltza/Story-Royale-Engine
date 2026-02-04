@@ -1,6 +1,6 @@
 include(sre)
-project(SRE_EXAMPLES_AUDIOCALLBACK)
+project(AudioCallback)
 
 set(SOURCES audio_callback.c)
 
-srEngine_build(SRE_EXAMPLES_AUDIOCALLBACK audio_callback SOURCES)
+srEngine_build(AudioCallback audio_callback SOURCES)

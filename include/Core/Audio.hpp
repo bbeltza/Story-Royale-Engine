@@ -33,6 +33,8 @@ namespace sre
 	inline T audio_getmaster() { static_assert(0, "Invalid use of audio_getmaster<T>(), use audio_getmaster<float>() instead"); }
 	template <>
 	inline float audio_getmaster<float>() { return sre_audiogetmaster() / 128.0f; }
+
+	inline bool audio_configure(bool mono, int freq) { return sre_audioconfigure(mono, freq); }
 }
 
 namespace sre

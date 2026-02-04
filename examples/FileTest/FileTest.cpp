@@ -6,8 +6,9 @@
 void sre::initialize()
 {
     File f("res://hello.txt");
-    LOG("Game res: %s", _game_res);
-    const char* data = (const char*)f.resource_data();
+    const char* data = (const char*)f.begin();
+    assert(data != NULL);
+
     size_t size = f.size();
     LOG("%s", data);
     LOG("%zd", size);

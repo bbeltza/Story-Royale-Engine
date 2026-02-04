@@ -1,6 +1,5 @@
 #include <Core/Audio.h>
 #include <Base/AudioChunk.h>
-#include <GameSettings.h>
 
 #include <utils/mem.h>
 
@@ -16,6 +15,19 @@ double sre_audiofreqratio(int freq)
 
 void sre_audiosetmaster(unsigned volume) { engine.audio_master = volume < 128 ? volume : 128; }
 int sre_audiogetmaster() { return engine.audio_master; }
+
+bool sre_audioconfigure(bool mono, int freq)
+{
+    if (engine.audio_device)
+        SDL_CloseAudioDevice(engine.audio_device);
+    
+    SDL_AudioSpec desired = engine.audio_spec;
+    desired.channels = 2 - mono;
+    desired.freq = freq; // Should have an enum for this...
+
+    engine.audio_device = SDL_OpenAudioDevice(NULL, false, &desired, &engine.audio_spec, 0);
+    return engine.audio_device > 0;
+}
 
 struct sre_audiocallback
 {
@@ -52,17 +64,12 @@ void __setup_audio_device()
 	SDL_AudioSpec desiredspec = {0};
 	desiredspec.callback = audio_callback;
 
-    // Should make an enum for different frequencies instead of letting the user have free choice
-	desiredspec.freq = game_settings.AudioOptions.Frequency;
-	desiredspec.channels = 2 - game_settings.AudioOptions.Mono;
+	desiredspec.freq = 0;
+	desiredspec.channels = 0;
 	desiredspec.samples = 512;
 	desiredspec.format = AUDIO_S16;
 
-	int CHANGES = 0;
-	if (!desiredspec.freq)
-		CHANGES |= SDL_AUDIO_ALLOW_FREQUENCY_CHANGE;
-
-	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, CHANGES);
+	engine.audio_device = SDL_OpenAudioDevice(NULL, 0, &desiredspec, &engine.audio_spec, SDL_AUDIO_ALLOW_CHANNELS_CHANGE | SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
     engine.audio_master = SDL_MIX_MAXVOLUME;
 }
 

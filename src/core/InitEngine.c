@@ -31,6 +31,7 @@ static void __invoke_entry(void* userdata) // Invoking the entry-point won't be 
 
 static inline void __setup_engine_data()
 {
+    engine.target_dt = 1 / 60;
     engine.phys_target_dt = 1 / 128.0;
     engine.framestart_time = os.clock();
 

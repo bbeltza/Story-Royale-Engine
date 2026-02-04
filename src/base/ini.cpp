@@ -38,7 +38,6 @@ bool IniFile::load(const char* from_path)
 bool IniFile::load(const File& from_file)
 {   
     Chunk chunk = from_file.allocate();
-    LOG("%s", chunk->data);
     if (!chunk) return false;
 
     return load_text(reinterpret_cast<const char*>(chunk->data));

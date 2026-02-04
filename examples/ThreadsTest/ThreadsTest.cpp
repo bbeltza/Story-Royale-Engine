@@ -1,4 +1,6 @@
-#include <Base/Thread.hpp>
+// NOTE: This example will be removed in favor of coroutines, and of course a coroutine example will be present
+
+#include <Core/Thread.hpp>
 #include <Entry.h>
 
 #include <utils/logging.h>

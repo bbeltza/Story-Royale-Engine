@@ -17,15 +17,8 @@
 
 - Android support
 
-- Remove GameSettings:
-	- Yeah, I'm planning to remove the game settings and whatever is used in the json file by cmake put it inside the project's properties
-	- Why? I have realized, if I just make a lot options then it would give me a lot of overhead, not only to implement whatever setting
-	  in the python script and in the GameSettings C header, but to also being able to change the value in runtime which is not implemented
-	  for every single option. I find it better to just be able to change whatever option in runtime and to just set whatever the
-	  GameSettings.json did set in the game's entry point.
-
 - Change the pipeline (Finally onto this idea, it was considered as a "less likely" one before):
-		- The idea is that you got a thread that does all of the update calling, and could eventually send some messages
+		- The idea is that you got a thread that does all of the update loop, and could eventually send some messages
 		  to tell the main thread that the game has to render
 		- It might actually not send any message, it's just to avoid the choppy window resizing/moving on Windows
 		  and for more safety (So that the game gets to be less in the main thread)

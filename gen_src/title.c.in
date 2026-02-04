@@ -1,0 +1,1 @@
+const char __game_title[] = "${GAME_TITLE}";

@@ -30,6 +30,9 @@ double sre_audiofreqratio(int freq);
 void sre_audiosetmaster(unsigned vol);
 int sre_audiogetmaster();
 
+// Closes the current audio device, and creates a new one with these parameters
+bool sre_audioconfigure(bool mono, int freq);
+
 SRE_CAPI_END
 
 #endif

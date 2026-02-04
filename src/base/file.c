@@ -1,4 +1,3 @@
-#include <GameSettings.h>
 #include <Base/File.h>
 
 #include <assert.h>
@@ -29,6 +28,7 @@ struct sre_FVFT
 #else
 	extern const sre_byte _game_res[];
 #endif
+extern const char __game_title[];
 extern const char __game_pwdres[];
 extern const unsigned __game_lenres;
 
@@ -84,7 +84,7 @@ bool sre_fileopen(sre_File* file, const char* path, int mode)
 		if (!strncmp(path, SRE_USR_PREFIX, SRE_FILEPREFIX_LENGTH))
 		{
 			const char* relpath = path + SRE_FILEPREFIX_LENGTH;
-			char* fullpath = SDL_GetPrefPath(NULL, game_settings.Title);
+			char* fullpath = SDL_GetPrefPath(NULL, __game_title);
 			fullpath = SDL_realloc(fullpath, strlen(fullpath) + strlen(relpath) + 1);
 			strcat(fullpath, relpath);
 			

@@ -15,6 +15,7 @@ set(CORE_SOURCES
 
 "InitEngine.c"
 "Runtime.c"
+"runtime.cpp"
 "display.cpp"
 "window.c"
 "window.cpp"
