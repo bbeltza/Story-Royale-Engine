@@ -134,7 +134,6 @@ void __end_engine()
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
     
-    SDL_DestroyCond(engine.render_cond);
     SDL_DestroyMutex(engine.render_mutex);
 
     TTF_Quit();

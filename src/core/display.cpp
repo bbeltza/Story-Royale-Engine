@@ -18,6 +18,8 @@ bool sre::display_setscale(int scale)
     return true;
 }
 
+bool sre::display_vsync(bool enable) { return engine.video->vsync(engine.video, enable); }
+
 void sre::display_autoscale_on(int target_w, int target_h)
 {
     assert((target_w && target_h) && "Use display_autoscale_off() instead, please");

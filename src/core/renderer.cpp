@@ -68,7 +68,8 @@ void __update_viewport(int w, int h)
 
 void __display_render()
 {
-	SDL_LockMutex(engine.render_mutex);
+	if (SDL_TryLockMutex(engine.render_mutex) == SDL_MUTEX_TIMEDOUT)
+		goto BROADCAST_END;
 
 	sre::onUpdate.fire();
 
@@ -113,5 +114,7 @@ void __display_render()
 	engine.video->present(engine.video);
 
 	SDL_UnlockMutex(engine.render_mutex);
-	SDL_CondBroadcast(engine.render_cond);
+
+	BROADCAST_END:
+	SDL_CondSignal(engine.render_cond);
 }

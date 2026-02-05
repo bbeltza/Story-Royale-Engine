@@ -55,8 +55,8 @@ void __run_engine()
     SDL_atomic_t running = {1};
     engine.game_loop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
-    SDL_SetEventFilter(__event_watch, NULL);
     SDL_AddEventWatch(__signal_events, NULL);
+    SDL_AddEventWatch(__event_watch, NULL);
 
     SDL_Event ev;
     while (SDL_WaitEvent(&ev))
@@ -100,8 +100,10 @@ void __run_engine()
             break;
         }
     }
+
     
     SDL_AtomicSet(&running, 0);
+    SDL_DestroyCond(engine.render_cond); // Destroy cond here before waiting for thread
     SDL_WaitThread(engine.game_loop, NULL);
 }
 
