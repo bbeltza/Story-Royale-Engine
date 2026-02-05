@@ -17,6 +17,21 @@ SRE_CAPI_BEGIN
 		uint32_t flags, renderflags;
 	};
 
+	enum _engine_event
+	{
+		ENGINE_EVENT_DEFER,
+		ENGINE_EVENT_RETDEFER,
+		ENGINE_EVENT_RENDER,
+		ENGINE_EVENT_ENTRY
+	};
+
+	struct _engine_retdefer
+	{
+    	void* userdata;
+    	SDL_sem* sem;
+    	sre_sptr ret;
+	};
+
 	struct _engine_data
 	{
 
@@ -31,9 +46,6 @@ SRE_CAPI_BEGIN
 		unsigned long long framestart_time;
 		unsigned long long frameend_time;
 
-		void* defer_head;
-		void* retdefer_head;
-
 		#define SRE_THREADS_BUCKETSIZE 32
 		void* threads_bucket[SRE_THREADS_BUCKETSIZE]; // "Hash" map of the threads
 
@@ -45,6 +57,7 @@ SRE_CAPI_BEGIN
 		SDL_mutex* destroyqueue_mutex;
 
 		void* entry_thread;
+		void* game_loop;
 
 		// Window data
 
@@ -94,17 +107,14 @@ SRE_CAPI_BEGIN
 	
 	extern void __setup_audio_device();
 
-	extern int __poll_events();
 	extern void __poll_input(SDL_Event* ev);
 	extern int __signal_events(void* data, SDL_Event* ev);
 
 	extern void __update_viewport(int w, int h);
-	extern void __update_input();
 
 	extern void __query_objects();
 
 	extern void __destroy_queue();
-	extern void __call_deferred();
 
 	extern void __cleanup_threads();
 	extern void __update_threads();

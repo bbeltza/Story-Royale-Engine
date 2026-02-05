@@ -23,7 +23,7 @@ static void __invoke_entry(void* userdata) // Invoking the entry-point won't be 
 {
     SDL_Event finish_event = { 0 };
     finish_event.type = SDL_USEREVENT;
-    finish_event.user.code = 1;
+    finish_event.user.code = ENGINE_EVENT_ENTRY;
     
     sre_initialize();
     SDL_PushEvent(&finish_event);
