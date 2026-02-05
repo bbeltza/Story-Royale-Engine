@@ -49,6 +49,8 @@ SRE_CAPI_BEGIN
 		#define SRE_THREADS_BUCKETSIZE 32
 		void* threads_bucket[SRE_THREADS_BUCKETSIZE]; // "Hash" map of the threads
 
+		void* event_queue;
+
 		// Instance data
 
 		void* current_world;
@@ -108,7 +110,9 @@ SRE_CAPI_BEGIN
 	extern void __setup_audio_device();
 
 	extern void __poll_input(SDL_Event* ev);
+
 	extern int __signal_events(void* data, SDL_Event* ev);
+	extern void __queue_events();
 
 	extern void __update_viewport(int w, int h);
 

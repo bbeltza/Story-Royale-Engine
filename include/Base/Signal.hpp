@@ -59,6 +59,8 @@ namespace sre
 				sizeof(void*) * 2,
 				reinterpret_cast<void**>(&data)
 			);
+			if (!connection)
+				return NULL;
 
 			data[0] = reinterpret_cast<void*>(fn);
 			data[1] = userdata;

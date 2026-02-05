@@ -18,16 +18,18 @@ static int game_loop(void* running)
         engine.last_dt = (engine.frameend_time - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
         engine.framestart_time = engine.frameend_time;
 
-        //
-        /* Looping codee!! */
-        __update_threads();
-        __destroy_queue();
+        SDL_LockMutex(engine.sdl_rendermutex);
+            __queue_events();
+            //
+            /* Looping codee!! */
+            __update_threads();
+            __destroy_queue();
 
-        __query_objects();
-        __update_world();
-        __update_layer();
+            __query_objects();
+            __update_world();
+            __update_layer();
 
-        __destroy_queue();
+            __destroy_queue();
 
         if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN)
         {
@@ -36,6 +38,7 @@ static int game_loop(void* running)
             ev.user.code = ENGINE_EVENT_RENDER;
             SDL_PushEvent(&ev);
         }
+        SDL_UnlockMutex(engine.sdl_rendermutex);
         //
 
         sre_timeStamp elapsed;

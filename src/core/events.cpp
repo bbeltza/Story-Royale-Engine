@@ -3,6 +3,13 @@
 
 #include <Core/Event.hpp>
 
+
+namespace sre
+{
+    using EventQueue = std::queue<sre::Event>;
+}
+
+static sre::EventQueue queue;
 sre::Signal<sre::Event> sre::onEvent;
 
 int __signal_events(void* data, SDL_Event* ev)
@@ -54,7 +61,16 @@ int __signal_events(void* data, SDL_Event* ev)
     default:
         return 1;
     }
-    sre::onEvent.fire(current);
+    queue.push(std::move(current));
 
     return 1;
+}
+
+void __queue_events()
+{
+    while (!queue.empty())
+    {
+        sre::onEvent.fire(queue.front());
+        queue.pop();
+    }
 }

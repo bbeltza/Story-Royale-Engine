@@ -37,6 +37,7 @@ static inline void __setup_engine_data()
 
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
+
     engine.main_thrd = SDL_ThreadID();
     engine.entry_thread = sre_coroutinecreate(false, __invoke_entry, NULL);
 }
@@ -130,8 +131,8 @@ void __end_engine()
     engine.video = NULL;
     
     SDL_CloseAudioDevice(engine.audio_device);
-    SDL_DestroyMutex(engine.sdl_rendermutex);
     SDL_DestroyMutex(engine.destroyqueue_mutex);
+    SDL_DestroyMutex(engine.sdl_rendermutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
 
     TTF_Quit();

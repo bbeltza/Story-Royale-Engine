@@ -30,11 +30,9 @@ void __setup_renderer()
 	}
 
 	engine.video->vsync(engine.video, 1);
-
-	int locked = SDL_TryLockMutex(engine.sdl_rendermutex);
-	assert(!locked);
-
 	engine.video->scale = 1;
+
+	engine.sdl_rendermutex = SDL_CreateMutex();
 }
 
 void __update_viewport(int w, int h)
@@ -69,10 +67,9 @@ void __update_viewport(int w, int h)
 
 void __display_render()
 {
-	sre::onUpdate.fire();
+	SDL_LockMutex(engine.sdl_rendermutex);
 
-	// Unlock the renderer
-	SDL_UnlockMutex(engine.sdl_rendermutex);
+	sre::onUpdate.fire();
 
 	// Render current world
 
@@ -112,8 +109,7 @@ void __display_render()
 
 	sre::afterRender.fire();
 
-	// Present the screen
-	SDL_LockMutex(engine.sdl_rendermutex);
-
 	engine.video->present(engine.video);
+
+	SDL_UnlockMutex(engine.sdl_rendermutex);
 }
