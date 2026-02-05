@@ -86,7 +86,10 @@ void __run_engine()
                 SDL_SemPost(defer->sem);
                 break;
             case ENGINE_EVENT_RENDER:
-                __display_render();
+                SDL_LockMutex(engine.render_mutex);
+                    __display_render();
+                SDL_UnlockMutex(engine.render_mutex);
+                SDL_CondBroadcast(engine.render_cond);
                 break;
             case ENGINE_EVENT_ENTRY:
                 SDL_ShowWindow(engine.sdl_windowhndl);
@@ -115,7 +118,12 @@ static int __event_watch(void *data, SDL_Event *ev)
         {
             #if _WIN32
             case SDL_WINDOWEVENT_EXPOSED:
-                __display_render();
+                if (SDL_TryLockMutex(engine.render_mutex) == 0)
+                {
+                    __display_render();
+                    SDL_UnlockMutex(engine.render_mutex);
+                }
+                SDL_CondBroadcast(engine.render_cond);
                 break;
             #endif
             case SDL_WINDOWEVENT_SIZE_CHANGED:

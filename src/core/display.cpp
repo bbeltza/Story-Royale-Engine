@@ -1,6 +1,8 @@
 #include <Core/Display.hpp>
+#include <Core/Defer.h>
 #include "../internal.h"
-#include "../core/drivers/drivers.h"
+#include "../drivers/drivers.h"
+
 
 sre::vec2ut sre::display_center() { return engine.video->center; }
 sre::vec2ut sre::display_size() { return engine.video->size; }
@@ -18,8 +20,6 @@ bool sre::display_setscale(int scale)
     return true;
 }
 
-bool sre::display_vsync(bool enable) { return engine.video->vsync(engine.video, enable); }
-
 void sre::display_autoscale_on(int target_w, int target_h)
 {
     assert((target_w && target_h) && "Use display_autoscale_off() instead, please");
@@ -31,4 +31,14 @@ void sre::display_autoscale_off()
 {
     engine.auto_scalex = 0;
     engine.auto_scaley = 0;
+}
+
+static void deferred_vsync(void* enable)
+{
+    engine.video->vsync(engine.video, enable != NULL);
+}
+
+void sre::display_vsync(bool enable)
+{
+    sre_defer(deferred_vsync, enable ? reinterpret_cast<void*>(1) : NULL);
 }

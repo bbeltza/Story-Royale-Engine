@@ -14,7 +14,7 @@ namespace sre
     void display_autoscale_on(int target_w, int target_h); // Set automatic scaling, targeting a resolution
     void display_autoscale_off(); // Disable automatic scaling
 
-    bool display_vsync(bool enable);
+    void display_vsync(bool enable);
 }
 
 #endif

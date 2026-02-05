@@ -46,9 +46,8 @@ bool Font::preload(const char *text)
 
         int code = *reinterpret_cast<int*>(utf8);
 
-        if (!textures.count(code))
+        if (textures.find(code) == textures.end())
         {
-            
             textures.emplace(
                 code,
                 sre::Image{TTF_RenderUTF8_Solid(m_font, utf8, sre::col4::WHITE.toSDL())});

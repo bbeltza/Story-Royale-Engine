@@ -45,6 +45,7 @@ sre_Texture sre_tex_gen()
             ptr = memcpy(ptr, engine.video->textures, engine.video->textures_capacity * engine.video->texture_size);
             if (!ptr) goto FAIL;
 
+            sre_delete(engine.video->textures);
             *(void**)&engine.video->textures = ptr;
             *(sre_usize*)&engine.video->textures_capacity = new_capacity;
         }

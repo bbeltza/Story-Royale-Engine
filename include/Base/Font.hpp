@@ -34,11 +34,10 @@ namespace sre
         // And returns the size of the codepoint
         static int str_to_utf8chr(const char* src, char* dst);
     private:
-        std::unordered_map<int, Texture> textures;
-
         TTF_Font *m_font = NULL;
         SDL_RWops *m_rwops = NULL;
 
-        friend struct _containers_service;
+        std::unordered_map<int, Texture> textures;
+        std::vector<std::string> linebuf;
     };
 }

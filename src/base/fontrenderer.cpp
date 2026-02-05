@@ -1,8 +1,6 @@
 #include <Core/Draw.hpp>
 #include <Base/Font.hpp>
 
-static std::vector<std::string> line_buff;
-
 using namespace sre;
 
 void Font::render(const sre::rect2Dut &bounds, const sre::col4 &color, const char *text, int count, Alignment halignment, Alignment valignment)
@@ -22,8 +20,8 @@ void Font::render(const sre::rect2Dut &bounds, const sre::col4 &color, const cha
 
     while (true)
     {
-        if (line_buff.size() <= (size_t)i)
-            line_buff.resize(i + 1);
+        if (linebuf.size() <= (size_t)i)
+            linebuf.resize(i + 1);
 
         TTF_MeasureText(m_font, text, width, NULL, &last_begin);
         int end = last_begin;
@@ -47,7 +45,7 @@ void Font::render(const sre::rect2Dut &bounds, const sre::col4 &color, const cha
         if (text[last_begin - 1] == '\n')
             diff = 1;
 
-        line_buff[i].assign(text, last_begin - diff);
+        linebuf[i].assign(text, last_begin - diff);
         i++;
         if (done)
             break;
@@ -69,7 +67,7 @@ void Font::render(const sre::rect2Dut &bounds, const sre::col4 &color, const cha
 
     for (int j = 0; j < i; j++)
     {
-        const char *c_str = line_buff[j].c_str();
+        const char *c_str = linebuf[j].c_str();
 
         int line_extent;
         TTF_MeasureText(m_font, c_str, width, &line_extent, NULL);
