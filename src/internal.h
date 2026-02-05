@@ -71,7 +71,8 @@ SRE_CAPI_BEGIN
 		
 		sre_videodriver* video;
 
-		SDL_mutex* sdl_rendermutex;
+		SDL_cond* render_cond;
+		SDL_mutex* render_mutex;
 		int osize_x, osize_y;
 
 		// Audio data

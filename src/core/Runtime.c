@@ -18,10 +18,10 @@ static int game_loop(void* running)
         engine.last_dt = (engine.frameend_time - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
         engine.framestart_time = engine.frameend_time;
 
-        SDL_LockMutex(engine.sdl_rendermutex);
+        //
+        SDL_LockMutex(engine.render_mutex);
             __queue_events();
-            //
-            /* Looping codee!! */
+            
             __update_threads();
             __destroy_queue();
 
@@ -31,14 +31,12 @@ static int game_loop(void* running)
 
             __destroy_queue();
 
-        if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN)
-        {
-            SDL_Event ev;
-            ev.type = SDL_USEREVENT;
-            ev.user.code = ENGINE_EVENT_RENDER;
-            SDL_PushEvent(&ev);
-        }
-        SDL_UnlockMutex(engine.sdl_rendermutex);
+        SDL_Event ev;
+        ev.type = SDL_USEREVENT;
+        ev.user.code = ENGINE_EVENT_RENDER;
+        SDL_PushEvent(&ev);
+        SDL_CondWait(engine.render_cond, engine.render_mutex);
+        SDL_UnlockMutex(engine.render_mutex);
         //
 
         sre_timeStamp elapsed;
@@ -57,7 +55,7 @@ void __run_engine()
     SDL_atomic_t running = {1};
     engine.game_loop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
-    SDL_AddEventWatch(__event_watch, NULL);
+    SDL_SetEventFilter(__event_watch, NULL);
     SDL_AddEventWatch(__signal_events, NULL);
 
     SDL_Event ev;

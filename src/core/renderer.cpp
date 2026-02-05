@@ -32,7 +32,8 @@ void __setup_renderer()
 	engine.video->vsync(engine.video, 1);
 	engine.video->scale = 1;
 
-	engine.sdl_rendermutex = SDL_CreateMutex();
+	engine.render_mutex = SDL_CreateMutex();
+	engine.render_cond = SDL_CreateCond();
 }
 
 void __update_viewport(int w, int h)
@@ -67,7 +68,7 @@ void __update_viewport(int w, int h)
 
 void __display_render()
 {
-	SDL_LockMutex(engine.sdl_rendermutex);
+	SDL_LockMutex(engine.render_mutex);
 
 	sre::onUpdate.fire();
 
@@ -111,5 +112,6 @@ void __display_render()
 
 	engine.video->present(engine.video);
 
-	SDL_UnlockMutex(engine.sdl_rendermutex);
+	SDL_UnlockMutex(engine.render_mutex);
+	SDL_CondBroadcast(engine.render_cond);
 }
