@@ -12,6 +12,11 @@ static int game_loop(void* running)
 {
     while (SDL_AtomicGet(running))
     {
+        sre_timeStamp elapsed;
+        SDL_Event ev;
+        ev.type = SDL_USEREVENT;
+        ev.user.code = ENGINE_EVENT_RENDER;
+
         engine.frame++;
 
         engine.frameend_time = os.clock();
@@ -20,19 +25,20 @@ static int game_loop(void* running)
 
         //
         SDL_LockMutex(engine.render_mutex);
-            __queue_events();
-            __update_threads();
-            __update_ecs();
 
-        SDL_Event ev;
-        ev.type = SDL_USEREVENT;
-        ev.user.code = ENGINE_EVENT_RENDER;
-        SDL_PushEvent(&ev);
+        __queue_events();
+        __update_threads();
+        __update_ecs();
+
+    #if _WIN32
+        if (!engine.exposing)
+    #endif
+            SDL_PushEvent(&ev);
+
         SDL_CondWait(engine.render_cond, engine.render_mutex);
         SDL_UnlockMutex(engine.render_mutex);
         //
 
-        sre_timeStamp elapsed;
         elapsed = (os.clock() - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
         elapsed = engine.target_dt - elapsed;
 
@@ -62,6 +68,11 @@ void __run_engine()
         case SDL_WINDOWEVENT:
             switch (ev.window.event)
             {
+            case SDL_WINDOWEVENT_EXPOSED:
+                #if _WIN32
+                    engine.exposing = false;
+                #endif
+                break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
                 SDL_ResetKeyboard();
                 break;
@@ -80,7 +91,9 @@ void __run_engine()
                 break;
             case ENGINE_EVENT_RENDER:
                 SDL_LockMutex(engine.render_mutex);
-                    __display_render();
+
+                __display_render();
+
                 SDL_UnlockMutex(engine.render_mutex);
                 SDL_CondBroadcast(engine.render_cond);
                 break;
@@ -113,6 +126,7 @@ static int __event_watch(void *data, SDL_Event *ev)
             case SDL_WINDOWEVENT_EXPOSED:
                 if (SDL_TryLockMutex(engine.render_mutex) == 0)
                 {
+                    engine.exposing = true;
                     __display_render();
                     SDL_UnlockMutex(engine.render_mutex);
                 }

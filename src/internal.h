@@ -96,6 +96,10 @@ SRE_CAPI_BEGIN
 		sre_unit scale_ratio; /* 1 / video->scale */
 		SDL_TouchID input_last_touchid;
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
+
+		#if _WIN32
+			int exposing;
+		#endif
 	};
 
 	extern struct _engine_data __engine_data;
