@@ -27,7 +27,6 @@ namespace sre
         void render(const sre::rect2Dut &bounds, const sre::col4 &color, const char *text, int count, Alignment halignment = A_LEFT, Alignment valignment = A_TOP);
         void render_line(const sre::vec2ut &start, const sre::col4 &color, const char *text, int count, int acc = 0);
 
-        bool preload(const char *desired);
         bool valid() const { return m_font != NULL; }
 
         // Converts `src` utf-8 string into null terminated utf-8 codepoint into `dst`
@@ -37,7 +36,9 @@ namespace sre
         TTF_Font *m_font = NULL;
         SDL_RWops *m_rwops = NULL;
 
-        std::unordered_map<int, Texture> textures;
         std::vector<std::string> linebuf;
+
+        std::array<Texture, 127> ascii; // Fast access ascii texture table
+        std::unordered_map<int, Texture> unicode;
     };
 }

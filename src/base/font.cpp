@@ -20,6 +20,16 @@ Font::Font(const char *path, int pt)
             m_rwops = NULL;
         }
     }
+
+    // Setup ascii textures
+        for (size_t code = 0; code < ascii.size(); code++)
+        {
+            char str[2] = { static_cast<char>(code + 1), '\0' };
+
+            auto& tex = ascii.at(code);
+            tex = sre::Image{TTF_RenderUTF8_Solid(m_font, str, sre::col4::WHITE.toSDL())};
+        }
+    //
 }
 
 Font::~Font()
@@ -28,34 +38,6 @@ Font::~Font()
         TTF_CloseFont(m_font);
     else if (m_rwops)
         SDL_RWclose(m_rwops);
-}
-
-bool Font::preload(const char *text)
-{
-    if (!m_font)
-        return true;
-    if (!text[0])
-        return true;
-
-    bool unloaded = false;
-    size_t n = 0;
-    while (text[n])
-    {
-        char utf8[8];
-        n += str_to_utf8chr(text + n, utf8);
-
-        int code = *reinterpret_cast<int*>(utf8);
-
-        if (textures.find(code) == textures.end())
-        {
-            textures.emplace(
-                code,
-                sre::Image{TTF_RenderUTF8_Solid(m_font, utf8, sre::col4::WHITE.toSDL())});
-            unloaded = true;
-        };
-    }
-
-    return unloaded;
 }
 
 int Font::str_to_utf8chr(const char* str, char* dst)

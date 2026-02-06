@@ -17,6 +17,5 @@ void Text::on_render(const sre::rect2Dut& dimensions)
 {
     FONTCHECK
 
-    m_font->preload(m_str.c_str());
     m_font->render(dimensions, color, m_str.c_str(), count, h_alignment, v_alignment);
 }
