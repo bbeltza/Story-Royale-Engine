@@ -34,7 +34,6 @@ SRE_CAPI_BEGIN
 
 	struct _engine_data
 	{
-
 		// Runtime data
 
 		size_t frame;
@@ -119,19 +118,16 @@ SRE_CAPI_BEGIN
 
 	extern void __query_objects();
 
-	extern void __destroy_queue();
+	extern void __update_ecs();
+	extern void __render_scene();
+	extern void __render_ui();
 
 	extern void __cleanup_threads();
 	extern void __update_threads();
 
-	extern void __update_world();
-	extern void __update_layer();
-
-	extern void __update_audio();
-
 	extern void __display_render();
 
-	extern void __clean_containers();
+	extern void __cleanup_ecs();
 SRE_CAPI_END
 
 #ifdef __cplusplus

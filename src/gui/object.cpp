@@ -14,7 +14,7 @@ Object::Object()
 {
     if (!m_parent)
     {
-        // Root objects couldn't be queries before, so they are have the query flag disabled by default now as they can be hovered
+        // Root objects couldn't be queried before, so they are have the query flag disabled by default now as they can be hovered
         flags.toggle_off(F_QUERY);
         return;
     }

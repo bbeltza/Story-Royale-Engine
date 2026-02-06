@@ -8,13 +8,11 @@ set(CORE_SOURCES
 "events.cpp"
 "input.cpp"
 
-"Containers.cpp"
-"DestroyQueue.cpp"
-"Querying.cpp"
+"objects.cpp"
 "renderer.cpp"
 
-"InitEngine.c"
-"Runtime.c"
+"init.c"
+"runtime.c"
 "runtime.cpp"
 "display.cpp"
 "window.c"

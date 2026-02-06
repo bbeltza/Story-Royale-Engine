@@ -6,14 +6,13 @@
 #include <Datatypes/Rect.hpp>
 #include <Datatypes/Flags.hpp>
 
-#include <Core/object.hpp>
+#include <Core/Object.hpp>
 #include <Base/Signal.hpp>
 
-#include <internal_def.hh>
-
-__def_internal(__update_layer);
-__def_internal(__query_objects);
-__def_internal(__display_render);
+namespace sre
+{
+    class ECS;
+}
 
 namespace sreGUI
 {
@@ -21,12 +20,11 @@ namespace sreGUI
 
     class Object : public ::sre::Object
     {
-        __friend_internal(__update_layer);
-        __friend_internal(__query_objects);
-        __friend_internal(__display_render);
+        friend class sre::ECS;
 
         static const Object *s_querying;
-        Object *m_parent;
+        Object * volatile m_parent;
+        //          ^^^   m_parent could be optimized away when `add_child gets called and not assign it`
 
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
     public:

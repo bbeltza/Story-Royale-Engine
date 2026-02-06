@@ -87,7 +87,7 @@ void __display_render()
 
 		//// Drawing all the entities (doesn't run if the foreground is full opaque)
 		if (fg.a < 255)
-			current->call_render();
+			__render_scene();
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
@@ -103,8 +103,7 @@ void __display_render()
 	}
 
 	// Drawing the Gui layer
-	if (sreGUI::Object *current = currlayer)
-		current->call_render();
+	__render_ui();
 
 	sre::afterRender.fire();
 

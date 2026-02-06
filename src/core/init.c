@@ -31,7 +31,6 @@ static void __invoke_entry(void* userdata) // Invoking the entry-point won't be 
 
 static inline void __setup_engine_data()
 {
-    engine.target_dt = 1 / 60;
     engine.phys_target_dt = 1 / 128.0;
     engine.framestart_time = os.clock();
 
@@ -121,7 +120,7 @@ void __end_engine()
 {
     sre_coroutinecorequit();
     __cleanup_threads();
-    __clean_containers();  
+    __cleanup_ecs();  
     
     engine.video->quit(engine.video);
     sre_delete((void*)engine.video->texture_fl);
