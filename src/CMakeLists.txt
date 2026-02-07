@@ -52,6 +52,7 @@ set(PRESET_SOURCES
     "gui/components/text.cpp"
     "gui/components/list.cpp"
     "gui/components/fill.cpp"
+    "gui/components/slice.cpp"
     "gui/components/transform.cpp"
     "gui/objects/button.cpp"
 

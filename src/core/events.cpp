@@ -72,12 +72,14 @@ int __signal_events(SDL_Event* ev)
 }
 
 void __queue_events()
-{
-    sre::EventGuard guard{mutex};
-    
+{    
     while (!queue.empty())
     {
-        sre::onEvent.fire(queue.front());
-        queue.pop();
+        mutex.lock();
+            sre::Event ev = std::move(queue.front());
+            queue.pop();
+        mutex.unlock();
+        // Don't forget to fire with the mutex unlocked, having the mutex locked can cause some softlocks
+        sre::onEvent.fire(ev);
     }
 }
