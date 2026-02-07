@@ -23,7 +23,7 @@ static void __invoke_entry(void* userdata) // Invoking the entry-point won't be 
 {
     SDL_Event finish_event = { 0 };
     finish_event.type = SDL_USEREVENT;
-    finish_event.user.code = 1;
+    finish_event.user.code = ENGINE_EVENT_ENTRY;
     
     sre_initialize();
     SDL_PushEvent(&finish_event);
@@ -31,12 +31,12 @@ static void __invoke_entry(void* userdata) // Invoking the entry-point won't be 
 
 static inline void __setup_engine_data()
 {
-    engine.target_dt = 1 / 60;
     engine.phys_target_dt = 1 / 128.0;
     engine.framestart_time = os.clock();
 
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
+
     engine.main_thrd = SDL_ThreadID();
     engine.entry_thread = sre_coroutinecreate(false, __invoke_entry, NULL);
 }
@@ -120,7 +120,7 @@ void __end_engine()
 {
     sre_coroutinecorequit();
     __cleanup_threads();
-    __clean_containers();  
+    __cleanup_ecs();  
     
     engine.video->quit(engine.video);
     sre_delete((void*)engine.video->texture_fl);
@@ -130,9 +130,10 @@ void __end_engine()
     engine.video = NULL;
     
     SDL_CloseAudioDevice(engine.audio_device);
-    SDL_DestroyMutex(engine.sdl_rendermutex);
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
+    
+    SDL_DestroyMutex(engine.render_mutex);
 
     TTF_Quit();
     IMG_Quit();

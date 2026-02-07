@@ -25,8 +25,6 @@ void* sre_get_texture(sre_Texture id)
 
 sre_Texture sre_tex_gen()
 {
-    SDL_LockMutex(engine.sdl_rendermutex);
-
     sre_Texture id = 0;
     for (size_t i = 0; i < engine.video->texture_flcount; i++)
     {
@@ -45,8 +43,9 @@ sre_Texture sre_tex_gen()
             void* ptr = sre_newclear(new_capacity * engine.video->texture_size);
 
             ptr = memcpy(ptr, engine.video->textures, engine.video->textures_capacity * engine.video->texture_size);
-            if (!ptr) goto FINISH_OR_FAIL;
+            if (!ptr) goto FAIL;
 
+            sre_delete(engine.video->textures);
             *(void**)&engine.video->textures = ptr;
             *(sre_usize*)&engine.video->textures_capacity = new_capacity;
         }
@@ -56,14 +55,13 @@ sre_Texture sre_tex_gen()
     }
 
     if (engine.video->tex_gen(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size) < 0)
-    {
-        sre_tex_destroy(id);
-        id = 0;
-    }
-
-    FINISH_OR_FAIL:
-    SDL_UnlockMutex(engine.sdl_rendermutex);
+        goto FAIL;
+    
     return id;
+
+    FAIL:
+    sre_tex_destroy(id);
+    return 0;
 }
 
 void sre_tex_destroy(sre_Texture id)
@@ -72,11 +70,10 @@ void sre_tex_destroy(sre_Texture id)
     if (!engine.video) return;
     size_t target = -1;
 
-    SDL_LockMutex(engine.sdl_rendermutex);
     for (size_t i = 0; i < engine.video->texture_flcount; i++)
     {
         if (!engine.video->texture_fl[i]) target = i;
-        else if (engine.video->texture_fl[i] == id) goto RET;
+        else if (engine.video->texture_fl[i] == id) return;
     }
 
     if (target == -1)
@@ -98,9 +95,6 @@ void sre_tex_destroy(sre_Texture id)
     }
 
     engine.video->tex_destroy(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size);
-
-    RET:
-    SDL_UnlockMutex(engine.sdl_rendermutex);
 }
 
 struct defer_texbind

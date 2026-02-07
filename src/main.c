@@ -6,10 +6,6 @@
 
 struct _engine_data __engine_data;
 
-#ifndef __clang__ 
-static void sig_handler(int signal) {}
-#endif
-
 static void handle_arg(const char* arg, char* argv[])
 {
     size_t j = 0;
@@ -56,7 +52,7 @@ int main(int argc, char* argv[])
 	__run_engine();
 }
 
-#ifdef _WIN32
+#if _WIN32
 #include <Windows.h>
 unsigned int winmain_enter = 0;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)

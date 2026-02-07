@@ -12,12 +12,9 @@
 
 #else
 
-#ifndef flockfile
-#define flockfile
-#endif
+#ifndef flockfile(x) (void)0
+#define flockfile(x) (void)0
 
-#ifndef funlockfile
-#define funlockfile
 #endif
 
 #endif

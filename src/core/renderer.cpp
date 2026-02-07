@@ -30,11 +30,10 @@ void __setup_renderer()
 	}
 
 	engine.video->vsync(engine.video, 1);
-
-	int locked = SDL_TryLockMutex(engine.sdl_rendermutex);
-	assert(!locked);
-
 	engine.video->scale = 1;
+
+	engine.render_mutex = SDL_CreateMutex();
+	engine.render_cond = SDL_CreateCond();
 }
 
 void __update_viewport(int w, int h)
@@ -71,9 +70,6 @@ void __display_render()
 {
 	sre::onUpdate.fire();
 
-	// Unlock the renderer
-	SDL_UnlockMutex(engine.sdl_rendermutex);
-
 	// Render current world
 
 	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
@@ -81,17 +77,16 @@ void __display_render()
 		engine.video->camera = current->camera.position;
 
 		//// Aliases for the background and the foreground (kind of old)
-		const sre::col4 bg{current->background};
 		const sre::col4& fg = current->foreground;
 
 		//// Clearing the screen with the background color
-		engine.video->draw_clear(engine.video, &bg);
+		engine.video->draw_clear(engine.video, &current->background);
 
 		sre::beforeRender.fire();
 
 		//// Drawing all the entities (doesn't run if the foreground is full opaque)
 		if (fg.a < 255)
-			current->call_render();
+			__render_scene();
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
@@ -102,18 +97,14 @@ void __display_render()
 		engine.video->camera.x = 0;
 		engine.video->camera.y = 0;
 
-		engine.video->draw_clear(engine.video, NULL);
+		engine.video->draw_clear(engine.video, &sre::col4::BLACK);
 		sre::beforeRender.fire();
 	}
 
 	// Drawing the Gui layer
-	if (sreGUI::Object *current = currlayer)
-		current->call_render();
+	__render_ui();
 
 	sre::afterRender.fire();
-
-	// Present the screen
-	SDL_LockMutex(engine.sdl_rendermutex);
 
 	engine.video->present(engine.video);
 }

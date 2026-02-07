@@ -8,11 +8,10 @@
 
 #include <ECS/camera.hpp>
 
-#include <internal_def.hh>
-
-__def_internal(__query_objects);
-__def_internal(__update_world);
-__def_internal(__display_render);
+namespace sre
+{
+    class ECS;
+}
 
 namespace sreECS
 {
@@ -20,9 +19,7 @@ namespace sreECS
 
     struct Scene: public Common
     {
-        __friend_internal(__query_objects);
-        __friend_internal(__update_world);
-        __friend_internal(__display_render);
+        friend class sre::ECS;
         friend class Entity;
 
         Scene();
@@ -47,7 +44,7 @@ namespace sreECS
 
         // Get the current scene, with a template in which `T` is a type inherited by Scene
         // @returns a pointer to a current scene, or `nullptr` if there's no current scene, or if the current scene isn't or doesn't inherit from `T`
-        template <typename T=Scene> static inline T* current() { return current()->cast<T>(); /* Scary ! Note that if current() is nullptr then dynamic_cast will just return nullptr */ }
+        template <typename T> static inline T* current() { return current()->cast<T>(); /* Scary ! Note that if current() is nullptr then dynamic_cast will just return nullptr */ }
 
         // Get the current scene, without templates
         static Scene* current();

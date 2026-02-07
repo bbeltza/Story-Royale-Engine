@@ -122,7 +122,7 @@ void sre_signaldisconnect(sre_Connection* connection)
 
 sre_Connection* sre_signalaquire(sre_Connection* connection)
 {
-    assert(connection);
+    assert(connection != NULL);
 
     SDL_AtomicAdd(&connection->reference, 1);
     return connection;

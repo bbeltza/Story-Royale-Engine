@@ -88,6 +88,8 @@ int sre_audiocallbackqueue(int (*callback)(void* userdata, sre_u8* samples, sre_
 
     struct sre_audiocallback* obj = engine.audio_queue;
     obj = &obj[engine.audio_queuesize];
+    assert(obj != NULL);
+
     obj->callback = callback;
     obj->userdata = userdata;
     obj->id = ++engine.last_audioid;
@@ -111,8 +113,10 @@ void sre_audiocallbackremove(int id)
     {
         if (queue[i].id != id) continue;
 
-        memmove(&queue[i], &queue[i + 1], engine.audio_queuesize - (i + 1));
         engine.audio_queuesize--;
+        queue[i].callback = queue[engine.audio_queuesize].callback;
+        queue[i].userdata = queue[engine.audio_queuesize].userdata;
+        queue[i].id = queue[engine.audio_queuesize].id;
 
         break;
     }

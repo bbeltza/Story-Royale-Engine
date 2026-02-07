@@ -17,9 +17,23 @@ SRE_CAPI_BEGIN
 		uint32_t flags, renderflags;
 	};
 
+	enum _engine_event
+	{
+		ENGINE_EVENT_DEFER,
+		ENGINE_EVENT_RETDEFER,
+		ENGINE_EVENT_RENDER,
+		ENGINE_EVENT_ENTRY
+	};
+
+	struct _engine_retdefer
+	{
+    	void* userdata;
+    	SDL_sem* sem;
+    	sre_sptr ret;
+	};
+
 	struct _engine_data
 	{
-
 		// Runtime data
 
 		size_t frame;
@@ -31,11 +45,10 @@ SRE_CAPI_BEGIN
 		unsigned long long framestart_time;
 		unsigned long long frameend_time;
 
-		void* defer_head;
-		void* retdefer_head;
-
 		#define SRE_THREADS_BUCKETSIZE 32
 		void* threads_bucket[SRE_THREADS_BUCKETSIZE]; // "Hash" map of the threads
+
+		void* event_queue;
 
 		// Instance data
 
@@ -45,6 +58,7 @@ SRE_CAPI_BEGIN
 		SDL_mutex* destroyqueue_mutex;
 
 		void* entry_thread;
+		void* game_loop;
 
 		// Window data
 
@@ -56,7 +70,8 @@ SRE_CAPI_BEGIN
 		
 		sre_videodriver* video;
 
-		SDL_mutex* sdl_rendermutex;
+		SDL_cond* render_cond;
+		SDL_mutex* render_mutex;
 		int osize_x, osize_y;
 
 		// Audio data
@@ -81,6 +96,10 @@ SRE_CAPI_BEGIN
 		sre_unit scale_ratio; /* 1 / video->scale */
 		SDL_TouchID input_last_touchid;
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
+
+		#if _WIN32
+			int exposing;
+		#endif
 	};
 
 	extern struct _engine_data __engine_data;
@@ -94,29 +113,25 @@ SRE_CAPI_BEGIN
 	
 	extern void __setup_audio_device();
 
-	extern int __poll_events();
 	extern void __poll_input(SDL_Event* ev);
-	extern int __signal_events(void* data, SDL_Event* ev);
+
+	extern int __signal_events(SDL_Event* ev);
+	extern void __queue_events();
 
 	extern void __update_viewport(int w, int h);
-	extern void __update_input();
 
 	extern void __query_objects();
 
-	extern void __destroy_queue();
-	extern void __call_deferred();
+	extern void __update_ecs();
+	extern void __render_scene();
+	extern void __render_ui();
 
 	extern void __cleanup_threads();
 	extern void __update_threads();
 
-	extern void __update_world();
-	extern void __update_layer();
-
-	extern void __update_audio();
-
 	extern void __display_render();
 
-	extern void __clean_containers();
+	extern void __cleanup_ecs();
 SRE_CAPI_END
 
 #ifdef __cplusplus

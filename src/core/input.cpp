@@ -16,20 +16,19 @@ void __poll_input(SDL_Event* event)
     case SDL_FINGERDOWN:
         engine.input_last_touchid = event->tfinger.touchId;
         break;
+    case SDL_MOUSEMOTION:
+        engine.mouse_x = event->motion.x * engine.scale_ratio;
+        engine.mouse_y = event->motion.y * engine.scale_ratio;
+        break;
+    case SDL_MOUSEBUTTONUP:
+        engine.mouse_press &= ~SDL_BUTTON(event->button.button);
+        break;
+    case SDL_MOUSEBUTTONDOWN:
+        engine.mouse_press |= SDL_BUTTON(event->button.button);
+        break;
     default:
         break;
     }
-}
-
-void __update_input()
-{
-    if (!engine.osize_x || !engine.osize_y) return;
-
-    int x, y;
-    engine.mouse_press = SDL_GetMouseState(&x, &y);
-
-    engine.mouse_x = x * engine.scale_ratio;
-    engine.mouse_y = y * engine.scale_ratio;
 }
 
 //

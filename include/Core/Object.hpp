@@ -1,19 +1,13 @@
 #ifndef SRE_OBJECT_HPP
 #define SRE_OBJECT_HPP
 
-#include <internal_def.hh>
-#include <cstddef>
-#include <string>
-
-__def_internal(__destroy_queue);
-
 namespace sre
 {
     class Object
     {
-        __friend_internal(__destroy_queue);
+        friend class ECS;
 
-        Object* m_nextdestroyed = NULL;
+        Object* m_nextdestroyed = nullptr;
     protected:
         virtual ~Object();
     public:

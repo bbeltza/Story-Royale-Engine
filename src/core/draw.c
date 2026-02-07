@@ -6,7 +6,6 @@
 
 int sre_draw(sre_DrawType type, const void* data)
 {
-	SDL_LockMutex(engine.sdl_rendermutex);
 	int ret;
 
 	switch (type)
@@ -41,7 +40,6 @@ int sre_draw(sre_DrawType type, const void* data)
 		ret = -1;
 		break;
 	}
-
-	SDL_UnlockMutex(engine.sdl_rendermutex);
+	
 	return ret;
 }
