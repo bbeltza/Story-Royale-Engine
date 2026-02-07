@@ -13,3 +13,6 @@ SRE_CAPI_BEGIN
 SRE_CAPI_END
 
 #endif
+
+// Just include utils/logging for now, I wanna push myself on including Base/Log instead of this
+#include <utils/logging.h>

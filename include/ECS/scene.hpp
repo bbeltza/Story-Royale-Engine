@@ -44,7 +44,7 @@ namespace sreECS
 
         // Get the current scene, with a template in which `T` is a type inherited by Scene
         // @returns a pointer to a current scene, or `nullptr` if there's no current scene, or if the current scene isn't or doesn't inherit from `T`
-        template <typename T=Scene> static inline T* current() { return current()->cast<T>(); /* Scary ! Note that if current() is nullptr then dynamic_cast will just return nullptr */ }
+        template <typename T> static inline T* current() { return current()->cast<T>(); /* Scary ! Note that if current() is nullptr then dynamic_cast will just return nullptr */ }
 
         // Get the current scene, without templates
         static Scene* current();

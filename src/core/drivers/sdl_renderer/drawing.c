@@ -58,11 +58,8 @@ static inline void sresdlrender_coordsr(const sre_videodriver* video, int cam, c
 //
 
 int sresdlrenderer_draw_clear(const sre_videodriver* video, const sre_col4* color)
-{
-	static const sre_col4 BLACK = { 0, 0, 0, 0 };
-	if (!color)
-		color = &BLACK;
-	
+{	
+	assert(color != NULL);
 	if (SDL_SetRenderDrawColor(video->userdata, color->r, color->g, color->b, color->a)) return -1;
 	return SDL_RenderClear(video->userdata);
 }

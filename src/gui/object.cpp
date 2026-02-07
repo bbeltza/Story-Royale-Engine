@@ -8,6 +8,8 @@
 
 using namespace sreGUI;
 
+Object* sreGUI::get_root() { return currlayer; }
+
 const Object* Object::s_querying = NULL;
 
 Object::Object()

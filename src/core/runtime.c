@@ -10,7 +10,8 @@ static int __event_watch(void *, SDL_Event *);
 
 static int game_loop(void* running)
 {
-    while (SDL_AtomicGet(running))
+    SDL_LockMutex(engine.render_mutex); // Lock the mutex once, it will be unlocked every time SDL_CondWait gets called
+    while (*(int*)running)
     {
         sre_timeStamp elapsed;
         SDL_Event ev;
@@ -24,21 +25,30 @@ static int game_loop(void* running)
         engine.framestart_time = engine.frameend_time;
 
         //
-        SDL_LockMutex(engine.render_mutex);
 
         __queue_events();
         __update_threads();
         __update_ecs();
 
-    #if _WIN32
-        if (!engine.exposing)
-    #endif
-            SDL_PushEvent(&ev);
-
-        SDL_CondWait(engine.render_cond, engine.render_mutex);
-        SDL_UnlockMutex(engine.render_mutex);
         //
 
+    #if _WIN32
+        if (!engine.exposing)
+        {
+    #endif
+        
+        if (SDL_PeepEvents(&ev, 1, SDL_ADDEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) == 1)
+            SDL_CondWait(engine.render_cond, engine.render_mutex);
+        else
+            ERROR("SDL_PeepEvents failed... %s", SDL_GetError());
+        #if _WIN32
+        }
+        else
+            SDL_CondWait(engine.render_cond, engine.render_mutex);
+        #endif
+
+        //
+        
         elapsed = (os.clock() - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
         elapsed = engine.target_dt - elapsed;
 
@@ -51,11 +61,10 @@ static int game_loop(void* running)
 
 void __run_engine()
 {
-    SDL_atomic_t running = {1};
+    int running = 1;
     engine.game_loop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
-    SDL_AddEventWatch(__signal_events, NULL);
-    SDL_AddEventWatch(__event_watch, NULL);
+    SDL_SetEventFilter(__event_watch, NULL);
 
     SDL_Event ev;
     while (SDL_WaitEvent(&ev))
@@ -94,8 +103,8 @@ void __run_engine()
 
                 __display_render();
 
+                if (SDL_CondBroadcast(engine.render_cond) < 0) assert(0 && "This should not happen!");
                 SDL_UnlockMutex(engine.render_mutex);
-                SDL_CondBroadcast(engine.render_cond);
                 break;
             case ENGINE_EVENT_ENTRY:
                 SDL_ShowWindow(engine.sdl_windowhndl);
@@ -108,11 +117,15 @@ void __run_engine()
             __poll_input(&ev);
             break;
         }
+
+        __signal_events(&ev); // In this case the QUIT event won't be fired
+                              // I'll make sure to make it fire once I make the QUIT event
     }
 
+    running = 0;
     
-    SDL_AtomicSet(&running, 0);
-    SDL_DestroyCond(engine.render_cond); // Destroy cond here before waiting for thread
+    SDL_CondBroadcast(engine.render_cond);
+    SDL_DestroyCond(engine.render_cond); // Destroy cond and mutex here before waiting for thread
     SDL_WaitThread(engine.game_loop, NULL);
 }
 

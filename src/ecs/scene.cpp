@@ -161,7 +161,9 @@ void Scene::call_update()
 
     static sre::timeStamp dt_accumulated;
     dt_accumulated += engine.last_dt;
-    while (dt_accumulated > 0) { // pUpdate phase region
+    if (dt_accumulated < 0)
+        camera.clamp_position(); // At least clamp the camera to the border whenever there are no updates
+    else do { // pUpdate phase region
         dt_accumulated -= engine.phys_target_dt;
 
         pupdate();
@@ -179,7 +181,7 @@ void Scene::call_update()
             const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position - ent.lastVelocity;
         }
         camera.pupdate();
-    }
+    }  while (dt_accumulated > 0);
 
     updated.fire();
 }

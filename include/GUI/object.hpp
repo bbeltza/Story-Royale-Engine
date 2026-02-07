@@ -217,6 +217,10 @@ namespace sreGUI
         sre::Signal<sre::empty_t> updated{this};
         sre::Signal<sre::empty_t> rendered{this};
     };
+
+    Object* get_root();
+    template <typename T>
+    inline T* get_root() { return dynamic_cast<T*>(get_root()); }
 }
 
 #endif

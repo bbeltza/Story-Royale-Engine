@@ -8,6 +8,8 @@
 
 namespace sre
 {
+    class File;
+
     enum Alignment
     {
         A_LEFT,
@@ -21,6 +23,7 @@ namespace sre
     class Font
     {
     public:
+        Font(const sre::File& from_file, int pt = 12);
         Font(const char *path, int pt = 12);
         ~Font();
 

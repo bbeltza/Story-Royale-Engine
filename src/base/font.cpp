@@ -3,9 +3,12 @@
 
 using namespace sre;
 
-Font::Font(const char *path, int pt)
+Font::Font(const char* path, int pt): Font(sre::File(path), pt)
 {
-    sre::File file(path);
+}
+
+Font::Font(const sre::File& file, int pt)
+{
     if (!file.valid())
         return;
 
@@ -13,12 +16,9 @@ Font::Font(const char *path, int pt)
     m_font = TTF_OpenFontRW(m_rwops, 1, pt);
     if (!m_font)
     {
-        ERROR("Font::Font() could not load font from '%s': %s", path, TTF_GetError());
+        ERROR("Font::Font() could not load font: %s", TTF_GetError());
         if (m_rwops)
-        {
-            SDL_RWclose(m_rwops);
-            m_rwops = NULL;
-        }
+            goto FAIL_CLOSE;
     }
 
     // Setup ascii textures
@@ -30,6 +30,11 @@ Font::Font(const char *path, int pt)
             tex = sre::Image{TTF_RenderUTF8_Solid(m_font, str, sre::col4::WHITE.toSDL())};
         }
     //
+    return;
+
+    FAIL_CLOSE:
+    SDL_RWclose(m_rwops);
+    m_rwops = NULL;
 }
 
 Font::~Font()

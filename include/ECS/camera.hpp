@@ -44,6 +44,9 @@ namespace sreECS
     private:
         void update();
         void pupdate();
+        
+        inline void clamp_position() { if (bounds.size != bounds.size.ZERO)
+                                    position.setclamp(bounds.top_left(), bounds.bottom_right()); }
     };
 }
 

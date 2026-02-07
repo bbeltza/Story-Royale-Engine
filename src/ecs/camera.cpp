@@ -15,8 +15,8 @@ void Camera::pupdate()
 {
     if (controller && controller->enabled)
         controller->on_pupdate(*this);
-    
-    if (bounds.size != bounds.size.ZERO) { position.setclamp(bounds.top_left(), bounds.bottom_right()); }
+
+    clamp_position();
 
     if (effect && effect->enabled)
         position += effect->on_process();

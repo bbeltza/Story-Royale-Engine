@@ -5,6 +5,8 @@ using namespace sre;
 
 void Font::render(const sre::rect2Dut &bounds, const sre::col4 &color, const char *text, int count, Alignment halignment, Alignment valignment)
 {
+    if (text[0] == '\0')
+        return;
     if (count == 0)
         return;
     if (bounds.size.x <= 0)
@@ -22,6 +24,8 @@ void Font::render(const sre::rect2Dut &bounds, const sre::col4 &color, const cha
 
         TTF_MeasureText(m_font, text, width, NULL, &last_begin);
         int end = last_begin;
+        assert(end != 0);
+        
         for (int j = 0; j < end; j++)
         {
             char chr = text[j];
@@ -110,7 +114,7 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
         }
         else
         {
-            char utf8[8] = { '\0' };
+            char utf8[8];
             int codepoint;
             n += str_to_utf8chr(text + n, utf8);
 

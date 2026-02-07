@@ -7,12 +7,15 @@
 namespace sre
 {
     using EventQueue = std::queue<sre::Event>;
+    using EventMutex = std::mutex;
+    using EventGuard = std::lock_guard<EventMutex>;
 }
 
 static sre::EventQueue queue;
+static sre::EventMutex mutex;
 sre::Signal<sre::Event> sre::onEvent;
 
-int __signal_events(void* data, SDL_Event* ev)
+int __signal_events(SDL_Event* ev)
 {
     sre::Event current;
 
@@ -61,6 +64,8 @@ int __signal_events(void* data, SDL_Event* ev)
     default:
         return 1;
     }
+
+    sre::EventGuard guard{mutex};
     queue.push(std::move(current));
 
     return 1;
@@ -68,6 +73,8 @@ int __signal_events(void* data, SDL_Event* ev)
 
 void __queue_events()
 {
+    sre::EventGuard guard{mutex};
+    
     while (!queue.empty())
     {
         sre::onEvent.fire(queue.front());

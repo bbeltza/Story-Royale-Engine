@@ -77,11 +77,10 @@ void __display_render()
 		engine.video->camera = current->camera.position;
 
 		//// Aliases for the background and the foreground (kind of old)
-		const sre::col4 bg{current->background};
 		const sre::col4& fg = current->foreground;
 
 		//// Clearing the screen with the background color
-		engine.video->draw_clear(engine.video, &bg);
+		engine.video->draw_clear(engine.video, &current->background);
 
 		sre::beforeRender.fire();
 
@@ -98,7 +97,7 @@ void __display_render()
 		engine.video->camera.x = 0;
 		engine.video->camera.y = 0;
 
-		engine.video->draw_clear(engine.video, NULL);
+		engine.video->draw_clear(engine.video, &sre::col4::BLACK);
 		sre::beforeRender.fire();
 	}
 
