@@ -32,6 +32,16 @@ namespace sre
         vec2ut pts[] = { pts_args... };
         return draw(DDLines{use_camera ? SRE_DRAWFLAGS_USECAM : 0, { color.r, color.g, color.b, color.a }, sizeof...(pts_args), 0, pts});
     }
+
+    // RAII render/draw clip wrapper
+    class DrawClip
+    {
+        bool aquired = false; // Classes are at least 1 byte minimum, so use this space to be more safe for errors :=)
+        public:
+        constexpr DrawClip() = default;
+        DrawClip(sre::rect2Dut rect): aquired(sre_draw_clipbegin(rect) == 0) {}
+        ~DrawClip() { if (aquired) sre_draw_clipend(); }
+    };
 }
 
 #endif

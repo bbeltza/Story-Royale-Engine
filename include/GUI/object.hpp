@@ -31,7 +31,8 @@ namespace sreGUI
         enum FlagsEnum
         {
             F_ENABLED = ut_bit(0),
-            F_QUERY = ut_bit(2)
+            F_QUERY = ut_bit(1),
+            F_CLIP = ut_bit(2)
         };
         // Flags that control the behavior of the object and its children
         sre::flags32 flags = {F_ENABLED, F_QUERY};

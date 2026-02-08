@@ -193,6 +193,8 @@ int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTextur
 		return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, 0, NULL, flip);
 }
 
+static const sre_vec2ut VEC2_ZERO = { 0, 0 };
+
 int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data)
 {
 	sresdlrender_texture(data->texture.texture)
@@ -201,12 +203,10 @@ int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRText
 	if (data->texture.rect.w == 0 || data->texture.rect.h == 0) return 0;
 	if (data->texture.rect.w < 0 || data->texture.rect.h < 0) return -1;
 
-	static const sre_vec2ut ZERO = { 0, 0 };
-
 	int usecam = data->texture.flags & SRE_DRAWFLAGS_USECAM;
 	SDL_RendererFlip flip = (data->texture.flags & SRE_DRAWFLAGS_FLIPX ? SDL_FLIP_HORIZONTAL : 0) | (data->texture.flags & SRE_DRAWFLAGS_FLIPY ? SDL_FLIP_VERTICAL : 0);
 	SDL_FRect render_rect;
-	sresdlrender_coordsr(video, usecam, &data->texture.rect, &render_rect, ZERO);
+	sresdlrender_coordsr(video, usecam, &data->texture.rect, &render_rect, VEC2_ZERO);
 
 	if (SDL_SetTextureColorMod(texture, data->texture.modulate.r, data->texture.modulate.g, data->texture.modulate.b)) return -1;
 	if (SDL_SetTextureAlphaMod(texture, data->texture.modulate.a)) return -1;
@@ -216,4 +216,21 @@ int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRText
 	if (!region.h && SDL_QueryTexture(texture, NULL, NULL, NULL, &region.h) < 0) return -1;
 
 	return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, data->angle, NULL, flip);
+}
+
+int sresdlrenderer_clip(const sre_videodriver* video, const sre_rect2Dut* rect)
+{
+	if (!rect)
+		return SDL_RenderSetClipRect(video->userdata, NULL);
+
+	SDL_FRect clip_frect;
+	SDL_Rect clip_rect;
+	sresdlrender_coordsr(video, false, rect, &clip_frect, VEC2_ZERO);
+
+	clip_rect.x = (int)clip_frect.x;
+	clip_rect.y = (int)clip_frect.y;
+	clip_rect.w = (int)clip_frect.w;
+	clip_rect.h = (int)clip_frect.h;
+
+	return SDL_RenderSetClipRect(video->userdata, &clip_rect);
 }

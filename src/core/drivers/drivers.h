@@ -30,6 +30,7 @@ struct sre_videodriver
 
 
 	SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
+	SRE_DRAW_FUNC(draw_clip, const sre_rect2Dut* rect);
 	
 	SRE_DRAW_FUNC(draw_fill, const sre_DDFill* data);
 	SRE_DRAW_FUNC(draw_line, const sre_DDLine* data);
@@ -58,6 +59,10 @@ struct sre_videodriver
 	const sre_Texture* const texture_fl; // Texture free list
 	const sre_usize texture_flcount;
 	const sre_usize texture_flcapacity;
+
+	const sre_rect2Dut* clipstack_base;
+	const sre_usize clipstack_pos;
+	const sre_usize clipstack_size;
 
 	sre_vec2ut size;
 	sre_vec2ut center;

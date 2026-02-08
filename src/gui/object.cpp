@@ -1,6 +1,7 @@
 #include <GUI/object.hpp>
 #include <GUI/component.hpp>
 #include <Core/Display.hpp>
+#include <Core/Draw.hpp>
 
 #include <utils/mem.h>
 
@@ -200,8 +201,13 @@ void Object::call_update()
 
 void Object::call_render()
 {
+    bool has_clip = flags.has(F_CLIP);
+
     pre_render();
 
+    if (has_clip)
+        sre_draw_clipbegin(m_absolute);
+    
     for (auto& comp : components)
     {
         if (comp.enabled)
@@ -214,10 +220,20 @@ void Object::call_render()
 
         obj.call_render();
     }
+
+    if (has_clip)
+        sre_draw_clipend();
+
     post_render();
 
-    /* 
-    Display::DrawRectangle(m_absolute, sre::col4::RED, sre::vec2f::ZERO, Display::M_STROKE, DISPLAY_DONT_CENTER);
+    /*
+    sre::draw(sre::DDRect{
+        SRE_DRAWFLAGS_STROKE,
+        sre::col4::RED,
+
+        m_absolute,
+        sre::vec2ut::ZERO
+    });
     */
 
     rendered.fire();

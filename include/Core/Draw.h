@@ -154,6 +154,20 @@ typedef struct sre_DDRTexture
  */
 int sre_draw(sre_DrawType type, const void* data);
 
+/* (Experimental and unimplemented)
+ * Sets up and begins the drawing clip rect
+ * @param rect The rectangle to clip in
+ * 
+ * @return 0 on success, -1 on error
+ */
+int sre_draw_clipbegin(sre_rect2Dut rect);
+
+/*
+ * Ends the drawing clip rect
+ * Can be called if there's no drawing clip rect
+ */
+void sre_draw_clipend();
+
 SRE_CAPI_END
 
 #endif

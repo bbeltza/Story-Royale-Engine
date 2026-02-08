@@ -124,6 +124,7 @@ void __end_engine()
     
     engine.video->quit(engine.video);
     sre_delete((void*)engine.video->texture_fl);
+    sre_delete((void*)engine.video->clipstack_base);
     sre_delete(engine.video->textures);
     sre_delete(engine.video);
     

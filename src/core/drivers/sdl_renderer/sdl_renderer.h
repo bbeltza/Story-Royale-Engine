@@ -27,6 +27,8 @@ extern int sresdlrenderer_tex_size(const sre_videodriver* video, void* texture, 
 extern SDL_PixelFormatEnum sresdlrenderer_tex_format(const sre_videodriver* video, void* texture);
 extern void sresdlrenderer_tex_destroy(const sre_videodriver* video, void* texture);
 
+extern int sresdlrenderer_clip(const sre_videodriver* video, const sre_rect2Dut* rect);
+
 SRE_CAPI_END
 
 #endif

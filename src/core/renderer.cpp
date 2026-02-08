@@ -29,6 +29,12 @@ void __setup_renderer()
 		const_cast<sre_usize &>(engine.video->texture_flcapacity) = SRE_TEXTURE_BASECOUNT;
 	}
 
+	if (engine.video->draw_clip)
+	{
+		const_cast<sre_rect2Dut* &>(engine.video->clipstack_base) = new sre::rect2Dut[SRE_TEXTURE_BASECOUNT]; // I think I'll make both textures and clip rect stacks start at the same size
+		const_cast<sre_usize &>(engine.video->clipstack_size) = SRE_TEXTURE_BASECOUNT;
+	}
+
 	engine.video->vsync(engine.video, 1);
 	engine.video->scale = 1;
 

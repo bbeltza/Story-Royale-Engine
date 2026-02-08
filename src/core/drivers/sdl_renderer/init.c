@@ -28,6 +28,8 @@ int sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
     video->tex_size = sresdlrenderer_tex_size;
     video->tex_destroy = sresdlrenderer_tex_destroy;
 
+    video->draw_clip = sresdlrenderer_clip;
+
     video->texture_size = sizeof(SDL_Texture*);
     return 0;
 }
