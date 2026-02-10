@@ -16,6 +16,9 @@
     using sre_rect2Dut = sre::rect2Dut;
     using sre_rect2Di = sre::rect2Di;
 #else
+    #include <Datatypes/CVector.h>
+    SRE_VEC2MAKE(sre_unit, ut);
+
     typedef struct
     {
         sre_u8 r;
@@ -24,11 +27,6 @@
         sre_u8 a;
     } sre_col4;
 
-    typedef struct
-    {
-        sre_unit x;
-        sre_unit y;
-    } sre_vec2ut; // TODO: Add C compatible vec2 templates (with macros)
     typedef union
     {
         struct

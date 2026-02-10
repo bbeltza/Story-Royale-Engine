@@ -193,7 +193,7 @@ int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTextur
 		return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, 0, NULL, flip);
 }
 
-static const sre_vec2ut VEC2_ZERO = { 0, 0 };
+static const sre_vec2ut VEC2_ZERO = SRE_VEC2SCALAR(0);
 
 int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data)
 {

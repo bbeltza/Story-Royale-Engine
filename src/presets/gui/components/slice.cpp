@@ -10,8 +10,6 @@ void Slice::on_render(const sre::rect2Dut &dimensions)
     
     const sre::vec2i size = texture->size();
     const sre::vec2i region_corners2 = region_corners * 2;
-    if (region_corners2.x >= size.x || region_corners2.y >= size.y)
-        WARN("Slice::on_render(): It is preferable to have the corner's region be less than half the size of the texture, otherwise, the edges may not be rendered correctly");
 
     sre::DDTexture data{ // Top left corner + texture render data setup!
         0,
@@ -44,10 +42,30 @@ void Slice::on_render(const sre::rect2Dut &dimensions)
     sre::draw(data); 
     //
 
+    //
+    auto check_yregion = [&]()
+    {
+        if (data.region.size.y >= 0)
+            return;
+        data.region.size.y = -data.region.size.y;
+        data.region.position.y -= data.region.size.y;
+    };
+
+    auto check_xregion = [&]()
+    {
+        if (data.region.size.x >= 0)
+            return;
+        data.region.size.x = -data.region.size.x;
+        data.region.position.x -= data.region.size.x;
+    };
+    //
+
     // Edges!!!
     // Left edge
     data.region.position.y = region_corners.y;
     data.region.size.y = size.y - region_corners2.y;
+    check_yregion();
+
     data.rect.position.y -= region_corners.y;
     data.rect.size.y = dimensions.size.y - region_corners2.y;
     sre::draw(data);
@@ -62,6 +80,8 @@ void Slice::on_render(const sre::rect2Dut &dimensions)
     data.region.position.x = region_corners.x;
     data.region.position.y = size.y - region_corners.y;
     data.region.size.x = size.x - region_corners2.x;
+    check_xregion();
+
     data.region.size.y = region_corners.y;
     data.rect.position.y = dimensions.position.y + dimensions.size.y;
     data.rect.position.x -= region_corners.x;
@@ -78,6 +98,9 @@ void Slice::on_render(const sre::rect2Dut &dimensions)
     // Center
     data.region.position = region_corners;
     data.region.size = size - region_corners2;
+    check_xregion();
+    check_yregion();
+
     data.rect.position = dimensions.position + region_corners;
     data.rect.size = dimensions.size - region_corners2;
     data.anchor = sre::vec2ut::ZERO;
