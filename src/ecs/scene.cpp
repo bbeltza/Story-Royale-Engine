@@ -7,6 +7,25 @@
 
 #include "../internal.h"
 
+#ifdef _CRT_BEGIN_C_HEADER
+    #define malloc_aligned(size) _aligned_malloc(size, _Arena::PAGE_SIZE)
+    #define free_aligned(block) _aligned_free(block)
+#elif _POSIX_C_SOURCE >= 200112L || XOPEN_SOURCE >= 600
+    static inline void* _malloc_aligned(size_t size, size_t alignment) // Need a stupid function for posix because posix_memalign doesn't return the pointer but instead it is passed as a parameter
+    {
+        void* block;
+        if (posix_memalign(&block, alignment, size) != 0)
+            return NULL;
+
+        return block;
+    }
+    #define malloc_aligned(size) _malloc_aligned(size, _Arena::PAGE_SIZE)
+    #define free_aligned(block) free(block)
+#else
+    #define malloc_aligned(size) operator new(size)
+    #define free_aligned(block) operator delete(block)
+#endif
+
 sre::vec2ut sreECS::mouse_worldcoords() { return Scene::current()->camera.toWorldSpace(sre::mouse_screencoords()); }
 
 using namespace sreECS;
@@ -15,13 +34,13 @@ const Entity* Scene::s_querying = NULL;
 
 Scene::_Arena* Scene::new_arena()
 {
-    _Arena* buff = (_Arena*)operator new(_Arena::PAGE_SIZE); // Consider using alligned_alloc
+    _Arena* buff = static_cast<_Arena*>(malloc_aligned(sizeof(*buff)));
     buff->next = NULL;
 
     return buff;
 }
 
-Scene::Scene(): m_arenabuff(new_arena())
+Scene::Scene(): m_arenabuff(new_arena()), m_entity_end(reinterpret_cast<Entity*>(m_arenabuff->data))
 {
 }
 
@@ -30,10 +49,11 @@ Scene::~Scene()
     for (Entity& ent : *this)
         ent.~Entity();
 
+    assert(m_arenabuff != NULL);
     do
     {
         _Arena* next = m_arenabuff->next;
-        operator delete(m_arenabuff);
+        free_aligned(m_arenabuff);
         m_arenabuff = next;
     } while (m_arenabuff);
     
@@ -59,66 +79,67 @@ Entity* Scene::alloc_entity(size_t size, size_t* _realsize)
     assert(size >= sizeof(Entity));
 
     Entity* result = NULL;
-
     size_t realsize = size;
 
-    for (auto it = m_freelist.begin(); it != m_freelist.end(); it++)
+    // TODO: add code that detects if `size` is larger than the arena page size and if so just mallocate outsize the arena
+    if (realsize > _Arena::SIZE)
     {
-        auto& fl = *it;
+        result = static_cast<Entity*>(operator new(realsize));
+        goto ENTITY_SETUP;
+    }
+    //
 
-        if (fl.size > realsize)
+    for (auto& ent : m_freelist)
+    {
+        if (ent->m_size < realsize)
             continue;
-        
-        result = entity_at(fl.offset);
-        result->m_offset = fl.offset;
-        if (fl.size == realsize)
+
+        result = ent;
+        if (ent->m_size == realsize)
         {
-            m_freelist.erase(it);
-            it--;
+            ent = m_freelist.back();
+            m_freelist.pop_back();
         }
         else
         {
-            fl.size -= realsize;
-            fl.offset += realsize;
+            size_t newsize = ent->m_size - realsize;
+
+            ent += realsize;
+            ent->m_size = newsize;
         }
     }
 
-    if (result) goto setup_entity;
+    if (result) goto ENTITY_SETUP;
 
     if (m_entities.empty())
     {
         result = reinterpret_cast<Entity*>(m_arenabuff->data);
-        result->m_offset = 0;
-        m_entities.push_back(0);
+        m_entity_end = reinterpret_cast<Entity*>(m_arenabuff->data + realsize);
     }
     else
     {
-        size_t backoffset = m_entities.back();
-        size_t accumulate = 0;
-        _Arena* curr = m_arenabuff;
-        while (backoffset > _Arena::SIZE)
+        result = m_entity_end;
+        int remaining_diff = (reinterpret_cast<sre::byte*>(result) + realsize) - (m_arenabuff->data + m_arenabuff->SIZE);
+        if (remaining_diff > 0)
         {
-            backoffset -= _Arena::SIZE;
-            accumulate += _Arena::SIZE;
-            curr = curr->next;
+            // Append remaining chunk into the freelist in case of it being used
+            m_entity_end->m_size = remaining_diff;
+            m_freelist.push_back(m_entity_end);
+            //
+
+            _Arena* arena = new_arena();
+            arena->next = m_arenabuff;
+            m_arenabuff = arena;
+            m_entity_end = reinterpret_cast<Entity*>(arena->data);
+            result = m_entity_end;
         }
-        
-        size_t backsize = reinterpret_cast<Entity*>(curr->data + backoffset)->m_size;
-        size_t nextoffset = backoffset + backsize;
-        if (nextoffset + realsize > _Arena::SIZE)
-        {
-            curr->next = new_arena();
-            curr = curr->next;
-            nextoffset = 0;
-            accumulate += _Arena::SIZE;
-        }
-        result = reinterpret_cast<Entity*>(curr->data + nextoffset);
-        result->m_offset = nextoffset + accumulate;
-        m_entities.push_back(result->m_offset);
+        m_entity_end = reinterpret_cast<Entity*>(reinterpret_cast<sre::byte*>(m_entity_end) + realsize);
     }
+    
+    ENTITY_SETUP:
+    assert(result != NULL);
 
-
-    setup_entity:
+    m_entities.push_back(result);
 
     if (_realsize) *_realsize = realsize;
 
@@ -126,20 +147,6 @@ Entity* Scene::alloc_entity(size_t size, size_t* _realsize)
     result->m_size = realsize;
 
     return result;
-}
-
-Entity* Scene::entity_at(size_t offset) const
-{
-    _Arena* curr = m_arenabuff;
-    while (offset > _Arena::SIZE)
-    {
-        offset -= _Arena::SIZE;
-        curr = curr->next;
-    }
-
-    assert(curr != NULL);
-
-    return reinterpret_cast<Entity*>(curr->data + offset);
 }
 
 void Scene::call_update()
@@ -189,21 +196,19 @@ void Scene::call_update()
 void Scene::call_render()
 {
     // Sort entities by z_index. Cannot use default std::sort because of the need to access the entity buffer with entity_at()
-    // So I made my own sorting algorithm :r)
+    // So I made my own sorting algorithm :r) (It's literally just gnome sort ahahah)
     for (auto i2 = m_entities.begin();;)
     {
         auto i1 = i2++;
         if (i2 == m_entities.end())
             break;
 
-        Entity* entity1 = entity_at(*i1);
-        Entity* entity2 = entity_at(*i2);
+        Entity*& entity1 = *i1;
+        Entity*& entity2 = *i2;
 
         if (entity1->z_index > entity2->z_index)
         {
-            *i1 ^= *i2;
-            *i2 ^= *i1;
-            *i1 ^= *i2;
+            std::swap(entity1, entity2); // Might still keep up the xor swapping!!
             i2--;
         }
     }

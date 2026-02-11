@@ -13,7 +13,7 @@ namespace sreECS
     {
         friend struct Scene;
 
-        size_t m_offset;
+        //size_t m_offset;
         // Total allocated size in the Scene's arena
         size_t m_size;
         // Current scene parent

@@ -20,12 +20,15 @@ Entity::~Entity()
 		::operator delete(ptr);
 	}
 
-	m_parent->m_freelist.push_back({ m_offset, m_size });
+	if (m_size < Scene::_Arena::SIZE)
+		m_parent->m_freelist.push_back(this);
+	
 	for (auto it = m_parent->m_entities.begin(); it != m_parent->m_entities.end(); it++)
 	{
-		if (*it != m_offset) continue;
+		if (*it != this) continue;
 
-		m_parent->m_entities.erase(it);
+		*it = m_parent->m_entities.back();
+		m_parent->m_entities.pop_back();
 		break;
 	}
 }

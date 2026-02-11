@@ -44,13 +44,10 @@ namespace sreECS
 
         // Get the current scene, with a template in which `T` is a type inherited by Scene
         // @returns a pointer to a current scene, or `nullptr` if there's no current scene, or if the current scene isn't or doesn't inherit from `T`
-        template <typename T> static inline T* current() { return current()->cast<T>(); /* Scary ! Note that if current() is nullptr then dynamic_cast will just return nullptr */ }
+        template <typename T> static inline T* current() { return dynamic_cast<T*>(current()); }
 
-        // Get the current scene, without templates
+        // Get the current scene, as the default `Scene` type
         static Scene* current();
-
-        // Calls dynamic_cast to it. It's also fine to just use dynamic_cast
-        template <typename T> inline T* cast() const { return dynamic_cast<T*>(this); }
 
         // Entities
 
@@ -73,11 +70,11 @@ namespace sreECS
             using reference = value_type&;
 
             Iterator() = default;
-            Iterator(const size_t& ptr, const Scene* _this): m_ptr(&ptr), m_scene(_this)
+            Iterator(Entity* const& ptr): m_ptr(&ptr)
             {
             }
 
-            inline reference operator *() const { return *m_scene->entity_at(*m_ptr); }
+            inline reference operator *() const { return **m_ptr; }
 
             inline Iterator& operator ++()
             {
@@ -111,17 +108,16 @@ namespace sreECS
                 return m_ptr != other.m_ptr;
             }
         private:
-            const size_t* m_ptr = NULL;
-            const Scene* m_scene = NULL;
+            Entity* const* m_ptr = NULL;
         };
         using ReverseIterator = std::reverse_iterator<Iterator>;
 
 
         Iterator begin() const {
-            return {*m_entities.begin(), this};
+            return {*m_entities.begin()};
         }
         Iterator end() const {
-            return {*(&m_entities.back() + 1), this};
+            return {*(&m_entities.back() + 1)};
         }
 
         ReverseIterator rbegin() const {
@@ -135,22 +131,18 @@ namespace sreECS
         struct _Arena
         {
             static constexpr size_t PAGE_SIZE = 4096;
-            static constexpr size_t SIZE = PAGE_SIZE - sizeof(_Arena*);
+            static constexpr size_t SIZE = PAGE_SIZE - sizeof(size_t);
 
             _Arena* next;
-            sre::byte data[1];
+            sre::byte data[SIZE];
         };
-        struct _FreeList
-        {
-            size_t offset;
-            size_t size;
-        };
+
         _Arena* m_arenabuff;
-        std::vector<size_t> m_entities;
-        std::vector<_FreeList> m_freelist;
+        Entity* m_entity_end;
+        std::vector<Entity*> m_entities;
+        std::vector<Entity*> m_freelist;
 
         Entity* alloc_entity(size_t size, size_t* realsize);
-        Entity* entity_at(size_t offset) const;
 
         static _Arena* new_arena();
     private:
