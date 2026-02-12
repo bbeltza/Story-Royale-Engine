@@ -11,7 +11,7 @@ namespace sreGUI
 
     struct Image : public Component
     {
-        sre::Texture* texture = NULL;
+        const sre::Texture* texture = NULL;
         sre::col4 modulate = sre::col4::WHITE;
 
         void fit(Transform& transform);

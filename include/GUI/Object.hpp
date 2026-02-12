@@ -45,6 +45,9 @@ namespace sreGUI
         static void *operator new(std::size_t size)
         {
             auto ptr = static_cast<Object *>(::operator new(size));
+            #ifndef NDEBUG // Easier for catching lack of initialization bugs
+                memset(ptr, 0, size);
+            #endif
             ptr->m_parent = NULL;
 
             return ptr;
@@ -72,6 +75,9 @@ namespace sreGUI
         {
             static_assert(std::is_base_of<Object, T>::value, "T must be derived from sreGUI::Object");
             auto ptr = static_cast<Object *>(::operator new(sizeof(T)));
+            #ifndef NDEBUG
+                memset(ptr, 0, sizeof(T));
+            #endif
             ptr->m_parent = this;
             return static_cast<T*>(ptr);
         }
@@ -87,7 +93,13 @@ namespace sreGUI
         static void remove_root(bool destroy_old=true);
 
         template <typename T=Object>
-        inline T *get_parent() const { return dynamic_cast<T*>(m_parent); }
+        inline T *get_parent() const
+        {
+            #ifdef assert
+                assert(this != NULL && "Attempting to return parent of NULL object!");
+            #endif
+            return dynamic_cast<T*>(m_parent);
+        }
 
     public:
         // Iterating

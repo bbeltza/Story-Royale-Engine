@@ -22,7 +22,7 @@ void* operator new(size_t size)
 	;
 	size_t* block = reinterpret_cast<size_t*>(malloc(newsize));
 	if (!block)
-		std::terminate();
+		throw std::bad_alloc();
 
 	block[0] = size;
 	SDL_AtomicAdd(&SR_ALLOCATED_SIZE, static_cast<int>(size));
@@ -31,7 +31,6 @@ void* operator new(size_t size)
 	LOG("operator new(%zd): %zd, %zd", size, SDL_AtomicGet(&SR_ALLOCATED_SIZE), SDL_AtomicGet(&SR_ALLOCATED_BLOCKS));
 
 	#ifdef __unix__ // Uhmmm I think new/delete blocks are aligned to 2 pointers on unix-like systems
-					// I'll try whatever number to align it correctly
 		block += 2;
 	#else
 		block++;
