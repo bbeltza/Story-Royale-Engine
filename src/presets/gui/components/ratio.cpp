@@ -1,4 +1,4 @@
-#include <GUI/Components/ratio.hpp>
+#include <GUI/Components/Ratio.hpp>
 
 using namespace sreGUI;
 

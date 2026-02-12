@@ -1,5 +1,5 @@
-#include <ECS/CameraControllers/entity.hpp>
-#include <ECS/entity.hpp>
+#include <ECS/CameraControllers/Entity.hpp>
+#include <ECS/Entity.hpp>
 #include <utils/math.h>
 
 #include <Core/Runtime.hpp>

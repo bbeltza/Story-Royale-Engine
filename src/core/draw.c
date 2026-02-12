@@ -46,8 +46,10 @@ int sre_draw(sre_DrawType type, const void* data)
 	return ret;
 }
 
-int sre_draw_clipbegin(sre_rect2Dut rect)
+int sre_draw_clipbegin(const sre_rect2Dut* _rect)
 {
+	sre_rect2Dut rect = *_rect;
+
 	if (!engine.video->clipstack_base)
 	{
 		static bool unsupport = false;

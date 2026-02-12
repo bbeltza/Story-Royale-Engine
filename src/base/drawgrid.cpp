@@ -3,7 +3,7 @@
 
 #include <Base/Grid.hpp>
 
-#include <ECS/scene.hpp>
+#include <ECS/Scene.hpp>
 
 int sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin, s32 flags)
 {

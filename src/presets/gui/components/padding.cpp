@@ -1,4 +1,4 @@
-#include <GUI/Components/padding.hpp>
+#include <GUI/Components/Padding.hpp>
 
 using namespace sreGUI;
 

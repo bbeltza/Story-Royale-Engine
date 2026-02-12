@@ -1,4 +1,4 @@
-#include <GUI/Components/list.hpp>
+#include <GUI/Components/List.hpp>
 
 using namespace sreGUI;
 

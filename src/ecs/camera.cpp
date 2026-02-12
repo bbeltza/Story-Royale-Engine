@@ -1,5 +1,5 @@
-#include <ECS/scene.hpp>
-#include <ECS/camera.hpp>
+#include <ECS/Scene.hpp>
+#include <ECS/Camera.hpp>
 
 #include <Core/Display.hpp>
 

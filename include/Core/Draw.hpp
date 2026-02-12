@@ -39,7 +39,7 @@ namespace sre
         bool aquired = false; // Classes are at least 1 byte minimum, so use this space to be more safe for errors :=)
         public:
         constexpr DrawClip() = default;
-        DrawClip(sre::rect2Dut rect): aquired(sre_draw_clipbegin(rect) == 0) {}
+        DrawClip(sre::rect2Dut rect): aquired(sre_draw_clipbegin(&rect) == 0) {}
         ~DrawClip() { if (aquired) sre_draw_clipend(); }
     };
 }

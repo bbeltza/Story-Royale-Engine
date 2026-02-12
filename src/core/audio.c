@@ -20,7 +20,7 @@ bool sre_audioconfigure(bool mono, int freq)
 {
     if (engine.audio_device)
         SDL_CloseAudioDevice(engine.audio_device);
-    
+
     SDL_AudioSpec desired = engine.audio_spec;
     desired.channels = 2 - mono;
     desired.freq = freq; // Should have an enum for this...

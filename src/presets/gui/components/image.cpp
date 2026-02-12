@@ -1,5 +1,5 @@
-#include <GUI/Components/image.hpp>
-#include <GUI/Components/transform.hpp>
+#include <GUI/Components/Image.hpp>
+#include <GUI/Components/Transform.hpp>
 #include <Core/Draw.hpp>
 
 using namespace sreGUI;

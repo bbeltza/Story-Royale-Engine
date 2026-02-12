@@ -1,5 +1,5 @@
-#include <ECS/entity.hpp>
-#include <ECS/Components/velocity.hpp>
+#include <ECS/Entity.hpp>
+#include <ECS/Components/Velocity.hpp>
 
 #include <Core/Runtime.hpp>
 

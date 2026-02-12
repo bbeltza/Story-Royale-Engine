@@ -1,5 +1,5 @@
-#include <ECS/entity.hpp>
-#include <ECS/scene.hpp>
+#include <ECS/Entity.hpp>
+#include <ECS/Scene.hpp>
 
 using namespace sreECS;
 

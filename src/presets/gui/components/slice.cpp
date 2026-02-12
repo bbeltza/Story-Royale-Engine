@@ -20,7 +20,7 @@ void Slice::on_render(const sre::rect2Dut &dimensions)
 
         texture->handle(),
         { sre::vec2i::ZERO, region_corners }
-    }; 
+    };
     sre::draw(data);
 
     // Top-right corner

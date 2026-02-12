@@ -1,4 +1,4 @@
-#include <GUI/Components/transform.hpp>
+#include <GUI/Components/Transform.hpp>
 
 using namespace sreGUI;
 

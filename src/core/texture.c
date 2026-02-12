@@ -64,6 +64,8 @@ sre_Texture sre_tex_gen()
     return 0;
 }
 
+void deferred_texdestroy(void* texture) { engine.video->tex_destroy(engine.video, texture); }
+
 void sre_tex_destroy(sre_Texture id)
 {
     if (!id) return;
@@ -94,7 +96,7 @@ void sre_tex_destroy(sre_Texture id)
         (*(sre_usize*)&engine.video->texture_flcount)++;
     }
 
-    engine.video->tex_destroy(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size);
+    sre_defer(deferred_texdestroy, (char*)engine.video->textures + (id - 1) * engine.video->texture_size);
 }
 
 struct defer_texbind

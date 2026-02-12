@@ -1,4 +1,4 @@
-#include <GUI/Components/fill.hpp>
+#include <GUI/Components/Fill.hpp>
 
 #include <Core/Draw.hpp>
 

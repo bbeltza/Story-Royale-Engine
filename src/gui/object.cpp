@@ -1,5 +1,5 @@
-#include <GUI/object.hpp>
-#include <GUI/component.hpp>
+#include <GUI/Object.hpp>
+#include <GUI/Component.hpp>
 #include <Core/Display.hpp>
 #include <Core/Draw.hpp>
 
@@ -206,7 +206,7 @@ void Object::call_render()
     pre_render();
 
     if (has_clip)
-        sre_draw_clipbegin(m_absolute);
+        sre_draw_clipbegin(&m_absolute);
     
     for (auto& comp : components)
     {

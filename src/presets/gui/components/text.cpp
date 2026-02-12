@@ -1,4 +1,4 @@
-#include <GUI/Components/text.hpp>
+#include <GUI/Components/Text.hpp>
 
 using namespace sreGUI;
 

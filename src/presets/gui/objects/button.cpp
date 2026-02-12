@@ -1,4 +1,4 @@
-#include <GUI/Presets/button.hpp>
+#include <GUI/Presets/Button.hpp>
 
 #include <Core/Event.hpp>
 #include <Core/Display.hpp>

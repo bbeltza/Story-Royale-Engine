@@ -3,8 +3,8 @@
 #include <Core/Object.hpp>
 #include <Core/Display.hpp>
 
-#include <ECS/scene.hpp>
-#include <GUI/object.hpp>
+#include <ECS/Scene.hpp>
+#include <GUI/Object.hpp>
 
 #include <cassert>
 

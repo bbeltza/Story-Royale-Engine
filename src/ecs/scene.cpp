@@ -1,6 +1,6 @@
-#include <ECS/scene.hpp>
-#include <ECS/entity.hpp>
-#include <ECS/component.hpp>
+#include <ECS/Scene.hpp>
+#include <ECS/Entity.hpp>
+#include <ECS/Component.hpp>
 
 #include <Core/Display.hpp>
 #include <Core/Input.hpp>

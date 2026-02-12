@@ -1,5 +1,5 @@
-#include <ECS/Components/shape.hpp>
-#include <ECS/scene.hpp>
+#include <ECS/Components/Shape.hpp>
+#include <ECS/Scene.hpp>
 
 #include <Core/Draw.hpp>
 
