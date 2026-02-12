@@ -13,13 +13,13 @@ struct sre_FVFT
 	bool (*open)(sre_FileImpl* file, const char* path, int mode);
 	void (*close)(sre_FileImpl file);
 
-	sre_usize (*read)(sre_FileImpl file, void* data, sre_usize size);
-	sre_usize (*write)(sre_FileImpl file, const void* data, sre_usize size);
+	size_t (*read)(sre_FileImpl file, void* data, size_t size);
+	size_t (*write)(sre_FileImpl file, const void* data, size_t size);
 
 	bool (*seek)(sre_FileImpl file, long offset, sre_seek origin);
 	long (*tell)(sre_FileImpl file);
 
-	sre_usize (*size)(sre_FileImpl file);
+	size_t (*size)(sre_FileImpl file);
 	const sre_byte* (*begin)(sre_FileImpl file); // Get beginning of file, returns NULL on stdio's implementation
 };
 
@@ -70,7 +70,7 @@ bool sre_fileopen(sre_File* file, const char* path, int mode)
 		{
 			file->vfptr = &SRE_STDIO_VFT;
 
-			sre_usize pathlen = strlen(relpath) + __game_lenres;
+			size_t pathlen = strlen(relpath) + __game_lenres;
 			ut_dynsalloc(char, fullpath, pathlen);
 			strcpy(fullpath, __game_pwdres);
 			strcat(fullpath, relpath);
@@ -109,7 +109,7 @@ void sre_fileclose(sre_File* file)
 	file->vfptr->close(file->impl);
 }
 
-sre_usize sre_fileread(const sre_File* file, void* data, sre_usize size)
+size_t sre_fileread(const sre_File* file, void* data, size_t size)
 {
 	if (!file || !data || !size) return 0;
 	if (!file->impl) return 0;
@@ -118,7 +118,7 @@ sre_usize sre_fileread(const sre_File* file, void* data, sre_usize size)
 	return file->vfptr->read(file->impl, data, size);
 }
 
-sre_usize sre_filewrite(const sre_File* file, const void* data, sre_usize size)
+size_t sre_filewrite(const sre_File* file, const void* data, size_t size)
 {
 	if (!file || !data || !size) return 0;
 	if (!file->impl) return 0;
@@ -145,7 +145,7 @@ long sre_filetell(const sre_File* file)
 	return file->vfptr->tell(file->impl);
 }
 
-sre_usize sre_filesize(const sre_File* file)
+size_t sre_filesize(const sre_File* file)
 {
 	if (!file) return 0;
 	if (!file->impl) return 0;

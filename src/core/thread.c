@@ -99,7 +99,7 @@ static sre_sptr thread_entry(sre_threadinst* inst)
     return res;
 }
 
-sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay, sre_usize stacksize)
+sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay, size_t stacksize)
 {
     sre_threadinst* volatile inst = sre_new(sizeof(sre_threadinst));
     inst->id = 0;

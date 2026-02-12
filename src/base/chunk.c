@@ -13,7 +13,7 @@ const sre_Chunk *sre_fileallocate(const sre_File* file, size_t max_size)
         return NULL;
     }
 
-    sre_usize filesize = sre_filesize(file);
+    size_t filesize = sre_filesize(file);
     if (!filesize)
     {
         WARN("File size will be equal to 0 when allocating chunk");

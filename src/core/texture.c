@@ -39,7 +39,7 @@ sre_Texture sre_tex_gen()
     {
         if (engine.video->textures_count >= engine.video->textures_capacity)
         {
-            sre_usize new_capacity = engine.video->textures_capacity * 2;
+            size_t new_capacity = engine.video->textures_capacity * 2;
             void* ptr = sre_newclear(new_capacity * engine.video->texture_size);
 
             ptr = memcpy(ptr, engine.video->textures, engine.video->textures_capacity * engine.video->texture_size);
@@ -47,11 +47,11 @@ sre_Texture sre_tex_gen()
 
             sre_delete(engine.video->textures);
             *(void**)&engine.video->textures = ptr;
-            *(sre_usize*)&engine.video->textures_capacity = new_capacity;
+            *(size_t*)&engine.video->textures_capacity = new_capacity;
         }
 
         id = (sre_Texture)(1 + engine.video->textures_count);
-        (*(sre_usize*)&engine.video->textures_count)++;
+        (*(size_t*)&engine.video->textures_count)++;
     }
 
     if (engine.video->tex_gen(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size) < 0)
@@ -82,18 +82,18 @@ void sre_tex_destroy(sre_Texture id)
     {
         if (engine.video->texture_flcount >= engine.video->texture_flcapacity)
         {
-            sre_usize new_capacity = engine.video->texture_flcapacity * 2;
+            size_t new_capacity = engine.video->texture_flcapacity * 2;
             void* ptr = sre_newclear(new_capacity * sizeof(sre_Texture));
 
             ptr = memcpy(ptr, engine.video->texture_fl, engine.video->texture_flcapacity * sizeof(sre_Texture));
             assert(ptr);
 
             *(const sre_Texture**)&engine.video->texture_fl = ptr;
-            *(sre_usize*)&engine.video->texture_flcapacity = new_capacity;
+            *(size_t*)&engine.video->texture_flcapacity = new_capacity;
         }
 
         target = (int)engine.video->texture_flcount;
-        (*(sre_usize*)&engine.video->texture_flcount)++;
+        (*(size_t*)&engine.video->texture_flcount)++;
     }
 
     sre_defer(deferred_texdestroy, (char*)engine.video->textures + (id - 1) * engine.video->texture_size);

@@ -55,8 +55,8 @@ void sre_win_resourceinit(void)
 struct impl_Res
 {
     const sre_byte* begin;
-    sre_usize size;
-    sre_usize pos;
+    size_t size;
+    size_t pos;
 };
 
 //
@@ -71,7 +71,7 @@ static bool resource_open(sre_FileImpl* impl, const char* path, int mode)
     }
 
     const sre_byte* begin;
-    sre_usize size;
+    size_t size;
 
     begin = sre_getresource(path, &size);
     if (!begin)
@@ -93,12 +93,12 @@ static void resource_close(sre_FileImpl impl)
 
 //
 
-static sre_usize resource_read(sre_FileImpl _impl, void* data, sre_usize size)
+static size_t resource_read(sre_FileImpl _impl, void* data, size_t size)
 {
     struct impl_Res* impl = _impl;
     
     {
-        sre_usize remaining_size = impl->size - impl->pos;
+        size_t remaining_size = impl->size - impl->pos;
         size = remaining_size < size ? remaining_size : size;
     }
 
@@ -108,7 +108,7 @@ static sre_usize resource_read(sre_FileImpl _impl, void* data, sre_usize size)
     return size;
 }
 
-static sre_usize resource_write(sre_FileImpl _impl, const void* data, sre_usize size)
+static size_t resource_write(sre_FileImpl _impl, const void* data, size_t size)
 {
     (void)_impl;
     (void)data;
@@ -143,7 +143,7 @@ static long resource_tell(sre_FileImpl _impl)
     return (long)impl->pos;
 }
 
-static sre_usize resource_size(sre_FileImpl _impl)
+static size_t resource_size(sre_FileImpl _impl)
 {
     struct impl_Res* impl = _impl;
     return impl->size;

@@ -13,7 +13,7 @@ typedef void (*sre_signalfunction)(void* signal_userdata, void* connection_data,
 sre_Signal* sre_signalcreate(void* userdata);
 void sre_signaldestroy(sre_Signal* signal);
 
-sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction function, sre_usize extra_size, void** extra_data);
+sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction function, size_t extra_size, void** extra_data);
 sre_Connection* sre_signalconnect(sre_Signal* signal, void* userdata, sre_signalfunction function);
 // Detach the connection from the signal and decrement its reference count `(sre_signalunaquire(connection))`
 void sre_signaldisconnect(sre_Connection* connection);

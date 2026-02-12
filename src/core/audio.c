@@ -32,7 +32,7 @@ bool sre_audioconfigure(bool mono, int freq)
 struct sre_audiocallback
 {
     int id;
-    int (*callback)(void*, sre_u8*, sre_usize);
+    int (*callback)(void*, sre_u8*, size_t);
     void* userdata;
 };
 
@@ -49,7 +49,7 @@ static void audio_callback(void *userdata, Uint8 *stream, int len)
     assert(engine.audio_stream);
     memset(stream, 0, len);
     
-    for (sre_usize i = 0; i < engine.audio_queuesize; i++)
+    for (size_t i = 0; i < engine.audio_queuesize; i++)
     {
         memset(engine.audio_stream, 0, len);
 
@@ -73,7 +73,7 @@ void __setup_audio_device()
     engine.audio_master = SDL_MIX_MAXVOLUME;
 }
 
-int sre_audiocallbackqueue(int (*callback)(void* userdata, sre_u8* samples, sre_usize size) , void* userdata)
+int sre_audiocallbackqueue(int (*callback)(void* userdata, sre_u8* samples, size_t size) , void* userdata)
 {
     if (!callback) return -1;
 
@@ -109,7 +109,7 @@ void sre_audiocallbackremove(int id)
     SDL_LockAudioDevice(engine.audio_device);
 
     struct sre_audiocallback* queue = engine.audio_queue;
-    for (sre_usize i = 0; i < engine.audio_queuesize; i++)
+    for (size_t i = 0; i < engine.audio_queuesize; i++)
     {
         if (queue[i].id != id) continue;
 

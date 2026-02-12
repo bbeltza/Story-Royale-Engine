@@ -38,13 +38,13 @@ typedef enum sre_seek
 bool sre_fileopen(sre_File* file, const char* path, int mode);
 void sre_fileclose(sre_File* file);
 
-sre_usize sre_fileread(const sre_File* file, void* data, sre_usize size);
-sre_usize sre_filewrite(const sre_File* file, const void* data, sre_usize size);
+size_t sre_fileread(const sre_File* file, void* data, size_t size);
+size_t sre_filewrite(const sre_File* file, const void* data, size_t size);
 
 bool sre_fileseek(const sre_File* file, long offset, sre_seek origin);
 long sre_filetell(const sre_File* file);
 
-sre_usize sre_filesize(const sre_File* file);
+size_t sre_filesize(const sre_File* file);
 const sre_byte* sre_filebegin(const sre_File* file);
 
 /*

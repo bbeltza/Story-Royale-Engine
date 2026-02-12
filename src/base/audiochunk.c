@@ -7,7 +7,7 @@
 #include <SDL_audio.h>
 #include <vorbis.h>
 
-const sre_usize SRE_AUDIOCHUNK_METASIZE = offsetof(sre_AudioChunk, samples);
+const size_t SRE_AUDIOCHUNK_METASIZE = offsetof(sre_AudioChunk, samples);
 
 const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
 {

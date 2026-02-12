@@ -80,8 +80,8 @@ SRE_CAPI_BEGIN
 		SDL_AudioDeviceID audio_device;
 
 		void* audio_queue;
-		sre_usize audio_queuesize;
-		sre_usize audio_queuecap;
+		size_t audio_queuesize;
+		size_t audio_queuecap;
 		int last_audioid;
 
 		int audio_master;

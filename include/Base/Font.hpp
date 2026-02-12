@@ -2,23 +2,15 @@
 #include <SDL_ttf.h>
 #include <standard>
 
-#include "Core/Texture.hpp"
-#include "Datatypes/Rect.hpp"
-#include "Datatypes/Color.hpp"
+#include <Core/Texture.hpp>
+#include <Datatypes/Rect.hpp>
+#include <Datatypes/Color.hpp>
+
+#include <Base/Alignment.hpp>
 
 namespace sre
 {
     class File;
-
-    enum Alignment
-    {
-        A_LEFT,
-        A_CENTER,
-        A_RIGHT,
-
-        A_TOP = A_LEFT,
-        A_BOTTOM = A_RIGHT
-    };
 
     class Font
     {

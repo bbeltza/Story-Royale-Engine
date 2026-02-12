@@ -17,7 +17,6 @@ typedef uint64_t sre_u64;
 
 typedef intptr_t sre_sptr;
 typedef uintptr_t sre_uptr;
-typedef size_t sre_usize;
 
 typedef sre_u8 sre_byte;
 
@@ -37,7 +36,6 @@ typedef sre_u8 sre_byte;
 
         using sptr = sre_sptr;
         using uptr = sre_uptr;
-        using usize = sre_usize;
 
         using byte = sre_byte;
     }

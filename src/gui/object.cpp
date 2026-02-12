@@ -145,10 +145,7 @@ void Object::call_process()
 
 void Object::call_processchildren()
 {
-    children.sort([](const Object* o1, const Object* o2)
-    {
-        return o1->z_index < o2->z_index;
-    });
+    children.sort([](const Object* o1, const Object* o2) { return o1->z_index < o2->z_index; });
 
     size_t children_count = children.size();
     size_t i = 0;

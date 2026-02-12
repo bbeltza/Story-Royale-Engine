@@ -78,7 +78,7 @@ void sre_signaldestroy(sre_Signal* signal)
     sre_delete(signal);
 }
 
-sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction function, sre_usize extra_size, void** extra_data)
+sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction function, size_t extra_size, void** extra_data)
 {
     if (!signal || !function) return NULL;
     

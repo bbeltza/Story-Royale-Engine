@@ -36,12 +36,12 @@ static void stdio_close(sre_FileImpl impl)
     fclose(impl);
 }
 
-static sre_usize stdio_read(sre_FileImpl impl, void* data, sre_usize size)
+static size_t stdio_read(sre_FileImpl impl, void* data, size_t size)
 {
     return fread(data, 1, size, impl);
 }
 
-static sre_usize stdio_write(sre_FileImpl impl, const void* data, sre_usize size)
+static size_t stdio_write(sre_FileImpl impl, const void* data, size_t size)
 {
     return fwrite(data, 1, size, impl);
 }
@@ -66,7 +66,7 @@ static long stdio_tell(sre_FileImpl impl)
     return ftell(impl);
 }
 
-static sre_usize stdio_size(sre_FileImpl impl)
+static size_t stdio_size(sre_FileImpl impl)
 {
     long offs = ftell(impl);
     if (offs < 0)
@@ -79,7 +79,7 @@ static sre_usize stdio_size(sre_FileImpl impl)
 
     fseek(impl, offs, SEEK_SET);
 
-    return (sre_usize)size;
+    return (size_t)size;
 }
 
 static const sre_byte* stdio_begin(sre_FileImpl impl)

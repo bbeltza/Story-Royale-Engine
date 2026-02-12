@@ -74,7 +74,7 @@ AudioChunk Audio::load(const File& from_file)
 	return chunk;
 }
 
-int Audio::audio_callback(Audio* audio, sre_u8* _samples, sre_usize len)
+int Audio::audio_callback(Audio* audio, sre_u8* _samples, size_t len)
 {
 	if (!audio->m_state) return 0;
 
@@ -85,7 +85,7 @@ int Audio::audio_callback(Audio* audio, sre_u8* _samples, sre_usize len)
 	const int freq = audio_frequency();
 	const timeStamp freqratio = static_cast<timeStamp>(audio_freqratio(audio->m_chunk->frequency));
 	
-	for (sre_usize i = 0; i < len; i += channels)
+	for (size_t i = 0; i < len; i += channels)
 	{
 		u32 sampleindex = audio->m_samplepos * channels;
 		const s16* const chunksamples = audio->m_chunk->samples + sampleindex;

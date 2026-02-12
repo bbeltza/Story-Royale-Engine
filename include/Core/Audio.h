@@ -18,7 +18,7 @@ typedef struct sre_AudioChunk sre_AudioChunk;
 // @return `NULL` if the function fails.
 const sre_AudioChunk* sre_convertchunk(const sre_AudioChunk* chunk, bool freechunk);
 
-int sre_audiocallbackqueue(int (*callback)(void* userdata, sre_u8* samples, sre_usize size) , void* userdata);
+int sre_audiocallbackqueue(int (*callback)(void* userdata, sre_u8* samples, size_t size) , void* userdata);
 void sre_audiocallbackremove(int id);
 
 // Return the sample-rate of the audio engine

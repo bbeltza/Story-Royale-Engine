@@ -77,16 +77,16 @@ int sre_draw_clipbegin(const sre_rect2Dut* _rect)
 		rect.h = rect.h > 0 ? rect.h : 0;
 	}
 
-	(*(sre_usize*)&engine.video->clipstack_pos)++;
+	(*(size_t*)&engine.video->clipstack_pos)++;
 	if (engine.video->clipstack_pos > engine.video->clipstack_size)
 	{
-		sre_usize new_size = engine.video->clipstack_size * 2;
+		size_t new_size = engine.video->clipstack_size * 2;
 		sre_rect2Dut* new_ptr = sre_new(new_size * sizeof(sre_rect2Dut));
 		new_ptr = memcpy(new_ptr, engine.video->clipstack_base, engine.video->clipstack_size);
 		assert(new_ptr != NULL);
 
 		sre_delete((void*)engine.video->clipstack_base);
-		(*(sre_usize*)&engine.video->clipstack_size) = new_size;
+		(*(size_t*)&engine.video->clipstack_size) = new_size;
 		engine.video->clipstack_base = new_ptr;
 	}
 
@@ -102,6 +102,6 @@ void sre_draw_clipend()
 
 	if (engine.video->clipstack_pos == 0) return;
 	
-	(*(sre_usize*)&engine.video->clipstack_pos)--;
+	(*(size_t*)&engine.video->clipstack_pos)--;
 	engine.video->draw_clip(engine.video, engine.video->clipstack_pos != 0 ? &engine.video->clipstack_base[engine.video->clipstack_pos] : NULL);
 }

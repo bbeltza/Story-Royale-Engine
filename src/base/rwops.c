@@ -21,7 +21,7 @@ SDL_RWops* sre_filetorwops(const sre_File* file)
     if (!file->impl) return NULL;
 
     SDL_RWops *rw;
-    sre_usize size = sre_filesize(file);
+    size_t size = sre_filesize(file);
     const sre_byte* begin = sre_filebegin(file);
 
     if (begin)

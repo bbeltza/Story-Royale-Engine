@@ -14,11 +14,11 @@ namespace sre
 	}
 
 	template <typename Cls>
-	inline int audio_callbackqueue(int (*callback)(Cls* userdata, byte* samples, usize size), Cls* userdata)
+	inline int audio_callbackqueue(int (*callback)(Cls* userdata, byte* samples, size_t size), Cls* userdata)
 	{
-		return sre_audiocallbackqueue(reinterpret_cast<int(*)(void*, byte*, usize)>(callback), userdata);
+		return sre_audiocallbackqueue(reinterpret_cast<int(*)(void*, byte*, size_t)>(callback), userdata);
 	}
-	inline int audio_callbackqueue(int (*callback)(void* userdata, byte* samples, usize size), void* userdata) { return sre_audiocallbackqueue(callback, userdata); }
+	inline int audio_callbackqueue(int (*callback)(void* userdata, byte* samples, size_t size), void* userdata) { return sre_audiocallbackqueue(callback, userdata); }
 	inline void audio_callbackremove(int id) { return sre_audiocallbackremove(id); }
 
 	inline int audio_frequency() { return sre_audiofreq(); }
@@ -68,7 +68,7 @@ namespace sre
 
 		int m_state = 0; // Playing state
 	private:
-		static int audio_callback(Audio* audio, sre_u8* samples, sre_usize len);
+		static int audio_callback(Audio* audio, sre_u8* samples, size_t len);
 	public:
 		constexpr Audio() = default;
 		Audio(const AudioChunk& chunk): m_chunk(chunk) {}

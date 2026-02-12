@@ -15,13 +15,13 @@ SRE_CAPI_BEGIN
 #endif
 
 // This is the function that holds the actual implementation for creating a thread
-sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay, sre_usize stacksize);
+sre_Thread sre_threadcreate_delaystacksize(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay, size_t stacksize);
 inline sre_Thread sre_threadcreate_delay(sre_sptr (*function)(void* data), void* data, sre_timeStamp delay)
 { return sre_threadcreate_delaystacksize(function, data, delay, 0); }
 
 inline sre_Thread sre_threadcreate(sre_sptr (*function)(void* data), void* data)
 { return sre_threadcreate_delay(function, data, 0); }
-inline sre_Thread sre_threadcreate_stacksize(sre_sptr (*function)(void* data), void* data, sre_usize stacksize)
+inline sre_Thread sre_threadcreate_stacksize(sre_sptr (*function)(void* data), void* data, size_t stacksize)
 { return sre_threadcreate_delaystacksize(function, data, 0, stacksize); }
 
 //

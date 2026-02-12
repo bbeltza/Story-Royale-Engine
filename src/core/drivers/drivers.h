@@ -53,16 +53,16 @@ struct sre_videodriver
 	void* const textures;
 	/* These are 'const' members, they aren't meant to be modified by the driver */
 	/* They are used by the engine to send the correct texture pointer to the driver, based on a texture id */
-	sre_usize texture_size; // Size in bytes of a driver-speficic texture
-	const sre_usize textures_count;
-	const sre_usize textures_capacity;
+	size_t texture_size; // Size in bytes of a driver-speficic texture
+	const size_t textures_count;
+	const size_t textures_capacity;
 	const sre_Texture* const texture_fl; // Texture free list
-	const sre_usize texture_flcount;
-	const sre_usize texture_flcapacity;
+	const size_t texture_flcount;
+	const size_t texture_flcapacity;
 
 	const sre_rect2Dut* clipstack_base;
-	const sre_usize clipstack_pos;
-	const sre_usize clipstack_size;
+	const size_t clipstack_pos;
+	const size_t clipstack_size;
 
 	sre_vec2ut size;
 	sre_vec2ut center;

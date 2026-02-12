@@ -39,7 +39,7 @@ namespace sre
 		inline Chunk allocate(size_t max_size=0) const { return Chunk(sre_fileallocate(this, max_size)); }
 		inline SDL_RWops* to_RWops() const { return sre_filetorwops(this); }
 
-		sre::usize size() const { return sre_filesize(this); }
+		size_t size() const { return sre_filesize(this); }
 		const sre::byte* begin() const { return sre_filebegin(this); }
 
 		template <typename Fn, typename... Args>
@@ -52,8 +52,8 @@ namespace sre
 		inline bool seek(long offset, sre::seek origin) const { return sre_fileseek(this, offset, origin); }
 		inline bool rewind() const { return seek(0, SRE_SEEK_SET); }
 
-		inline sre::usize write(const void* rawdata, sre::usize size) const { return sre_filewrite(this, rawdata, size); }
-		inline sre::usize read(void* data, sre::usize size) const { return sre_fileread(this, data, size); }
+		inline size_t write(const void* rawdata, size_t size) const { return sre_filewrite(this, rawdata, size); }
+		inline size_t read(void* data, size_t size) const { return sre_fileread(this, data, size); }
 	};
 }
 
