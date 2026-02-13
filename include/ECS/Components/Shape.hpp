@@ -11,17 +11,18 @@ namespace sreECS
     class Shape : public Component
     {
     public: // Enums
-        enum ShapeForm : sre::flags8::type
+        enum ShapeForm
         {
             S_RECTANGLE,
             S_CIRCLE
         };
-        enum Flags : sre::flags8::type
+        enum Flags
         {
-            F_VISIBLE = ut_bit(0),
-            F_ANCHORED = ut_bit(1),
-            F_CANCOLLIDE = ut_bit(2),
-            F_CANQUERY = ut_bit(3),
+            F_RESERVED = F_ENABLED,
+            F_VISIBLE = ut_bit(1),
+            F_ANCHORED = ut_bit(2),
+            F_CANCOLLIDE = ut_bit(3),
+            F_CANQUERY = ut_bit(4)
         };
 
     public:
@@ -33,7 +34,6 @@ namespace sreECS
         sre::col4 color = sre::col4::WHITE;
 
         ShapeForm shape;
-        sre::flags8 flags;
 
         void on_pupdate(Entity&) override;
         void on_render(Entity&) override;

@@ -133,12 +133,12 @@ void Object::call_process()
 {
     for (auto& comp : components)
     {
-        if (comp.enabled)
+        if (comp.enabled())
             m_absolute.size = comp.process_size(m_absolute);
     }
     for (auto& comp : components)
     {
-        if (comp.enabled)
+        if (comp.enabled())
             m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : sre::display_size());
     }
 }
@@ -163,7 +163,7 @@ void Object::call_processchildren()
 
     for (auto& comp : components)
     {
-        if (comp.enabled)
+        if (comp.enabled())
             comp.process_children(m_absolute, arr, children_count);
     }
 
@@ -183,7 +183,7 @@ void Object::call_prerender()
 {
     for (auto& comp : components)
     {
-        if (comp.enabled)   
+        if (comp.enabled())   
             comp.on_prerender(m_absolute);
     }
 }
@@ -207,7 +207,7 @@ void Object::call_render()
     
     for (auto& comp : components)
     {
-        if (comp.enabled)
+        if (comp.enabled())
             comp.on_render(m_absolute);
     }
     

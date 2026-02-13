@@ -119,7 +119,7 @@ Entity* Scene::alloc_entity(size_t size, size_t* _realsize)
     else
     {
         result = m_entity_end;
-        int remaining_diff = (reinterpret_cast<sre::byte*>(result) + realsize) - (m_arenabuff->data + m_arenabuff->SIZE);
+        sre::sptr remaining_diff = (reinterpret_cast<sre::byte*>(result) + realsize) - (m_arenabuff->data + m_arenabuff->SIZE);
         if (remaining_diff > 0)
         {
             // Append remaining chunk into the freelist in case of it being used
@@ -158,7 +158,7 @@ void Scene::call_update()
             ent.update();
             for (auto& comp : ent)
             {
-                if (comp.enabled)
+                if (comp.enabled())
                     comp.on_update(ent);
             }
             ent.updated.fire();
@@ -181,7 +181,7 @@ void Scene::call_update()
             ent.pupdate();
             for (auto& comp : ent)
             {
-                if (comp.enabled)
+                if (comp.enabled())
                     comp.on_pupdate(ent);
             }
 
@@ -220,7 +220,7 @@ void Scene::call_render()
         ent.pre_render();
         for (auto& comp : ent)
         {
-            if (comp.enabled)
+            if (comp.enabled())
                 comp.on_render(ent);
         }
         ent.post_render();

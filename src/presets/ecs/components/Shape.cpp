@@ -8,7 +8,7 @@
 using namespace sreECS;
 
 Shape::Shape() : shape(S_RECTANGLE),
-				 flags(F_VISIBLE)
+				 Component(F_VISIBLE)
 {
 }
 
@@ -84,7 +84,7 @@ void Shape::on_pupdate(Entity& entity)
         {
 			auto& compshape = *dynamic_cast<Shape*>(&comp);
 			if (&compshape == NULL) continue;
-			if (!compshape.enabled) continue;
+			if (!compshape.enabled()) continue;
             if (!compshape.flags.has(F_CANCOLLIDE)) continue;
 
             sre::rect2Dut thisRect = real_rect(entity),

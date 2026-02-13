@@ -24,7 +24,7 @@ namespace sreGUI
 
         static const Object *s_querying;
         Object * volatile m_parent;
-        //          ^^^   m_parent could be optimized away when `add_child gets called and not assign it`
+        //          ^^^   m_parent could be optimized away when `add_child` gets called and doesn't assign it
 
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
     public:
