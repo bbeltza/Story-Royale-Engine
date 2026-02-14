@@ -213,6 +213,7 @@ namespace sreGUI
         } components;
     public:
         bool is_hovering() const { return s_querying == this; }
+        static bool hovering_anything() { return s_querying != NULL; /*This should be the equivalent of !((Object*)nullptr)->is_hovering()*/ }
     protected:
         virtual void update() {}
         virtual void pre_render() {}

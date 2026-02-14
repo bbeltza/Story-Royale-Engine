@@ -111,19 +111,17 @@ void Object::CContainer::setup(Component* const components[], size_t count)
 bool Object::call_query(sre::vec2ut pt) const
 {
     s_querying = NULL;
+    if (!flags.has(F_ENABLED))
+        return false;
 
     for (auto it = children.rbegin(); it != children.rend(); it++)
     {
         Object* obj = *it;
-        if (!obj->flags.has(F_ENABLED))
-            continue;
-        if (!obj->flags.has(F_QUERY))
-            continue;
-        
+
         if (obj->call_query(pt)) return true;
     }
 
-    if (m_absolute.simple_intersects(pt))
+    if (flags.has(F_QUERY) && m_absolute.simple_intersects(pt))
         return s_querying = this;
 
     return false;
