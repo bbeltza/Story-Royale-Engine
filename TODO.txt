@@ -17,7 +17,17 @@
 
 - Android support
 
-(current version: 0.101.06 (experimental coroutines & pipeline))
+- Better ECS:
+	- The current "ECS" is more and still like inheritance, and that's not what I wanted to achieve, I felt like I was making an actual ECS at that moment
+	- Use actual raw component structures and have ACTUAL systems:
+		- Systems would be like the current components, just that they wouldn't contain any data, just functions
+		- The components would be the ones to contain the data, systems would have to know what components there are inside an entity too
+		- I don't know about entities, you may just have a single pointer with the components a kinda like in the current architecture
+		- Scenes/Worlds would be the ones to store the components, and provide pointers to the entities. Simple
+		- Basically, everything is managed by the scene, mostly, 
+	- Maybe do the same thing for UI, maybe not... It's probably okay to use inheritance for UI
+
+(current version: 0.101.15)
 
 - Work on the game ^^
 
