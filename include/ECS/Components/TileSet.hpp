@@ -5,9 +5,19 @@
 
 namespace sreECS
 {
-    struct TileSet: public Component
+    struct Tile
     {
 
+    };
+
+    struct TileSet: public Component
+    {
+        
+    private:
+        std::unordered_map<sre::vec2i, Tile> m_tiles;
+
+    protected:
+        void on_render(Entity& entity) override;
     };
 }
 
