@@ -85,6 +85,7 @@ namespace sre
 
     // A rect2D datatype composed of ints.
     using rect2Di = rect2D<int>;
+    using rect2Du = rect2D<unsigned>;
     // A rect2D datatype composed of floats.
     using rect2Df = rect2D<float>;
     using rect2Dd = rect2D<double>;

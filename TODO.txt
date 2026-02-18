@@ -36,7 +36,7 @@ Less likely ideas:
 			- Scenes/Worlds would be the ones to store the components, and provide pointers to the entities. Simple
 			- Basically, everything is managed by the scene, mostly, 
 		- Maybe do the same thing for UI, maybe not... It's probably okay to use inheritance for UI
-	- Compression on resources, or adding a bitmask at the resources
+	- Compression on resources (Maybe using a zip file with the resources?), or adding a bitmask at the resources
 	- Have the game run on an isolated space. I got some ideas on how this could be done and why:
 		- On Windows, you can have the game as a separate process executable, with its own memory space and have the engine create the process when running the game:
 			- This allows to garantee the engine's initialization when initializing game global variables, so it solves most static initialization and destruction overheads.

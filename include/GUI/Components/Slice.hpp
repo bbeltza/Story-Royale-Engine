@@ -6,7 +6,7 @@ namespace sreGUI
 {
     struct Slice: public sreGUI::Image
     {
-        sre::vec2i region_corners;
+        sre::rect2Di center_slice;
         protected:
         void on_render(const sre::rect2Dut &dimensions) override;
     };
