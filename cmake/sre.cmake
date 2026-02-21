@@ -1,8 +1,5 @@
 find_package(Python REQUIRED)
-if (NOT PYTHON_EXECUTABLE)
-    set(PYTHON_EXECUTABLE python)
-endif()
-set(PYTHON_COMMAND ${PYTHON_EXECUTABLE} ${SRE_DIR}/scripts/)
+set(PYTHON_COMMAND ${Python_EXECUTABLE} ${SRE_DIR}/scripts/)
 
 include(sre/Resources)
 include(sre/Icon)
