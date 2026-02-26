@@ -33,6 +33,7 @@ set(BASE_SOURCES
     "ini.cpp"
     "thread.cpp"
     "tween.cpp"
+    "log.cc"
 )
 
 set(ECS_SOURCES
