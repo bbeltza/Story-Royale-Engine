@@ -7,7 +7,7 @@ SRE_CAPI_BEGIN
 
 enum sre_LogCategory
 {
-    SRE_CATEGORY_LOG,
+    SRE_CATEGORY_INFO,
     SRE_CATEGORY_DEBUG,
     SRE_CATEGORY_ERROR
 };
@@ -20,6 +20,8 @@ enum sre_LogCategory
 #else
     extern int sre_log(const char* fmt, ...);
     extern int sre_logva(const char* fmt, va_list va);
+
+    extern int sre_logEx(int category, const char* fmt, va_list va);
 
     #ifdef __cplusplus
     extern "C++" {
