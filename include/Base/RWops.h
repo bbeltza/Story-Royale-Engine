@@ -5,9 +5,9 @@
 
 SRE_CAPI_BEGIN
 
-typedef struct sre_File sre_File;
+struct sre_File;
 
-SDL_RWops* sre_filetorwops(const sre_File* file);
+SDL_RWops* sre_filetorwops(const struct sre_File* file);
 
 SRE_CAPI_END
 

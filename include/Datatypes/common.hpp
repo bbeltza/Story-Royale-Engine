@@ -1,5 +1,6 @@
 #pragma once
 #include <Base/Log.h>
+#include <type_traits>
 #include <ints.h>
 
 #define SRE_IMPLEMENT_DATATYPE(...) \

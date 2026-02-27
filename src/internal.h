@@ -8,7 +8,7 @@
 #include <ints.h>
 
 SRE_CAPI_BEGIN
-	typedef struct sre_videodriver sre_videodriver;
+	struct sre_videodriver;
 
 	struct _win_settings
 	{
@@ -68,7 +68,7 @@ SRE_CAPI_BEGIN
 		
 		// Renderer data
 		
-		sre_videodriver* video;
+		struct sre_videodriver* video;
 
 		SDL_cond* render_cond;
 		SDL_mutex* render_mutex;

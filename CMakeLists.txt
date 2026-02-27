@@ -7,10 +7,6 @@ set(CMAKE_MODULE_PATH ${SRE_CMAKE_MODULE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib)
 
-if (UNIX)
-    enable_language(ASM)
-endif()
-
 if (ANDROID)
     set(BUILD_SHARED_LIBS ON)
 else()
@@ -26,6 +22,10 @@ include(sre)
 
 project(sre)
 project(sre_core)
+
+if (UNIX)
+    enable_language(ASM)
+endif()
 
 project(sre_interface)
 project(sre_noconsole)

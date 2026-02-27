@@ -186,14 +186,19 @@ int sre_logEx(int type, int category, const char* fmt, va_list va)
     auto& instance = log_instance();
     std::lock_guard<std::recursive_mutex> guard{instance.mutex};
 
+    int len = vsnprintf(NULL, 0, fmt, va) + 1;
     instance.msg_queue.emplace_back(
         type,
         category,
-        vsnprintf(NULL, 0, fmt, va) + 1
+        len
     );
     auto& msg = instance.msg_queue.back();
     
-    vsnprintf(msg.buffer, msg.size, fmt, va);
+    if (len == 1)
+        msg.buffer[0] = '\0';
+    else
+        vsnprintf(msg.buffer, msg.size, fmt, va);
+
     sre_logflush();
 
     return msg.size - 1;

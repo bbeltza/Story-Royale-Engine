@@ -21,8 +21,6 @@ typedef struct sre_threadinst
 
 void __update_threads()
 {
-    if (!engine.threads_bucket) return;
-
     for (size_t i = 0; i < SRE_THREADS_BUCKETSIZE; i++)
     {
         sre_threadinst* prev = NULL;

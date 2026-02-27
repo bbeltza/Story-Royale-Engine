@@ -1,8 +1,7 @@
 #pragma once
 #include <SDL_pixels.h>
-#include <standard>
-#include "Datatypes/common.hpp"
-#include "utils/math.h"
+#include <Datatypes/common.hpp>
+#include <utils/math.h>
 
 namespace sre
 {

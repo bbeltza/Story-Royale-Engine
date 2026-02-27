@@ -25,8 +25,8 @@ extern const size_t SRE_AUDIOCHUNK_METASIZE;
 const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata);
 void sre_audioclose(const sre_AudioChunk* chunk);
 
-typedef struct sre_File sre_File;
-const sre_AudioChunk* sre_audiofromfile(const sre_File* file);
+struct sre_File;
+const sre_AudioChunk* sre_audiofromfile(const struct sre_File* file);
 
 SRE_CAPI_END
 

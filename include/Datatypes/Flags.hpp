@@ -1,7 +1,7 @@
 #pragma once
-#include "Datatypes/common.hpp"
+#include <Datatypes/common.hpp>
 
-#include "utils/math.h"
+#include <utils/math.h>
 
 namespace sre
 {

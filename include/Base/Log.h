@@ -58,19 +58,20 @@ namespace sre
     extern "C++" {
         namespace sre
         {
-            template <LogCategory category=LOGCATEGORY_DEBUG, typename... Args>
-            inline int log(const char* fmt, Args&&... args)
+            inline int _loglegacy(int category, const char* fmt, ...)
             {
-                auto& logfn = [](const char* _fmt, ...)
-                {
-                    va_list va;
-                    int n;
-                    va_start(va, _fmt);
-                    n = sre_logEx(__LTYPE, category, _fmt, va);
-                    va_end(va);
-                    return n;
-                };
-                return logfn(fmt, args...); 
+                va_list va;
+                int n;
+                va_start(va, fmt);
+                n = sre_logEx(__LTYPE, category, fmt, va);
+                va_end(va);
+                return n;
+            }
+
+            template <LogCategory category=LOGCATEGORY_DEBUG, typename... Args>
+            inline int log(const char* fmt, Args... args)
+            {
+                return _loglegacy(category, fmt, args...); 
             }
 
             template <LogCategory category=LOGCATEGORY_INFO>
@@ -78,7 +79,7 @@ namespace sre
         }
     }
     #else
-    inline int sre_log(enum sre_LogCategory category, const char* fmt, ...)
+    static inline int sre_log(enum sre_LogCategory category, const char* fmt, ...)
     {
         va_list va;
         int n;
@@ -93,7 +94,7 @@ namespace sre
         return n;
     }
 
-    inline int sre_logsimple(enum sre_LogCategory category, const char* str)
+    static inline int sre_logsimple(enum sre_LogCategory category, const char* str)
     {
         return sre_logsimpleEx(
             __LTYPE,

@@ -30,8 +30,10 @@ const arg_t SRENGINE_ARGS[] = {
 
 
 #ifndef _WIN32
-static void handle_ac(const char*, char*[])
+static void handle_ac(const char* arg, char* argv[])
 {
+    (void)arg;
+    (void)argv;
     sre_log(SRE_LOGCATEGORY_WARN, "Option \"alloc-console\" is only supported on Windows");
     return;
 }

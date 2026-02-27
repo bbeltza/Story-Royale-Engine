@@ -94,10 +94,12 @@ void __run_engine()
                 ((sre_deferFunction)ev.user.data1)(ev.user.data2);
                 break;
             case ENGINE_EVENT_RETDEFER:
+            {
                 struct _engine_retdefer* defer = ev.user.data2;
                 defer->ret = ((sre_deferResponseFunction)ev.user.data1)(defer->userdata);
                 SDL_SemPost(defer->sem);
-                break;
+            }
+            break;
             case ENGINE_EVENT_RENDER:
                 SDL_LockMutex(engine.render_mutex);
 

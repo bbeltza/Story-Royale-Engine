@@ -6,18 +6,17 @@
 
 SRE_CAPI_BEGIN
 
-typedef struct sre_File sre_File;
 typedef void* sre_FileImpl; // File implementation type (it's just a void* to not be confused with the other vftable parameters)
 
 // File virtual function table structure
 typedef struct sre_FVFT sre_FVFT;
 
-struct sre_File
+typedef struct sre_File
 {
     const struct sre_FVFT* vfptr;
     sre_FileImpl impl;
     // Maybe add some data like the path of the file?
-};
+} sre_File;
 
 enum sre_fileMode
 {

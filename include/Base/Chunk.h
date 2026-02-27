@@ -11,7 +11,7 @@ typedef struct sre_Chunk
     sre_byte data[sizeof(size_t)];
 } sre_Chunk;
 
-typedef struct sre_File sre_File;
+struct sre_File;
 
 const sre_Chunk *sre_fileallocate(const sre_File* file, size_t max_size);
 void sre_chunkfree(const sre_Chunk* chunk);

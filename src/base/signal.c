@@ -137,7 +137,7 @@ void sre_signalunaquire(sre_Connection* connection)
 
 void* sre_signalwait(sre_Signal* signal)
 {
-    if (signal->coroutines_size <= signal->coroutines_size)
+    if (signal->coroutines_capacity <= signal->coroutines_size)
     {
         signal->coroutines_capacity *= 2;
 

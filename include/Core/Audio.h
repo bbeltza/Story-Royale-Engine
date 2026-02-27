@@ -5,7 +5,7 @@
 
 SRE_CAPI_BEGIN
 
-typedef struct sre_AudioChunk sre_AudioChunk;
+struct sre_AudioChunk;
 // Return a copy of an AudioChunk that respects the format of the audio engine
 //
 // Note that the `chunk`'s frequency will not be changed after converting it, it still respects the format of the audio engine.
@@ -16,7 +16,7 @@ typedef struct sre_AudioChunk sre_AudioChunk;
 // @return The new AudioChunk, if the passed `chunk` doesn't respect the audio engine's format.
 // @return `chunk` if it respects the audio engine's format, so it won't be freed if `freechunk` is on.
 // @return `NULL` if the function fails.
-const sre_AudioChunk* sre_convertchunk(const sre_AudioChunk* chunk, bool freechunk);
+const struct sre_AudioChunk* sre_convertchunk(const struct sre_AudioChunk* chunk, bool freechunk);
 
 int sre_audiocallbackqueue(int (*callback)(void* userdata, sre_u8* samples, size_t size) , void* userdata);
 void sre_audiocallbackremove(int id);
