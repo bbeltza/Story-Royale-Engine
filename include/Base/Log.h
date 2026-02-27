@@ -45,6 +45,12 @@ namespace sre
         }
     }
 #else
+    #ifdef SRE
+        #define __LTYPE 1
+    #else
+        #define __LTYPE 0
+    #endif
+
     extern int sre_logEx(int type, int category, const char* fmt, va_list va);
     extern int sre_logsimpleEx(int type, int category, const char* str);
 
@@ -60,7 +66,7 @@ namespace sre
                     va_list va;
                     int n;
                     va_start(va, _fmt);
-                    n = sre_logEx(0, category, _fmt, va);
+                    n = sre_logEx(__LTYPE, category, _fmt, va);
                     va_end(va);
                     return n;
                 };
@@ -68,7 +74,7 @@ namespace sre
             }
 
             template <LogCategory category=LOGCATEGORY_INFO>
-            inline int log(const char* str) { return sre_logsimpleEx(0, category, str); }
+            inline int log(const char* str) { return sre_logsimpleEx(__LTYPE, category, str); }
         }
     }
     #else
@@ -78,11 +84,7 @@ namespace sre
         int n;
         va_start(va, fmt);
         n = sre_logEx(
-            #ifdef SRE
-            1,
-            #else
-            0,
-            #endif
+            __LTYPE,
             category,
             fmt,
             va
@@ -94,11 +96,7 @@ namespace sre
     inline int sre_logsimple(enum sre_LogCategory category, const char* str)
     {
         return sre_logsimpleEx(
-            #ifdef SRE
-            1,
-            #else
-            0,
-            #endif
+            __LTYPE,
             category,
             str
         );

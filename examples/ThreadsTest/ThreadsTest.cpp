@@ -3,15 +3,15 @@
 #include <Core/Thread.hpp>
 #include <Entry.h>
 
-#include <utils/logging.h>
+#include <Base/Log.h>
 
 #include <OS.h>
 
 int testmyself(char a, float b)
 {
-    LOG("a is %d and b is %f!", a, b);
+    sre::log("a is %d and b is %f!", a, b);
     delay_s(1);
-    LOG("a is again... %d and b is %f!", a, b);
+    sre::log("a is again... %d and b is %f!", a, b);
 
     return 0;
 }
@@ -19,5 +19,5 @@ int testmyself(char a, float b)
 void sre::initialize()
 {
     sre::Thread thrd(testmyself, 3, 2.0f);
-    LOG("Thread has been finished");
+    sre::log("Thread has been finished");
 }

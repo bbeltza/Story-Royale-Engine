@@ -16,7 +16,7 @@ Font::Font(const sre::File& file, int pt)
     m_font = TTF_OpenFontRW(m_rwops, 1, pt);
     if (!m_font)
     {
-        ERROR("Font::Font() could not load font: %s", TTF_GetError());
+        sre::log<LOGCATEGORY_ERROR>("Font::Font() could not load font: %s", TTF_GetError());
         if (m_rwops)
             goto FAIL_CLOSE;
     }

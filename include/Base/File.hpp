@@ -7,8 +7,6 @@
 
 #include <SDL_endian.h>
 
-extern "C" void ERROR(const char*, ...);
-
 namespace sre
 {
 	enum fileMode
@@ -121,20 +119,6 @@ public:
 			return NULL;
 
 		return res.begin; // Even if it wasn't valid and this passes, res_begin will be NULL
-	}
-
-	size_t getSize() const
-	{
-		if (!isValid())
-		{
-			ERROR("File::size(): could not tell the size of the File, file is not valid.");
-			return 0;
-		}
-
-		if (isembedded)
-			return resource_size();
-		else
-			return stream_size();
 	}
 
 	// Read API

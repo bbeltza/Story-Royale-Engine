@@ -3,10 +3,11 @@
 #include <Base/Image.hpp>
 #include <Core/Texture.h>
 
+#include <Core/Error.h>
+#include <Base/Log.h>
+
 namespace sre
 {
-    extern "C" void ERROR(const char* fmt, ...);
-
     using TextureId = sre_Texture;
 
     class Texture
@@ -45,7 +46,7 @@ namespace sre
         {            
             if (!m_handle)
             {
-                ERROR("Texture::Texture(): Failed to create texture on sre_tex_gen()");
+                sre::log<LOGCATEGORY_ERROR>("Texture::Texture(): Failed to create texture on sre_tex_gen()");
                 return;
             }
             if (!from_image.valid())
@@ -54,7 +55,7 @@ namespace sre
             if (sre_tex_bind(
                 m_handle,
                 static_cast<SDL_Surface*>(from_image.handle())
-            ) < 0) ERROR("Texture::Texture(): Failed to create texture on sre_tex_bind()");
+            ) < 0) sre::log<LOGCATEGORY_ERROR>("Texture::Texture(): Failed to create texture on sre_tex_bind()");
         }
     };
 }

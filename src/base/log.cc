@@ -18,14 +18,14 @@ namespace sre
 
         LogMsg(int type, int category, int buffer_size):
             _timestamp(time(NULL)),
-            buffer(new char[buffer_size]),
+            buffer(static_cast<char*>(malloc(buffer_size))),
             category(category),
             type(type),
             size(buffer_size) {}
-        ~LogMsg() { delete buffer; }
+        ~LogMsg() { free(buffer); }
     };
 
-    template <class T>
+    template <typename T>
     struct MallocAllocator
     {
         using value_type = T;
@@ -41,13 +41,29 @@ namespace sre
         using propagate_on_container_move_assignment = std::true_type;
         using is_always_equal = std::true_type;
 
-        template <class U>
+        template <typename U>
         struct rebind
         {
             using other = MallocAllocator<U>;
         };
 
-        pointer allocate(std::size_t size) { return static_cast<pointer>(malloc(size)); }
+        MallocAllocator() throw() {}
+        MallocAllocator(const MallocAllocator&) throw() {}
+
+        template <typename U>
+        MallocAllocator(const MallocAllocator<U>&) throw() {}
+
+        ~MallocAllocator() throw() {}
+
+        pointer allocate(size_type size, void const * = 0) {
+            if (0 == size)
+                return NULL;
+            pointer ptr = (pointer)malloc(size * sizeof(T));
+            if (ptr == NULL)
+                throw std::bad_alloc();
+            return ptr;
+        }
+        void deallocate(pointer ptr, size_type) { free(ptr); }
     };
 
     // Structure containing the logging instance
@@ -111,7 +127,7 @@ namespace
     };
 }
 
-void sre_logflush()
+extern "C" void sre_logflush()
 {
     auto& instance = log_instance();
 
@@ -198,6 +214,7 @@ int sre_logsimpleEx(int type, int category, const char* str)
         len
     );
     strncpy(instance.msg_queue.back().buffer, str, len);
+    sre_logflush();
 
     return len - 1;
 }

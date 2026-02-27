@@ -51,16 +51,16 @@ target_compile_definitions(sre_core PRIVATE INTERNAL_DEF=1)
 
 target_link_libraries(sre_core PRIVATE sre_driverinterface)
 
+target_sources(sre PUBLIC "src/heap.cpp")
 target_link_libraries(sre PRIVATE sre_core)
 target_link_libraries(sre PRIVATE sre_interface)
 target_link_libraries(sre_interface INTERFACE sre_werror)
 
-target_sources(sre PUBLIC "src/heap.cpp")
+target_compile_definitions(sre_interface INTERFACE SRE=1)
 
 add_subdirectory(os)
 target_link_libraries(sre PUBLIC sre_os)
 
-target_compile_definitions(sre_interface INTERFACE SRE=1)
 
 if(MSVC)
     target_link_options(sre_noconsole INTERFACE "/SUBSYSTEM:WINDOWS")

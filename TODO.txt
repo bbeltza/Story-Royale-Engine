@@ -8,7 +8,6 @@
 
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
-- Even better logging
 - And error state support (Maybe using SDL's errors)
 - Remove OS: Don't ever use os and use proper Base engine functions
 
@@ -22,7 +21,7 @@
 	- It would be in a header like <Core/Physics.h-hpp>
 	- You'd append and remove physics objects with it, and the engine would do every needed operation in the next pupdate cycle
 
-(current version: 0.101.15)
+(current version: 0.101.27)
 
 - Work on the game ^^
 

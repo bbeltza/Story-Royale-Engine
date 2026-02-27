@@ -4,6 +4,8 @@
 #include <Entry.h>
 #include <Datatypes/Vector.hpp>
 
+#include <cassert>
+
 #define TEST_FAIL "Test failed (static assertion)"
 
 void sre::initialize()

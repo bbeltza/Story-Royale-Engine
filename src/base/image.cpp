@@ -14,7 +14,7 @@ Image::Image(const char* path)
     File file(path, FILE_READ);
     if (!file.valid())
     {
-        ERROR("Image::Image: Failed loading %s", path);
+        sre::log<LOGCATEGORY_ERROR>("Image::Image: Failed loading %s", path);
         return;
     }
 
@@ -23,7 +23,7 @@ Image::Image(const char* path)
 
     if (!this->sdl_surface)
     {
-        ERROR("Image::Image: Could not load %s, file is not an image or format is unsupported", path);
+        sre::log<LOGCATEGORY_ERROR>("Image::Image: Could not load %s, file is not an image or format is unsupported", path);
         return;
     }
 }

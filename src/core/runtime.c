@@ -5,6 +5,7 @@
 #include <Core/Defer.h>
 #include <Base/Log.h>
 
+extern void sre_logflush();
 static int __event_watch(void *, SDL_Event *);
 
 static int game_loop(void* running)

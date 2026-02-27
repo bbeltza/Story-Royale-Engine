@@ -7,7 +7,7 @@ macro(set_src FLDR SRCS)
     set_dst_src(${FLDR} ${SRCS} SOURCES)
 endmacro()
 
-set(SOURCES 
+set(SOURCES
     "main.c"
     "cmd/args.c"
 )

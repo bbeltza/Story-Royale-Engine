@@ -77,10 +77,10 @@ void DisplayText::post_render()
 
     sre::vec2ut mPos = sreECS::mouse_worldcoords();
     mouseRect.rect.position = mPos;
-    //mPos.println();
+    //mPos.display();
 
-    staticRect.color.println();
-    staticRect.rect.println();
+    staticRect.color.display();
+    staticRect.rect.display();
     sre::draw(staticRect);
     sre::draw(mouseRect);
     /*

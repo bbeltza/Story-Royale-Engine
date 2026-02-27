@@ -3,7 +3,6 @@
 #include <Entry.h>
 
 #include <utils/math.h>
-#include <utils/logging.h>
 
 struct
 {
@@ -18,7 +17,7 @@ double sawtooth(double x)
     return 1 - mod / UT_PI; 
 }
 
-int audio_callback(void* userdata, sre_u8* _samples, sre_usize size)
+int audio_callback(void* userdata, sre_u8* _samples, size_t size)
 {
     size >>= 1;
     sre_s16* samples = (sre_s16*)_samples;
@@ -42,7 +41,7 @@ int audio_callback(void* userdata, sre_u8* _samples, sre_usize size)
         freq5 = (int)(pow(2, freq5/12.0)*440);
     }
 
-    for (sre_usize i = 0; i < size; i += 2)
+    for (size_t i = 0; i < size; i += 2)
     {
         const double tt = sre_audiofreqratio(*t);
         double v;
@@ -65,6 +64,6 @@ int audio_callback(void* userdata, sre_u8* _samples, sre_usize size)
 
 void sre_initialize()
 {
-    sre_audioconfigure(false, 9000);
+    sre_audioconfigure(false, 9000); // what? This app makes a bunch of noises but it wasn't the case the last time I ran it...
     sre_audiocallbackqueue(audio_callback, &data);
 }

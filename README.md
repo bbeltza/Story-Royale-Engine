@@ -142,12 +142,12 @@ After you've configured everything, you're going to have to write a **C/C++** fi
 // Include runtime features of the engine
 #include <Core/Runtime.hpp>
 #include <Core/Window.hpp>
+#include <Base/Log.h> // Include logging
 #include <Entry.h> // Include the entry point declaration (sre::initialize())
-#include <utils/logging.h> // Include LOG(), it's just a printf() wrapper
 
 void myUpdateFunction()
 {
-    LOG("My framerate is: %g", 1 / sre::dt); // Print the framerate into the console
+    sre::log("My framerate is: %g", 1 / sre::dt); // Print the framerate into the console
                                             // Should be around 39.-- if you set the framerate to 40
 }
 
@@ -158,7 +158,7 @@ void sre::initialize()
                                         // And the action of the function ("setresizable" in this case)
                                     // Call this with `true` if you want to have some fun resizing your window...
 
-    LOG("Hello World!");
+    sre::log("Hello World!");
     sre::onUpdate.connect(myUpdateFunction, NULL); // Connect myUpdateFunction to a Signal that will be run every frame
     // Signals are objects that store functions to be called when fired 
     // sre::onUpdate is a signal that fires once every frame
