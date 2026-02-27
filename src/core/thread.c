@@ -5,7 +5,6 @@
 #define thread_bucket ((sre_threadinst**)engine.threads_bucket)
 
 #include <OS.h>
-#include <utils/logging.h>
 
 typedef struct sre_threadinst
 {

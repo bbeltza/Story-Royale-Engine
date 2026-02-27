@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include "../internal.h"
 
-#include <utils/logging.h>
-
 #include <Core/Defer.h>
+#include <Base/Log.h>
 
 static int __event_watch(void *, SDL_Event *);
 
@@ -40,7 +39,7 @@ static int game_loop(void* running)
         if (SDL_PeepEvents(&ev, 1, SDL_ADDEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) == 1)
             SDL_CondWait(engine.render_cond, engine.render_mutex);
         else
-            ERROR("SDL_PeepEvents failed... %s", SDL_GetError());
+            sre_log(SRE_LOGCATEGORY_ERROR, "SDL_PeepEvents failed... %s", SDL_GetError());
         #if _WIN32
         }
         else

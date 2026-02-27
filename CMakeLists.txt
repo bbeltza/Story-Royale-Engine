@@ -60,6 +60,8 @@ target_sources(sre PUBLIC "src/heap.cpp")
 add_subdirectory(os)
 target_link_libraries(sre PUBLIC sre_os)
 
+target_compile_definitions(sre_interface INTERFACE SRE=1)
+
 if(MSVC)
     target_link_options(sre_noconsole INTERFACE "/SUBSYSTEM:WINDOWS")
     target_compile_options(sre_werror INTERFACE "/WX")

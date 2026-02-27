@@ -152,9 +152,7 @@ void Action::sc_eventhandler(void*, void*, Event ev)
 	}
 	break;
 	case EVENT_TOUCH:
-		ALOG("Touching... %f %d", ev.touch.pressure, ev.touch.pressed);
-		ev.touch.delta.print();
-		ev.touch.uv.println();
+		// Unimplemented...
 		break;
 	default:
 		return;

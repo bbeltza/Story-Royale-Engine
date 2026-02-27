@@ -10,10 +10,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <utils/logging.h>
 #include <utils/mem.h>
 #include <OS.h>
 
+#include <Base/Log.h>
 #include <Base/Coroutine.h>
 
 extern bool sre_coroutinecoreinit();
@@ -45,46 +45,18 @@ static inline void __setup_engine_data()
 #define SDLCCASE(x) case SDL_LOG_CATEGORY_##x: category_str = "["#x" : "; break
 static void sdl_log_callback(void *userdata, int category, SDL_LogPriority priority, const char *message)
 {
-    const char *priority_str, *category_str;
-    FILE* files[] = {
-        NULL,
-        *SRE_LOGFILE,
-        NULL
-    };
-
-    switch (priority)
-    {
-        SDLPCASE(DEBUG, stdout);
-        SDLPCASE(INFO, stdout);
-        SDLPCASE(WARN, stderr);
-        SDLPCASE(ERROR, stderr);
-        SDLPCASE(CRITICAL, stderr);
-        default:
-            return;
-    }
-
+    int cat;
     switch (category)
     {
-        SDLCCASE(APPLICATION);
-        SDLCCASE(ERROR);
-        SDLCCASE(ASSERT);
-        SDLCCASE(SYSTEM);
-        SDLCCASE(AUDIO);
-        SDLCCASE(VIDEO);
-        SDLCCASE(RENDER);
-        SDLCCASE(INPUT);
-        SDLCCASE(TEST);
-        SDLCCASE(CUSTOM);
+    case SDL_LOG_CATEGORY_ERROR:
+        cat = SRE_LOGCATEGORY_ERROR;
+        break;
     default:
-        return;
+        cat = SRE_LOGCATEGORY_DEBUG;
+        break;
     }
 
-    char full_prefix[255] = "[SDL]";
-
-    strncat(full_prefix, category_str, 255 - strlen(full_prefix) - strlen(category_str));
-    strncat(full_prefix, priority_str, 255 - strlen(full_prefix) - strlen(priority_str));
-
-    CUSTOM_LOG(full_prefix, files, message, NULL, '\1');
+    sre_logsimpleEx(2, cat, message);
 }
 
 void __initialize_engine()
@@ -100,7 +72,7 @@ void __initialize_engine()
 
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
     {
-        ERROR("SDL ERROR: Could not initialize SDL Subsystems: '%s'", SDL_GetError());
+        sre_log(SRE_LOGCATEGORY_ERROR, "SDL ERROR: Could not initialize SDL Subsystems: '%s'", SDL_GetError());
         exit(-1);
     }
     IMG_Init(IMG_INIT_PNG);
@@ -140,8 +112,5 @@ void __end_engine()
     IMG_Quit();
     SDL_Quit();
 
-    //LOG("SDL_GetNumAllocations(): %d", SDL_GetNumAllocations());
-
-    if (*SRE_LOGFILE)
-        fclose(*SRE_LOGFILE);
+    //sre_log("SDL_GetNumAllocations(): %d", SDL_GetNumAllocations());
 }

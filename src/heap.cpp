@@ -1,13 +1,11 @@
 #include <cstdlib>
+#include <memory>
 #include <SDL.h>
 
-#include <utils/logging.h>
-#define ENABLE_LOGGING 0
-
-#if !ENABLE_LOGGING
-	#undef LOG
-	#define LOG(...)
+#if 0
+	#define SRE_DISABLE_LOGS
 #endif
+#include <Base/Log.h>
 
 #if !defined(NDEBUG)
 SDL_atomic_t SR_ALLOCATED_SIZE;
@@ -28,7 +26,7 @@ void* operator new(size_t size)
 	SDL_AtomicAdd(&SR_ALLOCATED_SIZE, static_cast<int>(size));
 	SDL_AtomicAdd(&SR_ALLOCATED_BLOCKS, 1);
 
-	LOG("operator new(%zd): %zd, %zd", size, SDL_AtomicGet(&SR_ALLOCATED_SIZE), SDL_AtomicGet(&SR_ALLOCATED_BLOCKS));
+	sre::log("operator new(%zd): %zd, %zd", size, SDL_AtomicGet(&SR_ALLOCATED_SIZE), SDL_AtomicGet(&SR_ALLOCATED_BLOCKS));
 
 	#ifdef __unix__ // Uhmmm I think new/delete blocks are aligned to 2 pointers on unix-like systems
 		block += 2;
@@ -52,7 +50,7 @@ void operator delete(void* block) noexcept
 	SDL_AtomicAdd(&SR_ALLOCATED_SIZE, -static_cast<int>(tblock[0]));
 	SDL_AtomicAdd(&SR_ALLOCATED_BLOCKS, -1);
 
-	LOG("operator delete(%zd): %zd, %zd", *tblock, SDL_AtomicGet(&SR_ALLOCATED_SIZE), SDL_AtomicGet(&SR_ALLOCATED_BLOCKS));
+	sre::log("operator delete(%zd): %zd, %zd", *tblock, SDL_AtomicGet(&SR_ALLOCATED_SIZE), SDL_AtomicGet(&SR_ALLOCATED_BLOCKS));
 
 	free(tblock);
 }

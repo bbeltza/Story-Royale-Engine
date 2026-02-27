@@ -1,5 +1,5 @@
 #include <Core/Draw.h>
-#include <utils/logging.h>
+#include <Base/Log.h>
 
 #include "../internal.h"
 #include "drivers/drivers.h"
@@ -13,7 +13,7 @@ int sre_draw(sre_DrawType type, const void* data)
 	switch (type)
 	{
 	case SRE_DRAW_CIRCLE:
-		ERROR("sre_draw: Unavailable option 'SRE_DRAW_CIRCLE'");
+		sre_log(SRE_LOGCATEGORY_ERROR, "sre_draw: Unavailable option 'SRE_DRAW_CIRCLE'");
 		ret = -1;
 		break;
 	case SRE_DRAW_FILL:
@@ -38,7 +38,7 @@ int sre_draw(sre_DrawType type, const void* data)
 		ret = engine.video->draw_rtexture(engine.video, data);
 		break;
 	default:
-		ERROR("sre_draw: Invalid type");
+		sre_log(SRE_LOGCATEGORY_ERROR, "sre_draw: Invalid type");
 		ret = -1;
 		break;
 	}
@@ -55,7 +55,7 @@ int sre_draw_clipbegin(const sre_rect2Dut* _rect)
 		static bool unsupport = false;
 		if (!unsupport)
 		{
-			ERROR("sre_draw_clipbegin: Unsupported");
+			sre_log(SRE_LOGCATEGORY_ERROR, "sre_draw_clipbegin: Unsupported");
 			unsupport = true;
 		}
 		return -1;

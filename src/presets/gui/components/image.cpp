@@ -8,7 +8,7 @@ void Image::fit(Transform& transform)
 {
     if (!texture)
     {
-        WARN("Calling Image::fit on NULL image");
+        sre::log<sre::LOGCATEGORY_WARN>("Calling Image::fit on NULL image");
         return;
     }
     sre::vec2i size = texture->size();

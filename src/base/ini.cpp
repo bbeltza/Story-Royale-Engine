@@ -1,6 +1,6 @@
 #include <Base/Ini.hpp>
 #include <Base/File.hpp>
-#include <utils/logging.h>
+#include <Base/Log.h>
 
 #if HAVE_STRTOK_R
     #define strtok_s strtok_r
@@ -29,7 +29,7 @@ bool IniFile::load(const char* from_path)
     // Perform a debug extension check
     const char* extension = strrchr(from_path, '.');
     if (!extension || strcmp(extension, ".ini"))
-        WARN("IniFile::load(): Path '%s' does not have the '.ini' extension. Is it intended?", from_path);
+        sre::log<LOGCATEGORY_WARN>("IniFile::load(): Path '%s' does not have the '.ini' extension. Is it intended?", from_path);
 
     File f(from_path, FILE_READ);
     return load(f);

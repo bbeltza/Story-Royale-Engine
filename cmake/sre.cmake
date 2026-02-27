@@ -59,7 +59,7 @@ function(srEngine_build TARGET EXE SRCS)
     if (ARGN MATCHES NO_CONSOLE)
         message("--- ${TARGET} HAS NO CONSOLE ${SR_ENGINE_NO_CONSOLE_OPTIONS}")
         target_link_libraries(${TARGET} PRIVATE sre_noconsole)
-        endif()
+    endif()
         
     if (ARGN MATCHES USE_WX)
         message("--- ${TARGET} HAS WX")

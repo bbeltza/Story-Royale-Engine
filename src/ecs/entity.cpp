@@ -42,7 +42,7 @@ void Entity::setup_components(Component* const components[], size_t count)
 {
 	if (m_components)
 	{
-		WARN("setup_components(): Current entity already has components attached to it, they will be deattached");
+		sre::log<sre::LOGCATEGORY_WARN>("setup_components(): Current entity already has components attached to it, they will be deattached");
 		if (m_componentcount != count)
 		{
 			operator delete (m_components);

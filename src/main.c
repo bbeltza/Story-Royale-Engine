@@ -2,7 +2,7 @@
 #include "internal.h"
 #include "cmd/args.h"
 
-#include "utils/logging.h"
+#include "Base/Log.h"
 
 struct _engine_data __engine_data;
 
@@ -40,7 +40,7 @@ static void handle_arg(const char* arg, char* argv[])
         return;
     }
 
-    WARN("Unrecognized option: %s", arg-j);
+    sre_log(SRE_LOGCATEGORY_WARN, "Unrecognized option: %s", arg-j);
 }
 
 int main(int argc, char* argv[])

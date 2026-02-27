@@ -1,5 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "args.h"
-#include "utils/logging.h"
+
+#include <Base/Log.h>
 
 static inline void display_option(const arg_t* argument)
 {
@@ -19,40 +22,8 @@ static void handle_help(const char* arg, char* argv[])
     exit(0);
 }
 
-static FILE* logfile;
-FILE* const* const SRE_LOGFILE = &logfile;
-#define LOGFILE_ERROR(...) ERROR("--logfile: " __VA_ARGS__)
-
-static void handle_logfile(const char* arg, char* argv[])
-{
-    if (logfile)
-    {
-        LOGFILE_ERROR("Attempt to open log file twice! Maybe you typed --logfile twice?");
-        return;
-    }
-
-    const char* file = strchr(arg, '=');
-    if (!file)
-    {
-        display_option(SRENGINE_ARGS + 1);
-        exit(1);
-    }
-    file++;
-
-    if (!(*file))
-    {
-        LOGFILE_ERROR("Could not open log file. Path is empty");
-        return;
-    }
-
-    logfile = fopen(file, "w");
-    if (!logfile)
-        LOGFILE_ERROR("Could not open log file \"%s\", maybe access is denied?", file);
-}
-
 const arg_t SRENGINE_ARGS[] = {
     {"help", "h", "\t\t\t\tPrint this message!", handle_help},
-    {"logfile", "lf", "=[ file name ]\t\tSave logs on a file", handle_logfile},
     {"alloc-console", "ac", "\t\t\tAllocate a new console (for NO_CONSOLE programs in Windows)", handle_ac},
     {NULL}
 };
@@ -61,7 +32,7 @@ const arg_t SRENGINE_ARGS[] = {
 #ifndef _WIN32
 static void handle_ac(const char*, char*[])
 {
-    WARN("Option \"alloc-console\" is only supported on Windows");
+    sre_log(SRE_LOGCATEGORY_WARN, "Option \"alloc-console\" is only supported on Windows");
     return;
 }
 #else
@@ -71,7 +42,7 @@ static void handle_ac(const char* arg, char* argv[])
 {
     if (!winmain_enter)
     {
-        WARN("Specified \"alloc-console\" but application already has a console");
+        sre_log(SRE_LOGCATEGORY_WARN, "Specified \"alloc-console\" but application already has a console");
         return;
     }
 

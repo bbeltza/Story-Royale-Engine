@@ -1,7 +1,7 @@
 #include <Base/Log.h>
-#include <time.h>
-
 #include <utils/mem.h>
+
+#include <standard>
 
 namespace sre
 {
@@ -12,37 +12,89 @@ namespace sre
         // Log message timestamps maybe?
         time_t _timestamp;
         char *buffer;
-        int category;
         int type; // application, engine, or sdl...
+        int category;
         int size;
+
+        LogMsg(int type, int category, int buffer_size):
+            _timestamp(time(NULL)),
+            buffer(new char[buffer_size]),
+            category(category),
+            type(type),
+            size(buffer_size) {}
+        ~LogMsg() { delete buffer; }
+    };
+
+    template <class T>
+    struct MallocAllocator
+    {
+        using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
+
+        using reference = T&;
+        using const_reference = const T&;
+
+        using size_type       = size_t;
+        using difference_type = ptrdiff_t;
+
+        using propagate_on_container_move_assignment = std::true_type;
+        using is_always_equal = std::true_type;
+
+        template <class U>
+        struct rebind
+        {
+            using other = MallocAllocator<U>;
+        };
+
+        pointer allocate(std::size_t size) { return static_cast<pointer>(malloc(size)); }
     };
 
     // Structure containing the logging instance
     struct Log
     {
-        std::deque<LogMsg> msg_queue;
+        std::deque<LogMsg, MallocAllocator<LogMsg>> msg_queue;
+        std::recursive_mutex mutex;
+    };
+
+    enum LogType
+    {
+        LOGTYPE_APP,
+        LOGTYPE_ENGINE,
+        LOGTYPE_SDL
     };
 }
 
 namespace
 {
-    sre::Log log_instance;
+    sre::Log &log_instance()
+    {
+        static sre::Log i;
+        return i;
+    }
 
     constexpr char CSTRING_INFO[] = "INFO";
     constexpr char CSTRING_DEBUG[] = "DEBUG";
+    constexpr char CSTRING_WARN[] = "WARN";
     constexpr char CSTRING_ERROR[] = "ERROR";
-    constexpr char CSTRING_POSTSTR[] = "]: ";
 
     constexpr const char* CATEGORY_STRINGS[] = {
         CSTRING_INFO,
         CSTRING_DEBUG,
+        CSTRING_WARN,
         CSTRING_ERROR
     };
     constexpr size_t CATEGORY_SIZES[] = {
-        sizeof(CSTRING_INFO),
-        sizeof(CSTRING_DEBUG),
-        sizeof(CSTRING_ERROR)
+        sizeof(CSTRING_INFO) - 1,
+        sizeof(CSTRING_DEBUG) - 1,
+        sizeof(CSTRING_WARN) - 1,
+        sizeof(CSTRING_ERROR) - 1
     };
+
+    static_assert(
+        ut_arrcount(CATEGORY_STRINGS) == ut_arrcount(CATEGORY_SIZES) &&
+        ut_arrcount(CATEGORY_STRINGS) == sre::NUM_LOGCATEGORIES,
+        "Log category string count mismatching with the enum categories");
 
     constexpr char TSTRING_APP[] = "APP";
     constexpr char TSTRING_ENGINE[] = "ENGINE";
@@ -52,63 +104,100 @@ namespace
         TSTRING_ENGINE,
         TSTRING_SDL
     };
-    constexpr size_t TYPE_STRINGS[] = {
-        sizeof(TSTRING_APP),
-        sizeof(TSTRING_ENGINE),
-        sizeof(TSTRING_SDL)
+    constexpr size_t TYPE_SIZES[] = {
+        sizeof(TSTRING_APP) - 1,
+        sizeof(TSTRING_ENGINE) - 1,
+        sizeof(TSTRING_SDL) - 1
     };
 }
 
 void sre_logflush()
 {
-    while (!log_instance.msg_queue.empty())
+    auto& instance = log_instance();
+
+    std::lock_guard<std::recursive_mutex> guard{instance.mutex};
+    while (!instance.msg_queue.empty())
     {
-        auto& msg = log_instance.msg_queue.front();
-        size_t buffer_size = msg.size + CATEGORY_SIZES[msg.category] + sizeof(CSTRING_POSTSTR) - 1;
+        auto& msg = instance.msg_queue.front();
+        static constexpr char extra_characters[] = "[]: ";
+        const size_t typestr_size = TYPE_SIZES[msg.type];
+        const size_t catstr_size = CATEGORY_SIZES[msg.category];
+        size_t buffer_size = typestr_size + catstr_size + msg.size + sizeof(extra_characters) + 2;
+
+        const char* const strings[] = {
+            extra_characters,
+            TYPE_STRINGS[msg.type],
+            extra_characters + 1,
+            extra_characters,
+            CATEGORY_STRINGS[msg.category],
+            extra_characters + 1,
+            msg.buffer       
+        };
+        const size_t sizes[] = {
+            1,
+            typestr_size,
+            1,
+            1,
+            catstr_size,
+            sizeof(extra_characters) - 2,
+            static_cast<size_t>(msg.size)
+        };
+        constexpr int STRINGS_COUNT = ut_arrcount(strings);
 
         ut_dynsalloc(char, buffer, buffer_size);
-        buffer[0] = '[';
-        strcpy(buffer + 1, CATEGORY_STRINGS[msg.category]);
-        strcpy(buffer + CATEGORY_SIZES[msg.category], CSTRING_POSTSTR);
-        strcpy(buffer + buffer_size - msg.size, msg.buffer);
-        buffer[buffer_size-1] = '\n';
+        char* buffptr = buffer;
+        for (int i = 0; i < STRINGS_COUNT; i++)
+        {
+            strncpy(buffptr, strings[i], sizes[i]);
+            buffptr += sizes[i];
+        }
+        *buffptr = '\n';
         
-        fwrite(buffer, buffer_size, 1, stdout);
+        // Console writing code
+        FILE* console = msg.category == sre::LOGCATEGORY_INFO ? stdout : stderr;
+        fwrite(buffer, buffer_size, 1, console);
+        //
 
-        delete[] msg.buffer;
-        log_instance.msg_queue.pop_back();
+        instance.msg_queue.pop_front();
     }
-}
-
-int sre_log(const char* fmt, ...)
-{
-    int n;
-    va_list va;
-    va_start(va, fmt);
-    n = sre_logva(fmt, va);
-    va_end(va);
-
-    return n;
-}
-
-int sre_logva(const char* fmt, va_list va)
-{
-    return sre_logEx(0, 0, fmt, va);
 }
 
 int sre_logEx(int type, int category, const char* fmt, va_list va)
 {
     assert(fmt != NULL);
+    assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
 
-    sre::LogMsg newmsg;
-    newmsg.category = category;
-    newmsg.type = type;
-    newmsg.size = vsnprintf(NULL, 0, fmt, va) + 1;
-    newmsg.buffer = new char[newmsg.size];
-    vsnprintf(newmsg.buffer, newmsg.size, fmt, va);
+    auto& instance = log_instance();
+    std::lock_guard<std::recursive_mutex> guard{instance.mutex};
 
-    log_instance.msg_queue.push_back(newmsg);
+    instance.msg_queue.emplace_back(
+        type,
+        category,
+        vsnprintf(NULL, 0, fmt, va) + 1
+    );
+    auto& msg = instance.msg_queue.back();
+    
+    vsnprintf(msg.buffer, msg.size, fmt, va);
     sre_logflush();
 
-    return newmsg.size;
+    return msg.size - 1;
+}
+
+int sre_logsimpleEx(int type, int category, const char* str)
+{
+    assert(str != NULL);
+    assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
+
+    auto& instance = log_instance();
+
+    std::lock_guard<std::recursive_mutex> barney{instance.mutex};
+    int len = strlen(str) + 1;
+    instance.msg_queue.emplace_back(
+        type,
+        category,
+        len
+    );
+    strncpy(instance.msg_queue.back().buffer, str, len);
+
+    return len - 1;
 }

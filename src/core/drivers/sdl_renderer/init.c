@@ -1,4 +1,3 @@
-#include <utils/logging.h>
 #include "sdl_renderer.h"
 
 int sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)

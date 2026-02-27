@@ -2,15 +2,12 @@
 #include "Datatypes/common.hpp"
 
 #include "utils/math.h"
-#include "utils/logging.h"
 
 namespace sre
 {
     template <typename T>
     struct flags
     {
-        SRE_IMPLEMENT_DATATYPE_PRINT
-
         static_assert(std::is_integral<T>::value, "Flags object must be of an integral type: Type must be a whole number");
         using type = T;
 
@@ -38,7 +35,7 @@ namespace sre
         template <typename... Args> static constexpr T get_pack(T first, Args... args) { return first | get_pack(args...); }
         static constexpr T get_pack(T first) { return first; }
 
-        inline void display(logfunc_t _printer) const
+        inline void println() const
         {
             constexpr size_t bitsize = sizeof(m_data) * 8;
             char buff[sizeof(m_data)][9] = { 0 };
@@ -49,7 +46,7 @@ namespace sre
             for (int i = 0; i < sizeof(m_data) - 1; i++)
                 buff[i][8] = ' ';
 
-            _printer("{ %s (0x%x) }", buff, m_data);
+            sre::log("{ %s (0x%x) }", buff, m_data);
         }
     private:
         T m_data{};

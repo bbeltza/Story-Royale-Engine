@@ -65,7 +65,7 @@ set(PRESET_SOURCES
 )
 
 set(UTIL_SOURCES
-    "logging.c"
+    #"logging.c"
     "operators.cc"
 )
 

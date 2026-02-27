@@ -1,10 +1,6 @@
 #pragma once
-#include <utils/logging.h>
+#include <Base/Log.h>
 #include <ints.h>
 
-#define SRE_IMPLEMENT_DATATYPE_PRINT \
-inline void print() const { display(&ALOG); } \
-inline void println() const { display(&NLOG); }
-
-#define SRE_IMPLEMENT_DATATYPE(...) SRE_IMPLEMENT_DATATYPE_PRINT \
-inline void display(logfunc_t logger) const { logger(__VA_ARGS__); }
+#define SRE_IMPLEMENT_DATATYPE(...) \
+inline void display() const { sre::log<sre::LOGCATEGORY_DEBUG>(__VA_ARGS__); }

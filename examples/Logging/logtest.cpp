@@ -4,7 +4,8 @@ namespace sre
 {
     extern "C" void initialize()
     {
-        sre::log("%d", 10);
+        sre::log("", 10);
         sre::log("Hello world2...");
+        sre::log<LOGCATEGORY_ERROR>("%d", 10);
     }
 }

@@ -1,6 +1,8 @@
+#include <Base/Log.h>
+#include <assert.h>
+
 #include "sdl_renderer.h"
 
-#include <utils/logging.h>
 #include <utils/mem.h>
 #include <utils/math.h>
 

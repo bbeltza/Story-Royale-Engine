@@ -1,7 +1,7 @@
 #include <Base/File.hpp>
 #include <Entry.h>
 
-#include <utils/logging.h>
+#include <Base/Log.h>
 
 void sre::initialize()
 {
@@ -10,6 +10,6 @@ void sre::initialize()
     assert(data != NULL);
 
     size_t size = f.size();
-    LOG("%s", data);
-    LOG("%zd", size);
+    sre::log("%s", data);
+    sre::log("%zd", size);
 }

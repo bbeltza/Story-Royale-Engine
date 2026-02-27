@@ -16,7 +16,7 @@ void __setup_renderer()
 
 	if (sresdlrenderer_init(engine.video, engine.sdl_windowhndl) < 0)
 	{
-		ERROR("Failed initializing the render driver");
+		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
 		exit(-1);
 	}
 

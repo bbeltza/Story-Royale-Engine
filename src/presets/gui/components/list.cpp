@@ -1,4 +1,5 @@
 #include <GUI/Components/List.hpp>
+#include <cstdlib>
 
 using namespace sreGUI;
 
