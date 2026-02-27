@@ -26,10 +26,10 @@ namespace sre
         template <typename... Args> inline void toggle_on(Args... args) { toggle_on(get_pack(args...)); }
         template <typename... Args> inline void toggle_off(Args... args) { toggle_off(get_pack(args...)); }
 
-        constexpr bool operator ==(const flags& other) { return m_data == other.m_data; }
-        constexpr bool operator !=(const flags& other) { return m_data != other.m_data; }
+        constexpr bool operator ==(const flags& other) const { return m_data == other.m_data; }
+        constexpr bool operator !=(const flags& other) const { return m_data != other.m_data; }
 
-        constexpr operator T() { return get(); }
+        constexpr operator T() const { return get(); }
 
         template <typename... Args> constexpr flags(Args... args) : m_data(get_pack(args...)) {}
         template <typename... Args> static constexpr T get_pack(T first, Args... args) { return first | get_pack(args...); }

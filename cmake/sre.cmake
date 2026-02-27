@@ -66,7 +66,7 @@ function(srEngine_build TARGET EXE SRCS)
         target_link_libraries(${TARGET} PRIVATE sre_werror)
     endif()
 
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(NOT MSVC)
         target_link_options(${EXE} PRIVATE "-Wl,--start-group")
     endif()
 

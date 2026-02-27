@@ -107,7 +107,7 @@ namespace sre
 		Connection::ptr connect(Fn fn(), void* userdata) { return connect(reinterpret_cast<Fn(*)(void*, void*, T*)>(fn), userdata); }
 	};
 
-	using empty_t = nullptr_t*;
+	using empty_t = std::nullptr_t*;
 	using EmptySignal = Signal<empty_t>;
 }
 

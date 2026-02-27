@@ -72,7 +72,7 @@ else()
     target_compile_options(sre_werror INTERFACE "-Werror")
 endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(sre_werror INTERFACE "-Wno-vla-extension")
+    target_compile_options(sre_werror INTERFACE "-Wno-vla-extension" "-Wno-deprecated-declarations")
 endif()
 target_compile_definitions(sre_werror INTERFACE _CRT_SECURE_NO_WARNINGS)
 

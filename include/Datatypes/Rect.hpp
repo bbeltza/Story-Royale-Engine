@@ -38,23 +38,37 @@ namespace sre
         }
 
         constexpr bool intersects(const rect2D& other) const {
-            const vec abs_size = size.abs() / 2;
-            const vec abs_othersize = other.size.abs() / 2;
+            #if __cplusplus < 201300
+                #define abs_size (size.abs() / 2)
+                #define abs_othersize (other.size.abs() / 2)
+            #else
+                const vec abs_size = size.abs() / 2;
+                const vec abs_othersize = other.size.abs() / 2;
+            #endif
             return ut::abs(position.x - other.position.x) < abs_size.x + abs_othersize.x &&
                 ut::abs(position.y - other.position.y) < abs_size.y + abs_othersize.y;
         }
 
         constexpr bool intersects(const vec pt) const {
-            const vec abs_size = size.abs() / 2;
+            #ifndef abs_size
+                const vec abs_size = size.abs() / 2;
+            #endif
             return (pt.x >= position.x - abs_size.x && pt.x <= position.x + abs_size.x) &&
                     (pt.y >= position.y - abs_size.y && pt.y <= position.y + abs_size.y);
         }
         
         constexpr bool simple_intersects(const vec pt) const {
-            const vec abs_size = size.abs();
+            #ifndef abs_size
+                const vec abs_size = size.abs();
+            #endif
             return ( pt.x >= position.x && pt.x <= position.x + abs_size.x ) &&
                     (pt.y >= position.y && pt.y <= position.y + abs_size.y);
         }
+
+        #ifdef abs_size
+            #undef abs_size
+            #undef abs_othersize
+        #endif
 
         constexpr T top() const { return position.y - ut::abs(size.y) / 2; }
         constexpr T bottom() const { return position.y + ut::abs(size.y) / 2; }

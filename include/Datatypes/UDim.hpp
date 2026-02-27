@@ -35,8 +35,8 @@ namespace sre
         template <typename TXS, typename TXO, typename TYS, typename TYO>
         constexpr udim2(TXS xscale, TXO xoffset, TYS yscale, TYO yoffset): x(xscale, xoffset), y(yscale, yoffset) {}
 
-        constexpr vec2ut to_absolute(unit_type xrelative, unit_type yrelative) { return { x.to_absolute(xrelative), y.to_absolute(yrelative) }; }
-        constexpr vec2ut to_absolute(vec2<unit_type> relative) { return udim2::to_absolute(relative.x, relative.y); }
+        constexpr vec2ut to_absolute(unit_type xrelative, unit_type yrelative) const { return { x.to_absolute(xrelative), y.to_absolute(yrelative) }; }
+        constexpr vec2ut to_absolute(vec2<unit_type> relative) const { return udim2::to_absolute(relative.x, relative.y); }
 
         udim x;
         udim y;

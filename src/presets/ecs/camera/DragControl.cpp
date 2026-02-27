@@ -42,5 +42,7 @@ void DragControl::handle_event(void*, DragControl* self, sre::Event ev)
     case sre::EVENT_TOUCH:
         self->m_lastmouseDelta += ev.touch.delta * sre::display_size();
         break;
+    default:
+        break;
     }
 }

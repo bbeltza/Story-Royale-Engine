@@ -12,7 +12,7 @@
 void __setup_renderer()
 {
 	engine.video = static_cast<sre_videodriver*>(operator new(sizeof(sre_videodriver)));
-	memset(engine.video, 0, sizeof(sre_videodriver));
+	memset(static_cast<void*>(engine.video), 0, sizeof(sre_videodriver));
 
 	if (sresdlrenderer_init(engine.video, engine.sdl_windowhndl) < 0)
 	{

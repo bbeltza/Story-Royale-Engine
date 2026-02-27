@@ -245,5 +245,5 @@ bool Scene::call_query(sre::vec2ut coords) const
         }
     }
 
-    return NULL;
+    return false;
 }

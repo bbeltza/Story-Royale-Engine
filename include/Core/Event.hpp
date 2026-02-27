@@ -86,7 +86,7 @@ namespace sre
 	union Event
 	{
 		Event() {}
-		Event(const Event& copy) { memcpy(this, &copy, sizeof(Event)); };
+		Event(const Event& copy) { memcpy(static_cast<void*>(this), &copy, sizeof(Event)); };
 
 		eventType type;
 		events::Common common;

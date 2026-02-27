@@ -19,6 +19,8 @@ void Button::handle_event(void*, Button* button, sre::Event ev)
         if (ev.touch.pressed) return;
         if (button->m_hover) button->on_press(ev.touch.uv * sre::display_size());
         break;
+    default:
+        break;
     }
 }
 

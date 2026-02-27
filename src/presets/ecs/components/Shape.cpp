@@ -82,15 +82,15 @@ void Shape::on_pupdate(Entity& entity)
 
         for (Component& comp : ent)
         {
-			auto& compshape = *dynamic_cast<Shape*>(&comp);
-			if (&compshape == NULL) continue;
-			if (!compshape.enabled()) continue;
-            if (!compshape.flags.has(F_CANCOLLIDE)) continue;
+			auto compshape = dynamic_cast<Shape*>(&comp);
+			if (compshape == NULL) continue;
+			if (!compshape->enabled()) continue;
+            if (!compshape->flags.has(F_CANCOLLIDE)) continue;
 
             sre::rect2Dut thisRect = real_rect(entity),
-                          otherRect = compshape.real_rect(ent);
+                          otherRect = compshape->real_rect(ent);
 
-            if (compshape.collides(ent, thisRect))
+            if (compshape->collides(ent, thisRect))
             {
                 sre::vec2ut distance = (thisRect.position - otherRect.position);
                 sre::vec2ut radius = (otherRect.size/2 + thisRect.size/2);
@@ -98,7 +98,7 @@ void Shape::on_pupdate(Entity& entity)
                 sre::vec2ut sign = {distance.x < 0 ? -1.0_ut : 1, distance.y < 0 ? -1 : 1.0_ut};
                 sre::vec2ut pushdist = radius * sign - distance;
 
-                if (!compshape.flags.has(F_ANCHORED)) pushdist = pushdist / 2;
+                if (!compshape->flags.has(F_ANCHORED)) pushdist = pushdist / 2;
 
                 sre::unit absdx = abs(pushdist.x), absdy = abs(pushdist.y);
 

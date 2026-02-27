@@ -46,7 +46,7 @@ namespace sreGUI
         {
             auto ptr = static_cast<Object *>(::operator new(size));
             #ifndef NDEBUG // Easier for catching lack of initialization bugs
-                memset(ptr, 0, size);
+                memset(static_cast<void*>(ptr), 0, size);
             #endif
             ptr->m_parent = NULL;
 
@@ -76,7 +76,7 @@ namespace sreGUI
             static_assert(std::is_base_of<Object, T>::value, "T must be derived from sreGUI::Object");
             auto ptr = static_cast<Object *>(::operator new(sizeof(T)));
             #ifndef NDEBUG
-                memset(ptr, 0, sizeof(T));
+                memset(static_cast<void*>(ptr), 0, sizeof(T));
             #endif
             ptr->m_parent = this;
             return static_cast<T*>(ptr);
