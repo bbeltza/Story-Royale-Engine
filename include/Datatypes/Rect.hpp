@@ -58,7 +58,10 @@ namespace sre
         }
         
         constexpr bool simple_intersects(const vec pt) const {
-            #ifndef abs_size
+            #ifdef abs_size
+                #undef abs_size
+                #define abs_size (size.abs())
+            #else
                 const vec abs_size = size.abs();
             #endif
             return ( pt.x >= position.x && pt.x <= position.x + abs_size.x ) &&
