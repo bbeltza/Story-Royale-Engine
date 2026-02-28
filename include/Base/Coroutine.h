@@ -60,13 +60,22 @@ namespace sre
     {
         sre_coroutine* m_coroutine = NULL;
     public:
-        Coroutine() = delete;
+        constexpr Coroutine() = default;
         ~Coroutine() { sre_coroutinecancel(m_coroutine); }
 
         template <typename Ret, typename Ptr>
         Coroutine(bool suspended, Ret fx(Ptr* data), void* userdata):
             m_coroutine(sre_coroutinecreate(suspended, reinterpret_cast<sre_coroutineFunction>(fx), userdata))
         {}
+
+        Coroutine(Coroutine& moving): m_coroutine(moving.m_coroutine) {
+            moving.m_coroutine = NULL;
+        }
+
+        void operator =(Coroutine& moving) {
+            m_coroutine = moving.m_coroutine;
+            moving.m_coroutine = NULL;
+        }
     public:
         bool resume(void* data=NULL) { return sre_coroutineresume(m_coroutine, data); }
         coroutineState state() const { return static_cast<coroutineState>(sre_coroutinestate(m_coroutine)); }

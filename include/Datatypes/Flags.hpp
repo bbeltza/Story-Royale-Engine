@@ -26,6 +26,7 @@ namespace sre
         template <typename... Args> inline void toggle_on(Args... args) { toggle_on(get_pack(args...)); }
         template <typename... Args> inline void toggle_off(Args... args) { toggle_off(get_pack(args...)); }
 
+        inline void operator =(T value) { m_data = value; }
         constexpr bool operator ==(const flags& other) const { return m_data == other.m_data; }
         constexpr bool operator !=(const flags& other) const { return m_data != other.m_data; }
 
