@@ -1,1 +1,0 @@
-add_library(sre_os STATIC "os.c" "output.c" "sync.c"  "threads.c")

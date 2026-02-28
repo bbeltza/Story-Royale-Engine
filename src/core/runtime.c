@@ -1,4 +1,3 @@
-#include <OS.h>
 #include <stdio.h>
 #include "../internal.h"
 
@@ -10,6 +9,7 @@ static int __event_watch(void *, SDL_Event *);
 
 static int game_loop(void* running)
 {
+    engine.framestart_time = SDL_GetTicks64();
     SDL_LockMutex(engine.render_mutex); // Lock the mutex once, it will be unlocked every time SDL_CondWait gets called
     while (*(int*)running)
     {
@@ -20,8 +20,8 @@ static int game_loop(void* running)
 
         engine.frame++;
 
-        engine.frameend_time = os.clock();
-        engine.last_dt = (engine.frameend_time - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
+        engine.frameend_time = SDL_GetTicks64();
+        engine.last_dt = (engine.frameend_time - engine.framestart_time) / SRE_TS(1000.0);
         engine.framestart_time = engine.frameend_time;
 
         //
@@ -49,11 +49,11 @@ static int game_loop(void* running)
 
         //
         
-        elapsed = (os.clock() - engine.framestart_time) / (sre_timeStamp)CLOCK_FREQUENCY;
+        elapsed = (SDL_GetTicks64() - engine.framestart_time) / SRE_TS(1000.0);
         elapsed = engine.target_dt - elapsed;
 
         if (elapsed > 0)
-            delay_s(elapsed);
+            SDL_Delay((Uint32)(elapsed*1000));
     }
 
     return 0;

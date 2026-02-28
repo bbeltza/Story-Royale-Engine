@@ -15,6 +15,7 @@ endif()
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(CheckIncludeFile)
@@ -57,10 +58,6 @@ target_link_libraries(sre PRIVATE sre_interface)
 target_link_libraries(sre_interface INTERFACE sre_werror)
 
 target_compile_definitions(sre_interface INTERFACE SRE=1)
-
-add_subdirectory(os)
-target_link_libraries(sre PUBLIC sre_os)
-
 
 if(MSVC)
     target_link_options(sre_noconsole INTERFACE "/SUBSYSTEM:WINDOWS")

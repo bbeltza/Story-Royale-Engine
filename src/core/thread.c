@@ -4,8 +4,6 @@
 #include "../internal.h"
 #define thread_bucket ((sre_threadinst**)engine.threads_bucket)
 
-#include <OS.h>
-
 typedef struct sre_threadinst
 {
     sre_Thread id;
@@ -86,7 +84,7 @@ static sre_sptr thread_entry(sre_threadinst* inst)
     inst->id = id;
 
     if (inst->delay)
-        delay_s(inst->delay);
+        SDL_Delay((Uint32)(inst->delay*1000));
     
     assert(inst->function);
 

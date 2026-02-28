@@ -1,4 +1,0 @@
-#pragma once
-
-#define TICKS_PER_SEC 1000000000
-#define CLOCK_FREQUENCY TICKS_PER_SEC

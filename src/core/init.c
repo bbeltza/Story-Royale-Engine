@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include <utils/mem.h>
-#include <OS.h>
 
 #include <Base/Log.h>
 #include <Base/Coroutine.h>
@@ -32,7 +31,6 @@ static void __invoke_entry(void* userdata) // Invoking the entry-point won't be 
 static inline void __setup_engine_data()
 {
     engine.phys_target_dt = 1 / 128.0;
-    engine.framestart_time = os.clock();
 
     engine.input_last_touchid = -1;
     engine.destroyqueue_mutex = SDL_CreateMutex();
