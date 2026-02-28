@@ -4,12 +4,22 @@
 #include <Core/Defer.h>
 #include <Base/Log.h>
 
+#if _WIN32
+    #include "time/win32.c"
+#elif __unix__
+    #include "time/unix.c"
+#else
+    #error "Implement your own sleep!!"
+#endif
+
 extern void sre_logflush();
 static int __event_watch(void *, SDL_Event *);
 
 static int game_loop(void* running)
 {
-    engine.framestart_time = SDL_GetTicks64();
+    const long long FREQUENCY = frequency();
+    ticks(&engine.framestart_time);
+
     SDL_LockMutex(engine.render_mutex); // Lock the mutex once, it will be unlocked every time SDL_CondWait gets called
     while (*(int*)running)
     {
@@ -20,8 +30,8 @@ static int game_loop(void* running)
 
         engine.frame++;
 
-        engine.frameend_time = SDL_GetTicks64();
-        engine.last_dt = (engine.frameend_time - engine.framestart_time) / SRE_TS(1000.0);
+        ticks(&engine.frameend_time);
+        engine.last_dt = (engine.frameend_time - engine.framestart_time) / SRE_TS(FREQUENCY);
         engine.framestart_time = engine.frameend_time;
 
         //
@@ -49,11 +59,12 @@ static int game_loop(void* running)
 
         //
         
-        elapsed = (SDL_GetTicks64() - engine.framestart_time) / SRE_TS(1000.0);
+        ticks(&engine.frameend_time);
+        elapsed = (engine.frameend_time - engine.framestart_time) / SRE_TS(FREQUENCY);
         elapsed = engine.target_dt - elapsed;
 
         if (elapsed > 0)
-            SDL_Delay((Uint32)(elapsed*1000));
+            wait(elapsed);
     }
 
     return 0;
