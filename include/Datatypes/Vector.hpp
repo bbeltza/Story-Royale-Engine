@@ -15,8 +15,6 @@ namespace sre
     template <typename T>
     struct vec2
     {
-        SRE_IMPLEMENT_DATATYPE("{ %g, %g }", static_cast<double>(x), static_cast<double>(y))
-
         static_assert(vec_valid_t<T>::value, "sre::vec2 datatype must be an arithmetic type: The type must represent a number");
         using type = T;
 
@@ -129,4 +127,13 @@ namespace sre
     using vec2d = vec2<double>;
 
     using vec2ut = vec2<unit>;
+}
+
+#include <ostream>
+
+template <typename Char, typename Traits, typename T>
+std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& os, const sre::vec2<T>& pos)
+{
+    os << "{ " << (pos.x + 0) << " ; " << (pos.y + 0) << " }";
+    return os;
 }
