@@ -15,6 +15,10 @@ enum sre_LogCategory
 };
 
 #ifdef __cplusplus
+extern "C++"
+{
+    #include <sstream>
+}
 namespace sre
 {
     enum LogCategory
@@ -25,6 +29,35 @@ namespace sre
         LOGCATEGORY_ERROR = SRE_LOGCATEGORY_ERROR,
         NUM_LOGCATEGORIES = SRE_NUM_LOGCATEGORIES
     };
+
+    extern "C++"
+    {
+        template <LogCategory category>
+        class _strbuf: public std::stringbuf
+        {
+            int sync() override
+            {
+                auto s = str();
+                if (s.back() == '\n') s.pop_back();
+                sre::log<category>(s.c_str());
+                str("");
+                return 0;
+            }
+        };
+        template <LogCategory category>
+        _strbuf<category> __strbuf;
+
+        template <LogCategory category=LOGCATEGORY_DEBUG>
+        std::ostream out{
+            #ifdef SRE_DISABLE_LOGS
+                nullptr
+            #else
+                &__strbuf<category>
+            #endif
+        };
+        
+        using std::endl;
+    }
 }
 #endif
 
@@ -32,6 +65,7 @@ namespace sre
     #define sre_logEx(t, c, fmt, va) (void)0
     #define sre_logsimpleEx(t, c, str) (void)0
 
+    #ifdef __cplusplus
     extern "C++" {
         namespace sre
         {
@@ -44,6 +78,7 @@ namespace sre
             }
         }
     }
+    #endif
 #else
     #ifdef SRE
         #define __LTYPE 1
@@ -76,6 +111,8 @@ namespace sre
 
             template <LogCategory category=LOGCATEGORY_INFO>
             inline int log(const char* str) { return sre_logsimpleEx(__LTYPE, category, str); }
+
+            
         }
     }
     #else
