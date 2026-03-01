@@ -5,6 +5,34 @@
 
 namespace sre
 {
+    template <LogCategory category=LOGCATEGORY_DEBUG>
+    class _strbuf: public std::stringbuf
+    {
+        int sync() override
+        {
+            auto s = str();
+            if (s.back() == '\n') s.pop_back();
+            sre_logsimpleEx(0, category, s.c_str());
+            str("");
+            return 0;
+        }
+
+    public:
+        static _strbuf buffer;
+    };
+    
+    template <LogCategory category>
+    _strbuf<category> _strbuf<category>::buffer;
+    
+    sre::ostream out{&_strbuf<>::buffer};
+    sre::ostream odbg{&_strbuf<LOGCATEGORY_DEBUG>::buffer};
+    sre::ostream oinfo{&_strbuf<LOGCATEGORY_INFO>::buffer};
+    sre::ostream owarn{&_strbuf<LOGCATEGORY_WARN>::buffer};
+    sre::ostream oerr{&_strbuf<LOGCATEGORY_ERROR>::buffer};
+}
+
+namespace sre
+{
     // Structure containing a log message
     // *if you're asking why `size` is not a size_t we're not having messages longer than 2^31-1 haha*
     struct LogMsg

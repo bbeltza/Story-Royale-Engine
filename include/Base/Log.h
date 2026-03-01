@@ -32,29 +32,18 @@ namespace sre
 
     extern "C++"
     {
-        template <LogCategory category>
-        class _strbuf: public std::stringbuf
-        {
-            int sync() override
-            {
-                auto s = str();
-                if (s.back() == '\n') s.pop_back();
-                sre::log<category>(s.c_str());
-                str("");
-                return 0;
-            }
-        };
-        template <LogCategory category>
-        _strbuf<category> __strbuf;
+        #ifndef SRE_DISABLE_LOGS
+            using std::ostream;
+        #else
+            // Try to find a way to implement null ostream...
+            struct ostream;
+        #endif
 
-        template <LogCategory category=LOGCATEGORY_DEBUG>
-        std::ostream out{
-            #ifdef SRE_DISABLE_LOGS
-                nullptr
-            #else
-                &__strbuf<category>
-            #endif
-        };
+        extern sre::ostream out;
+        extern sre::ostream odbg;
+        extern sre::ostream oinfo;
+        extern sre::ostream owarn;
+        extern sre::ostream oerr;
         
         using std::endl;
     }
