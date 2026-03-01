@@ -68,11 +68,11 @@ namespace sre
             m_coroutine(sre_coroutinecreate(suspended, reinterpret_cast<sre_coroutineFunction>(fx), userdata))
         {}
 
-        Coroutine(Coroutine& moving): m_coroutine(moving.m_coroutine) {
+        Coroutine(Coroutine&& moving): m_coroutine(moving.m_coroutine) {
             moving.m_coroutine = NULL;
         }
 
-        void operator =(Coroutine& moving) {
+        void operator =(Coroutine&& moving) {
             m_coroutine = moving.m_coroutine;
             moving.m_coroutine = NULL;
         }

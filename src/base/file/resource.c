@@ -33,8 +33,7 @@ const sre_byte* sre_getresource(const char* path, size_t* size_output)
 }
 
 #if _WIN32
-#include <Resapi.h> // Only include Resapi.h, we don't need the whole Windows header...
-#undef ERROR
+#include <Windows.h>
 
 void sre_win_resourceinit(void)
 {
