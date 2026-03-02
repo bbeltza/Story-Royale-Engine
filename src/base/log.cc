@@ -5,14 +5,14 @@
 
 namespace sre
 {
-    template <LogCategory category=LOGCATEGORY_DEBUG>
+    template <LogCategory category=LOGCATEGORY_DEBUG, int type=0>
     class _strbuf: public std::stringbuf
     {
         int sync() override
         {
             auto s = str();
             if (s.back() == '\n') s.pop_back();
-            sre_logsimpleEx(0, category, s.c_str());
+            sre_logsimpleEx(type, category, s.c_str());
             str("");
             return 0;
         }
@@ -21,14 +21,19 @@ namespace sre
         static _strbuf buffer;
     };
     
-    template <LogCategory category>
-    _strbuf<category> _strbuf<category>::buffer;
+    template <LogCategory category, int type>
+    _strbuf<category, type> _strbuf<category, type>::buffer;
     
     sre::ostream out{&_strbuf<>::buffer};
     sre::ostream odbg{&_strbuf<LOGCATEGORY_DEBUG>::buffer};
     sre::ostream oinfo{&_strbuf<LOGCATEGORY_INFO>::buffer};
     sre::ostream owarn{&_strbuf<LOGCATEGORY_WARN>::buffer};
     sre::ostream oerr{&_strbuf<LOGCATEGORY_ERROR>::buffer};
+
+    sre::ostream edbg{&_strbuf<LOGCATEGORY_DEBUG, 1>::buffer};
+    sre::ostream einfo{&_strbuf<LOGCATEGORY_INFO, 1>::buffer};
+    sre::ostream ewarn{&_strbuf<LOGCATEGORY_WARN, 1>::buffer};
+    sre::ostream eerr{&_strbuf<LOGCATEGORY_ERROR, 1>::buffer};
 }
 
 namespace sre

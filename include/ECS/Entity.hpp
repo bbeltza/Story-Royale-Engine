@@ -107,7 +107,7 @@ namespace sreECS
         Iterator end() const { return m_components + m_componentcount; }
         bool empty() const { return !m_componentcount; }
 
-        size_t component_size() const { return m_componentcount; }
+        size_t component_count() const { return m_componentcount; }
 
     private:
         Component** m_components = NULL;

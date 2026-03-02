@@ -44,6 +44,14 @@ namespace sre
         extern sre::ostream oinfo;
         extern sre::ostream owarn;
         extern sre::ostream oerr;
+
+        #ifdef SRE
+            // Engine output streams
+            extern sre::ostream edbg;
+            extern sre::ostream einfo;
+            extern sre::ostream ewarn;
+            extern sre::ostream eerr;
+        #endif
         
         using std::endl;
     }
