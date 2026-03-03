@@ -21,7 +21,7 @@
 	- It would be in a header like <Core/Physics.h-hpp>
 	- You'd append and remove physics objects with it, and the engine would do every needed operation in the next pupdate cycle
 
-(current version: 0.101.27)
+(current version: 0.102.02)
 
 - Work on the game ^^
 
@@ -35,7 +35,10 @@ Less likely ideas:
 			- Scenes/Worlds would be the ones to store the components, and provide pointers to the entities. Simple
 			- Basically, everything is managed by the scene, mostly, 
 		- Maybe do the same thing for UI, maybe not... It's probably okay to use inheritance for UI
+		(By the way, this ECS model sucks and it is a mess, so I better change it)
+	
 	- Compression on resources (Maybe using a zip file with the resources?), or adding a bitmask at the resources
+
 	- Have the game run on an isolated space. I got some ideas on how this could be done and why:
 		- On Windows, you can have the game as a separate process executable, with its own memory space and have the engine create the process when running the game:
 			- This allows to garantee the engine's initialization when initializing game global variables, so it solves most static initialization and destruction overheads.
