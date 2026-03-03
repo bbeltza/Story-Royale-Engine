@@ -78,6 +78,7 @@ namespace sre
         }
     public:
         bool resume(void* data=NULL) { return sre_coroutineresume(m_coroutine, data); }
+        void cancel() { sre_coroutinecancel(m_coroutine); m_coroutine = NULL; }
         coroutineState state() const { return static_cast<coroutineState>(sre_coroutinestate(m_coroutine)); }
     };
 
