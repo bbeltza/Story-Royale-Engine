@@ -5,7 +5,7 @@
 
 #include <ECS/Scene.hpp>
 
-int sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin, s32 flags)
+bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin, s32 flags)
 {
     sre::DDLine line_data{
         flags & ~SRE_DRAWFLAGS_USECAM, // We got our own custom handler for that (For now...)
@@ -31,8 +31,8 @@ int sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin, 
         line_data.pt1.x = remainder(line_data.pt1.x, ceiled_scrsize.x) + ceiled_scrcenter.x;
 
         line_data.pt2.x = line_data.pt1.x;
-        if (sre::draw(line_data))
-            return -1;
+        if (!sre::draw(line_data))
+            return false;
     }
 
     line_data.pt1.x = 0;
@@ -43,9 +43,9 @@ int sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin, 
         line_data.pt1.y = remainder(line_data.pt1.y, ceiled_scrsize.y) + ceiled_scrcenter.y;
 
         line_data.pt2.y = line_data.pt1.y;
-        if (sre::draw(line_data))
-            return -1;
+        if (!sre::draw(line_data))
+            return false;
     }
 
-    return 0;
+    return true;
 }

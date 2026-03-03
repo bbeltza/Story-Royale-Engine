@@ -8,19 +8,19 @@ using namespace sre;
 using easingFn = timeStamp (timeStamp alpha);
 static easingFn* EASE_FUNCTIONS[][3] = {
     /* S_LINEAR */ {
-        [](timeStamp a) { return a; },
-        [](timeStamp a) { return a; },
-        [](timeStamp a) { return a; }
+        [](timeStamp a) -> timeStamp { return a; },
+        [](timeStamp a) -> timeStamp { return a; },
+        [](timeStamp a) -> timeStamp { return a; }
     },
     /* S_QUAD */ {
-        [](timeStamp a) { return a*a; },
-        [](timeStamp a) { a = 1-a; return 1 - a*a; },
-        [](timeStamp a) { return a < 0.5 ? 2 * a*a : 1 - pow(-2 * a + 2, 2)/2; }
+        [](timeStamp a) -> timeStamp { return a*a; },
+        [](timeStamp a) -> timeStamp { a = 1-a; return 1 - a*a; },
+        [](timeStamp a) -> timeStamp { return a < 0.5 ? 2 * a*a : 1 - pow(-2 * a + 2, 2)/2; }
     },
     /* S_CUBIC  */ {
-        [](timeStamp a) { return a*a*a; },
-        [](timeStamp a) { a = 1-a; return 1 - a*a*a; },
-        [](timeStamp a) { return a < 0.5 ? 4 * a*a*a : 1 - pow(-2 * a + 2, 3)/2; }
+        [](timeStamp a) -> timeStamp { return a*a*a; },
+        [](timeStamp a) -> timeStamp { a = 1-a; return 1 - a*a*a; },
+        [](timeStamp a) -> timeStamp { return a < 0.5 ? 4 * a*a*a : 1 - pow(-2 * a + 2, 3)/2; }
     }
 };
 

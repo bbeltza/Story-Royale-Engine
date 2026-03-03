@@ -69,6 +69,17 @@ typedef enum
     SRE_DRAWFLAGS_FLIPY = ut_bit(3)
 } sre_DrawFlags;
 
+typedef enum
+{
+    SRE_BLEND_NONE = 0x00000000,
+    SRE_BLEND_BLEND = 0x00000001,
+    SRE_BLEND_ADD = 0x00000002,
+    SRE_BLEND_MOD = 0x00000004,
+    SRE_BLEND_MUL = 0x00000008,
+
+    SRE_BLEND_DEFAULT = SRE_BLEND_BLEND
+} sre_DrawBlending;
+
 /*
  * Structure representing the data to fill the screen, used with `sre_draw(SRE_DRAW_FILL)`
  * It's just a color struct, so you can still pass a color struct into `sre_draw`
@@ -148,23 +159,28 @@ typedef struct sre_DDRTexture
  * 
  * Passing something else or the wrong struct to the wrong `type` is undefined behavior 
  * 
- * @return 0 on success, -1 on error
+ * @return `true` on success, `false` on error
  */
-int sre_draw(sre_DrawType type, const void* data);
+bool sre_draw(sre_DrawType type, const void* data);
 
 /*
  * Sets up and begins the drawing clip rect
  * @param rect The rectangle to clip in
  * 
- * @return 0 on success, -1 on error
+ * @return `true` on success, `false` on error
  */
-int sre_draw_clipbegin(const sre_rect2Dut* rect);
+bool sre_draw_clipbegin(const sre_rect2Dut* rect);
 
 /*
  * Ends the drawing clip rect
  * Can be called if there's no drawing clip rect
  */
 void sre_draw_clipend();
+
+/*
+ * Set blending when drawing elements
+*/
+bool sre_draw_blend(sre_DrawBlending blend);
 
 SRE_CAPI_END
 

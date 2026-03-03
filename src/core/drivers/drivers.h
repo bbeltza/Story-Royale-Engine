@@ -12,7 +12,7 @@
 // @param signature the parameter to take in, these functions do only take a single argument, there might be an additional parameter for the video driver pointer too
 //
 // @return the value to return in `sre_draw()`: Usually 0 on success or -1 on error
-#define SRE_DRAW_FUNC(name, signature) int (*name)(const sre_videodriver* video, signature)
+#define SRE_DRAW_FUNC(name, signature) bool (*name)(const sre_videodriver* video, signature)
 
 #define SRE_TEXTURE_BASECOUNT 24
 
@@ -25,9 +25,10 @@ struct sre_videodriver
 	void (*quit)(sre_videodriver* video);
 	void (*present)(const sre_videodriver* video);
 
-	int (*vsync)(const sre_videodriver* video, int vsync);
-	int (*viewport)(const sre_videodriver* video, int w, int h);
+	bool (*vsync)(const sre_videodriver* video, int vsync);
+	bool (*viewport)(const sre_videodriver* video, int w, int h);
 
+	bool (*blend)(const sre_videodriver* video, sre_DrawBlending blending);
 
 	SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
 	SRE_DRAW_FUNC(draw_clip, const sre_rect2Dut* rect);
@@ -40,10 +41,10 @@ struct sre_videodriver
 	SRE_DRAW_FUNC(draw_texture, const sre_DDTexture* data);
 	SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
 
-	int (*tex_gen)(const sre_videodriver* video, void* texture);
-	int (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
-	int (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
-	int (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
+	bool (*tex_gen)(const sre_videodriver* video, void* texture);
+	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
+	bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
+	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
 	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
 	void (*tex_destroy)(const sre_videodriver* video, void* texture);
 

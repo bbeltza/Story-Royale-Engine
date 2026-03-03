@@ -16,22 +16,26 @@ namespace sre
     using DDTexture = sre_DDTexture;
     using DDRTexture = sre_DDRTexture;
 
-    inline int draw(const DDFill& data) { return sre_draw(SRE_DRAW_FILL, &data); }
-    inline int draw(const DDLine& data) { return sre_draw(SRE_DRAW_LINE, &data); }
-    inline int draw(const DDLines& data) { return sre_draw(SRE_DRAW_LINES, &data); }
-    inline int draw(const DDRect& data) { return sre_draw(SRE_DRAW_RECTANGLE, &data); }
-    inline int draw(const DDRRect& data) { return sre_draw(SRE_DRAW_RRECTANGLE, &data); }
-    inline int draw(const DDTexture& data) { return sre_draw(SRE_DRAW_TEXTURE, &data); }
-    inline int draw(const DDRTexture& data) { return sre_draw(SRE_DRAW_RTEXTURE, &data); }
+    using drawBlending = sre_DrawBlending;
 
-    inline int draw_fill(const col4& color) { return sre_draw(SRE_DRAW_FILL, &color); }
+    inline bool draw(const DDFill& data) { return sre_draw(SRE_DRAW_FILL, &data); }
+    inline bool draw(const DDLine& data) { return sre_draw(SRE_DRAW_LINE, &data); }
+    inline bool draw(const DDLines& data) { return sre_draw(SRE_DRAW_LINES, &data); }
+    inline bool draw(const DDRect& data) { return sre_draw(SRE_DRAW_RECTANGLE, &data); }
+    inline bool draw(const DDRRect& data) { return sre_draw(SRE_DRAW_RRECTANGLE, &data); }
+    inline bool draw(const DDTexture& data) { return sre_draw(SRE_DRAW_TEXTURE, &data); }
+    inline bool draw(const DDRTexture& data) { return sre_draw(SRE_DRAW_RTEXTURE, &data); }
+
+    inline bool draw_fill(const col4& color) { return sre_draw(SRE_DRAW_FILL, &color); }
 
     template <typename... Args>
-    inline int draw_lines(const col4& color, bool use_camera, Args&&... pts_args)
+    inline bool draw_lines(const col4& color, bool use_camera, Args&&... pts_args)
     {
         vec2ut pts[] = { pts_args... };
         return draw(DDLines{use_camera ? SRE_DRAWFLAGS_USECAM : 0, { color.r, color.g, color.b, color.a }, sizeof...(pts_args), 0, pts});
     }
+
+    inline bool draw_blend(drawBlending blend=SRE_BLEND_DEFAULT) { return sre_draw_blend(blend); }
 
     // RAII render/draw clip wrapper
     class DrawClip

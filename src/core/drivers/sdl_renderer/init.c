@@ -1,16 +1,16 @@
 #include "sdl_renderer.h"
 
-int sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
+bool sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
 {
     SDL_Renderer* const renderer = SDL_CreateRenderer(window, -1, 0);
-    if (!renderer) return -1;
-
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    if (!renderer) return false;
 
     video->userdata = renderer;
     video->vsync = sresdlrenderer_vsync;
     video->present = sresdlrenderer_present;
     video->quit = sresdlrenderer_quit;
+
+    video->blend = sresdlrenderer_blend;
 
     video->draw_clear = sresdlrenderer_draw_clear;
     video->draw_fill = sresdlrenderer_draw_fill;
@@ -30,7 +30,12 @@ int sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
     video->draw_clip = sresdlrenderer_clip;
 
     video->texture_size = sizeof(SDL_Texture*);
-    return 0;
+    return true;
+}
+
+bool sresdlrenderer_blend(const sre_videodriver* video, sre_DrawBlending blend)
+{
+    return SDL_SetRenderDrawBlendMode(video->userdata, (SDL_BlendMode)blend) == 0;
 }
 
 void sresdlrenderer_quit(sre_videodriver* video)
@@ -38,9 +43,9 @@ void sresdlrenderer_quit(sre_videodriver* video)
     SDL_DestroyRenderer(video->userdata);
 }
 
-int sresdlrenderer_vsync(const sre_videodriver* video, int vsync)
+bool sresdlrenderer_vsync(const sre_videodriver* video, int vsync)
 {
-    return SDL_RenderSetVSync(video->userdata, vsync);
+    return SDL_RenderSetVSync(video->userdata, vsync) == 0;
 }
 
 void sresdlrenderer_present(const sre_videodriver* video)

@@ -6,15 +6,15 @@
 
 #include <utils/mem.h>
 
-int sre_draw(sre_DrawType type, const void* data)
+bool sre_draw(sre_DrawType type, const void* data)
 {
-	int ret;
+	bool ret;
 
 	switch (type)
 	{
 	case SRE_DRAW_CIRCLE:
 		sre_log(SRE_LOGCATEGORY_ERROR, "sre_draw: Unavailable option 'SRE_DRAW_CIRCLE'");
-		ret = -1;
+		ret = false;
 		break;
 	case SRE_DRAW_FILL:
 		ret = engine.video->draw_fill(engine.video, data);
@@ -39,14 +39,14 @@ int sre_draw(sre_DrawType type, const void* data)
 		break;
 	default:
 		sre_log(SRE_LOGCATEGORY_ERROR, "sre_draw: Invalid type");
-		ret = -1;
+		ret = false;
 		break;
 	}
 	
 	return ret;
 }
 
-int sre_draw_clipbegin(const sre_rect2Dut* _rect)
+bool sre_draw_clipbegin(const sre_rect2Dut* _rect)
 {
 	sre_rect2Dut rect = *_rect;
 
@@ -58,7 +58,7 @@ int sre_draw_clipbegin(const sre_rect2Dut* _rect)
 			sre_log(SRE_LOGCATEGORY_ERROR, "sre_draw_clipbegin: Unsupported");
 			unsupport = true;
 		}
-		return -1;
+		return false;
 	}
 	assert(engine.video->draw_clip != NULL);
 	
@@ -104,4 +104,9 @@ void sre_draw_clipend()
 	
 	(*(size_t*)&engine.video->clipstack_pos)--;
 	engine.video->draw_clip(engine.video, engine.video->clipstack_pos != 0 ? &engine.video->clipstack_base[engine.video->clipstack_pos] : NULL);
+}
+
+bool sre_draw_blend(sre_DrawBlending blend)
+{
+	return engine.video->blend(engine.video, blend);
 }

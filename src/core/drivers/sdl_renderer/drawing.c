@@ -6,7 +6,7 @@
 #include <utils/mem.h>
 #include <utils/math.h>
 
-#define sresdlrender_color(col) if (SDL_SetRenderDrawColor(video->userdata, col.r, col.g, col.b, col.a) < 0) return -1
+#define sresdlrender_color(col) if (SDL_SetRenderDrawColor(video->userdata, col.r, col.g, col.b, col.a) < 0) return false
 #define sresdlrender_texture(tex) \
 SDL_Texture* texture;			   \
 {									\
@@ -59,22 +59,22 @@ static inline void sresdlrender_coordsr(const sre_videodriver* video, int cam, c
 
 //
 
-int sresdlrenderer_draw_clear(const sre_videodriver* video, const sre_col4* color)
+bool sresdlrenderer_draw_clear(const sre_videodriver* video, const sre_col4* color)
 {	
 	assert(color != NULL);
 	if (SDL_SetRenderDrawColor(video->userdata, color->r, color->g, color->b, color->a)) return -1;
-	return SDL_RenderClear(video->userdata);
+	return SDL_RenderClear(video->userdata) == 0;
 }
 
 //
 
-int sresdlrenderer_draw_fill(const sre_videodriver* video, const sre_DDFill* data)
+bool sresdlrenderer_draw_fill(const sre_videodriver* video, const sre_DDFill* data)
 {
 	sresdlrender_color(data->color);
 	
-	return SDL_RenderFillRectF(video->userdata, NULL);
+	return SDL_RenderFillRectF(video->userdata, NULL) == 0;
 }
-int sresdlrenderer_draw_line(const sre_videodriver* video, const sre_DDLine* data)
+bool sresdlrenderer_draw_line(const sre_videodriver* video, const sre_DDLine* data)
 {
 	sresdlrender_color(data->color);
 
@@ -84,10 +84,10 @@ int sresdlrenderer_draw_line(const sre_videodriver* video, const sre_DDLine* dat
 	
 	sresdlrender_coords(video, usecam, 2, &data->pt1, xy);
 
-	return SDL_RenderDrawLinesF(video->userdata, xy, 2);
+	return SDL_RenderDrawLinesF(video->userdata, xy, 2) == 0;
 }
 
-int sresdlrenderer_draw_lines(const sre_videodriver* video, const sre_DDLines* data)
+bool sresdlrenderer_draw_lines(const sre_videodriver* video, const sre_DDLines* data)
 {
 	sresdlrender_color(data->color);
 
@@ -99,7 +99,7 @@ int sresdlrenderer_draw_lines(const sre_videodriver* video, const sre_DDLines* d
 	return SDL_RenderDrawLinesF(video->userdata, pts, data->count);
 }
 
-int sresdlrenderer_draw_rect(const sre_videodriver* video, const sre_DDRect* data)
+bool sresdlrenderer_draw_rect(const sre_videodriver* video, const sre_DDRect* data)
 {
 	sresdlrender_color(data->color);
 
@@ -109,12 +109,12 @@ int sresdlrenderer_draw_rect(const sre_videodriver* video, const sre_DDRect* dat
 	sresdlrender_coordsr(video, usecam, &data->rect, &render_rect, data->anchor);
 
 	if (usestroke)
-		return SDL_RenderDrawRectsF(video->userdata, &render_rect, 1);
+		return SDL_RenderDrawRectsF(video->userdata, &render_rect, 1) == 0;
 	else
-		return SDL_RenderFillRectsF(video->userdata, &render_rect, 1);
+		return SDL_RenderFillRectsF(video->userdata, &render_rect, 1) == 0;
 }
 
-int sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DDRRect* data)
+bool sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DDRRect* data)
 {
 	if (data->angle / 360 == (int)data->angle / 360)
 		return sresdlrenderer_draw_rect(video, &data->rect);
@@ -154,7 +154,7 @@ int sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DDRRect* d
 		sresdlrender_coords(video, usecam, 4, pts_units, pts);
 
 		pts[4] = pts[0];
-		return SDL_RenderDrawLinesF(video->userdata, pts, 5);
+		return SDL_RenderDrawLinesF(video->userdata, pts, 5) == 0;
 	}
 	else
 	{
@@ -165,65 +165,70 @@ int sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DDRRect* d
 			0, 1, 2,
 			0, 2, 3
 		};
-		return SDL_RenderGeometryRaw(video->userdata, NULL, (const float*)vertices, sizeof(float) * 2, (const SDL_Color*)&data->rect.color, 0, NULL, 0, 4, indices, 6, 1);
+		return SDL_RenderGeometryRaw(video->userdata, NULL,
+			(const float*)vertices,
+			sizeof(float) * 2,
+			(const SDL_Color*)&data->rect.color,
+			0, NULL, 0, 4, indices, 6, 1
+		) == 0;
 	}
 }
 
-int sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTexture* data)
+bool sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTexture* data)
 {
 	sresdlrender_texture(data->texture)
 
-	if (!texture) return -1;
-	if (data->rect.h == 0 || data->rect.h == 0) return 0;
-	if (data->rect.w < 0 || data->rect.h < 0) return -1; // Drawing with negative sizes to flip the texture if no longer supported, use SDL_DRAWFLAGS_FLIP
+	if (!texture) return false;
+	if (data->rect.h == 0 || data->rect.h == 0) return true;
+	if (data->rect.w < 0 || data->rect.h < 0) return false; // Drawing with negative sizes to flip the texture if no longer supported, use SDL_DRAWFLAGS_FLIP
 
 	int usecam = data->flags & SRE_DRAWFLAGS_USECAM;
 	SDL_RendererFlip flip = (data->flags & SRE_DRAWFLAGS_FLIPX ? SDL_FLIP_HORIZONTAL : 0) | (data->flags & SRE_DRAWFLAGS_FLIPY ? SDL_FLIP_VERTICAL : 0);
 	SDL_FRect render_rect;
 	sresdlrender_coordsr(video, usecam, &data->rect, &render_rect, data->anchor);
 	
-	if (SDL_SetTextureColorMod(texture, data->modulate.r, data->modulate.g, data->modulate.b)) return -1;
-	if (SDL_SetTextureAlphaMod(texture, data->modulate.a)) return -1;
+	if (SDL_SetTextureColorMod(texture, data->modulate.r, data->modulate.g, data->modulate.b)) return false;
+	if (SDL_SetTextureAlphaMod(texture, data->modulate.a)) return false;
 	
 	SDL_Rect region = data->region;
-	if (!region.w && SDL_QueryTexture(texture, NULL, NULL, &region.w, NULL) < 0) return -1;
-	if (!region.h && SDL_QueryTexture(texture, NULL, NULL, NULL, &region.h) < 0) return -1;
+	if (!region.w && SDL_QueryTexture(texture, NULL, NULL, &region.w, NULL) < 0) return false;
+	if (!region.h && SDL_QueryTexture(texture, NULL, NULL, NULL, &region.h) < 0) return false;
 
 	if (flip == SDL_FLIP_NONE) // SDL has to check for rotation too if using RenderCopy instead of RenderCopyEx, since we don't need it here, we do the check ourselves
-		return SDL_RenderCopyF(video->userdata, texture, &region, &render_rect);
+		return SDL_RenderCopyF(video->userdata, texture, &region, &render_rect) == 0;
 	else															       
-		return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, 0, NULL, flip);
+		return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, 0, NULL, flip) == 0;
 }
 
 static const sre_vec2ut VEC2_ZERO = SRE_VEC2SCALAR(0);
 
-int sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data)
+bool sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data)
 {
 	sresdlrender_texture(data->texture.texture)
 
-	if (!texture) return -1;
-	if (data->texture.rect.w == 0 || data->texture.rect.h == 0) return 0;
-	if (data->texture.rect.w < 0 || data->texture.rect.h < 0) return -1;
+	if (!texture) return false;
+	if (data->texture.rect.w == 0 || data->texture.rect.h == 0) return true;
+	if (data->texture.rect.w < 0 || data->texture.rect.h < 0) return false;
 
 	int usecam = data->texture.flags & SRE_DRAWFLAGS_USECAM;
 	SDL_RendererFlip flip = (data->texture.flags & SRE_DRAWFLAGS_FLIPX ? SDL_FLIP_HORIZONTAL : 0) | (data->texture.flags & SRE_DRAWFLAGS_FLIPY ? SDL_FLIP_VERTICAL : 0);
 	SDL_FRect render_rect;
 	sresdlrender_coordsr(video, usecam, &data->texture.rect, &render_rect, VEC2_ZERO);
 
-	if (SDL_SetTextureColorMod(texture, data->texture.modulate.r, data->texture.modulate.g, data->texture.modulate.b)) return -1;
-	if (SDL_SetTextureAlphaMod(texture, data->texture.modulate.a)) return -1;
+	if (SDL_SetTextureColorMod(texture, data->texture.modulate.r, data->texture.modulate.g, data->texture.modulate.b)) return false;
+	if (SDL_SetTextureAlphaMod(texture, data->texture.modulate.a)) return false;
 
 	SDL_Rect region = data->texture.region;
-	if (!region.w && SDL_QueryTexture(texture, NULL, NULL, &region.w, NULL) < 0) return -1;
-	if (!region.h && SDL_QueryTexture(texture, NULL, NULL, NULL, &region.h) < 0) return -1;
+	if (!region.w && SDL_QueryTexture(texture, NULL, NULL, &region.w, NULL) < 0) return false;
+	if (!region.h && SDL_QueryTexture(texture, NULL, NULL, NULL, &region.h) < 0) return false;
 
-	return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, data->angle, NULL, flip);
+	return SDL_RenderCopyExF(video->userdata, texture, &region, &render_rect, data->angle, NULL, flip) == 0;
 }
 
-int sresdlrenderer_clip(const sre_videodriver* video, const sre_rect2Dut* rect)
+bool sresdlrenderer_clip(const sre_videodriver* video, const sre_rect2Dut* rect)
 {
 	if (!rect)
-		return SDL_RenderSetClipRect(video->userdata, NULL);
+		return SDL_RenderSetClipRect(video->userdata, NULL) == 0;
 
 	SDL_FRect clip_frect;
 	SDL_Rect clip_rect;
@@ -234,5 +239,5 @@ int sresdlrenderer_clip(const sre_videodriver* video, const sre_rect2Dut* rect)
 	clip_rect.w = (int)clip_frect.w;
 	clip_rect.h = (int)clip_frect.h;
 
-	return SDL_RenderSetClipRect(video->userdata, &clip_rect);
+	return SDL_RenderSetClipRect(video->userdata, &clip_rect) == 0;
 }
