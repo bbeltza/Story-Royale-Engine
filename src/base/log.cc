@@ -204,7 +204,16 @@ extern "C" void sre_logflush()
         
         // Console writing code
         FILE* console = msg.category == sre::LOGCATEGORY_INFO ? stdout : stderr;
-        fwrite(buffer, buffer_size, 1, console);
+        if (msg.category == sre::LOGCATEGORY_ERROR)
+        {
+            const char redbuf[] = "\033[31;1m";
+            const char redbufend[] = "\033[0m";
+            fwrite(redbuf, sizeof(redbuf), 1, stdout);
+            fwrite(buffer, buffer_size, 1, console);
+            fwrite(redbufend, sizeof(redbufend), 1, stdout);
+        }
+        else
+            fwrite(buffer, buffer_size, 1, console);
         //
 
         instance.msg_queue.pop_front();
