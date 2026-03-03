@@ -247,7 +247,7 @@ int sre_logsimpleEx(int type, int category, const char* str)
     auto& instance = log_instance();
 
     std::lock_guard<std::recursive_mutex> barney{instance.mutex};
-    int len = strlen(str) + 1;
+    int len = static_cast<int>(strlen(str) + 1);
     instance.msg_queue.emplace_back(
         type,
         category,

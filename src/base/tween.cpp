@@ -5,6 +5,25 @@
 
 using namespace sre;
 
+using easingFn = timeStamp (timeStamp alpha);
+static easingFn* EASE_FUNCTIONS[][3] = {
+    /* S_LINEAR */ {
+        [](timeStamp a) { return a; },
+        [](timeStamp a) { return a; },
+        [](timeStamp a) { return a; }
+    },
+    /* S_QUAD */ {
+        [](timeStamp a) { return a*a; },
+        [](timeStamp a) { a = 1-a; return 1 - a*a; },
+        [](timeStamp a) { return a < 0.5 ? 2 * a*a : 1 - pow(-2 * a + 2, 2)/2; }
+    },
+    /* S_CUBIC  */ {
+        [](timeStamp a) { return a*a*a; },
+        [](timeStamp a) { a = 1-a; return 1 - a*a*a; },
+        [](timeStamp a) { return a < 0.5 ? 4 * a*a*a : 1 - pow(-2 * a + 2, 3)/2; }
+    }
+};
+
 void TweenServer::update()
 {
     for (size_t i = 0; i < m_tweens.size(); i++)
@@ -24,9 +43,17 @@ void TweenServer::update()
         const timeStamp duration = tw->style.duration;
 
         tw->m_elapsed += sre::dt;
-        
+
+        sre_easingStyle es = tw->style.easing_style;
+        sre_easingDirection ed = tw->style.easing_direction;
+        easingFn* easefunc = EASE_FUNCTIONS[es][ed];
+        assert(easefunc != NULL);
+
         timeStamp alpha = duration ? tw->m_elapsed / duration : 1;
         ut_setclamp(alpha, 0.0_ts, 1.0_ts);
+
+        alpha = easefunc(alpha);
+
         tw->step(alpha);
 
         if (tw->m_elapsed >= duration)

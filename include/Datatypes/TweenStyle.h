@@ -7,14 +7,15 @@
 typedef enum
 {
     SRE_S_LINEAR,
+    SRE_S_QUAD,
     SRE_S_CUBIC,
 } sre_easingStyle;
 
 typedef enum
 {
-    SRE_D_IN = ut_bit(0),
-    SRE_D_OUT = ut_bit(1),
-    SRE_D_INOUT = SRE_D_IN | SRE_D_OUT
+    SRE_D_IN,
+    SRE_D_OUT,
+    SRE_D_INOUT
 } sre_easingDirection;
 
 typedef enum

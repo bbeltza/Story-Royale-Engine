@@ -1,3 +1,5 @@
+- Top priority: Change ECS! (Refer to the last "less likely" idea...)
+
 - Animations/Keyframes
 
 - Audio interpolation
