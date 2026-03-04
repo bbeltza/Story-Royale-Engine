@@ -167,28 +167,38 @@ extern "C" void sre_logflush()
     std::lock_guard<std::recursive_mutex> guard{instance.mutex};
     while (!instance.msg_queue.empty())
     {
-        auto& msg = instance.msg_queue.front();
         static constexpr char extra_characters[] = "[]: ";
+        static constexpr char style_characters_begin[] = "\033[30;1m";
+        static constexpr char style_characters_end[] = "\033[0m";
+
+        auto& msg = instance.msg_queue.front();
+
         const size_t typestr_size = TYPE_SIZES[msg.type];
         const size_t catstr_size = CATEGORY_SIZES[msg.category];
-        size_t buffer_size = typestr_size + catstr_size + msg.size + sizeof(extra_characters) + 2;
+        size_t buffer_size = typestr_size + catstr_size + msg.size + sizeof(extra_characters) + sizeof(style_characters_begin) + sizeof(style_characters_end);
 
         const char* const strings[] = {
+            style_characters_begin,
             extra_characters,
             TYPE_STRINGS[msg.type],
             extra_characters + 1,
             extra_characters,
             CATEGORY_STRINGS[msg.category],
             extra_characters + 1,
-            msg.buffer       
+            style_characters_end,
+
+            msg.buffer
         };
         const size_t sizes[] = {
+            sizeof(style_characters_begin) - 1,
             1,
             typestr_size,
             1,
             1,
             catstr_size,
             sizeof(extra_characters) - 2,
+            sizeof(style_characters_end) - 1,
+
             static_cast<size_t>(msg.size)
         };
         constexpr int STRINGS_COUNT = ut_arrcount(strings);
@@ -201,19 +211,27 @@ extern "C" void sre_logflush()
             buffptr += sizes[i];
         }
         *buffptr = '\n';
+
+        switch (msg.category)
+        {
+        case sre::LOGCATEGORY_WARN:
+            buffer[3] = '3';
+            break;
+        case sre::LOGCATEGORY_ERROR:
+            buffer[3] = '1';
+            break;
+        case sre::LOGCATEGORY_INFO:
+            buffer[3] = '6';
+            break;
+        default:
+            buffer[2] = '0';
+            buffer[3] = '0';
+            break;
+        }
         
         // Console writing code
         FILE* console = msg.category == sre::LOGCATEGORY_INFO ? stdout : stderr;
-        if (msg.category == sre::LOGCATEGORY_ERROR)
-        {
-            const char redbuf[] = "\033[31;1m";
-            const char redbufend[] = "\033[0m";
-            fwrite(redbuf, sizeof(redbuf), 1, stdout);
-            fwrite(buffer, buffer_size, 1, console);
-            fwrite(redbufend, sizeof(redbufend), 1, stdout);
-        }
-        else
-            fwrite(buffer, buffer_size, 1, console);
+        fwrite(buffer, buffer_size, 1, console);
         //
 
         instance.msg_queue.pop_front();
