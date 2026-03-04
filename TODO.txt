@@ -23,7 +23,7 @@
 	- It would be in a header like <Core/Physics.h-hpp>
 	- You'd append and remove physics objects with it, and the engine would do every needed operation in the next pupdate cycle
 
-(current version: 0.102.02)
+(current version: 0.102.04)
 
 - Work on the game ^^
 
