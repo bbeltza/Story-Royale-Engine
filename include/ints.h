@@ -38,6 +38,8 @@ typedef sre_u8 sre_byte;
         using uptr = sre_uptr;
 
         using byte = sre_byte;
+
+        using ::size_t;
     }
 
     #undef byte

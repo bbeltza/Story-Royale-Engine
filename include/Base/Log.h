@@ -92,10 +92,12 @@ namespace sre
         {
             inline int _loglegacy(int category, const char* fmt, ...)
             {
+                static constexpr int type = __LTYPE;
+
                 va_list va;
                 int n;
                 va_start(va, fmt);
-                n = sre_logEx(__LTYPE, category, fmt, va);
+                n = sre_logEx(type, category, fmt, va);
                 va_end(va);
                 return n;
             }

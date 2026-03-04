@@ -21,7 +21,7 @@ namespace sreECS
         sre::col4 modulate = sre::col4::WHITE;
         sre::rect2Di region = { 0, 0 };
 
-        size_t current_frame = 0;
+        sre::size_t current_frame = 0;
 
         void attach(sre::Texture&);
     private:
