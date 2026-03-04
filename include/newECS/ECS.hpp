@@ -23,9 +23,16 @@ namespace sr
 
 namespace _sreECS
 {
+    class System;
+    struct Scene;
+
     class System
     {
-        
+        Scene* const m_scene;
+        void* const m_entity;
+
+        protected:
+        virtual void update() = 0;
     };
 
     struct Scene
