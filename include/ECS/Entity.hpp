@@ -1,15 +1,17 @@
 #ifndef SREECS_ENTITY_HPP
 #define SREECS_ENTITY_HPP
 
-#include <ECS/common.hpp>
+#include <Core/Object.hpp>
 #include <Datatypes/Vector.hpp>
+
+#include <cassert>
 
 namespace sreECS
 {
     struct Scene;
     struct Component;
 
-    class Entity: public Common
+    class Entity: public sre::Object
     {
         friend struct Scene;
 

@@ -155,13 +155,11 @@ void Scene::call_update()
         update();
         for (auto& ent : *this)
         {
-            ent.update();
             for (auto& comp : ent)
             {
                 if (comp.enabled())
                     comp.on_update(ent);
             }
-            ent.updated.fire();
         }
         camera.update();
     }
@@ -178,7 +176,6 @@ void Scene::call_update()
         {
             const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position;
 
-            ent.pupdate();
             for (auto& comp : ent)
             {
                 if (comp.enabled())
@@ -217,13 +214,11 @@ void Scene::call_render()
 
     for (auto& ent : *this)
     {
-        ent.pre_render();
         for (auto& comp : ent)
         {
             if (comp.enabled())
                 comp.on_render(ent);
         }
-        ent.post_render();
     }
 
     post_render();

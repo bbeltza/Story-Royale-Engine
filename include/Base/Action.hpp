@@ -4,6 +4,13 @@
 #include <Core/Event.hpp>
 #include <Core/Runtime.hpp>
 
+#if defined(__GNUC__) && __GNUC__ <= 11
+	#include <cassert>
+	#define SRE_ABORT(msg) assert(0 && msg)
+#else
+	#define SRE_ABORT(msg) static_assert(0, msg)
+#endif
+
 namespace sre
 {
 	class Action
@@ -35,8 +42,8 @@ namespace sre
 		inline void remove(scanCode button) { return remove_impl(static_cast<int>(button), C_SCANCODE); }
 		inline void remove(keyCode button) { return remove_impl(static_cast<int>(button), C_KEYCODE); }
 
-		template <class T> inline void add(T) { static_assert(0, "Type must be either mouseButton, or scanCode, or keyCode"); }
-		template <class T> inline void remove(T) { static_assert(0, "Type must be either mouseButton, or scanCode, or keyCode"); }
+		template <class T> inline void add(T) { SRE_ABORT("Type must be either mouseButton, or scanCode, or keyCode"); }
+		template <class T> inline void remove(T) { SRE_ABORT("Type must be either mouseButton, or scanCode, or keyCode"); }
 
 		bool pressed() const { return !(m_frame < 0); }
 		bool just_pressed() const { return m_frame == sre::current_frame(); }

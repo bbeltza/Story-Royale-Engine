@@ -4,6 +4,13 @@
 #include <Base/AudioChunk.h>
 #include <Datatypes/TimeStamp.h>
 
+#if defined(__GNUC__) && __GNUC__ <= 11
+	#include <cassert>
+	#define SRE_ABORT(msg) assert(0 && msg)
+#else
+	#define SRE_ABORT(msg) static_assert(0, msg)
+#endif
+
 namespace sre
 {
 	inline AudioChunk convertchunk(const AudioChunk& chunk)
@@ -30,7 +37,7 @@ namespace sre
 
 	inline int audio_getmaster() { return sre_audiogetmaster(); }
 	template <typename T>
-	inline T audio_getmaster() { static_assert(0, "Invalid use of audio_getmaster<T>(), use audio_getmaster<float>() instead"); }
+	inline T audio_getmaster() { SRE_ABORT("Invalid use of audio_getmaster<T>(), use audio_getmaster<float>() instead"); }
 	template <>
 	inline float audio_getmaster<float>() { return sre_audiogetmaster() / 128.0f; }
 

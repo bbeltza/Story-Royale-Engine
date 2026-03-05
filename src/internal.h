@@ -32,7 +32,14 @@ SRE_CAPI_BEGIN
     	sre_sptr ret;
 	};
 
-	struct _engine_data
+	#if defined(_MSC_VER)
+		#define SRE_ALIGN(x) __declspec(align(x))
+	#elif defined(__GNUC__)
+		#define SRE_ALIGN(x) __attribute__((aligned(x)))
+	#else
+		#define SRE_ALIGN(x)
+	#endif
+	struct SRE_ALIGN(64) _engine_data
 	{
 		// Runtime data
 
