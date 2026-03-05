@@ -35,7 +35,7 @@ namespace sreECS
         // useful for checking if an entity has been moved
         const sre::vec2ut lastVelocity;
 
-        long z_index;
+        sre::sptr z_index;
 
         // Gets the parent scene of the entity, templated by a derived `T` type from `Scene`
         // 
