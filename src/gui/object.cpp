@@ -122,7 +122,10 @@ bool Object::call_query(sre::vec2ut pt) const
     }
 
     if (flags.has(F_QUERY) && m_absolute.simple_intersects(pt))
-        return s_querying = this;
+    {
+        s_querying = this;
+        return true;
+    }
 
     return false;
 }

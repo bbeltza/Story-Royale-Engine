@@ -241,7 +241,10 @@ bool Scene::call_query(sre::vec2ut coords) const
         for (auto& comp : entity)
         {
             if (comp.on_query(entity, coords))
-                return s_querying = &entity;
+            {
+                s_querying = &entity;
+                return true;
+            }
         }
     }
 

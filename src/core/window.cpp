@@ -38,5 +38,5 @@ bool sre::window_flash() { return flashwindowop(SDL_FLASH_UNTIL_FOCUSED); }
 bool sre::window_quickflash() { return flashwindowop(SDL_FLASH_BRIEFLY); }
 bool sre::window_cancelflash() { return flashwindowop(SDL_FLASH_CANCEL); }
 
-bool sre::window_isfullscreen() { return SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_FULLSCREEN; }
-bool sre::window_ishidden() { return SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN; }
+bool sre::window_isfullscreen() { return 0 != (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_FULLSCREEN); }
+bool sre::window_ishidden() { return 0 != (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN); }

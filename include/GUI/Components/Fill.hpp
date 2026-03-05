@@ -13,7 +13,7 @@ namespace sreGUI
         Fill(const sre::col4& col=sre::col4::WHITE): color(col) {}
 
         constexpr operator const sre::col4&() const { return color; }
-        constexpr operator sre::col4&() { return color; }
+        inline operator sre::col4&() { return color; }
     public:
         sre::col4 color;
     protected:

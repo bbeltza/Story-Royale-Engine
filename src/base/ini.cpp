@@ -249,5 +249,5 @@ bool IniFile::save(const char* path)
     }
 
     File file(path, FILE_WRITE);
-    return file.write(text.data(), text.size());
+    return file.write(text.data(), text.size()) == text.size();
 }

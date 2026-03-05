@@ -36,7 +36,7 @@ int __signal_events(SDL_Event* ev)
         current.mouse_button.id = ev->button.which;
         current.mouse_button.button = ev->button.button;
         current.mouse_button.clicks = ev->button.clicks;
-        current.mouse_button.pressed = ev->button.state;
+        current.mouse_button.pressed = ev->button.state == SDL_PRESSED;
         current.mouse_button.position = sre::vec2ut{ ev->button.x, ev->button.y } * engine.scale_ratio;
         break;
     case SDL_MOUSEMOTION:

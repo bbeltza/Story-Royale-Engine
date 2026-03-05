@@ -117,9 +117,9 @@ namespace sre
         static const vec2 CENTER;
     };
 
-    template <class T> const vec2<T> vec2<T>::ZERO{ 0, 0 };
-    template <class T> const vec2<T> vec2<T>::ONE{ 1, 1 };
-    template <class T> const vec2<T> vec2<T>::CENTER{ 0.5, 0.5 };
+    template <class T> const vec2<T> vec2<T>::ZERO = { 0, 0 };
+    template <class T> const vec2<T> vec2<T>::ONE = { 1, 1 };
+    template <class T> const vec2<T> vec2<T>::CENTER = { 0.5, 0.5 };
 
     using vec2i = vec2<int>;
     using vec2u = vec2<unsigned>;
