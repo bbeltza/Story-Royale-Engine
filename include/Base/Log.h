@@ -35,8 +35,13 @@ namespace sre
         #ifndef SRE_DISABLE_LOGS
             using std::ostream;
         #else
-            // Try to find a way to implement null ostream...
-            struct ostream;
+            struct ostream
+            {
+                template <typename T>
+                inline sre::ostream& operator <<(T&& type) { return *this; }
+                inline sre::ostream& operator<<(std::ostream& fn(std::ostream&)) { return *this; }
+            };
+            #define extern static
         #endif
 
         extern sre::ostream out;
@@ -51,6 +56,10 @@ namespace sre
             extern sre::ostream einfo;
             extern sre::ostream ewarn;
             extern sre::ostream eerr;
+        #endif
+
+        #ifdef extern
+            #undef extern
         #endif
         
         using std::endl;

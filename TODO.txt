@@ -1,4 +1,4 @@
-- Top priority: Change ECS! (Refer to the last "less likely" idea...)
+- Maybe add ImGui now that there's no scaling that can be affected?
 
 - Animations/Keyframes
 
