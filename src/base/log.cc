@@ -234,6 +234,11 @@ extern "C" void sre_logflush()
         fwrite(buffer, buffer_size, 1, console);
         //
 
+        #if _DEBUG
+            if (msg.category == sre::LOGCATEGORY_ERROR && msg.type == 2)
+                __debugbreak();
+        #endif
+
         instance.msg_queue.pop_front();
     }
 }

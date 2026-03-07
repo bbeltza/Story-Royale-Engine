@@ -56,6 +56,7 @@ target_sources(sre PUBLIC "src/heap.cpp")
 target_link_libraries(sre PRIVATE sre_core)
 target_link_libraries(sre PRIVATE sre_interface)
 target_link_libraries(sre_interface INTERFACE sre_werror)
+target_include_directories(sre PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/common)
 
 target_compile_definitions(sre_interface INTERFACE SRE=1)
 

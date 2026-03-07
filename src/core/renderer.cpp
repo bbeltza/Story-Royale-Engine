@@ -1,5 +1,5 @@
 #include "../internal.h"
-#include <sdl_renderer/sdl_renderer.h>
+#include "drivers/drivers.h"
 
 #include <Core/Texture.hpp>
 #include <Core/Runtime.hpp>
@@ -14,12 +14,28 @@
 	#include <backends/imgui_impl_sdl2.cpp> // Compile SDL2 ImGui implementation!
 //
 
+#define VIDEO_DRIVERS				\
+VIDEOINIT_DEF(sdlrenderer)			\
+//VIDEOINIT_DEF(opengl)				\
+//VIDEOINIT_DEF(software)
+
+
+#define VIDEOINIT_DEF(x) extern "C" bool sre##x##_init(sre_videodriver* video, SDL_Window* window);
+VIDEO_DRIVERS
+
+#undef VIDEOINIT_DEF
+#define VIDEOINIT_DEF(x) sre##x##_init,
+static const sre_videoinit_func video_drivers[] = {
+	VIDEO_DRIVERS
+};
+
 void __setup_renderer()
 {
 	engine.video = static_cast<sre_videodriver*>(operator new(sizeof(sre_videodriver)));
 	memset(static_cast<void*>(engine.video), 0, sizeof(sre_videodriver));
 
-	if (!sresdlrenderer_init(engine.video, engine.sdl_windowhndl))
+	const sre_videoinit_func init_driver = video_drivers[0];
+	if (!init_driver(engine.video, engine.sdl_windowhndl))
 	{
 		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
 		exit(-1);
