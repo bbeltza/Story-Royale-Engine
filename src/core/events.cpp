@@ -3,6 +3,9 @@
 
 #include <Core/Event.hpp>
 
+// So since this is the only cpp source that has access to every single event, I'm processing ImGui's events here!
+    #include <backends/imgui_impl_sdl2.h>
+//
 
 namespace sre
 {
@@ -17,6 +20,11 @@ sre::Signal<sre::Event> sre::onEvent;
 
 int __signal_events(SDL_Event* ev)
 {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui_ImplSDL2_ProcessEvent(ev);
+    if (io.WantCaptureMouse)
+        return 0;
+
     sre::Event current;
 
     switch (ev->type)
@@ -72,7 +80,7 @@ int __signal_events(SDL_Event* ev)
 }
 
 void __queue_events()
-{    
+{
     while (!queue.empty())
     {
         mutex.lock();

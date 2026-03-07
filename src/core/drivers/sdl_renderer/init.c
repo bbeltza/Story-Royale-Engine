@@ -30,6 +30,10 @@ bool sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
     video->draw_clip = sresdlrenderer_clip;
 
     video->texture_size = sizeof(SDL_Texture*);
+
+    video->imgui_init = sresdlrenderer_imgui_init;
+    video->imgui_newframe = sresdlrenderer_imgui_newframe;
+    video->imgui_renderdrawdata = sresdlrenderer_imgui_renderdrawdata;
     return true;
 }
 

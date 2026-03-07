@@ -9,6 +9,11 @@
 
 #include <utils/mem.h>
 
+// ImGUI setup!
+	#include <imgui.h>
+	#include <backends/imgui_impl_sdl2.cpp> // Compile SDL2 ImGui implementation!
+//
+
 void __setup_renderer()
 {
 	engine.video = static_cast<sre_videodriver*>(operator new(sizeof(sre_videodriver)));
@@ -20,6 +25,25 @@ void __setup_renderer()
 		exit(-1);
 	}
 	engine.video->blend(engine.video, SRE_BLEND_BLEND);
+
+	if (engine.video->imgui_init)
+	{
+		IMGUI_CHECKVERSION();
+		ImGuiContext* context = ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
+					   |  ImGuiConfigFlags_NavEnableGamepad;
+		
+		if (!ImGui_ImplSDL2_InitForOther(engine.sdl_windowhndl) ||
+			!engine.video->imgui_init(engine.video))
+		{
+			sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing ImGui, video driver error");
+			ImGui::DestroyContext(context);
+		}
+	}
+	else
+		sre::log<sre::LOGCATEGORY_WARN>("ImGui is not implemented in the current video driver");
+	
 
 	if (engine.video->texture_size)
 	{
@@ -75,6 +99,10 @@ void __update_viewport(int w, int h)
 
 void __display_render()
 {
+	engine.video->imgui_newframe();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
+
 	sre::onUpdate.fire();
 
 	// Render current world
@@ -85,6 +113,14 @@ void __display_render()
 
 		//// Aliases for the background and the foreground (kind of old)
 		const sre::col4& fg = current->foreground;
+
+		ImGui::Begin("Hello!");
+		{
+			float col[4] = { fg.r/255.0f, fg.g/255.0f, fg.b/255.0f, fg.a/255.0f };
+			ImGui::ColorEdit4("Foreground!", col, ImGuiColorEditFlags_Uint8);
+			current->foreground = sre::col4::fromNormalized(col[0], col[1], col[2], col[3]);
+		}
+		ImGui::End();
 
 		//// Clearing the screen with the background color
 		engine.video->draw_clear(engine.video, &current->background);
@@ -113,5 +149,7 @@ void __display_render()
 
 	sre::afterRender.fire();
 
+	ImGui::Render();
+	engine.video->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
 	engine.video->present(engine.video);
 }

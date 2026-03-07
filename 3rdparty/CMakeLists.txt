@@ -14,6 +14,8 @@ add_subdirectory(SDL_image)
 add_subdirectory(stb)
 #add_subdirectory(zlib)
 
+include(imgui.cmake)
+
 if(NOT BUILD_SHARED_LIBS)
     set(SDL_LIB_SUFFIX "-static")
     set(ZLIB_SUFFIX "static")
@@ -25,6 +27,7 @@ SDL2_ttf::SDL2_ttf${SDL_LIB_SUFFIX}
 SDL2_image::SDL2_image${SDL_LIB_SUFFIX}
 
 stb
+imgui
 #zlib${ZLIB_SUFFIX}
 )
 

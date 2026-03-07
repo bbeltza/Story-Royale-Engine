@@ -45,7 +45,6 @@ static void handle_arg(const char* arg, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    sre_log(SRE_LOGCATEGORY_DEBUG, "%d", (size_t)(&__engine_data) % 64);
 	for (int i = 1; i < argc; i++)
         handle_arg(argv[i], argv);
 

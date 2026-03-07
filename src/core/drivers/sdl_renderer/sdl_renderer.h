@@ -31,6 +31,11 @@ extern void sresdlrenderer_tex_destroy(const sre_videodriver* video, void* textu
 
 extern bool sresdlrenderer_clip(const sre_videodriver* video, const sre_rect2Dut* rect);
 
+
+extern bool sresdlrenderer_imgui_init(const sre_videodriver* video);
+extern void sresdlrenderer_imgui_newframe();
+extern void sresdlrenderer_imgui_renderdrawdata(struct ImDrawData* data, const sre_videodriver* video);
+
 SRE_CAPI_END
 
 #endif
