@@ -34,7 +34,7 @@ function(srEngine_link_icon TARGET)
 
     if (WIN32)
         add_dependencies(${TARGET} icowin32_${TARGET})
-        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc "IDI_ICON  ICON  DISCARDABLE  \"app.ico\"")
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc "IDI_ICON1  ICON  DISCARDABLE  \"app.ico\"")
         target_sources(${EXE} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ico.rc)
     else()
         add_dependencies(${TARGET} icogroup_${TARGET})

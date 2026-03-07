@@ -31,7 +31,7 @@ namespace sreECS
 
         // The rect representing the area of the shape by its size, and the offset from the entity by its position
         sre::rect2Dut rect;
-        sre::col4 color = sre::col4::WHITE;
+        sre::col4 color = sre::WHITE;
 
         ShapeForm shape;
 

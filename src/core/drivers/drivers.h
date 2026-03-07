@@ -18,19 +18,23 @@
 
 typedef struct sre_videodriver sre_videodriver;
 
-typedef int (*sre_videoinit_func)(sre_videodriver* video, SDL_Window* window);
-
-struct ImDrawData;
-
-struct sre_videodriver
+typedef bool (*sre_videoinit_func)(sre_videodriver* video, SDL_Window* window);
+struct sre_videodriverInterface
 {
 	void (*quit)(sre_videodriver* video);
+
 	void (*present)(const sre_videodriver* video);
 
+	bool (*viewport)(const sre_videodriver* video, int w, int h); // Resize the buffer, optional
 	bool (*vsync)(const sre_videodriver* video, int vsync);
-	bool (*viewport)(const sre_videodriver* video, int w, int h);
-
 	bool (*blend)(const sre_videodriver* video, sre_DrawBlending blending);
+
+	bool (*tex_gen)(const sre_videodriver* video, void* texture);
+	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
+	bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
+	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
+	void (*tex_destroy)(const sre_videodriver* video, void* texture);
+	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
 
 	SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
 	SRE_DRAW_FUNC(draw_clip, const sre_rect2Dut* rect);
@@ -42,41 +46,74 @@ struct sre_videodriver
 	SRE_DRAW_FUNC(draw_rrect, const sre_DDRRect* data);
 	SRE_DRAW_FUNC(draw_texture, const sre_DDTexture* data);
 	SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
+};
 
-	bool (*tex_gen)(const sre_videodriver* video, void* texture);
-	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
-	bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
-	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
-	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
-	void (*tex_destroy)(const sre_videodriver* video, void* texture);
+#ifndef IMGUI_DISABLE
+	struct ImDrawData;
+	struct sre_videodriverImGuiInterface
+	{
+		bool (*imgui_init)(const sre_videodriver* video);
+		void (*imgui_newframe)();
+		void (*imgui_renderdrawdata)(struct ImDrawData* ImDrawData, const sre_videodriver* video);
+	};
+#endif
 
-	const char* error;
+struct sre_videodriver
+{
+	struct sre_videodriverInterface const* interface;
+	#ifndef IMGUI_DISABLE
+		struct sre_videodriverImGuiInterface const* imgui;
+	#endif
+
+	/*
+		void (*quit)(sre_videodriver* video);
+		void (*present)(const sre_videodriver* video);
+
+		bool (*vsync)(const sre_videodriver* video, int vsync);
+		bool (*viewport)(const sre_videodriver* video, int w, int h);
+
+		bool (*blend)(const sre_videodriver* video, sre_DrawBlending blending);
+
+		SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
+		SRE_DRAW_FUNC(draw_clip, const sre_rect2Dut* rect);
+
+		SRE_DRAW_FUNC(draw_fill, const sre_DDFill* data);
+		SRE_DRAW_FUNC(draw_line, const sre_DDLine* data);
+		SRE_DRAW_FUNC(draw_lines, const sre_DDLines* data);
+		SRE_DRAW_FUNC(draw_rect, const sre_DDRect* data);
+		SRE_DRAW_FUNC(draw_rrect, const sre_DDRRect* data);
+		SRE_DRAW_FUNC(draw_texture, const sre_DDTexture* data);
+		SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
+
+		bool (*tex_gen)(const sre_videodriver* video, void* texture);
+		bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
+		bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
+		bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
+		SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
+		void (*tex_destroy)(const sre_videodriver* video, void* texture);
+	*/
+
+	char* error; // Error buffer/pointer, WIP
 	void* userdata;
 
-	void* const textures;
-	/* These are 'const' members, they aren't meant to be modified by the driver */
+	void* textures;
+	/* These are read-only members, they aren't meant to be modified by the driver */
 	/* They are used by the engine to send the correct texture pointer to the driver, based on a texture id */
 	size_t texture_size; // Size in bytes of a driver-speficic texture
-	const size_t textures_count;
-	const size_t textures_capacity;
-	const sre_Texture* const texture_fl; // Texture free list
-	const size_t texture_flcount;
-	const size_t texture_flcapacity;
+	size_t textures_count;
+	size_t textures_capacity;
+	sre_Texture* texture_fl; // Texture free list
+	size_t texture_flcount;
+	size_t texture_flcapacity;
 
-	const sre_rect2Dut* clipstack_base;
-	const size_t clipstack_pos;
-	const size_t clipstack_size;
+	sre_rect2Dut* clipstack_base;
+	size_t clipstack_pos;
+	size_t clipstack_size;
 
 	sre_vec2ut size;
 	sre_vec2ut center;
 	sre_vec2ut camera;
 	sre_unit scale;
-
-#ifndef IMGUI_DISABLE
-	bool (*imgui_init)(const sre_videodriver* video);
-	void (*imgui_newframe)();
-	void (*imgui_renderdrawdata)(struct ImDrawData* ImDrawData, const sre_videodriver* video);
-#endif
 };
 
 #endif

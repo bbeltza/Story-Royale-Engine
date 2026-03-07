@@ -49,13 +49,6 @@ namespace sre
 		inline void operator *=(const col3& other) { return mul(other); }
 
 		static constexpr col3 fromNormalized(double r, double g, double b) { return col3{ static_cast<T>(r * 255), static_cast<T>(g * 255), static_cast<T>(b * 255) }; }
-
-		static const col3 WHITE;
-		static const col3 BLACK;
-
-		static const col3 RED;
-		static const col3 GREEN;
-		static const col3 BLUE;
 	};
 
 	struct col4: public col3
@@ -113,16 +106,17 @@ namespace sre
 		constexpr SDL_Color toSDL() const { return { r, g, b, a }; }
 
 		static constexpr col4 fromNormalized(double r, double g, double b, double a) { return col4{ col3::fromNormalized(r, g, b), static_cast<T>(a * 255) }; }
-
-		static const col4 WHITE;
-		static const col4 BLACK;
-		static const col4 INVISIBLE;
-
-		static const col4 RED;
-		static const col4 GREEN;
-		static const col4 BLUE;
 	};
 
 	constexpr col3 fromHEX(sre::u32 hex) { return { static_cast<col3::T>((hex >> 16) & 0xFF), static_cast<col3::T>((hex >> 8) & 0xFF), static_cast<col3::T>((hex >> 0) & 0xFF) }; }
 	constexpr col4 fromHEX(sre::u32 hex, sre::col4::T alpha) { return { sre::fromHEX(hex), alpha }; }
+
+	constexpr col4 WHITE = { 0xFF, 0xFF, 0xFF };
+	constexpr col4 BLACK = { 0x00, 0x00, 0x00 };
+	constexpr col4 INVISIBLE = { 0x00, 0x00, 0x00, 0x00 };
+	
+	constexpr col4 RED = { 0xFF, 0x00, 0x00 };
+	constexpr col4 GREEN = { 0x00, 0xFF, 0x00 };
+	constexpr col4 BLUE = { 0x00, 0x00, 0xFF };
+
 }

@@ -18,7 +18,7 @@ namespace sreECS
         sre::vec2ut scale;
         sre::vec2ut offset;
 
-        sre::col4 modulate = sre::col4::WHITE;
+        sre::col4 modulate = sre::WHITE;
         sre::rect2Di region = { 0, 0 };
 
         sre::size_t current_frame = 0;

@@ -19,10 +19,8 @@ namespace sre
         unit_type offset = 0;
 
         constexpr ::sre::unit to_absolute(unit_type relative) const { return relative * scale + offset; }
-
-        static const udim ZERO;
-        static const udim FULL;
     };
+
     struct udim2
     {
         using unit_type = udim::unit_type;
@@ -52,8 +50,11 @@ namespace sre
 
         static constexpr udim2 fromscale(unit_type x, unit_type y) { return udim2{ x, 0, y, 0 }; }
         static constexpr udim2 fromscale(const vec2<unit_type>& vec) { return fromscale(vec.x, vec.y); }
-
-        static const udim2 ZERO;
-        static const udim2 FULL;
     };
+
+    constexpr udim UDIM_ZERO = { 0, 0 };
+    constexpr udim UDIM_FULL = { 1, 0 };
+    
+    constexpr udim2 UDIM2_ZERO = { UDIM_ZERO, UDIM_ZERO };
+    constexpr udim2 UDIM2_FULL = { UDIM_FULL, UDIM_FULL };
 }

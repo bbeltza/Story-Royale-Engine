@@ -9,7 +9,7 @@ namespace sreECS
     // Customizable grid that draws (wraps sre::draw_grid)
     struct Grid: sreECS::Component
     {
-        Grid(const sre::col4& col=sre::col4::WHITE, const sre::vec2ut& size=16):
+        Grid(const sre::col4& col=sre::WHITE, const sre::vec2ut& size=16):
             color(col),
             size(size)
         {}

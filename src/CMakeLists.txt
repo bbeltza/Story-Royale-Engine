@@ -12,10 +12,6 @@ set(SOURCES
     "cmd/args.c"
 )
 
-set(DATATYPES_SOURCES
-    "definitions.cpp"
-)
-
 set(BASE_SOURCES
     "file.c"
     "chunk.c"
@@ -71,7 +67,6 @@ set(UTIL_SOURCES
 
 set_dst_src(components COMPONENT_SOURCES LAYER_SOURCES)
 set_src(base BASE_SOURCES)
-set_src(datatypes DATATYPES_SOURCES)
 set_src(utils UTIL_SOURCES)
 
 set_src(ecs ECS_SOURCES)

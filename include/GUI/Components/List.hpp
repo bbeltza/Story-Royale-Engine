@@ -18,7 +18,7 @@ namespace sreGUI
         Direction direction = VERTICAL;
         sre::Alignment alignment = sre::A_LEFT;
 
-        sre::udim padding = sre::udim::ZERO;
+        sre::udim padding = sre::UDIM_ZERO;
     protected:
         void process_children(const sre::rect2Dut& parent, sre::rect2Dut children[], size_t count) override;
     };

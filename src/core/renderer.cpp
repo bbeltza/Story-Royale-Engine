@@ -24,11 +24,45 @@ void __setup_renderer()
 		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
 		exit(-1);
 	}
-	engine.video->blend(engine.video, SRE_BLEND_BLEND);
+
+	#define PFN_CHECK(i,x) if (i->x == nullptr) { sre::log<sre::LOGCATEGORY_ERROR>("Video driver error: '" #x "' interface function is missing. Please implement it"); } (void)0
+	const sre_videodriverInterface* interface = engine.video->interface; assert(interface != NULL);
+
+	PFN_CHECK(interface, quit);
+	PFN_CHECK(interface, present);
+	PFN_CHECK(interface, vsync);
+	PFN_CHECK(interface, blend);
+
+	PFN_CHECK(interface, tex_gen);
+	PFN_CHECK(interface, tex_update);
+	PFN_CHECK(interface, tex_bind);
+	PFN_CHECK(interface, tex_size);
+	PFN_CHECK(interface, tex_destroy);
+	PFN_CHECK(interface, tex_format);
+	assert(engine.video->texture_size >= sizeof(void*));	
+	
+	PFN_CHECK(interface, draw_clear);
+	PFN_CHECK(interface, draw_clip);
+
+	PFN_CHECK(interface, draw_fill);
+	PFN_CHECK(interface, draw_line);
+	PFN_CHECK(interface, draw_lines);
+	PFN_CHECK(interface, draw_rect);
+	PFN_CHECK(interface, draw_rrect);
+	PFN_CHECK(interface, draw_texture);
+	PFN_CHECK(interface, draw_rtexture);	
+	
+	interface->blend(engine.video, SRE_BLEND_DEFAULT);
 
 #ifndef IMGUI_DISABLE
-	if (engine.video->imgui_init)
+	const sre_videodriverImGuiInterface* imgui = engine.video->imgui;
+	
+	if (imgui)
 	{
+		PFN_CHECK(imgui, imgui_init);
+		PFN_CHECK(imgui, imgui_newframe);
+		PFN_CHECK(imgui, imgui_renderdrawdata);
+
 		IMGUI_CHECKVERSION();
 		ImGuiContext* context = ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -36,7 +70,7 @@ void __setup_renderer()
 					   |  ImGuiConfigFlags_NavEnableGamepad;
 		
 		if (!ImGui_ImplSDL2_InitForOther(engine.sdl_windowhndl) ||
-			!engine.video->imgui_init(engine.video))
+			!imgui->imgui_init(engine.video))
 		{
 			sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing ImGui, video driver error");
 			ImGui::DestroyContext(context);
@@ -46,22 +80,16 @@ void __setup_renderer()
 		sre::log<sre::LOGCATEGORY_WARN>("ImGui is not implemented in the current video driver");
 #endif
 
-	if (engine.video->texture_size)
-	{
-		const_cast<void* &>(engine.video->textures) = new sre::byte[SRE_TEXTURE_BASECOUNT * engine.video->texture_size] {};
-		const_cast<sre_u32* &>(engine.video->texture_fl) = new sre::u32[SRE_TEXTURE_BASECOUNT] {};
+	engine.video->textures = new sre::byte[SRE_TEXTURE_BASECOUNT * engine.video->texture_size] {};
+	engine.video->texture_fl = new sre::u32[SRE_TEXTURE_BASECOUNT] {};
 		
-		const_cast<size_t &>(engine.video->textures_capacity) = SRE_TEXTURE_BASECOUNT;
-		const_cast<size_t &>(engine.video->texture_flcapacity) = SRE_TEXTURE_BASECOUNT;
-	}
+	engine.video->textures_capacity = SRE_TEXTURE_BASECOUNT;
+	engine.video->texture_flcapacity = SRE_TEXTURE_BASECOUNT;
 
-	if (engine.video->draw_clip)
-	{
-		const_cast<sre_rect2Dut* &>(engine.video->clipstack_base) = new sre::rect2Dut[SRE_TEXTURE_BASECOUNT]; // I think I'll make both textures and clip rect stacks start at the same size
-		const_cast<size_t &>(engine.video->clipstack_size) = SRE_TEXTURE_BASECOUNT;
-	}
+	engine.video->clipstack_base = new sre::rect2Dut[SRE_TEXTURE_BASECOUNT]; // I think I'll make both textures and clip rect stacks start with the same size
+	engine.video->clipstack_size = SRE_TEXTURE_BASECOUNT;
 
-	engine.video->vsync(engine.video, 1);
+	interface->vsync(engine.video, 1);
 	engine.video->scale = 1;
 
 	engine.render_mutex = SDL_CreateMutex();
@@ -94,14 +122,18 @@ void __update_viewport(int w, int h)
 	engine.video->size = size;
 	engine.video->center = center;
 
-	if (engine.video->viewport)
-		engine.video->viewport(engine.video, w, h);
+	auto interface = engine.video->interface;
+	if (interface->viewport)
+		interface->viewport(engine.video, w, h);
 }
 
 void __display_render()
 {
+	auto interface = engine.video->interface;
+
 #ifndef IMGUI_DISABLE
-	engine.video->imgui_newframe();
+	auto imgui = engine.video->imgui;
+	imgui->imgui_newframe();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 #endif
@@ -131,7 +163,7 @@ void __display_render()
 	#endif
 
 		//// Clearing the screen with the background color
-		engine.video->draw_clear(engine.video, &current->background);
+		interface->draw_clear(engine.video, &current->background);
 
 		sre::beforeRender.fire();
 
@@ -141,14 +173,14 @@ void __display_render()
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
-			engine.video->draw_fill(engine.video, reinterpret_cast<const sre_DDFill*>(&fg));
+			interface->draw_fill(engine.video, reinterpret_cast<const sre_DDFill*>(&fg));
 	}
 	else
 	{
 		engine.video->camera.x = 0;
 		engine.video->camera.y = 0;
 
-		engine.video->draw_clear(engine.video, &sre::col4::BLACK);
+		interface->draw_clear(engine.video, &sre::BLACK);
 		sre::beforeRender.fire();
 	}
 
@@ -159,7 +191,7 @@ void __display_render()
 
 #ifndef IMGUI_DISABLE
 	ImGui::Render();
-	engine.video->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
+	imgui->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
 #endif
-	engine.video->present(engine.video);
+	interface->present(engine.video);
 }

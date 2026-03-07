@@ -65,7 +65,7 @@ void __initialize_engine()
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
 
 #ifdef SDL_VIDEO_DRIVER_WINDOWS // Replace the "SDL_app" window class name
-    SDL_RegisterApp("Story Royale Engine", 0, NULL);
+    SDL_RegisterApp("Story Royale Engine", 0x0003, NULL);
 #endif
 
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
@@ -92,9 +92,9 @@ void __end_engine()
     __cleanup_threads();
     __cleanup_ecs();  
     
-    engine.video->quit(engine.video);
-    sre_delete((void*)engine.video->texture_fl);
-    sre_delete((void*)engine.video->clipstack_base);
+    engine.video->interface->quit(engine.video);
+    sre_delete(engine.video->texture_fl);
+    sre_delete(engine.video->clipstack_base);
     sre_delete(engine.video->textures);
     sre_delete(engine.video);
     

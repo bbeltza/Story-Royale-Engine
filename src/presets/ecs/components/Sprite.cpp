@@ -55,7 +55,7 @@ void Sprite::on_render(Entity& entity)
         ImGui::DragFloat2("offset", offset);
         ImGui::DragFloat2("scale", scale, 0.1f);
         ImGui::DragInt4("region", region.position);
-        ImGui::SliderInt("current_frame", (int*)&current_frame, 0, textures.size());
+        ImGui::SliderInt("current_frame", (int*)&current_frame, 0, textures.size() - 1);
     
         float v[4] = { modulate.r/255.0f, modulate.g/255.0f, modulate.b/255.0f, modulate.a/255.0f };
         if (ImGui::ColorEdit4("modulate", v))

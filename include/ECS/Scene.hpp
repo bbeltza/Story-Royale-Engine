@@ -34,7 +34,7 @@ namespace sreECS
         sre::col4 background{255, 149, 236};
         /// The color that the game will render on top of the world.
         /// This also acts as the background of the GUI Layer
-        sre::col4 foreground{sre::col4::INVISIBLE};
+        sre::col4 foreground{sre::INVISIBLE};
         // The camera, whence its coordinates point to the center of the screen
         Camera camera;
     public:

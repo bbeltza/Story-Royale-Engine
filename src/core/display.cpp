@@ -35,7 +35,7 @@ void sre::display_autoscale_off()
 
 static void deferred_vsync(void* enable)
 {
-    engine.video->vsync(engine.video, enable != NULL);
+    engine.video->interface->vsync(engine.video, enable != NULL);
 }
 
 void sre::display_vsync(bool enable)

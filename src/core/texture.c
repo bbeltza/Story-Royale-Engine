@@ -31,7 +31,7 @@ sre_Texture sre_tex_gen()
         if (!engine.video->texture_fl[i]) continue;
 
         id = engine.video->texture_fl[i];
-        ((sre_Texture* const)engine.video->texture_fl)[i] = 0;
+        engine.video->texture_fl[i] = 0;
         break;
     }
 
@@ -46,15 +46,15 @@ sre_Texture sre_tex_gen()
             if (!ptr) goto FAIL;
 
             sre_delete(engine.video->textures);
-            *(void**)&engine.video->textures = ptr;
-            *(size_t*)&engine.video->textures_capacity = new_capacity;
+            engine.video->textures = ptr;
+            engine.video->textures_capacity = new_capacity;
         }
 
         id = (sre_Texture)(1 + engine.video->textures_count);
-        (*(size_t*)&engine.video->textures_count)++;
+        engine.video->textures_count++;
     }
 
-    if (engine.video->tex_gen(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size) < 0)
+    if (engine.video->interface->tex_gen(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size) < 0)
         goto FAIL;
     
     return id;
@@ -64,7 +64,7 @@ sre_Texture sre_tex_gen()
     return 0;
 }
 
-void deferred_texdestroy(void* texture) { engine.video->tex_destroy(engine.video, texture); }
+void deferred_texdestroy(void* texture) { engine.video->interface->tex_destroy(engine.video, texture); }
 
 void sre_tex_destroy(sre_Texture id)
 {
@@ -88,12 +88,12 @@ void sre_tex_destroy(sre_Texture id)
             ptr = memcpy(ptr, engine.video->texture_fl, engine.video->texture_flcapacity * sizeof(sre_Texture));
             assert(ptr);
 
-            *(const sre_Texture**)&engine.video->texture_fl = ptr;
-            *(size_t*)&engine.video->texture_flcapacity = new_capacity;
+            engine.video->texture_fl = ptr;
+            engine.video->texture_flcapacity = new_capacity;
         }
 
         target = (int)engine.video->texture_flcount;
-        (*(size_t*)&engine.video->texture_flcount)++;
+        engine.video->texture_flcount++;
     }
 
     sre_defer(deferred_texdestroy, (char*)engine.video->textures + (id - 1) * engine.video->texture_size);
@@ -105,7 +105,7 @@ struct defer_texbind
     const SDL_Surface* surface;
 };
 
-int deferred_texbind(struct defer_texbind* texbind) { return engine.video->tex_bind(engine.video, texbind->texture, texbind->surface); }
+int deferred_texbind(struct defer_texbind* texbind) { return engine.video->interface->tex_bind(engine.video, texbind->texture, texbind->surface); }
 
 int sre_tex_bind(sre_Texture id, const SDL_Surface* surface)
 {
@@ -126,7 +126,7 @@ int sre_tex_update(sre_Texture id, const void* pixels, int pitch)
     void* texture = sre_get_texture(id);
     if (!texture) return -1;
 
-    return engine.video->tex_update(engine.video, texture, pixels, pitch);
+    return engine.video->interface->tex_update(engine.video, texture, pixels, pitch);
 }
 
 SDL_PixelFormatEnum sre_tex_format(sre_Texture id)
@@ -134,7 +134,7 @@ SDL_PixelFormatEnum sre_tex_format(sre_Texture id)
     void* texture = sre_get_texture(id);
     if (!texture) return SDL_PIXELFORMAT_UNKNOWN;
 
-    return engine.video->tex_format(engine.video, texture);
+    return engine.video->interface->tex_format(engine.video, texture);
 }
 
 int sre_tex_size(sre_Texture id, int* w, int* h)
@@ -142,5 +142,5 @@ int sre_tex_size(sre_Texture id, int* w, int* h)
     void* texture = sre_get_texture(id);
     if (!texture) return -1;
 
-    return engine.video->tex_size(engine.video, texture, w, h);
+    return engine.video->interface->tex_size(engine.video, texture, w, h);
 }

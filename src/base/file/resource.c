@@ -39,7 +39,7 @@ void sre_win_resourceinit(void)
 {
     assert(_game_res == NULL);
 
-    HRSRC res = FindResourceA(NULL, "GAME_RES", MAKEINTRESOURCE(RT_RCDATA));
+    HRSRC res = FindResourceA(NULL, "GAME_RES", RT_RCDATA);
     if (!res)
     {
         static const UCHAR nullbyte = '\0';

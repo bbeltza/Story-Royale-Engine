@@ -10,7 +10,7 @@ namespace sreGUI
     {
         template <typename... Args>
         Fill(Args&&... args): color(std::forward<Args>(args)...) {} // Build `Fill` instance with arguments passed as in `sre::col4`
-        Fill(const sre::col4& col=sre::col4::WHITE): color(col) {}
+        Fill(const sre::col4& col=sre::WHITE): color(col) {}
 
         constexpr operator const sre::col4&() const { return color; }
         inline operator sre::col4&() { return color; }

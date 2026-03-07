@@ -1,40 +1,41 @@
 #include "sdl_renderer.h"
 
+static const struct sre_videodriverInterface sdl_interface = {
+    sresdlrenderer_quit,
+    sresdlrenderer_present,
+    NULL,
+    sresdlrenderer_vsync,
+    sresdlrenderer_blend,
+
+    sresdlrenderer_tex_gen,
+    sresdlrenderer_tex_update,
+    sresdlrenderer_tex_bind,
+    sresdlrenderer_tex_size,
+    sresdlrenderer_tex_destroy,
+    sresdlrenderer_tex_format,
+
+    sresdlrenderer_draw_clear,
+    sresdlrenderer_clip,
+    sresdlrenderer_draw_fill,
+    sresdlrenderer_draw_line,
+    sresdlrenderer_draw_lines,
+    sresdlrenderer_draw_rect,
+    sresdlrenderer_draw_rrect,
+    sresdlrenderer_draw_texture,
+    sresdlrenderer_draw_rtexture,
+};
+
 bool sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
 {
     SDL_Renderer* const renderer = SDL_CreateRenderer(window, -1, 0);
     if (!renderer) return false;
-
+    
+    video->interface = &sdl_interface;
     video->userdata = renderer;
-    video->vsync = sresdlrenderer_vsync;
-    video->present = sresdlrenderer_present;
-    video->quit = sresdlrenderer_quit;
-
-    video->blend = sresdlrenderer_blend;
-
-    video->draw_clear = sresdlrenderer_draw_clear;
-    video->draw_fill = sresdlrenderer_draw_fill;
-    video->draw_line = sresdlrenderer_draw_line;
-    video->draw_lines = sresdlrenderer_draw_lines;
-    video->draw_rect = sresdlrenderer_draw_rect;
-    video->draw_rrect = sresdlrenderer_draw_rrect;
-    video->draw_texture = sresdlrenderer_draw_texture;
-    video->draw_rtexture = sresdlrenderer_draw_rtexture;
-
-    video->tex_gen = sresdlrenderer_tex_gen;
-    video->tex_bind = sresdlrenderer_tex_bind;
-    video->tex_update = sresdlrenderer_tex_update;
-    video->tex_size = sresdlrenderer_tex_size;
-    video->tex_destroy = sresdlrenderer_tex_destroy;
-
-    video->draw_clip = sresdlrenderer_clip;
-
     video->texture_size = sizeof(SDL_Texture*);
 
 #ifndef IMGUI_DISABLE
-    video->imgui_init = sresdlrenderer_imgui_init;
-    video->imgui_newframe = sresdlrenderer_imgui_newframe;
-    video->imgui_renderdrawdata = sresdlrenderer_imgui_renderdrawdata;
+    video->imgui = &sresdlrenderer_imgui;
 #endif
     return true;
 }

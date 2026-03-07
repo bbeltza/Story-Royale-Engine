@@ -27,7 +27,7 @@ Font::Font(const sre::File& file, int pt)
             char str[2] = { static_cast<char>(code + 1), '\0' };
 
             auto& tex = ascii.at(code);
-            tex = sre::Image{TTF_RenderUTF8_Solid(m_font, str, sre::col4::WHITE.toSDL())};
+            tex = sre::Image{TTF_RenderUTF8_Solid(m_font, str, sre::WHITE.toSDL())};
         }
     //
     return;

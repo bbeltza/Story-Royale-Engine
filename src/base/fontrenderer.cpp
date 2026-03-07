@@ -120,7 +120,7 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
 
             codepoint = *reinterpret_cast<int*>(utf8);
             if (unicode.find(codepoint) == unicode.end())
-                unicode.emplace(codepoint, sre::Image{TTF_RenderUTF8_Solid(m_font, utf8, sre::col4::WHITE.toSDL())});
+                unicode.emplace(codepoint, sre::Image{TTF_RenderUTF8_Solid(m_font, utf8, sre::WHITE.toSDL())});
             
             texture = &unicode.at(codepoint);
         }

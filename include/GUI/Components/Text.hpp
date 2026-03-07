@@ -23,7 +23,7 @@ namespace sreGUI
         int count = -1;
         unsigned int scale = 0;
 
-        sre::col4 color = sre::col4::BLACK;
+        sre::col4 color = sre::BLACK;
 
         sre::Alignment h_alignment = sre::A_LEFT;
         sre::Alignment v_alignment = sre::A_TOP;
