@@ -1,3 +1,5 @@
+#ifndef IMGUI_DISABLE
+
 #include "sdl_renderer.h"
 
 #include <backends/imgui_impl_sdl2.h>
@@ -18,3 +20,5 @@ extern "C" bool sresdlrenderer_imgui_init(const sre_videodriver* video)
 
 extern "C" void sresdlrenderer_imgui_newframe() { ImGui_ImplSDLRenderer2_NewFrame(); }
 extern "C" void sresdlrenderer_imgui_renderdrawdata(ImDrawData* data, const sre_videodriver* video) { ImGui_ImplSDLRenderer2_RenderDrawData(data, static_cast<SDL_Renderer*>(video->userdata)); }
+
+#endif

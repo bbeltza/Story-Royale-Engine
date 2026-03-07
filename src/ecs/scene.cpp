@@ -190,8 +190,21 @@ void Scene::call_update()
     updated.fire();
 }
 
+#include <imgui.h>
+
 void Scene::call_render()
 {
+#ifndef IMGUI_DISABLE
+    ImGui::Begin("Current scene");
+        ImGui::SeparatorText("camera");
+        ImGui::DragFloat2("position", camera.position);
+        ImGui::DragFloat2("scale", camera.scale, 0.1f);
+        ImGui::DragFloat4("bounds", camera.bounds.position);
+
+        ImGuiUpdate();
+    ImGui::End();
+#endif
+
     // Sort entities by z_index. Cannot use default std::sort because of the need to access the entity buffer with entity_at()
     // So I made my own sorting algorithm :r) (It's literally just gnome sort ahahah)
     for (auto i2 = m_entities.begin();;)
@@ -211,9 +224,39 @@ void Scene::call_render()
     }
 
     pre_render();
+    
+#ifndef IMGUI_DISABLE
+    ImGui::Begin("Current scene");
+        if (ImGui::CollapsingHeader("Entities"))
+        {
+            for (auto& ent : *this)
+            {
+                if (ImGui::TreeNode(&ent, "Entity at %p", &ent))
+                {
+                    ImGui::DragFloat2("position", ent.position);
+                    ent.ImGuiUpdate();
+
+                    ImGui::SeparatorText("Components");
+                    for (auto& comp : ent)
+                    {
+                        if (ImGui::TreeNode(&comp, "Component at %p", &comp))
+                        {
+                            ImGui::CheckboxFlags("Enabled", (unsigned int*)&comp.flags, comp.F_ENABLED);
+                            comp.ImGuiUpdate();
+
+                            ImGui::TreePop();
+                        }
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
+        }
+    ImGui::End();
+#endif
 
     for (auto& ent : *this)
-    {
+    {      
         for (auto& comp : ent)
         {
             if (comp.enabled())

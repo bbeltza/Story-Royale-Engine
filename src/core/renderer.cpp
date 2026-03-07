@@ -26,6 +26,7 @@ void __setup_renderer()
 	}
 	engine.video->blend(engine.video, SRE_BLEND_BLEND);
 
+#ifndef IMGUI_DISABLE
 	if (engine.video->imgui_init)
 	{
 		IMGUI_CHECKVERSION();
@@ -43,7 +44,7 @@ void __setup_renderer()
 	}
 	else
 		sre::log<sre::LOGCATEGORY_WARN>("ImGui is not implemented in the current video driver");
-	
+#endif
 
 	if (engine.video->texture_size)
 	{
@@ -99,9 +100,11 @@ void __update_viewport(int w, int h)
 
 void __display_render()
 {
+#ifndef IMGUI_DISABLE
 	engine.video->imgui_newframe();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
+#endif
 
 	sre::onUpdate.fire();
 
@@ -114,13 +117,18 @@ void __display_render()
 		//// Aliases for the background and the foreground (kind of old)
 		const sre::col4& fg = current->foreground;
 
-		ImGui::Begin("Hello!");
-		{
-			float col[4] = { fg.r/255.0f, fg.g/255.0f, fg.b/255.0f, fg.a/255.0f };
-			ImGui::ColorEdit4("Foreground!", col, ImGuiColorEditFlags_Uint8);
-			current->foreground = sre::col4::fromNormalized(col[0], col[1], col[2], col[3]);
+	#ifndef IMGUI_DISABLE
+		ImGui::Begin("Current scene"); {
+			float colb[4] = { current->background.r/255.0f, current->background.g/255.0f, current->background.b/255.0f, current->background.a/255.0f };
+			if (ImGui::ColorEdit4("Background", colb))
+				current->background = sre::col4::fromNormalized(colb[0], colb[1], colb[2], colb[3]);
+			
+			float colf[4] = { fg.r/255.0f, fg.g/255.0f, fg.b/255.0f, fg.a/255.0f };
+			if (ImGui::ColorEdit4("Foreground", colf))
+				current->foreground = sre::col4::fromNormalized(colf[0], colf[1], colf[2], colf[3]);
 		}
 		ImGui::End();
+	#endif
 
 		//// Clearing the screen with the background color
 		engine.video->draw_clear(engine.video, &current->background);
@@ -149,7 +157,9 @@ void __display_render()
 
 	sre::afterRender.fire();
 
+#ifndef IMGUI_DISABLE
 	ImGui::Render();
 	engine.video->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
+#endif
 	engine.video->present(engine.video);
 }

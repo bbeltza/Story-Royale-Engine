@@ -31,9 +31,11 @@ bool sresdlrenderer_init(sre_videodriver* video, SDL_Window *window)
 
     video->texture_size = sizeof(SDL_Texture*);
 
+#ifndef IMGUI_DISABLE
     video->imgui_init = sresdlrenderer_imgui_init;
     video->imgui_newframe = sresdlrenderer_imgui_newframe;
     video->imgui_renderdrawdata = sresdlrenderer_imgui_renderdrawdata;
+#endif
     return true;
 }
 

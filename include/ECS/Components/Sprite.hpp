@@ -28,5 +28,7 @@ namespace sreECS
         void on_render(Entity&) override;
 
         std::vector<sre::Texture*> textures;
+
+        void ImGuiUpdate();
     };
 }

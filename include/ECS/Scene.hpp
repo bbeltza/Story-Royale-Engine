@@ -9,6 +9,8 @@
 
 #include <ECS/Camera.hpp>
 
+#include <imgui.h>
+
 namespace sre
 {
     class ECS;
@@ -147,11 +149,14 @@ namespace sreECS
 
         static _Arena* new_arena();
     protected:
-        protected:
         virtual void update() {}
         virtual void pupdate() {}
         virtual void pre_render() {}
         virtual void post_render() {}
+
+        #ifndef IMGUI_DISABLE
+		    virtual void ImGuiUpdate() {} // User function for ImGui frame updates
+	    #endif
     public:
         sre::Signal<sre::empty_t> updated{this};
         sre::Signal<sre::empty_t> rendered{this};

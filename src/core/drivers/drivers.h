@@ -72,9 +72,11 @@ struct sre_videodriver
 	sre_vec2ut camera;
 	sre_unit scale;
 
+#ifndef IMGUI_DISABLE
 	bool (*imgui_init)(const sre_videodriver* video);
 	void (*imgui_newframe)();
 	void (*imgui_renderdrawdata)(struct ImDrawData* ImDrawData, const sre_videodriver* video);
+#endif
 };
 
 #endif

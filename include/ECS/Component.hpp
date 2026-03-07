@@ -4,6 +4,8 @@
 #include <Datatypes/Vector.hpp>
 #include <Datatypes/Flags.hpp>
 
+#include <imgui.h>
+
 namespace sreECS
 {
 	class Entity;
@@ -36,6 +38,10 @@ namespace sreECS
 		virtual void on_update(Entity& entity) {}
 		virtual void on_pupdate(Entity& entity) {}
 		virtual bool on_query(Entity& entity, sre::vec2ut pt) const { return false; }
+
+	#ifndef IMGUI_DISABLE
+		virtual void ImGuiUpdate() {}
+	#endif
 	};
 }
 
