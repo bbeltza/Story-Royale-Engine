@@ -53,6 +53,11 @@ namespace sre
 
 		inline size_t write(const void* rawdata, size_t size) const { return sre_filewrite(this, rawdata, size); }
 		inline size_t read(void* data, size_t size) const { return sre_fileread(this, data, size); }
+		
+		template <typename T>
+		inline bool read(T& obj) const { return read(&obj, sizeof(obj)) == sizeof(obj); }
+		template <typename T>
+		inline bool write(const T& obj) const { return write(&obj, sizeof(obj)) == sizeof(obj); }
 	};
 }
 

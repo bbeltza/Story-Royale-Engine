@@ -120,3 +120,19 @@ namespace sre
 	constexpr col4 BLUE = { 0x00, 0x00, 0xFF };
 
 }
+
+#include <ostream>
+
+template <typename Char, typename Traits>
+std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& os, const sre::col3& col)
+{
+    os << "{ " << static_cast<int>(col.r) << " ; " << static_cast<int>(col.g) << " ; " << static_cast<int>(col.b) << " }";
+    return os;
+}
+
+template <typename Char, typename Traits>
+std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& os, const sre::col4& col)
+{
+    os << "{ " << static_cast<int>(col.r) << " , " << static_cast<int>(col.g) << " , " << static_cast<int>(col.b) << " | " << static_cast<int>(col.a) << " }";
+    return os;
+}
