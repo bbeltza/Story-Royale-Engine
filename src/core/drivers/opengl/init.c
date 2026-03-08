@@ -14,6 +14,17 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
 {
     assert(video != NULL);
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
+    #ifndef NDEBUG
+        SDL_GL_CONTEXT_DEBUG_FLAG
+    #else
+        0
+    #endif
+    );
+
     Uint32 win_flags = SDL_GetWindowFlags(window);
     if (!(win_flags & SDL_WINDOW_OPENGL))
     {
@@ -34,6 +45,9 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
         video->imgui = &sreopengl_imgui;
     #endif
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     return true;
     FAIL:
         sre_delete(inst);
@@ -43,25 +57,28 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
 void sreopengl_quit(sre_videodriver* video)
 {
     sre_videoOpenGL* inst = video->userdata;
-
     SDL_GL_DeleteContext(inst->context);
 
     sre_delete(inst);
 }
 
-bool sreopengl_present(const sre_videodriver* video)
+void sreopengl_present(const sre_videodriver* video)
 {
-    SDL_ClearError();
-
-    sre_videoOpenGL* inst = video->userdata;
+    //sre_videoOpenGL* inst = video->userdata;
 
     SDL_GL_SwapWindow(SDL_GL_GetCurrentWindow());
-
-    return SDL_GetError()[0] != '\0';
 }
 
-bool sreopengl_viewport(const sre_videodriver* video, int w, int h) { glViewport(0, 0, w, h); return true; }
 bool sreopengl_vsync(const sre_videodriver* video, int vsync) { return SDL_GL_SetSwapInterval(vsync) == 0; }
+bool sreopengl_viewport(const sre_videodriver* video, int w, int h)
+{
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, video->size.x, video->size.y, 0.0, 0.0, 1.0);
+
+    glViewport(0, 0, w, h);
+    return true;
+}
 
 bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color)
 {
@@ -72,6 +89,49 @@ bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color
 
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    return true;
+}
+
+bool sreopengl_drawrectlegacytest(const sre_videodriver* video, const sre_DDRect* data)
+{    
+    const sre_unit mat[16] = {
+        data->rect.size.x, 0, 0, 0,
+        0, data->rect.size.y, 0, 0,
+        0, 0, 1, 0,
+        data->rect.position.x, data->rect.position.y, 0, 1
+    };
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(mat);
+
+    const bool USE_CAM = data->flags & SRE_DRAWFLAGS_USECAM;
+    if (USE_CAM)
+    {
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glOrtho(-video->center.x, video->center.x, video->center.y, -video->center.y, 0, 1);
+        
+        const sre_unit cam[16] = {
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            -video->camera.x, -video->camera.y, 0, 1
+        };
+        glMultMatrixf(cam);
+    }
+
+        glColor4f(data->color.r / 255.0f, data->color.g / 255.0f, data->color.b / 255.0f, data->color.a / 255.0f);
+        glBegin(GL_POLYGON);
+                const sre_vec2ut anchor_vert = { data->anchor.x - SRE_UT(0.5), data->anchor.y - SRE_UT(0.5) };
+                glVertex2f(-0.5f - anchor_vert.x, -0.5f - anchor_vert.y);
+                glVertex2f(0.5f - anchor_vert.x, -0.5f - anchor_vert.y);
+                glVertex2f(0.5f - anchor_vert.x, 0.5f - anchor_vert.y);
+                glVertex2f(-0.5f - anchor_vert.x, 0.5f - anchor_vert.y);
+        glEnd();
+    
+    if (USE_CAM)
+        glPopMatrix();
 
     return true;
 }
@@ -99,7 +159,7 @@ const struct sre_videodriverInterface sreopengl_interface = {
     FN(voi),
     FN(voi),
     FN(voi),
-    FN(voi),
+    sreopengl_drawrectlegacytest,
     FN(voi),
     FN(voi),
     FN(voi)

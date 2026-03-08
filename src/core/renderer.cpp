@@ -35,7 +35,13 @@ void __setup_renderer()
 	engine.video = static_cast<sre_videodriver*>(operator new(sizeof(sre_videodriver)));
 	memset(static_cast<void*>(engine.video), 0, sizeof(sre_videodriver));
 
-	const sre_videoinit_func init_driver = video_drivers[0];
+	enum sre_RenderDrivers
+	{
+		SRE_RENDERDRIVER_SDLRENDERER,
+		SRE_RENDERDRIVER_OPENGL
+	};
+
+	const sre_videoinit_func init_driver = video_drivers[SRE_RENDERDRIVER_OPENGL];
 	if (!init_driver(engine.video, engine.sdl_windowhndl))
 	{
 		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");

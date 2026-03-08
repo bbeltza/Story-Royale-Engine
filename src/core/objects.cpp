@@ -10,7 +10,7 @@
 
 static void* const PTR_MAX = reinterpret_cast<void*>(UINTPTR_MAX); 
 static sre::Object* obj_head = static_cast<sre::Object*>(PTR_MAX); // PTR_MAX to make sure an object is in a queue, otherwise, m_nextdestroyed is NULL
-static size_t queue_count = 0;
+//static size_t queue_count = 0;
 
 namespace sre
 {

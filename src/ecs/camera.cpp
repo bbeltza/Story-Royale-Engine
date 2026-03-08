@@ -21,7 +21,7 @@ void Camera::pupdate()
     if (effect && effect->enabled)
         position += effect->on_process();
     
-    const sre::unit scale = sre::display_scale();
+    //const sre::unit scale = sre::display_scale();
 }
 
 static const Camera ZERO_CAM;

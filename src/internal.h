@@ -49,8 +49,8 @@ SRE_CAPI_BEGIN
 		sre_timeStamp phys_target_dt;
 		SDL_threadID main_thrd;
 
-		unsigned long long framestart_time;
-		unsigned long long frameend_time;
+		long long framestart_time;
+		long long frameend_time;
 
 		#define SRE_THREADS_BUCKETSIZE 32
 		void* threads_bucket[SRE_THREADS_BUCKETSIZE]; // "Hash" map of the threads

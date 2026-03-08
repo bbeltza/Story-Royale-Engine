@@ -54,7 +54,7 @@ sre_Texture sre_tex_gen()
         engine.video->textures_count++;
     }
 
-    if (engine.video->interface->tex_gen(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size) < 0)
+    if (!engine.video->interface->tex_gen(engine.video, (char*)engine.video->textures + (id - 1) * engine.video->texture_size))
         goto FAIL;
     
     return id;

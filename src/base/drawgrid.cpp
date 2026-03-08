@@ -13,7 +13,7 @@ bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin,
     };
 
     const sre::vec2ut scr_size = sre::display_size();
-    const sre::vec2ut scr_center = sre::display_center();
+    //const sre::vec2ut scr_center = sre::display_center();
     
     const auto xgrids = static_cast<int>(ceil(scr_size.x / size.x / 2));
     const auto ygrids = static_cast<int>(ceil(scr_size.y / size.y / 2));
