@@ -30,7 +30,6 @@ void sre::window_focus() { return SDL_RaiseWindow(engine.sdl_windowhndl); }
 void sre::window_minimize() { return SDL_MinimizeWindow(engine.sdl_windowhndl); }
 void sre::window_maximize() { return SDL_MaximizeWindow(engine.sdl_windowhndl); }
 
-void sre::window_setsize(int w, int h) { return SDL_SetWindowSize(engine.sdl_windowhndl, w, h); } // TODO: Defer this to the main thread
 void sre::window_setresizable(bool resizable) { return SDL_SetWindowResizable(engine.sdl_windowhndl, static_cast<SDL_bool>(resizable)); }
 
 static inline bool flashwindowop(SDL_FlashOperation op) { return SDL_FlashWindow(engine.sdl_windowhndl, op) == 0; }
@@ -40,3 +39,15 @@ bool sre::window_cancelflash() { return flashwindowop(SDL_FLASH_CANCEL); }
 
 bool sre::window_isfullscreen() { return 0 != (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_FULLSCREEN); }
 bool sre::window_ishidden() { return 0 != (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN); }
+
+// Deferred functions (they require to be run on the main thread otherwise it's undefined behavior)
+#include <Core/Defer.hpp>
+
+void sre::window_setsize(int w, int h)
+{
+    static int data[2];
+    data[0] = w;
+    data[1] = h;
+
+    defer([](int data[2]) { SDL_SetWindowSize(engine.sdl_windowhndl, data[0], data[1]); }, data);
+}

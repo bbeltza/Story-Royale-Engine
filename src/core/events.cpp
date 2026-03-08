@@ -21,10 +21,13 @@ sre::Signal<sre::Event> sre::onEvent;
 int __signal_events(SDL_Event* ev)
 {
 #ifndef IMGUI_DISABLE
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui_ImplSDL2_ProcessEvent(ev);
-    if (io.WantCaptureMouse)
-        return 0;
+    if (engine.video->imgui)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui_ImplSDL2_ProcessEvent(ev);
+        if (io.WantCaptureMouse)
+            return 0;
+    }
 #endif
 
     sre::Event current;

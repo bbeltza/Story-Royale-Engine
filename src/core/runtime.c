@@ -51,11 +51,11 @@ static int game_loop(void* running)
             SDL_CondWait(engine.render_cond, engine.render_mutex);
         else
             sre_log(SRE_LOGCATEGORY_ERROR, "SDL_PeepEvents failed... %s", SDL_GetError());
-        #if _WIN32
+    #if _WIN32
         }
         else
             SDL_CondWait(engine.render_cond, engine.render_mutex);
-        #endif
+    #endif
 
         //
         
@@ -104,13 +104,11 @@ void __run_engine()
             case ENGINE_EVENT_DEFER:
                 ((sre_deferFunction)ev.user.data1)(ev.user.data2);
                 break;
-            case ENGINE_EVENT_RETDEFER:
-            {
+            case ENGINE_EVENT_RETDEFER: {
                 struct _engine_retdefer* defer = ev.user.data2;
                 defer->ret = ((sre_deferResponseFunction)ev.user.data1)(defer->userdata);
                 SDL_SemPost(defer->sem);
-            }
-            break;
+            } break;
             case ENGINE_EVENT_RENDER:
                 SDL_LockMutex(engine.render_mutex);
 
@@ -120,9 +118,9 @@ void __run_engine()
                 SDL_UnlockMutex(engine.render_mutex);
                 break;
             case ENGINE_EVENT_ENTRY:
+                __update_viewport(engine.osize_x, engine.osize_y);
                 SDL_ShowWindow(engine.sdl_windowhndl);
                 SDL_RaiseWindow(engine.sdl_windowhndl);
-                __update_viewport(engine.osize_x, engine.osize_y);
                 break;
             }
             break;

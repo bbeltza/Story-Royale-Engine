@@ -94,6 +94,9 @@ namespace sre
 
 		constexpr col4 operator *(float) const { return col4(); }
 
+		constexpr bool operator ==(const col4& other) const { return r == other.r && g == other.g && b == other.b && a == other.a; }
+		constexpr bool operator !=(const col4& other) const { return !operator ==(other); }
+
 		using lerp_tag = T;
 		constexpr col4 lerp(const col4& goal, float alpha) const
 		{

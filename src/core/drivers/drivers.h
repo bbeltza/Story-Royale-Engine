@@ -25,7 +25,7 @@ struct sre_videodriverInterface
 
 	void (*present)(const sre_videodriver* video);
 
-	bool (*viewport)(const sre_videodriver* video, int w, int h); // Resize the buffer, optional
+	bool (*viewport)(const sre_videodriver* video, int w, int h); // Resize the screen buffer, optional
 	bool (*vsync)(const sre_videodriver* video, int vsync);
 	bool (*blend)(const sre_videodriver* video, sre_DrawBlending blending);
 

@@ -12,11 +12,12 @@
 // ImGUI setup!
 	#include <imgui.h>
 	#include <backends/imgui_impl_sdl2.cpp> // Compile SDL2 ImGui implementation!
+	#include <backends/imgui_impl_null.cpp>
 //
 
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
-//VIDEOINIT_DEF(opengl)				\
+VIDEOINIT_DEF(opengl)				\
 //VIDEOINIT_DEF(software)
 
 
@@ -93,7 +94,12 @@ void __setup_renderer()
 		}
 	}
 	else
+	{
 		sre::log<sre::LOGCATEGORY_WARN>("ImGui is not implemented in the current video driver");
+		// Create dummy context
+		ImGui::CreateContext();
+		ImGui_ImplNull_Init();
+	}
 #endif
 
 	engine.video->textures = new sre::byte[SRE_TEXTURE_BASECOUNT * engine.video->texture_size] {};
@@ -149,8 +155,13 @@ void __display_render()
 
 #ifndef IMGUI_DISABLE
 	auto imgui = engine.video->imgui;
-	imgui->imgui_newframe();
-	ImGui_ImplSDL2_NewFrame();
+	if (imgui)
+	{
+		imgui->imgui_newframe();
+		ImGui_ImplSDL2_NewFrame();
+	}
+	else
+		ImGui_ImplNull_NewFrame();
 	ImGui::NewFrame();
 #endif
 
@@ -207,7 +218,8 @@ void __display_render()
 
 #ifndef IMGUI_DISABLE
 	ImGui::Render();
-	imgui->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
+	if (imgui)
+		imgui->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
 #endif
 	interface->present(engine.video);
 }

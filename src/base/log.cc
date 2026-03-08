@@ -3,6 +3,10 @@
 
 #include <standard>
 
+#if _WIN32 && _DEBUG
+    #include <Windows.h>
+#endif
+
 namespace sre
 {
     template <LogCategory category=LOGCATEGORY_DEBUG, int type=0>
@@ -234,9 +238,12 @@ extern "C" void sre_logflush()
         fwrite(buffer, buffer_size, 1, console);
         //
 
-        #if _DEBUG
+        #if _WIN32 && _DEBUG
             if (msg.category == sre::LOGCATEGORY_ERROR && msg.type == 2)
-                __debugbreak();
+            {
+                if (IsDebuggerPresent())
+                    DebugBreak();
+            }
         #endif
 
         instance.msg_queue.pop_front();
