@@ -7,11 +7,10 @@ static const struct sre_videodriverInterface sdl_interface = {
     sresdlrenderer_vsync,
     sresdlrenderer_blend,
 
-    sresdlrenderer_tex_gen,
+    sresdlrenderer_tex_create,
     sresdlrenderer_tex_update,
-    sresdlrenderer_tex_bind,
-    sresdlrenderer_tex_size,
     sresdlrenderer_tex_destroy,
+    sresdlrenderer_tex_size,
     sresdlrenderer_tex_format,
 
     sresdlrenderer_draw_clear,

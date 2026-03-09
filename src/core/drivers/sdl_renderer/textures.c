@@ -1,11 +1,22 @@
 #include "sdl_renderer.h"
 
-extern bool sresdlrenderer_tex_gen(const sre_videodriver* video, void* texture)
+extern bool sresdlrenderer_tex_create(const sre_videodriver* video, void* p_texture, int w, int h, SDL_PixelFormatEnum format)
 {
-    // No action needed for now
-    *(SDL_Texture**)texture = NULL;
+    SDL_Texture** p_sdltex = p_texture;
+    
+    SDL_Surface* dummy_fmtsurfacep = SDL_CreateRGBSurfaceWithFormat(0, w, h, 0, format);
+    if (!dummy_fmtsurfacep)
+        return false;
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(video->userdata, dummy_fmtsurfacep);
+    SDL_FreeSurface(dummy_fmtsurfacep);
+    if (!texture)
+        return false;
+
+    *p_sdltex = texture;
     return true;
 }
+
 extern bool sresdlrenderer_tex_update(const sre_videodriver* video, void* texture, const void* pixels, int pitch)
 {
     SDL_Texture** sdltex = texture;
@@ -13,13 +24,13 @@ extern bool sresdlrenderer_tex_update(const sre_videodriver* video, void* textur
 
     return SDL_UpdateTexture(*sdltex, NULL, pixels, pitch) == 0;
 }
-extern bool sresdlrenderer_tex_bind(const sre_videodriver* video, void* texture, const SDL_Surface* surface)
+
+extern void sresdlrenderer_tex_destroy(const sre_videodriver* video, void* texture)
 {
     SDL_Texture** sdltex = texture;
-    if (*sdltex) return false;
+    if (!*sdltex) return;
 
-    *sdltex = SDL_CreateTextureFromSurface(video->userdata, (SDL_Surface*)surface);
-    return *sdltex != NULL;
+    SDL_DestroyTexture(*sdltex);
 }
 
 extern SDL_PixelFormatEnum sresdlrenderer_tex_format(const sre_videodriver* video, void* texture)
@@ -39,12 +50,4 @@ extern bool sresdlrenderer_tex_size(const sre_videodriver* video, void* texture,
     if (!*sdltex) return false;
 
     return SDL_QueryTexture(*sdltex, NULL, NULL, w, h) == 0;
-}
-
-extern void sresdlrenderer_tex_destroy(const sre_videodriver* video, void* texture)
-{
-    SDL_Texture** sdltex = texture;
-    if (!*sdltex) return;
-
-    SDL_DestroyTexture(*sdltex);
 }

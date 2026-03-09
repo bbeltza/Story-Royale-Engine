@@ -25,6 +25,8 @@ namespace sre
 		bool valid() const { return sdl_surface != NULL; }
 		void* handle() const { return sdl_surface; }
 
+		sre::vec2i size() const { return valid() ? vec2i{ sdl_surface->w, sdl_surface->h } : vec2i::ZERO; }
+		SDL_PixelFormatEnum SDLformat() const { return valid() ? static_cast<SDL_PixelFormatEnum>(sdl_surface->format->format) : SDL_PIXELFORMAT_UNKNOWN; }
 	public:
 		static SDL_Surface* copy_SDLsurface(const SDL_Surface* other);
 	};

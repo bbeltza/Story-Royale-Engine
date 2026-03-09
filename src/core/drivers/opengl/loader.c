@@ -17,3 +17,24 @@ extern bool SRE_GL_LOAD3(struct sre_GLfuncs3_2* inst)
 
     return true;
 }
+
+const char* SRE_GL_FMTERR(GLenum err)
+{
+    #define SRE_GL_CASE(x) case x: return #x
+    switch (err)
+    {
+        SRE_GL_CASE(GL_NO_ERROR);
+        SRE_GL_CASE(GL_INVALID_ENUM);
+        SRE_GL_CASE(GL_INVALID_VALUE);
+        SRE_GL_CASE(GL_INVALID_OPERATION);
+        SRE_GL_CASE(GL_STACK_OVERFLOW);
+        SRE_GL_CASE(GL_STACK_UNDERFLOW);
+        SRE_GL_CASE(GL_OUT_OF_MEMORY);
+        SRE_GL_CASE(GL_INVALID_FRAMEBUFFER_OPERATION);
+        default: 
+        #if _WIN32
+            __debugbreak();
+        #endif
+            return NULL;
+    }
+}

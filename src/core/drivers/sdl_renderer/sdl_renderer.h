@@ -22,12 +22,12 @@ extern bool sresdlrenderer_draw_rrect(const sre_videodriver* video, const sre_DD
 extern bool sresdlrenderer_draw_texture(const sre_videodriver* video, const sre_DDTexture* data);
 extern bool sresdlrenderer_draw_rtexture(const sre_videodriver* video, const sre_DDRTexture* data);
 
-extern bool sresdlrenderer_tex_gen(const sre_videodriver* video, void* texture);
+extern bool sresdlrenderer_tex_create(const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format);
 extern bool sresdlrenderer_tex_update(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
-extern bool sresdlrenderer_tex_bind(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
+extern void sresdlrenderer_tex_destroy(const sre_videodriver* video, void* texture);
+
 extern bool sresdlrenderer_tex_size(const sre_videodriver* video, void* texture, int* w, int* h);
 extern SDL_PixelFormatEnum sresdlrenderer_tex_format(const sre_videodriver* video, void* texture);
-extern void sresdlrenderer_tex_destroy(const sre_videodriver* video, void* texture);
 
 extern bool sresdlrenderer_clip(const sre_videodriver* video, const sre_rect2Dut* rect);
 

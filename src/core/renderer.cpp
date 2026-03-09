@@ -56,13 +56,12 @@ void __setup_renderer()
 	PFN_CHECK(interface, vsync);
 	PFN_CHECK(interface, blend);
 
-	PFN_CHECK(interface, tex_gen);
+	PFN_CHECK(interface, tex_create);
 	PFN_CHECK(interface, tex_update);
-	PFN_CHECK(interface, tex_bind);
-	PFN_CHECK(interface, tex_size);
 	PFN_CHECK(interface, tex_destroy);
+	PFN_CHECK(interface, tex_size);
 	PFN_CHECK(interface, tex_format);
-	assert(engine.video->texture_size >= sizeof(void*));	
+	assert(engine.video->texture_size >= sizeof(int));	
 	
 	PFN_CHECK(interface, draw_clear);
 	PFN_CHECK(interface, draw_clip);

@@ -3,27 +3,6 @@
 #include <standard>
 #include <utils/mem.h>
 
-extern const char* SRE_GL_FMTERR(GLenum err)
-{
-    #define SRE_GL_CASE(x) case x: return #x
-    switch (err)
-    {
-        SRE_GL_CASE(GL_NO_ERROR);
-        SRE_GL_CASE(GL_INVALID_ENUM);
-        SRE_GL_CASE(GL_INVALID_VALUE);
-        SRE_GL_CASE(GL_INVALID_OPERATION);
-        SRE_GL_CASE(GL_STACK_OVERFLOW);
-        SRE_GL_CASE(GL_STACK_UNDERFLOW);
-        SRE_GL_CASE(GL_OUT_OF_MEMORY);
-        SRE_GL_CASE(GL_INVALID_FRAMEBUFFER_OPERATION);
-        default: 
-        #if _WIN32
-            __debugbreak();
-        #endif
-            return NULL;
-    }
-}
-
 extern const struct sre_videodriverInterface sreopengl_interface;
 
 // Okay so we need to recreate the SDL window, it's an external function that SDL's internals provide to create OpenGL contexts for the renderer
@@ -213,7 +192,8 @@ bool sreopengl_drawrectlegacytest(const sre_videodriver* video, const sre_DDRect
 
 
 #define FN(x) (void*)x
-bool voi() { return true; }
+long voi() { return 1; }
+long fai() { return 0; }
 
 const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_quit,
@@ -222,12 +202,11 @@ const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_vsync,
     sreopengl_blend,
 
-    FN(voi),
-    FN(voi),
-    FN(voi),
-    FN(voi),
-    FN(voi),
-    FN(voi),
+    FN(fai),
+    FN(fai),
+    FN(fai),
+    FN(fai),
+    FN(fai),
 
     sreopengl_drawcleartest,
     FN(voi),

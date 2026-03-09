@@ -29,21 +29,22 @@ struct sre_videodriverInterface
 	bool (*vsync)(const sre_videodriver* video, int vsync);
 	bool (*blend)(const sre_videodriver* video, sre_DrawBlending blending);
 
-/*		Future texture interface (Removing gen and bind to form `create`)
+
 	bool (*tex_create)(const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format);
 	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
 	void (*tex_destroy)(const sre_videodriver* video, void* texture);
 
 	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
 	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
-*/
 
+/*
 	bool (*tex_gen)(const sre_videodriver* video, void* texture);
 	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
 	bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
 	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
 	void (*tex_destroy)(const sre_videodriver* video, void* texture);
 	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
+*/
 
 	SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
 	SRE_DRAW_FUNC(draw_clip, const sre_rect2Dut* rect);
@@ -73,34 +74,6 @@ struct sre_videodriver
 	#ifndef IMGUI_DISABLE
 		struct sre_videodriverImGuiInterface const* imgui;
 	#endif
-
-	/*
-		void (*quit)(sre_videodriver* video);
-		void (*present)(const sre_videodriver* video);
-
-		bool (*vsync)(const sre_videodriver* video, int vsync);
-		bool (*viewport)(const sre_videodriver* video, int w, int h);
-
-		bool (*blend)(const sre_videodriver* video, sre_DrawBlending blending);
-
-		SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
-		SRE_DRAW_FUNC(draw_clip, const sre_rect2Dut* rect);
-
-		SRE_DRAW_FUNC(draw_fill, const sre_DDFill* data);
-		SRE_DRAW_FUNC(draw_line, const sre_DDLine* data);
-		SRE_DRAW_FUNC(draw_lines, const sre_DDLines* data);
-		SRE_DRAW_FUNC(draw_rect, const sre_DDRect* data);
-		SRE_DRAW_FUNC(draw_rrect, const sre_DDRRect* data);
-		SRE_DRAW_FUNC(draw_texture, const sre_DDTexture* data);
-		SRE_DRAW_FUNC(draw_rtexture, const sre_DDRTexture* data);
-
-		bool (*tex_gen)(const sre_videodriver* video, void* texture);
-		bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
-		bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
-		bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
-		SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
-		void (*tex_destroy)(const sre_videodriver* video, void* texture);
-	*/
 
 	char* error; // Error buffer/pointer, WIP
 	void* userdata;
