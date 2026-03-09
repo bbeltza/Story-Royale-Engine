@@ -30,6 +30,16 @@ typedef struct sre_videoOpenGL
     GLuint basic_vao; // Not using VAOs for now, since they're a 3.0 feature (I know kind of weird)
     GLuint basic_vbo;
     GLuint basic_ibo;
+    GLuint basic_program;
+
+    GLuint basic_program_uniform_color;
+    GLuint basic_program_uniform_model;
+    GLuint basic_program_uniform_anchor;
+    
+    GLuint basic_program_state_projection;
+    GLuint basic_program_state_cameraview;
+
+    GLfloat camera_view[16];
 } sre_videoOpenGL;
 
 typedef struct sre_GLtexture
@@ -43,12 +53,19 @@ extern bool SRE_GL_LOAD3(struct sre_GLfuncs3_2* inst); // Load OpenGL 3.2 functi
 #ifndef __PRETTY_FUNCTION__
     #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
+
+#ifdef __cplusplus
+    #define SRE_LOGERR sre::log<sre::LOGCATEGORY_ERROR>
+#else
+    #define SRE_LOGERR(...) sre_log(SRE_LOGCATEGORY_ERROR, __VA_ARGS__)
+#endif
+
 #define SRE_GL_CALL(x, ...) x;      \
 while (1)                           \
 {                                   \
     GLenum err = glGetError();      \
     if (err == GL_NO_ERROR) break;  \
-    sre_log(SRE_LOGCATEGORY_ERROR,  \
+    SRE_LOGERR(  \
         "[OPENGL] - (line: %d " __PRETTY_FUNCTION__ "): Call to '" #x "' failed, error code %08x (%s)",     \
         __LINE__,                                                                                           \
         err,                                                                                                \

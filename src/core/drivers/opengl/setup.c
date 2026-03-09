@@ -19,10 +19,33 @@ const char BASIC_VS[] =
         ""
         "attribute vec2 i_pos;"
         ""
+        "uniform mat4 u_model;"
+        "uniform vec2 u_anchor;"
+        ""
+        "uniform mat4 u_projection;"
+        "uniform mat4 u_camera;"
+        ""
         "void main() {"
-            "gl_Position = vec4(i_pos);"
+            "gl_Position = u_projection * u_camera * u_model * vec4(i_pos - (u_anchor-0.5f), 0.0f, 1.0f);"
         "}"
 ;
+
+const char BASIC_FS[] = 
+        "#version 120\n"
+        ""
+        "uniform vec4 u_col;"
+        ""
+        "void main() {"
+            "gl_FragColor = u_col;"
+        "}"
+;
+
+static void SRE_GL_SHADERLOG(sre_videoOpenGL* inst, GLuint shader)
+{
+    GLchar buffer[255];
+    SRE_GL_CALL(inst->funcs2.glGetShaderInfoLog(shader, 255, NULL, buffer));
+    sre_log(SRE_LOGCATEGORY_ERROR, "[OPENGL]: Failed compiling shader:\n%s", buffer);
+}
 
 bool sreopengl_bindva2_1(sre_videoOpenGL* inst)
 {
@@ -44,6 +67,39 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
         return false;
     
     SRE_GL_CALL(inst->funcs2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(BASIC_RECT_INDICES), BASIC_RECT_INDICES, GL_STATIC_DRAW), return false;);
+
+    #define SRE_GL_STATUSCHECK(shader) inst->funcs2.glGetShaderiv(shader, GL_COMPILE_STATUS, &status); if (status == GL_FALSE){ SRE_GL_SHADERLOG(inst, vs); return false; } (void)0
+
+    const char* shader;
+    shader = BASIC_VS;
+    GLuint status;
+    GLuint vs = SRE_GL_CALL(inst->funcs2.glCreateShader(GL_VERTEX_SHADER));
+    SRE_GL_CALL(inst->funcs2.glShaderSource(vs, 1, &shader, NULL));
+    SRE_GL_CALL(inst->funcs2.glCompileShader(vs), );
+    SRE_GL_STATUSCHECK(vs);
+    
+    shader = BASIC_FS;
+    GLuint fs = SRE_GL_CALL(inst->funcs2.glCreateShader(GL_FRAGMENT_SHADER));
+    SRE_GL_CALL(inst->funcs2.glShaderSource(fs, 1, &shader, NULL));
+    SRE_GL_CALL(inst->funcs2.glCompileShader(fs), SRE_GL_SHADERLOG(inst, fs); return false;);
+    SRE_GL_STATUSCHECK(fs);
+
+    GLuint program = SRE_GL_CALL(inst->funcs2.glCreateProgram());
+    SRE_GL_CALL(inst->funcs2.glAttachShader(program, vs), return false;);
+    SRE_GL_CALL(inst->funcs2.glAttachShader(program, fs), return false;);
+    SRE_GL_CALL(inst->funcs2.glLinkProgram(program), return false;);
+
+    SRE_GL_CALL(inst->funcs2.glUseProgram(program));
+    SRE_GL_CALL(inst->funcs2.glBindAttribLocation(program, 0, "i_pos"));
+
+    inst->basic_program_uniform_color = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_col"));
+    inst->basic_program_uniform_model = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_model"));
+    inst->basic_program_uniform_anchor = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_anchor"));
+
+    inst->basic_program_state_projection = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_projection"));
+    inst->basic_program_state_cameraview = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_camera"));
+
+    inst->basic_program = program;
 
     return true;
 }

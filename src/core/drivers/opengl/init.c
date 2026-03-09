@@ -98,10 +98,20 @@ void sreopengl_present(const sre_videodriver* video)
 bool sreopengl_vsync(const sre_videodriver* video, int vsync) { return SDL_GL_SetSwapInterval(vsync) == 0; }
 bool sreopengl_viewport(const sre_videodriver* video, int w, int h)
 {
-    SRE_GL_CALL(glMatrixMode(GL_PROJECTION));
-    SRE_GL_CALL(glLoadIdentity());
-    SRE_GL_CALL(glOrtho(0, video->size.x, video->size.y, 0.0, 0.0, 1.0));
+    const sre_videoOpenGL* inst = video->userdata;
 
+    GLfloat left = 0;
+    GLfloat top = 0;
+    GLfloat right = video->size.x;
+    GLfloat bottom = video->size.y;
+    GLfloat projection[16] = {
+        2 / (right - left), 0, 0, 0,
+        0, 2 / (top - bottom), 0, 0,
+        0, 0, -1                , 0,
+        -(right + left)/(right - left), -(top + bottom)/(top - bottom), -1, 1
+    };
+
+    SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_state_projection, 1, GL_FALSE, projection));
     SRE_GL_CALL(glViewport(0, 0, w, h));
     return true;
 }
@@ -155,48 +165,48 @@ bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color
     SRE_GL_CALL(glClearColor(r, g, b, a));
     SRE_GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
+    sre_videoOpenGL* inst = video->userdata;
+    GLfloat camera[16] = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        video->center.x - video->camera.x, video->center.y - video->camera.y, 0, 1
+    };
+
+    memcpy(inst->camera_view, camera, sizeof(camera));
     return true;
 }
 
 bool sreopengl_drawrectlegacytest(const sre_videodriver* video, const sre_DDRect* data)
-{    
+{
+    static const GLfloat IDENTITY[16] = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+
+    const sre_videoOpenGL* inst = video->userdata;
     const sre_unit mat[16] = {
         data->rect.size.x, 0, 0, 0,
         0, data->rect.size.y, 0, 0,
         0, 0, 1, 0,
         data->rect.position.x, data->rect.position.y, 0, 1
     };
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(mat);
 
-    const bool USE_CAM = data->flags & SRE_DRAWFLAGS_USECAM;
-    if (USE_CAM)
-    {
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-        glOrtho(-video->center.x, video->center.x, video->center.y, -video->center.y, 0, 1);
-        
-        const sre_unit cam[16] = {
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            -video->camera.x, -video->camera.y, 0, 1
-        };
-        glMultMatrixf(cam);
-    }
-
-        glColor4f(data->color.r / 255.0f, data->color.g / 255.0f, data->color.b / 255.0f, data->color.a / 255.0f);
-        glBegin(GL_POLYGON);
-                const sre_vec2ut anchor_vert = { data->anchor.x - SRE_UT(0.5), data->anchor.y - SRE_UT(0.5) };
-                glVertex2f(-0.5f - anchor_vert.x, -0.5f - anchor_vert.y);
-                glVertex2f(0.5f - anchor_vert.x, -0.5f - anchor_vert.y);
-                glVertex2f(0.5f - anchor_vert.x, 0.5f - anchor_vert.y);
-                glVertex2f(-0.5f - anchor_vert.x, 0.5f - anchor_vert.y);
-        glEnd();
+    const GLfloat* cam;
+    if (data->flags & SRE_DRAWFLAGS_USECAM)
+        cam = inst->camera_view;
+    else
+        cam = IDENTITY;
     
-    if (USE_CAM)
-        glPopMatrix();
+    SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_state_cameraview, 1, GL_FALSE, cam));
+
+    SRE_GL_CALL(inst->funcs2.glUniform4f(inst->basic_program_uniform_color, data->color.r/255.0f, data->color.g/255.0f, data->color.b/255.0f, data->color.a/255.0f));
+    SRE_GL_CALL(inst->funcs2.glUniform2fv(inst->basic_program_uniform_anchor, 1, &data->anchor.x));
+    SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_uniform_model, 1, GL_FALSE, mat));
+
+    SRE_GL_CALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL), return false;);
 
     return true;
 }
