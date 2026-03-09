@@ -4,5 +4,5 @@ if (NOT OpenGL_FOUND)
     return()
 endif()
 
-SRE_DRIVERBUILD(sre_opengl "init.c" "imgui.cpp")
+SRE_DRIVERBUILD(sre_opengl "init.c" "setup.c" "loader.c" "imgui.cpp")
 target_link_libraries(sre_opengl PRIVATE OpenGL::GL)

@@ -29,6 +29,15 @@ struct sre_videodriverInterface
 	bool (*vsync)(const sre_videodriver* video, int vsync);
 	bool (*blend)(const sre_videodriver* video, sre_DrawBlending blending);
 
+/*		Future texture interface (Removing gen and bind to form `create`)
+	bool (*tex_create)(const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format);
+	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
+	void (*tex_destroy)(const sre_videodriver* video, void* texture);
+
+	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
+	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
+*/
+
 	bool (*tex_gen)(const sre_videodriver* video, void* texture);
 	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
 	bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);

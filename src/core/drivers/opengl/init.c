@@ -3,6 +3,27 @@
 #include <standard>
 #include <utils/mem.h>
 
+extern const char* SRE_GL_FMTERR(GLenum err)
+{
+    #define SRE_GL_CASE(x) case x: return #x
+    switch (err)
+    {
+        SRE_GL_CASE(GL_NO_ERROR);
+        SRE_GL_CASE(GL_INVALID_ENUM);
+        SRE_GL_CASE(GL_INVALID_VALUE);
+        SRE_GL_CASE(GL_INVALID_OPERATION);
+        SRE_GL_CASE(GL_STACK_OVERFLOW);
+        SRE_GL_CASE(GL_STACK_UNDERFLOW);
+        SRE_GL_CASE(GL_OUT_OF_MEMORY);
+        SRE_GL_CASE(GL_INVALID_FRAMEBUFFER_OPERATION);
+        default: 
+        #if _WIN32
+            __debugbreak();
+        #endif
+            return NULL;
+    }
+}
+
 extern const struct sre_videodriverInterface sreopengl_interface;
 
 // Okay so we need to recreate the SDL window, it's an external function that SDL's internals provide to create OpenGL contexts for the renderer
@@ -45,8 +66,13 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
         video->imgui = &sreopengl_imgui;
     #endif
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (!SRE_GL_LOAD2(&inst->funcs2))
+        goto FAIL;
+    if (!SRE_GL_LOAD3(&inst->funcs3))
+        goto FAIL;
+
+    if (!sreopengl_setupbuffers(inst))
+        goto FAIL;
 
     return true;
     FAIL:
@@ -72,11 +98,50 @@ void sreopengl_present(const sre_videodriver* video)
 bool sreopengl_vsync(const sre_videodriver* video, int vsync) { return SDL_GL_SetSwapInterval(vsync) == 0; }
 bool sreopengl_viewport(const sre_videodriver* video, int w, int h)
 {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, video->size.x, video->size.y, 0.0, 0.0, 1.0);
+    SRE_GL_CALL(glMatrixMode(GL_PROJECTION));
+    SRE_GL_CALL(glLoadIdentity());
+    SRE_GL_CALL(glOrtho(0, video->size.x, video->size.y, 0.0, 0.0, 1.0));
 
-    glViewport(0, 0, w, h);
+    SRE_GL_CALL(glViewport(0, 0, w, h));
+    return true;
+}
+
+bool sreopengl_blend(const sre_videodriver* video, sre_DrawBlending blending)
+{
+    if (blending == SRE_BLEND_NONE)
+    {
+        SRE_GL_CALL(glDisable(GL_BLEND), return false;);
+        return true;
+    }
+
+    GLenum sfactor;
+    GLenum dfactor;
+    (void)sfactor;
+    (void)dfactor;
+
+    switch (blending)
+    {
+        case SRE_BLEND_BLEND:
+            sfactor = GL_SRC_ALPHA;
+            dfactor = GL_ONE_MINUS_SRC_ALPHA;
+            break;
+        case SRE_BLEND_ADD:
+            sfactor = GL_SRC_ALPHA;
+            dfactor = GL_ONE;
+            break;
+        case SRE_BLEND_MOD:
+            sfactor = GL_DST_COLOR;
+            dfactor = GL_ZERO;
+            break;
+        case SRE_BLEND_MUL:
+            sfactor = GL_DST_COLOR;
+            dfactor = GL_ONE_MINUS_SRC_ALPHA;
+            break;
+        default: abort();
+    }
+
+    SRE_GL_CALL(glEnable(GL_BLEND), return false;);
+    SRE_GL_CALL(glBlendFunc(sfactor, dfactor), return false;);
     return true;
 }
 
@@ -87,8 +152,8 @@ bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color
     GLclampf b = color->b / 255.0f;
     GLclampf a = color->a / 255.0f;
 
-    glClearColor(r, g, b, a);
-    glClear(GL_COLOR_BUFFER_BIT);
+    SRE_GL_CALL(glClearColor(r, g, b, a));
+    SRE_GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
     return true;
 }
@@ -145,7 +210,7 @@ const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_present,
     sreopengl_viewport,
     sreopengl_vsync,
-    FN(voi),
+    sreopengl_blend,
 
     FN(voi),
     FN(voi),
