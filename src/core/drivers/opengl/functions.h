@@ -25,11 +25,15 @@
         SRE_GL_FUNC(PFNGLBINDATTRIBLOCATIONPROC, glBindAttribLocation);  \
         SRE_GL_FUNC(PFNGLGETUNIFORMLOCATIONPROC, glGetUniformLocation);  \
                                                                          \
+        SRE_GL_FUNC(PFNGLUNIFORM1IPROC, glUniform1i);                    \
+        SRE_GL_FUNC(PFNGLUNIFORM1IVPROC, glUniform1iv);                  \
         SRE_GL_FUNC(PFNGLUNIFORM2FPROC, glUniform2f);                    \
         SRE_GL_FUNC(PFNGLUNIFORM2FVPROC, glUniform2fv);                  \
         SRE_GL_FUNC(PFNGLUNIFORM4FPROC, glUniform4f);                    \
         SRE_GL_FUNC(PFNGLUNIFORM4FVPROC, glUniform4fv);                  \
         SRE_GL_FUNC(PFNGLUNIFORMMATRIX4FVPROC, glUniformMatrix4fv);      \
+                                                                         \
+        SRE_GL_FUNC(PFNGLACTIVETEXTUREPROC, glActiveTexture);            \
 
 
 #define SRE_GL_FUNCTIONS_3_2                                             \

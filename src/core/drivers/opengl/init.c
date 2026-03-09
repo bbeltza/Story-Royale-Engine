@@ -156,41 +156,6 @@ bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color
     return true;
 }
 
-bool sreopengl_drawrectlegacytest(const sre_videodriver* video, const sre_DDRect* data)
-{
-    static const GLfloat IDENTITY[16] = {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    };
-
-    const sre_videoOpenGL* inst = video->userdata;
-    const sre_unit mat[16] = {
-        data->rect.size.x, 0, 0, 0,
-        0, data->rect.size.y, 0, 0,
-        0, 0, 1, 0,
-        data->rect.position.x, data->rect.position.y, 0, 1
-    };
-
-    const GLfloat* cam;
-    if (data->flags & SRE_DRAWFLAGS_USECAM)
-        cam = inst->camera_view;
-    else
-        cam = IDENTITY;
-    
-    SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_state_cameraview, 1, GL_FALSE, cam));
-
-    SRE_GL_CALL(inst->funcs2.glUniform4f(inst->basic_program_uniform_color, data->color.r/255.0f, data->color.g/255.0f, data->color.b/255.0f, data->color.a/255.0f));
-    SRE_GL_CALL(inst->funcs2.glUniform2fv(inst->basic_program_uniform_anchor, 1, &data->anchor.x));
-    SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_uniform_model, 1, GL_FALSE, mat));
-
-    SRE_GL_CALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL), return false;);
-
-    return true;
-}
-
-
 #define FN(x) (void*)x
 long voi() { return 1; }
 long fai() { return 0; }
@@ -202,19 +167,19 @@ const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_vsync,
     sreopengl_blend,
 
-    FN(fai),
-    FN(fai),
-    FN(fai),
-    FN(fai),
-    FN(fai),
+    sreopengl_texcreate,
+    sreopengl_texupdate,
+    sreopengl_texdestroy,
+    sreopengl_texsize,
+    sreopengl_texformat,
 
     sreopengl_drawcleartest,
     FN(voi),
+    sreopengl_drawfill,
+    sreopengl_drawline,
     FN(voi),
-    FN(voi),
-    FN(voi),
-    sreopengl_drawrectlegacytest,
-    FN(voi),
-    FN(voi),
+    sreopengl_drawrect,
+    FN(voi),//sreopengl_drawrrect,
+    sreopengl_drawtexture,
     FN(voi)
 };

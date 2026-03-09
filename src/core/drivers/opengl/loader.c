@@ -20,6 +20,10 @@ extern bool SRE_GL_LOAD3(struct sre_GLfuncs3_2* inst)
 
 const char* SRE_GL_FMTERR(GLenum err)
 {
+    #if _WIN32
+        __debugbreak();
+    #endif
+
     #define SRE_GL_CASE(x) case x: return #x
     switch (err)
     {
