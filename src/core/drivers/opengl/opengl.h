@@ -43,6 +43,8 @@ typedef struct sre_videoOpenGL
     GLuint basicfill_program;
     GLuint basicfill_program_uniform_color;
     
+    GLuint basic_texture;
+
     GLfloat camera_view[16];
 } sre_videoOpenGL;
 

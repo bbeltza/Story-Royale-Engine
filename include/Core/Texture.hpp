@@ -45,6 +45,8 @@ namespace sre
 
         Texture(Texture&& moving) noexcept: m_handle(moving.m_handle) { moving.m_handle = 0; }
         ~Texture() { sre_tex_destroy(m_handle); }
+
+        bool update(const void* pixels, int pitch) const { return sre_tex_update(m_handle, pixels, pitch); }
         
         void operator =(Texture&& moving) noexcept { sre_tex_destroy(m_handle); m_handle = moving.m_handle; moving.m_handle = 0; }
 

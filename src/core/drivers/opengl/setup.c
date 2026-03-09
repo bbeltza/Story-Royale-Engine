@@ -53,7 +53,7 @@ const char BASIC_FS[] =
         "uniform sampler2D u_texture;"
         ""
         "void main() {"
-            "gl_FragColor = u_col;"
+            "gl_FragColor = u_col * texture2D(u_texture, f_uv);"
         "}"
 ;
 
@@ -74,6 +74,12 @@ bool sreopengl_bindva2_1(sre_videoOpenGL* inst)
 
 bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
 {
+    if (inst->funcs3.glBindVertexArray)
+    {
+        SRE_GL_CALL(inst->funcs3.glGenVertexArrays(1, &inst->basic_vao));
+        SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->basic_vao));
+    }
+
     SRE_GL_CALL(inst->funcs2.glGenBuffers(2, &inst->basic_vbo), return false;);
     SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->basic_vbo), return false;);
     SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->basic_ibo), return false;);
@@ -137,6 +143,11 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
 
     SRE_GL_CALL(inst->funcs2.glActiveTexture(GL_TEXTURE0));
     SRE_GL_CALL(inst->funcs2.glUniform1i(inst->basic_program_uniform_texture, 0));
+
+    const unsigned WHITE = -1;
+    SRE_GL_CALL(glGenTextures(1, &inst->basic_texture));
+    SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, inst->basic_texture));
+    SRE_GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA2, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, &WHITE));
 
     inst->basic_program = program;
     inst->basicfill_program = program2;

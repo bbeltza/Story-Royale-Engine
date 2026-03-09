@@ -61,7 +61,8 @@ bool sreopengl_drawtexture(const sre_videodriver* video, const sre_DDTexture* da
 {
     const sre_videoOpenGL* inst = video->userdata;
     const sre_GLtexture* texture = sre_get_texture(data->texture);
-    assert(texture != NULL);
+    if (!texture)
+        return false;
 
     SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, texture->id));
     
@@ -73,6 +74,6 @@ bool sreopengl_drawtexture(const sre_videodriver* video, const sre_DDTexture* da
     };
 
     bool res = sreopengl_drawrect(video, &rect_data);
-    SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+    SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, inst->basic_texture));
     return res;    
 }
