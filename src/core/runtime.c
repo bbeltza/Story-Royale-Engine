@@ -136,9 +136,9 @@ void __run_engine()
                               // I'll make sure to make it fire once I make the QUIT event
     }
 
-    running = 0;
     
     SDL_LockMutex(engine.render_mutex);
+        running = 0;
         SDL_CondBroadcast(engine.render_cond);
         SDL_DestroyCond(engine.render_cond); // Destroy cond and mutex here before waiting for thread
     SDL_UnlockMutex(engine.render_mutex);

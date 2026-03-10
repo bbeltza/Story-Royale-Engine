@@ -1,4 +1,4 @@
-find_package(OpenGL)
+find_package(OpenGL REQUIRED)
 if (NOT OpenGL_FOUND)
     message("-- OpenGL HASN'T been found. Please, install the required packages if you require OpenGL")
     return()

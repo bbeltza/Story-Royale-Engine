@@ -51,7 +51,8 @@ typedef struct sre_videoOpenGL
 extern const char* SRE_GL_FMTERR(GLenum err);
 extern bool SRE_GL_LOAD2(struct sre_GLfuncs2_1* funcs); // Load OpenGL 2.1 functions (Minimum supported version)
 extern bool SRE_GL_LOAD3(struct sre_GLfuncs3_2* inst); // Load OpenGL 3.2 functions (If supported)
-#ifndef __PRETTY_FUNCTION__
+
+#if defined(__FUNCSIG__)
     #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
 
@@ -67,8 +68,9 @@ while (1)                           \
     GLenum err = glGetError();      \
     if (err == GL_NO_ERROR) break;  \
     SRE_LOGERR(  \
-        "[OPENGL] - (line: %d " __PRETTY_FUNCTION__ "): Call to '" #x "' failed, error code %08x (%s)",     \
-        __LINE__,                                                                                           \
+        "[OPENGL] - (line: %d %s): Call to '" #x "' failed, error code %08x (%s)",     \
+        __LINE__,                                                                      \
+        __PRETTY_FUNCTION__,                                                           \
         err,                                                                                                \
         SRE_GL_FMTERR(err)                                                                                  \
     );                                                                                                      \

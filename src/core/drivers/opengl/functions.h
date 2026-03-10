@@ -41,3 +41,5 @@
         SRE_GL_FUNC(PFNGLDELETEVERTEXARRAYSPROC, glDeleteVertexArrays);  \
         SRE_GL_FUNC(PFNGLGENVERTEXARRAYSPROC, glGenVertexArrays);        \
         SRE_GL_FUNC(PFNGLISVERTEXARRAYPROC, glIsVertexArray);            \
+
+        

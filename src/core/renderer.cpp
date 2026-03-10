@@ -35,7 +35,7 @@ void __cleanup_renderer()
 	engine.video->interface->quit(engine.video);
 	delete[] engine.video->texture_fl;
 	delete[] engine.video->clipstack_base;
-	delete engine.video->textures;
+	operator delete (engine.video->textures);
 	operator delete (engine.video);
 
 	engine.video = NULL;
@@ -223,7 +223,12 @@ void __display_render()
 		engine.video->camera.x = 0;
 		engine.video->camera.y = 0;
 
-		interface->draw_clear(engine.video, &sre::BLACK);
+		#if 0 // Debug easier on black backgrounds
+			sre::col4 col{50, 50, 50};
+		#else
+			sre::col4 col = sre::BLACK;
+		#endif
+		interface->draw_clear(engine.video, &col);
 		sre::beforeRender.fire();
 	}
 

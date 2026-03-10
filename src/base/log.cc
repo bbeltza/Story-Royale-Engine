@@ -2,6 +2,7 @@
 #include <utils/mem.h>
 
 #include <standard>
+#include <thread>
 
 #if _WIN32 && _DEBUG
     #include <Windows.h>
@@ -179,10 +180,8 @@ int init_logsifnoinst()
             inst = &instance;
             while (true)
             {
-                using namespace std::chrono_literals;
-
                 instance.flush();
-                std::this_thread::sleep_for(10ms);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         });
         thrd.detach();
