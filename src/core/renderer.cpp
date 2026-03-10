@@ -30,6 +30,17 @@ static const sre_videoinit_func video_drivers[] = {
 	VIDEO_DRIVERS
 };
 
+void __cleanup_renderer()
+{
+	engine.video->interface->quit(engine.video);
+	delete[] engine.video->texture_fl;
+	delete[] engine.video->clipstack_base;
+	delete engine.video->textures;
+	operator delete (engine.video);
+
+	engine.video = NULL;
+}
+
 void __setup_renderer()
 {
 	engine.video = static_cast<sre_videodriver*>(operator new(sizeof(sre_videodriver)));

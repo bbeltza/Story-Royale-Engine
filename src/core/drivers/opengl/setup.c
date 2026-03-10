@@ -3,10 +3,10 @@
 
 SRE_VEC2MAKE(float, f);
 const sre_vec2f BASIC_RECT_DATA[] = {
-    { -0.5f, -0.5f },
-    {  0.5f, -0.5f },
-    {  0.5f, 0.5f },
-    {  -0.5f, 0.5f }
+    { 0.0f, 0.0f },
+    { 1.0f, 0.0f },
+    { 1.0f, 1.0f },
+    { 0.0f, 1.0f }
 };
 
 const uint8_t BASIC_RECT_INDICES[] = {
@@ -27,8 +27,8 @@ const char BASIC_VS[] =
         ""
         "varying vec2 f_uv;"
         "void main() {"
-            "f_uv = i_pos.xy + 0.5f;"
-            "gl_Position = u_projection * u_camera * u_model * vec4(i_pos - (u_anchor-0.5f), 0.0f, 1.0f);"
+            "f_uv = i_pos.xy;"
+            "gl_Position = u_projection * u_camera * u_model * vec4(i_pos - u_anchor, 0.0f, 1.0f);"
         "}"
 ;
 
@@ -39,8 +39,8 @@ const char BASICFILL_VS[] =
         ""
         "varying vec2 f_uv;"
         "void main() {"
-            "f_uv = i_pos.xy + 0.5f;"
-            "gl_Position = sign(i_pos);"
+            "f_uv = vec2(0.0f);"
+            "gl_Position = i_pos + i_pos - 1;"
         "}"
 ;
 

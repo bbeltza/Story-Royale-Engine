@@ -13,7 +13,7 @@ void __create_window()
 		SDL_WINDOWPOS_CENTERED,
 		DEFAULT_WIDTH,
 		DEFAULT_HEIGHT,
-		SDL_WINDOW_HIDDEN
+		SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
 	);
 
     SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);

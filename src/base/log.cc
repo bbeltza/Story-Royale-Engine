@@ -58,7 +58,16 @@ namespace sre
             buffer(static_cast<char*>(malloc(buffer_size))),
             category(category),
             type(type),
-            size(buffer_size) {}
+            size(buffer_size)
+        {
+            #if _WIN32 && _DEBUG
+                if (category == sre::LOGCATEGORY_ERROR && type == 2)
+                {
+                    if (IsDebuggerPresent())
+                        DebugBreak();
+                }
+            #endif
+        }
         ~LogMsg() { free(buffer); }
     };
 
@@ -108,6 +117,8 @@ namespace sre
     {
         std::deque<LogMsg, MallocAllocator<LogMsg>> msg_queue;
         std::recursive_mutex mutex;
+
+        void flush();
     };
 
     enum LogType
@@ -120,12 +131,6 @@ namespace sre
 
 namespace
 {
-    sre::Log &log_instance()
-    {
-        static sre::Log i;
-        return i;
-    }
-
     constexpr char CSTRING_INFO[] = "INFO";
     constexpr char CSTRING_DEBUG[] = "DEBUG";
     constexpr char CSTRING_WARN[] = "WARN";
@@ -164,18 +169,44 @@ namespace
     };
 }
 
-extern "C" void sre_logflush()
+static sre::Log* inst;
+int init_logsifnoinst()
 {
-    auto& instance = log_instance();
+    if (!inst)
+    {
+        std::thread thrd([]() {
+            sre::Log instance;
+            inst = &instance;
+            while (true)
+            {
+                using namespace std::chrono_literals;
 
-    std::lock_guard<std::recursive_mutex> guard{instance.mutex};
-    while (!instance.msg_queue.empty())
+                instance.flush();
+                std::this_thread::sleep_for(10ms);
+            }
+        });
+        thrd.detach();
+
+        while (!inst)
+            std::this_thread::yield();
+
+        std::atexit([]() { inst->flush(); });
+    }
+
+    return 0;
+}
+static int _ = init_logsifnoinst();
+
+void sre::Log::flush()
+{
+    std::lock_guard<std::recursive_mutex> guard{mutex};
+    while (!msg_queue.empty())
     {
         static constexpr char extra_characters[] = "[]: ";
         static constexpr char style_characters_begin[] = "\033[30;1m";
         static constexpr char style_characters_end[] = "\033[0m";
 
-        auto& msg = instance.msg_queue.front();
+        auto& msg = msg_queue.front();
 
         const size_t typestr_size = TYPE_SIZES[msg.type];
         const size_t catstr_size = CATEGORY_SIZES[msg.category];
@@ -238,15 +269,7 @@ extern "C" void sre_logflush()
         fwrite(buffer, buffer_size, 1, console);
         //
 
-        #if _WIN32 && _DEBUG
-            if (msg.category == sre::LOGCATEGORY_ERROR && msg.type == 2)
-            {
-                if (IsDebuggerPresent())
-                    DebugBreak();
-            }
-        #endif
-
-        instance.msg_queue.pop_front();
+        msg_queue.pop_front();
     }
 }
 
@@ -255,25 +278,23 @@ int sre_logEx(int type, int category, const char* fmt, va_list va)
     assert(fmt != NULL);
     assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
 
-    auto& instance = log_instance();
-    std::lock_guard<std::recursive_mutex> guard{instance.mutex};
+    init_logsifnoinst();
+    std::lock_guard<std::recursive_mutex> guard{inst->mutex};
 
     va_list cpy;
     va_copy(cpy, va);
     int len = vsnprintf(NULL, 0, fmt, cpy) + 1;
-    instance.msg_queue.emplace_back(
+    inst->msg_queue.emplace_back(
         type,
         category,
         len
     );
-    auto& msg = instance.msg_queue.back();
+    auto& msg = inst->msg_queue.back();
     
     if (len == 1)
         msg.buffer[0] = '\0';
     else
         vsnprintf(msg.buffer, msg.size, fmt, va);
-
-    sre_logflush();
 
     return msg.size - 1;
 }
@@ -283,17 +304,16 @@ int sre_logsimpleEx(int type, int category, const char* str)
     assert(str != NULL);
     assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
 
-    auto& instance = log_instance();
+    init_logsifnoinst();
 
-    std::lock_guard<std::recursive_mutex> barney{instance.mutex};
+    std::lock_guard<std::recursive_mutex> barney{inst->mutex};
     int len = static_cast<int>(strlen(str) + 1);
-    instance.msg_queue.emplace_back(
+    inst->msg_queue.emplace_back(
         type,
         category,
         len
     );
-    strncpy(instance.msg_queue.back().buffer, str, len);
-    sre_logflush();
+    strncpy(inst->msg_queue.back().buffer, str, len);
 
     return len - 1;
 }

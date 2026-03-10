@@ -48,7 +48,7 @@ static int game_loop(void* running)
     #endif
         
         if (SDL_PeepEvents(&ev, 1, SDL_ADDEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) == 1)
-            SDL_CondWait(engine.render_cond, engine.render_mutex);
+            SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000);
         else
             sre_log(SRE_LOGCATEGORY_ERROR, "SDL_PeepEvents failed... %s", SDL_GetError());
     #if _WIN32
@@ -88,6 +88,9 @@ void __run_engine()
         case SDL_WINDOWEVENT:
             switch (ev.window.event)
             {
+            case SDL_WINDOWEVENT_CLOSE:
+                sre_log(SRE_LOGCATEGORY_DEBUG, "close");
+                break;
             case SDL_WINDOWEVENT_EXPOSED:
                 #if _WIN32
                     engine.exposing = false;
@@ -135,13 +138,23 @@ void __run_engine()
 
     running = 0;
     
-    SDL_CondBroadcast(engine.render_cond);
-    SDL_DestroyCond(engine.render_cond); // Destroy cond and mutex here before waiting for thread
+    SDL_LockMutex(engine.render_mutex);
+        SDL_CondBroadcast(engine.render_cond);
+        SDL_DestroyCond(engine.render_cond); // Destroy cond and mutex here before waiting for thread
+    SDL_UnlockMutex(engine.render_mutex);
+
     SDL_WaitThread(engine.game_loop, NULL);
+
+    SDL_DestroyMutex(engine.render_mutex);
 }
 
 static int __event_watch(void *data, SDL_Event *ev)
 {
+    SDL_threadID id = SDL_ThreadID();
+    if (id != engine.main_thrd)
+        return 1;
+
+    //if (ev->type == SDL_QUIT) __debugbreak();
     if (ev->type == SDL_WINDOWEVENT)
     {
         switch (ev->window.event)

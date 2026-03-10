@@ -39,8 +39,6 @@ static inline void __setup_engine_data()
     engine.entry_thread = sre_coroutinecreate(false, __invoke_entry, NULL);
 }
 
-#define SDLPCASE(x, f) case SDL_LOG_PRIORITY_##x: priority_str = #x"]: "; files[0] = f; break
-#define SDLCCASE(x) case SDL_LOG_CATEGORY_##x: category_str = "["#x" : "; break
 static void sdl_log_callback(void *userdata, int category, SDL_LogPriority priority, const char *message)
 {
     int cat;
@@ -92,19 +90,11 @@ void __end_engine()
     __cleanup_threads();
     __cleanup_ecs();  
     
-    engine.video->interface->quit(engine.video);
-    sre_delete(engine.video->texture_fl);
-    sre_delete(engine.video->clipstack_base);
-    sre_delete(engine.video->textures);
-    sre_delete(engine.video);
-    
-    engine.video = NULL;
+    __cleanup_renderer();
     
     SDL_CloseAudioDevice(engine.audio_device);
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
-    
-    SDL_DestroyMutex(engine.render_mutex);
 
     TTF_Quit();
     IMG_Quit();

@@ -14,9 +14,6 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
 {
     assert(video != NULL);
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
     #ifndef NDEBUG
         SDL_GL_CONTEXT_DEBUG_FLAG
@@ -33,10 +30,24 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
             return false;
     }
 
-    sre_videoOpenGL* inst = sre_new(sizeof(sre_videoOpenGL));
+    sre_videoOpenGL* inst = sre_newclear(sizeof(sre_videoOpenGL));
+
+#if 0
+   // Chose core 3.2 first, switch to compat 2.1 if it's not available
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     inst->context = SDL_GL_CreateContext(window);
+#endif
     if (!inst->context)
-        goto FAIL;
+    {
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        inst->context = SDL_GL_CreateContext(window);
+        if (!inst->context)
+            goto FAIL;
+    }
 
     video->userdata = inst;
     video->interface = &sreopengl_interface;

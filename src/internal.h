@@ -117,6 +117,7 @@ SRE_CAPI_BEGIN
 
 	extern void __create_window();
 	extern void __setup_renderer();
+	extern void __cleanup_renderer();
 	
 	extern void __setup_audio_device();
 
