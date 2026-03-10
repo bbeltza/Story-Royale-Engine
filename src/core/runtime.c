@@ -48,13 +48,19 @@ static int game_loop(void* running)
     #endif
         
         if (SDL_PeepEvents(&ev, 1, SDL_ADDEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) == 1)
-            SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000);
+        {
+            if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
+                sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
+        }
         else
             sre_log(SRE_LOGCATEGORY_ERROR, "SDL_PeepEvents failed... %s", SDL_GetError());
     #if _WIN32
         }
         else
-            SDL_CondWait(engine.render_cond, engine.render_mutex);
+        {
+            if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
+                sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
+        }
     #endif
 
         //

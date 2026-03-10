@@ -65,6 +65,31 @@ bool sreopengl_drawtexture(const sre_videodriver* video, const sre_DDTexture* da
         return false;
 
     SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, texture->id));
+
+    if (!data->region.w && !data->region.h)
+    {
+        SRE_GL_CALL(inst->funcs2.glUniform4f(inst->basic_program_uniform_region,
+                0.0f,
+                0.0f,
+                1.0f,
+                1.0f
+        ));
+    }
+    else
+    {
+        float wf = (float)texture->w;
+        float hf = (float)texture->h;
+
+        float rwf = data->region.w ? (float)data->region.w : wf;
+        float rhf = data->region.h ? (float)data->region.h : hf;
+
+        SRE_GL_CALL(inst->funcs2.glUniform4f(inst->basic_program_uniform_region,
+                data->region.x / wf,
+                data->region.y / hf,
+                rwf / wf,
+                rhf / hf
+    ));
+    }
     
     const sre_DDRect rect_data = {
         .flags = data->flags & SRE_DRAWFLAGS_USECAM,

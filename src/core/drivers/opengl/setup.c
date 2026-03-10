@@ -52,8 +52,12 @@ const char BASIC_FS[] =
         "uniform vec4 u_col;"
         "uniform sampler2D u_texture;"
         ""
+        "uniform vec4 u_regionuv;"
+        ""
         "void main() {"
-            "gl_FragColor = u_col * texture2D(u_texture, f_uv);"
+            "vec2 uv_begin = u_regionuv.xy;"
+            "vec2 uv_end = u_regionuv.zw;"
+            "gl_FragColor = u_col * texture2D(u_texture, (f_uv*uv_end + uv_begin));"
         "}"
 ;
 
@@ -135,6 +139,7 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
     inst->basic_program_uniform_model = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_model"));
     inst->basic_program_uniform_anchor = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_anchor"));
     inst->basic_program_uniform_texture = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_texture"));
+    inst->basic_program_uniform_region = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_regionuv"));
     
     inst->basic_program_state_projection = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_projection"));
     inst->basic_program_state_cameraview = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_camera"));

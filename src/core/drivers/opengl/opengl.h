@@ -36,6 +36,7 @@ typedef struct sre_videoOpenGL
     GLuint basic_program_uniform_model;
     GLuint basic_program_uniform_anchor;
     GLuint basic_program_uniform_texture;
+    GLuint basic_program_uniform_region;
     
     GLuint basic_program_state_projection;
     GLuint basic_program_state_cameraview;
