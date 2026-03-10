@@ -32,7 +32,7 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
 
     sre_videoOpenGL* inst = sre_newclear(sizeof(sre_videoOpenGL));
 
-#if 0
+#if 01
    // Chose core 3.2 first, switch to compat 2.1 if it's not available
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
