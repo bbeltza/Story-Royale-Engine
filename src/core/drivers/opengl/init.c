@@ -97,9 +97,15 @@ bool sreopengl_viewport(const sre_videodriver* video, int w, int h)
     GLfloat projection[16] = {
         2 / (right - left), 0, 0, 0,
         0, 2 / (top - bottom), 0, 0,
-        0, 0, -1                , 0,
-        -(right + left)/(right - left), -(top + bottom)/(top - bottom), -1, 1
+        0, 0,                  1, 0,
+        -(right + left)/(right - left), -(top + bottom)/(top - bottom), 1, 1
     };
+
+    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[0], projection[1], projection[2], projection[3]);
+    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[4], projection[5], projection[6], projection[7]);
+    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[8], projection[9], projection[10], projection[11]);
+    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[12], projection[13], projection[14], projection[15]);
+    sre_log(SRE_LOGCATEGORY_DEBUG, "| -----------");
 
     SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_state_projection, 1, GL_FALSE, projection));
     SRE_GL_CALL(glViewport(0, 0, w, h));
@@ -156,14 +162,18 @@ bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color
     SRE_GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
     sre_videoOpenGL* inst = video->userdata;
-    GLfloat camera[16] = {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        video->center.x - video->camera.x, video->center.y - video->camera.y, 0, 1
-    };
 
-    memcpy(inst->camera_view, camera, sizeof(camera));
+    const GLfloat tx = video->center.x - video->camera.x;
+    const GLfloat ty = video->center.y - video->camera.y;
+
+    //sre_log(SRE_LOGCATEGORY_DEBUG, "%f %f", tx, ty);
+
+    memcpy(inst->camera_view, (GLfloat[16]){
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        tx,   ty,   0.0f, 1.0f
+    }, sizeof(GLfloat[16]));
     return true;
 }
 
@@ -192,5 +202,5 @@ const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_drawrect,
     sreopengl_drawrrect,
     sreopengl_drawtexture,
-    FN(voi)
+    sreopengl_drawrtexture
 };

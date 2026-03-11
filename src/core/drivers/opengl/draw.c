@@ -25,10 +25,10 @@ static const GLfloat IDENTITY[16] = {
     };
 static bool common_drawrect(const sre_videoOpenGL* inst, const sre_DDRect* data)
 {
-    const sre_unit mat[16] = {
-        data->rect.size.x, 0, 0, 0,
-        0, data->rect.size.y, 0, 0,
-        0, 0, 1, 0,
+    const GLfloat mat[16] = {
+        data->rect.size.x, 0.0f, 0.0f, 0.0f,
+        0.0f, data->rect.size.y, 0.0f, 0.0f,
+        0.0f, 0.0f,                 1.0f, 0.0f,
         data->rect.position.x, data->rect.position.y, 0, 1
     };
 
