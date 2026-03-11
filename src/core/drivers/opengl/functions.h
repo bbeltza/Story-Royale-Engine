@@ -31,6 +31,7 @@
         SRE_GL_FUNC(PFNGLUNIFORM2FVPROC, glUniform2fv);                  \
         SRE_GL_FUNC(PFNGLUNIFORM4FPROC, glUniform4f);                    \
         SRE_GL_FUNC(PFNGLUNIFORM4FVPROC, glUniform4fv);                  \
+        SRE_GL_FUNC(PFNGLUNIFORMMATRIX2FVPROC, glUniformMatrix2fv);      \
         SRE_GL_FUNC(PFNGLUNIFORMMATRIX4FVPROC, glUniformMatrix4fv);      \
                                                                          \
         SRE_GL_FUNC(PFNGLACTIVETEXTUREPROC, glActiveTexture);            \

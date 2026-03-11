@@ -50,7 +50,10 @@ static int game_loop(void* running)
         if (SDL_PeepEvents(&ev, 1, SDL_ADDEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) == 1)
         {
             if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
+            {
                 sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
+                assert(0 && "You must debug this");
+            }
         }
         else
             sre_log(SRE_LOGCATEGORY_ERROR, "SDL_PeepEvents failed... %s", SDL_GetError());
@@ -59,7 +62,10 @@ static int game_loop(void* running)
         else
         {
             if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
+            {
                 sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
+                assert(0 && "You must debug this too");
+            }
         }
     #endif
 
@@ -100,6 +106,7 @@ void __run_engine()
             case SDL_WINDOWEVENT_EXPOSED:
                 #if _WIN32
                     engine.exposing = false;
+                    SDL_CondBroadcast(engine.render_cond);
                 #endif
                 break;
             case SDL_WINDOWEVENT_FOCUS_LOST:

@@ -18,23 +18,13 @@ struct TextureEntity : public sreECS::Entity
     sre::Texture sprt1{img1};
     sre::Texture sprt2{img2};
 
-    sre::Texture testsprt{ {2, 2}, SDL_PIXELFORMAT_RGBA8888 };
-
     sre::Connection button_connection = sre::onEvent.connect(mouse, this);
 
     TextureEntity()
     {
-        static const sre::byte testpixels[ 2 * 4*4 ] = {
-            255, 150, 100, 50,     255, 255, 255, 255,
-            255, 255, 255, 255,     255, 255, 255, 255
-        };
-
-        testsprt.update(testpixels, 8);
-
-        sprite.attach(testsprt);
         sprite.attach(sprt1);
         sprite.attach(sprt2);
-        sprite.scale = { 4, 4 };
+        sprite.scale = 4;
 
         setup_components(sprite);
     }
@@ -53,8 +43,10 @@ static void mouse(void*, TextureEntity* ent, sre::Event event)
     }
 }
 
+#include <Core/Window.hpp>
 void sre::initialize()
 {
+    sre::window_setresizable(true);
     auto texture_palace = new sreECS::Scene;
     texture_palace->add_entity<TextureEntity>();
     texture_palace->make_current();
