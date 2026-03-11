@@ -9,6 +9,8 @@ bool sreopengl_texcreate(const sre_videodriver* video, void* _texture, int w, in
     SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, texture->id));
     SRE_GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
     SRE_GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    SRE_GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    SRE_GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
     
     // Should define the format here before calling glTexImage2D    
     // Maybe not???

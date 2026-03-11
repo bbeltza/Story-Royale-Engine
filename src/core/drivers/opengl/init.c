@@ -190,7 +190,7 @@ const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_drawline,
     FN(voi),
     sreopengl_drawrect,
-    FN(voi),//sreopengl_drawrrect,
+    sreopengl_drawrrect,
     sreopengl_drawtexture,
     FN(voi)
 };

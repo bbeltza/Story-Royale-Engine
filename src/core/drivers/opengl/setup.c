@@ -20,15 +20,23 @@ const char BASIC_VS[] =
         "attribute vec2 i_pos;"
         ""
         "uniform mat4 u_model;"
+        "uniform mat4 u_rotation;"
         "uniform vec2 u_anchor;"
         ""
         "uniform mat4 u_projection;"
         "uniform mat4 u_camera;"
         ""
+        "uniform vec4 u_regionuv;"
+        "uniform vec2 u_flipvec;"
         "varying vec2 f_uv;"
         "void main() {"
-            "f_uv = i_pos.xy;"
-            "gl_Position = u_projection * u_camera * u_model * vec4(i_pos - u_anchor, 0.0f, 1.0f);"
+            "vec2 uv_add = (u_flipvec/-2.0f + 0.5f);"
+            "vec2 uv_begin = u_regionuv.xy;"
+            "vec2 uv_end = u_regionuv.zw;"
+            "f_uv = ((i_pos.xy*u_flipvec+uv_add)*uv_end + uv_begin);"
+            //"f_uv = i_pos.xy * u_flipvec;"
+            ""
+            "gl_Position = u_projection * u_camera * u_model * u_rotation * vec4(i_pos - u_anchor, 0.0f, 1.0f);"
         "}"
 ;
 
@@ -37,9 +45,7 @@ const char BASICFILL_VS[] =
         ""
         "attribute vec4 i_pos;"
         ""
-        "varying vec2 f_uv;"
         "void main() {"
-            "f_uv = vec2(0.0f);"
             "gl_Position = i_pos + i_pos - 1;"
         "}"
 ;
@@ -52,12 +58,8 @@ const char BASIC_FS[] =
         "uniform vec4 u_col;"
         "uniform sampler2D u_texture;"
         ""
-        "uniform vec4 u_regionuv;"
-        ""
         "void main() {"
-            "vec2 uv_begin = u_regionuv.xy;"
-            "vec2 uv_end = u_regionuv.zw;"
-            "gl_FragColor = u_col * texture2D(u_texture, (f_uv*uv_end + uv_begin));"
+            "gl_FragColor = u_col * texture2D(u_texture, f_uv);"
         "}"
 ;
 
@@ -137,9 +139,11 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
 
     inst->basic_program_uniform_color = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_col"));
     inst->basic_program_uniform_model = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_model"));
+    inst->basic_program_uniform_rotation = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_rotation"));
     inst->basic_program_uniform_anchor = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_anchor"));
     inst->basic_program_uniform_texture = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_texture"));
     inst->basic_program_uniform_region = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_regionuv"));
+    inst->basic_program_uniform_flip = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_flipvec"));
     
     inst->basic_program_state_projection = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_projection"));
     inst->basic_program_state_cameraview = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(program, "u_camera"));

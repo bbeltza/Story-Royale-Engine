@@ -14,7 +14,7 @@ void Render()
     sre::draw(sre::DDRRect{
         {
             SRE_DRAWFLAGS_STROKE & 0,
-            sre::col4::WHITE,
+            sre::WHITE,
             { mpos, {10, 10} },
             sre::vec2ut::CENTER
         },
