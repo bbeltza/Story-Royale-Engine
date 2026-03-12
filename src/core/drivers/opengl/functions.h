@@ -17,7 +17,9 @@
         SRE_GL_FUNC(PFNGLSHADERSOURCEPROC, glShaderSource);              \
         SRE_GL_FUNC(PFNGLCOMPILESHADERPROC, glCompileShader);            \
         SRE_GL_FUNC(PFNGLGETSHADERINFOLOGPROC, glGetShaderInfoLog);      \
+        SRE_GL_FUNC(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog);      \
         SRE_GL_FUNC(PFNGLGETSHADERIVPROC, glGetShaderiv);                \
+        SRE_GL_FUNC(PFNGLGETPROGRAMIVPROC, glGetProgramiv);                \
         SRE_GL_FUNC(PFNGLATTACHSHADERPROC, glAttachShader);              \
         SRE_GL_FUNC(PFNGLDETACHSHADERPROC, glDetachShader);              \
         SRE_GL_FUNC(PFNGLLINKPROGRAMPROC, glLinkProgram);                \

@@ -69,6 +69,13 @@ static void SRE_GL_SHADERLOG(sre_videoOpenGL* inst, GLuint shader)
     sre_log(SRE_LOGCATEGORY_ERROR, "[OPENGL]: Failed compiling shader:\n%s", buffer);
 }
 
+static void SRE_GL_PROGRAMLOG(sre_videoOpenGL* inst, GLuint program)
+{
+    GLchar buffer[255];
+    SRE_GL_CALL(inst->funcs2.glGetProgramInfoLog(program, 255, NULL, buffer), abort(););
+    sre_log(SRE_LOGCATEGORY_ERROR, "[OPENGL]: Failed linking program:\n%s", buffer);
+}
+
 bool sreopengl_bindva2_1(sre_videoOpenGL* inst)
 {
     SRE_GL_CALL(inst->funcs2.glEnableVertexAttribArray(0), return false;);
@@ -96,7 +103,8 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
     
     SRE_GL_CALL(inst->funcs2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(BASIC_RECT_INDICES), BASIC_RECT_INDICES, GL_STATIC_DRAW), return false;);
 
-    #define SRE_GL_STATUSCHECK(shader) inst->funcs2.glGetShaderiv(shader, GL_COMPILE_STATUS, &status); if (status == GL_FALSE){ SRE_GL_SHADERLOG(inst, vs); return false; } (void)0
+    #define SRE_GL_STATUSCHECK(shader) inst->funcs2.glGetShaderiv(shader, GL_COMPILE_STATUS, &status); if (status == GL_FALSE){ SRE_GL_SHADERLOG(inst, shader); return false; } (void)0
+    #define SRE_GL_STATUSCHECKP(program) inst->funcs2.glGetProgramiv(program, GL_LINK_STATUS, &status); if (status == GL_FALSE){ SRE_GL_PROGRAMLOG(inst, program); return false; } (void)0
 
     const char* shader;
     shader = BASIC_VS;
@@ -127,6 +135,9 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
     SRE_GL_CALL(inst->funcs2.glAttachShader(program2, vsf), return false;);
     SRE_GL_CALL(inst->funcs2.glAttachShader(program2, fs), return false;);
     SRE_GL_CALL(inst->funcs2.glLinkProgram(program2), return false;);
+
+    SRE_GL_STATUSCHECKP(program);
+    SRE_GL_STATUSCHECKP(program2);
 
     SRE_GL_CALL(inst->funcs2.glBindAttribLocation(program, 0, "i_pos"));
     SRE_GL_CALL(inst->funcs2.glBindAttribLocation(program2, 0, "i_pos"));
