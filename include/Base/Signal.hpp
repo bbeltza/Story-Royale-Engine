@@ -24,12 +24,14 @@ namespace sre
 	template <typename... Args>
 	class Signal
 	{
-		sre_Signal* m_ptr;
+		sre_Signal* m_ptr = NULL;
 	public:
 		using TupleType = std::tuple<Args...>;
 	public:
 		Signal(void* userdata=NULL): m_ptr(sre_signalcreate(userdata)) {}
 		~Signal() { sre_signaldestroy(m_ptr); }
+
+		Signal(const Signal& other) = delete;
 
 		void fire(Args... args)
 		{
@@ -89,10 +91,12 @@ namespace sre
 	template <typename T>
 	class Signal<T*>
 	{
-		sre_Signal* m_ptr;
+		sre_Signal* m_ptr = NULL;
 	public:
 		Signal(void* userdata=NULL): m_ptr(sre_signalcreate(userdata)) {}
 		~Signal() { release(); }
+
+		Signal(const Signal& other) = delete;
 
 		void release() { sre_signaldestroy(m_ptr); m_ptr = NULL; }
 

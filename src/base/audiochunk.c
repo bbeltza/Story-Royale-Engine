@@ -6,6 +6,7 @@
 
 #include <SDL_audio.h>
 #include <vorbis.h>
+#include <assert.h>
 
 const size_t SRE_AUDIOCHUNK_METASIZE = offsetof(sre_AudioChunk, samples);
 
@@ -28,6 +29,7 @@ const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
         if (!SDL_LoadWAV_RW(rw, 1, &spec, &audio_buff, &audio_len)) return NULL;
 
         sre_AudioChunk* chunk = sre_new(SRE_AUDIOCHUNK_METASIZE + audio_len);
+        chunk->_refcount = 0;
         chunk->format = spec.format;
         chunk->channels = spec.channels;
         chunk->frequency = spec.freq;
@@ -57,7 +59,7 @@ const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
 
         audio_len = audio_samples * channels * (SDL_AUDIO_BITSIZE(AUDIO_S16) / 8);
         sre_AudioChunk* chunk = sre_new(SRE_AUDIOCHUNK_METASIZE + audio_len);
-        
+        chunk->_refcount = 0;
         chunk->format = AUDIO_S16;
         chunk->frequency = sample_rate;
         chunk->sample_count = audio_samples;
@@ -73,9 +75,20 @@ const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
     return NULL;
 }
 
-void sre_audioclose(const sre_AudioChunk* chunk)
+#include <Base/Log.h>
+int sre_audioaddref(const sre_AudioChunk* chunk) { return SDL_AtomicAdd((SDL_atomic_t*)&chunk->_refcount, 1); }
+
+int sre_audioclose(const sre_AudioChunk* chunk)
 {
-    sre_delete((void*)chunk);
+    if (!chunk)
+        return -1;
+
+    int ref = SDL_AtomicAdd((SDL_atomic_t*)&chunk->_refcount, -1);
+    if (ref <= 1)
+        sre_delete((void*)chunk);
+    
+    assert(ref >= 0);
+    return ref;
 }
 
 const sre_AudioChunk* sre_audiofromfile(const sre_File* file)

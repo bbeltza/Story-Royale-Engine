@@ -138,6 +138,7 @@ const sre_AudioChunk* sre_convertchunk(const sre_AudioChunk* chunk, bool freechu
 
     cvt.len = chunk->size;
     sre_AudioChunk* newchunk = sre_new(SRE_AUDIOCHUNK_METASIZE + cvt.len * cvt.len_mult);
+    newchunk->_refcount = 0;
     newchunk->frequency = chunk->frequency;
     newchunk->sample_count = chunk->sample_count;
     newchunk->channels = engine.audio_spec.channels;

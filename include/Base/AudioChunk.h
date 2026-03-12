@@ -10,6 +10,8 @@ typedef signed short sre_sample;
 
 typedef struct sre_AudioChunk
 {
+	int _refcount;
+
     sre_u32 size;
     sre_u32 sample_count;
 
@@ -23,7 +25,8 @@ typedef struct sre_AudioChunk
 extern const size_t SRE_AUDIOCHUNK_METASIZE;
 
 const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata);
-void sre_audioclose(const sre_AudioChunk* chunk);
+int sre_audioaddref(const sre_AudioChunk* chunk);
+int sre_audioclose(const sre_AudioChunk* chunk);
 
 struct sre_File;
 const sre_AudioChunk* sre_audiofromfile(const struct sre_File* file);
@@ -39,23 +42,27 @@ namespace sre
     // Holder class for the audio chunk (sre_AudioChunk shared pointer wrapper)
 	class AudioChunk
 	{
-		std::shared_ptr<const sre_AudioChunk> m_ptr;
-		struct ChunkDeleter
-		{
-			void operator ()(const sre_AudioChunk* chunk) { sre_audioclose(chunk); }
-		};
-
+		const sre_AudioChunk* m_ptr = NULL;
 	public:
 		constexpr AudioChunk() = default;
-		AudioChunk(const sre_AudioChunk* chunk): m_ptr(chunk, ChunkDeleter{}) {}
+		AudioChunk(const sre_AudioChunk* chunk): m_ptr(chunk) { sre_audioaddref(chunk); }
+		AudioChunk(const AudioChunk& chunk): AudioChunk(chunk.m_ptr) {}
 
-		void operator =(const sre_AudioChunk* chunk) { if (get() != chunk) m_ptr.reset(chunk, ChunkDeleter{}); }
-		void operator =(const AudioChunk& chunk) { m_ptr = chunk.m_ptr; }
+		void operator =(const AudioChunk& chunk)
+		{
+			sre_audioclose(m_ptr);
+			sre_audioaddref(chunk.m_ptr);
+			m_ptr = chunk.m_ptr;
+		}
 
-		const sre_AudioChunk* operator ->() const { return m_ptr.operator->(); }
-		operator bool() const { return m_ptr.operator bool(); }
+		~AudioChunk() { sre_audioclose(m_ptr); m_ptr = NULL; }
 
-        const sre_AudioChunk* get() const { return m_ptr.get(); }
+		//void operator =(const AudioChunk& chunk) { m_ptr = chunk.m_ptr; sre_audioaddref(chunk); }
+
+		const sre_AudioChunk* operator ->() const { return m_ptr; }
+		operator bool() const { return m_ptr != NULL; }
+
+        const sre_AudioChunk* get() const { return m_ptr; }
 	public:
 		AudioChunk(size_t size, const byte* rawdata): AudioChunk(sre_audioload(size, rawdata)) {}
 		AudioChunk(const File& file);
