@@ -44,7 +44,9 @@ const char BASICFILL_VS[] =
         ""
         "attribute vec4 i_pos;"
         ""
+        "varying vec2 f_uv;"
         "void main() {"
+            "f_uv = vec2(0.0f);"
             "gl_Position = i_pos + i_pos - 1;"
         "}"
 ;
