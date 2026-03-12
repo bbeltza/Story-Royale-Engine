@@ -18,7 +18,7 @@
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
 VIDEOINIT_DEF(opengl)				\
-//VIDEOINIT_DEF(software)
+//VIDEOINIT_DEF(softwarerender)
 
 
 #define VIDEOINIT_DEF(x) extern "C" bool sre##x##_init(sre_videodriver* video, SDL_Window* window);

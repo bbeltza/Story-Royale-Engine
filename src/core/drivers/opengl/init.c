@@ -90,15 +90,13 @@ bool sreopengl_viewport(const sre_videodriver* video, int w, int h)
 {
     const sre_videoOpenGL* inst = video->userdata;
 
-    GLfloat left = 0;
-    GLfloat top = 0;
-    GLfloat right = video->size.x;
-    GLfloat bottom = video->size.y;
+    GLfloat right = (GLfloat)w;
+    GLfloat bottom = (GLfloat)h;
     GLfloat projection[16] = {
-        2 / (right - left), 0, 0, 0,
-        0, 2 / (top - bottom), 0, 0,
-        0, 0,                  1, 0,
-        -(right + left)/(right - left), -(top + bottom)/(top - bottom), 1, 1
+        2 / right, 0, 0, 0,
+        0, -2 / bottom, 0, 0,
+        0, 0,           1, 0,
+        -1, 1,          0, 1
     };
 
     sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[0], projection[1], projection[2], projection[3]);
@@ -122,9 +120,6 @@ bool sreopengl_blend(const sre_videodriver* video, sre_DrawBlending blending)
 
     GLenum sfactor;
     GLenum dfactor;
-    (void)sfactor;
-    (void)dfactor;
-
     switch (blending)
     {
         case SRE_BLEND_BLEND:

@@ -23,13 +23,13 @@ static const GLfloat IDENTITY[16] = {
         0, 0, 1, 0,
         0, 0, 0, 1
     };
-static bool common_drawrect(const sre_videoOpenGL* inst, const sre_DDRect* data)
+static bool common_drawrect(const sre_videoOpenGL* inst, const sre_DDRect* data, sre_unit scale)
 {
     const GLfloat mat[16] = {
         data->rect.size.x, 0.0f, 0.0f, 0.0f,
         0.0f, data->rect.size.y, 0.0f, 0.0f,
-        0.0f, 0.0f,                 1.0f, 0.0f,
-        data->rect.position.x, data->rect.position.y, 0, 1
+        0.0f, 0.0f,                 1.0f, scale,
+        data->rect.position.x, data->rect.position.y, 0.0f, 1.0f
     };
 
     const GLfloat* cam;
@@ -109,14 +109,14 @@ bool sreopengl_drawrect(const sre_videodriver* video, const sre_DDRect* data)
 {
     const sre_videoOpenGL* inst = video->userdata;
     SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_uniform_rotation, 1, GL_FALSE, IDENTITY));
-    return common_drawrect(inst, data);
+    return common_drawrect(inst, data, video->scale);
 }
 
 bool sreopengl_drawrrect(const sre_videodriver* video, const sre_DDRRect* data)
 {
     const sre_videoOpenGL* inst = video->userdata;
 
-    return common_setrotation(inst, data->angle) && common_drawrect(inst, &data->rect);
+    return common_setrotation(inst, data->angle) && common_drawrect(inst, &data->rect, video->scale);
 }
 
 bool sreopengl_drawline(const sre_videodriver* video, const sre_DDLine* data)

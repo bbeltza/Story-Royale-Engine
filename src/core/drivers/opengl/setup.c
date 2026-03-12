@@ -35,7 +35,10 @@ const char BASIC_VS[] =
             "vec2 uv_end = u_regionuv.zw;"
             "f_uv = ((i_pos.xy*u_flipvec+uv_add)*uv_end + uv_begin);"
             ""
-            "gl_Position = u_projection * u_camera * u_model * u_rotation * vec4(i_pos - u_anchor, 0.0f, 1.0f);"
+            "float scale = u_model[2][3];"
+            "gl_Position = u_camera * u_model * u_rotation * vec4(i_pos - u_anchor, 0.0f, 1.0f);"
+            "gl_Position *= vec4(vec2(scale), 1, 1);"
+            "gl_Position = u_projection * floor(gl_Position);"
         "}"
 ;
 

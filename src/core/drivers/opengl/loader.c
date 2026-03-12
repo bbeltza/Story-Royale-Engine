@@ -37,9 +37,7 @@ const char* SRE_GL_FMTERR(GLenum err)
         SRE_GL_CASE(GL_OUT_OF_MEMORY);
         SRE_GL_CASE(GL_INVALID_FRAMEBUFFER_OPERATION);
         default: 
-        #if _WIN32
-            __debugbreak();
-        #endif
+            abort();
             return NULL;
     }
 }
