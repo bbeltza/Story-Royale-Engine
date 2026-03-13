@@ -97,6 +97,10 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
         SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->basic_vao));
     }
 
+    SRE_GL_CALL(inst->funcs2.glGenBuffers(1, &inst->line_vbo), return false;);
+    SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->line_vbo), return false;);
+    SRE_GL_CALL(inst->funcs2.glBufferData(GL_ARRAY_BUFFER, 256, NULL, GL_DYNAMIC_DRAW), return false;); // 256 byte buffer size at the beginning looks fine
+
     SRE_GL_CALL(inst->funcs2.glGenBuffers(2, &inst->basic_vbo), return false;);
     SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->basic_vbo), return false;);
     SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->basic_ibo), return false;);

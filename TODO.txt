@@ -1,5 +1,3 @@
-- Maybe add ImGui now that there's no scaling that can be affected?
-
 - Animations/Keyframes
 
 - Audio interpolation
@@ -11,10 +9,15 @@
 - Camera effects: They will affect the camera position but shouldn't modify the camera base position (like shakes...)
 
 - And error state support (Maybe using SDL's errors)
-- Remove OS: Don't ever use os and use proper Base engine functions
 
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
+	- Working: I'm still maintaining it since it is still uncomplete, and there are no custom shader support (which I might not add at all..)
+
+- Game Engine hints: They are pretty much like the old GameSettings, but they are used for hints to the engine on how to start the game (ex: Picking the renderer driver, or having a user argv handler!)
+						With the difference that they are completely optional, and they can be integrated directly in C/C++ code without the help of CMake
+						This can be achieved with exported symbols (what you usually do to export a function for a DLL). The engine will look up the exported symbols for the actual executable
+						(Doing LoadProcAddress(NULL, "sym_name") for example, we have SDL functions for that too) and it would return the address of the hint, or NULL if it hasn't been declared. So no linking errors!
 
 - Android support
 
@@ -22,8 +25,6 @@
 - Core physics (Basically supporting physics/collisions from the core engine)
 	- It would be in a header like <Core/Physics.h-hpp>
 	- You'd append and remove physics objects with it, and the engine would do every needed operation in the next pupdate cycle
-
-(current version: 0.102.04)
 
 - Work on the game ^^
 

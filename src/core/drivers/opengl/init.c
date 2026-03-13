@@ -193,7 +193,7 @@ const struct sre_videodriverInterface sreopengl_interface = {
     FN(voi),
     sreopengl_drawfill,
     sreopengl_drawline,
-    FN(voi),
+    sreopengl_drawlines,
     sreopengl_drawrect,
     sreopengl_drawrrect,
     sreopengl_drawtexture,

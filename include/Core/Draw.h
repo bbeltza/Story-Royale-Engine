@@ -66,7 +66,9 @@ typedef enum
     SRE_DRAWFLAGS_USECAM = ut_bit(0), // Use the current camera coordinates to determine the final position of the object to draw
     SRE_DRAWFLAGS_STROKE = ut_bit(1), // Used by some types (Like DDRect), draw the contour of the object to draw instead of filling it
     SRE_DRAWFLAGS_FLIPX = ut_bit(2), // Used only by textures for now, to determine how to flip the content to render
-    SRE_DRAWFLAGS_FLIPY = ut_bit(3)
+    SRE_DRAWFLAGS_FLIPY = ut_bit(3),
+    SRE_DRAWFLAGS_SCALELINE = ut_bit(4) // Used by lines (or rect if STROKE is on) to match the scaled viewport when drawing lines instead of the full output viewport
+                                            // Currently unavailable
 } sre_DrawFlags;
 
 typedef enum

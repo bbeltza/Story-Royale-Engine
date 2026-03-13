@@ -48,6 +48,11 @@ typedef struct sre_videoOpenGL
     
     GLuint basic_texture;
 
+    GLuint line_vbo;
+    GLuint line_vao;
+
+    
+
     GLfloat camera_view[16];
 } sre_videoOpenGL;
 
