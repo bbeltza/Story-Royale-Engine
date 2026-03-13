@@ -132,8 +132,23 @@ bool sreopengl_drawline(const sre_videodriver* video, const sre_DDLine* data)
 
 bool sreopengl_drawlines(const sre_videodriver* video, const sre_DDLines* data)
 {
-    SRE_GL_CALL(glDrawElements(GL_LINES, data->count, GL_UNSIGNED_BYTE, NULL));
-    return false;
+    const sre_videoOpenGL* inst = video->userdata;
+    if (inst->basic_vao)
+    {
+        SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->line_vao), return false;);
+    }
+    else
+    {
+        SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->line_vbo), return false;);
+        if (!sreopengl_bindva2_1(inst))
+            abort();
+    }
+
+    SRE_GL_CALL(inst->funcs2.glBufferSubData(GL_ARRAY_BUFFER, 0, data->count, data->pts));
+    SRE_GL_CALL(glDrawArrays(GL_LINES, 0, data->count));
+
+    SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->basic_vao));
+    return true;
 }
 
 bool sreopengl_drawtexture(const sre_videodriver* video, const sre_DDTexture* data)

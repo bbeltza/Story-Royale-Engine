@@ -51,7 +51,10 @@ typedef struct sre_videoOpenGL
     GLuint line_vbo;
     GLuint line_vao;
 
-    
+    GLuint line_program;
+    GLuint line_program_uniform_color;
+    GLuint line_program_uniform_projection;
+    GLuint line_program_uniform_cameraview;
 
     GLfloat camera_view[16];
 } sre_videoOpenGL;
@@ -91,6 +94,8 @@ while (1)                           \
 extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window);
 
 extern bool sreopengl_setupbuffers(sre_videoOpenGL* inst);
+
+extern bool sreopengl_bindva2_1(const sre_videoOpenGL* inst);
 
 /* Drawing functions */
 

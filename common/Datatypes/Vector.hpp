@@ -113,7 +113,7 @@ namespace sre
         constexpr bool operator !=(const vec2& other) const { return x != other.x || y != other.y; }
 
         constexpr operator const T*() const { return &x; }
-        constexpr operator T*() { return &x; }
+        inline operator T*() { return &x; }
 
         static const vec2 ZERO;
         static const vec2 ONE;

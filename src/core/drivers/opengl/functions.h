@@ -2,7 +2,9 @@
 #define SRE_GL_FUNCTIONS_2_1                                            \
         SRE_GL_FUNC(PFNGLBINDBUFFERPROC, glBindBuffer);                 \
         SRE_GL_FUNC(PFNGLBUFFERDATAPROC, glBufferData);                 \
-                                                                        \
+        \
+        SRE_GL_FUNC(PFNGLBUFFERSUBDATAPROC, glBufferSubData);                 \
+        \
         SRE_GL_FUNC(PFNGLGENBUFFERSPROC, glGenBuffers);                 \
                                                                         \
         SRE_GL_FUNC(PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray);      \

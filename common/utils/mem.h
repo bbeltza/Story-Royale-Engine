@@ -23,7 +23,7 @@ It's discouraged to use it with numbers as numbers can be 0
 
 #if defined(_MSC_VER) && !defined(__clang__)
 	#include <malloc.h>
-	#define __ut_dynsalloc(t, x, c) t *x = ut_static_cast(t*, alloca((c) * sizeof(t)))
+	#define __ut_dynsalloc(t, x, c) t *(x) = ut_static_cast(t*, alloca((c) * sizeof(t)))
 #else
 	#define __ut_dynsalloc(t, x, c) t x[c]
 #endif

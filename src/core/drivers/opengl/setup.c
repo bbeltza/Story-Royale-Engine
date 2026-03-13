@@ -67,6 +67,29 @@ const char BASIC_FS[] =
         "}"
 ;
 
+const char LINE_VS[] = 
+        "#version 120\n"
+        ""
+        "attribute vec4 i_pos;"
+        ""
+        "uniform mat4 u_projection;"
+        "uniform mat4 u_camera;"
+        ""
+        "void main() {"
+            "gl_Position = u_projection * u_camera * i_pos;"
+        "}"
+;
+
+const char LINE_FS[] = 
+        "#version 120\n"
+        ""
+        "uniform vec4 u_color;"
+        ""
+        "void main() {"
+            "gl_FragColor = u_color;"
+        "}"
+;
+
 static void SRE_GL_SHADERLOG(sre_videoOpenGL* inst, GLuint shader)
 {
     GLchar buffer[255];
@@ -81,7 +104,7 @@ static void SRE_GL_PROGRAMLOG(sre_videoOpenGL* inst, GLuint program)
     sre_log(SRE_LOGCATEGORY_ERROR, "[OPENGL]: Failed linking program:\n%s", buffer);
 }
 
-bool sreopengl_bindva2_1(sre_videoOpenGL* inst)
+bool sreopengl_bindva2_1(const sre_videoOpenGL* inst)
 {
     SRE_GL_CALL(inst->funcs2.glEnableVertexAttribArray(0), return false;);
     SRE_GL_CALL(inst->funcs2.glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, sizeof(sre_vec2f), (void*)0), return false;);
@@ -91,15 +114,27 @@ bool sreopengl_bindva2_1(sre_videoOpenGL* inst)
 
 bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
 {
+    // Lines setup
     if (inst->funcs3.glBindVertexArray)
     {
-        SRE_GL_CALL(inst->funcs3.glGenVertexArrays(1, &inst->basic_vao));
-        SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->basic_vao));
+        SRE_GL_CALL(inst->funcs3.glGenVertexArrays(1, &inst->line_vao));
+        SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->line_vao));
     }
 
     SRE_GL_CALL(inst->funcs2.glGenBuffers(1, &inst->line_vbo), return false;);
     SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->line_vbo), return false;);
     SRE_GL_CALL(inst->funcs2.glBufferData(GL_ARRAY_BUFFER, 256, NULL, GL_DYNAMIC_DRAW), return false;); // 256 byte buffer size at the beginning looks fine
+
+    if (!sreopengl_bindva2_1(inst))
+        return false;
+    
+    //
+
+    if (inst->funcs3.glBindVertexArray)
+    {
+        SRE_GL_CALL(inst->funcs3.glGenVertexArrays(1, &inst->basic_vao));
+        SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->basic_vao));
+    }
 
     SRE_GL_CALL(inst->funcs2.glGenBuffers(2, &inst->basic_vbo), return false;);
     SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->basic_vbo), return false;);
@@ -118,7 +153,7 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
     const char* shader;
     shader = BASIC_VS;
     GLuint status;
-    GLuint vs = SRE_GL_CALL(inst->funcs2.glCreateShader(GL_VERTEX_SHADER));
+    GLint vs = SRE_GL_CALL(inst->funcs2.glCreateShader(GL_VERTEX_SHADER));
     SRE_GL_CALL(inst->funcs2.glShaderSource(vs, 1, &shader, NULL));
     SRE_GL_CALL(inst->funcs2.glCompileShader(vs), );
     SRE_GL_STATUSCHECK(vs);
