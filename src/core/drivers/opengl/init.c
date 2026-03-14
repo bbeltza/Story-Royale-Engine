@@ -95,16 +95,14 @@ bool sreopengl_viewport(const sre_videodriver* video, int w, int h)
     GLfloat projection[16] = {
         2 / right, 0, 0, 0,
         0, -2 / bottom, 0, 0,
-        0, 0,           1, 0,
+        0, 0,           video->scale, 0,
         -1, 1,          0, 1
     };
 
-    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[0], projection[1], projection[2], projection[3]);
-    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[4], projection[5], projection[6], projection[7]);
-    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[8], projection[9], projection[10], projection[11]);
-    sre_log(SRE_LOGCATEGORY_DEBUG, "| %f %f %f %f |", projection[12], projection[13], projection[14], projection[15]);
-    sre_log(SRE_LOGCATEGORY_DEBUG, "| -----------");
+    SRE_GL_CALL(inst->funcs2.glUseProgram(inst->line_program));
+    SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->line_program_uniform_projection, 1, GL_FALSE, projection));
 
+    SRE_GL_CALL(inst->funcs2.glUseProgram(inst->basic_program));
     SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_state_projection, 1, GL_FALSE, projection));
     SRE_GL_CALL(glViewport(0, 0, w, h));
     return true;

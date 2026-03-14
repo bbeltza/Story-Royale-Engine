@@ -23,12 +23,12 @@ static const GLfloat IDENTITY[16] = {
         0, 0, 1, 0,
         0, 0, 0, 1
     };
-static bool common_drawrect(const sre_videoOpenGL* inst, const sre_DDRect* data, sre_unit scale)
+static bool common_drawrect(const sre_videoOpenGL* inst, const sre_DDRect* data)
 {
     const GLfloat mat[16] = {
         data->rect.size.x, 0.0f, 0.0f, 0.0f,
         0.0f, data->rect.size.y, 0.0f, 0.0f,
-        0.0f, 0.0f,                 1.0f, scale,
+        0.0f, 0.0f,              1.0f, 0.0f,
         data->rect.position.x, data->rect.position.y, 0.0f, 1.0f
     };
 
@@ -109,14 +109,14 @@ bool sreopengl_drawrect(const sre_videodriver* video, const sre_DDRect* data)
 {
     const sre_videoOpenGL* inst = video->userdata;
     SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_uniform_rotation, 1, GL_FALSE, IDENTITY));
-    return common_drawrect(inst, data, video->scale);
+    return common_drawrect(inst, data);
 }
 
 bool sreopengl_drawrrect(const sre_videodriver* video, const sre_DDRRect* data)
 {
     const sre_videoOpenGL* inst = video->userdata;
 
-    return common_setrotation(inst, data->angle) && common_drawrect(inst, &data->rect, video->scale);
+    return common_setrotation(inst, data->angle) && common_drawrect(inst, &data->rect);
 }
 
 bool sreopengl_drawline(const sre_videodriver* video, const sre_DDLine* data)
@@ -133,21 +133,41 @@ bool sreopengl_drawline(const sre_videodriver* video, const sre_DDLine* data)
 bool sreopengl_drawlines(const sre_videodriver* video, const sre_DDLines* data)
 {
     const sre_videoOpenGL* inst = video->userdata;
-    if (inst->basic_vao)
+    SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->line_vbo), return false;);
+    if (inst->line_vao)
     {
         SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->line_vao), return false;);
     }
     else
     {
-        SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->line_vbo), return false;);
         if (!sreopengl_bindva2_1(inst))
             abort();
     }
+    SRE_GL_CALL(inst->funcs2.glUseProgram(inst->line_program));
 
-    SRE_GL_CALL(inst->funcs2.glBufferSubData(GL_ARRAY_BUFFER, 0, data->count, data->pts));
+    SRE_GL_CALL(inst->funcs2.glUniform4f(inst->line_program_uniform_color, NORM_RGBA(data->color, f)));
+    
+    const GLfloat* cam;
+    if (data->flags & SRE_DRAWFLAGS_USECAM)
+        cam = inst->camera_view;
+    else
+        cam = IDENTITY;
+    SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->line_program_uniform_cameraview, 1, GL_FALSE, cam));
+    
+    SRE_GL_CALL(inst->funcs2.glBufferSubData(GL_ARRAY_BUFFER, 0, data->count * sizeof(sre_vec2ut), data->pts));
     SRE_GL_CALL(glDrawArrays(GL_LINES, 0, data->count));
-
-    SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->basic_vao));
+    
+    SRE_GL_CALL(inst->funcs2.glUseProgram(inst->basic_program));
+    if (inst->basic_vao)
+    {
+        SRE_GL_CALL(inst->funcs3.glBindVertexArray(inst->basic_vao), return false;);
+    }
+    else
+    {
+        SRE_GL_CALL(inst->funcs2.glBindBuffer(GL_ARRAY_BUFFER, inst->basic_vbo), return false;);
+        if (!sreopengl_bindva2_1(inst))
+            abort();
+    }
     return true;
 }
 

@@ -35,9 +35,9 @@ const char BASIC_VS[] =
             "vec2 uv_end = u_regionuv.zw;"
             "f_uv = ((i_pos.xy*u_flipvec+uv_add)*uv_end + uv_begin);"
             ""
-            "float scale = u_model[2][3];"
+            "vec4 scale = vec4(vec2(u_projection[2][2]), 1.0f, 1.0f);"
             "gl_Position = u_camera * u_model * u_rotation * vec4(i_pos - u_anchor, 0.0f, 1.0f);"
-            "gl_Position *= vec4(vec2(scale), 1, 1);"
+            "gl_Position *= scale;"
             "gl_Position = u_projection * floor(gl_Position);"
         "}"
 ;
@@ -76,7 +76,8 @@ const char LINE_VS[] =
         "uniform mat4 u_camera;"
         ""
         "void main() {"
-            "gl_Position = u_projection * u_camera * i_pos;"
+            "vec4 scale = vec4(vec2(u_projection[2][2]), 1.0f, 1.0f);"
+            "gl_Position = u_projection * u_camera * (i_pos*scale);"
         "}"
 ;
 
@@ -115,6 +116,7 @@ bool sreopengl_bindva2_1(const sre_videoOpenGL* inst)
 bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
 {
     // Lines setup
+
     if (inst->funcs3.glBindVertexArray)
     {
         SRE_GL_CALL(inst->funcs3.glGenVertexArrays(1, &inst->line_vao));
@@ -128,6 +130,35 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
     if (!sreopengl_bindva2_1(inst))
         return false;
     
+    #define SRE_GL_STATUSCHECK(shader) inst->funcs2.glGetShaderiv(shader, GL_COMPILE_STATUS, &status); if (status == GL_FALSE){ SRE_GL_SHADERLOG(inst, shader); return false; } (void)0
+    #define SRE_GL_STATUSCHECKP(program) inst->funcs2.glGetProgramiv(program, GL_LINK_STATUS, &status); if (status == GL_FALSE){ SRE_GL_PROGRAMLOG(inst, program); return false; } (void)0
+    
+    const char* shader;
+    shader = LINE_VS;
+    GLint status;
+    GLuint line_vs = SRE_GL_CALL(inst->funcs2.glCreateShader(GL_VERTEX_SHADER));
+    SRE_GL_CALL(inst->funcs2.glShaderSource(line_vs, 1, &shader, NULL));
+    SRE_GL_CALL(inst->funcs2.glCompileShader(line_vs));
+    SRE_GL_STATUSCHECK(line_vs);
+
+    shader = LINE_FS;
+    GLuint line_fs = SRE_GL_CALL(inst->funcs2.glCreateShader(GL_FRAGMENT_SHADER));
+    SRE_GL_CALL(inst->funcs2.glShaderSource(line_fs, 1, &shader, NULL));
+    SRE_GL_CALL(inst->funcs2.glCompileShader(line_fs));
+    SRE_GL_STATUSCHECK(line_fs);
+
+    inst->line_program = SRE_GL_CALL(inst->funcs2.glCreateProgram());
+    SRE_GL_CALL(inst->funcs2.glAttachShader(inst->line_program, line_vs));
+    SRE_GL_CALL(inst->funcs2.glAttachShader(inst->line_program, line_fs));
+    SRE_GL_CALL(inst->funcs2.glLinkProgram(inst->line_program));
+    SRE_GL_STATUSCHECKP(inst->line_program);
+    
+    SRE_GL_CALL(inst->funcs2.glBindAttribLocation(inst->line_program, 0, "i_pos"));
+
+    inst->line_program_uniform_color = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(inst->line_program, "u_color"));
+    inst->line_program_uniform_projection = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(inst->line_program, "u_projection"));
+    inst->line_program_uniform_cameraview = SRE_GL_CALL(inst->funcs2.glGetUniformLocation(inst->line_program, "u_camera"));
+
     //
 
     if (inst->funcs3.glBindVertexArray)
@@ -142,17 +173,14 @@ bool sreopengl_setupbuffers(sre_videoOpenGL* inst)
 
     SRE_GL_CALL(inst->funcs2.glBufferData(GL_ARRAY_BUFFER, sizeof(BASIC_RECT_DATA), BASIC_RECT_DATA, GL_STATIC_DRAW), return false;);
 
+    
+
     if (!sreopengl_bindva2_1(inst))
         return false;
     
     SRE_GL_CALL(inst->funcs2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(BASIC_RECT_INDICES), BASIC_RECT_INDICES, GL_STATIC_DRAW), return false;);
 
-    #define SRE_GL_STATUSCHECK(shader) inst->funcs2.glGetShaderiv(shader, GL_COMPILE_STATUS, &status); if (status == GL_FALSE){ SRE_GL_SHADERLOG(inst, shader); return false; } (void)0
-    #define SRE_GL_STATUSCHECKP(program) inst->funcs2.glGetProgramiv(program, GL_LINK_STATUS, &status); if (status == GL_FALSE){ SRE_GL_PROGRAMLOG(inst, program); return false; } (void)0
-
-    const char* shader;
     shader = BASIC_VS;
-    GLuint status;
     GLint vs = SRE_GL_CALL(inst->funcs2.glCreateShader(GL_VERTEX_SHADER));
     SRE_GL_CALL(inst->funcs2.glShaderSource(vs, 1, &shader, NULL));
     SRE_GL_CALL(inst->funcs2.glCompileShader(vs), );
