@@ -64,8 +64,15 @@ namespace sre
         ~Coroutine() { sre_coroutinecancel(m_coroutine); }
 
         template <typename Ret, typename Ptr>
-        Coroutine(bool suspended, Ret fx(Ptr* data), void* userdata):
+        using TFn = Ret (Ptr* data);
+
+        template <typename Ret, typename Ptr>
+        Coroutine(bool suspended, TFn<Ret, Ptr> fx, void* userdata):
             m_coroutine(sre_coroutinecreate(suspended, reinterpret_cast<sre_coroutineFunction>(fx), userdata))
+        {}
+
+        Coroutine(bool suspended, void fx(void* data), void* userdata):
+            m_coroutine(sre_coroutinecreate(suspended, fx, userdata))
         {}
 
         Coroutine(Coroutine&& moving): m_coroutine(moving.m_coroutine) {

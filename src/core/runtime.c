@@ -37,7 +37,6 @@ static int game_loop(void* running)
         //
 
         __queue_events();
-        __update_threads();
         __update_ecs();
 
         //

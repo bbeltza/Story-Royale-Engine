@@ -87,7 +87,6 @@ void __initialize_engine()
 void __end_engine()
 {
     sre_coroutinecorequit();
-    __cleanup_threads();
     __cleanup_ecs();  
     
     __cleanup_renderer();

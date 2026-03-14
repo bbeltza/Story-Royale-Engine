@@ -3,7 +3,6 @@ set(CORE_SOURCES
 "draw.c"
 "texture.c"
 "defer.c"
-"thread.c"
 
 "events.cpp"
 "input.cpp"

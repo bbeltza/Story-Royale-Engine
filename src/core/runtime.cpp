@@ -1,7 +1,6 @@
 #include "../internal.h"
 
 #include <Core/Runtime.hpp>
-#include <Core/Thread.hpp>
 
 sre::Signal<sre::empty_t> sre::onUpdate{ NULL };
 sre::Signal<sre::empty_t> sre::beforeRender{ NULL };

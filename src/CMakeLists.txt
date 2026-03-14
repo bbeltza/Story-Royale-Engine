@@ -27,7 +27,6 @@ set(BASE_SOURCES
     "fontrenderer.cpp"
     "image.cpp"
     "ini.cpp"
-    "thread.cpp"
     "tween.cpp"
     "log.cc"
 )

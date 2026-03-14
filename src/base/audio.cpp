@@ -1,6 +1,5 @@
 #include <Core/Audio.hpp>
 #include <Core/Audio.h>
-#include <Core/Thread.hpp>
 #include <Base/File.hpp>
 #include <Base/Log.h>
 

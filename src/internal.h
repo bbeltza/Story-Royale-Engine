@@ -52,10 +52,7 @@ SRE_CAPI_BEGIN
 		long long framestart_time;
 		long long frameend_time;
 
-		#define SRE_THREADS_BUCKETSIZE 32
-		void* threads_bucket[SRE_THREADS_BUCKETSIZE]; // "Hash" map of the threads
-
-		void* event_queue;
+		//void* event_queue;
 
 		// Instance data
 
@@ -133,9 +130,6 @@ SRE_CAPI_BEGIN
 	extern void __update_ecs();
 	extern void __render_scene();
 	extern void __render_ui();
-
-	extern void __cleanup_threads();
-	extern void __update_threads();
 
 	extern void __display_render();
 
