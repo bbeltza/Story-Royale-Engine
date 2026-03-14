@@ -76,8 +76,14 @@ const char LINE_VS[] =
         "uniform mat4 u_camera;"
         ""
         "void main() {"
-            "vec4 scale = vec4(vec2(u_projection[2][2]), 1.0f, 1.0f);"
-            "gl_Position = u_projection * u_camera * (i_pos*scale);"
+            "float scale = u_projection[2][2];"
+            "mat4 scalemat = mat4("
+                    "scale, 0.0f, 0.0f, 0.0f,"
+                    "0.0f, scale, 0.0f, 0.0f,"
+                    "0.0f, 0.0f,  1.0f, 0.0f,"
+                    "0.0f, 0.0f,  0.0f, 1.0f"
+            ");"
+            "gl_Position = u_projection * scalemat * u_camera * i_pos;"
         "}"
 ;
 

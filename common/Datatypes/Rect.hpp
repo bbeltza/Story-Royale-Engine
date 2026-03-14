@@ -109,4 +109,14 @@ namespace sre
 
     // A rect2D datatype composed of units ( floats for now )
     using rect2Dut = rect2D<unit>;
+
+    // NOTE: This returns a centered rect!!
+    template <typename T>
+    constexpr rect2D<T> from_bounds(const vec2<T>& top_left, const vec2<T>& bottom_right)
+    {
+        return {
+            top_left + (bottom_right - top_left)/2,
+            (bottom_right - top_left)
+        };
+    }
 }

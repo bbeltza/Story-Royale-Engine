@@ -170,6 +170,27 @@ bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color
     return true;
 }
 
+bool sreopengl_clip(const sre_videodriver* video, const sre_rect2Dut* rect)
+{
+    if (!rect)
+    {
+        SRE_GL_CALL(glDisable(GL_SCISSOR_TEST), return false;);
+        return true;
+    }
+
+    SRE_GL_CALL(glEnable(GL_SCISSOR_TEST), return false;);
+
+    sre_rect2Di r = {
+        (GLint)(rect->x * video->scale),
+        (GLint)((video->size.y - rect->y) * video->scale),
+        (GLint)(rect->w * video->scale),
+        (GLint)(rect->h * video->scale)
+    };
+    SRE_GL_CALL(glScissor(r.x, r.y, r.w, r.h), return false;);
+    return true;
+}
+
+
 #define FN(x) (void*)x
 long voi() { return 1; }
 long fai() { return 0; }
@@ -188,7 +209,7 @@ const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_texformat,
 
     sreopengl_drawcleartest,
-    FN(voi),
+    sreopengl_clip,
     sreopengl_drawfill,
     sreopengl_drawline,
     sreopengl_drawlines,

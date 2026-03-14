@@ -89,6 +89,8 @@ namespace sre
         inline void setclamp(const vec2& min, const vec2& max) { ut_setclamp(x, min.x, max.y); ut_setclamp(y, min.y, max.y); }
         inline void setlerp(const vec2& dst, double alpha) { x = static_cast<T> ut_lerp(x, dst.x, alpha); y = static_cast<T> ut_lerp(y, dst.y, alpha); }
 
+        constexpr vec2<int> sign() const { return { ut_sign(x), ut_sign(y) }; }
+
         template <typename T2> constexpr auto operator +(const vec2<T2>& other) const -> decltype(getAdd(other)) { return getAdd(other); }
         template <typename T2> constexpr auto operator -(const vec2<T2>& other) const -> decltype(getSub(other)) { return getSub(other); }
         template <typename T2> constexpr auto operator *(const vec2<T2>& other) const -> decltype(getMul(other)) { return getMul(other); }
