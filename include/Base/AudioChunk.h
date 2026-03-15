@@ -6,6 +6,8 @@
 
 SRE_CAPI_BEGIN
 
+typedef float sre_Sample;
+typedef float sre_Sample2D[2];
 typedef signed short sre_sample;
 
 typedef struct sre_AudioChunk

@@ -18,7 +18,7 @@
 						With the difference that they are completely optional, and they can be integrated directly in C/C++ code without the help of CMake
 						This can be achieved with exported symbols (what you usually do to export a function for a DLL). The engine will look up the exported symbols for the actual executable
 						(Doing LoadProcAddress(NULL, "sym_name") for example, we have SDL functions for that too) and it would return the address of the hint, or NULL if it hasn't been declared. So no linking errors!
-- Better audio: Add a standard format for audio callbacks (probably signed floats since it's easiest to operate on), with the engine's format being able to be different, this can be achieved in SDL using SDL_Streams
+- Better audio: Add a standard format for audio callbacks (probably signed floats since it's easiest to operate on), with the engine's format being able to be different, this can be achieved in SDL using SDL_AudioStreams
 
 - Android support
 

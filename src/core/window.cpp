@@ -45,9 +45,5 @@ bool sre::window_ishidden() { return 0 != (SDL_GetWindowFlags(engine.sdl_windowh
 
 void sre::window_setsize(int w, int h)
 {
-    static int data[2];
-    data[0] = w;
-    data[1] = h;
-
-    defer([](int _data[2]) { SDL_SetWindowSize(engine.sdl_windowhndl, data[0], data[1]); }, data);
+    defer([](int w, int h) { SDL_SetWindowSize(engine.sdl_windowhndl, w, h); }, w, h);
 }
