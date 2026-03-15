@@ -26,14 +26,14 @@
 
     char* sre_temporarypath(char* buffer, size_t size)
     {
-        const char* tmpdir = getenv("TMPDIR") : "/tmp";
+        const char* tmpdir = getenv("TMPDIR");
+        tmpdir = tmpdir ? tmpdir : "/tmp/";
         size_t len = strlen(tmpdir)+1;
 
         if (buffer)
-            return strlcpy(buffer, tmpdir, ut_min(len, size));
+            return strncpy(buffer, tmpdir, ut_min(len, size));
         
         buffer = sre_new(len + size);
         return strncpy(buffer, tmpdir, len);
     }
-    #error
 #endif

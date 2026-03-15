@@ -5,12 +5,16 @@
 
 void sre_defer(sre_deferFunction func, void* userdata)
 {
+    if (SDL_ThreadID() == engine.main_thrd) return func(userdata);
+
     SDL_Event ev;
     ev.type = SDL_USEREVENT;
     ev.user.code = ENGINE_EVENT_DEFER;
     ev.user.data1 = func;
     ev.user.data2 = userdata;
-    SDL_PushEvent(&ev);
+    int res = SDL_PushEvent(&ev);
+    assert(res == 1);
+    (void)res;
 }
 
 sre_sptr sre_defer_response(sre_deferResponseFunction func, void* userdata)
@@ -28,7 +32,9 @@ sre_sptr sre_defer_response(sre_deferResponseFunction func, void* userdata)
     defer->sem = SDL_CreateSemaphore(0);
 
     ev.user.data2 = defer;
-    SDL_PushEvent(&ev);
+    int res = SDL_PushEvent(&ev);
+    assert(res == 1);
+    (void)res;
 
     SDL_SemWait(defer->sem);
     ret = defer->ret;

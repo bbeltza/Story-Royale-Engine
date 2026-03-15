@@ -100,7 +100,6 @@ void __run_engine()
             switch (ev.window.event)
             {
             case SDL_WINDOWEVENT_CLOSE:
-                sre_log(SRE_LOGCATEGORY_DEBUG, "close");
                 break;
             case SDL_WINDOWEVENT_EXPOSED:
                 #if _WIN32

@@ -10,7 +10,7 @@ typedef sre_sptr (*sre_deferResponseFunction)(void* data);
 
 // Queue a function to the main thread for the next runtime execution point
 // This is pretty useful for multithreading, since some features aren't fully supported on multiple threads
-// (Like creating a texture on linux), or to solve synchronisation issues
+// (Like creating a texture with OpenGL), or to solve synchronisation issues
 // However, do not use any yielding functions like os.delay (delay_s) because othewise it would block the entire game
 void sre_defer(sre_deferFunction func, void* userdata);
 

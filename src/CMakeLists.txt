@@ -20,6 +20,7 @@ set(BASE_SOURCES
     "audiochunk.c"
     "signal.c"
     "temporary.c"
+    "filesystem.c"
 
     "action.cpp"
     "audio.cpp"
