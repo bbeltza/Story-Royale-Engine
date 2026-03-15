@@ -19,7 +19,11 @@ typedef struct sre_AudioChunk
     sre_u16 channels;
     sre_u32 frequency;
 
-    sre_sample samples[sizeof(sre_u32)];
+    sre_sample samples[
+		#ifdef __cplusplus
+			1
+		#endif
+	];
 } sre_AudioChunk;
 // Size of the audio chunk metadata (the entire size without `samples`)
 extern const size_t SRE_AUDIOCHUNK_METASIZE;
@@ -27,6 +31,8 @@ extern const size_t SRE_AUDIOCHUNK_METASIZE;
 const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata);
 int sre_audioaddref(const sre_AudioChunk* chunk);
 int sre_audioclose(const sre_AudioChunk* chunk);
+
+const sre_AudioChunk* sre_audiofromraw(const sre_AudioChunk* metadata, const void* data);
 
 struct sre_File;
 const sre_AudioChunk* sre_audiofromfile(const struct sre_File* file);

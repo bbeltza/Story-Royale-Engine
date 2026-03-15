@@ -28,17 +28,15 @@ const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
 
         if (!SDL_LoadWAV_RW(rw, 1, &spec, &audio_buff, &audio_len)) return NULL;
 
-        sre_AudioChunk* chunk = sre_new(SRE_AUDIOCHUNK_METASIZE + audio_len);
-        chunk->_refcount = 0;
-        chunk->format = spec.format;
-        chunk->channels = spec.channels;
-        chunk->frequency = spec.freq;
-        chunk->size = audio_len;
-        chunk->sample_count = audio_len / (SDL_AUDIO_BITSIZE(spec.format)/8) / spec.channels;
+        const sre_AudioChunk* chunk = sre_audiofromraw(&(sre_AudioChunk){
+            .format = spec.format,
+            .channels = spec.channels,
+            .frequency = spec.freq,
+            .size = audio_len,
+            .sample_count = audio_len / (SDL_AUDIO_BITSIZE(spec.format)/8) / spec.channels
+        }, audio_buff);
 
-        memcpy(chunk->samples, audio_buff, audio_len);
         SDL_FreeWAV(audio_buff);
-
         return chunk;
     }
     else if (
@@ -58,15 +56,15 @@ const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
         if (audio_samples < 0) return NULL;
 
         audio_len = audio_samples * channels * (SDL_AUDIO_BITSIZE(AUDIO_S16) / 8);
-        sre_AudioChunk* chunk = sre_new(SRE_AUDIOCHUNK_METASIZE + audio_len);
-        chunk->_refcount = 0;
-        chunk->format = AUDIO_S16;
-        chunk->frequency = sample_rate;
-        chunk->sample_count = audio_samples;
-        chunk->size = audio_len;
-        chunk->channels = channels;
 
-        memcpy(chunk->samples, output, audio_len);
+        const sre_AudioChunk* chunk = sre_audiofromraw(&(sre_AudioChunk){
+            .format = AUDIO_S16,
+            .frequency = sample_rate,
+            .sample_count = audio_samples,
+            .size = audio_len,
+            .channels = channels
+        }, output);
+
         free(output);
 
         return chunk;
@@ -75,7 +73,6 @@ const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
     return NULL;
 }
 
-#include <Base/Log.h>
 int sre_audioaddref(const sre_AudioChunk* chunk) { return SDL_AtomicAdd((SDL_atomic_t*)&chunk->_refcount, 1); }
 
 int sre_audioclose(const sre_AudioChunk* chunk)
@@ -105,4 +102,22 @@ const sre_AudioChunk* sre_audiofromfile(const sre_File* file)
 
     sre_chunkfree(fchunk);
     return achunk;
+}
+
+const sre_AudioChunk* sre_audiofromraw(const sre_AudioChunk* metadata, const void* raw)
+{
+    if (!metadata)
+        return NULL;
+    
+    const size_t size = metadata->size;
+    sre_AudioChunk* chunk = sre_new(SRE_AUDIOCHUNK_METASIZE + size);
+    chunk->_refcount = 0;
+    chunk->size = size;
+    chunk->sample_count = metadata->sample_count;
+    chunk->format = metadata->format;
+    chunk->channels = metadata->channels;
+    chunk->frequency = metadata->frequency;
+    memcpy(chunk->samples, raw, size);
+
+    return chunk;
 }

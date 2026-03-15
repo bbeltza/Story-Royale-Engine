@@ -33,6 +33,7 @@ namespace sre
 		~File() { sre_fileclose(this); }
 
 		inline bool valid() const { return this->impl != NULL; }
+		inline operator bool() const { return valid(); }
 
 		inline Chunk allocate(size_t max_size=0) const { return Chunk(sre_fileallocate(this, max_size)); }
 		inline SDL_RWops* to_RWops() const { return sre_filetorwops(this); }
