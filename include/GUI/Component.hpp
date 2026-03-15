@@ -26,6 +26,7 @@ namespace sreGUI
             inline void disable() { flags.toggle_off(F_ENABLED); }
         //
 
+        constexpr Component() = default;
         // TODO too: Add custom constructor
     protected:
         virtual void on_render(const sre::rect2Dut& dimensions) {}

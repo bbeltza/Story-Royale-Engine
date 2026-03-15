@@ -29,7 +29,7 @@ bool sreopengl_texupdate(const sre_videodriver* video, void* _texture, const voi
 
     SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, texture->id));
                                                 // Don't see this... I don't know, when I saw RGB5 I thought it was cool
-    SRE_GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA4, texture->w, texture->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels), return false;);
+    SRE_GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->w, texture->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels), return false;);
     
     SRE_GL_CALL(glBindTexture(GL_TEXTURE_2D, inst->basic_texture));
     return true;

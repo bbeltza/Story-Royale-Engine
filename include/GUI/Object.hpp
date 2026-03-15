@@ -152,6 +152,9 @@ namespace sreGUI
             Iterator begin() const { return Iterator(list_type::begin()); }
             Iterator end() const { return Iterator(list_type::end()); }
 
+            using list::size;
+            using list::front;
+            using list::back;
         } children;
         class CContainer
         {
