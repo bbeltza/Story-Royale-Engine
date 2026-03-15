@@ -4,7 +4,6 @@ inline bool _mkdir_internal(const char*);
 
 #if _WIN32
     #include <Windows.h>
-    #error "I'm on linux right now so I cannot properly implement the internal but I'll do it"
 
     inline bool _mkdir_internal(const char* path) { return CreateDirectoryA(path, NULL) != FALSE; }
 #elif __unix__

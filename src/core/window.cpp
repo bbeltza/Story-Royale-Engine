@@ -49,5 +49,5 @@ void sre::window_setsize(int w, int h)
     data[0] = w;
     data[1] = h;
 
-    defer([](int data[2]) { SDL_SetWindowSize(engine.sdl_windowhndl, data[0], data[1]); }, data);
+    defer([](int _data[2]) { SDL_SetWindowSize(engine.sdl_windowhndl, data[0], data[1]); }, data);
 }

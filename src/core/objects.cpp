@@ -117,12 +117,12 @@ void sre::ECS::update_layer()
 	if (!current) return;
 	current->m_absolute.size = sre::display_size();
 	current->m_absolute.position = sre::vec2ut::ZERO;
+	
+    current->call_update();
 
 	current->call_process();
 	current->call_processchildren();
 	current->call_prerender();
-
-	current->call_update();
 
 	if (current != engine.current_guilayer) goto BEGIN;
 }

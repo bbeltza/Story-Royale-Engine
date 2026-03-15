@@ -5,7 +5,10 @@
 
 void sre_defer(sre_deferFunction func, void* userdata)
 {
-    if (SDL_ThreadID() == engine.main_thrd) return func(userdata);
+    if (SDL_ThreadID() == engine.main_thrd){
+        func(userdata);
+        return;
+    };
 
     SDL_Event ev;
     ev.type = SDL_USEREVENT;
