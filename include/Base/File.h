@@ -24,7 +24,8 @@ enum sre_fileMode
     SRE_FILE_READ,
     SRE_FILE_WRITE,
     SRE_FILE_READWRITE,
-    SRE_FILE_READWRITE_CREATE
+    SRE_FILE_READWRITE_CREATE,
+    SRE_FILE_OVERRIDE
 };
 
 typedef enum sre_seek

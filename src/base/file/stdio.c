@@ -13,6 +13,7 @@ static const char* map_modetostr(int mode)
     case SRE_FILE_WRITE: return "wb";
     case SRE_FILE_READWRITE: return "rb+";
     case SRE_FILE_READWRITE_CREATE: return "wb+";
+    //case SRE_FILE_APPEND: return "ab";
     default: return NULL;
     }
 }

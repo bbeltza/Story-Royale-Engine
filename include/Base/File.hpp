@@ -58,6 +58,15 @@ namespace sre
 		inline bool read(T& obj) const { return read(&obj, sizeof(obj)) == sizeof(obj); }
 		template <typename T>
 		inline bool write(const T& obj) const { return write(&obj, sizeof(obj)) == sizeof(obj); }
+
+		template <size_t n>
+		inline bool write(const char (&str)[n]) const
+		{
+			size_t size = sizeof(str);
+			if (!str[n-1])
+				size--;
+			return write(str, size) == size;
+		}
 	};
 }
 

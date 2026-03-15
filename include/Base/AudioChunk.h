@@ -30,6 +30,8 @@ int sre_audioclose(const sre_AudioChunk* chunk);
 
 struct sre_File;
 const sre_AudioChunk* sre_audiofromfile(const struct sre_File* file);
+const sre_AudioChunk* sre_audiofromcache(const char* resource);
+bool sre_audiotocache(const sre_AudioChunk* chunk, const char* resource);
 
 SRE_CAPI_END
 
