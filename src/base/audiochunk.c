@@ -1,6 +1,7 @@
 #include <Base/AudioChunk.h>
 #include <Base/File.h>
 #include <Base/Chunk.h>
+#include <Base/Log.h>
 
 #include <utils/mem.h>
 
@@ -46,34 +47,78 @@ const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
         rawdata[3] == 'S'
     )
     {
-        int audio_samples;
-        int audio_len;
-        int channels;
-        int sample_rate;
-        short* output;
+        
+        stb_vorbis* context = stb_vorbis_open_memory(rawdata, (int)size, NULL, NULL);
+        if (!context)
+            return NULL;
+        
+        stb_vorbis_info info = stb_vorbis_get_info(context);
+        /*
+        SDL_AudioStream* stream = SDL_NewAudioStream(
+                AUDIO_S16,
+                info.channels,
+                info.sample_rate,
+                
+                AUDIO_S16,
+                info.channels,
+                info.sample_rate
+        );
+        if (!stream)
+        {
+            stb_vorbis_close(context);
+            return NULL;
+        }
+        */
+        int end = 0;
+        int cap = info.max_frame_size;
+        short *buffer = malloc(cap*sizeof(short)*info.channels);
 
-        audio_samples = stb_vorbis_decode_memory(rawdata, (int)size, &channels, &sample_rate, &output);
-        if (audio_samples < 0) return NULL;
-
-        audio_len = audio_samples * channels * (SDL_AUDIO_BITSIZE(AUDIO_S16) / 8);
-
+        while (true)
+        {
+            int x = stb_vorbis_get_samples_short_interleaved(context, info.channels, buffer+end*info.channels, info.max_frame_size);
+            if (x == 0)
+                break;
+            end += x;
+            if (end+info.max_frame_size > cap)
+            {
+                cap *= 2;
+                buffer = realloc(buffer, cap*sizeof(short)*info.channels);
+            }
+            /*
+            SDL_AudioStreamPut(stream, buff, x*sizeof(short)*info.channels);
+            */
+        }
+        
+        /*
+        SDL_AudioStreamFlush(stream);
+        int audio_len = SDL_AudioStreamAvailable(stream);
+        */
         const sre_AudioChunk* chunk = sre_audiofromraw(&(sre_AudioChunk){
             .format = AUDIO_S16,
-            .frequency = sample_rate,
-            .sample_count = audio_samples,
-            .size = audio_len,
-            .channels = channels
-        }, output);
+            .frequency = info.sample_rate,
+            .sample_count = end,
+            .size = end*sizeof(short)*info.channels,
+            .channels = info.channels
+        }, buffer);
 
-        free(output);
-
+        free(buffer);
+        /*
+        SDL_AudioStreamGet(stream, (void*)chunk->samples, audio_len);
+        SDL_FreeAudioStream(stream);
+        */
+        stb_vorbis_close(context);
         return chunk;
     }
 
     return NULL;
 }
 
-int sre_audioaddref(const sre_AudioChunk* chunk) { return SDL_AtomicAdd((SDL_atomic_t*)&chunk->_refcount, 1); }
+int sre_audioaddref(const sre_AudioChunk* chunk)
+{
+    if (!chunk)
+        return -1;
+    return SDL_AtomicAdd((SDL_atomic_t*)&chunk->_refcount, 1);
+}
 
 int sre_audioclose(const sre_AudioChunk* chunk)
 {
@@ -117,7 +162,8 @@ const sre_AudioChunk* sre_audiofromraw(const sre_AudioChunk* metadata, const voi
     chunk->format = metadata->format;
     chunk->channels = metadata->channels;
     chunk->frequency = metadata->frequency;
-    memcpy(chunk->samples, raw, size);
+    if (raw)
+        memcpy(chunk->samples, raw, size);
 
     return chunk;
 }

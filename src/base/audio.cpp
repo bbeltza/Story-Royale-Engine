@@ -87,7 +87,7 @@ int Audio::audio_callback(Audio* audio, sre_u8* _samples, size_t len)
 	for (size_t i = 0; i < len; i += channels)
 	{
 		u32 sampleindex = audio->m_samplepos * channels;
-		const s16* const chunksamples = audio->m_chunk->samples + sampleindex;
+		const s16* const chunksamples = reinterpret_cast<const s16*>(audio->m_chunk->samples) + sampleindex;
 
 		if (audio->m_fading)
 		{

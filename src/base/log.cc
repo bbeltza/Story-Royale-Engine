@@ -170,12 +170,14 @@ namespace
     };
 }
 
+#include <SDL_thread.h>
+
 static sre::Log* inst;
 int init_logsifnoinst()
 {
     if (!inst)
     {
-        std::thread thrd([]() {
+        SDL_Thread* thrd = SDL_CreateThread([](void*) {
             sre::Log instance;
             inst = &instance;
             while (true)
@@ -183,8 +185,10 @@ int init_logsifnoinst()
                 instance.flush();
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
-        });
-        thrd.detach();
+
+            return 0;
+        }, "Logging loop", NULL);
+        SDL_DetachThread(thrd);
 
         while (!inst)
             std::this_thread::yield();
