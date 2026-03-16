@@ -1,14 +1,10 @@
 #ifndef SRE_AUDIOCHUNK_H
 #define SRE_AUDIOCHUNK_H
 #include <C_API.h>
-
 #include <ints.h>
+#include <Datatypes/Samples.h>
 
 SRE_CAPI_BEGIN
-
-typedef float sre_Sample;
-typedef float sre_Sample2D[2];
-typedef signed short sre_sample;
 
 typedef struct sre_AudioChunk
 {
@@ -21,7 +17,7 @@ typedef struct sre_AudioChunk
     sre_u16 channels;
     sre_u32 frequency;
 
-    sre_sample samples[
+    sre_Sample samples[
 		#ifdef __cplusplus
 			1
 		#endif
