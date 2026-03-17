@@ -80,8 +80,12 @@ if (ANDROID)
 endif()
 
 check_include_file(ucontext.h HAVE_UCONTEXT_H)
+check_include_file(sys/stat.h HAVE_SYSSTAT_H)
 if (HAVE_UCONTEXT_H)
     target_compile_definitions(sre PUBLIC "HAVE_UCONTEXT_H")
+endif()
+if (HAVE_SYSSTAT_H)
+    target_compile_definitions(sre PUBLIC "HAVE_SYSSTAT_H")
 endif()
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})

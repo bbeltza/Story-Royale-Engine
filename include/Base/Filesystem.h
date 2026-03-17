@@ -15,7 +15,7 @@ SRE_CAPI_END
 namespace sre
 {
     bool mkdir(const char* path) { return sre_mkdir(path); }
-    bool mkdir(const std::string& path) { return sre::mkdir(path.c_str()); }
+    bool mkdir(const std::string& path) { return sre_mkdir(path.c_str()); }
 }
 
 #endif

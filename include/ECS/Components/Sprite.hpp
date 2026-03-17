@@ -12,8 +12,26 @@ namespace sreECS
     class Sprite : public Component
     {       
     public:
-        Sprite();
-        ~Sprite();
+        template <typename... Args>
+        Sprite(
+            const sre::vec2ut& scale,
+            const sre::vec2ut& offset=sre::vec2ut::ZERO,
+            const sre::col4& modulate=sre::WHITE,
+            Args&&... textures
+        ):
+            scale(scale),
+            offset(offset),
+            modulate(modulate),
+            textures({&textures...})
+        {}
+
+        template <typename... Args>
+        Sprite(Args&&... textures):
+            scale(scale.ONE),
+            offset(offset.ZERO),
+            modulate(sre::WHITE),
+            textures({&textures...})
+        {}
 
         sre::vec2ut scale;
         sre::vec2ut offset;

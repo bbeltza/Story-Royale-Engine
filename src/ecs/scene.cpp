@@ -4,6 +4,7 @@
 
 #include <Core/Display.hpp>
 #include <Core/Input.hpp>
+#include <Core/Draw.hpp>
 
 #include "../internal.h"
 
@@ -262,6 +263,11 @@ void Scene::call_render()
             if (comp.enabled())
                 comp.on_render(ent);
         }
+
+        #if 0
+            sre::draw_lines(sre::RED, true, ent.position + sre::vec2ut{ 0, 3 }, ent.position - sre::vec2ut{ 0, 3 });
+            sre::draw_lines(sre::RED, true, ent.position + sre::vec2ut{ 3, 0 }, ent.position - sre::vec2ut{ 3, 0 });
+        #endif
     }
 
     post_render();

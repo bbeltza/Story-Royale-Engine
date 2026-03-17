@@ -7,11 +7,6 @@
 
 using namespace sreECS;
 
-Sprite::Sprite(): scale(1, 1), offset(0, 0) {}
-Sprite::~Sprite()
-{
-}
-
 void Sprite::attach(sre::Texture& texture)
 {
     textures.push_back(&texture);
