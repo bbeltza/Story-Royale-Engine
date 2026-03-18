@@ -154,7 +154,7 @@ const sre_AudioChunk* sre_audiofromraw(const sre_AudioChunk* metadata, const voi
     if (!metadata)
         return NULL;
     
-    const size_t size = metadata->size;
+    const sre_u32 size = metadata->size;
     sre_AudioChunk* chunk = sre_new(SRE_AUDIOCHUNK_METASIZE + size);
     chunk->_refcount = 0;
     chunk->size = size;

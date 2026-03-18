@@ -182,7 +182,7 @@ bool sreopengl_clip(const sre_videodriver* video, const sre_rect2Dut* rect)
 
     sre_rect2Di r = {
         (GLint)(rect->x * video->scale),
-        (GLint)((video->size.y - rect->y) * video->scale),
+        (GLint)((video->size.y - rect->y - rect->h) * video->scale),
         (GLint)(rect->w * video->scale),
         (GLint)(rect->h * video->scale)
     };
