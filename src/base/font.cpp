@@ -55,14 +55,14 @@ int Font::str_to_utf8chr(const char* str, char* dst)
         dst[0] = str[0];
         return 1;
     }
-    else if (str[0] < -64) assert(0 && "Broken UTF-8 codepoint");
-    else if (str[0] < -32)
+    else if (str[0] < static_cast<char>(-64)) assert(0 && "Broken UTF-8 codepoint");
+    else if (str[0] < static_cast<char>(-32))
     {
         dst[0] = str[0];
         dst[1] = str[1];
         return 2;
     }
-    else if (str[0] < -16)
+    else if (str[0] < static_cast<char>(-16))
     {
         dst[0] = str[0];
         dst[1] = str[1];

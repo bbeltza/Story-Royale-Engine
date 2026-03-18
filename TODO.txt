@@ -21,6 +21,9 @@
 - Better audio: Add a standard format for audio callbacks (probably signed floats since it's easiest to operate on), with the engine's format being able to be different, this can be achieved in SDL using SDL_AudioStreams
 
 - Android support
+	- NOTE: Android code support has been dropped since the last time I tried to compile this because of coroutines
+		Android sadly does not have any of the ucontext.h functions...
+		I'll have to write my own assembly for 4 ARCHITECTURES... (arm32, arm64, x86 and x64...)
 
 - Tile map components AND core physics
 - Core physics (Basically supporting physics/collisions from the core engine)

@@ -133,6 +133,9 @@ namespace sreECS
     private:
         struct _Arena
         {
+            #ifdef PAGE_SIZE
+                #undef PAGE_SIZE
+            #endif
             static constexpr size_t PAGE_SIZE = 4096;
             static constexpr size_t SIZE = PAGE_SIZE - sizeof(size_t);
 

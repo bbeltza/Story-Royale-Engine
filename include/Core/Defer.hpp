@@ -34,7 +34,7 @@ namespace sre
     void defer(Fn&& func, Args... args)
     {
         using Wrapper = _DeferWrapper<Fn&&, Args...>;
-        using Tuple = Wrapper::Tuple;
+        using Tuple = typename Wrapper::Tuple;
 
         auto wrapper = new Wrapper{ std::forward<Fn>(func), Tuple{args...} };
         sre_defer( Wrapper::_getcall(typename ut::make_sequence<sizeof...(Args)>::type{}), wrapper);

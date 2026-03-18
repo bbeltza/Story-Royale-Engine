@@ -6,7 +6,7 @@ target_include_directories(sre_driverinterface INTERFACE ".")
 
 function(SRE_DRIVERBUILD TARGET)
     project(${TARGET})
-    add_library(${TARGET} ${ARGN})
+    add_library(${TARGET} STATIC ${ARGN})
     target_link_libraries(${TARGET} PRIVATE sre_driverinterface)
     target_link_libraries(sre_driverinterface INTERFACE ${TARGET})
 endfunction()

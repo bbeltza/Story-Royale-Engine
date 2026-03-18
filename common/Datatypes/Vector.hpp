@@ -2,7 +2,7 @@
 #include <Datatypes/common.hpp>
 #include <Datatypes/Units.h>
 
-#include <math.h>
+#include <cmath>
 
 #include "utils/math.h"
 #include "utils/math.hpp"
