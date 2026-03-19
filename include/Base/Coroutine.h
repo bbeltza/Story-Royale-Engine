@@ -17,8 +17,11 @@ typedef enum
     SRE_COROUTINESTATE_RUNNING,
     SRE_COROUTINESTATE_SUSPENDED,
     SRE_COROUTINESTATE_CANCELLED
-    // There might be `CANCELLED` and `FINISHED` too
+    // There might be `FINISHED` too
 } sre_coroutineState;
+
+// Will initialize and run coroutine context in the calling thread
+void _coroutine_coreinit(void* running);
 
 // Create new coroutine handle
 // @return Handle to the coroutine, or `NULL` if creation fails
@@ -28,7 +31,7 @@ bool sre_coroutineresume(sre_coroutine* coroutine, void* data);
 
 // Note that these 2 functions don't yield if the calling coroutine is in a `CANCELLED` state
 bool sre_coroutinesuspend(); // Suspend calling coroutine
-bool sre_coroutineyield(sre_timeStamp time); // Yield current coroutine for `time` seconds
+bool sre_coroutineyield(sre_timeStamp delay); // Yield current coroutine for `time` seconds
 
 // Retrieve the current coroutine, suspend the coroutine and retrieve data from it
 void* sre_coroutinesuspendEx(sre_coroutine** current);
