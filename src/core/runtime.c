@@ -12,7 +12,6 @@
     #error "Implement your own sleep!!"
 #endif
 
-extern void sre_logflush();
 static int __event_watch(void *, SDL_Event *);
 
 static int game_loop(void* running)
@@ -164,6 +163,9 @@ static int __event_watch(void *data, SDL_Event *ev)
     SDL_threadID id = SDL_ThreadID();
     if (id != engine.main_thrd)
         return 1;
+
+    if (!__event_filter(data, ev))
+        return 0;
 
     //if (ev->type == SDL_QUIT) __debugbreak();
     if (ev->type == SDL_WINDOWEVENT)

@@ -26,14 +26,18 @@ namespace sreECS
         };
 
     public:
-        Shape();
+        Shape(
+            sre::flagsptr flags=F_VISIBLE,
+            sre::rect2Dut rect={},
+            sre::col4 color=sre::WHITE
+        );
         ~Shape();
 
         // The rect representing the area of the shape by its size, and the offset from the entity by its position
         sre::rect2Dut rect;
         sre::col4 color = sre::WHITE;
 
-        ShapeForm shape;
+        ShapeForm shape = S_RECTANGLE;
 
         void on_pupdate(Entity&) override;
         void on_render(Entity&) override;

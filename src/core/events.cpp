@@ -18,18 +18,23 @@ static sre::EventQueue queue;
 static sre::EventMutex mutex;
 sre::Signal<sre::Event> sre::onEvent;
 
-int __signal_events(SDL_Event* ev)
+int __event_filter(void* userdata, SDL_Event* ev)
 {
-#ifndef IMGUI_DISABLE
-    if (engine.video->imgui)
+    #ifndef IMGUI_DISABLE
+    if (ev->type == SDL_QUIT) return 1;
+    if (engine.video && engine.video->imgui)
     {
         ImGuiIO& io = ImGui::GetIO();
         ImGui_ImplSDL2_ProcessEvent(ev);
-        if (io.WantCaptureMouse)
+        if (io.WantCaptureKeyboard)
             return 0;
     }
-#endif
+    #endif
+    return 1;
+}
 
+int __signal_events(SDL_Event* ev)
+{
     sre::Event current;
 
     switch (ev->type)

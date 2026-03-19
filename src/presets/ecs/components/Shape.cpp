@@ -7,8 +7,14 @@
 
 using namespace sreECS;
 
-Shape::Shape() : shape(S_RECTANGLE),
-				 Component(F_VISIBLE)
+Shape::Shape(
+            sre::flagsptr _flags,
+            sre::rect2Dut _rect,
+            sre::col4 _color
+        ):
+		Component(_flags),
+		rect(_rect),
+		color(_color)
 {
 }
 

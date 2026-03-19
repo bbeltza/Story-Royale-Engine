@@ -120,6 +120,7 @@ SRE_CAPI_BEGIN
 
 	extern void __poll_input(SDL_Event* ev);
 
+	extern int __event_filter(void*, SDL_Event* ev);
 	extern int __signal_events(SDL_Event* ev);
 	extern void __queue_events();
 
