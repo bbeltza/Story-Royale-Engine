@@ -28,6 +28,13 @@ static void __invoke_entry(void* userdata) // Invoking the entry-point won't be 
     SDL_PushEvent(&finish_event);
 }
 
+static int __run_coroutine(void* run)
+{
+    _coroutine_coreinit(run);
+
+    return 0;
+}
+
 static inline void __setup_engine_data()
 {
     engine.phys_target_dt = 1 / 128.0;
@@ -36,7 +43,10 @@ static inline void __setup_engine_data()
     engine.destroyqueue_mutex = SDL_CreateMutex();
 
     engine.main_thrd = SDL_ThreadID();
-    engine.entry_thread = sre_coroutinecreate(false, __invoke_entry, NULL);
+
+    engine.cor_running = true;
+    engine.coroutine_thread = SDL_CreateThread(__run_coroutine, "Coroutine Engine Thread", &engine.cor_running);
+    sre_coroutinecreate(false, __invoke_entry, NULL);
 }
 
 static void sdl_log_callback(void *userdata, int category, SDL_LogPriority priority, const char *message)
@@ -73,7 +83,6 @@ void __initialize_engine()
     }
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
-    sre_coroutinecoreinit();
 
     __setup_audio_device();
     __create_window();
@@ -86,7 +95,9 @@ void __initialize_engine()
 
 void __end_engine()
 {
-    sre_coroutinecorequit();
+    engine.cor_running = false;
+    SDL_WaitThread(engine.coroutine_thread, NULL);
+
     __cleanup_ecs();  
     
     __cleanup_renderer();

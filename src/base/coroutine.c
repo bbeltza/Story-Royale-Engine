@@ -26,7 +26,9 @@
     
 typedef struct coroutine_data coroutine_data;
 
-#if defined(_WIN32)
+#if !defined(_MSC_VER) && defined(__x86_64__)
+    #include "coroutine/x86_64.c"
+#elif defined(_WIN32)
     #include "coroutine/win32.c"
 #elif defined(HAVE_UCONTEXT_H)
     #include "coroutine/ucontext.c"
@@ -84,90 +86,12 @@ struct coroutine_data
     sre_coroutineState* stateptr;
 };
 
-static struct coroutine_instance inst;
-
-static int SDLCALL poolthread_proc(void* _inst)
-{
-    struct coroutine_instance* inst = _inst;
-    inst->thread_id = SDL_ThreadID();
-    inst->running = true;
-
-    sys_coroutinepoolsetup(&inst->thread_native);
-
-    while (inst->running || inst->current)
-    {
-        sre_coroutine* prev = NULL;
-        inst->current = inst->head;
-        while (inst->current)
-        {
-            assert(inst->current->state != SRE_COROUTINESTATE_INVALID);
-            if (inst->current->state == SRE_COROUTINESTATE_SUSPENDED)
-            {
-                if (inst->current->resume_tick && inst->current->resume_tick <= SDL_GetTicks64())
-                    inst->current->state = SRE_COROUTINESTATE_RUNNING;
-                else
-                    goto ENDLOOP;
-            }
-
-            // Code to perform the "OS" switch
-                sys_coroutineswitch(&inst->current->native);
-                if (inst->current->state == SRE_COROUTINESTATE_CANCELLED)
-                {
-                    sre_coroutine* curr = inst->current;
-                    if (prev)
-                        prev->next = curr->next;
-                    else
-                        inst->head = curr->next;
-
-                    if (curr == inst->end)
-                        inst->end = prev;
-                    
-                    inst->current = curr->next;
-
-                    sys_coroutineclose(&curr->native);
-                    sre_delete(curr);
-
-                    continue;
-                }
-            //
-
-            ENDLOOP:
-            prev = inst->current;
-            inst->current = inst->current->next;
-        }
-
-        SDL_Delay(1);
-    }
-
-    return 0;
-}
-
-bool sre_coroutinecoreinit()
-{
-    assert(inst.thread == NULL /* Cannot call sre_coroutinecoreinit() twice!! */);
-    
-    inst.thread = SDL_CreateThread(poolthread_proc, "Coroutine pool", &inst);
-    if (!inst.thread)
-        return false;
-    
-    return true;
-}
-
-void sre_coroutinecorequit()
-{
-    sre_coroutine* current = inst.head;
-    while (current)
-    {
-        current->state = SRE_COROUTINESTATE_CANCELLED;
-        current = current->next;
-    }
-
-    inst.running = false;
-    SDL_WaitThread(inst.thread, NULL);
-}
+static struct coroutine_instance* current_instance;
 
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata)
 {
+    while (!current_instance)
+        (void)0;
     sre_coroutine* coroutine = sre_newclear(sizeof(sre_coroutine));
 
     coroutine_data* data = sre_new(sizeof(coroutine_data));
@@ -182,16 +106,16 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     }
     
     coroutine->state = suspended ? SRE_COROUTINESTATE_SUSPENDED : SRE_COROUTINESTATE_RUNNING;
-    if (inst.end)
+    if (current_instance->end)
     {
-        inst.end->next = coroutine;
+        current_instance->end->next = coroutine;
     }
     else
     {
-        assert(inst.head == NULL);
-        inst.head = coroutine;
+        assert(current_instance->head == NULL);
+        current_instance->head = coroutine;
     }
-    inst.end = coroutine;
+    current_instance->end = coroutine;
 
     return coroutine;
 }
@@ -209,10 +133,10 @@ bool sre_coroutineresume(sre_coroutine* coroutine, void* data)
 
 bool sre_coroutinerunning()
 {
-    if (SDL_ThreadID() != inst.thread_id) return true;
-    assert(inst.current != NULL);
+    if (SDL_ThreadID() != current_instance->thread_id) return true;
+    assert(current_instance->current != NULL);
 
-    return inst.current->state == SRE_COROUTINESTATE_RUNNING;
+    return current_instance->current->state == SRE_COROUTINESTATE_RUNNING;
 }
 
 bool sre_coroutinesuspend()
@@ -227,36 +151,36 @@ void* sre_coroutinesuspendEx(sre_coroutine** current)
     static sre_coroutine* dummy;
     if (!current) current = &dummy;
 
-    if (SDL_ThreadID() != inst.thread_id)
+    if (SDL_ThreadID() != current_instance->thread_id)
     {
         *current = NULL;
         return NULL;
     }
-    assert(inst.current != NULL);
-    *current = inst.current;
+    assert(current_instance->current != NULL);
+    *current = current_instance->current;
 
-    if (inst.current->state == SRE_COROUTINESTATE_CANCELLED) goto END_FUNC;
-    inst.current->state = SRE_COROUTINESTATE_SUSPENDED;
-    inst.current->resume_tick = 0;
-    sys_coroutineswitch(&inst.thread_native);
+    if (current_instance->current->state == SRE_COROUTINESTATE_CANCELLED) goto END_FUNC;
+    current_instance->current->state = SRE_COROUTINESTATE_SUSPENDED;
+    current_instance->current->resume_tick = 0;
+    sys_coroutineswitch(&current_instance->thread_native);
 
     END_FUNC:
-    return inst.current->data;
+    return current_instance->current->data;
 }
 
 bool sre_coroutineyield(sre_timeStamp time)
 {
-    if (SDL_ThreadID() != inst.thread_id) return false;
-    assert(inst.current != NULL);
+    if (SDL_ThreadID() != current_instance->thread_id) return false;
+    assert(current_instance->current != NULL);
 
-    if (inst.current->state == SRE_COROUTINESTATE_CANCELLED) return true;
+    if (current_instance->current->state == SRE_COROUTINESTATE_CANCELLED) return true;
     if (time > 0) // Passing a `time` of zero (or a value lower than 0 if you'd like to shake your head and risk an assertion)
                   // will simply switch execution to other coroutines
     {
-        inst.current->state = SRE_COROUTINESTATE_SUSPENDED;
-        inst.current->resume_tick = (unsigned long)(SDL_GetTicks64() + (Uint64)(time * 1000));
+        current_instance->current->state = SRE_COROUTINESTATE_SUSPENDED;
+        current_instance->current->resume_tick = (unsigned long)(SDL_GetTicks64() + (Uint64)(time * 1000));
     }
-    sys_coroutineswitch(&inst.thread_native);
+    sys_coroutineswitch(&current_instance->thread_native);
 
     return true;
 }
@@ -288,8 +212,74 @@ void COROUTINE_CALL coroutine_entry(void* _data)
     func(userdata);
 
     *stateptr = SRE_COROUTINESTATE_CANCELLED;
-    sys_coroutineswitch(&inst.thread_native);
+    sys_coroutineswitch(&current_instance->thread_native);
 
-    // Right now when a coroutine finishes without closing then it reaches this line
     assert("This location should NOT be reached" && NULL);
+}
+
+void _coroutine_coreinit(void* running)
+{
+    struct coroutine_instance instance;
+    memset(&instance, 0, sizeof(instance));
+    current_instance = &instance;
+
+    instance.thread_id = SDL_ThreadID();
+    sys_coroutinepoolsetup(&instance.thread_native);
+
+    while (*(bool*)running)
+    {
+        sre_coroutine* prev = NULL;
+        instance.current = instance.head;
+        while (instance.current)
+        {
+            assert(instance.current->state != SRE_COROUTINESTATE_INVALID);
+            if (instance.current->state == SRE_COROUTINESTATE_SUSPENDED)
+            {
+                if (instance.current->resume_tick && instance.current->resume_tick <= SDL_GetTicks64())
+                    instance.current->state = SRE_COROUTINESTATE_RUNNING;
+                else
+                    goto ENDLOOP;
+            }
+
+            // Code to perform the context switch
+                sys_coroutineswitch(&instance.current->native);
+                if (instance.current->state == SRE_COROUTINESTATE_CANCELLED)
+                {
+                    sre_coroutine* curr = instance.current;
+                    if (prev)
+                        prev->next = curr->next;
+                    else
+                        instance.head = curr->next;
+
+                    if (curr == instance.end)
+                        instance.end = prev;
+                    
+                    instance.current = curr->next;
+
+                    sys_coroutineclose(&curr->native);
+                    sre_delete(curr);
+
+                    continue;
+                }
+            //
+
+            ENDLOOP:
+            prev = instance.current;
+            instance.current = instance.current->next;
+        }
+
+        SDL_Delay(1);
+    }
+
+    // Close coroutine engine, cleanup remaining coroutines
+    while (instance.head)
+    {
+        sre_coroutine* curr = instance.head;
+        instance.head = instance.head->next;
+        
+        instance.current = curr;
+        curr->state = SRE_COROUTINESTATE_CANCELLED;
+        sys_coroutineswitch(&curr->native);
+        sre_delete(curr);
+    }
 }

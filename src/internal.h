@@ -61,8 +61,9 @@ SRE_CAPI_BEGIN
 
 		SDL_mutex* destroyqueue_mutex;
 
-		void* entry_thread;
+		void* coroutine_thread;
 		void* game_loop;
+		bool cor_running;
 
 		// Window data
 

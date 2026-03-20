@@ -4,7 +4,7 @@
 
 typedef ucontext_t coroutine_native;
 
-static coroutine_native* current_context;
+static __thread coroutine_native* current_context;
 static void coroutine_entry(void* data);
 
 
