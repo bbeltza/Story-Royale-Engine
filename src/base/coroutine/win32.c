@@ -29,8 +29,9 @@ static bool sys_coroutinepoolsetup(coroutine_native* pool)
     return true;
 }
 
-static void sys_coroutineswitch(coroutine_native* coroutine)
+static void sys_coroutineswitch(coroutine_native* coroutine, coroutine_native* _current)
 {
+    (void)_current; // Unused
     assert(coroutine != NULL);
 
     LPVOID fiber = *coroutine;

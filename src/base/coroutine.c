@@ -26,8 +26,10 @@
     
 typedef struct coroutine_data coroutine_data;
 
-#if !defined(_MSC_VER) && defined(__x86_64__) && 01
+#if !defined(_MSC_VER) && defined(__x86_64__)
     #include "coroutine/x86_64.c"
+#elif !defined(_MSC_VER) && defined(__i386__)
+    #include "coroutine/x86_32.c"
 #elif defined(_WIN32)
     #include "coroutine/win32.c"
 #elif defined(HAVE_UCONTEXT_H)
