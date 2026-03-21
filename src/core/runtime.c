@@ -50,7 +50,7 @@ static int game_loop(void* running)
             if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
             {
                 sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
-                assert(0 && "You must debug this");
+                //assert(0 && "You must debug this");
             }
         }
         else

@@ -50,8 +50,6 @@ sre::Object::~Object()
 
 void sre::Object::destroy()
 {
-    if (!static_cast<void*>(this))
-        return; // Safe to call this->destroy() when `this` is NULL
     if (m_nextdestroyed) // Object is already in the queue, don't insert it again
 		return;
 

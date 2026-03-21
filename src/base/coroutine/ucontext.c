@@ -4,7 +4,6 @@
 
 typedef ucontext_t coroutine_native;
 
-static __thread coroutine_native* current_context;
 static void coroutine_entry(void* data);
 
 
@@ -24,17 +23,20 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_dat
 
 static bool sys_coroutinepoolsetup(coroutine_native* pool)
 {
-    current_context = pool;
+    (void)pool;
     return true;
 }
 
-static void sys_coroutineswitch(coroutine_native* coroutine)
+static void sys_coroutineswitch(coroutine_native* coroutine, coroutine_native* current)
 {
-    if (!current_context) return;
+    static coroutine_native _dummy;
+    if (!current)
+    {
+        setcontext(coroutine);
+        return;
+    }
 
-    coroutine_native* curr = current_context;
-    current_context = coroutine;
-    swapcontext(curr, coroutine);
+    swapcontext(current, coroutine);
 }
 
 static void sys_coroutineclose(coroutine_native* coroutine)

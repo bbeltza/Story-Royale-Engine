@@ -26,7 +26,7 @@
     
 typedef struct coroutine_data coroutine_data;
 
-#if !defined(_MSC_VER) && defined(__x86_64__)
+#if !defined(_MSC_VER) && defined(__x86_64__) && 01
     #include "coroutine/x86_64.c"
 #elif defined(_WIN32)
     #include "coroutine/win32.c"
@@ -48,7 +48,7 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_dat
 // `pool` is automatically initialized to `NULL` for the first time
 static bool sys_coroutinepoolsetup(coroutine_native* pool);
 // Switch to the following coroutine
-static void sys_coroutineswitch(coroutine_native* coroutine);
+static void sys_coroutineswitch(coroutine_native* coroutine, coroutine_native* current);
 
 static void sys_coroutineclose(coroutine_native* coroutine);
 
@@ -90,7 +90,7 @@ static struct coroutine_instance* current_instance;
 
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata)
 {
-    while (!current_instance)
+    while (!*(struct coroutine_instance* volatile*)(&current_instance))
         (void)0;
     sre_coroutine* coroutine = sre_newclear(sizeof(sre_coroutine));
 
@@ -162,7 +162,7 @@ void* sre_coroutinesuspendEx(sre_coroutine** current)
     if (current_instance->current->state == SRE_COROUTINESTATE_CANCELLED) goto END_FUNC;
     current_instance->current->state = SRE_COROUTINESTATE_SUSPENDED;
     current_instance->current->resume_tick = 0;
-    sys_coroutineswitch(&current_instance->thread_native);
+    sys_coroutineswitch(&current_instance->thread_native, &current_instance->current->native);
 
     END_FUNC:
     return current_instance->current->data;
@@ -175,12 +175,12 @@ bool sre_coroutineyield(sre_timeStamp time)
 
     if (current_instance->current->state == SRE_COROUTINESTATE_CANCELLED) return true;
     if (time > 0) // Passing a `time` of zero (or a value lower than 0 if you'd like to shake your head and risk an assertion)
-                  // will simply switch execution to other coroutines
+                  // will simply just switch execution to other coroutines
     {
         current_instance->current->state = SRE_COROUTINESTATE_SUSPENDED;
         current_instance->current->resume_tick = (unsigned long)(SDL_GetTicks64() + (Uint64)(time * 1000));
     }
-    sys_coroutineswitch(&current_instance->thread_native);
+    sys_coroutineswitch(&current_instance->thread_native, &current_instance->current->native);
 
     return true;
 }
@@ -212,7 +212,7 @@ void COROUTINE_CALL coroutine_entry(void* _data)
     func(userdata);
 
     *stateptr = SRE_COROUTINESTATE_CANCELLED;
-    sys_coroutineswitch(&current_instance->thread_native);
+    sys_coroutineswitch(&current_instance->thread_native, NULL);
 
     assert("This location should NOT be reached" && NULL);
 }
@@ -242,7 +242,7 @@ void _coroutine_coreinit(void* running)
             }
 
             // Code to perform the context switch
-                sys_coroutineswitch(&instance.current->native);
+                sys_coroutineswitch(&instance.current->native, &instance.thread_native);
                 if (instance.current->state == SRE_COROUTINESTATE_CANCELLED)
                 {
                     sre_coroutine* curr = instance.current;
@@ -279,7 +279,7 @@ void _coroutine_coreinit(void* running)
         
         instance.current = curr;
         curr->state = SRE_COROUTINESTATE_CANCELLED;
-        sys_coroutineswitch(&curr->native);
+        sys_coroutineswitch(&curr->native, &current_instance->thread_native);
         sre_delete(curr);
     }
 }

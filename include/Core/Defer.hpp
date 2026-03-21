@@ -6,6 +6,7 @@
 
 #include <Core/Defer.h>
 #include <utils/sequence.hpp>
+#include <memory>
 namespace sre
 {
     template <class T>
