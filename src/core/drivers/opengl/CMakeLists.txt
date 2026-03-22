@@ -1,5 +1,5 @@
 if (ANDROID)
-    set(SRE_OPENGL_LIB GLESv3)
+    set(SRE_OPENGL_LIB GLESv2)
 else()
     find_package(OpenGL REQUIRED)
     if (NOT OpenGL_FOUND)

@@ -77,9 +77,10 @@ target_compile_definitions(sre_werror INTERFACE _CRT_SECURE_NO_WARNINGS)
 
 if (ANDROID)
     target_link_libraries(sre PUBLIC android log)
+else()
+    check_include_file(ucontext.h HAVE_UCONTEXT_H)
 endif()
 
-check_include_file(ucontext.h HAVE_UCONTEXT_H)
 check_include_file(sys/stat.h HAVE_SYSSTAT_H)
 if (HAVE_UCONTEXT_H)
     target_compile_definitions(sre PUBLIC "HAVE_UCONTEXT_H")

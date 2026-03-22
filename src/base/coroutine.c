@@ -26,7 +26,9 @@
     
 typedef struct coroutine_data coroutine_data;
 
-#if !defined(_MSC_VER) && defined(__x86_64__)
+#if defined(__aarch64__) || defined(__arm__)
+    #include "coroutine/arm.c"
+#elif !defined(_MSC_VER) && defined(__x86_64__)
     #include "coroutine/x86_64.s"
 #elif !defined(_MSC_VER) && defined(__i386__)
     #include "coroutine/x86_32.s"
