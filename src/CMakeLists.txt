@@ -22,6 +22,7 @@ set(BASE_SOURCES
     "temporary.c"
     "filesystem.c"
 
+    "action.cc"
     "action.cpp"
     "audio.cpp"
     "drawgrid.cpp"
