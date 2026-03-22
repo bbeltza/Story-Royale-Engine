@@ -97,10 +97,12 @@ SRE_CAPI_BEGIN
 		// Input data
 
 		sre_unit mouse_x, mouse_y;
-		uint32_t mouse_press;
+		sre_u16 mouse_press;
+		sre_u16 mouse_framepress;
 		sre_unit scale_ratio; /* 1 / video->scale */
 		SDL_TouchID input_last_touchid;
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
+		sre_u8 keyboard_framestate[SDL_NUM_SCANCODES / 8];
 
 		#if _WIN32
 			int exposing;

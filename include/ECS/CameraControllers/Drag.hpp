@@ -2,7 +2,8 @@
 #include <ECS/Camera.hpp>
 
 #include <Datatypes/Vector.hpp>
-#include <Base/Action.hpp>
+#include <Base/Action.h>
+#include <Core/Event.hpp>
 
 namespace sreECS
 {
@@ -23,6 +24,6 @@ namespace sreECS
         const sre::Action& m_action;
 
         static void handle_event(void* signalData, DragControl* self, sre::Event ev);
-        static sre::Action default_action;
+        static const sre::Action default_action;
     };
 }

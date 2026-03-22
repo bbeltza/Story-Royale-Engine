@@ -1,4 +1,5 @@
 #ifndef SRE_ACTION_H
+#define SRE_ACTION_H
 #include <C_API.h>
 
 SRE_CAPI_BEGIN
@@ -39,48 +40,38 @@ struct sre_ActionInput
 extern "C++" {
 #endif
 
-typedef struct sre_Action
-{
-    struct sre_ActionInput const *inputs;
-
-    #ifdef __cplusplus
-        template <size_t n>
-        sre_Action(const sre_ActionInput (&inputs)[n]): inputs(inputs) {}
-            
-        inline bool pressed() const;
-        inline bool just_pressed() const;
-    #endif
-} sre_Action;
+typedef struct sre_ActionInput sre_Action[];
 
 #ifdef __cplusplus
 }
 #endif
 
-bool sre_actionpressed(const sre_Action* action);
-bool sre_actionjustpressed(const sre_Action* action);
+bool sre_actionpressed(const sre_Action action);
+bool sre_actionjustpressed(const sre_Action action);
 
 struct sre_Signal;
 // Make a signal that fires when one of the inputs in `action` get pressed
 struct sre_Signal* sre_actionsignal(const sre_Action* action);
 
 #ifndef __cplusplus
-    #define SRE_MAKE_ACTION(...) { (struct sre_ActionInput[]){__VA_ARGS__, {SRE_ACTION_NULL, 0}} }
+    #define SRE_MAKE_ACTION(...) {__VA_ARGS__, {SRE_ACTION_NULL, 0}}
 #else
     extern "C++" {
-        bool sre_Action::pressed() const { return sre_actionpressed(this); }
-        bool sre_Action::just_pressed() const { return sre_actionjustpressed(this); }
-        
+
         struct sre_Connection;
         namespace sre
         {
             using Action = sre_Action;
+
+            inline bool action_pressed(const Action act) { return sre_actionpressed(act); }
+            inline bool action_justpressed(const Action act) { return sre_actionjustpressed(act); }
 
             extern sre_Connection* action_signal(const Action& action);
         }
     }
     
 
-    #define SRE_MAKE_ACTION(...) ::sre::Action{ { __VA_ARGS__, {::sre::ACTION_NULL, 0} } }
+    #define SRE_MAKE_ACTION(...) { __VA_ARGS__, {::sre::ACTION_NULL, 0} }
 #endif
 
 SRE_CAPI_END

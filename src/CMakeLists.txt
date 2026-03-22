@@ -23,7 +23,6 @@ set(BASE_SOURCES
     "filesystem.c"
 
     "action.cc"
-    "action.cpp"
     "audio.cpp"
     "drawgrid.cpp"
     "font.cpp"

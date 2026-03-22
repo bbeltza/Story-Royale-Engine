@@ -618,8 +618,12 @@ namespace sre
 {
 	bool key_pressed(sre::keyCode code);
 	bool key_pressed(sre::scanCode code);
-
 	bool button_pressed(sre::mouseButton button);
+	
+	// `justpressed` functions, check if input has been just pressed in the current frame
+	bool key_justpressed(sre::scanCode code);
+	bool key_justpressed(sre::keyCode code);
+	bool button_justpressed(sre::mouseButton button);
 
 	sre::vec2ut mouse_screencoords();
 

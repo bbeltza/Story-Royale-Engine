@@ -9,7 +9,7 @@
 
 namespace sre
 {
-    using EventQueue = std::queue<sre::Event>;
+    using EventQueue = std::deque<sre::Event>;
     using EventMutex = std::mutex;
     using EventGuard = std::lock_guard<EventMutex>;
 }
@@ -84,18 +84,42 @@ int __signal_events(SDL_Event* ev)
     }
 
     sre::EventGuard guard{mutex};
-    queue.push(std::move(current));
+    queue.push_back(std::move(current));
 
     return 1;
 }
 
 void __queue_events()
 {
+    memset(&engine.keyboard_framestate, 0, sizeof(engine.keyboard_framestate));
+    memset(&engine.mouse_framepress, 0, sizeof(engine.mouse_framepress));
+
+    for (auto& ev : queue )
+    {
+        switch (ev.type)
+        {
+            case sre::EVENT_MOUSEBUTTON:
+                if (!ev.mouse_button.pressed)
+                    break;
+            
+                engine.mouse_framepress |= SDL_BUTTON(ev.mouse_button.button);
+                break;
+            case sre::EVENT_KEYPRESS:
+                if (ev.key_press.press != sre::KEY_PRESSED)
+                    break;
+                
+                engine.keyboard_framestate[ev.key_press.scancode/8] |= (1 << (ev.key_press.scancode%8));
+                break;
+            default:
+                break;
+        }
+    }
+
     while (!queue.empty())
     {
         mutex.lock();
             sre::Event ev = std::move(queue.front());
-            queue.pop();
+            queue.pop_front();
         mutex.unlock();
         // Don't forget to fire with the mutex unlocked, having the mutex locked can cause some softlocks
         sre::onEvent.fire(ev);
