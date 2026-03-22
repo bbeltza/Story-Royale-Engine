@@ -26,14 +26,14 @@
     
 typedef struct coroutine_data coroutine_data;
 
-#if defined(__aarch64__) || defined(__arm__)
+#if defined(_WIN32)
+    #include "coroutine/win32.c"
+#elif defined(__aarch64__) || defined(__arm__)
     #include "coroutine/arm.c"
 #elif !defined(_MSC_VER) && defined(__x86_64__)
     #include "coroutine/x86_64.s"
 #elif !defined(_MSC_VER) && defined(__i386__)
     #include "coroutine/x86_32.s"
-#elif defined(_WIN32)
-    #include "coroutine/win32.c"
 #elif defined(HAVE_UCONTEXT_H)
     #include "coroutine/ucontext.c"
 #else
@@ -248,6 +248,7 @@ void _coroutine_coreinit(void* running)
             }
 
             // Code to perform the context switch
+                //__debugbreak();
                 sys_coroutineswitch(&instance.current->native, &instance.thread_native);
                 if (instance.current->state == SRE_COROUTINESTATE_CANCELLED)
                 {

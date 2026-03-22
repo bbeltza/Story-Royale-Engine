@@ -8,7 +8,7 @@
     char* sre_temporarypath(char* buffer, size_t size)
     {
         CHAR buf[MAX_PATH+1];
-        DWORD len = GetTempPath2A(sizeof(buf), buf)+1;
+        DWORD len = GetTempPathA(sizeof(buf), buf)+1;
         if (len == 0)
         {
             return NULL;

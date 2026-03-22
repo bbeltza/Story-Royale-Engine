@@ -1,5 +1,6 @@
 #ifndef SRE_OBJECT_HPP
 #define SRE_OBJECT_HPP
+#include <cstddef>
 
 namespace sre
 {

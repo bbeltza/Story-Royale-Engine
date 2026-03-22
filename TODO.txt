@@ -26,13 +26,11 @@
 		I'll have to write my own assembly for 4 ARCHITECTURES... (arm32, arm64, x86 and x64...)
 
 - Change the coroutine runtime (Make it run on the same thread (usually a separate thread for that) that calls the core initialization function)
-- Change the actions: They will be more global, and just IDs instead of you owning the pointer to them
-						They will also be part of the Core engine
 - Add reference counting on sre::Objects
 
 - Tile map components AND core physics
 - Core physics (Basically supporting physics/collisions from the core engine)
-	- It would be in a header like <Core/Physics.h-hpp>
+	- It would be in a header like <Core/Physics.h/hpp>
 	- You'd append and remove physics objects with it, and the engine would do every needed operation in the next pupdate cycle
 
 - Work on the game ^^
