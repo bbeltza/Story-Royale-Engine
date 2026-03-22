@@ -31,6 +31,8 @@ static int game_loop(void* running)
 
         ticks(&engine.frameend_time);
         engine.last_dt = (engine.frameend_time - engine.framestart_time) / SRE_TS(FREQUENCY);
+        assert(engine.last_dt > 0);
+
         engine.framestart_time = engine.frameend_time;
 
         //

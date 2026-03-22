@@ -27,7 +27,7 @@ namespace sre
     // std::string `temporary_path()` helper wrapper
     inline std::string temporary_path()
     {
-        std::unique_ptr<char> buf{temporary_path(NULL, 0)};
+        std::unique_ptr<char[]> buf{temporary_path(NULL, 0)};
         std::string str(buf.get());
 
         return str;

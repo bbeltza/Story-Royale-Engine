@@ -39,14 +39,18 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_dat
 
     coroutine->stack = sre_new(stacksize);
     uintptr_t sp = (uintptr_t)coroutine->stack + stacksize;
-    #ifdef __x86_64
+        
+    coroutine->regs.rip = coroutine_entry;
+    #ifdef __x86_64__
         // Vector instructions crash when rsp is not aligned correctly, it broke me out of my entire mind
         sp = (sp & -16)  -8;
+        coroutine->regs.rsp = (reg_t)sp;
+        coroutine->regs.rdi = (void*)data;
+    #elif __i386__
+        // Arguments in x32 are passed in the stack, do that of course
+        *(void**)sp = (void*)data;
+        coroutine->regs.rsp = (reg_t)(sp - 4);
     #endif
-
-    coroutine->regs.rip = coroutine_entry;
-    coroutine->regs.rsp = (reg_t)sp;
-    coroutine->regs.rdi = (void*)data;
 
     return true;
 }

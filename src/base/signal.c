@@ -139,14 +139,13 @@ void* sre_signalwait(sre_Signal* signal)
 {
     if (signal->coroutines_capacity <= signal->coroutines_size)
     {
-        signal->coroutines_capacity *= 2;
-
-        sre_coroutine** new_block = sre_new(sizeof(sre_coroutine*) * signal->coroutines_capacity);
-        new_block = memcpy(new_block, signal->coroutines, sizeof(sre_coroutine*) * signal->coroutines_capacity);
-        assert(new_block != NULL);
-
+        size_t new_capacity = signal->coroutines_capacity * 2;
+        sre_coroutine** new_block = sre_new(sizeof(sre_coroutine*) * new_capacity);
+        memcpy(new_block, signal->coroutines, sizeof(sre_coroutine*) * signal->coroutines_capacity);
+        
         sre_delete(signal->coroutines);
         signal->coroutines = new_block;
+        signal->coroutines_capacity = new_capacity;
     }
     return sre_coroutinesuspendEx(&signal->coroutines[signal->coroutines_size++]);
 }

@@ -108,7 +108,7 @@ int Audio::audio_callback(Audio* audio, sre_u8* _samples, size_t len)
 		for (int c = 0; c < channels; c++)
 			samples[i + c] = static_cast<s16>(chunksamples[c] * audio->m_fadevol);
 
-		if (!audio->m_subsample) goto DONT_INTERPOLATE;
+		if (!audio->m_subsample || audio->m_chunk->sample_count <= sampleindex) goto DONT_INTERPOLATE;
 		for (int c = 0; c < channels; c++)
 		{
 			s16 nextsample = static_cast<s16>(chunksamples[c + channels] * audio->m_fadevol);

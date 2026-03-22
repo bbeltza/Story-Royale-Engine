@@ -2,14 +2,16 @@
 
 static long long frequency()
 {
-    return 1000000000; 
+    return 1000000000LL; 
 }
 
 static void ticks(long long* t_out)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    *t_out = ts.tv_sec * 1000000000 + ts.tv_nsec;
+    long long t = ts.tv_sec * 1000000000LL + ts.tv_nsec;
+    assert(t > 0);
+    *t_out = t;
 }
 
 static void wait(sre_timeStamp delay)

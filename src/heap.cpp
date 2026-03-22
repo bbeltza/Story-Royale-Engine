@@ -9,7 +9,7 @@
 #endif
 #include <Base/Log.h>
 
-#if !defined(NDEBUG)
+#if !defined(NDEBUG) && !__unix__
 SDL_atomic_t SR_ALLOCATED_SIZE;
 SDL_atomic_t SR_ALLOCATED_BLOCKS;
 

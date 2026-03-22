@@ -27,9 +27,9 @@
 typedef struct coroutine_data coroutine_data;
 
 #if !defined(_MSC_VER) && defined(__x86_64__)
-    #include "coroutine/x86_64.c"
+    #include "coroutine/x86_64.s"
 #elif !defined(_MSC_VER) && defined(__i386__)
-    #include "coroutine/x86_32.c"
+    #include "coroutine/x86_32.s"
 #elif defined(_WIN32)
     #include "coroutine/win32.c"
 #elif defined(HAVE_UCONTEXT_H)
@@ -135,7 +135,8 @@ bool sre_coroutineresume(sre_coroutine* coroutine, void* data)
 
 bool sre_coroutinerunning()
 {
-    if (SDL_ThreadID() != current_instance->thread_id) return true;
+    if (!current_instance) return false;
+    if (SDL_ThreadID() != current_instance->thread_id) return false;
     assert(current_instance->current != NULL);
 
     return current_instance->current->state == SRE_COROUTINESTATE_RUNNING;
@@ -194,6 +195,7 @@ sre_coroutineState sre_coroutinestate(const sre_coroutine* coroutine)
 
 void sre_coroutinecancel(sre_coroutine* coroutine)
 {
+    if (!current_instance) return;
     if (!coroutine) return;
 
     coroutine->state = SRE_COROUTINESTATE_CANCELLED;
@@ -281,7 +283,8 @@ void _coroutine_coreinit(void* running)
         
         instance.current = curr;
         curr->state = SRE_COROUTINESTATE_CANCELLED;
-        sys_coroutineswitch(&curr->native, &current_instance->thread_native);
+        sys_coroutineswitch(&curr->native, &instance.thread_native);
         sre_delete(curr);
     }
+    current_instance = NULL;
 }

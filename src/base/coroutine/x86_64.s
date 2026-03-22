@@ -1,6 +1,7 @@
 #include "x86_common.c"
 
-__attribute__((naked)) static void sys_coroutineswitch(coroutine_native* coroutine, coroutine_native* current)
+__attribute__((naked))
+ static void sys_coroutineswitch(coroutine_native* coroutine, coroutine_native* current)
 {
     // Save current context
     __asm__(
@@ -16,7 +17,7 @@ __attribute__((naked)) static void sys_coroutineswitch(coroutine_native* corouti
         "mov %rax, 0*8(%rsi)\n\t"
 
         // Set `rsp`, popped from the return address
-        "lea -8(%rsp), %rax\n\t"
+        "lea 8(%rsp), %rax\n\t"
         "mov %rax, 5*8(%rsi)\n\t"
 
         // Save the rest of the registers

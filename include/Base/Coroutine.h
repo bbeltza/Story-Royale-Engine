@@ -64,7 +64,7 @@ namespace sre
         sre_coroutine* m_coroutine = NULL;
     public:
         constexpr Coroutine() = default;
-        ~Coroutine() { sre_coroutinecancel(m_coroutine); }
+        ~Coroutine() { cancel(); }
 
         template <typename Ret, typename Ptr>
         using TFn = Ret (Ptr* data);
