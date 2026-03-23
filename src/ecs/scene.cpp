@@ -189,7 +189,7 @@ void Scene::call_update()
     }  while (dt_accumulated > 0);
 
     if (camera.effect && camera.effect->enabled)
-        camera.m_processed = camera.position + camera.effect->on_process();
+        camera.m_processed = camera.position + camera.effect->on_process(engine.last_dt);
     else
         camera.m_processed = camera.position;
 

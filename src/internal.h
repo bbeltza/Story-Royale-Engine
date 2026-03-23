@@ -84,6 +84,10 @@ SRE_CAPI_BEGIN
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
+		#if _WIN32
+				int exposing;
+		#endif
+
 		void* audio_queue;
 		size_t audio_queuesize;
 		size_t audio_queuecap;
@@ -104,11 +108,11 @@ SRE_CAPI_BEGIN
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 		sre_u8 keyboard_framestate[SDL_NUM_SCANCODES / 8];
 
-		#if _WIN32
-			int exposing;
-		#endif
+		// Touch finger data (not working yet)
+		sre_unit (*pressed_fingers)[2];
+		size_t finger_count;
+		size_t finger_capacity;
 	};
-
 	extern struct _engine_data __engine_data;
 
 	extern void __initialize_engine();

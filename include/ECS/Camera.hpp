@@ -2,6 +2,7 @@
 #define SREECS_CAMERA_HPP
 
 #include <Datatypes/Rect.hpp>
+#include <Datatypes/TimeStamp.h>
 
 namespace sreECS
 {
@@ -21,7 +22,7 @@ namespace sreECS
         friend struct Scene;
         bool enabled = true;
     protected:
-        virtual sre::vec2ut on_process() = 0;
+        virtual sre::vec2ut on_process(sre::timeStamp dt) = 0;
     };
 
     struct Camera
