@@ -17,11 +17,6 @@ void Camera::pupdate()
         controller->on_pupdate(*this);
 
     clamp_position();
-
-    if (effect && effect->enabled)
-        position += effect->on_process();
-    
-    //const sre::unit scale = sre::display_scale();
 }
 
 static const Camera ZERO_CAM;

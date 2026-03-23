@@ -17,7 +17,7 @@
 - Game Engine hints: They are pretty much like the old GameSettings, but they are used for hints to the engine on how to start the game (ex: Picking the renderer driver, or having a user argv handler!)
 						With the difference that they are completely optional, and they can be integrated directly in C/C++ code without the help of CMake
 						This can be achieved with exported symbols (what you usually do to export a function for a DLL). The engine will look up the exported symbols for the actual executable
-						(Doing LoadProcAddress(NULL, "sym_name") for example, we have SDL functions for that too) and it would return the address of the hint, or NULL if it hasn't been declared. So no linking errors!
+						(Doing GetProcAddress(NULL, "sym_name") for example, we have SDL functions for that too) and it would return the address of the hint, or NULL if it hasn't been declared. So no linking errors!
 - Better audio: Add a standard format for audio callbacks (probably signed floats since it's easiest to operate on), with the engine's format being able to be different, this can be achieved in SDL using SDL_AudioStreams
 
 - Android support
@@ -30,7 +30,7 @@
 
 - Tile map components AND core physics
 - Core physics (Basically supporting physics/collisions from the core engine)
-	- It would be in a header like <Core/Physics.h/hpp>
+	- It would be in a header like <Core/Physics.h-hpp>
 	- You'd append and remove physics objects with it, and the engine would do every needed operation in the next pupdate cycle
 
 - Work on the game ^^

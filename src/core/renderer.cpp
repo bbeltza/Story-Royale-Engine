@@ -187,7 +187,7 @@ void __display_render()
 
 	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
 	{
-		engine.video->camera = current->camera.position;
+		engine.video->camera = current->camera.processed_position();
 
 		//// Aliases for the background and the foreground (kind of old)
 		const sre::col4& fg = current->foreground;

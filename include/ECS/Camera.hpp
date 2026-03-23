@@ -15,13 +15,15 @@ namespace sreECS
         virtual void on_update(Camera& camera) {}
         virtual void on_pupdate(Camera& camera) = 0;
     };
+
     struct CameraEffect
     {
-        friend struct Camera;
+        friend struct Scene;
         bool enabled = true;
     protected:
         virtual sre::vec2ut on_process() = 0;
     };
+
     struct Camera
     {
         friend struct Scene;
@@ -41,12 +43,16 @@ namespace sreECS
 
         inline sre::vec2ut toScreenSpace(sre::unit x, sre::unit y) const { return toScreenSpace({x, y}); }
         inline sre::vec2ut toWorldSpace(sre::unit x, sre::unit y) const { return toWorldSpace({x, y}); }
+
+        inline sre::vec2ut processed_position() const { return m_processed; }
     private:
         void update();
         void pupdate();
         
         inline void clamp_position() { if (bounds.size != bounds.size.ZERO)
                                     position.setclamp(bounds.top_left(), bounds.bottom_right()); }
+
+        sre::vec2ut m_processed;
     };
 }
 

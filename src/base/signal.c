@@ -139,7 +139,7 @@ void* sre_signalwait(sre_Signal* signal)
 {
     if (signal->coroutines_capacity <= signal->coroutines_size)
     {
-        size_t new_capacity = signal->coroutines_capacity * 2;
+        sre_u32 new_capacity = signal->coroutines_capacity * 2;
         sre_coroutine** new_block = sre_new(sizeof(sre_coroutine*) * new_capacity);
         memcpy(new_block, signal->coroutines, sizeof(sre_coroutine*) * signal->coroutines_capacity);
         

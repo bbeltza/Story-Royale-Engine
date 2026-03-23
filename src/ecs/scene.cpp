@@ -188,6 +188,11 @@ void Scene::call_update()
         camera.pupdate();
     }  while (dt_accumulated > 0);
 
+    if (camera.effect && camera.effect->enabled)
+        camera.m_processed = camera.position + camera.effect->on_process();
+    else
+        camera.m_processed = camera.position;
+
     updated.fire();
 }
 
