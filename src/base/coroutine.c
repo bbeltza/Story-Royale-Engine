@@ -28,8 +28,10 @@ typedef struct coroutine_data coroutine_data;
 
 #if defined(_WIN32)
     #include "coroutine/win32.c"
-#elif defined(__aarch64__) || defined(__arm__)
-    #include "coroutine/arm.c"
+#elif defined(__arm__)
+    #include "coroutine/arm32.s"
+#elif defined(__aarch64__)
+    #include "coroutine/arm64.s"
 #elif !defined(_MSC_VER) && defined(__x86_64__)
     #include "coroutine/x86_64.s"
 #elif !defined(_MSC_VER) && defined(__i386__)

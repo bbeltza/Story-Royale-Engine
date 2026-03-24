@@ -25,9 +25,13 @@ extern bool sreopengl_init(sre_videodriver* video, SDL_Window* window)
     Uint32 win_flags = SDL_GetWindowFlags(window);
     if (!(win_flags & SDL_WINDOW_OPENGL))
     {
-        win_flags |= SDL_WINDOW_OPENGL;
-        if (SDL_RecreateWindow(window, win_flags) < 0)
+        #ifdef ANDROID
             return false;
+        #else
+            win_flags |= SDL_WINDOW_OPENGL;
+            if (SDL_RecreateWindow(window, win_flags) < 0)
+                return false;
+        #endif
     }
 
     sre_videoOpenGL* inst = sre_newclear(sizeof(sre_videoOpenGL));
