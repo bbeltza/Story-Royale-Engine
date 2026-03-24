@@ -104,14 +104,12 @@ SRE_CAPI_BEGIN
 		sre_u16 mouse_press;
 		sre_u16 mouse_framepress;
 		sre_unit scale_ratio; /* 1 / video->scale */
-		SDL_TouchID input_last_touchid;
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 		sre_u8 keyboard_framestate[SDL_NUM_SCANCODES / 8];
 
 		// Touch finger data (not working yet)
-		sre_unit (*pressed_fingers)[2];
-		size_t finger_count;
-		size_t finger_capacity;
+		SDL_TouchID input_last_touchid;
+		int lastfingerup;
 	};
 	extern struct _engine_data __engine_data;
 

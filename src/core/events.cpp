@@ -93,6 +93,7 @@ void __queue_events()
 {
     memset(&engine.keyboard_framestate, 0, sizeof(engine.keyboard_framestate));
     memset(&engine.mouse_framepress, 0, sizeof(engine.mouse_framepress));
+    engine.lastfingerup = 0;
 
     for (auto& ev : queue )
     {
@@ -110,6 +111,12 @@ void __queue_events()
                 
                 engine.keyboard_framestate[ev.key_press.scancode/8] |= (1 << (ev.key_press.scancode%8));
                 break;
+            case sre::EVENT_TOUCH:
+                if (ev.touch.pressed)
+                    break;
+
+                engine.lastfingerup <<= 1;
+                engine.lastfingerup |= 1;
             default:
                 break;
         }
