@@ -1,5 +1,3 @@
-#include <Events/Mouse.hpp>
-
 #include <GUI/object.hpp>
 #include <GUI/Components/transform.hpp>
 #include <GUI/Components/text.hpp>
@@ -71,10 +69,10 @@ void handle_events(void* signal_data, void* connection_data, sre::Event event)
 void DisplayText::post_render()
 {
     if (mouseRect.rect.intersects(staticRect.rect))
-        mouseRect.color = sre::col4::GREEN; // Green
+        mouseRect.color = sre::GREEN;
     else
-        mouseRect.color = sre::col4::RED; // Red
-
+        mouseRect.color = sre::RED;
+        
     sre::vec2ut mPos = sreECS::mouse_worldcoords();
     mouseRect.rect.position = mPos;
     //mPos.display();

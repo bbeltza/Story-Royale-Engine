@@ -21,9 +21,9 @@
 - Better audio: Add a standard format for audio callbacks (probably signed floats since it's easiest to operate on), with the engine's format being able to be different, this can be achieved in SDL using SDL_AudioStreams
 
 - Android support
-	- NOTE: Android code support has been dropped since the last time I tried to compile this because of coroutines
-		Android sadly does not have any of the ucontext.h functions...
-		I'll have to write my own assembly for 4 ARCHITECTURES... (arm32, arm64, x86 and x64...)
+	- The assembly for coroutines has been (kind of) done, for testing now (specially for ARM).
+		Now try to run Story Royale on android, using a template folder I made, that wraps an android project to be build in Android Studio
+		Then, make a program (likely to be a C/C++ program) that builds an apk for you: It runs cmake for the 4 architectures, and wraps the binaries into an output folder that will be zipped into an apk
 
 - Change the coroutine runtime (Make it run on the same thread (usually a separate thread for that) that calls the core initialization function)
 - Add reference counting on sre::Objects

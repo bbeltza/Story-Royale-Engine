@@ -15,7 +15,7 @@ const sre::DDRect bounds = {
 void render()
 {
     static sre::Font font("res://fonts/OpenSans-Regular.ttf", 12);
-    font.render(bounds.rect, sre::col4::WHITE,"Hello world from Font::Render()", -1, sre::A_CENTER, sre::A_CENTER);
+    font.render(bounds.rect, sre::WHITE,"Hello world from Font::Render()", -1, sre::A_CENTER, sre::A_CENTER);
     sre::draw(bounds);
 }
 

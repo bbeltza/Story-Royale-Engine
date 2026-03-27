@@ -4,7 +4,9 @@
 #include <standard>
 #include <thread>
 
-#if _WIN32 && _DEBUG
+#ifdef ANDROID
+    #include <android/log.h>
+#elif _WIN32 && _DEBUG
     #include <Windows.h>
 #endif
 
@@ -25,10 +27,10 @@ namespace sre
     public:
         static _strbuf buffer;
     };
-    
+
     template <LogCategory category, int type>
     _strbuf<category, type> _strbuf<category, type>::buffer;
-    
+
     sre::ostream out{&_strbuf<>::buffer};
     sre::ostream odbg{&_strbuf<LOGCATEGORY_DEBUG>::buffer};
     sre::ostream oinfo{&_strbuf<LOGCATEGORY_INFO>::buffer};
@@ -205,6 +207,9 @@ void sre::Log::flush()
     std::lock_guard<std::recursive_mutex> guard{mutex};
     while (!msg_queue.empty())
     {
+#ifdef ANDROID
+        __android_log_write(ANDROID_LOG_DEFAULT, "APP", msg_queue.front().buffer);
+#else
         static constexpr char extra_characters[] = "[]: ";
         static constexpr char style_characters_begin[] = "\033[30;1m";
         static constexpr char style_characters_end[] = "\033[0m";
@@ -266,12 +271,12 @@ void sre::Log::flush()
             buffer[3] = '0';
             break;
         }
-        
+
         // Console writing code
         FILE* console = msg.category == sre::LOGCATEGORY_INFO ? stdout : stderr;
         fwrite(buffer, buffer_size, 1, console);
         //
-
+#endif
         msg_queue.pop_front();
     }
 }
@@ -293,7 +298,7 @@ int sre_logEx(int type, int category, const char* fmt, va_list va)
         len
     );
     auto& msg = inst->msg_queue.back();
-    
+
     if (len == 1)
         msg.buffer[0] = '\0';
     else
