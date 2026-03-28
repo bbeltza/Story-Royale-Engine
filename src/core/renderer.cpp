@@ -49,10 +49,16 @@ void __setup_renderer()
 	enum sre_RenderDrivers
 	{
 		SRE_RENDERDRIVER_SDLRENDERER,
-		SRE_RENDERDRIVER_OPENGL
+		SRE_RENDERDRIVER_OPENGL,
+
+#ifndef ANDROID
+        SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL
+#else
+        SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_SDLRENDERER
+#endif
 	};
 
-	const sre_videoinit_func init_driver = video_drivers[SRE_RENDERDRIVER_OPENGL];
+	const sre_videoinit_func init_driver = video_drivers[SRE_RENDERDRIVER_DEFAULT];
 	if (!init_driver(engine.video, engine.sdl_windowhndl))
 	{
 		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");

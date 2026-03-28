@@ -30,7 +30,10 @@ void sre::window_focus() { return SDL_RaiseWindow(engine.sdl_windowhndl); }
 void sre::window_minimize() { return SDL_MinimizeWindow(engine.sdl_windowhndl); }
 void sre::window_maximize() { return SDL_MaximizeWindow(engine.sdl_windowhndl); }
 
-void sre::window_setresizable(bool resizable) { return SDL_SetWindowResizable(engine.sdl_windowhndl, static_cast<SDL_bool>(resizable)); }
+void sre::window_setresizable(bool resizable)
+{
+    SDL_SetWindowResizable(engine.sdl_windowhndl, static_cast<SDL_bool>(resizable));
+}
 
 static inline bool flashwindowop(SDL_FlashOperation op) { return SDL_FlashWindow(engine.sdl_windowhndl, op) == 0; }
 bool sre::window_flash() { return flashwindowop(SDL_FLASH_UNTIL_FOCUSED); }

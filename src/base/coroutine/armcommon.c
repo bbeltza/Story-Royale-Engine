@@ -21,6 +21,7 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_dat
 
     coroutine->stack = sre_new(stacksize);
     uintptr_t sp = (uintptr_t)coroutine->stack + stacksize;
+    sp = (sp & -16L);
         
     coroutine->lr = coroutine_entry;
     coroutine->sp = (reg_t)sp;

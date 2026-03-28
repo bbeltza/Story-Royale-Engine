@@ -70,7 +70,7 @@ __attribute__((naked)) static void sys_coroutineswitch(coroutine_native* corouti
         "LDR X28, [X0, #30*8]\n\t"
         "LDR X29, [X0, #31*8]\n\t"
 
-        "LDR X2, [X0, #4*1]\n\t"
+        "LDR X2, [X0, #1*8]\n\t"
         "MOV SP, X2\n\t"
 
         "LDR X2, [X0, #4*8]\n\t"

@@ -85,12 +85,16 @@ bool sre_fileopen(sre_File* file, const char* path, int mode)
 		{
 			const char* relpath = path + SRE_FILEPREFIX_LENGTH;
 			char* fullpath = SDL_GetPrefPath(NULL, __game_title);
-			fullpath = SDL_realloc(fullpath, strlen(fullpath) + strlen(relpath) + 1);
-			strcat(fullpath, relpath);
-			
-			ret = file->vfptr->open(&file->impl, fullpath, mode);
 
-			SDL_free(fullpath);
+            if (fullpath)
+            {
+                fullpath = SDL_realloc(fullpath, strlen(fullpath) + strlen(relpath) + 1);
+                strcat(fullpath, relpath);
+
+                ret = file->vfptr->open(&file->impl, fullpath, mode);
+
+                SDL_free(fullpath);
+            }
 		}
 		else
 			ret = file->vfptr->open(&file->impl, path, mode);

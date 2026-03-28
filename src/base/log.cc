@@ -2,13 +2,6 @@
 #include <utils/mem.h>
 
 #include <standard>
-#include <thread>
-
-#ifdef ANDROID
-    #include <android/log.h>
-#elif _WIN32 && _DEBUG
-    #include <Windows.h>
-#endif
 
 namespace sre
 {
@@ -41,7 +34,70 @@ namespace sre
     sre::ostream einfo{&_strbuf<LOGCATEGORY_INFO, 1>::buffer};
     sre::ostream ewarn{&_strbuf<LOGCATEGORY_WARN, 1>::buffer};
     sre::ostream eerr{&_strbuf<LOGCATEGORY_ERROR, 1>::buffer};
+
+    enum LogType
+    {
+        LOGTYPE_APP,
+        LOGTYPE_ENGINE,
+        LOGTYPE_SDL
+    };
 }
+
+#ifdef ANDROID
+    #include <android/log.h>
+
+    static const char* map_type_tag(int type)
+    {
+        using namespace sre;
+        switch(type)
+        {
+            case LOGTYPE_APP:
+                return "APP";
+            case LOGTYPE_ENGINE:
+                return "ENGINE";
+            case LOGTYPE_SDL:
+                return "SDL";
+            default:
+                abort();
+        }
+
+        return NULL;
+    }
+
+    static int map_cat_prio(int category)
+    {
+        using namespace sre;
+        switch (category)
+        {
+            case LOGCATEGORY_INFO:
+                return ANDROID_LOG_INFO;
+            case LOGCATEGORY_DEBUG:
+                return ANDROID_LOG_DEBUG;
+            case LOGCATEGORY_WARN:
+                return ANDROID_LOG_WARN;
+            case LOGCATEGORY_ERROR:
+                return ANDROID_LOG_ERROR;
+            default:
+                abort();
+        }
+
+        return ANDROID_LOG_UNKNOWN;
+    }
+
+    extern "C" int sre_logEx(int type, int category, const char* fmt, va_list va)
+    {
+        return __android_log_vprint(map_cat_prio(category), map_type_tag(type), fmt, va);
+    }
+
+    extern "C" int sre_logsimpleEx(int type, int category, const char* str)
+    {
+        return __android_log_write(map_cat_prio(category), map_type_tag(type), str);
+    }
+#else
+
+#if _WIN32 && _DEBUG
+    #include <Windows.h>
+#endif
 
 namespace sre
 {
@@ -122,13 +178,6 @@ namespace sre
         std::recursive_mutex mutex;
 
         void flush();
-    };
-
-    enum LogType
-    {
-        LOGTYPE_APP,
-        LOGTYPE_ENGINE,
-        LOGTYPE_SDL
     };
 }
 
@@ -325,3 +374,5 @@ int sre_logsimpleEx(int type, int category, const char* str)
 
     return len - 1;
 }
+
+#endif

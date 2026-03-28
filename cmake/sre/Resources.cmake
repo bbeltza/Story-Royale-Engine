@@ -5,7 +5,6 @@ endmacro()
 
 function(srEngine_link_resource PROJECT)
     get_target_property(PWDRES ${PROJECT} RES_FOLDER)
-    get_target_property(EXE ${PROJECT} EXE)
 
     set(_PWDRES "__res/")
     if(NOT PWDRES)
@@ -58,7 +57,7 @@ function(srEngine_link_resource PROJECT)
         add_dependencies(${PROJECT} bind_${PROJECT})
 
         if (WIN32)
-            target_sources(${EXE} PRIVATE ${OUTPUT}/_res.rc)
+            target_sources(${PROJECT} PRIVATE ${OUTPUT}/_res.rc)
             srEngine_nobind(${PROJECT})
         elseif(UNIX)
             configure_file(${SRE_DIR}/asm/res.s ${OUTPUT}/_res.s)

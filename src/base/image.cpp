@@ -14,7 +14,7 @@ Image::Image(const char* path)
     File file(path, FILE_READ);
     if (!file.valid())
     {
-        sre::eerr << "Image::Image: Failed loading '" << path << "'." << sre::endl;
+        sre::log<LOGCATEGORY_ERROR>("Image::Image: Failed loading %s");
         return;
     }
 
