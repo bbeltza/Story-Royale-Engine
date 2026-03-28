@@ -225,6 +225,37 @@ void COROUTINE_CALL coroutine_entry(void* _data)
     assert("This location should NOT be reached" && NULL);
 }
 
+
+#ifdef ANDROID
+    #include <jni.h>
+    #include <SDL_system.h>
+    #include <pthread.h>
+
+    static jint __jni_attach(jint (*fun)(JavaVM*, JNIEnv**, void*), JavaVM* vm, JNIEnv** env, void* bp)
+    {
+        return fun(vm, env, NULL);
+    }
+
+    // JNI setup function before switching to context! (Still unfinished)
+    static void _coroutine_setup_jni(const coroutine_native* ctx)
+    {
+        JavaVM* vm;
+        JNIEnv* env = SDL_AndroidGetJNIEnv();
+        (*env)->GetJavaVM(env, &vm);
+
+        (*vm)->DetachCurrentThread(vm);
+
+
+        pthread_t self = pthread_self();
+        void** base = (void**)(self+32);
+        size_t* size = (size_t*)(self+40);
+        *base = ctx->stack;
+        *size = 4096*1024;
+
+        __jni_attach((*vm)->AttachCurrentThread, vm, &env, NULL);
+    }
+#endif
+
 void _coroutine_coreinit(void* running)
 {
     struct coroutine_instance instance;
@@ -251,6 +282,10 @@ void _coroutine_coreinit(void* running)
 
             // Code to perform the context switch
                 //__debugbreak();
+                #ifdef ANDROID
+                    _coroutine_setup_jni(&instance.current->native);
+                #endif
+
                 sys_coroutineswitch(&instance.current->native, &instance.thread_native);
                 if (instance.current->state == SRE_COROUTINESTATE_CANCELLED)
                 {
@@ -262,7 +297,7 @@ void _coroutine_coreinit(void* running)
 
                     if (curr == instance.end)
                         instance.end = prev;
-                    
+
                     instance.current = curr->next;
 
                     sys_coroutineclose(&curr->native);
@@ -285,7 +320,7 @@ void _coroutine_coreinit(void* running)
     {
         sre_coroutine* curr = instance.head;
         instance.head = instance.head->next;
-        
+
         instance.current = curr;
         curr->state = SRE_COROUTINESTATE_CANCELLED;
         sys_coroutineswitch(&curr->native, &instance.thread_native);

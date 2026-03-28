@@ -19,7 +19,7 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_dat
 {
     const size_t stacksize = 4096*1024;
 
-    coroutine->stack = sre_new(stacksize);
+    posix_memalign((void**)&coroutine->stack, PAGE_SIZE, stacksize);
     uintptr_t sp = (uintptr_t)coroutine->stack + stacksize;
     sp = (sp & -16L);
         

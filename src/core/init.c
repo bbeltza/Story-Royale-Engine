@@ -45,7 +45,7 @@ static inline void __setup_engine_data()
     engine.main_thrd = SDL_ThreadID();
 
     engine.cor_running = true;
-    engine.coroutine_thread = SDL_CreateThread(__run_coroutine, "Coroutine Engine Thread", &engine.cor_running);
+    engine.coroutine_thread = SDL_CreateThread(__run_coroutine, "Coroutine Engine", &engine.cor_running);
     sre_coroutinecreate(false, __invoke_entry, NULL);
 }
 

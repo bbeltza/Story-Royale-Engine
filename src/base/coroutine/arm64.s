@@ -3,6 +3,8 @@
 __attribute__((naked)) static void sys_coroutineswitch(coroutine_native* coroutine, coroutine_native* current)
 {
     __asm(
+        "CBZ X1, CONTEXT_SWITCH\n\t"
+
         "STR LR, [X1, #0*8]\n\t"
         "STR X0, [X1, #2*8]\n\t"
         "STR X1, [X1, #3*8]\n\t"
@@ -40,6 +42,7 @@ __attribute__((naked)) static void sys_coroutineswitch(coroutine_native* corouti
         "STR X2, [X1, #1*8]\n\t"
 
         // Context switch!
+     "CONTEXT_SWITCH:\n\t"
         "LDR LR, [X0, #0*8]\n\t"
         "LDR X1, [X0, #3*8]\n\t"
         "LDR X3, [X0, #5*8]\n\t"
