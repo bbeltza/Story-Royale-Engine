@@ -22,7 +22,7 @@ __attribute__((naked)) static void sys_coroutineswitch(coroutine_native* corouti
         "STR X15, [X1, #17*8]\n\t"
         "STR X16, [X1, #18*8]\n\t"
         "STR X17, [X1, #19*8]\n\t"
-        "STR X18, [X1, #20*8]\n\t"
+        //"STR X18, [X1, #20*8]\n\t" // X18 is reserved for platform use. Don't use it nor store it
         "STR X19, [X1, #21*8]\n\t"
         "STR X20, [X1, #22*8]\n\t"
         "STR X21, [X1, #23*8]\n\t"
@@ -57,7 +57,7 @@ __attribute__((naked)) static void sys_coroutineswitch(coroutine_native* corouti
         "LDR X15, [X0, #17*8]\n\t"
         "LDR X16, [X0, #18*8]\n\t"
         "LDR X17, [X0, #19*8]\n\t"
-        "LDR X18, [X0, #20*8]\n\t"
+        //"LDR X18, [X0, #20*8]\n\t"
         "LDR X19, [X0, #21*8]\n\t"
         "LDR X20, [X0, #22*8]\n\t"
         "LDR X21, [X0, #23*8]\n\t"
