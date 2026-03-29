@@ -238,6 +238,9 @@ namespace sreGUI
     Object* get_root();
     template <typename T>
     inline T* get_root() { return dynamic_cast<T*>(get_root()); }
+
+    sre::unit get_insets();
+    void set_insets(sre::unit insets); // Set left and right GUI insets. It is shared globally across the program
 }
 
 #endif

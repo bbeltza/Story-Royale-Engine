@@ -4,7 +4,10 @@
 
 using namespace sreECS;
 
-const sre::Action DragControl::default_action = SRE_MAKE_ACTION({ sre::ACTION_MOUSE, sre::MB_RIGHT });
+const sre::Action DragControl::default_action = SRE_MAKE_ACTION(
+    { sre::ACTION_MOUSE, sre::MB_RIGHT },
+    { sre::ACTION_TOUCH, 0 } // `0` for now since there are no parameters for touch actions
+);
 
 DragControl::DragControl(const sre::Action& action): m_action(action), m_eventconnection(sre::onEvent.connect(handle_event, this))
 {

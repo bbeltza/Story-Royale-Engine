@@ -107,6 +107,8 @@ SRE_CAPI_BEGIN
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 		sre_u8 keyboard_framestate[SDL_NUM_SCANCODES / 8];
 
+		// sre_unit uni_x, uni_y; // Might replace `mouse_x` and `mouse_y`
+
 		// Touch finger data (not working yet)
 		SDL_TouchID input_last_touchid;
 		int lastfingerup;

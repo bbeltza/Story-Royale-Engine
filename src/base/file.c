@@ -38,9 +38,14 @@ const char SRE_USR_PREFIX[] = "usr://";
 #define SRE_FILEPREFIX_LENGTH (sizeof(SRE_RES_PREFIX) - 1)
 
 extern const sre_FVFT SRE_STDIO_VFT;
-extern const sre_FVFT SRE_RESOURCE_VFT;
 
-#include "file/resource.c"
+#ifdef ANDROID
+	extern const sre_FVFT SRE_ANDROIDASSET_VFT;
+	#include "file/androidasset.c"
+#else
+	extern const sre_FVFT SRE_RESOURCE_VFT;
+	#include "file/resource.c"
+#endif
 #include "file/stdio.c"
 
 bool sre_fileopen(sre_File* file, const char* path, int mode)
@@ -58,9 +63,10 @@ bool sre_fileopen(sre_File* file, const char* path, int mode)
 	bool ret = false;
 	if (!strncmp(path, SRE_RES_PREFIX, SRE_FILEPREFIX_LENGTH))
 	{
-		assert(_game_res != NULL);
-
 		const char* const relpath = path + SRE_FILEPREFIX_LENGTH;
+
+#ifndef ANDROID
+		assert(_game_res != NULL);
 		if (_game_res[0])
 		{
 			file->vfptr = &SRE_RESOURCE_VFT;
@@ -77,6 +83,16 @@ bool sre_fileopen(sre_File* file, const char* path, int mode)
 
 			ret = file->vfptr->open(&file->impl, fullpath, mode);
 		}
+#else
+        file->vfptr = &SRE_ANDROIDASSET_VFT;
+
+        /*
+        size_t pathlen = strlen(relpath) + sizeof(SRE_ANDROID_RESPREFIX);
+        ut_dynsalloc(char, assetpath, pathlen);
+        */
+
+        ret = file->vfptr->open(&file->impl, relpath, mode);
+#endif
 	}
 	else
 	{

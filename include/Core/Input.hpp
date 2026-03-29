@@ -628,6 +628,12 @@ namespace sre
 	sre::vec2ut mouse_screencoords();
 
 	int fingers_pressed();
+
+	// (Unimplemented) Get the coordinates of the last input that has coordinates
+	//	  It's usually the mouse for computers, or the last touched finger for mobile devices
+	//		But it can be different if for example, you have a laptop with touch support, or a phone with a bluetooth mouse
+	//	The engine will automatically decide which input whose coordinates to return.
+	sre::vec2ut input_coordinates();
 }
 
 #endif

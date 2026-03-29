@@ -115,8 +115,9 @@ void sre::ECS::update_layer()
 	sreGUI::Object* current = currlayer;
 	
 	if (!current) return;
-	current->m_absolute.size = sre::display_size();
-	current->m_absolute.position = sre::vec2ut::ZERO;
+    sre::unit insets = sreGUI::get_insets();
+	current->m_absolute.size = sre::display_size() - vec2ut{insets*2, 0};
+	current->m_absolute.position = sre::vec2ut::ZERO + vec2ut{insets, 0};
 	
     current->call_update();
 

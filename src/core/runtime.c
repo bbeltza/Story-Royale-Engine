@@ -133,7 +133,11 @@ void __run_engine()
                 SDL_UnlockMutex(engine.render_mutex);
                 break;
             case ENGINE_EVENT_ENTRY:
-                __update_viewport(engine.osize_x, engine.osize_y);
+            {
+                int w, h;
+                SDL_GetWindowSize(engine.sdl_windowhndl, &w, &h);
+                __update_viewport(w, h);
+            }
                 SDL_ShowWindow(engine.sdl_windowhndl);
                 SDL_RaiseWindow(engine.sdl_windowhndl);
                 break;

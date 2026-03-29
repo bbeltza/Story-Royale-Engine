@@ -236,3 +236,7 @@ void Object::call_render()
 
     rendered.fire();
 }
+
+static sre::unit s_insets;
+sre::unit sreGUI::get_insets() { return s_insets; }
+void sreGUI::set_insets(sre::unit insets) { s_insets = insets; }
