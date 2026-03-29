@@ -16,6 +16,10 @@ void __create_window()
 		SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
 	);
 
+	#if ANDROID
+		// Figure out what to setup here for android... ._.
+	#endif
+
     SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);
     engine.osize_x = DEFAULT_WIDTH;
     engine.osize_y = DEFAULT_HEIGHT;

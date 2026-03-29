@@ -1,3 +1,11 @@
+macro (SRE_BUILD_SRC TARGET)
+    project(${TARGET})
+
+    add_library(${TARGET} ${ARGN})
+    target_link_libraries(${TARGET} PRIVATE sre)
+endmacro()
+
+
 macro(set_dst_src FLDR SRCS DST)
     foreach(src ${${SRCS}})
         set(${DST} ${${DST}} "${FLDR}/${src}")

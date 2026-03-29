@@ -29,16 +29,16 @@ struct r_general
 typedef struct coroutine_x86_64
 {
     struct r_general regs;
-
-    char* stack;
+    void* stack;
+    size_t stacksize;
 } coroutine_native;
+
+#define COROUTINE_STACKVAR stack
+#define COROUTINE_STACKSIZE stacksize
 
 static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_data* data)
 {
-    const size_t stacksize = 4096*1024;
-
-    coroutine->stack = sre_new(stacksize);
-    uintptr_t sp = (uintptr_t)coroutine->stack + stacksize;
+    uintptr_t sp = (uintptr_t)coroutine->stack + coroutine->stacksize;
         
     coroutine->regs.rip = coroutine_entry;
     #ifdef __x86_64__
@@ -54,12 +54,6 @@ static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_dat
 
     return true;
 }
-
-static void sys_coroutineclose(coroutine_native* coroutine)
-{
-    sre_delete(coroutine->stack);
-}
-
 
 static bool sys_coroutinepoolsetup(coroutine_native* pool)
 {

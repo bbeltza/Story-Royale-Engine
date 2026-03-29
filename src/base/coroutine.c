@@ -19,10 +19,6 @@
     // An #include to a header called "internal.h" (Maybe not for now). It contains common internal declarations
     // A set of `sys` functions below, all commented
     // Perhaps a #define to the entry point's calling convention, it's optional
-
-/* There will also be two functions used by the engine that are not included in `Coroutine.h` to initialize and deinitialize the coroutine engine */
-    // sre_coroutinecoreinit()
-    // sre_coroutinecorequit()
     
 typedef struct coroutine_data coroutine_data;
 
@@ -48,6 +44,16 @@ typedef struct coroutine_data coroutine_data;
 #endif
 
 /* `sys_` functions */
+#ifdef COROUTINE_STACKVAR
+#ifndef COROUTINE_STACKSIZE
+    #error "Need to define `COROUTINE_STACKSIZE` if you're willing to use COROUTINE_STACKVAR"
+#endif
+    #include "coroutine/stack.c"
+    // Allocate the coroutine's stack (if needed, it can be shared between multiple implementations)
+    // `COROUTINE_STACKVAR` is the member from `coroutine_native` in which the stack is stored, it has to be a pointer
+    // `COROUTINE_STACKSIZE` has to then be defined, to be a member holding the stack size
+    static bool sys_coroutinestack(void** base, size_t* size);
+#endif
 // Setup to the coroutine (using CreateFiber on win32 for example)
 static bool sys_coroutinecreate(coroutine_native* coroutine, const coroutine_data* data);
 // Setup the thread pool context coroutine (On win32 it will just call SwitchThreadToFiber once if what's in `pool` is NULL)
@@ -105,7 +111,14 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     data->userdata = userdata;
     data->stateptr = &coroutine->state;
 
-    if (!sys_coroutinecreate(&coroutine->native, data))
+
+
+    if (
+#ifdef COROUTINE_STACKVAR
+            !sys_coroutinestack(&coroutine->native.COROUTINE_STACKVAR, &coroutine->native.COROUTINE_STACKSIZE) ||
+#endif
+            !sys_coroutinecreate(&coroutine->native, data)
+            )
     {
         sre_delete(coroutine);
         return NULL;
@@ -256,18 +269,21 @@ void COROUTINE_CALL coroutine_entry(void* _data)
     // JNI setup function before switching to context! (Still unfinished)
     static void _coroutine_setup_jni(const coroutine_native* ctx)
     {
-        JavaVM* vm;
-        JNIEnv* env = SDL_AndroidGetJNIEnv();
-        (*env)->GetJavaVM(env, &vm);
+        static JavaVM* vm;
+        JNIEnv* env;
+        if (!vm)
+        {
+            JNIEnv* env = SDL_AndroidGetJNIEnv();
+            (*env)->GetJavaVM(env, &vm);
+        }
 
         (*vm)->DetachCurrentThread(vm);
-
 
         pthread_t self = pthread_self();
         void** base = (void**)(self+32);
         size_t* size = (size_t*)(self+40);
-        *base = ctx->stack;
-        *size = 4096*1024;
+        *base = ctx->COROUTINE_STACKVAR;
+        *size = ctx->COROUTINE_STACKSIZE;
 
         #if defined(__x86_64__)
             #define __sp ctx->rsp
