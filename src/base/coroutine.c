@@ -231,9 +231,26 @@ void COROUTINE_CALL coroutine_entry(void* _data)
     #include <SDL_system.h>
     #include <pthread.h>
 
-    static jint __jni_attach(jint (*fun)(JavaVM*, JNIEnv**, void*), JavaVM* vm, JNIEnv** env, void* bp)
+    // JNI stack switcher warpper, only for aarch64 for now. Need to incorporate the other functions
+    static __attribute__((naked)) jint __jni_attach(jint (*fun)(JavaVM*, JNIEnv**, void*), JavaVM* vm, JNIEnv** env, void* bp)
     {
-        return fun(vm, env, NULL);
+        __asm(
+                "mov x8, x0\n\t"
+                "mov x0, x1\n\t"
+                "mov x1, x2\n\t"
+                "mov x2, #0\n\t"
+
+                "mov x4, sp\n\t"
+                "mov sp, x3\n\t"
+                "sub sp, sp, #16\n\t"
+                "stp x4, lr, [sp]\n\t"
+
+                "blr x8\n\t"
+
+                "ldp x2, lr, [sp]\n\t"
+                "mov sp, x2\n\t"
+                "ret"
+                );
     }
 
     // JNI setup function before switching to context! (Still unfinished)
@@ -252,7 +269,17 @@ void COROUTINE_CALL coroutine_entry(void* _data)
         *base = ctx->stack;
         *size = 4096*1024;
 
-        __jni_attach((*vm)->AttachCurrentThread, vm, &env, NULL);
+        #if defined(__x86_64__)
+            #define __sp ctx->rsp
+        #elif defined(i386)
+            #define __sp ctx->esp
+        #elif defined(__arm__) || defined(__aarch64__)
+            #define __sp ctx->sp
+        #endif
+
+        __jni_attach((*vm)->AttachCurrentThread, vm, &env, __sp);
+
+        #undef __sp
     }
 #endif
 
