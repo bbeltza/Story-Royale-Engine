@@ -1,7 +1,7 @@
 #include <Core/Display.hpp>
 #include <Core/Defer.hpp>
 #include "../internal.h"
-#include "../drivers/drivers.h"
+#include "drivers/drivers.h"
 
 
 sre::vec2ut sre::display_center() { return engine.video->center; }

@@ -50,7 +50,7 @@ function(srEngine_build TARGET_EXE SRCS)
     srEngine_link_resource(${TARGET_EXE} ${ARGN})
     srEngine_link_icon(${TARGET_EXE})
 
-    target_link_libraries(${TARGET_EXE} PUBLIC sre)
+    target_link_libraries(${TARGET_EXE} PUBLIC srelib)
 
     if (ARGN MATCHES NO_CONSOLE)
         message("--- ${TARGET} HAS NO CONSOLE ${SR_ENGINE_NO_CONSOLE_OPTIONS}")

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
+option(SRE_MINIMAL "Build binaries, without building the rest (Resource folderd, icons, etc...)" OFF)
+
 set(SRE_CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(SRE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -13,6 +15,10 @@ else()
     set(BUILD_SHARED_LIBS OFF)
 endif()
 
+if (UNIX)
+    enable_language(ASM)
+endif()
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -22,47 +28,47 @@ include(CheckIncludeFile)
 include(sre)
 
 project(sre)
-project(sre_core)
+add_library(sre INTERFACE)
 
-if (UNIX)
-    enable_language(ASM)
-endif()
+add_subdirectory(3rdparty)
+add_subdirectory(src)
 
-project(sre_interface)
+target_include_directories(sre INTERFACE ${SRE_DIR}/common)
+target_include_directories(sre INTERFACE ${SRE_DIR}/include)
+target_link_libraries(sre INTERFACE ${3RDPARTYLIBS})
+
 project(sre_noconsole)
 project(sre_werror)
-add_library(sre_interface INTERFACE)
 add_library(sre_noconsole INTERFACE)
 add_library(sre_werror INTERFACE)
 
-add_subdirectory(src)
-add_subdirectory(3rdparty)
+project(sre_private)
+add_library(sre_private INTERFACE)
+target_link_libraries(sre_private INTERFACE sre_werror)
+target_compile_definitions(sre_private INTERFACE SRE=1)
 
-list(TRANSFORM SOURCES PREPEND "src/")
-list(TRANSFORM CORE_SOURCES PREPEND "src/")
+set(SRE_MODULES
+    sre # SRE global interface target
+    sre_main # Contains the entry point, as well as some argument helpers
+    sre_core # Engine core library
+    sre_base # Engine base library
+    sreECS # Scene and entity manager library
+    sreECS_presets # Scene and entity presets (only has components and camera controllers...) (optional)
+    sreGUI # GUI manager library
+    sreGUI_presets # UI presets (optional)
+)
+project(srelib)
+add_library(srelib INTERFACE)
+target_link_libraries(srelib INTERFACE ${SRE_MODULES})
 
-add_library(sre STATIC ${SOURCES})
-target_include_directories(sre PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(sre PUBLIC ${3RDPARTYLIBS})
-
-add_library(sre_core STATIC ${CORE_SOURCES})
-target_link_libraries(sre_core PRIVATE sre)
-target_link_libraries(sre_core PRIVATE sre_interface)
-target_compile_definitions(sre_core PRIVATE INTERNAL_DEF=1)
-
-target_link_libraries(sre_core PRIVATE sre_driverinterface)
-
-target_sources(sre PUBLIC "src/heap.cpp")
-target_link_libraries(sre PRIVATE sre_core)
-target_link_libraries(sre PRIVATE sre_interface)
-target_link_libraries(sre_interface INTERFACE sre_werror)
-target_include_directories(sre PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/common)
-
-target_compile_definitions(sre_interface INTERFACE SRE=1)
+project(sredll) # sre shared library?? :o (unimplemented...)
+add_library(sredll SHARED src/internal.h)
+target_link_libraries(sredll PUBLIC ${SRE_MODULES})
 
 if(MSVC)
     target_link_options(sre_noconsole INTERFACE "/SUBSYSTEM:WINDOWS")
     target_compile_options(sre_werror INTERFACE "/WX")
+    target_compile_definitions(sre_werror INTERFACE _CRT_SECURE_NO_WARNINGS)
 else()
     if (WIN32)
         target_link_options(sre_noconsole INTERFACE "-mwindows")
@@ -72,21 +78,19 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(sre_werror INTERFACE "-Wno-vla-extension" "-Wno-deprecated-declarations")
 endif()
-target_compile_definitions(sre_werror INTERFACE _CRT_SECURE_NO_WARNINGS)
-
 
 if (ANDROID)
-    target_link_libraries(sre PUBLIC android log)
+    target_link_libraries(sre INTERFACE android log)
 else()
     check_include_file(ucontext.h HAVE_UCONTEXT_H)
 endif()
 
 check_include_file(sys/stat.h HAVE_SYSSTAT_H)
 if (HAVE_UCONTEXT_H)
-    target_compile_definitions(sre PUBLIC "HAVE_UCONTEXT_H")
+    target_compile_definitions(sre INTERFACE "HAVE_UCONTEXT_H")
 endif()
 if (HAVE_SYSSTAT_H)
-    target_compile_definitions(sre PUBLIC "HAVE_SYSSTAT_H")
+    target_compile_definitions(sre INTERFACE "HAVE_SYSSTAT_H")
 endif()
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
