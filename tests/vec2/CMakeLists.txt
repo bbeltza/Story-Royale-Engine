@@ -1,5 +1,5 @@
 set(SOURCES "init.cpp")
 
-srEngine_build(vec2test SOURCES)
+SRE_BUILD(vec2test SOURCES)
 
 add_test(NAME sre_vec2 COMMAND vec2test)
