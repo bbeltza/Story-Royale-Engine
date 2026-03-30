@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 
-option(SRE_MINIMAL "Build binaries, without building the rest (Resource folderd, icons, etc...)" OFF)
+option(SRE_MINIMAL "Build binaries only, without building the rest (Resource folderd, icons, etc...)" OFF)
+option(SRE_IMGUI "Integrate ImGui. A GUI library that's useful for debugging, along with its integration with the engine's world/entity system" ON)
+option(SRE_EXAMPLES "Build example applications" ${EXAMPLE_OPTIONS})
+option(SRE_TESTS "Build and run tests" ON)
 
 set(SRE_CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(SRE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -62,7 +65,7 @@ add_library(srelib INTERFACE)
 target_link_libraries(srelib INTERFACE ${SRE_MODULES})
 
 project(sredll) # sre shared library?? :o (unimplemented...)
-add_library(sredll SHARED src/internal.h)
+add_library(sredll SHARED src/dllmain.c)
 target_link_libraries(sredll PUBLIC ${SRE_MODULES})
 
 if(MSVC)
@@ -74,12 +77,18 @@ else()
         target_link_options(sre_noconsole INTERFACE "-mwindows")
     endif()
     target_compile_options(sre_werror INTERFACE "-Werror")
+    target_link_options(sre INTERFACE "-Wl,--start-group") # Incremental linking, this is needed for non-MSVC compilers
 endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(sre_werror INTERFACE "-Wno-vla-extension" "-Wno-deprecated-declarations")
 endif()
 
+    if (ANDROID) 
+    endif()
+
 if (ANDROID)
+    # Support for 16kb aligned memory pages (Support for disabling the option might come)
+    target_link_options(sre INTERFACE "-Wl,-z,max-page-size=16384")
     target_link_libraries(sre INTERFACE android log)
 else()
     check_include_file(ucontext.h HAVE_UCONTEXT_H)
@@ -104,9 +113,6 @@ else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} PARENT_SCOPE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} PARENT_SCOPE)
 endif()
-
-option(WANT_EXAMPLES "Build example applications" ${EXAMPLE_OPTIONS})
-option(BUILD_TESTING "Build and run tests" ON)
 
 if (WANT_EXAMPLES)
     add_subdirectory(examples)

@@ -20,10 +20,12 @@
 						(Doing GetProcAddress(NULL, "sym_name") for example, we have SDL functions for that too) and it would return the address of the hint, or NULL if it hasn't been declared. So no linking errors!
 - Better audio: Add a standard format for audio callbacks (probably signed floats since it's easiest to operate on), with the engine's format being able to be different, this can be achieved in SDL using SDL_AudioStreams
 
+- Reorganize the cmake routines: My goal is to be able to use `find_package` to include the engine, which would force me to organize my cmake lists and make them better and more reliable, since they seem a mess...
+								 	It would also allow anyone to use the engine without having to compile it from source, and also allow me to make a release build of the engine (Although I know you can just put the source code there...)
+									But still, the whole point is to have a more organized cmake, that has less repeated code, and that splits the fundamental sections into separate module (which I already did for every group in `src/`)
 - Android support
-	- The assembly for coroutines has been (kind of) done, for testing now (specially for ARM).
-		Now try to run Story Royale on android, using a template folder I made, that wraps an android project to be build in Android Studio
-		Then, make a program (likely to be a C/C++ program) that builds an apk for you: It runs cmake for the 4 architectures, and wraps the binaries into an output folder that will be zipped into an apk
+	- I've been able to make an apk that runs Story Royale on my phone (on android, in the aarch64 (64-bit ARM) architecture)
+		Now, make a program (likely to be integrated in cmake) that builds an apk for you: It would run cmake for the other architectures, and wrap the binaries into an output folder that will be zipped into an apk
 
 - Change the coroutine runtime (Make it run on the same thread (usually a separate thread for that) that calls the core initialization function)
 - Add reference counting on sre::Objects
@@ -49,6 +51,8 @@ Less likely ideas:
 	
 	- Compression on resources (Maybe using a zip file with the resources?), or adding a bitmask at the resources
 
+	- Support for shared library c:
+		(Although Story Royale will still be linked statically. The engine was indeed made for that)
 	- Have the game run on an isolated space. I got some ideas on how this could be done and why:
 		- On Windows, you can have the game as a separate process executable, with its own memory space and have the engine create the process when running the game:
 			- This allows to garantee the engine's initialization when initializing game global variables, so it solves most static initialization and destruction overheads.

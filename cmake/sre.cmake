@@ -6,6 +6,7 @@ include(sre/Icon)
 
 # A couple of helpers
 
+# Get the target property's holder name
 macro(SRE_PROPERTY_TARGET TARGET VAR)
     set(${VAR} ${TARGET}_PROPERTY_INTERFACE)
 endmacro()
@@ -52,13 +53,14 @@ function(SRE_BUILD TARGET_EXE SRCS)
     endif()
     configure_file(${SRE_DIR}/gen_src/title.c.in ${CMAKE_CURRENT_BINARY_DIR}/title.c)
     
-    macro(SETIFEXISTS) endmacro()
-    if (GAME_RESOURCES)
-        set_target_properties(${TARGET_EXE} PROPERTIES RES_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/${GAME_RESOURCES})
-    endif()
-    if (GAME_ICONS)
-        set_target_properties(${TARGET_EXE} PROPERTIES ICO_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/${GAME_ICONS})
-    endif()
+    macro(SETIFEXISTS VAR PROP VALUE)
+        if (${VAR})
+            set_target_properties(${TARGET_EXE} PROPERTIES ${PROP} ${VALUE})
+        endif()
+    endmacro()
+
+    SETIFEXISTS(GAME_RESOURCES RES_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/${GAME_RESOURCES})
+    SETIFEXISTS(GAME_ICONS ICO_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/${GAME_ICONS})
 
     set_target_properties(${TARGET_EXE} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_EXE})
     if (MSVC_IDE)
@@ -78,13 +80,6 @@ function(SRE_BUILD TARGET_EXE SRCS)
     if (ARGN MATCHES USE_WX)
         message("--- ${TARGET} HAS WX")
         target_link_libraries(${TARGET_EXE} PRIVATE sre_werror)
-    endif()
-
-    if(NOT MSVC) # Incremental linking, this is needed for non-MSVC compilers
-        target_link_options(${TARGET_EXE} PRIVATE "-Wl,--start-group")
-    endif()
-    if (ANDROID) # Support for 16kb aligned memory pages (Support for disabling the option might come)
-        target_link_options(${TARGET_EXE} PRIVATE "-Wl,-z,max-page-size=16384")
     endif()
 endfunction()
 
