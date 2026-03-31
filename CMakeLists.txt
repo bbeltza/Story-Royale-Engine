@@ -27,42 +27,18 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_subdirectory(3rdparty)
+
 include(CheckIncludeFile)
 include(sre)
+include(sre/targets)
 
-project(sre)
-add_library(sre INTERFACE)
-
-add_subdirectory(3rdparty)
 add_subdirectory(src)
-
-target_include_directories(sre INTERFACE ./common)
-target_include_directories(sre INTERFACE ./include)
-target_link_libraries(sre INTERFACE ${3RDPARTYLIBS})
-
-project(sre_noconsole)
-project(sre_werror)
-add_library(sre_noconsole INTERFACE)
-add_library(sre_werror INTERFACE)
 
 project(sre_private)
 add_library(sre_private INTERFACE)
 target_link_libraries(sre_private INTERFACE sre_werror)
 target_compile_definitions(sre_private INTERFACE SRE=1)
-
-set(SRE_MODULES
-    sre # SRE global interface target
-    sre_main # Contains the entry point, as well as some argument helpers
-    sre_core # Engine core library
-    sre_base # Engine base library
-    sreECS # Scene and entity manager library
-    sreECS_presets # Scene and entity presets (only has components and camera controllers...) (optional)
-    sreGUI # GUI manager library
-    sreGUI_presets # UI presets (optional)
-)
-project(srelib)
-add_library(srelib INTERFACE)
-target_link_libraries(srelib INTERFACE ${SRE_MODULES})
 
 project(sredll) # sre shared library?? :o (unimplemented...)
 add_library(sredll SHARED src/dllmain.c)
@@ -82,9 +58,6 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(sre_werror INTERFACE "-Wno-vla-extension" "-Wno-deprecated-declarations")
 endif()
-
-    if (ANDROID) 
-    endif()
 
 if (ANDROID)
     # Support for 16kb aligned memory pages (Support for disabling the option might come)
@@ -126,5 +99,7 @@ endif()
 install(TARGETS ${SRE_MODULES})
 install(FILES cmake/sre-config.cmake DESTINATION .)
 install(DIRECTORY include DESTINATION share/sre)
+install(DIRECTORY common DESTINATION share/sre)
 install(DIRECTORY scripts DESTINATION share/sre PATTERN __pycache__ EXCLUDE)
 install(DIRECTORY cmake DESTINATION share/sre)
+install(DIRECTORY gen_src DESTINATION share/sre)
