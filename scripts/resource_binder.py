@@ -76,6 +76,9 @@ def writeRes(base:str, dirs:list[str], res_dat:typing.BinaryIO):
         res_dat.write(b'\n')
 
 def main():
+    if not os.path.isdir(res_dir):
+        raise FileNotFoundError(f"Resource path {res_dir} doesn't exist, or is not a directory.")
+
     dirs = getDirs(res_dir)
     with open(f"{output_folder}/_res.dat", "wb") as res_dat:
         writeRes(res_dir, dirs, res_dat)

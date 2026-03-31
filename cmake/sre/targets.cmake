@@ -41,3 +41,27 @@ target_link_libraries(srelib INTERFACE ${SRE_MODULES})
 target_include_directories(sre INTERFACE ${SRE_DIR}/common)
 target_include_directories(sre INTERFACE ${SRE_DIR}/include)
 target_link_libraries(sre INTERFACE ${SRE_3RDPARTYLIBS})
+
+# Compiler specific argument options
+
+if(MSVC)
+    target_link_options(sre_noconsole INTERFACE "/SUBSYSTEM:WINDOWS")
+    target_compile_options(sre_werror INTERFACE "/WX")
+    target_compile_definitions(sre_werror INTERFACE _CRT_SECURE_NO_WARNINGS)
+else()
+    if (WIN32)
+        target_link_options(sre_noconsole INTERFACE "-mwindows")
+    endif()
+    target_compile_options(sre_werror INTERFACE "-Werror")
+    target_link_options(sre INTERFACE "-Wl,--start-group") # Incremental linking, this is needed for non-MSVC compilers
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(sre_werror INTERFACE "-Wno-vla-extension" "-Wno-deprecated-declarations")
+endif()
+
+if (ANDROID)
+    # Support for 16kb aligned memory pages (Support for disabling the option might come)
+    target_link_options(sre INTERFACE "-Wl,-z,max-page-size=16384")
+    target_link_libraries(sre INTERFACE android log)
+endif()

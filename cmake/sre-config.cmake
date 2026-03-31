@@ -1,11 +1,19 @@
-set(SRE_DIR "${CMAKE_CURRENT_LIST_DIR}/share/sre" CACHE PATH "Directory of the Story Royale engine" FORCE)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRE_DIR}/cmake/)
+set(SRE_DIR "${CMAKE_INSTALL_PREFIX}/share/sre" CACHE PATH "Directory of the Story Royale engine" FORCE)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR})
 
-link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
+link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
+find_package(OpenGL REQUIRED)
 
-include(sre)
 include(sre/targets)
+include(sre/game_build)
+
+include(sre/drivers)
+target_link_libraries(sre_drivers INTERFACE sre_sdlrenderer
+                                            sre_opengl)
+target_link_libraries(sre_drivers INTERFACE OpenGL::GL)
+target_link_libraries(srelib INTERFACE sre_drivers)
+

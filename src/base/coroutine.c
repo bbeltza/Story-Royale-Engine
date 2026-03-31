@@ -32,7 +32,7 @@ typedef struct coroutine_data coroutine_data;
     #include "coroutine/x86_64.s"
 #elif !defined(_MSC_VER) && defined(__i386__)
     #include "coroutine/x86_32.s"
-#elif defined(HAVE_UCONTEXT_H)
+#elif defined(SRE_HAVE_UCONTEXT_H)
     #include "coroutine/ucontext.c"
 #else
     #include "coroutine/dummy.c"

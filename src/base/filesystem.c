@@ -6,7 +6,7 @@ static inline bool _mkdir_internal(const char*);
     #include <Windows.h>
 
     static inline bool _mkdir_internal(const char* path) { return CreateDirectoryA(path, NULL) != FALSE; }
-#elif defined(HAVE_SYSSTAT_H)
+#elif defined(SRE_HAVE_SYSSTAT_H)
     #include <sys/stat.h>
     static inline bool _mkdir_internal(const char* path) { return mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0; }
 #else

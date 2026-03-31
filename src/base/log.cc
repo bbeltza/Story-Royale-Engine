@@ -222,6 +222,7 @@ namespace
 }
 
 #include <SDL_thread.h>
+#include <thread>
 
 static sre::Log* inst;
 int init_logsifnoinst()
@@ -256,9 +257,6 @@ void sre::Log::flush()
     std::lock_guard<std::recursive_mutex> guard{mutex};
     while (!msg_queue.empty())
     {
-#ifdef ANDROID
-        __android_log_write(ANDROID_LOG_DEFAULT, "APP", msg_queue.front().buffer);
-#else
         static constexpr char extra_characters[] = "[]: ";
         static constexpr char style_characters_begin[] = "\033[30;1m";
         static constexpr char style_characters_end[] = "\033[0m";
@@ -325,7 +323,6 @@ void sre::Log::flush()
         FILE* console = msg.category == sre::LOGCATEGORY_INFO ? stdout : stderr;
         fwrite(buffer, buffer_size, 1, console);
         //
-#endif
         msg_queue.pop_front();
     }
 }
