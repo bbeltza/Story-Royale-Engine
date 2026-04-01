@@ -1,0 +1,1 @@
+# Include to build game on android, it might also have the tooling to make a full apk! (will implement what SRE_BUILD does but android exclusive, but for now it does nothing)

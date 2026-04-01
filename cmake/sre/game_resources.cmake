@@ -25,7 +25,7 @@ function(srEngine_link_resource PROJECT)
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${PWDRES}
             ${OUTPUT}/__res
-            )
+        )
 	    message("-- ${OUTPUT}")	
         message("-- ${CMAKE_BUILD_TYPE}")
         add_dependencies(${PROJECT} copy_${PROJECT})
@@ -38,16 +38,16 @@ function(srEngine_link_resource PROJECT)
         endif()
         set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}")
         add_custom_target(
-        bind_${PROJECT}
-        COMMENT "--- Binding source resources..."
-        COMMAND ${PYTHON_COMMAND}resource_binder.py
-        ${PWDRES}
-        ${OUTPUT}
-        ${WANT_C}
-        ${CMAKE_SIZEOF_VOID_P}
-        ${CMAKE_C_BYTE_ORDER}
-        DEPENDS ${OUTPUT}/_res.c
-        DEPENDS ${OUTPUT}/_res.dat
+            bind_${PROJECT}
+            COMMENT "--- Binding source resources..."
+            COMMAND ${PYTHON_COMMAND}resource_binder.py
+            ${PWDRES}
+            ${OUTPUT}
+            ${WANT_C}
+            ${CMAKE_SIZEOF_VOID_P}
+            ${CMAKE_C_BYTE_ORDER}
+            DEPENDS ${PWDRES}
+            BYPRODUCTS ${OUTPUT}/_res.c ${OUTPUT}/_res.dat
         )
 
         file(TOUCH ${OUTPUT}/_res.c)
@@ -62,7 +62,7 @@ function(srEngine_link_resource PROJECT)
             target_sources(${PROJECT} PRIVATE ${OUTPUT}/_res.rc)
             srEngine_nobind(${PROJECT})
         elseif(UNIX)
-            configure_file(${SRE_DIR}/asm/res.s ${OUTPUT}/_res.s)
+            configure_file(${SRE_DIR}/gen_src/res.s ${OUTPUT}/_res.s)
             target_link_libraries(${PROJECT} PUBLIC ${OUTPUT}/_res.s)
         else()
             target_sources(${PROJECT} PUBLIC ${OUTPUT}/_res.c)

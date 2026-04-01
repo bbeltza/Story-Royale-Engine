@@ -2,8 +2,6 @@ include(sre/game_icon)
 include(sre/game_property)
 include(sre/game_resources)
 
-option(SRE_GAME_MINIMAL "Build binaries only, without building the rest (Resource folders, icons, etc...)" OFF)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib)
 

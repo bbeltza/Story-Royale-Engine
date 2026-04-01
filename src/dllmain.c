@@ -8,5 +8,8 @@
         return TRUE;
     }
 #else
-    #error "sre DLL not supported on the current platform!"
+    __attribute__((constructor)) int _dlmain()
+    {
+
+    }
 #endif
