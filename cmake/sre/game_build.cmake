@@ -9,6 +9,17 @@ if (UNIX) # Enable assembly to .incbin embedded resources
     enable_language(ASM)
 endif()
 
+# Future SRE_BUILD interface
+function(_SRE_BUILD TARGET_EXE SRCS)
+    if (NOT ${SRCS})
+        message(FATAL_ERROR "No sources speficied in variable '${SRCS}'. Note that you won't be able to compile a game if you don't define 'sre::initailize()'!")
+    endif()
+    project(${TARGET_EXE})
+
+    SRE_BUILD_INTERNAL(${TARGET_EXE} TITLE ICONS RES ${SRCS})
+endfunction()
+
+
 function(SRE_BUILD TARGET_EXE SRCS)
     if (NOT ${SRCS})
         message(FATAL_ERROR "No sources speficied in variable '${SRCS}'. Note that you won't be able to compile a game if you don't define 'sre::initailize()'!")

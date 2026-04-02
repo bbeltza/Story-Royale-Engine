@@ -12,8 +12,5 @@ include(sre/targets)
 include(sre/game_build)
 
 include(sre/drivers)
-target_link_libraries(sre_drivers INTERFACE sre_sdlrenderer
-                                            sre_opengl)
-target_link_libraries(sre_drivers INTERFACE OpenGL::GL)
 target_link_libraries(srelib INTERFACE sre_drivers)
 

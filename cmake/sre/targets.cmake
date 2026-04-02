@@ -61,6 +61,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 if (ANDROID)
+    include(sre/game_apk)
     # Support for 16kb aligned memory pages (Support for disabling the option might come)
     target_link_options(sre INTERFACE "-Wl,-z,max-page-size=16384")
     target_link_libraries(sre INTERFACE android log)
