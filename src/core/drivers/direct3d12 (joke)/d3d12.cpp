@@ -403,15 +403,19 @@ struct sre_d3d12;
 
 struct sre_d3d12texture
 {
-    sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format): w(size.x), h(size.y) {}
+    sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format);
     ~sre_d3d12texture();
-
-    int w, h;
     
-    bool valid() { return true; }
-    bool size(int* pw, int* ph) { *pw = w; *ph = h; return true; }
+    bool valid() { return m_resource != NULL; }
     
+    bool update(const void* pixels, int pitch);
+    bool size(int* pw, int* ph) { *pw = m_size.x; *ph = m_size.y; return true; }
+    SDL_PixelFormatEnum format() { return m_format; }
+    
+    void bind(ID3D12GraphicsCommandList* dxcmd_list);
 private:
+    SDL_PixelFormatEnum m_format = SDL_PIXELFORMAT_UNKNOWN;
+    sre::vec2i m_size{};
     ID3D12Resource* m_resource{};
 };
 
@@ -431,8 +435,10 @@ struct sre_d3d12
     ID3D12RootSignature* dxrootsignature;
     ID3D12Heap* dxheap;
 
-    ID3D12PipelineState* dxpipeline_blendstates[6];
+    ID3D12PipelineState* dxpipeline_blendstates[5];
     ID3D12Resource* dxrender_targets[2];
+
+    int current_dxpipelinestate;
     
     // Some DirectX state members
     UINT current_frameindex;
@@ -453,17 +459,14 @@ struct sre_d3d12
     sre::uptr basicvbo_index;
 
     sre::vec2f* cbuffermap;
+    VBO_INPUT* basicvbomap;
 private:
     D3D12_VIEWPORT m_viewport;
 public:
     void present();
     bool viewport(sre::vec2i osize, sre::vec2ut vsize);
     bool vsync(int mode) { return false; }
-    bool blend(sre_DrawBlending blend) { return false; }
-
-    bool tex_update(void* texture, const void* pixels, int pitch) { return false; }
-    bool tex_size(void* texture, int* w, int* h) {  return __tex->size(w, h); }
-    SDL_PixelFormatEnum tex_format(void* texture) { return SDL_PIXELFORMAT_ARGB8888; }
+    bool blend(sre_DrawBlending blend);
 
     bool clear(sre::col4 color);
     bool clip(sre::rect2Dut rect) { return false; }
@@ -472,16 +475,7 @@ public:
     bool draw_lines(const sre_DDLines* data) { return false; }
     bool draw_rect(const sre_DDRect* data);
     bool draw_rrect(const sre_DDRRect* data) { return false; }
-    bool draw_texture(const sre_DDTexture* data)
-    {
-        sre_DDRect rect{
-            data->flags,
-            data->modulate,
-            data->rect,
-            data->anchor
-        };
-        return draw_rect(&rect);
-    }
+    bool draw_texture(const sre_DDTexture* data);
     bool draw_rtexture(const sre_DDRTexture* data) { return false; }
 
     private:
@@ -496,10 +490,10 @@ static const sre_videodriverInterface sred3d12_interface{
     [](const sre_videodriver* video, int vsync) { return __inst->vsync(vsync); },
     [](const sre_videodriver* video, sre_DrawBlending blend) { return __inst->blend(blend); },
     [](const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format) { new(texture) sre_d3d12texture(__inst, {w, h}, format); return __tex->valid(); },
-    [](const sre_videodriver* video, void* texture, const void* pixels, int pitch) { return __inst->tex_update(texture, pixels, pitch); },
+    [](const sre_videodriver* video, void* texture, const void* pixels, int pitch) { return __tex->update(pixels, pitch); },
     [](const sre_videodriver* video, void* texture) { __tex->~sre_d3d12texture(); },
-    [](const sre_videodriver* video, void* texture, int* w, int* h) { return __inst->tex_size(texture, w, h); },
-    [](const sre_videodriver* video, void* texture) { return __inst->tex_format(texture); },
+    [](const sre_videodriver* video, void* texture, int* w, int* h) { return __tex->size(w, h); },
+    [](const sre_videodriver* video, void* texture) { return __tex->format(); },
 
     [](const sre_videodriver* video, const sre::col4* color) { return __inst->clear(*color); },
     [](const sre_videodriver* video, const sre::rect2Dut* rect) { return __inst->clip(*rect); },
@@ -648,6 +642,8 @@ bool create_targets(sre_d3d12* inst)
     return SUCCEEDED(hr);
 }
 
+extern void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc);
+
 bool setup_pipeline(sre_d3d12* inst)
 {
     static const D3D12_INPUT_ELEMENT_DESC INPUTS[3] = {
@@ -655,8 +651,9 @@ bool setup_pipeline(sre_d3d12* inst)
         /* color     */ {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
         /* anchor    */ {"POSITION", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
     };
-    static const D3D12_ROOT_PARAMETER CBUFFERS[1] = {
-        { D3D12_ROOT_PARAMETER_TYPE_CBV, {0, 0}, D3D12_SHADER_VISIBILITY_VERTEX }
+    static const D3D12_ROOT_PARAMETER CBUFFERS[2] = {
+        /* global cb */ { D3D12_ROOT_PARAMETER_TYPE_CBV, {0, 0}, D3D12_SHADER_VISIBILITY_VERTEX },
+        /* texture   */ { D3D12_ROOT_PARAMETER_TYPE_SRV, {0, 0}, D3D12_SHADER_VISIBILITY_PIXEL }
     };
 
     HRESULT hr;
@@ -704,19 +701,10 @@ bool setup_pipeline(sre_d3d12* inst)
     pstate_desc.PS.pShaderBytecode = PS_BYTES;
     pstate_desc.PS.BytecodeLength = sizeof(PS_BYTES);
     
-    for (int i = 0; i < 6; i++)
+    pstate_desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    for (int i = 0; i < sre::countof(inst->dxpipeline_blendstates); i++)
     {
-        pstate_desc.BlendState.RenderTarget[0].BlendEnable = FALSE;
-        pstate_desc.BlendState.RenderTarget[0].LogicOpEnable = FALSE;
-        pstate_desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-        pstate_desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-        pstate_desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-        pstate_desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-        pstate_desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-        pstate_desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-        pstate_desc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-        pstate_desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
+        blend_functions[i](pstate_desc.BlendState.RenderTarget[0]);
         SRE_DXCALL(inst->dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&inst->dxpipeline_blendstates[i])));
     }
 
@@ -777,10 +765,11 @@ bool setup_pipeline(sre_d3d12* inst)
             IID_PPV_ARGS(&inst->cbuffer)
         ));
 
-        D3D12_RANGE range{0, 0};
-        SRE_DXCALL(inst->cbuffer->Map(0, &range, reinterpret_cast<void**>(&inst->cbuffermap)));
     }
-
+    D3D12_RANGE range{0, 0};
+    SRE_DXCALL(inst->basicvbo_container->Map(0, &range, reinterpret_cast<void**>(&inst->basicvbomap)));
+    SRE_DXCALL(inst->cbuffer->Map(0, &range, reinterpret_cast<void**>(&inst->cbuffermap)));
+    
     return SUCCEEDED(hr);
 }
 
@@ -790,7 +779,7 @@ bool sre_d3d12::clear(sre::col4 color)
     _waitforgpu();
     
     SRE_DXCALL(dxcmd_allocator->Reset());
-    SRE_DXCALL(dxcmd_list->Reset(dxcmd_allocator, dxpipeline_blendstates[0]));
+    SRE_DXCALL(dxcmd_list->Reset(dxcmd_allocator, dxpipeline_blendstates[current_dxpipelinestate]));
 
     D3D12_RECT scr{0, 0, (LONG)m_viewport.Width, (LONG)m_viewport.Height};
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
@@ -833,12 +822,6 @@ void sre_d3d12::present()
     
     {
         D3D12_RESOURCE_BARRIER transitions[] = {
-            /*{ D3D12_RESOURCE_BARRIER_TYPE_TRANSITION, D3D12_RESOURCE_BARRIER_FLAG_NONE, {
-                basic_vbo,
-                D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-                D3D12_RESOURCE_STATE_COPY_DEST,
-                D3D12_RESOURCE_STATE_PRESENT
-            } },*/
             { D3D12_RESOURCE_BARRIER_TYPE_TRANSITION, D3D12_RESOURCE_BARRIER_FLAG_NONE, {
                 dxrender_targets[current_frameindex],
                 D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
@@ -884,6 +867,24 @@ bool sre_d3d12::viewport(sre::vec2i osize, sre::vec2ut vsize)
     return true;
 }
 
+bool sre_d3d12::blend(sre_DrawBlending blend)
+{
+    int state;
+    switch (blend)
+    {
+        case SRE_BLEND_NONE: state = 0; break;
+        case SRE_BLEND_BLEND: state = 1; break;
+        case SRE_BLEND_ADD: state = 2; break;
+        case SRE_BLEND_MOD: state = 3; break;
+        case SRE_BLEND_MUL: state = 4; break;
+        default: abort(); return false;
+    }
+
+    current_dxpipelinestate = state;
+    dxcmd_list->SetPipelineState(dxpipeline_blendstates[state]);
+    return true;
+}
+
 bool sre_d3d12::draw_fill(const sre_DDFill* data)
 {
     HRESULT hr{};
@@ -897,12 +898,7 @@ bool sre_d3d12::draw_rect(const sre_DDRect* data)
 
     HRESULT hr{};
 
-    D3D12_RANGE rrange{};
-    D3D12_RANGE wrange{basicvbo_index*sizeof(VBO_INPUT), (basicvbo_index+1)*sizeof(VBO_INPUT)};
-    VBO_INPUT* addr;
-    SRE_DXCALL(basicvbo_container->Map(0, &rrange, reinterpret_cast<void**>(&addr)));
-    addr[basicvbo_index] = { data->rect, { data->color.r/255.0f, data->color.g/255.0f, data->color.b/255.0f, data->color.a/255.0f }, data->anchor };
-    basicvbo_container->Unmap(0, &wrange);
+    basicvbomap[basicvbo_index] = { data->rect, { data->color.r/255.0f, data->color.g/255.0f, data->color.b/255.0f, data->color.a/255.0f }, data->anchor };
     basic_vboview.BufferLocation = basicvbo_container->GetGPUVirtualAddress() + basicvbo_index*sizeof(VBO_INPUT);
     basicvbo_index++;
 
@@ -911,7 +907,98 @@ bool sre_d3d12::draw_rect(const sre_DDRect* data)
     return SUCCEEDED(hr);
 }
 
+bool sre_d3d12::draw_texture(const sre_DDTexture* data)
+{
+    auto* texture = static_cast<sre_d3d12texture*>(sre_get_texture(data->texture));
+    texture->bind(dxcmd_list);
+
+    sre_DDRect rect{
+        data->flags,
+        data->modulate,
+        data->rect,
+        data->anchor
+    };
+    return draw_rect(&rect);
+}
+
 sre_d3d12texture::~sre_d3d12texture()
 {
-
+    SRE_DXRELEASE(m_resource);
 }
+
+sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format)
+{
+    HRESULT hr;
+
+    D3D12_HEAP_PROPERTIES heap_properties{};
+    heap_properties.Type = D3D12_HEAP_TYPE_GPU_UPLOAD;
+
+    D3D12_RESOURCE_DESC texture_desc{};
+    texture_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    texture_desc.Width = size.x;
+    texture_desc.Height = size.y;
+    texture_desc.DepthOrArraySize = 1;
+    texture_desc.MipLevels = 1;
+    texture_desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; // Default format for now, might make a function to chose the best format for this but for now using the exact same Swapchain's format is enough
+                                                        // Note that `format` is just a hint to chose a seemimgly better format for conversions, you must get the format of the texture returned in order to convert it and update its pixels
+    texture_desc.SampleDesc.Count = 1;
+
+    SRE_DXCALL(video->dxdevice->CreateCommittedResource(
+        &heap_properties, D3D12_HEAP_FLAG_NONE,
+        &texture_desc,
+        D3D12_RESOURCE_STATE_COMMON,
+        NULL, IID_PPV_ARGS(&m_resource)
+    ));
+
+    if (SUCCEEDED(hr))
+    {
+        m_size = size;
+        m_format = SDL_PIXELFORMAT_RGBA8888;
+    }
+}
+
+bool sre_d3d12texture::update(const void* pixels, int pitch)
+{
+    HRESULT hr;
+
+    SRE_DXCALL(m_resource->Map(0, NULL, NULL));
+    SRE_DXCALL(m_resource->WriteToSubresource(0, NULL, pixels, pitch, 0));
+    
+    D3D12_RANGE range{};
+    m_resource->Unmap(0, &range);
+    return SUCCEEDED(hr);
+}
+
+void sre_d3d12texture::bind(ID3D12GraphicsCommandList* dxcmd_list)
+{
+    // Code to bind texture, I DON'T know yet how to do it...
+}
+
+//
+
+static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_NONE
+        desc.BlendEnable = FALSE;
+        desc.LogicOpEnable = FALSE;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_BLEND
+        desc.BlendEnable = TRUE;
+        desc.LogicOpEnable = FALSE;
+        
+        desc.SrcBlend = D3D12_BLEND_ONE;
+        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+        desc.SrcBlendAlpha = D3D12_BLEND_ONE;
+        desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+        desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD (unimplemented from here)
+
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_ADD
+
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
+
+    }
+};
