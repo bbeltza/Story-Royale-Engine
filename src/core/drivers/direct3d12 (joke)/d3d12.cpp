@@ -416,7 +416,11 @@ struct sre_d3d12texture
 private:
     SDL_PixelFormatEnum m_format = SDL_PIXELFORMAT_UNKNOWN;
     sre::vec2i m_size{};
+
+    ID3D12DescriptorHeap* m_descheap; // This is dumb, make a single one inside sre_d3d12
+
     ID3D12Resource* m_resource{};
+    D3D12_GPU_DESCRIPTOR_HANDLE m_gpudesc;
 };
 
 struct sre_d3d12
@@ -432,6 +436,7 @@ struct sre_d3d12
     ID3D12CommandQueue* dxcmd_queue;
     ID3D12GraphicsCommandList* dxcmd_list;
     ID3D12DescriptorHeap* dxdesc_heap;
+    ID3D12DescriptorHeap* dxsrvheap;
     ID3D12RootSignature* dxrootsignature;
     ID3D12Heap* dxheap;
 
@@ -663,7 +668,7 @@ bool setup_pipeline(sre_d3d12* inst)
         ID3DBlob* rserr;
         D3D12_ROOT_SIGNATURE_DESC rsdesc{};
         rsdesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-        rsdesc.NumParameters = 1;
+        rsdesc.NumParameters = sre::countof(CBUFFERS);
         rsdesc.pParameters = CBUFFERS;
 
         SRE_DXCALL(D3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
@@ -924,6 +929,7 @@ bool sre_d3d12::draw_texture(const sre_DDTexture* data)
 sre_d3d12texture::~sre_d3d12texture()
 {
     SRE_DXRELEASE(m_resource);
+    SRE_DXRELEASE(m_descheap);
 }
 
 sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format)
@@ -950,8 +956,27 @@ sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelF
         NULL, IID_PPV_ARGS(&m_resource)
     ));
 
+    {
+        D3D12_DESCRIPTOR_HEAP_DESC descheap_desc{};
+        descheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        descheap_desc.NumDescriptors = 1;
+        descheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+
+        SRE_DXCALL(video->dxdevice->CreateDescriptorHeap(&descheap_desc, IID_PPV_ARGS(&m_descheap)));
+    }
+
+    if (0) {
+        D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+        srv_desc.Format = texture_desc.Format;
+        srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srv_desc.Texture2D.MipLevels = 1;
+
+        video->dxdevice->CreateShaderResourceView(m_resource, &srv_desc, m_descheap->GetCPUDescriptorHandleForHeapStart());
+    }
+
     if (SUCCEEDED(hr))
     {
+        m_gpudesc = m_descheap->GetGPUDescriptorHandleForHeapStart();
         m_size = size;
         m_format = SDL_PIXELFORMAT_RGBA8888;
     }
@@ -972,6 +997,7 @@ bool sre_d3d12texture::update(const void* pixels, int pitch)
 void sre_d3d12texture::bind(ID3D12GraphicsCommandList* dxcmd_list)
 {
     // Code to bind texture, I DON'T know yet how to do it...
+    dxcmd_list->SetGraphicsRootDescriptorTable(1, m_gpudesc);
 }
 
 //
