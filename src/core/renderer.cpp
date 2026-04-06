@@ -18,8 +18,8 @@
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
 VIDEOINIT_DEF(opengl)				\
+VIDEOINIT_DEF(d3d12)				\
 //VIDEOINIT_DEF(softwarerender)
-
 
 #define VIDEOINIT_DEF(x) extern "C" bool sre##x##_init(sre_videodriver* video, SDL_Window* window);
 VIDEO_DRIVERS
@@ -51,7 +51,10 @@ void __setup_renderer()
 		SRE_RENDERDRIVER_SDLRENDERER,
 		SRE_RENDERDRIVER_OPENGL,
 
-#ifndef ANDROID
+#if _WIN32 && 0
+		SRE_RENDERDRIVER_DIRECTX12,
+		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX12
+#elif !defined(ANDROID) && 1
         SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL
 #else
         SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_SDLRENDERER
@@ -84,7 +87,6 @@ void __setup_renderer()
 	PFN_CHECK(interface, draw_clip);
 
 	PFN_CHECK(interface, draw_fill);
-	PFN_CHECK(interface, draw_line);
 	PFN_CHECK(interface, draw_lines);
 	PFN_CHECK(interface, draw_rect);
 	PFN_CHECK(interface, draw_rrect);
@@ -173,6 +175,9 @@ void __update_viewport(int w, int h)
 
 void __display_render()
 {
+	if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN)
+		return;
+
 	auto interface = engine.video->interface;
 
 #ifndef IMGUI_DISABLE

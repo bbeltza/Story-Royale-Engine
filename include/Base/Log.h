@@ -86,7 +86,7 @@ namespace sre
     }
     #endif
 #else
-    #ifdef SRE
+    #if SRE
         #define __LTYPE 1
     #else
         #define __LTYPE 0
@@ -110,13 +110,13 @@ namespace sre
             }
 
             template <LogCategory category=LOGCATEGORY_DEBUG, typename... Args>
-            inline int log(const char* fmt, Args... args)
+            static inline int log(const char* fmt, Args... args)
             {
                 return _loglegacy(category, fmt, args...); 
             }
 
             template <LogCategory category=LOGCATEGORY_INFO>
-            inline int log(const char* str) { return sre_logsimpleEx(__LTYPE, category, str); }
+            static inline int log(const char* str) { return sre_logsimpleEx(__LTYPE, category, str); }
 
             
         }

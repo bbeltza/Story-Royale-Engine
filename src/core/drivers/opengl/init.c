@@ -108,7 +108,6 @@ bool sreopengl_viewport(const sre_videodriver* video, int w, int h)
 
     SRE_GL_CALL(inst->funcs2.glUseProgram(inst->basic_program));
     SRE_GL_CALL(inst->funcs2.glUniformMatrix4fv(inst->basic_program_state_projection, 1, GL_FALSE, projection));
-    SRE_GL_CALL(glViewport(0, 0, w, h));
     return true;
 }
 
@@ -150,6 +149,10 @@ bool sreopengl_blend(const sre_videodriver* video, sre_DrawBlending blending)
 
 bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color)
 {
+    int w = (int)(video->size.x * video->scale);
+    int h = (int)(video->size.y * video->scale);
+    SRE_GL_CALL(glViewport(0, 0, w, h));
+
     GLclampf r = color->r / 255.0f;
     GLclampf g = color->g / 255.0f;
     GLclampf b = color->b / 255.0f;
@@ -171,6 +174,7 @@ bool sreopengl_drawcleartest(const sre_videodriver* video, const sre_col4* color
         0.0f, 0.0f, 1.0f, 0.0f,
         tx,   ty,   0.0f, 1.0f
     }, sizeof(GLfloat[16]));
+
     return true;
 }
 
@@ -215,7 +219,6 @@ const struct sre_videodriverInterface sreopengl_interface = {
     sreopengl_drawcleartest,
     sreopengl_clip,
     sreopengl_drawfill,
-    sreopengl_drawline,
     sreopengl_drawlines,
     sreopengl_drawrect,
     sreopengl_drawrrect,

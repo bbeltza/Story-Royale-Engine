@@ -37,20 +37,10 @@ struct sre_videodriverInterface
 	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
 	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
 
-/*
-	bool (*tex_gen)(const sre_videodriver* video, void* texture);
-	bool (*tex_update)(const sre_videodriver* video, void* texture, const void* pixels, int pitch);
-	bool (*tex_bind)(const sre_videodriver* video, void* texture, const SDL_Surface* surface);
-	bool (*tex_size)(const sre_videodriver* video, void* texture, int* w, int* h);
-	void (*tex_destroy)(const sre_videodriver* video, void* texture);
-	SDL_PixelFormatEnum (*tex_format)(const sre_videodriver* video, void* texture);
-*/
-
 	SRE_DRAW_FUNC(draw_clear, const sre_col4* color);
 	SRE_DRAW_FUNC(draw_clip, const sre_rect2Dut* rect);
 	
 	SRE_DRAW_FUNC(draw_fill, const sre_DDFill* data);
-	SRE_DRAW_FUNC(draw_line, const sre_DDLine* data);
 	SRE_DRAW_FUNC(draw_lines, const sre_DDLines* data);
 	SRE_DRAW_FUNC(draw_rect, const sre_DDRect* data);
 	SRE_DRAW_FUNC(draw_rrect, const sre_DDRRect* data);

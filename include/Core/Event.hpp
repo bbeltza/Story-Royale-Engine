@@ -32,13 +32,10 @@ namespace sre
 {
 	namespace events
 	{
-		struct Common
+		struct MouseButton
 		{
-			eventType type;
-		};
+			static constexpr eventType EVENT_TYPE = EVENT_MOUSEBUTTON;
 
-		struct MouseButton: Common
-		{
 			sre::u32 id;
 			sre::u8 button;
 			sre::u8 clicks;
@@ -48,31 +45,39 @@ namespace sre
 			sre::vec2ut position;
 		};
 
-		struct MouseWheel: Common
+		struct MouseWheel
 		{
+			static constexpr eventType EVENT_TYPE = EVENT_MOUSEWHEEL;
+
 			sre::u32 id;
 			sre::vec2i amount;
 			sre::vec2ut position;
 		};
 
-		struct MouseMove: Common
+		struct MouseMove
 		{
+			static constexpr eventType EVENT_TYPE = EVENT_MOUSEMOVE;
+
 			sre::u32 id;
 			sre::u32 button_state;
 			sre::vec2ut position;
 			sre::vec2ut delta;
 		};
 
-		struct Key: Common
+		struct Key
 		{
+			static constexpr eventType EVENT_TYPE = EVENT_KEYPRESS;
+
 			sre::keyCode keycode;
 			sre::scanCode scancode;
 			sre::keyMod keymod;
-			u32 press;
+			int press;
 		};
 
-		struct Touch: Common
+		struct Touch
 		{
+			static constexpr eventType EVENT_TYPE = EVENT_TOUCH;
+
 			sre::vec2ut uv;
 			sre::vec2ut delta;
 			sre::unit pressure;
@@ -83,21 +88,39 @@ namespace sre
 
 namespace sre
 {
-	union Event
+	struct Event
 	{
-		Event() {}
-		Event(const Event& copy) { memcpy(static_cast<void*>(this), &copy, sizeof(Event)); };
+		#define __CHECK_EVSIZE static_assert(sizeof(Event::_data) >= sizeof(evT), "Should not happen, in case it happens, make Event bigger");
 
-		eventType type;
-		events::Common common;
+		template <typename evT>
+		Event(const evT& ev): m_type(evT::EVENT_TYPE)
+		{
+			__CHECK_EVSIZE
+			new(_data) evT(ev);
+		}
 
-		events::MouseButton mouse_button;
-		events::MouseWheel mouse_wheel;
-		events::MouseMove mouse_move;
+		template <typename evT>
+		evT& get()
+		{
+			// Event structs don't need any inheritance, they instead just need to define the static constant EVENT_TYPE
+			// This would also mean that you can make your own events, if they're smaller than Event's set constant capacity.
+			//		It is still not recommended, making custom events for custom systems is possible, but this is only meant to be used with sre::onEvent
+			__CHECK_EVSIZE
 
-		events::Key key_press;
+			static constexpr int evtype = evT::EVENT_TYPE;
+			if (m_type == evtype)
+				return reinterpret_cast<evT&>(*this->_data);
+			
+			throw std::bad_cast();
+		}
 
-		events::Touch touch;
+		template <typename evT>
+		operator evT&() { return get<evT>(); }
+
+		eventType type() const { return m_type; }
+		private:
+			const eventType m_type;
+			char _data[28];
 	};
 
 	extern Signal<sre::Event> onEvent;

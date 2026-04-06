@@ -9,7 +9,6 @@
 namespace sre
 {
     using DDFill = sre_DDFill;
-    using DDLine = sre_DDLine;
     using DDLines = sre_DDLines;
     using DDRect = sre_DDRect;
     using DDRRect = sre_DDRRect;
@@ -19,7 +18,6 @@ namespace sre
     using drawBlending = sre_DrawBlending;
 
     inline bool draw(const DDFill& data) { return sre_draw(SRE_DRAW_FILL, &data); }
-    inline bool draw(const DDLine& data) { return sre_draw(SRE_DRAW_LINE, &data); }
     inline bool draw(const DDLines& data) { return sre_draw(SRE_DRAW_LINES, &data); }
     inline bool draw(const DDRect& data) { return sre_draw(SRE_DRAW_RECTANGLE, &data); }
     inline bool draw(const DDRRect& data) { return sre_draw(SRE_DRAW_RRECTANGLE, &data); }

@@ -9,16 +9,19 @@ void Button::handle_event(void*, Button* button, sre::Event ev)
 {
     if (!button->flags.has(F_ENABLED)) return;
 
-    switch (ev.type)
+    switch (ev.type())
     {
-    case sre::EVENT_MOUSEBUTTON:
-        if (!ev.mouse_button.pressed) return;
-        if (button->m_hover) button->on_press(ev.mouse_button.position);
-        break;
-    case sre::EVENT_TOUCH:
-        if (ev.touch.pressed) return;
-        if (button->m_hover) button->on_press(ev.touch.uv * sre::display_size());
-        break;
+    using namespace sre::events;
+    case sre::EVENT_MOUSEBUTTON: {
+        const MouseButton& mev = ev;
+        if (!mev.pressed) return;
+        if (button->m_hover) button->on_press(mev.position);
+    } break;
+    case sre::EVENT_TOUCH: {
+        const Touch& tev = ev;
+        if (tev.pressed) return;
+        if (button->m_hover) button->on_press(tev.uv * sre::display_size());
+    } break;
     default:
         break;
     }

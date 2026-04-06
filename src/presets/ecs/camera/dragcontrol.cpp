@@ -37,13 +37,14 @@ void DragControl::on_pupdate(Camera&)
 
 void DragControl::handle_event(void*, DragControl* self, sre::Event ev)
 {
-    switch (ev.type)
+    switch (ev.type())
     {
+    using namespace sre::events;
     case sre::EVENT_MOUSEMOVE:
-        if (sre::action_pressed(self->m_action)) self->m_lastmouseDelta += ev.mouse_move.delta;
+        if (sre::action_pressed(self->m_action)) self->m_lastmouseDelta += ev.get<MouseMove>().delta;
         break;
     case sre::EVENT_TOUCH:
-        self->m_lastmouseDelta += ev.touch.delta * sre::display_size();
+        self->m_lastmouseDelta += ev.get<Touch>().delta * sre::display_size();
         break;
     default:
         break;

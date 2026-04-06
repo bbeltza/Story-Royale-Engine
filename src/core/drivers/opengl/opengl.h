@@ -100,7 +100,6 @@ extern bool sreopengl_bindva2_1(const sre_videoOpenGL* inst);
 /* Drawing functions */
 
 extern bool sreopengl_drawfill(const sre_videodriver* video, const sre_DDFill* data);
-extern bool sreopengl_drawline(const sre_videodriver* video, const sre_DDLine* data);
 extern bool sreopengl_drawlines(const sre_videodriver* video, const sre_DDLines* data);
 extern bool sreopengl_drawrect(const sre_videodriver* video, const sre_DDRect* data);
 extern bool sreopengl_drawrrect(const sre_videodriver* video, const sre_DDRRect* data);

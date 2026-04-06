@@ -43,8 +43,21 @@ static void handle_arg(const char* arg, char* argv[])
     sre_log(SRE_LOGCATEGORY_WARN, "Unrecognized option: %s", arg-j);
 }
 
+#pragma comment(lib, "dxguid.lib")
+#include <d3d12.h>
+
 int main(int argc, char* argv[])
 {
+    // Useful dx debugger!
+    #if !defined(NDEBUG) && 1
+        ID3D12Debug* dxdebug = NULL;
+        if (D3D12GetDebugInterface(&IID_ID3D12Debug, &dxdebug) == S_OK)
+        {
+            dxdebug->lpVtbl->EnableDebugLayer(dxdebug);
+            dxdebug->lpVtbl->Release(dxdebug);
+        }
+    #endif
+
 	for (int i = 1; i < argc; i++)
         handle_arg(argv[i], argv);
 

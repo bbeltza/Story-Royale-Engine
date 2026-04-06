@@ -119,7 +119,7 @@ namespace sre
             type(type),
             size(buffer_size)
         {
-            #if _WIN32 && _DEBUG
+            #if _WIN32 && !defined(NDEBUG) && 0
                 if (category == sre::LOGCATEGORY_ERROR && type == 2)
                 {
                     if (IsDebuggerPresent())

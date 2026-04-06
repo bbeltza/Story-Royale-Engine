@@ -16,7 +16,6 @@ static const struct sre_videodriverInterface sdl_interface = {
     sresdlrenderer_draw_clear,
     sresdlrenderer_clip,
     sresdlrenderer_draw_fill,
-    sresdlrenderer_draw_line,
     sresdlrenderer_draw_lines,
     sresdlrenderer_draw_rect,
     sresdlrenderer_draw_rrect,

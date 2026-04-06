@@ -119,17 +119,6 @@ bool sreopengl_drawrrect(const sre_videodriver* video, const sre_DDRRect* data)
     return common_setrotation(inst, data->angle) && common_drawrect(inst, &data->rect);
 }
 
-bool sreopengl_drawline(const sre_videodriver* video, const sre_DDLine* data)
-{
-    sre_DDLines linesdata;
-    linesdata.color = data->color;
-    linesdata.flags = data->flags;
-    linesdata.pts = &data->pt1;
-    linesdata.count = 2;
-    linesdata._unused = 0;
-    return sreopengl_drawlines(video, &linesdata);
-}
-
 bool sreopengl_drawlines(const sre_videodriver* video, const sre_DDLines* data)
 {
     const sre_videoOpenGL* inst = video->userdata;

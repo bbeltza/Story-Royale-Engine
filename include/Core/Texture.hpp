@@ -53,8 +53,9 @@ namespace sre
         sre::vec2i size() const
         {
             int _size[2];
-            sre_tex_size(m_handle, _size + 0, _size + 1);
-            return { _size[0], _size[1] };
+            if (sre_tex_size(m_handle, _size + 0, _size + 1))
+                return { _size[0], _size[1] };
+            return { 0, 0 };
         }
 
         TextureId handle() const { return m_handle; }

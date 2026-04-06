@@ -52,13 +52,16 @@ extern const void *const SRE_DRAW_DONT_CENTER;
 typedef enum
 {
     SRE_DRAW_FILL,
-    SRE_DRAW_LINE,
     SRE_DRAW_LINES,
     SRE_DRAW_RECTANGLE,
     SRE_DRAW_RRECTANGLE,
     SRE_DRAW_CIRCLE, // Unavailable
     SRE_DRAW_TEXTURE,
-    SRE_DRAW_RTEXTURE
+    SRE_DRAW_RTEXTURE,
+
+    SRE_DRAWTYPES,
+    SRE_DRAW_FIRST = 0, // Returns to SRE_DRAW_FILL currently
+    SRE_DRAW_LAST = SRE_DRAWTYPES-1 // Returns to SRE_DRAW_RTEXTURE currently
 } sre_DrawType;
 
 typedef enum
@@ -93,12 +96,13 @@ typedef struct sre_DDFill
 
 /*
  * Structure representing the data to draw a line, used with `sre_draw(SRE_DRAW_LINE)`
+ * @deprecated Use `sre_DDLines` instead. With `count` being 2 the exact same result is achieved.
  */
 typedef struct sre_DDLine
 {
     sre_s32 flags;
     sre_col4 color;
-    //sre_unit thickness; // The thickness of the line, it is currently unavailable for future use
+    //sre_unit thickness; // The thickness of the line, it is currently unavailable
 
     sre_vec2ut pt1;
     sre_vec2ut pt2;

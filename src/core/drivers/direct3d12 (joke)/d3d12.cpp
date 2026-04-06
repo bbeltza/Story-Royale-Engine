@@ -1,0 +1,917 @@
+// This is all of the code present for d3d12, it will be thousands of lines long, I'm not thinking of expanding not separating it
+// Thus the class definitions will be put here
+#include <drivers.h>
+
+#include <dxgi1_4.h>
+#include <d3d12.h>
+
+#include <SDL_syswm.h>
+
+// All shader bytecode
+static const BYTE VS_BYTES[] = {
+     68,  88,  66,  67, 129,  11, 
+     28, 127, 120,  29, 198,  36, 
+     99, 179, 104, 128, 234, 109, 
+    252, 112,   1,   0,   0,   0, 
+    112,   5,   0,   0,   5,   0, 
+      0,   0,  52,   0,   0,   0, 
+    248,   0,   0,   0, 132,   1, 
+      0,   0, 216,   1,   0,   0, 
+    244,   4,   0,   0,  82,  68, 
+     69,  70, 188,   0,   0,   0, 
+      1,   0,   0,   0,  72,   0, 
+      0,   0,   1,   0,   0,   0, 
+     28,   0,   0,   0,   0,   4, 
+    254, 255,   0,  17,   0,   0, 
+    148,   0,   0,   0,  60,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   1,   0,   0,   0, 
+     67,  66, 117, 110, 105, 102, 
+    111, 114, 109, 115,   0, 171, 
+     60,   0,   0,   0,   1,   0, 
+      0,   0,  96,   0,   0,   0, 
+     16,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+    120,   0,   0,   0,   0,   0, 
+      0,   0,   8,   0,   0,   0, 
+      2,   0,   0,   0, 132,   0, 
+      0,   0,   0,   0,   0,   0, 
+    118, 105, 101, 119, 112, 111, 
+    114, 116,   0, 171, 171, 171, 
+      1,   0,   3,   0,   1,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,  77, 105, 
+     99, 114, 111, 115, 111, 102, 
+    116,  32,  40,  82,  41,  32, 
+     72,  76,  83,  76,  32,  83, 
+    104,  97, 100, 101, 114,  32, 
+     67, 111, 109, 112, 105, 108, 
+    101, 114,  32,  49,  48,  46, 
+     49,   0,  73,  83,  71,  78, 
+    132,   0,   0,   0,   4,   0, 
+      0,   0,   8,   0,   0,   0, 
+    104,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   0,   0, 
+      0,   0,  15,  15,   0,   0, 
+    113,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   1,   0, 
+      0,   0,  15,  15,   0,   0, 
+    104,   0,   0,   0,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   2,   0, 
+      0,   0,   3,   3,   0,   0, 
+    119,   0,   0,   0,   0,   0, 
+      0,   0,   6,   0,   0,   0, 
+      1,   0,   0,   0,   3,   0, 
+      0,   0,   1,   1,   0,   0, 
+     80,  79,  83,  73,  84,  73, 
+     79,  78,   0,  67,  79,  76, 
+     79,  82,   0,  83,  86,  95, 
+     86, 101, 114, 116, 101, 120, 
+     73,  68,   0, 171,  79,  83, 
+     71,  78,  76,   0,   0,   0, 
+      2,   0,   0,   0,   8,   0, 
+      0,   0,  56,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   3,   0,   0,   0, 
+      0,   0,   0,   0,  15,   0, 
+      0,   0,  68,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      1,   0,   0,   0,  15,   0, 
+      0,   0,  83,  86,  95,  80, 
+    111, 115, 105, 116, 105, 111, 
+    110,   0,  67,  79,  76,  79, 
+     82,   0, 171, 171,  83,  72, 
+     68,  82,  20,   3,   0,   0, 
+     64,   0,   1,   0, 197,   0, 
+      0,   0,  89,   0,   0,   4, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+     95,   0,   0,   3, 242,  16, 
+     16,   0,   0,   0,   0,   0, 
+     95,   0,   0,   3, 242,  16, 
+     16,   0,   1,   0,   0,   0, 
+     95,   0,   0,   3,  50,  16, 
+     16,   0,   2,   0,   0,   0, 
+     96,   0,   0,   4,  18,  16, 
+     16,   0,   3,   0,   0,   0, 
+      6,   0,   0,   0, 103,   0, 
+      0,   4, 242,  32,  16,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0, 101,   0,   0,   3, 
+    242,  32,  16,   0,   1,   0, 
+      0,   0, 104,   0,   0,   2, 
+      2,   0,   0,   0, 105,   0, 
+      0,   4,   0,   0,   0,   0, 
+      4,   0,   0,   0,   4,   0, 
+      0,   0,  54,   0,   0,   9, 
+     50,  48,  32,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      2,  64,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,  54,   0,   0,   9, 
+     50,  48,  32,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+      2,  64,   0,   0,   0,   0, 
+    128,  63,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,  54,   0,   0,   9, 
+     50,  48,  32,   0,   0,   0, 
+      0,   0,   2,   0,   0,   0, 
+      2,  64,   0,   0,   0,   0, 
+    128,  63,   0,   0, 128,  63, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,  54,   0,   0,   9, 
+     50,  48,  32,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      2,  64,   0,   0,   0,   0, 
+      0,   0,   0,   0, 128,  63, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,  54,   0,   0,   5, 
+     18,   0,  16,   0,   0,   0, 
+      0,   0,  10,  16,  16,   0, 
+      3,   0,   0,   0,  54,   0, 
+      0,   7,  50,   0,  16,   0, 
+      0,   0,   0,   0,  70,  48, 
+     32,   4,   0,   0,   0,   0, 
+     10,   0,  16,   0,   0,   0, 
+      0,   0,  54,   0,   0,   5, 
+    194,   0,  16,   0,   0,   0, 
+      0,   0,   6,  20,  16,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   8,  50,   0,  16,   0, 
+      0,   0,   0,   0, 230,  10, 
+     16, 128,  65,   0,   0,   0, 
+      0,   0,   0,   0,  70,   0, 
+     16,   0,   0,   0,   0,   0, 
+     54,   0,   0,   5,  18,   0, 
+     16,   0,   1,   0,   0,   0, 
+     10,  16,  16,   0,   0,   0, 
+      0,   0,  54,   0,   0,   8, 
+    162,   0,  16,   0,   1,   0, 
+      0,   0,   2,  64,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+    128,  63,   0,   0,   0,   0, 
+      0,   0, 128, 191,  14,   0, 
+      0,   8,  66,   0,  16,   0, 
+      1,   0,   0,   0,   1,  64, 
+      0,   0,   0,   0,   0,  64, 
+     10, 128,  32,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+     15,   0,   0,   7,  34,   0, 
+     16,   0,   1,   0,   0,   0, 
+     70,   0,  16,   0,   1,   0, 
+      0,   0, 230,  10,  16,   0, 
+      1,   0,   0,   0,  56,   0, 
+      0,   7,  18,   0,  16,   0, 
+      1,   0,   0,   0,  42,   0, 
+     16,   0,   1,   0,   0,   0, 
+     42,  16,  16,   0,   0,   0, 
+      0,   0,  54,   0,   0,   5, 
+     66,   0,  16,   0,   0,   0, 
+      0,   0,   1,  64,   0,   0, 
+      0,   0, 128,  63,  15,   0, 
+      0,   7,  18,  32,  16,   0, 
+      0,   0,   0,   0, 134,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70,   0,  16,   0,   1,   0, 
+      0,   0,  54,   0,   0,   5, 
+     18,   0,  16,   0,   1,   0, 
+      0,   0,  26,  16,  16,   0, 
+      0,   0,   0,   0,  54,   0, 
+      0,   8, 162,   0,  16,   0, 
+      1,   0,   0,   0,   2,  64, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0, 128,  63,   0,   0, 
+      0,   0,   0,   0, 128,  63, 
+     14,   0,   0,   9,  66,   0, 
+     16,   0,   1,   0,   0,   0, 
+      1,  64,   0,   0,   0,   0, 
+      0,  64,  26, 128,  32, 128, 
+     65,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+     15,   0,   0,   7,  34,   0, 
+     16,   0,   1,   0,   0,   0, 
+     70,   0,  16,   0,   1,   0, 
+      0,   0, 230,  10,  16,   0, 
+      1,   0,   0,   0,  56,   0, 
+      0,   7,  18,   0,  16,   0, 
+      1,   0,   0,   0,  42,   0, 
+     16,   0,   1,   0,   0,   0, 
+     58,  16,  16,   0,   0,   0, 
+      0,   0,  15,   0,   0,   7, 
+     34,  32,  16,   0,   0,   0, 
+      0,   0, 150,   5,  16,   0, 
+      0,   0,   0,   0,  70,   0, 
+     16,   0,   1,   0,   0,   0, 
+     54,   0,   0,   8, 194,  32, 
+     16,   0,   0,   0,   0,   0, 
+      2,  64,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+    128,  63,  54,   0,   0,   5, 
+    242,  32,  16,   0,   1,   0, 
+      0,   0,  70,  30,  16,   0, 
+      1,   0,   0,   0,  62,   0, 
+      0,   1,  83,  84,  65,  84, 
+    116,   0,   0,   0,  24,   0, 
+      0,   0,   2,   0,   0,   0, 
+      0,   0,   0,   0,   6,   0, 
+      0,   0,   9,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   4,   0,   0,   0, 
+      5,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   9,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0
+};
+
+static const BYTE PS_BYTES[] = {
+     68,  88,  66,  67, 128,   1, 
+    200, 118,  81, 152,  71, 208, 
+     28, 245,  79,  63,  36,  93, 
+    145,  36,   1,   0,   0,   0, 
+    196,   1,   0,   0,   5,   0, 
+      0,   0,  52,   0,   0,   0, 
+    128,   0,   0,   0, 212,   0, 
+      0,   0,   8,   1,   0,   0, 
+     72,   1,   0,   0,  82,  68, 
+     69,  70,  68,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+     28,   0,   0,   0,   0,   4, 
+    255, 255,   0,  17,   0,   0, 
+     28,   0,   0,   0,  77, 105, 
+     99, 114, 111, 115, 111, 102, 
+    116,  32,  40,  82,  41,  32, 
+     72,  76,  83,  76,  32,  83, 
+    104,  97, 100, 101, 114,  32, 
+     67, 111, 109, 112, 105, 108, 
+    101, 114,  32,  49,  48,  46, 
+     49,   0,  73,  83,  71,  78, 
+     76,   0,   0,   0,   2,   0, 
+      0,   0,   8,   0,   0,   0, 
+     56,   0,   0,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+      3,   0,   0,   0,   0,   0, 
+      0,   0,  15,   0,   0,   0, 
+     68,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   1,   0, 
+      0,   0,  15,  15,   0,   0, 
+     83,  86,  95,  80, 111, 115, 
+    105, 116, 105, 111, 110,   0, 
+     67,  79,  76,  79,  82,   0, 
+    171, 171,  79,  83,  71,  78, 
+     44,   0,   0,   0,   1,   0, 
+      0,   0,   8,   0,   0,   0, 
+     32,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   0,   0, 
+      0,   0,  15,   0,   0,   0, 
+     83,  86,  95,  84,  97, 114, 
+    103, 101, 116,   0, 171, 171, 
+     83,  72,  68,  82,  56,   0, 
+      0,   0,  64,   0,   0,   0, 
+     14,   0,   0,   0,  98,  16, 
+      0,   3, 242,  16,  16,   0, 
+      1,   0,   0,   0, 101,   0, 
+      0,   3, 242,  32,  16,   0, 
+      0,   0,   0,   0,  54,   0, 
+      0,   5, 242,  32,  16,   0, 
+      0,   0,   0,   0,  70,  30, 
+     16,   0,   1,   0,   0,   0, 
+     62,   0,   0,   1,  83,  84, 
+     65,  84, 116,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0
+};
+
+
+namespace sre
+{
+    template <typename T, size_t N>
+    constexpr inline int countof(T (&arr)[N]) { return N; }
+    template <typename T>
+    constexpr inline int countof(T &el) { return 1; }
+}
+
+#ifndef NDEBUG
+    #define __BREAK if (IsDebuggerPresent()) DebugBreak();
+#else
+    #define __BREAK
+#endif
+
+// Since cleaning up would turn into a hazy mess, this does ONLY report for errors, it doesn't return execution! (At least for now)
+#define SRE_DXCALL(x) hr = x;                                                                           \
+do { if (FAILED(hr)) {                                                                                  \
+    sre::log<sre::LOGCATEGORY_ERROR>("DIRECT3D12: '" #x "' failed, line %u: '%s' (0x%X)", __LINE__, DXHRTOSTRING(hr), hr); \
+    __BREAK                                                                                             \
+}} while(0)
+
+#define SRE_DXRELEASE(iunknown) if (iunknown) (iunknown)->Release()
+#define SRE_DXSAFERELEASE(iunknown) SRE_DXRELEASE(iunknown); iunknown = nullptr
+
+// Convert HRESULT error codes into a constant string
+const char* DXHRTOSTRING(HRESULT hr)
+{
+    #define _FMT_CASE(x) case x: return #x
+    switch (hr)
+    {
+        _FMT_CASE(DXGI_ERROR_ACCESS_DENIED);
+        _FMT_CASE(DXGI_ERROR_ACCESS_LOST);
+        _FMT_CASE(DXGI_ERROR_ALREADY_EXISTS);
+        _FMT_CASE(DXGI_ERROR_CANNOT_PROTECT_CONTENT);
+        _FMT_CASE(DXGI_ERROR_DEVICE_HUNG);
+        _FMT_CASE(DXGI_ERROR_DEVICE_REMOVED);
+        _FMT_CASE(DXGI_ERROR_DEVICE_RESET);
+        _FMT_CASE(DXGI_ERROR_DRIVER_INTERNAL_ERROR);
+        _FMT_CASE(DXGI_ERROR_FRAME_STATISTICS_DISJOINT);
+        _FMT_CASE(DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE);
+        _FMT_CASE(DXGI_ERROR_INVALID_CALL);
+        _FMT_CASE(DXGI_ERROR_MORE_DATA);
+        _FMT_CASE(DXGI_ERROR_NAME_ALREADY_EXISTS);
+        _FMT_CASE(DXGI_ERROR_NONEXCLUSIVE);
+        _FMT_CASE(DXGI_ERROR_NOT_CURRENTLY_AVAILABLE);
+        _FMT_CASE(DXGI_ERROR_NOT_FOUND);
+        _FMT_CASE(DXGI_ERROR_RESTRICT_TO_OUTPUT_STALE);
+        _FMT_CASE(DXGI_ERROR_SDK_COMPONENT_MISSING);
+        _FMT_CASE(DXGI_ERROR_SESSION_DISCONNECTED);
+        _FMT_CASE(DXGI_ERROR_UNSUPPORTED);
+        _FMT_CASE(DXGI_ERROR_WAIT_TIMEOUT);
+        _FMT_CASE(DXGI_ERROR_WAS_STILL_DRAWING);
+        
+        _FMT_CASE(D3D12_ERROR_ADAPTER_NOT_FOUND);
+        _FMT_CASE(D3D12_ERROR_DRIVER_VERSION_MISMATCH);
+        _FMT_CASE(E_FAIL);
+        _FMT_CASE(E_INVALIDARG);
+        _FMT_CASE(E_OUTOFMEMORY);
+        _FMT_CASE(E_NOTIMPL);
+        _FMT_CASE(S_FALSE);
+        _FMT_CASE(S_OK);
+
+        _FMT_CASE(DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED);
+        _FMT_CASE(DXGI_ERROR_REMOTE_OUTOFMEMORY);
+        default: return NULL;
+    }
+    #undef _FMT_CASE
+}
+
+// This??
+typedef IDXGIFactory4 ID3D12Factory;
+typedef IDXGISwapChain3 ID3D12SwapChain;
+
+#define __inst static_cast<sre_d3d12*>(video->userdata)
+#define __tex static_cast<sre_d3d12texture*>(texture)
+
+struct sre_d3d12;
+
+struct sre_d3d12texture
+{
+    sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format): w(size.x), h(size.y) {}
+    ~sre_d3d12texture();
+
+    int w, h;
+    
+    bool valid() { return true; }
+    bool size(int* pw, int* ph) { *pw = w; *ph = h; return true; }
+    
+private:
+    ID3D12Resource* m_resource{};
+};
+
+struct sre_d3d12
+{
+    ~sre_d3d12();
+
+    // DirectX members
+    IDXGIFactory4* dxfactory;
+    IDXGISwapChain3* dxswapchain;
+    
+    ID3D12Device* dxdevice;
+    ID3D12CommandAllocator* dxcmd_allocator;
+    ID3D12CommandQueue* dxcmd_queue;
+    ID3D12GraphicsCommandList* dxcmd_list;
+    ID3D12DescriptorHeap* dxdesc_heap;
+    ID3D12RootSignature* dxrootsignature;
+    ID3D12Heap* dxheap;
+
+    ID3D12PipelineState* dxpipeline_blendstates[6];
+    ID3D12Resource* dxrender_targets[2];
+    
+    // Some DirectX state members
+    UINT current_frameindex;
+    UINT rtv_increment;
+    
+    ID3D12Fence* dxfence;
+    HANDLE hfence;
+
+    struct VBO_INPUT
+    {
+        sre::rect2Dut rect;
+        float color[4];
+        sre::vec2ut anchor;
+    };
+    ID3D12Resource* cbuffer;
+    ID3D12Resource* basicvbo_container; // Basic container for rect data, holds 64kb in total of rect data
+    D3D12_VERTEX_BUFFER_VIEW basic_vboview;
+    sre::uptr basicvbo_index;
+
+    sre::vec2f* cbuffermap;
+private:
+    D3D12_VIEWPORT m_viewport;
+public:
+    void present();
+    bool viewport(sre::vec2i osize, sre::vec2ut vsize);
+    bool vsync(int mode) { return false; }
+    bool blend(sre_DrawBlending blend) { return false; }
+
+    bool tex_update(void* texture, const void* pixels, int pitch) { return false; }
+    bool tex_size(void* texture, int* w, int* h) {  return __tex->size(w, h); }
+    SDL_PixelFormatEnum tex_format(void* texture) { return SDL_PIXELFORMAT_ARGB8888; }
+
+    bool clear(sre::col4 color);
+    bool clip(sre::rect2Dut rect) { return false; }
+
+    bool draw_fill(const sre_DDFill* data);
+    bool draw_lines(const sre_DDLines* data) { return false; }
+    bool draw_rect(const sre_DDRect* data);
+    bool draw_rrect(const sre_DDRRect* data) { return false; }
+    bool draw_texture(const sre_DDTexture* data)
+    {
+        sre_DDRect rect{
+            data->flags,
+            data->modulate,
+            data->rect,
+            data->anchor
+        };
+        return draw_rect(&rect);
+    }
+    bool draw_rtexture(const sre_DDRTexture* data) { return false; }
+
+    private:
+        void _waitforgpu(); // Wait for the GPU to finish all commands
+        bool _createtargets();
+};
+
+static const sre_videodriverInterface sred3d12_interface{
+    [](sre_videodriver* video) { delete __inst; },
+    [](const sre_videodriver* video) { __inst->present(); },
+    [](const sre_videodriver* video, int w, int h) { return __inst->viewport({w, h}, video->size); },
+    [](const sre_videodriver* video, int vsync) { return __inst->vsync(vsync); },
+    [](const sre_videodriver* video, sre_DrawBlending blend) { return __inst->blend(blend); },
+    [](const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format) { new(texture) sre_d3d12texture(__inst, {w, h}, format); return __tex->valid(); },
+    [](const sre_videodriver* video, void* texture, const void* pixels, int pitch) { return __inst->tex_update(texture, pixels, pitch); },
+    [](const sre_videodriver* video, void* texture) { __tex->~sre_d3d12texture(); },
+    [](const sre_videodriver* video, void* texture, int* w, int* h) { return __inst->tex_size(texture, w, h); },
+    [](const sre_videodriver* video, void* texture) { return __inst->tex_format(texture); },
+
+    [](const sre_videodriver* video, const sre::col4* color) { return __inst->clear(*color); },
+    [](const sre_videodriver* video, const sre::rect2Dut* rect) { return __inst->clip(*rect); },
+
+    [](const sre_videodriver* video, const sre_DDFill* data) { return __inst->draw_fill(data); },
+    [](const sre_videodriver* video, const sre_DDLines* data) { return __inst->draw_lines(data); },
+    [](const sre_videodriver* video, const sre_DDRect* data) { return __inst->draw_rect(data); },
+    [](const sre_videodriver* video, const sre_DDRRect* data) { return __inst->draw_rrect(data); },
+    [](const sre_videodriver* video, const sre_DDTexture* data) { return __inst->draw_texture(data); },   
+    [](const sre_videodriver* video, const sre_DDRTexture* data) { return __inst->draw_rtexture(data); }    
+};
+
+static bool setup_pipeline(sre_d3d12* inst);
+static bool create_targets(sre_d3d12* inst);
+
+extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
+{
+    // I can do two things on the window to make a Direct3D 12 device
+    // 1- Create an SDL renderer (with the d3d12 hint or driver index), then call SDL_RenderGetD3D12Device and work with the returned device
+    // 2- Screw everything and make the device all alone from scratch, I would need to then get the HWND of the window (from surely the syswm API) and setup everything...
+
+        // The second one sounds fun as hell!
+
+    SDL_SysWMinfo syswm;
+    SDL_VERSION(&syswm.version);
+    if (SDL_GetWindowWMInfo(window, &syswm) == SDL_FALSE)
+        return false;
+    SDL_assert(syswm.subsystem == SDL_SYSWM_WINDOWS); // WINRT too?
+
+    auto inst = new sre_d3d12{};
+    std::unique_ptr<sre_d3d12> _holder{inst};
+
+    HRESULT hr;
+
+    // Create factory and maybe get an adapter?
+    SRE_DXCALL(CreateDXGIFactory1(IID_PPV_ARGS(&inst->dxfactory)));
+    SRE_DXCALL(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&inst->dxdevice)));
+
+    {
+        D3D12_COMMAND_QUEUE_DESC cmdqueue_desc{};
+        cmdqueue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+
+        SRE_DXCALL(inst->dxdevice->CreateCommandQueue(&cmdqueue_desc, IID_PPV_ARGS(&inst->dxcmd_queue)));
+        SRE_DXCALL(inst->dxdevice->CreateCommandAllocator(cmdqueue_desc.Type, IID_PPV_ARGS(&inst->dxcmd_allocator)));
+        SRE_DXCALL(inst->dxdevice->CreateCommandList(0, cmdqueue_desc.Type, inst->dxcmd_allocator, NULL, IID_PPV_ARGS(&inst->dxcmd_list)));
+        SRE_DXCALL(inst->dxcmd_list->Close());
+    }
+
+    {
+        DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
+        swapchain_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        swapchain_desc.SampleDesc.Count = 1;
+        swapchain_desc.BufferCount = 2;
+        swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+        SRE_DXCALL(inst->dxfactory->CreateSwapChainForHwnd(
+            inst->dxcmd_queue,
+            syswm.info.win.window, // Window gotten from SDL_Window*
+            &swapchain_desc,
+            NULL,
+            NULL,
+            (IDXGISwapChain1**)&inst->dxswapchain
+        ));
+    }
+
+    {
+        D3D12_DESCRIPTOR_HEAP_DESC dheap_desc{};
+        dheap_desc.NumDescriptors = 2;
+        dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+
+        SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxdesc_heap)));
+        inst->rtv_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    }
+
+    
+    if (!SUCCEEDED(hr))
+        return false;
+
+    if (!create_targets(inst))
+        return false;
+
+    if (!setup_pipeline(inst))
+        return false;
+
+    SRE_DXCALL(inst->dxdevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&inst->dxfence)));
+    inst->hfence = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (!inst->hfence)
+        return false;
+
+    #undef interface
+
+    _holder.release();
+    video->texture_size = sizeof(sre_d3d12texture);
+    video->userdata = inst;
+    video->interface = &sred3d12_interface;
+
+    return true;
+}
+
+sre_d3d12::~sre_d3d12()
+{
+    this->_waitforgpu();
+
+    this->dxcmd_allocator->Release();
+    this->dxcmd_list->Release();
+    this->dxcmd_queue->Release();
+    this->dxdevice->Release();
+    this->dxfactory->Release();
+    this->dxswapchain->Release();
+    this->dxdesc_heap->Release();
+    this->dxrootsignature->Release();
+    this->dxfence->Release();
+    this->dxheap->Release();
+
+    this->basicvbo_container->Release();
+    for (int i = 0; i < sre::countof(dxrender_targets); i++)
+        dxrender_targets[i]->Release();
+    for (int i = 0; i < sre::countof(dxpipeline_blendstates); i++)
+        SRE_DXRELEASE(dxpipeline_blendstates[i]);
+
+    CloseHandle(this->hfence);
+}
+
+void sre_d3d12::_waitforgpu()
+{
+    HRESULT hr;
+    SRE_DXCALL(dxcmd_queue->Signal(dxfence, 1));
+
+    SRE_DXCALL(dxfence->SetEventOnCompletion(1, hfence));
+    WaitForSingleObject(hfence, INFINITE);
+    SRE_DXCALL(dxfence->Signal(0));
+}
+
+bool create_targets(sre_d3d12* inst)
+{
+    HRESULT hr;
+
+    D3D12_CPU_DESCRIPTOR_HANDLE cpudesc = inst->dxdesc_heap->GetCPUDescriptorHandleForHeapStart();
+    for (int i = 0; i < sre::countof(inst->dxrender_targets); i++, cpudesc.ptr+=inst->rtv_increment)
+    {
+        SRE_DXCALL(inst->dxswapchain->GetBuffer(i, IID_PPV_ARGS(&inst->dxrender_targets[i])));
+        inst->dxdevice->CreateRenderTargetView(inst->dxrender_targets[i], NULL, cpudesc);
+    }
+
+    return SUCCEEDED(hr);
+}
+
+bool setup_pipeline(sre_d3d12* inst)
+{
+    static const D3D12_INPUT_ELEMENT_DESC INPUTS[3] = {
+        /* transform */ {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* color     */ {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* anchor    */ {"POSITION", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
+    };
+    static const D3D12_ROOT_PARAMETER CBUFFERS[1] = {
+        { D3D12_ROOT_PARAMETER_TYPE_CBV, {0, 0}, D3D12_SHADER_VISIBILITY_VERTEX }
+    };
+
+    HRESULT hr;
+
+    {   // Root Signature setup
+        ID3DBlob* rsblob;
+        ID3DBlob* rserr;
+        D3D12_ROOT_SIGNATURE_DESC rsdesc{};
+        rsdesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        rsdesc.NumParameters = 1;
+        rsdesc.pParameters = CBUFFERS;
+
+        SRE_DXCALL(D3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
+        if (rserr)
+        {
+            sre::log<sre::LOGCATEGORY_ERROR>("Failed serializing D3D12 root signature: %*.s", rserr->GetBufferSize(), rserr->GetBufferPointer());
+            rsblob->Release();
+            rserr->Release();
+            return false;
+        }
+
+        SRE_DXCALL(inst->dxdevice->CreateRootSignature(0, rsblob->GetBufferPointer(), rsblob->GetBufferSize(), IID_PPV_ARGS(&inst->dxrootsignature)));
+        rsblob->Release();
+    }
+
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC pstate_desc{};
+    pstate_desc.pRootSignature = inst->dxrootsignature;
+    pstate_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    pstate_desc.InputLayout.NumElements = sre::countof(INPUTS);
+    pstate_desc.InputLayout.pInputElementDescs = INPUTS;
+    pstate_desc.NumRenderTargets = 1;
+    pstate_desc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+    pstate_desc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+    pstate_desc.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+    pstate_desc.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+    pstate_desc.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+    pstate_desc.RasterizerState.DepthClipEnable = FALSE;
+    pstate_desc.SampleMask = UINT_MAX;
+    pstate_desc.SampleDesc.Count = 1;
+    pstate_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+    pstate_desc.VS.pShaderBytecode = VS_BYTES;
+    pstate_desc.VS.BytecodeLength = sizeof(VS_BYTES);
+    pstate_desc.PS.pShaderBytecode = PS_BYTES;
+    pstate_desc.PS.BytecodeLength = sizeof(PS_BYTES);
+    
+    for (int i = 0; i < 6; i++)
+    {
+        pstate_desc.BlendState.RenderTarget[0].BlendEnable = FALSE;
+        pstate_desc.BlendState.RenderTarget[0].LogicOpEnable = FALSE;
+        pstate_desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+        pstate_desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+        pstate_desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+        pstate_desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+        pstate_desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+        pstate_desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+        pstate_desc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+        pstate_desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+        SRE_DXCALL(inst->dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&inst->dxpipeline_blendstates[i])));
+    }
+
+    {
+        D3D12_HEAP_DESC heap_desc{};
+        heap_desc.Flags = D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
+        heap_desc.Alignment = 0;
+        heap_desc.SizeInBytes = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+        heap_desc.Properties.Type = D3D12_HEAP_TYPE_CUSTOM;
+        heap_desc.Properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+        heap_desc.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+
+        SRE_DXCALL(inst->dxdevice->CreateHeap(&heap_desc, IID_PPV_ARGS(&inst->dxheap)));
+
+        D3D12_RESOURCE_DESC resource_desc{};
+        resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        resource_desc.Width = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+        resource_desc.Height = 1;
+        resource_desc.DepthOrArraySize = 1;
+        resource_desc.MipLevels = 1;
+        resource_desc.Format = DXGI_FORMAT_UNKNOWN;
+        resource_desc.SampleDesc.Count = 1;
+        resource_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+        SRE_DXCALL(inst->dxdevice->CreatePlacedResource(
+            inst->dxheap, 0,
+            &resource_desc,
+            D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+            NULL,
+            IID_PPV_ARGS(&inst->basicvbo_container)
+        ));
+        
+        inst->basic_vboview.BufferLocation = inst->basicvbo_container->GetGPUVirtualAddress();
+        inst->basic_vboview.SizeInBytes = sizeof(sre_d3d12::VBO_INPUT);
+        inst->basic_vboview.StrideInBytes = 0;
+    }
+
+    {   // Constant buffers
+        D3D12_HEAP_PROPERTIES heap_properties{};
+        heap_properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+        D3D12_RESOURCE_DESC resource_desc{};
+        resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        resource_desc.Width = sizeof(float)*2;
+        resource_desc.Height = 1;
+        resource_desc.DepthOrArraySize = 1;
+        resource_desc.MipLevels = 1;
+        resource_desc.Format = DXGI_FORMAT_UNKNOWN;
+        resource_desc.SampleDesc.Count = 1;
+        resource_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+        SRE_DXCALL(inst->dxdevice->CreateCommittedResource(
+            &heap_properties,
+            D3D12_HEAP_FLAG_NONE,
+            &resource_desc,
+            D3D12_RESOURCE_STATE_COMMON,
+            NULL,
+            IID_PPV_ARGS(&inst->cbuffer)
+        ));
+
+        D3D12_RANGE range{0, 0};
+        SRE_DXCALL(inst->cbuffer->Map(0, &range, reinterpret_cast<void**>(&inst->cbuffermap)));
+    }
+
+    return SUCCEEDED(hr);
+}
+
+bool sre_d3d12::clear(sre::col4 color)
+{
+    HRESULT hr{};
+    _waitforgpu();
+    
+    SRE_DXCALL(dxcmd_allocator->Reset());
+    SRE_DXCALL(dxcmd_list->Reset(dxcmd_allocator, dxpipeline_blendstates[0]));
+
+    D3D12_RECT scr{0, 0, (LONG)m_viewport.Width, (LONG)m_viewport.Height};
+    dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
+    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
+    dxcmd_list->RSSetViewports(1, &m_viewport);
+    dxcmd_list->RSSetScissorRects(1, &scr);
+    dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN);
+
+    D3D12_RESOURCE_BARRIER rbtransition{};
+    rbtransition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    rbtransition.Transition.pResource = dxrender_targets[current_frameindex];
+    rbtransition.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    rbtransition.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    rbtransition.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    dxcmd_list->ResourceBarrier(1, &rbtransition);
+
+    {
+        D3D12_CPU_DESCRIPTOR_HANDLE rtv = dxdesc_heap->GetCPUDescriptorHandleForHeapStart();
+        rtv.ptr += current_frameindex*rtv_increment;
+
+        FLOAT fcolor[4] = {
+            color.r/255.0f,
+            color.g/255.0f,
+            color.b/255.0f,
+            1
+        };
+
+        dxcmd_list->OMSetRenderTargets(1, &rtv, FALSE, NULL);
+        dxcmd_list->ClearRenderTargetView(rtv, fcolor, 0, NULL);
+    }
+
+    basicvbo_index = 0;
+
+    return SUCCEEDED(hr);
+}
+
+void sre_d3d12::present()
+{
+    HRESULT hr;
+    
+    {
+        D3D12_RESOURCE_BARRIER transitions[] = {
+            /*{ D3D12_RESOURCE_BARRIER_TYPE_TRANSITION, D3D12_RESOURCE_BARRIER_FLAG_NONE, {
+                basic_vbo,
+                D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+                D3D12_RESOURCE_STATE_COPY_DEST,
+                D3D12_RESOURCE_STATE_PRESENT
+            } },*/
+            { D3D12_RESOURCE_BARRIER_TYPE_TRANSITION, D3D12_RESOURCE_BARRIER_FLAG_NONE, {
+                dxrender_targets[current_frameindex],
+                D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+                D3D12_RESOURCE_STATE_RENDER_TARGET,
+                D3D12_RESOURCE_STATE_PRESENT
+            } }
+        };
+        dxcmd_list->ResourceBarrier(1, transitions);
+        SRE_DXCALL(dxcmd_list->Close());
+    }
+    
+    ID3D12CommandList* cmd_lists[] = { dxcmd_list };
+    dxcmd_queue->ExecuteCommandLists(1, cmd_lists);
+    SRE_DXCALL(dxswapchain->Present(0, 0));
+    
+    current_frameindex = dxswapchain->GetCurrentBackBufferIndex();
+}
+
+bool sre_d3d12::viewport(sre::vec2i osize, sre::vec2ut vsize)
+{
+    _waitforgpu();
+
+    HRESULT hr;
+
+    *cbuffermap = vsize;
+
+    m_viewport.Width = static_cast<FLOAT>(osize.x);
+    m_viewport.Height = static_cast<FLOAT>(osize.y);
+
+    for (int i = 0; i < sre::countof(dxrender_targets); i++)
+    {
+        if (!dxrender_targets[i]) break;
+        dxrender_targets[i]->Release();
+        dxrender_targets[i] = NULL;
+    }
+    SRE_DXCALL(dxswapchain->ResizeBuffers(sre::countof(dxrender_targets), osize.x, osize.y, DXGI_FORMAT_UNKNOWN, 0));
+
+    if (!create_targets(this))
+        abort();
+
+    current_frameindex = 0;
+
+    return true;
+}
+
+bool sre_d3d12::draw_fill(const sre_DDFill* data)
+{
+    HRESULT hr{};
+
+    return SUCCEEDED(hr);
+}
+
+bool sre_d3d12::draw_rect(const sre_DDRect* data)
+{
+    if (!data->color.a) return true;
+
+    HRESULT hr{};
+
+    D3D12_RANGE rrange{};
+    D3D12_RANGE wrange{basicvbo_index*sizeof(VBO_INPUT), (basicvbo_index+1)*sizeof(VBO_INPUT)};
+    VBO_INPUT* addr;
+    SRE_DXCALL(basicvbo_container->Map(0, &rrange, reinterpret_cast<void**>(&addr)));
+    addr[basicvbo_index] = { data->rect, { data->color.r/255.0f, data->color.g/255.0f, data->color.b/255.0f, data->color.a/255.0f }, data->anchor };
+    basicvbo_container->Unmap(0, &wrange);
+    basic_vboview.BufferLocation = basicvbo_container->GetGPUVirtualAddress() + basicvbo_index*sizeof(VBO_INPUT);
+    basicvbo_index++;
+
+    dxcmd_list->IASetVertexBuffers(0, 1, &basic_vboview);
+    dxcmd_list->DrawInstanced(4, 1, 0, 0);
+    return SUCCEEDED(hr);
+}
+
+sre_d3d12texture::~sre_d3d12texture()
+{
+
+}

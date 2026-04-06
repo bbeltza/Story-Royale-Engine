@@ -13,6 +13,10 @@
 - Better error handling on Base structures, specially the ones that rely on the filesysten
 - Make an OpenGL renderer and thus support shaders (And perhaps making a DirectX renderer too for Windows and later on for Xbox)
 	- Working: I'm still maintaining this text since it is still uncomplete, and there are no custom shader support (which I might not add at all..)
+- Better rendering interface: I want it to be like in DirectX, the interface being an object in which you'll be able to call inside a virtual table its methods
+								being in C, as well as in C++. AND the game will be able to call them directly.
+							Make it lower level too and incorporate rendering functions that are at a higher lever in the GUI and ECS APIs to be more friendly.
+
 
 - Game Engine hints: They are pretty much like the old GameSettings, but they are used for hints to the engine on how to start the game (ex: Picking the renderer driver, or having a user argv handler!)
 						With the difference that they are completely optional, and they can be integrated directly in C/C++ code without the help of CMake

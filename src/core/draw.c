@@ -22,9 +22,6 @@ bool sre_draw(sre_DrawType type, const void* data)
 	case SRE_DRAW_FILL:
 		ret = interface->draw_fill(engine.video, data);
 		break;
-	case SRE_DRAW_LINE:
-		ret = interface->draw_line(engine.video, data);
-		break;
 	case SRE_DRAW_LINES:
 		ret = interface->draw_lines(engine.video, data);
 		break;
