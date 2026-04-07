@@ -7,23 +7,25 @@
 
 #include <SDL_syswm.h>
 
+#include <unordered_set>
+
 // All shader bytecode
 static const BYTE VS_BYTES[] = {
-     68,  88,  66,  67, 129,  11, 
-     28, 127, 120,  29, 198,  36, 
-     99, 179, 104, 128, 234, 109, 
-    252, 112,   1,   0,   0,   0, 
-    112,   5,   0,   0,   5,   0, 
+     68,  88,  66,  67, 140, 193, 
+    179, 142, 223, 149,  44,  44, 
+     31, 233, 183, 204,  74, 228, 
+    199, 212,   1,   0,   0,   0, 
+    192,   5,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
-    248,   0,   0,   0, 132,   1, 
-      0,   0, 216,   1,   0,   0, 
-    244,   4,   0,   0,  82,  68, 
-     69,  70, 188,   0,   0,   0, 
+     24,   1,   0,   0, 196,   1, 
+      0,   0,  56,   2,   0,   0, 
+     68,   5,   0,   0,  82,  68, 
+     69,  70, 220,   0,   0,   0, 
       1,   0,   0,   0,  72,   0, 
       0,   0,   1,   0,   0,   0, 
      28,   0,   0,   0,   0,   4, 
     254, 255,   0,  17,   0,   0, 
-    148,   0,   0,   0,  60,   0, 
+    179,   0,   0,   0,  60,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -31,65 +33,81 @@ static const BYTE VS_BYTES[] = {
       0,   0,   1,   0,   0,   0, 
      67,  66, 117, 110, 105, 102, 
     111, 114, 109, 115,   0, 171, 
-     60,   0,   0,   0,   1,   0, 
+     60,   0,   0,   0,   2,   0, 
       0,   0,  96,   0,   0,   0, 
      16,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-    120,   0,   0,   0,   0,   0, 
+    144,   0,   0,   0,   0,   0, 
       0,   0,   8,   0,   0,   0, 
-      2,   0,   0,   0, 132,   0, 
+      2,   0,   0,   0, 156,   0, 
       0,   0,   0,   0,   0,   0, 
-    118, 105, 101, 119, 112, 111, 
-    114, 116,   0, 171, 171, 171, 
+    172,   0,   0,   0,   8,   0, 
+      0,   0,   8,   0,   0,   0, 
+      2,   0,   0,   0, 156,   0, 
+      0,   0,   0,   0,   0,   0, 
+     86,  73,  69,  87,  80,  79, 
+     82,  84,   0, 171, 171, 171, 
       1,   0,   3,   0,   1,   0, 
       2,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,  77, 105, 
-     99, 114, 111, 115, 111, 102, 
-    116,  32,  40,  82,  41,  32, 
-     72,  76,  83,  76,  32,  83, 
-    104,  97, 100, 101, 114,  32, 
-     67, 111, 109, 112, 105, 108, 
-    101, 114,  32,  49,  48,  46, 
-     49,   0,  73,  83,  71,  78, 
-    132,   0,   0,   0,   4,   0, 
-      0,   0,   8,   0,   0,   0, 
-    104,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,  67,  65, 
+     77,  69,  82,  65,   0,  77, 
+    105,  99, 114, 111, 115, 111, 
+    102, 116,  32,  40,  82,  41, 
+     32,  72,  76,  83,  76,  32, 
+     83, 104,  97, 100, 101, 114, 
+     32,  67, 111, 109, 112, 105, 
+    108, 101, 114,  32,  49,  48, 
+     46,  49,   0, 171,  73,  83, 
+     71,  78, 164,   0,   0,   0, 
+      5,   0,   0,   0,   8,   0, 
+      0,   0, 128,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      0,   0,   0,   0,  15,  15, 
+      0,   0, 137,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      1,   0,   0,   0,  15,  15, 
+      0,   0, 128,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      2,   0,   0,   0,   3,   3, 
+      0,   0, 143,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   2,   0,   0,   0, 
+      3,   0,   0,   0,  15,   0, 
+      0,   0, 152,   0,   0,   0, 
+      0,   0,   0,   0,   6,   0, 
+      0,   0,   1,   0,   0,   0, 
+      4,   0,   0,   0,   1,   1, 
+      0,   0,  80,  79,  83,  73, 
+     84,  73,  79,  78,   0,  67, 
+     79,  76,  79,  82,   0,  84, 
+     69,  88,  67,  79,  79,  82, 
+     68,   0,  83,  86,  95,  86, 
+    101, 114, 116, 101, 120,  73, 
+     68,   0,  79,  83,  71,  78, 
+    108,   0,   0,   0,   3,   0, 
+      0,   0,   8,   0,   0,   0, 
+     80,   0,   0,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
       3,   0,   0,   0,   0,   0, 
-      0,   0,  15,  15,   0,   0, 
-    113,   0,   0,   0,   0,   0, 
+      0,   0,  15,   0,   0,   0, 
+     92,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       3,   0,   0,   0,   1,   0, 
-      0,   0,  15,  15,   0,   0, 
-    104,   0,   0,   0,   1,   0, 
+      0,   0,  15,   0,   0,   0, 
+     98,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       3,   0,   0,   0,   2,   0, 
-      0,   0,   3,   3,   0,   0, 
-    119,   0,   0,   0,   0,   0, 
-      0,   0,   6,   0,   0,   0, 
-      1,   0,   0,   0,   3,   0, 
-      0,   0,   1,   1,   0,   0, 
-     80,  79,  83,  73,  84,  73, 
-     79,  78,   0,  67,  79,  76, 
-     79,  82,   0,  83,  86,  95, 
-     86, 101, 114, 116, 101, 120, 
-     73,  68,   0, 171,  79,  83, 
-     71,  78,  76,   0,   0,   0, 
-      2,   0,   0,   0,   8,   0, 
-      0,   0,  56,   0,   0,   0, 
-      0,   0,   0,   0,   1,   0, 
-      0,   0,   3,   0,   0,   0, 
-      0,   0,   0,   0,  15,   0, 
-      0,   0,  68,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   3,   0,   0,   0, 
-      1,   0,   0,   0,  15,   0, 
-      0,   0,  83,  86,  95,  80, 
-    111, 115, 105, 116, 105, 111, 
-    110,   0,  67,  79,  76,  79, 
-     82,   0, 171, 171,  83,  72, 
-     68,  82,  20,   3,   0,   0, 
-     64,   0,   1,   0, 197,   0, 
+      0,   0,   3,  12,   0,   0, 
+     83,  86,  95,  80, 111, 115, 
+    105, 116, 105, 111, 110,   0, 
+     67,  79,  76,  79,  82,   0, 
+     84,  69,  88,  67,  79,  79, 
+     82,  68,   0, 171,  83,  72, 
+     68,  82,   4,   3,   0,   0, 
+     64,   0,   1,   0, 193,   0, 
       0,   0,  89,   0,   0,   4, 
      70, 142,  32,   0,   0,   0, 
       0,   0,   1,   0,   0,   0, 
@@ -100,14 +118,16 @@ static const BYTE VS_BYTES[] = {
      95,   0,   0,   3,  50,  16, 
      16,   0,   2,   0,   0,   0, 
      96,   0,   0,   4,  18,  16, 
-     16,   0,   3,   0,   0,   0, 
+     16,   0,   4,   0,   0,   0, 
       6,   0,   0,   0, 103,   0, 
       0,   4, 242,  32,  16,   0, 
       0,   0,   0,   0,   1,   0, 
       0,   0, 101,   0,   0,   3, 
     242,  32,  16,   0,   1,   0, 
+      0,   0, 101,   0,   0,   3, 
+     50,  32,  16,   0,   2,   0, 
       0,   0, 104,   0,   0,   2, 
-      2,   0,   0,   0, 105,   0, 
+      4,   0,   0,   0, 105,   0, 
       0,   4,   0,   0,   0,   0, 
       4,   0,   0,   0,   4,   0, 
       0,   0,  54,   0,   0,   9, 
@@ -137,7 +157,7 @@ static const BYTE VS_BYTES[] = {
       0,   0,  54,   0,   0,   5, 
      18,   0,  16,   0,   0,   0, 
       0,   0,  10,  16,  16,   0, 
-      3,   0,   0,   0,  54,   0, 
+      4,   0,   0,   0,  54,   0, 
       0,   7,  50,   0,  16,   0, 
       0,   0,   0,   0,  70,  48, 
      32,   4,   0,   0,   0,   0, 
@@ -147,179 +167,208 @@ static const BYTE VS_BYTES[] = {
       0,   0,   6,  20,  16,   0, 
       2,   0,   0,   0,   0,   0, 
       0,   8,  50,   0,  16,   0, 
-      0,   0,   0,   0, 230,  10, 
+      1,   0,   0,   0, 230,  10, 
      16, 128,  65,   0,   0,   0, 
       0,   0,   0,   0,  70,   0, 
      16,   0,   0,   0,   0,   0, 
-     54,   0,   0,   5,  18,   0, 
-     16,   0,   1,   0,   0,   0, 
-     10,  16,  16,   0,   0,   0, 
-      0,   0,  54,   0,   0,   8, 
-    162,   0,  16,   0,   1,   0, 
-      0,   0,   2,  64,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-    128,  63,   0,   0,   0,   0, 
-      0,   0, 128, 191,  14,   0, 
-      0,   8,  66,   0,  16,   0, 
-      1,   0,   0,   0,   1,  64, 
+     54,   0,   0,   5,  50,  32, 
+     16,   0,   2,   0,   0,   0, 
+     70,   0,  16,   0,   0,   0, 
+      0,   0,   0,   0,   0,   8, 
+     50,   0,  16,   0,   0,   0, 
+      0,   0,  70,  16,  16,   0, 
+      0,   0,   0,   0, 230, 138, 
+     32,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,  14,   0, 
+      0,   8,  18,   0,  16,   0, 
+      2,   0,   0,   0,   1,  64, 
       0,   0,   0,   0,   0,  64, 
      10, 128,  32,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-     15,   0,   0,   7,  34,   0, 
-     16,   0,   1,   0,   0,   0, 
-     70,   0,  16,   0,   1,   0, 
-      0,   0, 230,  10,  16,   0, 
-      1,   0,   0,   0,  56,   0, 
-      0,   7,  18,   0,  16,   0, 
-      1,   0,   0,   0,  42,   0, 
-     16,   0,   1,   0,   0,   0, 
-     42,  16,  16,   0,   0,   0, 
-      0,   0,  54,   0,   0,   5, 
-     66,   0,  16,   0,   0,   0, 
-      0,   0,   1,  64,   0,   0, 
-      0,   0, 128,  63,  15,   0, 
-      0,   7,  18,  32,  16,   0, 
-      0,   0,   0,   0, 134,   0, 
+     54,   0,   0,   5,  66,   0, 
      16,   0,   0,   0,   0,   0, 
-     70,   0,  16,   0,   1,   0, 
-      0,   0,  54,   0,   0,   5, 
-     18,   0,  16,   0,   1,   0, 
-      0,   0,  26,  16,  16,   0, 
-      0,   0,   0,   0,  54,   0, 
-      0,   8, 162,   0,  16,   0, 
-      1,   0,   0,   0,   2,  64, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0, 128,  63,   0,   0, 
-      0,   0,   0,   0, 128,  63, 
-     14,   0,   0,   9,  66,   0, 
-     16,   0,   1,   0,   0,   0, 
       1,  64,   0,   0,   0,   0, 
-      0,  64,  26, 128,  32, 128, 
-     65,   0,   0,   0,   0,   0, 
+    128,  63,  54,   0,   0,   8, 
+    162,   0,  16,   0,   2,   0, 
+      0,   0,   2,  64,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-     15,   0,   0,   7,  34,   0, 
-     16,   0,   1,   0,   0,   0, 
-     70,   0,  16,   0,   1,   0, 
-      0,   0, 230,  10,  16,   0, 
-      1,   0,   0,   0,  56,   0, 
-      0,   7,  18,   0,  16,   0, 
-      1,   0,   0,   0,  42,   0, 
-     16,   0,   1,   0,   0,   0, 
-     58,  16,  16,   0,   0,   0, 
-      0,   0,  15,   0,   0,   7, 
-     34,  32,  16,   0,   0,   0, 
-      0,   0, 150,   5,  16,   0, 
-      0,   0,   0,   0,  70,   0, 
-     16,   0,   1,   0,   0,   0, 
-     54,   0,   0,   8, 194,  32, 
+    128, 191,   0,   0,   0,   0, 
+      0,   0, 128,  63,  15,   0, 
+      0,   7,  34,   0,  16,   0, 
+      3,   0,   0,   0, 134,   0, 
      16,   0,   0,   0,   0,   0, 
-      2,  64,   0,   0,   0,   0, 
+     70,   0,  16,   0,   2,   0, 
+      0,   0,  14,   0,   0,   9, 
+     66,   0,  16,   0,   2,   0, 
+      0,   0,   1,  64,   0,   0, 
+      0,   0,   0,  64,  26, 128, 
+     32, 128,  65,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,  56,   0,   0,   7, 
+     82,   0,  16,   0,   3,   0, 
+      0,   0,   6,   2,  16,   0, 
+      2,   0,   0,   0, 166,  27, 
+     16,   0,   0,   0,   0,   0, 
+     15,   0,   0,   7, 130,   0, 
+     16,   0,   3,   0,   0,   0, 
+    150,   5,  16,   0,   0,   0, 
+      0,   0, 230,  10,  16,   0, 
+      2,   0,   0,   0,  54,   0, 
+      0,   5,  66,   0,  16,   0, 
+      1,   0,   0,   0,   1,  64, 
+      0,   0,   0,   0, 128,  63, 
+     15,   0,   0,   7,  18,  32, 
+     16,   0,   0,   0,   0,   0, 
+    134,   0,  16,   0,   1,   0, 
+      0,   0,  70,   0,  16,   0, 
+      3,   0,   0,   0,  15,   0, 
+      0,   7,  34,  32,  16,   0, 
+      0,   0,   0,   0, 150,   5, 
+     16,   0,   1,   0,   0,   0, 
+    230,  10,  16,   0,   3,   0, 
+      0,   0,  54,   0,   0,   8, 
+    194,  32,  16,   0,   0,   0, 
+      0,   0,   2,  64,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-    128,  63,  54,   0,   0,   5, 
-    242,  32,  16,   0,   1,   0, 
-      0,   0,  70,  30,  16,   0, 
-      1,   0,   0,   0,  62,   0, 
-      0,   1,  83,  84,  65,  84, 
-    116,   0,   0,   0,  24,   0, 
-      0,   0,   2,   0,   0,   0, 
-      0,   0,   0,   0,   6,   0, 
-      0,   0,   9,   0,   0,   0, 
+      0,   0, 128,  63,  54,   0, 
+      0,   5, 242,  32,  16,   0, 
+      1,   0,   0,   0,  70,  30, 
+     16,   0,   1,   0,   0,   0, 
+     62,   0,   0,   1,  83,  84, 
+     65,  84, 116,   0,   0,   0, 
+     23,   0,   0,   0,   4,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   1,   0,   0,   0, 
+      7,   0,   0,   0,   9,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   4,   0,   0,   0, 
-      5,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   9,   0,   0,   0, 
+      0,   0,   0,   0,   4,   0, 
+      0,   0,   5,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   8,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0
 };
 
 static const BYTE PS_BYTES[] = {
-     68,  88,  66,  67, 128,   1,
-    200, 118,  81, 152,  71, 208,
-     28, 245,  79,  63,  36,  93,
-    145,  36,   1,   0,   0,   0,
-    196,   1,   0,   0,   5,   0,
-      0,   0,  52,   0,   0,   0,
-    128,   0,   0,   0, 212,   0,
-      0,   0,   8,   1,   0,   0,
-     72,   1,   0,   0,  82,  68,
-     69,  70,  68,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-     28,   0,   0,   0,   0,   4,
-    255, 255,   0,  17,   0,   0,
-     28,   0,   0,   0,  77, 105,
-     99, 114, 111, 115, 111, 102,
-    116,  32,  40,  82,  41,  32,
-     72,  76,  83,  76,  32,  83,
-    104,  97, 100, 101, 114,  32,
-     67, 111, 109, 112, 105, 108,
-    101, 114,  32,  49,  48,  46,
-     49,   0,  73,  83,  71,  78,
-     76,   0,   0,   0,   2,   0,
-      0,   0,   8,   0,   0,   0,
-     56,   0,   0,   0,   0,   0,
-      0,   0,   1,   0,   0,   0,
-      3,   0,   0,   0,   0,   0,
-      0,   0,  15,   0,   0,   0,
-     68,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      3,   0,   0,   0,   1,   0,
-      0,   0,  15,  15,   0,   0,
-     83,  86,  95,  80, 111, 115,
-    105, 116, 105, 111, 110,   0,
-     67,  79,  76,  79,  82,   0,
-    171, 171,  79,  83,  71,  78,
-     44,   0,   0,   0,   1,   0,
-      0,   0,   8,   0,   0,   0,
-     32,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      3,   0,   0,   0,   0,   0,
-      0,   0,  15,   0,   0,   0,
-     83,  86,  95,  84,  97, 114,
-    103, 101, 116,   0, 171, 171,
-     83,  72,  68,  82,  56,   0,
-      0,   0,  64,   0,   0,   0,
-     14,   0,   0,   0,  98,  16,
-      0,   3, 242,  16,  16,   0,
-      1,   0,   0,   0, 101,   0,
-      0,   3, 242,  32,  16,   0,
-      0,   0,   0,   0,  54,   0,
-      0,   5, 242,  32,  16,   0,
-      0,   0,   0,   0,  70,  30,
-     16,   0,   1,   0,   0,   0,
-     62,   0,   0,   1,  83,  84,
-     65,  84, 116,   0,   0,   0,
-      2,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      2,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   1,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   1,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,
-      0,   0
+     68,  88,  66,  67,  85, 143, 
+      4, 154,  26, 237, 247,  69, 
+    188,  94,  49, 161,  59,  78, 
+    191,   7,   1,   0,   0,   0, 
+    140,   2,   0,   0,   5,   0, 
+      0,   0,  52,   0,   0,   0, 
+    204,   0,   0,   0,  64,   1, 
+      0,   0, 116,   1,   0,   0, 
+     16,   2,   0,   0,  82,  68, 
+     69,  70, 144,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   2,   0,   0,   0, 
+     28,   0,   0,   0,   0,   4, 
+    255, 255,   0,  17,   0,   0, 
+    103,   0,   0,   0,  92,   0, 
+      0,   0,   3,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   1,   0,   0,   0, 
+     99,   0,   0,   0,   2,   0, 
+      0,   0,   5,   0,   0,   0, 
+      4,   0,   0,   0, 255, 255, 
+    255, 255,   0,   0,   0,   0, 
+      1,   0,   0,   0,  13,   0, 
+      0,   0, 115, 115, 116,  97, 
+    116, 101,   0, 116, 101, 120, 
+      0,  77, 105,  99, 114, 111, 
+    115, 111, 102, 116,  32,  40, 
+     82,  41,  32,  72,  76,  83, 
+     76,  32,  83, 104,  97, 100, 
+    101, 114,  32,  67, 111, 109, 
+    112, 105, 108, 101, 114,  32, 
+     49,  48,  46,  49,   0, 171, 
+     73,  83,  71,  78, 108,   0, 
+      0,   0,   3,   0,   0,   0, 
+      8,   0,   0,   0,  80,   0, 
+      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   3,   0, 
+      0,   0,   0,   0,   0,   0, 
+     15,   0,   0,   0,  92,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   3,   0, 
+      0,   0,   1,   0,   0,   0, 
+     15,  15,   0,   0,  98,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   3,   0, 
+      0,   0,   2,   0,   0,   0, 
+      3,   3,   0,   0,  83,  86, 
+     95,  80, 111, 115, 105, 116, 
+    105, 111, 110,   0,  67,  79, 
+     76,  79,  82,   0,  84,  69, 
+     88,  67,  79,  79,  82,  68, 
+      0, 171,  79,  83,  71,  78, 
+     44,   0,   0,   0,   1,   0, 
+      0,   0,   8,   0,   0,   0, 
+     32,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   0,   0, 
+      0,   0,  15,   0,   0,   0, 
+     83,  86,  95,  84,  97, 114, 
+    103, 101, 116,   0, 171, 171, 
+     83,  72,  68,  82, 148,   0, 
+      0,   0,  64,   0,   0,   0, 
+     37,   0,   0,   0,  90,   0, 
+      0,   3,   0,  96,  16,   0, 
+      0,   0,   0,   0,  88,  24, 
+      0,   4,   0, 112,  16,   0, 
+      0,   0,   0,   0,  85,  85, 
+      0,   0,  98,  16,   0,   3, 
+    242,  16,  16,   0,   1,   0, 
+      0,   0,  98,  16,   0,   3, 
+     50,  16,  16,   0,   2,   0, 
+      0,   0, 101,   0,   0,   3, 
+    242,  32,  16,   0,   0,   0, 
+      0,   0, 104,   0,   0,   2, 
+      1,   0,   0,   0,  69,   0, 
+      0,   9, 242,   0,  16,   0, 
+      0,   0,   0,   0,  70,  16, 
+     16,   0,   2,   0,   0,   0, 
+     70, 126,  16,   0,   0,   0, 
+      0,   0,   0,  96,  16,   0, 
+      0,   0,   0,   0,  56,   0, 
+      0,   7, 242,  32,  16,   0, 
+      0,   0,   0,   0,  70,  14, 
+     16,   0,   0,   0,   0,   0, 
+     70,  30,  16,   0,   1,   0, 
+      0,   0,  62,   0,   0,   1, 
+     83,  84,  65,  84, 116,   0, 
+      0,   0,   3,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0
 };
 
 namespace sre
@@ -412,12 +461,14 @@ struct sre_d3d12texture
     SDL_PixelFormatEnum format() { return m_format; }
     
     void bind(ID3D12GraphicsCommandList* dxcmd_list);
+    void free(sre_d3d12* video);
 private:
     SDL_PixelFormatEnum m_format = SDL_PIXELFORMAT_UNKNOWN;
     sre::vec2i m_size{};
 
     ID3D12Resource* m_resource{};
-    D3D12_GPU_DESCRIPTOR_HANDLE m_gpudesc;
+    UINT m_srvoffset{};
+    D3D12_GPU_DESCRIPTOR_HANDLE m_gpudesc{};
 };
 
 struct sre_d3d12
@@ -446,6 +497,11 @@ struct sre_d3d12
     UINT current_frameindex;
     UINT rtvheap_increment;
     UINT srvheap_increment;
+
+    // Data to handle SRV heap descriptors
+    UINT srvlast;
+    UINT srvcap = 300;
+    std::unordered_set<UINT> srvfreelist;
     
     ID3D12Fence* dxfence;
     HANDLE hfence;
@@ -469,6 +525,8 @@ struct sre_d3d12
 
     CBUFFER* cbuffermap;
     VBO_INPUT* basicvbomap;
+
+    alignas(sre_d3d12texture) char basictexture[sizeof(sre_d3d12texture)]; // Allocate it as buffer of bytes to initialize it later
 private:
     D3D12_VIEWPORT m_viewport;
 public:
@@ -477,7 +535,7 @@ public:
     bool vsync(int mode) { return false; }
     bool blend(sre_DrawBlending blend);
 
-    bool clear(sre::col4 color);
+    bool clear(sre::col4 color, sre::vec2f camera);
     bool clip(sre::rect2Dut rect) { return false; }
 
     bool draw_fill(const sre_DDFill* data);
@@ -500,11 +558,11 @@ static const sre_videodriverInterface sred3d12_interface{
     [](const sre_videodriver* video, sre_DrawBlending blend) { return __inst->blend(blend); },
     [](const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format) { new(texture) sre_d3d12texture(__inst, {w, h}, format); return __tex->valid(); },
     [](const sre_videodriver* video, void* texture, const void* pixels, int pitch) { return __tex->update(pixels, pitch); },
-    [](const sre_videodriver* video, void* texture) { __tex->~sre_d3d12texture(); },
+    [](const sre_videodriver* video, void* texture) { __tex->free(__inst); __tex->~sre_d3d12texture(); },
     [](const sre_videodriver* video, void* texture, int* w, int* h) { return __tex->size(w, h); },
     [](const sre_videodriver* video, void* texture) { return __tex->format(); },
 
-    [](const sre_videodriver* video, const sre::col4* color) { return __inst->clear(*color); },
+    [](const sre_videodriver* video, const sre::col4* color) { return __inst->clear(*color, video->center - video->camera); },
     [](const sre_videodriver* video, const sre::rect2Dut* rect) { return __inst->clip(*rect); },
 
     [](const sre_videodriver* video, const sre_DDFill* data) { return __inst->draw_fill(data); },
@@ -575,7 +633,7 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
         dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
         SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxrtvheap)));
-        dheap_desc.NumDescriptors = 10; // I guess this will be resized and recreated... Ughh
+        dheap_desc.NumDescriptors = inst->srvcap; // I guess this will be resized and recreated... Ughh
         dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxsrvheap)));
@@ -599,6 +657,10 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
     if (!inst->hfence)
         return false;
 
+    UINT32 WHITE = UINT32_MAX;
+    new(inst->basictexture) sre_d3d12texture(inst, 1, SDL_PIXELFORMAT_UNKNOWN);
+    reinterpret_cast<sre_d3d12texture*>(inst->basictexture)->update(&WHITE, 4);
+
     #undef interface
 
     _holder.release();
@@ -612,6 +674,8 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
 sre_d3d12::~sre_d3d12()
 {
     this->_waitforgpu();
+
+    reinterpret_cast<sre_d3d12texture*>(this->basictexture)->~sre_d3d12texture();
 
     this->dxcmd_allocator->Release();
     this->dxcmd_list->Release();
@@ -662,15 +726,16 @@ extern void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc);
 
 bool setup_pipeline(sre_d3d12* inst)
 {
-    static const D3D12_INPUT_ELEMENT_DESC INPUTS[3] = {
-        /* transform */ {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
-        /* color     */ {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
-        /* anchor    */ {"POSITION", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
+    static const D3D12_INPUT_ELEMENT_DESC INPUTS[] = {
+        /* transform      */ {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* color          */ {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* anchor         */ {"POSITION", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* texture region */ {"TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_SINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
     };
     static const D3D12_DESCRIPTOR_RANGE DESCRANGES[] = {
         { D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 }
     };
-    static const D3D12_ROOT_PARAMETER CBUFFERS[2] = {
+    static const D3D12_ROOT_PARAMETER CBUFFERS[] = {
         /* global cb */ { D3D12_ROOT_PARAMETER_TYPE_CBV, {0, 0}, D3D12_SHADER_VISIBILITY_VERTEX },
         /* textures  */ { D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, {sre::countof(DESCRANGES), DESCRANGES}, D3D12_SHADER_VISIBILITY_PIXEL}
     };
@@ -708,7 +773,6 @@ bool setup_pipeline(sre_d3d12* inst)
         SRE_DXCALL(inst->dxdevice->CreateRootSignature(0, rsblob->GetBufferPointer(), rsblob->GetBufferSize(), IID_PPV_ARGS(&inst->dxrootsignature)));
         rsblob->Release();
     }
-
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pstate_desc{};
     pstate_desc.pRootSignature = inst->dxrootsignature;
@@ -778,7 +842,7 @@ bool setup_pipeline(sre_d3d12* inst)
 
         D3D12_RESOURCE_DESC resource_desc{};
         resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        resource_desc.Width = sizeof(sre_d3d12::CBUFFER)*2;
+        resource_desc.Width = sizeof(sre_d3d12::CBUFFER)*2; // Two identical cbuffers where the first one doesn't contain any camera offset, while the second one does!
         resource_desc.Height = 1;
         resource_desc.DepthOrArraySize = 1;
         resource_desc.MipLevels = 1;
@@ -803,7 +867,7 @@ bool setup_pipeline(sre_d3d12* inst)
     return SUCCEEDED(hr);
 }
 
-bool sre_d3d12::clear(sre::col4 color)
+bool sre_d3d12::clear(sre::col4 color, sre::vec2f camera)
 {
     HRESULT hr{};
     _waitforgpu();
@@ -812,11 +876,12 @@ bool sre_d3d12::clear(sre::col4 color)
     SRE_DXCALL(dxcmd_list->Reset(dxcmd_allocator, dxpipeline_blendstates[current_dxpipelinestate]));
 
     D3D12_RECT scr{0, 0, (LONG)m_viewport.Width, (LONG)m_viewport.Height};
+    dxcmd_list->SetDescriptorHeaps(1, &dxsrvheap);
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
-    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
     dxcmd_list->RSSetViewports(1, &m_viewport);
     dxcmd_list->RSSetScissorRects(1, &scr);
     dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN);
+    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
 
     D3D12_RESOURCE_BARRIER rbtransition{};
     rbtransition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -842,6 +907,7 @@ bool sre_d3d12::clear(sre::col4 color)
     }
 
     basicvbo_index = 0;
+    cbuffermap[1].camera = camera;
 
     return SUCCEEDED(hr);
 }
@@ -876,7 +942,8 @@ bool sre_d3d12::viewport(sre::vec2i osize, sre::vec2ut vsize)
 
     HRESULT hr;
 
-    cbuffermap->viewport = vsize;
+    cbuffermap[0].viewport = vsize;
+    cbuffermap[1].viewport = vsize;
 
     m_viewport.Width = static_cast<FLOAT>(osize.x);
     m_viewport.Height = static_cast<FLOAT>(osize.y);
@@ -932,6 +999,9 @@ bool sre_d3d12::draw_rect(const sre_DDRect* data)
     basic_vboview.BufferLocation = basicvbo_container->GetGPUVirtualAddress() + basicvbo_index*sizeof(VBO_INPUT);
     basicvbo_index++;
 
+    bool usecam = data->flags & SRE_DRAWFLAGS_USECAM;
+    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress() + sizeof(CBUFFER)*usecam);
+
     dxcmd_list->IASetVertexBuffers(0, 1, &basic_vboview);
     dxcmd_list->DrawInstanced(4, 1, 0, 0);
     return SUCCEEDED(hr);
@@ -948,7 +1018,9 @@ bool sre_d3d12::draw_texture(const sre_DDTexture* data)
         data->rect,
         data->anchor
     };
-    return draw_rect(&rect);
+    bool ret = draw_rect(&rect);
+    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
+    return ret;
 }
 
 sre_d3d12texture::~sre_d3d12texture()
@@ -980,22 +1052,33 @@ sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelF
         NULL, IID_PPV_ARGS(&m_resource)
     ));
 
-    if (0) {
+    if (1) {
         D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
-        srv_desc.Format = texture_desc.Format;
+        srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srv_desc.Texture2D.MipLevels = 1;
         srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-        video->dxdevice->CreateShaderResourceView(m_resource, &srv_desc, video->dxsrvheap->GetCPUDescriptorHandleForHeapStart());
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandle = video->dxsrvheap->GetCPUDescriptorHandleForHeapStart();
+        cpuhandle.ptr += video->srvlast;
+        video->dxdevice->CreateShaderResourceView(m_resource, &srv_desc, cpuhandle);
     }
 
     if (SUCCEEDED(hr))
     {
+        m_srvoffset = video->srvlast;
         m_gpudesc = video->dxsrvheap->GetGPUDescriptorHandleForHeapStart();
+        m_gpudesc.ptr += m_srvoffset;
         m_size = size;
-        m_format = SDL_PIXELFORMAT_RGBA8888;
+        m_format = SDL_PIXELFORMAT_RGBA32;
+
+        video->srvlast += video->srvheap_increment;
     }
+}
+
+void sre_d3d12texture::free(sre_d3d12* video)
+{
+    video->srvfreelist.insert(m_srvoffset);
 }
 
 bool sre_d3d12texture::update(const void* pixels, int pitch)
@@ -1003,7 +1086,7 @@ bool sre_d3d12texture::update(const void* pixels, int pitch)
     HRESULT hr;
 
     SRE_DXCALL(m_resource->Map(0, NULL, NULL));
-    SRE_DXCALL(m_resource->WriteToSubresource(0, NULL, pixels, pitch, 0));
+    SRE_DXCALL(m_resource->WriteToSubresource(0, NULL, pixels, pitch, 1));
     
     D3D12_RANGE range{};
     m_resource->Unmap(0, &range);
@@ -1013,7 +1096,7 @@ bool sre_d3d12texture::update(const void* pixels, int pitch)
 void sre_d3d12texture::bind(ID3D12GraphicsCommandList* dxcmd_list)
 {
     // Code to bind texture, I DON'T know yet how to do it...
-    //dxcmd_list->SetGraphicsRootDescriptorTable(1, m_gpudesc);
+    dxcmd_list->SetGraphicsRootDescriptorTable(1, m_gpudesc);
 }
 
 //
@@ -1027,11 +1110,11 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         desc.BlendEnable = TRUE;
         desc.LogicOpEnable = FALSE;
         
-        desc.SrcBlend = D3D12_BLEND_ONE;
+        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
         desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
         desc.BlendOp = D3D12_BLEND_OP_ADD;
         desc.SrcBlendAlpha = D3D12_BLEND_ONE;
-        desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+        desc.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
         desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     },
     [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD (unimplemented from here)
