@@ -244,84 +244,83 @@ static const BYTE VS_BYTES[] = {
 };
 
 static const BYTE PS_BYTES[] = {
-     68,  88,  66,  67, 128,   1, 
-    200, 118,  81, 152,  71, 208, 
-     28, 245,  79,  63,  36,  93, 
-    145,  36,   1,   0,   0,   0, 
-    196,   1,   0,   0,   5,   0, 
-      0,   0,  52,   0,   0,   0, 
-    128,   0,   0,   0, 212,   0, 
-      0,   0,   8,   1,   0,   0, 
-     72,   1,   0,   0,  82,  68, 
-     69,  70,  68,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-     28,   0,   0,   0,   0,   4, 
-    255, 255,   0,  17,   0,   0, 
-     28,   0,   0,   0,  77, 105, 
-     99, 114, 111, 115, 111, 102, 
-    116,  32,  40,  82,  41,  32, 
-     72,  76,  83,  76,  32,  83, 
-    104,  97, 100, 101, 114,  32, 
-     67, 111, 109, 112, 105, 108, 
-    101, 114,  32,  49,  48,  46, 
-     49,   0,  73,  83,  71,  78, 
-     76,   0,   0,   0,   2,   0, 
-      0,   0,   8,   0,   0,   0, 
-     56,   0,   0,   0,   0,   0, 
-      0,   0,   1,   0,   0,   0, 
-      3,   0,   0,   0,   0,   0, 
-      0,   0,  15,   0,   0,   0, 
-     68,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      3,   0,   0,   0,   1,   0, 
-      0,   0,  15,  15,   0,   0, 
-     83,  86,  95,  80, 111, 115, 
-    105, 116, 105, 111, 110,   0, 
-     67,  79,  76,  79,  82,   0, 
-    171, 171,  79,  83,  71,  78, 
-     44,   0,   0,   0,   1,   0, 
-      0,   0,   8,   0,   0,   0, 
-     32,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      3,   0,   0,   0,   0,   0, 
-      0,   0,  15,   0,   0,   0, 
-     83,  86,  95,  84,  97, 114, 
-    103, 101, 116,   0, 171, 171, 
-     83,  72,  68,  82,  56,   0, 
-      0,   0,  64,   0,   0,   0, 
-     14,   0,   0,   0,  98,  16, 
-      0,   3, 242,  16,  16,   0, 
-      1,   0,   0,   0, 101,   0, 
-      0,   3, 242,  32,  16,   0, 
-      0,   0,   0,   0,  54,   0, 
-      0,   5, 242,  32,  16,   0, 
-      0,   0,   0,   0,  70,  30, 
-     16,   0,   1,   0,   0,   0, 
-     62,   0,   0,   1,  83,  84, 
-     65,  84, 116,   0,   0,   0, 
-      2,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      2,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   1,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   1,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
+     68,  88,  66,  67, 128,   1,
+    200, 118,  81, 152,  71, 208,
+     28, 245,  79,  63,  36,  93,
+    145,  36,   1,   0,   0,   0,
+    196,   1,   0,   0,   5,   0,
+      0,   0,  52,   0,   0,   0,
+    128,   0,   0,   0, 212,   0,
+      0,   0,   8,   1,   0,   0,
+     72,   1,   0,   0,  82,  68,
+     69,  70,  68,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+     28,   0,   0,   0,   0,   4,
+    255, 255,   0,  17,   0,   0,
+     28,   0,   0,   0,  77, 105,
+     99, 114, 111, 115, 111, 102,
+    116,  32,  40,  82,  41,  32,
+     72,  76,  83,  76,  32,  83,
+    104,  97, 100, 101, 114,  32,
+     67, 111, 109, 112, 105, 108,
+    101, 114,  32,  49,  48,  46,
+     49,   0,  73,  83,  71,  78,
+     76,   0,   0,   0,   2,   0,
+      0,   0,   8,   0,   0,   0,
+     56,   0,   0,   0,   0,   0,
+      0,   0,   1,   0,   0,   0,
+      3,   0,   0,   0,   0,   0,
+      0,   0,  15,   0,   0,   0,
+     68,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      3,   0,   0,   0,   1,   0,
+      0,   0,  15,  15,   0,   0,
+     83,  86,  95,  80, 111, 115,
+    105, 116, 105, 111, 110,   0,
+     67,  79,  76,  79,  82,   0,
+    171, 171,  79,  83,  71,  78,
+     44,   0,   0,   0,   1,   0,
+      0,   0,   8,   0,   0,   0,
+     32,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      3,   0,   0,   0,   0,   0,
+      0,   0,  15,   0,   0,   0,
+     83,  86,  95,  84,  97, 114,
+    103, 101, 116,   0, 171, 171,
+     83,  72,  68,  82,  56,   0,
+      0,   0,  64,   0,   0,   0,
+     14,   0,   0,   0,  98,  16,
+      0,   3, 242,  16,  16,   0,
+      1,   0,   0,   0, 101,   0,
+      0,   3, 242,  32,  16,   0,
+      0,   0,   0,   0,  54,   0,
+      0,   5, 242,  32,  16,   0,
+      0,   0,   0,   0,  70,  30,
+     16,   0,   1,   0,   0,   0,
+     62,   0,   0,   1,  83,  84,
+     65,  84, 116,   0,   0,   0,
+      2,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      2,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   1,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   1,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,
       0,   0
 };
-
 
 namespace sre
 {
@@ -417,8 +416,6 @@ private:
     SDL_PixelFormatEnum m_format = SDL_PIXELFORMAT_UNKNOWN;
     sre::vec2i m_size{};
 
-    ID3D12DescriptorHeap* m_descheap; // This is dumb, make a single one inside sre_d3d12
-
     ID3D12Resource* m_resource{};
     D3D12_GPU_DESCRIPTOR_HANDLE m_gpudesc;
 };
@@ -435,7 +432,7 @@ struct sre_d3d12
     ID3D12CommandAllocator* dxcmd_allocator;
     ID3D12CommandQueue* dxcmd_queue;
     ID3D12GraphicsCommandList* dxcmd_list;
-    ID3D12DescriptorHeap* dxdesc_heap;
+    ID3D12DescriptorHeap* dxrtvheap;
     ID3D12DescriptorHeap* dxsrvheap;
     ID3D12RootSignature* dxrootsignature;
     ID3D12Heap* dxheap;
@@ -447,7 +444,8 @@ struct sre_d3d12
     
     // Some DirectX state members
     UINT current_frameindex;
-    UINT rtv_increment;
+    UINT rtvheap_increment;
+    UINT srvheap_increment;
     
     ID3D12Fence* dxfence;
     HANDLE hfence;
@@ -458,12 +456,18 @@ struct sre_d3d12
         float color[4];
         sre::vec2ut anchor;
     };
+    struct CBUFFER
+    {
+        sre::vec2f viewport;
+        sre::vec2ut camera;
+    };
+
     ID3D12Resource* cbuffer;
     ID3D12Resource* basicvbo_container; // Basic container for rect data, holds 64kb in total of rect data
     D3D12_VERTEX_BUFFER_VIEW basic_vboview;
     sre::uptr basicvbo_index;
 
-    sre::vec2f* cbuffermap;
+    CBUFFER* cbuffermap;
     VBO_INPUT* basicvbomap;
 private:
     D3D12_VIEWPORT m_viewport;
@@ -570,8 +574,14 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
         dheap_desc.NumDescriptors = 2;
         dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
-        SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxdesc_heap)));
-        inst->rtv_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxrtvheap)));
+        dheap_desc.NumDescriptors = 10; // I guess this will be resized and recreated... Ughh
+        dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxsrvheap)));
+
+        inst->rtvheap_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        inst->srvheap_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
     
@@ -609,7 +619,8 @@ sre_d3d12::~sre_d3d12()
     this->dxdevice->Release();
     this->dxfactory->Release();
     this->dxswapchain->Release();
-    this->dxdesc_heap->Release();
+    this->dxrtvheap->Release();
+    this->dxsrvheap->Release();
     this->dxrootsignature->Release();
     this->dxfence->Release();
     this->dxheap->Release();
@@ -637,8 +648,8 @@ bool create_targets(sre_d3d12* inst)
 {
     HRESULT hr;
 
-    D3D12_CPU_DESCRIPTOR_HANDLE cpudesc = inst->dxdesc_heap->GetCPUDescriptorHandleForHeapStart();
-    for (int i = 0; i < sre::countof(inst->dxrender_targets); i++, cpudesc.ptr+=inst->rtv_increment)
+    D3D12_CPU_DESCRIPTOR_HANDLE cpudesc = inst->dxrtvheap->GetCPUDescriptorHandleForHeapStart();
+    for (int i = 0; i < sre::countof(inst->dxrender_targets); i++, cpudesc.ptr+=inst->rtvheap_increment)
     {
         SRE_DXCALL(inst->dxswapchain->GetBuffer(i, IID_PPV_ARGS(&inst->dxrender_targets[i])));
         inst->dxdevice->CreateRenderTargetView(inst->dxrender_targets[i], NULL, cpudesc);
@@ -656,9 +667,12 @@ bool setup_pipeline(sre_d3d12* inst)
         /* color     */ {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
         /* anchor    */ {"POSITION", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
     };
+    static const D3D12_DESCRIPTOR_RANGE DESCRANGES[] = {
+        { D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 }
+    };
     static const D3D12_ROOT_PARAMETER CBUFFERS[2] = {
         /* global cb */ { D3D12_ROOT_PARAMETER_TYPE_CBV, {0, 0}, D3D12_SHADER_VISIBILITY_VERTEX },
-        /* texture   */ { D3D12_ROOT_PARAMETER_TYPE_SRV, {0, 0}, D3D12_SHADER_VISIBILITY_PIXEL }
+        /* textures  */ { D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, {sre::countof(DESCRANGES), DESCRANGES}, D3D12_SHADER_VISIBILITY_PIXEL}
     };
 
     HRESULT hr;
@@ -671,11 +685,22 @@ bool setup_pipeline(sre_d3d12* inst)
         rsdesc.NumParameters = sre::countof(CBUFFERS);
         rsdesc.pParameters = CBUFFERS;
 
+        D3D12_STATIC_SAMPLER_DESC sampler_desc{};
+        sampler_desc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+        sampler_desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        sampler_desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        sampler_desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        sampler_desc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+        sampler_desc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        sampler_desc.ShaderRegister = 0;
+        sampler_desc.RegisterSpace = 0;
+        rsdesc.NumStaticSamplers = 1;
+        rsdesc.pStaticSamplers = &sampler_desc;
+
         SRE_DXCALL(D3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
         if (rserr)
         {
-            sre::log<sre::LOGCATEGORY_ERROR>("Failed serializing D3D12 root signature: %*.s", rserr->GetBufferSize(), rserr->GetBufferPointer());
-            rsblob->Release();
+            sre::log<sre::LOGCATEGORY_ERROR>("Failed serializing D3D12 root signature: %.*s", rserr->GetBufferSize(), rserr->GetBufferPointer());
             rserr->Release();
             return false;
         }
@@ -753,7 +778,7 @@ bool setup_pipeline(sre_d3d12* inst)
 
         D3D12_RESOURCE_DESC resource_desc{};
         resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        resource_desc.Width = sizeof(float)*2;
+        resource_desc.Width = sizeof(sre_d3d12::CBUFFER)*2;
         resource_desc.Height = 1;
         resource_desc.DepthOrArraySize = 1;
         resource_desc.MipLevels = 1;
@@ -802,8 +827,8 @@ bool sre_d3d12::clear(sre::col4 color)
     dxcmd_list->ResourceBarrier(1, &rbtransition);
 
     {
-        D3D12_CPU_DESCRIPTOR_HANDLE rtv = dxdesc_heap->GetCPUDescriptorHandleForHeapStart();
-        rtv.ptr += current_frameindex*rtv_increment;
+        D3D12_CPU_DESCRIPTOR_HANDLE rtv = dxrtvheap->GetCPUDescriptorHandleForHeapStart();
+        rtv.ptr += current_frameindex*rtvheap_increment;
 
         FLOAT fcolor[4] = {
             color.r/255.0f,
@@ -851,7 +876,7 @@ bool sre_d3d12::viewport(sre::vec2i osize, sre::vec2ut vsize)
 
     HRESULT hr;
 
-    *cbuffermap = vsize;
+    cbuffermap->viewport = vsize;
 
     m_viewport.Width = static_cast<FLOAT>(osize.x);
     m_viewport.Height = static_cast<FLOAT>(osize.y);
@@ -929,7 +954,6 @@ bool sre_d3d12::draw_texture(const sre_DDTexture* data)
 sre_d3d12texture::~sre_d3d12texture()
 {
     SRE_DXRELEASE(m_resource);
-    SRE_DXRELEASE(m_descheap);
 }
 
 sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format)
@@ -956,27 +980,19 @@ sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelF
         NULL, IID_PPV_ARGS(&m_resource)
     ));
 
-    {
-        D3D12_DESCRIPTOR_HEAP_DESC descheap_desc{};
-        descheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-        descheap_desc.NumDescriptors = 1;
-        descheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-
-        SRE_DXCALL(video->dxdevice->CreateDescriptorHeap(&descheap_desc, IID_PPV_ARGS(&m_descheap)));
-    }
-
     if (0) {
         D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
         srv_desc.Format = texture_desc.Format;
         srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srv_desc.Texture2D.MipLevels = 1;
+        srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-        video->dxdevice->CreateShaderResourceView(m_resource, &srv_desc, m_descheap->GetCPUDescriptorHandleForHeapStart());
+        video->dxdevice->CreateShaderResourceView(m_resource, &srv_desc, video->dxsrvheap->GetCPUDescriptorHandleForHeapStart());
     }
 
     if (SUCCEEDED(hr))
     {
-        m_gpudesc = m_descheap->GetGPUDescriptorHandleForHeapStart();
+        m_gpudesc = video->dxsrvheap->GetGPUDescriptorHandleForHeapStart();
         m_size = size;
         m_format = SDL_PIXELFORMAT_RGBA8888;
     }
@@ -997,7 +1013,7 @@ bool sre_d3d12texture::update(const void* pixels, int pitch)
 void sre_d3d12texture::bind(ID3D12GraphicsCommandList* dxcmd_list)
 {
     // Code to bind texture, I DON'T know yet how to do it...
-    dxcmd_list->SetGraphicsRootDescriptorTable(1, m_gpudesc);
+    //dxcmd_list->SetGraphicsRootDescriptorTable(1, m_gpudesc);
 }
 
 //
