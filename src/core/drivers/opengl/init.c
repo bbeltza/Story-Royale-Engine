@@ -139,7 +139,7 @@ bool sreopengl_blend(const sre_videodriver* video, sre_DrawBlending blending)
             sfactor = GL_DST_COLOR;
             dfactor = GL_ONE_MINUS_SRC_ALPHA;
             break;
-        default: abort();
+        default: abort(); return false;
     }
 
     SRE_GL_CALL(glEnable(GL_BLEND), return false;);

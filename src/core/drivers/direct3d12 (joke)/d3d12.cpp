@@ -512,15 +512,16 @@ struct sre_d3d12
         float color[4];
         sre::vec2ut anchor;
     };
-    struct CBUFFER
+    struct alignas(256) CBUFFER
     {
         sre::vec2f viewport;
-        sre::vec2ut camera;
+        sre::vec2f camera;
     };
 
     ID3D12Resource* cbuffer;
     ID3D12Resource* basicvbo_container; // Basic container for rect data, holds 64kb in total of rect data
-    D3D12_VERTEX_BUFFER_VIEW basic_vboview;
+    //D3D12_VERTEX_BUFFER_VIEW basic_vboview;
+    D3D12_GPU_VIRTUAL_ADDRESS basic_vboaddr;
     sre::uptr basicvbo_index;
 
     CBUFFER* cbuffermap;
@@ -547,7 +548,9 @@ public:
 
     private:
         void _waitforgpu(); // Wait for the GPU to finish all commands
-        bool _createtargets();
+
+        void _drawvbo(const VBO_INPUT& input);
+        void _setcameracbuf(bool usecam);
 };
 
 static const sre_videodriverInterface sred3d12_interface{
@@ -831,9 +834,7 @@ bool setup_pipeline(sre_d3d12* inst)
             IID_PPV_ARGS(&inst->basicvbo_container)
         ));
         
-        inst->basic_vboview.BufferLocation = inst->basicvbo_container->GetGPUVirtualAddress();
-        inst->basic_vboview.SizeInBytes = sizeof(sre_d3d12::VBO_INPUT);
-        inst->basic_vboview.StrideInBytes = 0;
+        inst->basic_vboaddr = inst->basicvbo_container->GetGPUVirtualAddress();
     }
 
     {   // Constant buffers
@@ -858,7 +859,6 @@ bool setup_pipeline(sre_d3d12* inst)
             NULL,
             IID_PPV_ARGS(&inst->cbuffer)
         ));
-
     }
     D3D12_RANGE range{0, 0};
     SRE_DXCALL(inst->basicvbo_container->Map(0, &range, reinterpret_cast<void**>(&inst->basicvbomap)));
@@ -982,29 +982,58 @@ bool sre_d3d12::blend(sre_DrawBlending blend)
     return true;
 }
 
+void sre_d3d12::_drawvbo(const VBO_INPUT& input)
+{
+    D3D12_VERTEX_BUFFER_VIEW vboview{};
+    vboview.BufferLocation = basic_vboaddr + basicvbo_index * sizeof(VBO_INPUT);
+    vboview.SizeInBytes = sizeof(VBO_INPUT);
+
+    basicvbomap[basicvbo_index] = input;
+    basicvbo_index++;
+
+    dxcmd_list->IASetVertexBuffers(0, 1, &vboview);
+    dxcmd_list->DrawInstanced(4, 1, 0, 0);
+}
+
+void sre_d3d12::_setcameracbuf(bool usecam)
+{
+    // if (lastcamstate != usecam)
+    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress() + sizeof(CBUFFER) * usecam);
+}
+
+// Same type of color normalization macro helper as in OpenGL
+// One thing that I really want to do is to send the raw color data into the vertex shader
+//  which will transform it to normalized floats for the pixel shader to use
+//  so that there would be minimal transformations done in the CPU
+// But right now I cannot do it I'm on my laptop stuck in the car for ~3 hours and my shaders are on my pc at home...
+#define COLOR4_NORM(c) { (c).r/255.0f, (c).g/255.0f, (c).b/255.0f, (c).a/255.0f }
+
 bool sre_d3d12::draw_fill(const sre_DDFill* data)
 {
-    HRESULT hr{};
+    _setcameracbuf(false);
+    _drawvbo({
+        { 0, {D3D12_FLOAT32_MAX} }, // FLOAT32_MAX hell yeah!
+        COLOR4_NORM(data->color),
+        0
+        });
 
-    return SUCCEEDED(hr);
+    return true;
 }
 
 bool sre_d3d12::draw_rect(const sre_DDRect* data)
 {
     if (!data->color.a) return true;
 
-    HRESULT hr{};
+    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
 
-    basicvbomap[basicvbo_index] = { data->rect, { data->color.r/255.0f, data->color.g/255.0f, data->color.b/255.0f, data->color.a/255.0f }, data->anchor };
-    basic_vboview.BufferLocation = basicvbo_container->GetGPUVirtualAddress() + basicvbo_index*sizeof(VBO_INPUT);
-    basicvbo_index++;
+    _setcameracbuf(data->flags & SRE_DRAWFLAGS_USECAM);
+    _drawvbo({
+        data->rect,
+        { data->color.r / 255.0f, data->color.g / 255.0f, data->color.b / 255.0f, data->color.a / 255.0f },
+        data->anchor
+        });
 
-    bool usecam = data->flags & SRE_DRAWFLAGS_USECAM;
-    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress() + sizeof(CBUFFER)*usecam);
-
-    dxcmd_list->IASetVertexBuffers(0, 1, &basic_vboview);
-    dxcmd_list->DrawInstanced(4, 1, 0, 0);
-    return SUCCEEDED(hr);
+    return true; // As DX command lists run directly on the GPU they return void so there'd be little to no purpose on returning a status code in these draw functions
 }
 
 bool sre_d3d12::draw_texture(const sre_DDTexture* data)
@@ -1012,15 +1041,13 @@ bool sre_d3d12::draw_texture(const sre_DDTexture* data)
     auto* texture = static_cast<sre_d3d12texture*>(sre_get_texture(data->texture));
     texture->bind(dxcmd_list);
 
-    sre_DDRect rect{
-        data->flags,
-        data->modulate,
+    _setcameracbuf(data->flags & SRE_DRAWFLAGS_USECAM);
+    _drawvbo({
         data->rect,
+        { data->modulate.r / 255.0f, data->modulate.g / 255.0f, data->modulate.b / 255.0f, data->modulate.a / 255.0f },
         data->anchor
-    };
-    bool ret = draw_rect(&rect);
-    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
-    return ret;
+    });
+    return true;
 }
 
 sre_d3d12texture::~sre_d3d12texture()
@@ -1114,7 +1141,7 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
         desc.BlendOp = D3D12_BLEND_OP_ADD;
         desc.SrcBlendAlpha = D3D12_BLEND_ONE;
-        desc.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
+        desc.DestBlendAlpha = D3D12_BLEND_ZERO;
         desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     },
     [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD (unimplemented from here)
@@ -1124,6 +1151,13 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
 
     },
     [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
+        desc.BlendEnable = TRUE;
 
+        desc.SrcBlend = D3D12_BLEND_SRC_COLOR;
+        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+        desc.SrcBlendAlpha = D3D12_BLEND_ONE;
+        desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+        desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     }
 };
