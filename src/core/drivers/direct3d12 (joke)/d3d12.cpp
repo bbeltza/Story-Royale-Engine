@@ -1010,6 +1010,9 @@ void sre_d3d12::_setcameracbuf(bool usecam)
 
 bool sre_d3d12::draw_fill(const sre_DDFill* data)
 {
+    if (!data->color.a) return true;
+
+    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
     _setcameracbuf(false);
     _drawvbo({
         { 0, {D3D12_FLOAT32_MAX} }, // FLOAT32_MAX hell yeah!
@@ -1144,16 +1147,31 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         desc.DestBlendAlpha = D3D12_BLEND_ZERO;
         desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD (unimplemented from here)
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD
+        desc.BlendEnable = TRUE;
 
+        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
+        desc.DestBlend = D3D12_BLEND_ZERO;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+        // TODO: Remove the alpha blends there, they make this part of the code look more complex and they are useless for our case
+        desc.SrcBlendAlpha = D3D12_BLEND_ONE;
+        desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+        desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     },
     [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_ADD
+        desc.BlendEnable = TRUE;
 
+        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        desc.DestBlend = D3D12_BLEND_ONE;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+        desc.SrcBlendAlpha = D3D12_BLEND_ONE;
+        desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+        desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
     },
     [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
         desc.BlendEnable = TRUE;
 
-        desc.SrcBlend = D3D12_BLEND_SRC_COLOR;
+        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
         desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
         desc.BlendOp = D3D12_BLEND_OP_ADD;
         desc.SrcBlendAlpha = D3D12_BLEND_ONE;
