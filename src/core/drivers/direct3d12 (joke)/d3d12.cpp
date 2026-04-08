@@ -574,6 +574,11 @@ public:
 
         void _drawvbo(const VBO_INPUT& input);
         void _setcameracbuf(bool usecam);
+
+    #ifndef IMGUI_DISABLE
+        public:
+            bool imgui_init();
+    #endif
 };
 
 static const sre_videodriverInterface sred3d12_interface{
@@ -598,6 +603,10 @@ static const sre_videodriverInterface sred3d12_interface{
     [](const sre_videodriver* video, const sre_DDTexture* data) { return __inst->draw_texture(data); },   
     [](const sre_videodriver* video, const sre_DDRTexture* data) { return __inst->draw_rtexture(data); }    
 };
+
+#ifndef IMGUI_DISABLE
+    extern const sre_videodriverImGuiInterface sred3d12imgui_interface;
+#endif
 
 static bool setup_pipeline(sre_d3d12* inst);
 static bool create_targets(sre_d3d12* inst);
@@ -694,6 +703,10 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
     video->userdata = inst;
     video->interface = &sred3d12_interface;
 
+    #ifndef IMGUI_DISABLE
+        video->imgui = &sred3d12imgui_interface;
+    #endif
+
     return true;
 }
 
@@ -757,7 +770,7 @@ bool setup_pipeline(sre_d3d12* inst)
         /* color          */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
         /* anchor         */ {"POSITION", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
         /* texture's max uv value */ {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
-        /* texture's offset       */ {"TEXCOORD", 1, DXGI_FORMAT_R32G32_SINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
+        /* texture's offset       */ {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
     };
     static const D3D12_DESCRIPTOR_RANGE DESCRANGES[] = {
         { D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 }
@@ -1215,3 +1228,58 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         desc.BlendOp = D3D12_BLEND_OP_ADD;
     }
 };
+
+// ImGui
+
+#ifndef IMGUI_DISABLE
+    #include <backends/imgui_impl_dx12.h>
+
+    static const sre_videodriverImGuiInterface sred3d12imgui_interface = {
+        [](const sre_videodriver* video) { return __inst->imgui_init(); },
+        []() { ImGui_ImplDX12_NewFrame(); },
+        [](struct ImDrawData* ImDrawData, const sre_videodriver* video) { ImGui_ImplDX12_RenderDrawData(ImDrawData, __inst->dxcmd_list); }
+    };
+
+    static void imgui_srvalloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* ocpu, D3D12_GPU_DESCRIPTOR_HANDLE* ogpu)
+    {
+        auto inst = static_cast<sre_d3d12*>(info->UserData);
+        
+        D3D12_CPU_DESCRIPTOR_HANDLE cpu = inst->dxsrvheap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_GPU_DESCRIPTOR_HANDLE gpu = inst->dxsrvheap->GetGPUDescriptorHandleForHeapStart();
+
+        cpu.ptr += inst->srvlast;
+        gpu.ptr += inst->srvlast;
+
+        *ocpu = cpu;
+        *ogpu = gpu;
+
+        inst->srvlast += inst->srvheap_increment;
+    }
+
+    static void imgui_srvfree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu)
+    {
+        // Does nothing for now, should implement the free list allocator soon
+    }
+
+    bool sre_d3d12::imgui_init()
+    {
+        ImGui_ImplDX12_InitInfo info{};
+        info.UserData = this;
+        info.Device = dxdevice;
+        info.CommandQueue = dxcmd_queue;
+        info.NumFramesInFlight = sre::countof(dxrender_targets);
+        info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+        info.SrvDescriptorHeap = dxsrvheap; // Using my srv descriptor heap, I was going to separate it but I don't care
+        info.SrvDescriptorAllocFn = imgui_srvalloc;
+        info.SrvDescriptorFreeFn = imgui_srvfree;
+
+        if (ImGui_ImplDX12_Init(&info))
+        {
+
+            return true;
+        }
+
+        return false;
+    }
+#endif
