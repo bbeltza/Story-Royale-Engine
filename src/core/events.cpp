@@ -22,6 +22,7 @@ int __event_filter(void* userdata, SDL_Event* ev)
 {
     #ifndef IMGUI_DISABLE
     if (ev->type == SDL_QUIT) return 1;
+    if (ev->type == SDL_WINDOWEVENT) return 1;
     if (engine.video && engine.video->imgui)
     {
         ImGuiIO& io = ImGui::GetIO();

@@ -1,0 +1,1 @@
+SRE_DRIVERBUILD(sre_d3d11 "d3d11main.cpp")

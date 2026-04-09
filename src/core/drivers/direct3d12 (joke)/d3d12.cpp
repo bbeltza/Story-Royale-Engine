@@ -7,7 +7,8 @@
 
 #include <SDL_syswm.h>
 
-#include <unordered_set>
+#include <stack>
+#include <cassert>
 
 // All shader bytecode
 static const BYTE VS_BYTES[] = {
@@ -518,11 +519,13 @@ struct sre_d3d12
     UINT rtvheap_increment;
     UINT srvheap_increment;
 
+private:
     // Data to handle SRV heap descriptors
-    UINT srvlast;
-    UINT srvcap = 300;
-    std::unordered_set<UINT> srvfreelist;
+    UINT m_srvlast;
+    UINT m_srvcap = 0;
+    std::stack<UINT> m_srvfreelist;
     
+public:
     ID3D12Fence* dxfence;
     HANDLE hfence;
 
@@ -543,7 +546,6 @@ struct sre_d3d12
 
     ID3D12Resource* cbuffer;
     ID3D12Resource* basicvbo_container; // Basic container for rect data, holds 64kb in total of rect data
-    //D3D12_VERTEX_BUFFER_VIEW basic_vboview;
     D3D12_GPU_VIRTUAL_ADDRESS basic_vboaddr;
     sre::uptr basicvbo_index;
 
@@ -553,10 +555,11 @@ struct sre_d3d12
     alignas(sre_d3d12texture) char basictexture[sizeof(sre_d3d12texture)]; // Allocate it as buffer of bytes to initialize it later
 private:
     D3D12_VIEWPORT m_viewport;
+    bool m_vsync = 0;
 public:
     void present();
     bool viewport(sre::vec2i osize, sre::vec2ut vsize);
-    bool vsync(int mode) { return false; }
+    bool vsync(int mode) { m_vsync = mode != 0; return true; }
     bool blend(sre_DrawBlending blend);
 
     bool clear(sre::col4 color, sre::vec2f camera);
@@ -569,6 +572,8 @@ public:
     bool draw_texture(const sre_DDTexture* data);
     bool draw_rtexture(const sre_DDRTexture* data) { return false; }
 
+    UINT srvallocate();
+    void srvfree(UINT offs);
     private:
         void _waitforgpu(); // Wait for the GPU to finish all commands
 
@@ -668,10 +673,6 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
         dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
         SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxrtvheap)));
-        dheap_desc.NumDescriptors = inst->srvcap; // I guess this will be resized and recreated... Ughh
-        dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-        SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxsrvheap)));
 
         inst->rtvheap_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
         inst->srvheap_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -741,10 +742,12 @@ void sre_d3d12::_waitforgpu()
 {
     HRESULT hr;
     SRE_DXCALL(dxcmd_queue->Signal(dxfence, 1));
-
-    SRE_DXCALL(dxfence->SetEventOnCompletion(1, hfence));
-    WaitForSingleObject(hfence, INFINITE);
-    SRE_DXCALL(dxfence->Signal(0));
+    
+    {
+        SRE_DXCALL(dxfence->SetEventOnCompletion(1, hfence));
+        WaitForSingleObject(hfence, INFINITE);
+        SRE_DXCALL(dxfence->Signal(0));
+    }
 }
 
 bool create_targets(sre_d3d12* inst)
@@ -971,7 +974,7 @@ void sre_d3d12::present()
     
     ID3D12CommandList* cmd_lists[] = { dxcmd_list };
     dxcmd_queue->ExecuteCommandLists(1, cmd_lists);
-    SRE_DXCALL(dxswapchain->Present(0, 0));
+    SRE_DXCALL(dxswapchain->Present(m_vsync, 0));
     
     current_frameindex = dxswapchain->GetCurrentBackBufferIndex();
 }
@@ -1116,6 +1119,46 @@ bool sre_d3d12::draw_texture(const sre_DDTexture* data)
     return true;
 }
 
+UINT sre_d3d12::srvallocate()
+{
+    HRESULT hr;
+    UINT offset;
+    if (m_srvfreelist.empty())
+    {
+        offset = m_srvlast;
+        m_srvlast += srvheap_increment;
+
+        if (m_srvlast / srvheap_increment > m_srvcap)
+        {
+            assert(m_srvcap == 0 && "Heap descriptor resizing isn't currently implemented. Try increasing the increment number in the line below?");
+            m_srvcap += 1024;
+
+            //ID3D12DescriptorHeap* old_dheap = dxsrvheap;
+
+            D3D12_DESCRIPTOR_HEAP_DESC dheap_desc{};
+            dheap_desc.NumDescriptors = m_srvcap; // I guess this will be resized and recreated... Ughh
+            dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+            SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheap)));
+            
+        }
+    }
+    else
+    {
+        assert(dxsrvheap != NULL);
+        
+        offset = m_srvfreelist.top();
+        m_srvfreelist.pop();
+    }
+
+    return offset;
+}
+
+void sre_d3d12::srvfree(UINT offs)
+{
+    m_srvfreelist.push(offs);
+}
+
 sre_d3d12texture::~sre_d3d12texture()
 {
     SRE_DXRELEASE(m_resource);
@@ -1147,6 +1190,8 @@ sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelF
 
     if (SUCCEEDED(hr))
     {
+        UINT offset = video->srvallocate();
+
         D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
         srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -1154,23 +1199,20 @@ sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelF
         srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
         D3D12_CPU_DESCRIPTOR_HANDLE cpuhandle = video->dxsrvheap->GetCPUDescriptorHandleForHeapStart();
-        cpuhandle.ptr += video->srvlast;
+        cpuhandle.ptr += offset;
         video->dxdevice->CreateShaderResourceView(m_resource, &srv_desc, cpuhandle);
 
-
-        m_srvoffset = video->srvlast;
+        m_srvoffset = offset;
         m_gpudesc = video->dxsrvheap->GetGPUDescriptorHandleForHeapStart();
-        m_gpudesc.ptr += m_srvoffset;
+        m_gpudesc.ptr += offset;
         m_size = size;
         m_format = SDL_PIXELFORMAT_RGBA32;
-
-        video->srvlast += video->srvheap_increment;
     }
 }
 
 void sre_d3d12texture::free(sre_d3d12* video)
 {
-    video->srvfreelist.insert(m_srvoffset);
+    video->srvfree(m_srvoffset);
 }
 
 bool sre_d3d12texture::update(const void* pixels, int pitch)
@@ -1247,13 +1289,13 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         D3D12_CPU_DESCRIPTOR_HANDLE cpu = inst->dxsrvheap->GetCPUDescriptorHandleForHeapStart();
         D3D12_GPU_DESCRIPTOR_HANDLE gpu = inst->dxsrvheap->GetGPUDescriptorHandleForHeapStart();
 
-        cpu.ptr += inst->srvlast;
-        gpu.ptr += inst->srvlast;
+        UINT offs = inst->srvallocate();
+
+        cpu.ptr += offs;
+        gpu.ptr += offs;
 
         *ocpu = cpu;
         *ogpu = gpu;
-
-        inst->srvlast += inst->srvheap_increment;
     }
 
     static void imgui_srvfree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu)
