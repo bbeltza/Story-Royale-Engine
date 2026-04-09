@@ -16,32 +16,9 @@
     using sre_rect2Dut = sre::rect2Dut;
     using sre_rect2Di = sre::rect2Di;
 #else
-    #include <Datatypes/CVector.h>
-    SRE_VEC2MAKE(sre_unit, ut);
-
-    typedef struct
-    {
-        sre_u8 r;
-        sre_u8 g;
-        sre_u8 b;
-        sre_u8 a;
-    } sre_col4;
-
-    typedef union
-    {
-        struct
-        {
-            sre_unit x;
-            sre_unit y;
-            sre_unit w;
-            sre_unit h;
-        };
-        struct
-        {
-            sre_vec2ut position;
-            sre_vec2ut size;
-        };
-    } sre_rect2Dut;
+    #include <Datatypes/CRect.h>
+    #include <Datatypes/CColor.h>
+    SRE_RECT2DMAKE(sre_unit, ut);
     typedef SDL_Rect sre_rect2Di;
 #endif
 

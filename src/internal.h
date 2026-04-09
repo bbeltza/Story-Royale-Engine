@@ -8,7 +8,7 @@
 #include <ints.h>
 
 SRE_CAPI_BEGIN
-	struct sre_videodriver;
+	struct sre_RenderInterface;
 
 	struct _win_settings
 	{
@@ -73,11 +73,14 @@ SRE_CAPI_BEGIN
 		
 		// Renderer data
 		
-		struct sre_videodriver* video;
+		struct sre_RenderInterface* video;
+		void (*video_quit)(struct sre_RenderInterface* interface);
 
 		SDL_cond* render_cond;
 		SDL_mutex* render_mutex;
 		int osize_x, osize_y;
+		sre_unit vsize_x, vsize_y;
+		sre_unit vcenter_x, vcenter_y;
 
 		// Audio data
 
@@ -103,7 +106,8 @@ SRE_CAPI_BEGIN
 		sre_unit mouse_x, mouse_y;
 		sre_u16 mouse_press;
 		sre_u16 mouse_framepress;
-		sre_unit scale_ratio; /* 1 / video->scale */
+		sre_unit scale;
+		sre_unit scale_ratio; /* 1 / engine.scale */
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 		sre_u8 keyboard_framestate[SDL_NUM_SCANCODES / 8];
 

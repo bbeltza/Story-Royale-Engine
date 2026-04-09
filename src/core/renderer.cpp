@@ -1,8 +1,8 @@
-#include "../internal.h"
-#include "drivers/drivers.h"
-
+#include <Core/Render.h>
 #include <Core/Texture.hpp>
 #include <Core/Runtime.hpp>
+
+#include "../internal.h"
 
 #include <ECS/Scene.hpp>
 #include <GUI/Object.hpp>
@@ -17,83 +17,66 @@
 
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
-VIDEOINIT_DEF(opengl)				\
-VIDEOINIT_DEF(d3d12)				\
+//VIDEOINIT_DEF(opengl)				\
+//VIDEOINIT_DEF(d3d12)				\
+//VIDEOINIT_DEF(d3d11)				\
 //VIDEOINIT_DEF(softwarerender)
 
-#define VIDEOINIT_DEF(x) extern "C" bool sre##x##_init(sre_videodriver* video, SDL_Window* window);
+#define VIDEOINIT_DEF(x) extern "C" const sre::RenderDriverData sre##x;
 VIDEO_DRIVERS
-
 #undef VIDEOINIT_DEF
-#define VIDEOINIT_DEF(x) sre##x##_init,
-static const sre_videoinit_func video_drivers[] = {
+
+#define VIDEOINIT_DEF(x) sre##x,
+static const sre::RenderDriverData video_drivers[] = {
 	VIDEO_DRIVERS
 };
 
+namespace sre
+{
+	class CoreRenderer
+	{
+		public:
+			static inline bool set_viewport(int w, int h, sre::unit scale) { return engine.video->set_viewportstate(w, h, scale); }
+			
+			static inline void render(float bg[3], sre::vec2ut camoffset);
+	};
+}
+
 void __cleanup_renderer()
 {
-	engine.video->interface->quit(engine.video);
+	engine.video_quit(engine.video);
+	/*
 	delete[] engine.video->texture_fl;
 	delete[] engine.video->clipstack_base;
 	operator delete (engine.video->textures);
 	operator delete (engine.video);
+	*/
 
 	engine.video = NULL;
 }
 
 void __setup_renderer()
 {
-	engine.video = static_cast<sre_videodriver*>(operator new(sizeof(sre_videodriver)));
-	memset(static_cast<void*>(engine.video), 0, sizeof(sre_videodriver));
-
 	enum sre_RenderDrivers
 	{
 		SRE_RENDERDRIVER_SDLRENDERER,
-		SRE_RENDERDRIVER_OPENGL,
 
-#if _WIN32 && 01
-		SRE_RENDERDRIVER_DIRECTX12,
-		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX12
-#elif !defined(ANDROID) && 01
-        SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL
-#else
-        SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_SDLRENDERER
-#endif
+		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_SDLRENDERER
 	};
 
-	const sre_videoinit_func init_driver = video_drivers[SRE_RENDERDRIVER_DEFAULT];
-	if (!init_driver(engine.video, engine.sdl_windowhndl))
+	auto driverdata = video_drivers[SRE_RENDERDRIVER_DEFAULT];
+	assert(driverdata.initialize != NULL);
+	assert(driverdata.destroy != NULL);
+	assert(driverdata.texture_size >= sizeof(int));
+
+	engine.video_quit = driverdata.destroy;
+	engine.video = driverdata.initialize(engine.sdl_windowhndl);
+
+	if (!engine.video)
 	{
 		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
 		exit(-1);
 	}
-
-	#define PFN_CHECK(i,x) if (i->x == nullptr) { sre::log<sre::LOGCATEGORY_ERROR>("Video driver error: '" #x "' interface function is missing. Please implement it"); } (void)0
-	const sre_videodriverInterface* interface = engine.video->interface; assert(interface != NULL);
-
-	PFN_CHECK(interface, quit);
-	PFN_CHECK(interface, present);
-	PFN_CHECK(interface, vsync);
-	PFN_CHECK(interface, blend);
-
-	PFN_CHECK(interface, tex_create);
-	PFN_CHECK(interface, tex_update);
-	PFN_CHECK(interface, tex_destroy);
-	PFN_CHECK(interface, tex_size);
-	PFN_CHECK(interface, tex_format);
-	assert(engine.video->texture_size >= sizeof(int));	
-	
-	PFN_CHECK(interface, draw_clear);
-	PFN_CHECK(interface, draw_clip);
-
-	PFN_CHECK(interface, draw_fill);
-	PFN_CHECK(interface, draw_lines);
-	PFN_CHECK(interface, draw_rect);
-	PFN_CHECK(interface, draw_rrect);
-	PFN_CHECK(interface, draw_texture);
-	PFN_CHECK(interface, draw_rtexture);	
-	
-	interface->blend(engine.video, SRE_BLEND_DEFAULT);
 
 #ifndef IMGUI_DISABLE
 	const sre_videodriverImGuiInterface* imgui = engine.video->imgui;
@@ -126,18 +109,6 @@ void __setup_renderer()
 	}
 #endif
 
-	engine.video->textures = new sre::byte[SRE_TEXTURE_BASECOUNT * engine.video->texture_size] {};
-	engine.video->texture_fl = new sre::u32[SRE_TEXTURE_BASECOUNT] {};
-		
-	engine.video->textures_capacity = SRE_TEXTURE_BASECOUNT;
-	engine.video->texture_flcapacity = SRE_TEXTURE_BASECOUNT;
-
-	engine.video->clipstack_base = new sre::rect2Dut[SRE_TEXTURE_BASECOUNT]; // I think I'll make both textures and clip rect stacks start with the same size
-	engine.video->clipstack_size = SRE_TEXTURE_BASECOUNT;
-
-	interface->vsync(engine.video, 1);
-	engine.video->scale = 1;
-
 	engine.render_mutex = SDL_CreateMutex();
 	engine.render_cond = SDL_CreateCond();
 }
@@ -153,7 +124,7 @@ void __update_viewport(int w, int h)
 	}
 	else
 	{
-		integer_scale = static_cast<int>(engine.video->scale);
+		integer_scale = static_cast<int>(engine.scale);
 	}
 
 	sre::unit scale = static_cast<sre::unit>(integer_scale);
@@ -164,21 +135,19 @@ void __update_viewport(int w, int h)
 	engine.osize_x = w;
 	engine.osize_y = h;
 	engine.scale_ratio = 1 / scale;
-	engine.video->scale = scale;
-	engine.video->size = size;
-	engine.video->center = center;
+	engine.scale = scale;
+	engine.vsize_x = size.x;
+	engine.vsize_y = size.y;
+	engine.vcenter_x = center.y;
+	engine.vcenter_y = center.y;
 
-	auto interface = engine.video->interface;
-	if (interface->viewport)
-		interface->viewport(engine.video, w, h);
+	sre::CoreRenderer::set_viewport(w, h, scale);
 }
 
 void __display_render()
 {
 	if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN)
 		return;
-
-	auto interface = engine.video->interface;
 
 #ifndef IMGUI_DISABLE
 	auto imgui = engine.video->imgui;
@@ -196,9 +165,12 @@ void __display_render()
 
 	// Render current world
 
+	float bg[3];
 	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
 	{
-		engine.video->camera = current->camera.processed_position();
+		bg[0] = current->background.r / 255.0f;
+		bg[1] = current->background.g / 255.0f;
+		bg[2] = current->background.b / 255.0f;
 
 		//// Aliases for the background and the foreground (kind of old)
 		const sre::col4& fg = current->foreground;
@@ -217,7 +189,6 @@ void __display_render()
 	#endif
 
 		//// Clearing the screen with the background color
-		interface->draw_clear(engine.video, &current->background);
 
 		sre::beforeRender.fire();
 
@@ -227,19 +198,19 @@ void __display_render()
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
-			interface->draw_fill(engine.video, reinterpret_cast<const sre_DDFill*>(&fg));
+			engine.video->draw1(0, { {  } });
 	}
 	else
 	{
-		engine.video->camera.x = 0;
-		engine.video->camera.y = 0;
-
 		#if 0 // Debug easier on black backgrounds
-			sre::col4 col{50, 50, 50};
+			bg[0] = 0.3f;
+			bg[1] = 0.3f;
+			bg[2] = 0.3f;
 		#else
-			sre::col4 col = sre::BLACK;
+			bg[0] = 0.0f;
+			bg[1] = 0.0f;
+			bg[2] = 0.0f;
 		#endif
-		interface->draw_clear(engine.video, &col);
 		sre::beforeRender.fire();
 	}
 
@@ -248,10 +219,28 @@ void __display_render()
 
 	sre::afterRender.fire();
 
-#ifndef IMGUI_DISABLE
+	sre::CoreRenderer::render(bg,
+		engine.current_world ? sre::vec2ut{ engine.vcenter_x, engine.vcenter_y } - currscn->camera.processed_position() : 0);
+}
+
+void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
+{
+	engine.video->clear(bg);
+	engine.video->set_camerastate(camoffset.x, camoffset.y);
+	
+	// Perform flushes
+		for (auto& queue : engine.video->m_renderqueues)
+		{
+			
+		}
+		engine.video->m_renderqueues.clear();
+	//
+
+	#ifndef IMGUI_DISABLE
 	ImGui::Render();
 	if (imgui)
 		imgui->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
-#endif
-	interface->present(engine.video);
+	#endif
+
+	engine.video->present();
 }

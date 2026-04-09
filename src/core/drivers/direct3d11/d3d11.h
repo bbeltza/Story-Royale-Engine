@@ -18,7 +18,7 @@ namespace sred3d11
 
         protected:
             // Instance drawing functions
-            virtual void flush_queueinstances1(const sre::RI1Texture* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::flags32 flags) {}
+            virtual void flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::flags32 flags) {}
             virtual void flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::flags32 flags) {}
     
             virtual void present() {}
