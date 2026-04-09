@@ -64,9 +64,11 @@ struct SDL_Window;
         size_t texture_size;
     } sre_RenderDriverData;
 
+    SRE_CAPI_BEGIN
     // You must use these functions to properly initialize and destroy the rendering interface if you're using the C API
     void sre_RenderInterface_constructor(sre_RenderInterface* interface);
     void sre_RenderInterface_destructor(sre_RenderInterface* interface);
+    SRE_CAPI_END
 
 #else
     #include <Core/Draw.hpp> // Only for drawBlending, removing soon
@@ -119,6 +121,13 @@ struct SDL_Window;
             template <size_t n>
             void draw1(sre::flags32 flags, const RenderInstance1 (&instances)[n], Sampler*const (&samplers)[n]={NULL}) { draw1(flags, instances, n, samplers); }
 
+            template <size_t n>
+            void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&points)[n]) { return draw2(flags, color, points, n); }
+
+            // Create a "sampler", it's a piece of texture that can get rendered
+            // It replaces the current textures
+            Sampler sampler(pixelFormat format, int x, int y);
+
             protected: // Full interface
                 // Instance drawing functions
                 virtual void flush_queueinstances1(Sampler*const* inst_textures, const RenderInstance1* instances, size_t instance_count, sre::flags32 flags) = 0;
@@ -137,6 +146,16 @@ struct SDL_Window;
                 virtual bool update_texture(Sampler* texture, const void* pixels, int pitch=0) = 0;
                 virtual bool query_texture(Sampler* texture, sre::vec2i& size, pixelFormat* format) = 0;
             private:
+                RenderInterface();
+                ~RenderInterface();
+
+                char* textures;
+                size_t* textures_fl;
+                size_t textures_size;
+                size_t textures_capacity;
+                size_t textures_flsize;
+                size_t textures_flcapacity;
+
                 std::vector<Sampler*> m_texturecache;
                 std::vector<RenderInstance1> m_rinst1cache;
                 std::vector<sre::byte> m_rinst2cache; // sre::byte to be more like a point buffer. RenderInstance2's size varies
