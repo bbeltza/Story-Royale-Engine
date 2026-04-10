@@ -75,6 +75,7 @@ SRE_CAPI_BEGIN
 		
 		struct sre_RenderInterface* video;
 		void (*video_quit)(struct sre_RenderInterface* interface);
+		size_t video_tsize;
 
 		SDL_cond* render_cond;
 		SDL_mutex* render_mutex;

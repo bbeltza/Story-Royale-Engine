@@ -1,10 +1,35 @@
-#include <Core/Texture.h>
+#include <Core/Render.h>
 #include <Core/Defer.h>
 
-#include "drivers/drivers.h"
+
 #include "../internal.h"
 
 #include <utils/mem.h>
+
+sre_Sampler* sre_RI_sampler(sre_RenderInterface* render, sre_pixelFormat formathint, int w, int h)
+{
+    sre_Sampler* sampler;
+
+    if (render->_textures_flsize)
+    {
+        sampler = render->_textures_fl[--render->_textures_flsize];
+    }
+    else
+    {
+        
+    }
+
+    render->vftptr->setup_texture(render, sampler, formathint, w, h);
+    return sampler;
+}
+
+void sre_RI_samplerdestroy(sre_RenderInterface* render, sre_Sampler* sampler)
+{
+
+}
+
+bool sre_RI_samplerupdate(sre_RenderInterface* render, sre_Sampler* sampler, const void* pixels, int pitch);
+bool sre_RI_samplerquery(sre_RenderInterface* render, sre_Sampler* sampler, int size[2], sre_pixelFormat* format);
 
 size_t sre_isinfreelist(sre_Texture id)
 {

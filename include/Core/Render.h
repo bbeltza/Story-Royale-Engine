@@ -54,6 +54,13 @@ struct SDL_Window;
     typedef struct sre_RenderInterface
     {
         const struct _sre_RenderInterfacevft* vftptr;
+
+        void* _textures; // Arena structure
+        sre_Sampler** _textures_fl;
+        size_t _textures_flsize;
+        size_t _textures_flcapacity;
+
+        void* _vector_data1[3][4];
     } sre_RenderInterface;
     extern sre_RenderInterface* sre_getrenderer();
 
@@ -126,7 +133,11 @@ struct SDL_Window;
 
             // Create a "sampler", it's a piece of texture that can get rendered
             // It replaces the current textures
-            Sampler sampler(pixelFormat format, int x, int y);
+            inline Sampler* sampler(pixelFormat format, int x, int y);
+            inline void sampler(Sampler* sampler_todestroy);
+            inline bool sampler_update(Sampler* sampler, const void* pixels, int pitch);
+            inline bool sampler_query(Sampler* sampler, sre::vec2i& size, pixelFormat& format);
+
 
             protected: // Full interface
                 // Instance drawing functions
@@ -149,10 +160,8 @@ struct SDL_Window;
                 RenderInterface();
                 ~RenderInterface();
 
-                char* textures;
-                size_t* textures_fl;
-                size_t textures_size;
-                size_t textures_capacity;
+                void* textures; // Arena structure
+                sre_Sampler** textures_fl;
                 size_t textures_flsize;
                 size_t textures_flcapacity;
 
@@ -177,6 +186,18 @@ struct SDL_Window;
 
     #define sre_RenderInterface sre::RenderInterface
 
+#endif
+
+    sre_Sampler* sre_RI_sampler(sre_RenderInterface* render, sre_pixelFormat formathint, int w, int h);
+    void sre_RI_samplerdestroy(sre_RenderInterface* render, sre_Sampler* sampler);
+    bool sre_RI_samplerupdate(sre_RenderInterface* render, sre_Sampler* sampler, const void* pixels, int pitch);
+    bool sre_RI_samplerquery(sre_RenderInterface* render, sre_Sampler* sampler, int size[2], sre_pixelFormat* format);
+
+#ifdef __cplusplus
+    sre::Sampler* sre::RenderInterface::sampler(pixelFormat formathint, int w, int h) { return sre_RI_sampler(this, static_cast<sre_pixelFormat>(formathint), w, h); }
+    void sre::RenderInterface::sampler(sre::Sampler* sampler_todestroy) { sre_RI_samplerdestroy(this, sampler_todestroy); }
+    bool sre::RenderInterface::sampler_update(sre::Sampler* sampler, const void* pixels, int pitch) { return sre_RI_samplerupdate(this, sampler, pixels, pitch); }
+    bool sre::RenderInterface::sampler_query(sre::Sampler* sampler, sre::vec2i& size, sre::pixelFormat& format) { return sre_RI_samplerquery(this, sampler, &size.x, reinterpret_cast<sre_pixelFormat*>(&format)); }
 #endif
 
 #endif
