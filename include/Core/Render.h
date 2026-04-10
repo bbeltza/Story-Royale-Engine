@@ -49,6 +49,7 @@ struct SDL_Window;
         bool (*const setup_texture)(void*, sre_Sampler* texture, sre_pixelFormat format, int w, int h);
         bool (*const update_texture)(void*, sre_Sampler* texture, const void* pixels, int pitch);
         bool (*const query_texture)(void*, sre_Sampler* texture, int size[2], sre_pixelFormat* format);
+        bool (*const destroy_texture)(void*, sre_Sampler* texture);
     };
 
     typedef struct sre_RenderInterface
@@ -156,6 +157,7 @@ struct SDL_Window;
                 virtual bool setup_texture(Sampler* texture, pixelFormat format, int x, int y) = 0;
                 virtual bool update_texture(Sampler* texture, const void* pixels, int pitch=0) = 0;
                 virtual bool query_texture(Sampler* texture, sre::vec2i& size, pixelFormat* format) = 0;
+                virtual bool destroy_texture(Sampler* texture) = 0;
             private:
                 RenderInterface();
                 ~RenderInterface();
