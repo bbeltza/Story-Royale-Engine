@@ -1,5 +1,6 @@
 #include <Core/Display.hpp>
 #include <Core/Defer.hpp>
+#include <Core/Render.h>
 #include "../internal.h"
 
 
@@ -30,4 +31,20 @@ void sre::display_autoscale_off()
 {
     engine.auto_scalex = 0;
     engine.auto_scaley = 0;
+}
+
+namespace sre
+{
+    class CoreRenderer
+    {
+        public:
+            static void vsync(bool enable) { engine.video->set_vsync(enable); }
+    };
+}
+
+void sre::display_vsync(bool enable)
+{
+    sre_defer([](void* enable) { 
+        CoreRenderer::vsync(enable != NULL);
+     }, reinterpret_cast<void*>(enable));
 }

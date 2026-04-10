@@ -2,7 +2,7 @@
 #include <SDL_ttf.h>
 #include <standard>
 
-#include <Core/Texture.hpp>
+#include <Base/Sampler.hpp>
 #include <Datatypes/Rect.hpp>
 #include <Datatypes/Color.hpp>
 
@@ -33,7 +33,7 @@ namespace sre
 
         std::vector<std::string> linebuf;
 
-        std::array<Texture, 127> ascii; // Fast access ascii texture table
-        std::unordered_map<int, Texture> unicode;
+        std::array<RSampler, 127> ascii; // Fast access ascii texture table
+        std::unordered_map<int, RSampler> unicode;
     };
 }

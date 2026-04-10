@@ -1,5 +1,4 @@
 #include <Core/Render.h>
-#include <Core/Texture.hpp>
 #include <Core/Runtime.hpp>
 
 #include "../internal.h"

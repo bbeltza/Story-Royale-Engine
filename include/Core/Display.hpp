@@ -13,6 +13,7 @@ namespace sre
     bool display_setscale(int scale); // Set display scale
     void display_autoscale_on(int target_w, int target_h); // Set automatic scaling, targeting a resolution
     void display_autoscale_off(); // Disable automatic scaling
+    void display_vsync(bool enable); // Deferred renderer vsync wrapper
 }
 
 #endif

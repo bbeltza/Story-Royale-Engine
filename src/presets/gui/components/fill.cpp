@@ -1,6 +1,6 @@
 #include <GUI/Components/Fill.hpp>
 
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 
 using namespace sreGUI;
 

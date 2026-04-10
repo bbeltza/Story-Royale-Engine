@@ -1,5 +1,3 @@
-#include <Core/Draw.hpp>
-
 #include <ECS/Entity.hpp>
 #include <ECS/Scene.hpp>
 
@@ -7,9 +5,9 @@
 
 using namespace sreECS;
 
-void Sprite::attach(sre::Texture& texture)
+void Sprite::attach(sre::RSampler&& texture)
 {
-    textures.push_back(&texture);
+    textures.push_back(std::move(texture));
 }
 
 void Sprite::on_render(Entity& entity)
@@ -18,8 +16,11 @@ void Sprite::on_render(Entity& entity)
 
     auto frame = ut_min(current_frame, textures.size() - 1);
     current_frame = frame;
-    const sre::Texture& texture = *textures[frame];
-    sre::vec2i texture_size = texture.size();
+
+    auto renderer = sre::get_renderer();
+    sre::RSampler& texture = textures[frame];
+    sre::vec2i texture_size;
+    renderer->sampler_query(texture, &texture_size, NULL);
 
     if (region.size.x)
         texture_size.x = region.size.x;
@@ -31,17 +32,31 @@ void Sprite::on_render(Entity& entity)
         entity.position + offset,
         texture_size * scale
     );
-    sre::s32 flags = SRE_DRAWFLAGS_USECAM | (render_rect.size.x < 0 ? SRE_DRAWFLAGS_FLIPX : 0) | (render_rect.size.y < 0 ? SRE_DRAWFLAGS_FLIPY : 0);
+    sre::s32 flags = SRE_DRAWFLAGS_USECAM;
+    bool flipx = render_rect.size.x < 0;
+    bool flipy = render_rect.size.y < 0;
     render_rect.size = render_rect.size.abs();
 
-    sre::draw(sre::DDTexture{
+    sre::vec2f uv{
+        region.size.x / texture_size.x * (flipx ? -1.0f : 1.0f),
+        region.size.y / texture_size.y * (flipy ? -1.0f : 1.0f)
+    };
+
+    renderer->draw1(
         flags,
-        modulate,
-        render_rect,
-        sre::vec2ut::CENTER,
-        texture.handle(),
-        region
-    });
+        {sre::RenderInstance1{
+            render_rect,
+            sre::vec2ut::CENTER,
+            modulate,
+            0,
+            uv,
+            {
+                region.position.x / (float)texture_size.x - (flipx ? uv.x : 0.0f),
+                region.position.y / (float)texture_size.y - (flipy ? uv.y : 0.0f)
+            }
+        }},
+        {texture.operator sre::Sampler *()}
+    );
 }
 
 #ifndef IMGUI_DISABLE

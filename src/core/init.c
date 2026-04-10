@@ -2,8 +2,6 @@
 #include <SDL_image.h>
 #include "../internal.h"
 
-#include "drivers/drivers.h"
-
 #include <Entry.h>
 
 #include <stdlib.h>

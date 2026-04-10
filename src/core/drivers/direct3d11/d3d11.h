@@ -18,21 +18,22 @@ namespace sred3d11
 
         protected:
             // Instance drawing functions
-            virtual void flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::flags32 flags) {}
-            virtual void flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::flags32 flags) {}
-    
-            virtual void present() {}
-            virtual bool clear(float color[3]) { return false; }
+            virtual void flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::flags32 flags) override {}
+            virtual void flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::flags32 flags) override {}
+            
+            virtual void present() override {}
+            virtual bool clear(float color[3]) override { return false; }
     
             // State functions
-            virtual bool set_viewportstate(int w, int h, sre::unit scale) { return false; }
-            virtual bool set_blendstate(sre::drawBlending blending) { return false; }
-            virtual bool set_camerastate(sre::unit x, sre::unit y) { return false; }
+            virtual bool set_viewportstate(int w, int h, sre::unit scale) override { return false; }
+            virtual bool set_blendstate(sre::blendMode blending) override { return false; }
+            virtual bool set_camerastate(sre::unit x, sre::unit y) override { return false; }
                 
             // Texture functions
-            virtual bool setup_texture(sre::Sampler* texture, sre::pixelFormat format, int x, int y) { return false; }
-            virtual bool update_texture(sre::Sampler* texture, const void* pixels, int pitch=0) { return false; }
-            virtual bool query_texture(sre::Sampler* texture, sre::vec2i& size, sre::pixelFormat* format) { return false; }
+            virtual bool setup_texture(sre::Sampler* texture, sre::pixelFormat format, int x, int y) override { return false; }
+            virtual bool update_texture(sre::Sampler* texture, const void* pixels, int pitch=0) override { return false; }
+            virtual bool query_texture(sre::Sampler* texture, sre::vec2i* size, sre::pixelFormat* format) override { return false; }
+            virtual bool destroy_texture(sre::Sampler* texture) override { return false; }
     };
 };
 

@@ -6,14 +6,23 @@
 typedef struct sre_Sampler sre_Sampler;
 typedef enum sre_pixelFormat sre_pixelFormat;
 
+typedef enum sre_blendMode
+{
+    SRE_BLEND_NONE,
+    SRE_BLEND_BLEND,
+    SRE_BLEND_ADD,
+    SRE_BLEND_MOD,
+    SRE_BLEND_MUL
+} sre_blendMode;
+
 struct SDL_Window;
 
 #ifndef __cplusplus
-    #include <Core/Draw.h> // Same as in C++, blend modes
     #include <Datatypes/CRect.h>
     #include <Datatypes/CColor.h>
+    #include <Datatypes/Units.h>
 
-    //SRE_RECT2DMAKE(sre_unit, ut);
+    SRE_RECT2DMAKE(sre_unit, ut);
     SRE_VEC2MAKE(float, f);
 
     typedef struct sre_RenderInstance1
@@ -41,10 +50,11 @@ struct SDL_Window;
 
         void (*const present)(void*);
         bool (*const clear)(void*, float color[3]);
-
+        
         bool (*const set_viewportstate)(void*, int w, int h, sre_unit scale);
-        bool (*const set_blendstate)(void*, sre_DrawBlending blending);
+        bool (*const set_blendstate)(void*, sre_blendMode blending);
         bool (*const set_camerastate)(void*, sre_unit x, sre_unit y);
+        void (*const set_vsync)(void*, bool enable);
 
         bool (*const setup_texture)(void*, sre_Sampler* texture, sre_pixelFormat format, int w, int h);
         bool (*const update_texture)(void*, sre_Sampler* texture, const void* pixels, int pitch);
@@ -79,7 +89,6 @@ struct SDL_Window;
     SRE_CAPI_END
 
 #else
-    #include <Core/Draw.hpp> // Only for drawBlending, removing soon
     #include <Datatypes/Rect.hpp>
     #include <Datatypes/Color.hpp>
     #include <Datatypes/Flags.hpp>
@@ -89,6 +98,7 @@ struct SDL_Window;
     namespace sre
     {
         using Sampler = sre_Sampler;
+        using blendMode = sre_blendMode;
         enum pixelFormat;
 
         struct RenderInstance1 // Render instance for all rectangle draw calls
@@ -137,7 +147,7 @@ struct SDL_Window;
             inline Sampler* sampler(pixelFormat format, int x, int y);
             inline void sampler(Sampler* sampler_todestroy);
             inline bool sampler_update(Sampler* sampler, const void* pixels, int pitch);
-            inline bool sampler_query(Sampler* sampler, sre::vec2i& size, pixelFormat& format);
+            inline bool sampler_query(Sampler* sampler, sre::vec2i* size, pixelFormat* format);
 
 
             protected: // Full interface
@@ -150,17 +160,19 @@ struct SDL_Window;
 
                 // State functions
                 virtual bool set_viewportstate(int w, int h, sre::unit scale) = 0;
-                virtual bool set_blendstate(drawBlending blending) = 0;
+                virtual bool set_blendstate(blendMode blending) = 0;
                 virtual bool set_camerastate(sre::unit x, sre::unit y) = 0;
+                virtual void set_vsync(bool enable);
                 
                 // Texture functions
                 virtual bool setup_texture(Sampler* texture, pixelFormat format, int x, int y) = 0;
-                virtual bool update_texture(Sampler* texture, const void* pixels, int pitch=0) = 0;
-                virtual bool query_texture(Sampler* texture, sre::vec2i& size, pixelFormat* format) = 0;
+                virtual bool update_texture(Sampler* texture, const void* pixels, int pitch) = 0;
+                virtual bool query_texture(Sampler* texture, sre::vec2i* size, pixelFormat* format) = 0;
                 virtual bool destroy_texture(Sampler* texture) = 0;
-            private:
+                
                 RenderInterface();
                 ~RenderInterface();
+            private:
 
                 void* textures; // Arena structure
                 sre_Sampler** textures_fl;
@@ -199,7 +211,7 @@ struct SDL_Window;
     sre::Sampler* sre::RenderInterface::sampler(pixelFormat formathint, int w, int h) { return sre_RI_sampler(this, static_cast<sre_pixelFormat>(formathint), w, h); }
     void sre::RenderInterface::sampler(sre::Sampler* sampler_todestroy) { sre_RI_samplerdestroy(this, sampler_todestroy); }
     bool sre::RenderInterface::sampler_update(sre::Sampler* sampler, const void* pixels, int pitch) { return sre_RI_samplerupdate(this, sampler, pixels, pitch); }
-    bool sre::RenderInterface::sampler_query(sre::Sampler* sampler, sre::vec2i& size, sre::pixelFormat& format) { return sre_RI_samplerquery(this, sampler, &size.x, reinterpret_cast<sre_pixelFormat*>(&format)); }
+    bool sre::RenderInterface::sampler_query(sre::Sampler* sampler, sre::vec2i* size, sre::pixelFormat* format) { return sre_RI_samplerquery(this, sampler, &size->x, reinterpret_cast<sre_pixelFormat*>(format)); }
 #endif
 
 #endif

@@ -5,7 +5,7 @@
 #include <Datatypes/Color.hpp>
 
 #include <Base/File.hpp>
-#include <Core/Texture.hpp>
+#include <Base/Sampler.hpp>
 
 namespace sreECS
 {
@@ -30,11 +30,11 @@ namespace sreECS
 
         sre::size_t current_frame = 0;
 
-        void attach(sre::Texture&);
+        void attach(sre::RSampler&&);
     private:
         void on_render(Entity&) override;
 
-        std::vector<sre::Texture*> textures;
+        std::vector<sre::RSampler> textures;
 
         void ImGuiUpdate();
     };

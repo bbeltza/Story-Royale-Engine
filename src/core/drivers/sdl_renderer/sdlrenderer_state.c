@@ -12,9 +12,20 @@ bool sresdlrenderer_set_viewportstate(sresdlrenderer_interface* inst, int w, int
     return true;
 }
 
-bool sresdlrenderer_set_blendstate(sresdlrenderer_interface* inst, sre_DrawBlending blending)
+bool sresdlrenderer_set_blendstate(sresdlrenderer_interface* inst, sre_blendMode blending)
 {
-    return SDL_SetRenderDrawBlendMode(inst->renderer, blending) == 0;
+    SDL_BlendMode mode;
+    switch (blending)
+    {
+        case SRE_BLEND_NONE: mode = SDL_BLENDMODE_NONE; break;
+        case SRE_BLEND_BLEND: mode = SDL_BLENDMODE_BLEND; break;
+        case SRE_BLEND_ADD: mode = SDL_BLENDMODE_ADD; break;
+        case SRE_BLEND_MOD: mode = SDL_BLENDMODE_MOD; break;
+        case SRE_BLEND_MUL: mode = SDL_BLENDMODE_MUL; break;
+        default: return false;
+    }
+
+    return SDL_SetRenderDrawBlendMode(inst->renderer, mode) == 0;
 }
 
 bool sresdlrenderer_set_camerastate(sresdlrenderer_interface* inst, sre_unit x, sre_unit y)
@@ -26,4 +37,9 @@ bool sresdlrenderer_set_camerastate(sresdlrenderer_interface* inst, sre_unit x, 
 
     // Surely storing the state somewhere
     return true;
+}
+
+void sresdlrenderer_set_vsync(sresdlrenderer_interface* inst, bool enable)
+{
+    SDL_RenderSetVSync(inst->renderer, enable);
 }

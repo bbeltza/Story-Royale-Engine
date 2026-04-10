@@ -8,6 +8,7 @@ const struct _sre_RenderInterfacevft sresdlrenderer_vft = {
     sresdlrenderer_set_viewportstate,
     sresdlrenderer_set_blendstate,
     sresdlrenderer_set_camerastate,
+    sresdlrenderer_set_vsync,
     sresdlrenderer_setup_texture,
     sresdlrenderer_update_texture,
     sresdlrenderer_query_texture

@@ -1,5 +1,6 @@
 #include <Base/Font.hpp>
 #include <Base/File.hpp>
+#include <Base/Image.hpp>
 
 using namespace sre;
 
@@ -27,7 +28,7 @@ Font::Font(const sre::File& file, int pt)
             char str[2] = { static_cast<char>(code + 1), '\0' };
 
             auto& tex = ascii.at(code);
-            tex = sre::Image{TTF_RenderUTF8_Solid(m_font, str, sre::WHITE.toSDL())};
+            tex = sre::Image{TTF_RenderUTF8_Solid(m_font, str, sre::WHITE.toSDL())}.to_sampler();
         }
     //
     return;

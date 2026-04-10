@@ -1,5 +1,6 @@
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 #include <Base/Font.hpp>
+#include <Base/Image.hpp>
 
 using namespace sre;
 
@@ -105,11 +106,11 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
         if (n >= scount)
             break;
         
-        Texture* texture;
+        Sampler* texture;
 
         if (text[n] > 0)
         {
-            texture = &ascii.at(text[n] - 1);
+            texture = ascii.at(text[n] - 1);
             n++;
         }
         else
@@ -120,20 +121,26 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
 
             codepoint = *reinterpret_cast<int*>(utf8);
             if (unicode.find(codepoint) == unicode.end())
-                unicode.emplace(codepoint, sre::Image{TTF_RenderUTF8_Solid(m_font, utf8, sre::WHITE.toSDL())});
+                unicode.emplace(codepoint, sre::Image{TTF_RenderUTF8_Solid(m_font, utf8, sre::WHITE.toSDL())}.to_sampler());
             
-            texture = &unicode.at(codepoint);
+            texture = unicode.at(codepoint);
         }
-        render_rect.size = sre::vec2ut{texture->size()};
 
-        draw(DDTexture{
-            0,
-            color,
-            render_rect,
-            sre::vec2ut::ZERO,
-            texture->handle(),
-            { 0, 0, 0, 0 }
-        });
+        sre::vec2i tsize;
+        sre::RenderInterface* renderer = sre::get_renderer();
+        renderer->sampler_query(texture, &tsize, NULL);
+        render_rect.size = sre::vec2ut{tsize};
+
+        renderer->draw1(
+            0, {{
+                render_rect,
+                vec2ut::ZERO,
+                color,
+                0,
+                { 1, 1 },
+                { 0, 0 }
+            }}, { texture }
+        );
 
         render_rect.position.x += render_rect.size.x;
     }
