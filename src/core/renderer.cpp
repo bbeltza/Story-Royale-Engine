@@ -94,6 +94,7 @@ void __setup_renderer()
 
 	engine.video_quit = driverdata.destroy;
 	engine.video = driverdata.initialize(engine.sdl_windowhndl);
+	engine.video_tsize = driverdata.texture_size;
 
 	if (!engine.video)
 	{
@@ -161,7 +162,7 @@ void __update_viewport(int w, int h)
 	engine.scale = scale;
 	engine.vsize_x = size.x;
 	engine.vsize_y = size.y;
-	engine.vcenter_x = center.y;
+	engine.vcenter_x = center.x;
 	engine.vcenter_y = center.y;
 
 	sre::CoreRenderer::set_viewport(w, h, scale);
@@ -221,7 +222,7 @@ void __display_render()
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
-			engine.video->draw1(0, { {  } });
+			engine.video->fill(fg);
 	}
 	else
 	{
@@ -243,7 +244,7 @@ void __display_render()
 	sre::afterRender.fire();
 
 	sre::CoreRenderer::render(bg,
-		engine.current_world ? sre::vec2ut{ engine.vcenter_x, engine.vcenter_y } - currscn->camera.processed_position() : 0);
+		sre::vec2ut{ engine.vcenter_x, engine.vcenter_y } - (currscn != NULL ? currscn->camera.processed_position() : 0));
 }
 
 void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
@@ -251,12 +252,37 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 	engine.video->clear(bg);
 	engine.video->set_camerastate(camoffset.x, camoffset.y);
 	
+	engine.video->m_blendmode = -1;
 	// Perform flushes
+		size_t insti1 = 0;
+		size_t insti2 = 0;
 		for (auto& queue : engine.video->m_renderqueues)
 		{
-			
+			if (queue.blendmode != engine.video->m_blendmode)
+				engine.video->set_blendstate(static_cast<sre::blendMode>(queue.blendmode));
+
+			switch (queue.type)
+			{
+			case 1:
+				assert(insti1 + queue.count <= engine.video->m_rinst1cache.size());
+				assert(insti1 + queue.count <= engine.video->m_texturecache.size());
+				engine.video->flush_queueinstances1(&engine.video->m_texturecache.at(insti1),
+													&engine.video->m_rinst1cache.at(insti1),
+													queue.count,
+													queue.flags
+												);
+				insti1 += queue.count;
+				break;
+			default:
+				break;
+			}
 		}
+		engine.video->m_rinst1cache.clear();
+		engine.video->m_rinst2cache.clear();
+		engine.video->m_texturecache.clear();
 		engine.video->m_renderqueues.clear();
+
+		engine.video->m_blendmode = SRE_BLEND_DEFAULT;
 	//
 
 	#ifndef IMGUI_DISABLE
@@ -287,7 +313,24 @@ void sre::RenderInterface::clip_set(sre::rect2Dut zone)
 
 void sre::RenderInterface::draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler*const samplers[])
 {
-
+	m_rinst1cache.insert(m_rinst1cache.end(), instances, instances + instcount);
+	if (samplers)
+		m_texturecache.insert(m_texturecache.end(), samplers, samplers + instcount); // Some textures can be NULL, in this case, either let the driver do the work, or do it ourselves with a basic texture
+	else
+		m_texturecache.insert(m_texturecache.end(), instcount, NULL);
+	
+	auto* back = m_renderqueues.empty() ? NULL : &m_renderqueues.back();
+	if (!back || back->type != 1 || back->flags != flags || back->blendmode != m_blendmode)
+	{
+		m_renderqueues.push_back({
+			instcount,
+			1,
+			m_blendmode,
+			flags
+		});
+	}
+	else
+		back->count+= instcount;
 }
 
 void sre::RenderInterface::draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount)

@@ -37,7 +37,7 @@ void Slice::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* ren
         {centerslice_uv.position.x + centerslice_uv.size.x, centerslice_uv.position.y + centerslice_uv.size.y}
     };
 
-    sre::RenderInstance1 instances[9] = {
+    sre::RenderInstance1 instances[9] = { // Doesn't work for now, `rect` has to be set
         { {dimensions.position, sre::vec2ut{center_slice.position}}, sre::vec2ut::ZERO, modulate, 0,  uvs[0], uvoffsets[0]},
         { {dimensions.position, sre::vec2ut{center_slice.position}}, sre::vec2ut::ZERO, modulate, 0,  uvs[1], uvoffsets[1]},
         { {dimensions.position, sre::vec2ut{center_slice.position}}, sre::vec2ut::ZERO, modulate, 0,  uvs[2], uvoffsets[2]},

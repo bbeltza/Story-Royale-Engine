@@ -14,6 +14,8 @@ typedef struct sresdlrenderer_interface
     sre_RenderInterface inter;
 
     SDL_Renderer* renderer;
+    sre_unit scaling;
+    sre_vec2ut camera;
 } sresdlrenderer_interface;
 
 SRE_CAPI_BEGIN
@@ -33,6 +35,7 @@ void sresdlrenderer_set_vsync(sresdlrenderer_interface* inst, bool enable);
 bool sresdlrenderer_setup_texture(sresdlrenderer_interface* inst, sre_Sampler* texture, sre_pixelFormat format, int w, int h);
 bool sresdlrenderer_update_texture(sresdlrenderer_interface* inst, sre_Sampler* texture, const void* pixels, int pitch);
 bool sresdlrenderer_query_texture(sresdlrenderer_interface* inst, sre_Sampler* texture, int size[2], sre_pixelFormat* format);
+void sresdlrenderer_destroy_texture(sresdlrenderer_interface* inst, sre_Sampler* texture);
 
 SRE_CAPI_END
 

@@ -18,7 +18,9 @@ typedef enum sre_blendMode
     SRE_BLEND_BLEND,
     SRE_BLEND_ADD,
     SRE_BLEND_MOD,
-    SRE_BLEND_MUL
+    SRE_BLEND_MUL,
+
+    SRE_BLEND_DEFAULT = SRE_BLEND_BLEND
 } sre_blendMode;
 
 enum sre_drawFlags
@@ -80,7 +82,7 @@ struct sre_SamplerNew
         bool (SRE_RENDERCALL *const setup_texture)(void*, sre_Sampler* texture, sre_pixelFormat format, int w, int h);
         bool (SRE_RENDERCALL *const update_texture)(void*, sre_Sampler* texture, const void* pixels, int pitch);
         bool (SRE_RENDERCALL *const query_texture)(void*, sre_Sampler* texture, int size[2], sre_pixelFormat* format);
-        bool (SRE_RENDERCALL *const destroy_texture)(void*, sre_Sampler* texture);
+        void (SRE_RENDERCALL *const destroy_texture)(void*, sre_Sampler* texture);
     };
 
     typedef struct sre_RenderInterface
@@ -91,6 +93,8 @@ struct sre_SamplerNew
         sre_Sampler** _textures_fl;
         size_t _textures_flsize;
         size_t _textures_flcapacity;
+
+        short _blendmode;
 
         long long _vector_data1[3][4];
     } sre_RenderInterface;
@@ -166,7 +170,7 @@ struct sre_SamplerNew
             template <size_t n>
             void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&points)[n]) { return draw2(flags, color, points, n); }
 
-            void fill(sre::col4 color) { draw1(0, {{ {0, FLT_MAX}, 0, color }}); }
+            void fill(sre::col4 color) { draw1(0, {{ {0, 65536}, 0, color }}); }
 
             // Create a "sampler", it's a piece of texture that can get rendered
             // It replaces the current textures
@@ -204,6 +208,8 @@ struct sre_SamplerNew
                 sre_Sampler** textures_fl;
                 size_t textures_flsize;
                 size_t textures_flcapacity;
+
+                short m_blendmode = SRE_BLEND_DEFAULT;
 
                 std::vector<Sampler*> m_texturecache;
                 std::vector<RenderInstance1> m_rinst1cache;

@@ -28,7 +28,7 @@ void Image::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* ren
             sre::vec2ut::ZERO,
             modulate,
             0,
-            1
+            {1, 1}
         }},
         { texture.operator sre::Sampler *() }
     );

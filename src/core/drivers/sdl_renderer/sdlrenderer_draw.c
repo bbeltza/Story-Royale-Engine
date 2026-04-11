@@ -1,4 +1,5 @@
 #include "sdlrenderer.h"
+#include <assert.h>
 
 bool sresdlrenderer_clear(sresdlrenderer_interface* inst, float color[3])
 {
@@ -21,23 +22,29 @@ void sresdlrenderer_flush_queueinstances1(sresdlrenderer_interface* inst, sre_Sa
 {
     static const uint8_t DRAW1_INDICES[6] = {
         0, 1, 2,
-        2, 3, 0
+        0, 2, 3
     };
 
     for (size_t i = 0; i < instance_count; i++)
     {
         const sre_RenderInstance1* dinst = &instances[i];
+        sre_rect2Dut srect = {
+            (dinst->rectangle.x + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0)) * inst->scaling,
+            (dinst->rectangle.y + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0)) * inst->scaling,
+            dinst->rectangle.w * inst->scaling,
+            dinst->rectangle.h * inst->scaling
+        };
 
         const float interpositions[2] = {
-            dinst->rectangle.x - dinst->anchor.x * dinst->rectangle.w,
-            dinst->rectangle.y - dinst->anchor.y * dinst->rectangle.h,
+            srect.x - dinst->anchor.x * srect.w,
+            srect.y - dinst->anchor.y * srect.h,
         };
 
         const float positions[4*2] = {
             interpositions[0], interpositions[1],
-            interpositions[0] + dinst->rectangle.w, interpositions[1],
-            interpositions[0] + dinst->rectangle.w, interpositions[1] + dinst->rectangle.h,
-            dinst->rectangle.w, interpositions[0] + interpositions[1]
+            interpositions[0] + srect.w, interpositions[1],
+            interpositions[0] + srect.w, interpositions[1] + srect.h,
+            interpositions[0],                      interpositions[1] + srect.h
         };
 
         const float uvs[4*2] = {
@@ -47,13 +54,16 @@ void sresdlrenderer_flush_queueinstances1(sresdlrenderer_interface* inst, sre_Sa
             dinst->uv_offset.x, dinst->uv_offset.y + dinst->uv.y,
         };
 
-        SDL_RenderGeometryRaw(
-            inst->renderer, inst_textures[i]->texture,
+        int res = SDL_RenderGeometryRaw(
+            inst->renderer, inst_textures[i] ? inst_textures[i]->texture : NULL,
             positions, sizeof(float)*2,
             (SDL_Color*)&dinst->color, 0,
             uvs, sizeof(float)*2,
             4, DRAW1_INDICES, 6, 1
         );
+
+        assert(res == 0);
+            
     }
 }
 

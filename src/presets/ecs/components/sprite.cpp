@@ -20,7 +20,8 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
     sre::RSampler& texture = textures[frame];
     sre::vec2i texture_size;
     renderer->sampler_query(texture, &texture_size, NULL);
-
+    
+    sre::vec2f texture_fsize{texture_size};
     if (region.size.x)
         texture_size.x = region.size.x;
 
@@ -37,8 +38,8 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
     render_rect.size = render_rect.size.abs();
 
     sre::vec2f uv{
-        region.size.x / texture_size.x * (flipx ? -1.0f : 1.0f),
-        region.size.y / texture_size.y * (flipy ? -1.0f : 1.0f)
+        !region.size.x ? 1.0f : region.size.x / texture_fsize.x * (flipx ? -1.0f : 1.0f),
+        !region.size.y ? 1.0f : region.size.y / texture_fsize.y * (flipy ? -1.0f : 1.0f)
     };
 
     renderer->draw1(
@@ -50,8 +51,8 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
             0,
             uv,
             {
-                region.position.x / (float)texture_size.x - (flipx ? uv.x : 0.0f),
-                region.position.y / (float)texture_size.y - (flipy ? uv.y : 0.0f)
+                region.position.x / texture_fsize.x - (flipx ? uv.x : 0.0f),
+                region.position.y / texture_fsize.y - (flipy ? uv.y : 0.0f)
             }
         }},
         {texture.operator sre::Sampler *()}

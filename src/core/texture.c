@@ -7,12 +7,12 @@
 
 sre_Sampler* texture_alloc(sre_RenderInterface* render)
 {
-    return malloc(engine.video_tsize);
+    return sre_new(engine.video_tsize);
 }
 
 void texture_free(sre_RenderInterface* render, sre_Sampler* sampler)
 {
-    free(sampler);
+    sre_delete(sampler);
 }
 
 struct d_setup_texture
@@ -58,6 +58,7 @@ struct d_destroy_texture
 static void d_destroy_texture(struct d_destroy_texture* data)
 {
     data->render->vftptr->destroy_texture(data->render, data->sampler);
+    texture_free(data->render, data->sampler);
     sre_delete(data);
 }
 
@@ -67,7 +68,6 @@ sre_Sampler* sre_RI_sampler(sre_RenderInterface* render, sre_pixelFormat formath
 {
     sre_Sampler* sampler = texture_alloc(render); assert(sampler != NULL);
     sre_defer_response(d_setup_texture, &(struct d_setup_texture){ render, sampler, formathint, w, h });
-    render->vftptr->setup_texture(render, sampler, formathint, w, h);
     return sampler;
 }
 
@@ -81,7 +81,6 @@ void sre_RI_samplerdestroy(sre_RenderInterface* render, sre_Sampler* sampler)
     ddata->sampler = sampler;
 
     sre_defer(d_destroy_texture, ddata);
-    texture_free(render, sampler);
 }
 
 bool sre_RI_samplerupdate(sre_RenderInterface* render, sre_Sampler* sampler, const void* pixels, int pitch)

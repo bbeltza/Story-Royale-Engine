@@ -1,5 +1,7 @@
 #include "sdlrenderer.h"
 
+#include <SDL_hints.h>
+
 const struct _sre_RenderInterfacevft sresdlrenderer_vft = {
     sresdlrenderer_flush_queueinstances1,
     sresdlrenderer_flush_queueinstances2,
@@ -12,7 +14,8 @@ const struct _sre_RenderInterfacevft sresdlrenderer_vft = {
     sresdlrenderer_set_vsync,
     sresdlrenderer_setup_texture,
     sresdlrenderer_update_texture,
-    sresdlrenderer_query_texture
+    sresdlrenderer_query_texture,
+    sresdlrenderer_destroy_texture
 };
 
 sre_RenderInterface* sresdlrenderer_main(SDL_Window* window)

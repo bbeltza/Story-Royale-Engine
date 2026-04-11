@@ -6,9 +6,8 @@ bool sresdlrenderer_set_viewportstate(sresdlrenderer_interface* inst, int w, int
 
     (void)w;
     (void)h;
-    (void)scale;
-    // Do nothing for now, I may store these variables though
-
+    
+    inst->scaling = scale;
     return true;
 }
 
@@ -32,10 +31,7 @@ bool sresdlrenderer_set_camerastate(sresdlrenderer_interface* inst, sre_unit x, 
 {
     (void)inst;
 
-    (void)x;
-    (void)y;
-
-    // Surely storing the state somewhere
+    inst->camera = (sre_vec2ut){ x, y };
     return true;
 }
 
