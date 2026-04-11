@@ -8,6 +8,7 @@ const struct _sre_RenderInterfacevft sresdlrenderer_vft = {
     sresdlrenderer_set_viewportstate,
     sresdlrenderer_set_blendstate,
     sresdlrenderer_set_camerastate,
+    sresdlrenderer_set_clipstate,
     sresdlrenderer_set_vsync,
     sresdlrenderer_setup_texture,
     sresdlrenderer_update_texture,
@@ -19,6 +20,8 @@ sre_RenderInterface* sresdlrenderer_main(SDL_Window* window)
     sresdlrenderer_interface* inst = SDL_calloc(1, sizeof(sresdlrenderer_interface));
     if (!inst)
         return NULL;
+
+    sre_RIconstructor(&inst->inter);
     
     inst->inter.vftptr = &sresdlrenderer_vft;
     inst->renderer = SDL_CreateRenderer(window, -1, 0);
@@ -36,6 +39,8 @@ void sresdlrenderer_destroy(void* renderer)
     sresdlrenderer_interface* inst = renderer;
     SDL_DestroyRenderer(inst->renderer);
     SDL_free(inst->renderer);
+
+    sre_RIdestructor(renderer);
 }
 
 extern sre_RenderDriverData sresdlrenderer = {

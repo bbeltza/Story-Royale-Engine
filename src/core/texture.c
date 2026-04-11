@@ -1,13 +1,19 @@
 #include <Core/Render.h>
 #include <Core/Defer.h>
 
-
 #include "../internal.h"
 
 #include <utils/mem.h>
 
-sre_Sampler* texture_alloc(sre_RenderInterface* render);
-void texture_free(sre_RenderInterface* render, sre_Sampler* sampler);
+sre_Sampler* texture_alloc(sre_RenderInterface* render)
+{
+    return malloc(engine.video_tsize);
+}
+
+void texture_free(sre_RenderInterface* render, sre_Sampler* sampler)
+{
+    free(sampler);
+}
 
 struct d_setup_texture
 {

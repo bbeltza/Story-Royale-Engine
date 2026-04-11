@@ -27,6 +27,7 @@ bool sresdlrenderer_clear(sresdlrenderer_interface* inst, float color[3]);
 bool sresdlrenderer_set_viewportstate(sresdlrenderer_interface* inst, int w, int h, sre_unit scale);
 bool sresdlrenderer_set_blendstate(sresdlrenderer_interface* inst, sre_blendMode blending);
 bool sresdlrenderer_set_camerastate(sresdlrenderer_interface* inst, sre_unit x, sre_unit y);
+void sresdlrenderer_set_clipstate(sresdlrenderer_interface* inst, const sre_rect2Di* rectangle);
 void sresdlrenderer_set_vsync(sresdlrenderer_interface* inst, bool enable);
 
 bool sresdlrenderer_setup_texture(sresdlrenderer_interface* inst, sre_Sampler* texture, sre_pixelFormat format, int w, int h);

@@ -32,12 +32,36 @@ static const sre::RenderDriverData video_drivers[] = {
 
 namespace sre
 {
+	class DummyInterface: sre::RenderInterface
+	{
+		virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::flags32 flags) override {}
+        virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::flags32 flags) override {}
+            
+        virtual void SRE_RENDERCALL present() override {}
+        virtual bool SRE_RENDERCALL clear(float color[3]) override { return false; }
+    
+        // State functions
+        virtual bool SRE_RENDERCALL set_viewportstate(int w, int h, sre::unit scale) override { return false; }
+        virtual bool SRE_RENDERCALL set_blendstate(sre::blendMode blending) override { return false; }
+        virtual bool SRE_RENDERCALL set_camerastate(sre::unit x, sre::unit y) override { return false; }
+        virtual void SRE_RENDERCALL set_clipstate(const sre::rect2Di* rectangle) override {}
+        virtual void SRE_RENDERCALL set_vsync(bool enable) override {}
+                
+        // Texture functions
+        virtual bool SRE_RENDERCALL setup_texture(sre::Sampler* texture, sre::pixelFormat format, int x, int y) override { return false; }
+        virtual bool SRE_RENDERCALL update_texture(sre::Sampler* texture, const void* pixels, int pitch=0) override { return false; }
+        virtual bool SRE_RENDERCALL query_texture(sre::Sampler* texture, sre::vec2i* size, sre::pixelFormat* format) override { return false; }
+        virtual bool SRE_RENDERCALL destroy_texture(sre::Sampler* texture) override { return false; }
+	};
+
 	class CoreRenderer
 	{
 		public:
 			static inline bool set_viewport(int w, int h, sre::unit scale) { return engine.video->set_viewportstate(w, h, scale); }
-			
 			static inline void render(float bg[3], sre::vec2ut camoffset);
+
+			static void constructor(sre_RenderInterface* inter) { new(inter) DummyInterface(); }
+			static void destructor(sre_RenderInterface* inter) { inter->~RenderInterface(); }
 	};
 }
 
@@ -243,3 +267,41 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 
 	engine.video->present();
 }
+
+// All of sre::RenderInterface's code
+
+sre::RenderInterface* sre::get_renderer() { assert(engine.video != NULL); return engine.video; }
+
+void sre::RenderInterface::clip_reset() { set_clipstate(NULL); }
+
+void sre::RenderInterface::clip_set(sre::rect2Dut zone)
+{
+	sre::rect2Di rect{
+		static_cast<int>(zone.position.x * engine.scale),
+		static_cast<int>(zone.position.y * engine.scale),
+		static_cast<int>(zone.size.x * engine.scale),
+		static_cast<int>(zone.size.y * engine.scale)
+	};
+	set_clipstate(&rect);
+}
+
+void sre::RenderInterface::draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler*const samplers[])
+{
+
+}
+
+void sre::RenderInterface::draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount)
+{
+
+}
+
+sre::RenderInterface::RenderInterface()
+{
+}
+
+sre::RenderInterface::~RenderInterface()
+{
+}
+
+extern "C" void sre_RIconstructor(sre_RenderInterface* inter) { sre::CoreRenderer::constructor(inter); }
+extern "C" void sre_RIdestructor(sre_RenderInterface* inter) { sre::CoreRenderer::destructor(inter); }

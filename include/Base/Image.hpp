@@ -31,7 +31,5 @@ namespace sre
 		SDL_PixelFormatEnum SDLformat() const { return valid() ? static_cast<SDL_PixelFormatEnum>(sdl_surface->format->format) : SDL_PIXELFORMAT_UNKNOWN; }
 
 		sre_Sampler* to_sampler() const;
-	public:
-		static SDL_Surface* copy_SDLsurface(const SDL_Surface* other);
 	};
 }

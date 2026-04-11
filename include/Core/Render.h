@@ -3,6 +3,12 @@
 #include <C_API.h>
 #include <ints.h>
 
+#if _WIN32
+    #define SRE_RENDERCALL __cdecl
+#else
+    #define SRE_RENDERCALL
+#endif
+
 typedef struct sre_Sampler sre_Sampler;
 typedef enum sre_pixelFormat sre_pixelFormat;
 
@@ -36,6 +42,7 @@ struct sre_SamplerNew
     #include <Datatypes/Units.h>
 
     SRE_RECT2DMAKE(sre_unit, ut);
+    SRE_RECT2DMAKE(int, i);
     SRE_VEC2MAKE(float, f);
 
     typedef struct sre_RenderInstance1
@@ -55,24 +62,25 @@ struct sre_SamplerNew
         sre_vec2ut points[];
     } sre_RenderInstance2;
 
-    // C interface, experimental and not even available
+    // C interface, experimental
     struct _sre_RenderInterfacevft
     {
-        void (*const flush_queueinstances1)(void*, sre_Sampler*const* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags);
-        void (*const flush_queueinstances2)(void*, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags);
+        void (SRE_RENDERCALL *const flush_queueinstances1)(void*, sre_Sampler*const* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags);
+        void (SRE_RENDERCALL *const flush_queueinstances2)(void*, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags);
 
-        void (*const present)(void*);
-        bool (*const clear)(void*, float color[3]);
+        void (SRE_RENDERCALL *const present)(void*);
+        bool (SRE_RENDERCALL *const clear)(void*, float color[3]);
         
-        bool (*const set_viewportstate)(void*, int w, int h, sre_unit scale);
-        bool (*const set_blendstate)(void*, sre_blendMode blending);
-        bool (*const set_camerastate)(void*, sre_unit x, sre_unit y);
-        void (*const set_vsync)(void*, bool enable);
+        bool (SRE_RENDERCALL *const set_viewportstate)(void*, int w, int h, sre_unit scale);
+        bool (SRE_RENDERCALL *const set_blendstate)(void*, sre_blendMode blending);
+        bool (SRE_RENDERCALL *const set_camerastate)(void*, sre_unit x, sre_unit y);
+        void (SRE_RENDERCALL *const set_clipstate)(void*, const sre_rect2Di* rectangle);
+        void (SRE_RENDERCALL *const set_vsync)(void*, bool enable);
 
-        bool (*const setup_texture)(void*, sre_Sampler* texture, sre_pixelFormat format, int w, int h);
-        bool (*const update_texture)(void*, sre_Sampler* texture, const void* pixels, int pitch);
-        bool (*const query_texture)(void*, sre_Sampler* texture, int size[2], sre_pixelFormat* format);
-        bool (*const destroy_texture)(void*, sre_Sampler* texture);
+        bool (SRE_RENDERCALL *const setup_texture)(void*, sre_Sampler* texture, sre_pixelFormat format, int w, int h);
+        bool (SRE_RENDERCALL *const update_texture)(void*, sre_Sampler* texture, const void* pixels, int pitch);
+        bool (SRE_RENDERCALL *const query_texture)(void*, sre_Sampler* texture, int size[2], sre_pixelFormat* format);
+        bool (SRE_RENDERCALL *const destroy_texture)(void*, sre_Sampler* texture);
     };
 
     typedef struct sre_RenderInterface
@@ -84,7 +92,7 @@ struct sre_SamplerNew
         size_t _textures_flsize;
         size_t _textures_flcapacity;
 
-        void* _vector_data1[3][4];
+        long long _vector_data1[3][4];
     } sre_RenderInterface;
     extern sre_RenderInterface* sre_getrenderer();
 
@@ -97,8 +105,8 @@ struct sre_SamplerNew
 
     SRE_CAPI_BEGIN
     // You must use these functions to properly initialize and destroy the rendering interface if you're using the C API
-    void sre_RenderInterface_constructor(sre_RenderInterface* interface);
-    void sre_RenderInterface_destructor(sre_RenderInterface* interface);
+    void sre_RIconstructor(sre_RenderInterface* interface);
+    void sre_RIdestructor(sre_RenderInterface* interface);
     SRE_CAPI_END
 
 #else
@@ -146,6 +154,9 @@ struct sre_SamplerNew
         {
             friend class ::sre::CoreRenderer;
 
+            void clip_reset();
+            void clip_set(sre::rect2Dut zone);
+
             void draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler*const samplers[]=NULL);
             void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount);
 
@@ -164,26 +175,26 @@ struct sre_SamplerNew
             inline bool sampler_update(Sampler* sampler, const void* pixels, int pitch);
             inline bool sampler_query(Sampler* sampler, sre::vec2i* size, pixelFormat* format);
 
-
             protected: // Full interface
                 // Instance drawing functions
-                virtual void flush_queueinstances1(Sampler*const* inst_textures, const RenderInstance1* instances, size_t instance_count, sre::flags32 flags) = 0;
-                virtual void flush_queueinstances2(const RenderInstance2& instance, size_t point_count, sre::flags32 flags) = 0;
+                virtual void SRE_RENDERCALL flush_queueinstances1(Sampler*const* inst_textures, const RenderInstance1* instances, size_t instance_count, sre::flags32 flags) = 0;
+                virtual void SRE_RENDERCALL flush_queueinstances2(const RenderInstance2& instance, size_t point_count, sre::flags32 flags) = 0;
 
-                virtual void present() = 0; // Present the screen, acts as the last function to be run in the current frame
-                virtual bool clear(float color[3]) = 0; // Clear the screen and more likely the target buffer, also acts as the rendering frame setup function
+                virtual void SRE_RENDERCALL present() = 0; // Present the screen, acts as the last function to be run in the current frame
+                virtual bool SRE_RENDERCALL clear(float color[3]) = 0; // Clear the screen and more likely the target buffer, also acts as the rendering frame setup function
 
                 // State functions
-                virtual bool set_viewportstate(int w, int h, sre::unit scale) = 0;
-                virtual bool set_blendstate(blendMode blending) = 0;
-                virtual bool set_camerastate(sre::unit x, sre::unit y) = 0;
-                virtual void set_vsync(bool enable);
+                virtual bool SRE_RENDERCALL set_viewportstate(int w, int h, sre::unit scale) = 0;
+                virtual bool SRE_RENDERCALL set_blendstate(blendMode blending) = 0;
+                virtual bool SRE_RENDERCALL set_camerastate(sre::unit x, sre::unit y) = 0;
+                virtual void SRE_RENDERCALL set_clipstate(const sre::rect2Di* rectangle) = 0;
+                virtual void SRE_RENDERCALL set_vsync(bool enable) = 0;
                 
                 // Texture functions
-                virtual bool setup_texture(Sampler* texture, pixelFormat format, int x, int y) = 0;
-                virtual bool update_texture(Sampler* texture, const void* pixels, int pitch) = 0;
-                virtual bool query_texture(Sampler* texture, sre::vec2i* size, pixelFormat* format) = 0;
-                virtual bool destroy_texture(Sampler* texture) = 0;
+                virtual bool SRE_RENDERCALL setup_texture(Sampler* texture, pixelFormat format, int x, int y) = 0;
+                virtual bool SRE_RENDERCALL update_texture(Sampler* texture, const void* pixels, int pitch) = 0;
+                virtual bool SRE_RENDERCALL query_texture(Sampler* texture, sre::vec2i* size, pixelFormat* format) = 0;
+                virtual bool SRE_RENDERCALL destroy_texture(Sampler* texture) = 0;
                 
                 RenderInterface();
                 ~RenderInterface();
@@ -217,10 +228,12 @@ struct sre_SamplerNew
 
 #endif
 
+SRE_CAPI_BEGIN
     sre_Sampler* sre_RI_sampler(sre_RenderInterface* render, sre_pixelFormat formathint, int w, int h);
     void sre_RI_samplerdestroy(sre_RenderInterface* render, sre_Sampler* sampler);
     bool sre_RI_samplerupdate(sre_RenderInterface* render, sre_Sampler* sampler, const void* pixels, int pitch);
     bool sre_RI_samplerquery(sre_RenderInterface* render, sre_Sampler* sampler, int size[2], sre_pixelFormat* format);
+SRE_CAPI_END
 
 #ifdef __cplusplus
     sre::Sampler* sre::RenderInterface::sampler(pixelFormat formathint, int w, int h) { return sre_RI_sampler(this, static_cast<sre_pixelFormat>(formathint), w, h); }

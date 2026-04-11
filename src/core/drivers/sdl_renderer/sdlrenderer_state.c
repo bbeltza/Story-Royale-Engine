@@ -39,6 +39,11 @@ bool sresdlrenderer_set_camerastate(sresdlrenderer_interface* inst, sre_unit x, 
     return true;
 }
 
+void sresdlrenderer_set_clipstate(sresdlrenderer_interface* inst, const sre_rect2Di* rectangle)
+{
+    SDL_RenderSetClipRect(inst->renderer, (const SDL_Rect*)rectangle);
+}
+
 void sresdlrenderer_set_vsync(sresdlrenderer_interface* inst, bool enable)
 {
     SDL_RenderSetVSync(inst->renderer, enable);

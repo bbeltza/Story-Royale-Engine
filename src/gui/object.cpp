@@ -1,6 +1,7 @@
 #include <GUI/Object.hpp>
 #include <GUI/Component.hpp>
 #include <Core/Display.hpp>
+#include <Core/Render.h>
 
 #include <utils/mem.h>
 
@@ -11,6 +12,7 @@ using namespace sreGUI;
 Object* sreGUI::get_root() { return currlayer; }
 
 const Object* Object::s_querying = NULL;
+sre::ClipStackUT Object::s_clipstack;
 
 Object::Object()
 {
@@ -203,7 +205,9 @@ void Object::call_render(sre::RenderInterface* renderer)
     pre_render(renderer);
 
     if (has_clip)
-        sre_draw_clipbegin(&m_absolute);
+    {
+        s_clipstack.push(m_absolute);
+    }
     
     for (auto& comp : components)
     {
@@ -219,7 +223,12 @@ void Object::call_render(sre::RenderInterface* renderer)
     }
 
     if (has_clip)
-        sre_draw_clipend();
+    {
+        if (s_clipstack.pop())
+            renderer->clip_set(s_clipstack.top());
+        else
+            renderer->clip_reset();
+    }
 
     post_render(renderer);
 

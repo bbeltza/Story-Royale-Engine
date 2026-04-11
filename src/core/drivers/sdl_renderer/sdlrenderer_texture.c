@@ -13,5 +13,5 @@ bool sresdlrenderer_update_texture(sresdlrenderer_interface* inst, sre_Sampler* 
 
 bool sresdlrenderer_query_texture(sresdlrenderer_interface* inst, sre_Sampler* texture, int size[2], sre_pixelFormat* format)
 {
-    return SDL_QueryTexture(texture->texture, (Uint32*)format, NULL, &size[0], &size[1]) == 0;
+    return SDL_QueryTexture(texture->texture, (Uint32*)format, NULL, &size[0], size ? &size[1] : NULL) == 0;
 }

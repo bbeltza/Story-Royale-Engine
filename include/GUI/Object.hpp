@@ -8,6 +8,7 @@
 
 #include <Core/Object.hpp>
 #include <Base/Signal.hpp>
+#include <Base/Clipstack.h>
 
 namespace sre
 {
@@ -23,6 +24,7 @@ namespace sreGUI
     {
         friend class sre::ECS;
 
+        static sre::ClipStackUT s_clipstack;
         static const Object *s_querying;
         Object * volatile m_parent;
         //          ^^^   m_parent could be optimized away when `add_child` gets called and doesn't assign it
