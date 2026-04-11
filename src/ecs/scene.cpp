@@ -197,7 +197,7 @@ void Scene::call_update()
 
 #include <imgui.h>
 
-void Scene::call_render()
+void Scene::call_render(sre::RenderInterface* renderer)
 {
 #ifndef IMGUI_DISABLE
     ImGui::Begin("Current scene");
@@ -228,7 +228,7 @@ void Scene::call_render()
         }
     }
 
-    pre_render();
+    pre_render(renderer);
     
 #ifndef IMGUI_DISABLE
     ImGui::Begin("Current scene");
@@ -265,7 +265,7 @@ void Scene::call_render()
         for (auto& comp : ent)
         {
             if (comp.enabled())
-                comp.on_render(ent);
+                comp.on_render(ent, renderer);
         }
 
         #if 0
@@ -274,7 +274,7 @@ void Scene::call_render()
         #endif
     }
 
-    post_render();
+    post_render(renderer);
 
     rendered.fire();
 }

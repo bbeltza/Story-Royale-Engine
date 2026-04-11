@@ -16,7 +16,7 @@ bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin,
     const sre::vec2ut ceiled_scrsize = sre::vec2ut{ xgrids, ygrids } * size * 2;
     const sre::vec2ut ceiled_scrcenter = ceiled_scrsize / 2;;
     
-    const sre::vec2ut scr_origin = flags & SRE_DRAWFLAGS_USECAM ? sreECS::World::current()->camera.toScreenSpace(origin) : origin;
+    const sre::vec2ut scr_origin = flags & SRE_DRAWFLAG_CAMERA ? sreECS::World::current()->camera.toScreenSpace(origin) : origin;
 
     sre::vec2ut pt1;
     sre::vec2ut pt2;

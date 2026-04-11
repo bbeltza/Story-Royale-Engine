@@ -17,7 +17,7 @@ namespace sreGUI
     public:
         sre::col4 color;
     protected:
-        void on_render(const sre::rect2Dut& dimensions) override;
+        void on_render(const sre::rect2Dut& dimensions, sre::RenderInterface*) override;
     };
 }
 

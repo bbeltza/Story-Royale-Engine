@@ -11,12 +11,15 @@ namespace sreGUI
 
     struct Image : public Component
     {
+        Image() = default;
+        Image(sre::RSampler&& sampler): texture(std::move(sampler)) {}
+
         sre::RSampler texture;
         sre::col4 modulate = sre::WHITE;
 
         void fit(Transform& transform);
     protected:
-        void on_render(const sre::rect2Dut &dimensions) override;
+        void on_render(const sre::rect2Dut &dimensions, sre::RenderInterface*) override;
     };
 }
 

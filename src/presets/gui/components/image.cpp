@@ -1,6 +1,6 @@
 #include <GUI/Components/Image.hpp>
 #include <GUI/Components/Transform.hpp>
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 
 using namespace sreGUI;
 
@@ -11,21 +11,25 @@ void Image::fit(Transform& transform)
         sre::log<sre::LOGCATEGORY_WARN>("Calling Image::fit on NULL image");
         return;
     }
-    sre::vec2i size = texture->size();
+
+    sre::RenderInterface* renderer = sre::get_renderer();
+    sre::vec2i size;
+    renderer->sampler_query(texture, &size, NULL);
     transform.size = sre::udim2::fromoffset(sre::vec2ut{size});
 }
 
-void Image::on_render(const sre::rect2Dut &dimensions)
+void Image::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* renderer)
 {
     if (!texture) return;
 
-    sre::draw(sre::DDTexture{
-        0,
-        modulate,
-        dimensions,
-        sre::vec2ut::ZERO,
-
-        texture->handle(),
-        { 0, 0, 0, 0 }
-    });
+    renderer->draw1(
+        0, {{
+            dimensions,
+            sre::vec2ut::ZERO,
+            modulate,
+            0,
+            1
+        }},
+        { texture.operator sre::Sampler *() }
+    );
 }

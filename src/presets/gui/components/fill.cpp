@@ -4,12 +4,13 @@
 
 using namespace sreGUI;
 
-void Fill::on_render(const sre::rect2Dut& dimensions)
+void Fill::on_render(const sre::rect2Dut& dimensions, sre::RenderInterface* renderer)
 {
-    sre::draw(sre::DDRect{
-        0,
-        *this,
-        dimensions,
-        sre::vec2ut::ZERO
-    });
+    renderer->draw1(
+        0, {{
+            dimensions,
+            sre::vec2ut::ZERO,
+            color
+        }}
+    );
 }

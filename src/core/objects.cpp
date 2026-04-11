@@ -1,7 +1,8 @@
-#include "../internal.h"
-
+#include <Core/Render.h>
 #include <Core/Object.hpp>
 #include <Core/Display.hpp>
+
+#include "../internal.h"
 
 #include <ECS/Scene.hpp>
 #include <GUI/Object.hpp>
@@ -136,13 +137,13 @@ void __render_scene() { sre::ECS::render_scene(); }
 void sre::ECS::render_ui()
 {
     if (engine.current_guilayer)
-        currlayer->call_render();
+        currlayer->call_render(engine.video);
 }
 
 void sre::ECS::render_scene()
 {
     assert(engine.current_world != NULL);
-    currscn->call_render();
+    currscn->call_render(engine.video);
 }
 
 //

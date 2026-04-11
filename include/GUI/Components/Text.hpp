@@ -28,7 +28,7 @@ namespace sreGUI
         sre::Alignment h_alignment = sre::A_LEFT;
         sre::Alignment v_alignment = sre::A_TOP;
     protected:
-        void on_render(const sre::rect2Dut& dimensions) override;
+        void on_render(const sre::rect2Dut& dimensions, sre::RenderInterface*) override;
     private:
         std::string m_str;
         sre::Font* m_font = NULL;

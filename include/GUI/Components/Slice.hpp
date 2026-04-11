@@ -6,9 +6,12 @@ namespace sreGUI
 {
     struct Slice: public sreGUI::Image
     {
+        Slice() = default;
+        Slice(sre::RSampler&& sampler): Image(std::move(sampler)) {}
+
         sre::rect2Di center_slice;
         protected:
-        void on_render(const sre::rect2Dut &dimensions) override;
+        void on_render(const sre::rect2Dut &dimensions, sre::RenderInterface*) override;
     };
 }
 

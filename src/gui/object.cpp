@@ -196,11 +196,11 @@ void Object::call_update()
     updated.fire();
 }
 
-void Object::call_render()
+void Object::call_render(sre::RenderInterface* renderer)
 {
     bool has_clip = flags.has(F_CLIP);
 
-    pre_render();
+    pre_render(renderer);
 
     if (has_clip)
         sre_draw_clipbegin(&m_absolute);
@@ -208,20 +208,20 @@ void Object::call_render()
     for (auto& comp : components)
     {
         if (comp.enabled())
-            comp.on_render(m_absolute);
+            comp.on_render(m_absolute, renderer);
     }
     
     for (auto& obj : children)
     {
         if (!obj.flags.has(F_ENABLED)) continue;
 
-        obj.call_render();
+        obj.call_render(renderer);
     }
 
     if (has_clip)
         sre_draw_clipend();
 
-    post_render();
+    post_render(renderer);
 
     /*
     sre::draw(sre::DDRect{

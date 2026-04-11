@@ -44,13 +44,12 @@ bool Shape::in_screen_point(Entity &entity, sre::vec2ut pt) const
 	}
 }
 
-void Shape::on_render(Entity &entity)
+void Shape::on_render(Entity &entity, sre::RenderInterface* renderer)
 {
 	if (!this->flags.has(F_VISIBLE))
 		return;
 
 	const auto world = entity.get_parent();
-	auto renderer = sre::get_renderer();
 
 	switch (shape)
 	{
@@ -61,7 +60,7 @@ void Shape::on_render(Entity &entity)
 	{
 		sre::rect2Dut render_rect = real_rect(entity);
 		renderer->draw1(
-			SRE_RENDERFLAGS_USECAM,
+			SRE_DRAWFLAG_CAMERA,
 			{{ render_rect, sre::vec2ut::CENTER, color }}
 		);
 

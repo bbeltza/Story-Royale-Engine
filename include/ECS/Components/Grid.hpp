@@ -16,9 +16,9 @@ namespace sreECS
         sre::col4 color;
         sre::vec2ut size;
 
-        void on_render(sreECS::Entity& entity) override
+        void on_render(sreECS::Entity& entity, sre::RenderInterface*) override
         {
-            sre::draw_grid(color, size, entity.position, SRE_RENDERFLAGS_USECAM);
+            sre::draw_grid(color, size, entity.position, 1);
         };
     };
 }

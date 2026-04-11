@@ -6,6 +6,11 @@
 
 #include <imgui.h>
 
+namespace sre
+{
+	struct RenderInterface;
+}
+
 namespace sreECS
 {
 	class Entity;
@@ -34,7 +39,7 @@ namespace sreECS
 		constexpr Component() = default;
 		constexpr Component(sre::flagsptr::type flags): flags{flags, F_ENABLED} {}
 	protected:
-		virtual void on_render(Entity& entity) {}
+		virtual void on_render(Entity& entity, sre::RenderInterface* renderer) {}
 		virtual void on_update(Entity& entity) {}
 		virtual void on_pupdate(Entity& entity) {}
 		virtual bool on_query(Entity& entity, sre::vec2ut pt) const { return false; }

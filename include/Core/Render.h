@@ -15,7 +15,20 @@ typedef enum sre_blendMode
     SRE_BLEND_MUL
 } sre_blendMode;
 
+enum sre_drawFlags
+{
+    SRE_DRAWFLAG_CAMERA = 1 << 0
+};
+
 struct SDL_Window;
+
+struct sre_SamplerNew
+{
+    int _refcount;
+    int w, h;
+    sre_pixelFormat format;
+    void* renderer;
+};
 
 #ifndef __cplusplus
     #include <Datatypes/CRect.h>
@@ -141,6 +154,8 @@ struct SDL_Window;
 
             template <size_t n>
             void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&points)[n]) { return draw2(flags, color, points, n); }
+
+            void fill(sre::col4 color) { draw1(0, {{ {0, FLT_MAX}, 0, color }}); }
 
             // Create a "sampler", it's a piece of texture that can get rendered
             // It replaces the current textures

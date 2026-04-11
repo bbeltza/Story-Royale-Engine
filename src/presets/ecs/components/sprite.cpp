@@ -10,14 +10,13 @@ void Sprite::attach(sre::RSampler&& texture)
     textures.push_back(std::move(texture));
 }
 
-void Sprite::on_render(Entity& entity)
+void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
 {
     if (textures.empty()) return;
 
     auto frame = ut_min(current_frame, textures.size() - 1);
     current_frame = frame;
 
-    auto renderer = sre::get_renderer();
     sre::RSampler& texture = textures[frame];
     sre::vec2i texture_size;
     renderer->sampler_query(texture, &texture_size, NULL);
@@ -32,7 +31,7 @@ void Sprite::on_render(Entity& entity)
         entity.position + offset,
         texture_size * scale
     );
-    sre::s32 flags = SRE_DRAWFLAGS_USECAM;
+    sre::s32 flags = SRE_DRAWFLAG_CAMERA;
     bool flipx = render_rect.size.x < 0;
     bool flipy = render_rect.size.y < 0;
     render_rect.size = render_rect.size.abs();

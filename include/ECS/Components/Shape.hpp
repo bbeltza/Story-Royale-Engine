@@ -40,7 +40,7 @@ namespace sreECS
         ShapeForm shape = S_RECTANGLE;
 
         void on_pupdate(Entity&) override;
-        void on_render(Entity&) override;
+        void on_render(Entity&, sre::RenderInterface*) override;
         bool on_query(Entity&, sre::vec2ut) const override;
 
         bool in_screen_point(Entity& entity, sre::vec2ut) const;
