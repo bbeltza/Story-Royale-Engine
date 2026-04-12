@@ -273,6 +273,13 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 												);
 				insti1 += queue.count;
 				break;
+			case 2:
+				engine.video->flush_queueinstances2(
+					reinterpret_cast<RenderInstance2&>(engine.video->m_rinst2cache.at(insti2)),
+					queue.count,
+					queue.flags
+				);
+				insti2 += queue.count*sizeof(RenderInstance2::points[0]) + sizeof(RenderInstance2::color) + sizeof(RenderInstance2::mode);
 			default:
 				break;
 			}
@@ -333,9 +340,20 @@ void sre::RenderInterface::draw1(sre::flags32 flags, const RenderInstance1 insta
 		back->count+= instcount;
 }
 
-void sre::RenderInterface::draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount)
+void sre::RenderInterface::draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2Mode mode)
 {
-
+	sre::RenderInstance2 dummy{
+		color,
+		mode
+	};
+	m_rinst2cache.insert(m_rinst2cache.end(), reinterpret_cast<sre::byte*>(&dummy), reinterpret_cast<sre::byte*>(&dummy.points));
+	m_rinst2cache.insert(m_rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
+	m_renderqueues.push_back({
+		pcount,
+		2,
+		m_blendmode,
+		flags
+	});
 }
 
 sre::RenderInterface::RenderInterface()

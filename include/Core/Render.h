@@ -23,6 +23,12 @@ typedef enum sre_blendMode
     SRE_BLEND_DEFAULT = SRE_BLEND_BLEND
 } sre_blendMode;
 
+typedef enum sre_draw2mode // Primitive rendering mode for draw2
+{
+    SRE_DRAW2_JOINED,
+    SRE_DRAW2_TRIANGLE
+} sre_draw2mode;
+
 enum sre_drawFlags
 {
     SRE_DRAWFLAG_CAMERA = 1 << 0
@@ -61,6 +67,7 @@ struct sre_SamplerNew
     typedef struct sre_RenderInstance2
     {
         sre_col4 color;
+        sre_draw2mode mode;
         sre_vec2ut points[];
     } sre_RenderInstance2;
 
@@ -124,6 +131,7 @@ struct sre_SamplerNew
     {
         using Sampler = sre_Sampler;
         using blendMode = sre_blendMode;
+        using draw2Mode = sre_draw2mode;
         enum pixelFormat;
 
         struct RenderInstance1 // Render instance for all rectangle draw calls
@@ -139,6 +147,7 @@ struct sre_SamplerNew
         struct RenderInstance2 // Render instance for all line & geometry draw calls
         {
             sre::col4 color;
+            sre::draw2Mode mode;
             sre::vec2ut points[1]; // Size set to 1, don't bother, it's in the `point_count` parameter in `flush_queueinstances2`
         };
 
@@ -165,13 +174,13 @@ struct sre_SamplerNew
             void blend() { m_blendmode = SRE_BLEND_DEFAULT; }
 
             void draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler*const samplers[]=NULL);
-            void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount);
+            void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2Mode mode=SRE_DRAW2_JOINED);
 
             template <size_t n>
             void draw1(sre::flags32 flags, const RenderInstance1 (&instances)[n], Sampler*const (&samplers)[n]={NULL}) { draw1(flags, instances, n, samplers); }
 
             template <size_t n>
-            void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&points)[n]) { return draw2(flags, color, points, n); }
+            void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&points)[n], sre::draw2Mode mode=SRE_DRAW2_JOINED) { return draw2(flags, color, points, n, mode); }
 
             void fill(sre::col4 color) { draw1(0, {{ {0, 65536}, 0, color }}); }
 
