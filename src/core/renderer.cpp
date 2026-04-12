@@ -16,6 +16,7 @@
 
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
+VIDEOINIT_DEF(gl21)					\
 //VIDEOINIT_DEF(opengl)				\
 //VIDEOINIT_DEF(d3d12)				\
 //VIDEOINIT_DEF(d3d11)				\
@@ -83,8 +84,9 @@ void __setup_renderer()
 	enum sre_RenderDrivers
 	{
 		SRE_RENDERDRIVER_SDLRENDERER,
+		SRE_RENDERDRIVER_OPENGL_21,
 
-		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_SDLRENDERER
+		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_21
 	};
 
 	auto driverdata = video_drivers[SRE_RENDERDRIVER_DEFAULT];
