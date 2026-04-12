@@ -22,11 +22,12 @@ void sresdlrenderer_flush_queueinstances1(sresdlrenderer_interface* inst, sre_Sa
 {
     static const uint8_t DRAW1_INDICES[6] = {
         0, 1, 2,
-        0, 2, 3
+        2, 3, 0
     };
 
     for (size_t i = 0; i < instance_count; i++)
     {
+        #define Tround SDL_floorf
         const sre_RenderInstance1* dinst = &instances[i];
         sre_rect2Dut srect = {
             (dinst->rectangle.x + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0)) * inst->scaling,
@@ -35,16 +36,18 @@ void sresdlrenderer_flush_queueinstances1(sresdlrenderer_interface* inst, sre_Sa
             dinst->rectangle.h * inst->scaling
         };
 
-        const float interpositions[2] = {
-            srect.x - dinst->anchor.x * srect.w,
-            srect.y - dinst->anchor.y * srect.h,
-        };
-
         const float positions[4*2] = {
-            interpositions[0], interpositions[1],
-            interpositions[0] + srect.w, interpositions[1],
-            interpositions[0] + srect.w, interpositions[1] + srect.h,
-            interpositions[0],                      interpositions[1] + srect.h
+            Tround(srect.x - dinst->anchor.x * srect.w),
+            Tround(srect.y - dinst->anchor.y * srect.h),
+
+            positions[0] + srect.w,
+            positions[1],
+
+            positions[0] + srect.w,
+            positions[1] + srect.h,
+            
+            positions[0],
+            positions[1] + srect.h
         };
 
         const float uvs[4*2] = {

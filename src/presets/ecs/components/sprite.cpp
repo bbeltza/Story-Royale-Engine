@@ -33,14 +33,6 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
         texture_size * scale
     );
     sre::s32 flags = SRE_DRAWFLAG_CAMERA;
-    bool flipx = render_rect.size.x < 0;
-    bool flipy = render_rect.size.y < 0;
-    render_rect.size = render_rect.size.abs();
-
-    sre::vec2f uv{
-        !region.size.x ? 1.0f : region.size.x / texture_fsize.x * (flipx ? -1.0f : 1.0f),
-        !region.size.y ? 1.0f : region.size.y / texture_fsize.y * (flipy ? -1.0f : 1.0f)
-    };
 
     renderer->draw1(
         flags,
@@ -49,11 +41,8 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
             sre::vec2ut::CENTER,
             modulate,
             0,
-            uv,
-            {
-                region.position.x / texture_fsize.x - (flipx ? uv.x : 0.0f),
-                region.position.y / texture_fsize.y - (flipy ? uv.y : 0.0f)
-            }
+            { region.size.x ? region.size.x / texture_fsize.x : 1, region.size.y ? region.size.y / texture_fsize.y : 1 },
+            { region.position.x / texture_fsize.x, region.position.y / texture_fsize.y }
         }},
         {texture.operator sre::Sampler *()}
     );

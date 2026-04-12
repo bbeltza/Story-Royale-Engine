@@ -161,6 +161,9 @@ struct sre_SamplerNew
             void clip_reset();
             void clip_set(sre::rect2Dut zone);
 
+            void blend(sre::blendMode blend) { m_blendmode = blend; }
+            void blend() { m_blendmode = SRE_BLEND_DEFAULT; }
+
             void draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler*const samplers[]=NULL);
             void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount);
 

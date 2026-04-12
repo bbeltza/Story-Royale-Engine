@@ -26,6 +26,7 @@ sre_RenderInterface* sresdlrenderer_main(SDL_Window* window)
 
     sre_RIconstructor(&inst->inter);
     
+    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
     inst->inter.vftptr = &sresdlrenderer_vft;
     inst->renderer = SDL_CreateRenderer(window, -1, 0);
     if (!inst->renderer)
