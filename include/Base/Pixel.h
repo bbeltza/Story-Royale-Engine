@@ -5,10 +5,12 @@
 typedef SDL_PixelFormatEnum sre_pixelFormat;
 
 #ifdef __cplusplus
+
 namespace sre
 {
     using pixelFormat = sre_pixelFormat;
 }
+
 #endif
 
 #endif
