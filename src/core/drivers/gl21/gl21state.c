@@ -1,27 +1,91 @@
 #include "gl21.h"
+#include <stdlib.h>
 
-bool sregl21_set_viewportstate(sregl21_inst* inst, int w, int h, sre_unit scale)
+bool sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
 {
-    SRE_GLCALL(glViewport(0, 0, w, h));
+    sregl21_inst* inst = _inst;
+    SRE_GLCTXMAKE(false);
+
+    SRE_GLCALL(inst->glfuncs.Viewport(0, 0, w, h));
     return true;
 }
 
-bool sregl21_set_blendstate(sregl21_inst* inst, sre_blendMode blending)
+bool sregl21_set_blendstate(void* _inst, sre_blendMode blending)
 {
+    sregl21_inst* inst = _inst;
+    SRE_GLCTXCHECK;
+
+    if (blending == SRE_BLEND_NONE)
+    {
+        SRE_GLCALL(inst->glfuncs.Disable(GL_BLEND));
+        return true;
+    }
+
+    GLenum sfactor;
+    GLenum dfactor;
+    switch (blending)
+    {
+        case SRE_BLEND_BLEND:
+            sfactor = GL_SRC_ALPHA;
+            dfactor = GL_ONE_MINUS_SRC_ALPHA;
+            break;
+        case SRE_BLEND_ADD:
+            sfactor = GL_SRC_ALPHA;
+            dfactor = GL_ONE;
+            break;
+        case SRE_BLEND_MOD:
+            sfactor = GL_DST_COLOR;
+            dfactor = GL_ZERO;
+            break;
+        case SRE_BLEND_MUL:
+            sfactor = GL_DST_COLOR;
+            dfactor = GL_ONE_MINUS_SRC_ALPHA;
+            break;
+        default: abort(); return false;
+    }
+
+    SRE_GLCALL(inst->glfuncs.Enable(GL_BLEND));
+    SRE_GLCALL(inst->glfuncs.BlendFunc(sfactor, dfactor));
+    return true;
+
     return true;
 }
 
-bool sregl21_set_camerastate(sregl21_inst* inst, sre_unit x, sre_unit y)
+bool sregl21_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 {
+    sregl21_inst* inst = _inst;
+    SRE_GLCTXCHECK;
+
     return true;
 }
 
-void sregl21_set_clipstate(sregl21_inst* inst, const sre_rect2Di* rectangle)
+void sregl21_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
 {
+    sregl21_inst* inst = _inst;
+    SRE_GLCTXCHECK;
 
+    int w, h;
+    SDL_GL_GetDrawableSize(inst->window, &w, &h);
+
+    SRE_GLCALL(inst->glfuncs.Scissor(
+        rectangle->x,
+        h - rectangle->y + rectangle->h,
+        rectangle->w,
+        rectangle->h
+    ));
 }
 
-void sregl21_set_vsync(sregl21_inst* inst, bool enable)
+void sregl21_set_vsync(void* _inst, bool enable)
 {
+    sregl21_inst* inst = _inst;
+    SRE_GLCTXCHECK;
 
+    if (!enable) goto DISABLE;
+
+    if (SDL_GL_SetSwapInterval(-1) != 0)
+        SDL_GL_SetSwapInterval(1);
+    return;
+    
+    DISABLE:
+        SDL_GL_SetSwapInterval(0);
 }

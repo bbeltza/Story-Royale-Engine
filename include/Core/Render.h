@@ -9,8 +9,9 @@
     #define SRE_RENDERCALL
 #endif
 
+#include <Base/Pixel.h>
+
 typedef struct sre_Sampler sre_Sampler;
-typedef enum sre_pixelFormat sre_pixelFormat;
 
 typedef enum sre_blendMode
 {
@@ -132,7 +133,6 @@ struct sre_SamplerNew
         using Sampler = sre_Sampler;
         using blendMode = sre_blendMode;
         using draw2Mode = sre_draw2mode;
-        enum pixelFormat;
 
         struct RenderInstance1 // Render instance for all rectangle draw calls
         {
@@ -193,8 +193,8 @@ struct sre_SamplerNew
 
             protected: // Full interface
                 // Instance drawing functions
-                virtual void SRE_RENDERCALL flush_queueinstances1(Sampler*const* inst_textures, const RenderInstance1* instances, size_t instance_count, sre::flags32 flags) = 0;
-                virtual void SRE_RENDERCALL flush_queueinstances2(const RenderInstance2& instance, size_t point_count, sre::flags32 flags) = 0;
+                virtual void SRE_RENDERCALL flush_queueinstances1(Sampler*const* inst_textures, const RenderInstance1* instances, size_t instance_count, sre::u32 flags) = 0;
+                virtual void SRE_RENDERCALL flush_queueinstances2(const RenderInstance2& instance, size_t point_count, sre::u32 flags) = 0;
 
                 virtual void SRE_RENDERCALL present() = 0; // Present the screen, acts as the last function to be run in the current frame
                 virtual bool SRE_RENDERCALL clear(float color[3]) = 0; // Clear the screen and more likely the target buffer, also acts as the rendering frame setup function

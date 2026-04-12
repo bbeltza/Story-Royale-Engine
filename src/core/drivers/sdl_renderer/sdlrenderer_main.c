@@ -38,16 +38,16 @@ sre_RenderInterface* sresdlrenderer_main(SDL_Window* window)
     return &inst->inter;
 }
 
-void sresdlrenderer_destroy(void* renderer)
+void sresdlrenderer_destroy(sre_RenderInterface* _inst)
 {
-    sresdlrenderer_interface* inst = renderer;
+    sresdlrenderer_interface* inst = (sresdlrenderer_interface*)_inst;
     SDL_DestroyRenderer(inst->renderer);
     SDL_free(inst->renderer);
 
-    sre_RIdestructor(renderer);
+    sre_RIdestructor(_inst);
 }
 
-extern sre_RenderDriverData sresdlrenderer = {
+sre_RenderDriverData sresdlrenderer = {
     .init = sresdlrenderer_main,
     .destroy = sresdlrenderer_destroy,
     .texture_size = sizeof(SDL_Texture*)

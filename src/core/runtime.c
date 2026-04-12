@@ -125,6 +125,10 @@ void __run_engine()
                 SDL_SemPost(defer->sem);
             } break;
             case ENGINE_EVENT_RENDER:
+                #if _WIN32
+                    if (engine.quit)
+                        break;
+                #endif
                 SDL_LockMutex(engine.render_mutex);
 
                 __display_render();
@@ -166,6 +170,11 @@ void __run_engine()
 
 static int __event_watch(void *data, SDL_Event *ev)
 {
+    #if _WIN32
+        if (ev->type == SDL_QUIT)
+            engine.quit = 1;
+    #endif
+
     SDL_threadID id = SDL_ThreadID();
     if (id != engine.main_thrd)
         return 1;
@@ -173,7 +182,6 @@ static int __event_watch(void *data, SDL_Event *ev)
     if (!__event_filter(data, ev))
         return 0;
 
-    //if (ev->type == SDL_QUIT) __debugbreak();
     if (ev->type == SDL_WINDOWEVENT)
     {
         switch (ev->window.event)

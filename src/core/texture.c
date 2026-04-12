@@ -22,8 +22,9 @@ struct d_setup_texture
     sre_pixelFormat formathint;
     int w, h;
 };
-static sre_sptr d_setup_texture(const struct d_setup_texture* data)
+static sre_sptr d_setup_texture(void* _data)
 {
+    const struct d_setup_texture* data = _data;
     return data->render->vftptr->setup_texture(
         data->render,
         data->sampler,
@@ -40,8 +41,9 @@ struct d_update_texture
     int pitch;
 };
 
-static sre_sptr d_update_texture(const struct d_update_texture* data)
+static sre_sptr d_update_texture(void* _data)
 {
+    const struct d_update_texture* data = _data;
     return data->render->vftptr->update_texture(
         data->render,
         data->sampler,
@@ -55,8 +57,9 @@ struct d_destroy_texture
     sre_Sampler* sampler;
 };
 
-static void d_destroy_texture(struct d_destroy_texture* data)
+static void d_destroy_texture(void* _data)
 {
+    struct d_destroy_texture* data = _data;
     data->render->vftptr->destroy_texture(data->render, data->sampler);
     texture_free(data->render, data->sampler);
     sre_delete(data);

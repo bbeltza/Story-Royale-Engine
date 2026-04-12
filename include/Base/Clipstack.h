@@ -16,6 +16,7 @@
 
         public:
             using Rect = sre::rect2D<T>;
+            using Vec = typename Rect::vec;
             static constexpr T ZERO{0};
 
             bool pop()
@@ -35,7 +36,7 @@
                 rectangle.position.x = toprect.position.x > rectangle.position.x ? toprect.position.x : rectangle.position.x;
                 rectangle.position.x = toprect.position.y > rectangle.position.y ? toprect.position.y : rectangle.position.y;
 
-                Rect::vec bounding = (toprect.position + toprect.size) - (rectangle.position + rectangle.size);
+                Vec bounding = (toprect.position + toprect.size) - (rectangle.position + rectangle.size);
                 rectangle.size.x = bounding.x < 0 ? rectangle.size.x + bounding.x : rectangle.size.x;
                 rectangle.size.y = bounding.y < 0 ? rectangle.size.y + bounding.y : rectangle.size.y;
 
@@ -54,7 +55,7 @@
     }
 
 #else
-    #error Clipstack not implemented in C for now, it's going to be
+    #error "Clipstack not implemented in C for now, it's going to be"
 #endif
 
 #endif

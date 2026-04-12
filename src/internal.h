@@ -8,7 +8,9 @@
 #include <ints.h>
 
 SRE_CAPI_BEGIN
-	struct sre_RenderInterface;
+	#ifndef sre_RenderInterface
+		struct sre_RenderInterface;
+	#endif
 
 	struct _win_settings
 	{
@@ -90,6 +92,7 @@ SRE_CAPI_BEGIN
 
 		#if _WIN32
 				int exposing;
+				int quit; // Check if the SDL_QUIT event has been sent before rendering (on windows and OpenGL, rendering causes an error after a window closes)
 		#endif
 
 		void* audio_queue;

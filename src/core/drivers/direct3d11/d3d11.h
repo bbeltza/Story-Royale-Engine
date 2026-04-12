@@ -18,8 +18,8 @@ namespace sred3d11
 
         protected:
             // Instance drawing functions
-            virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::flags32 flags) override {}
-            virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::flags32 flags) override {}
+            virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags) override {}
+            virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags) override {}
             
             virtual void SRE_RENDERCALL present() override {}
             virtual bool SRE_RENDERCALL clear(float color[3]) override { return false; }

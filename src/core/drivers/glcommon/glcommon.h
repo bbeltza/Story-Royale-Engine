@@ -10,6 +10,9 @@
 #define SRE_GLGETERROR inst->glfuncs.GetError // Macro to the variable to hold glGetError, it's usually inst->glfuncs.GetError but it can be changed
 #define SRE_GLLOG(...) sre_log(SRE_LOGCATEGORY_ERROR, __VA_ARGS__) // You'd need #include <Base/Log.h> for the default definition
 
+#define SRE_GLCTXMAKE(ret) if (SDL_GL_MakeCurrent(inst->window, inst->context)) return ret
+#define SRE_GLCTXCHECK assert(SDL_GL_GetCurrentContext() == inst->context) // Need #include <assert.h>
+
 struct sregl_functions
 {
     SRE_GLFUNCS
