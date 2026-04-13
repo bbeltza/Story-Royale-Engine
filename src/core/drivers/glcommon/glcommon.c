@@ -17,11 +17,18 @@ extern const char* SRE_GLERRFMT(GLenum err)
     }
 }
 
+#undef SRE_GLPFNDEF
+#define SRE_GLPFNDEF(t, x) funcs->x = (t)pGetProcAddress("gl" #x); if (!funcs->x) { SRE_GLLOG("Failed to load function: 'gl" #x"'"); return GL_FALSE; }
 extern GLboolean sregl_loadfunctions(struct sregl_functions* funcs, void* (*pGetProcAddress)(const char* proc))
 {
-    #undef SRE_GLPFNDEF
-    #define SRE_GLPFNDEF(t, x) funcs->x = (t)pGetProcAddress("gl" #x); if (!funcs->x) { SRE_GLLOG("Failed to load function: 'gl" #x"'"); return GL_FALSE; }
     SRE_GLFUNCS
+
+    return GL_TRUE;
+}
+
+extern GLboolean sregl_loadfunctions21(struct sregl_functions21* funcs, void* (*pGetProcAddress)(const char* proc))
+{
+    SRE_GLFUNCS21
 
     return GL_TRUE;
 }

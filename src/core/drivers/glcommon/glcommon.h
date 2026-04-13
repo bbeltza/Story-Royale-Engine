@@ -18,12 +18,18 @@ struct sregl_functions
     SRE_GLFUNCS
 };
 
+struct sregl_functions21
+{
+    SRE_GLFUNCS21
+};
+
 #ifdef __cplusplus
     extern "C" {
 #endif
 
 extern const char* SRE_GLERRFMT(GLenum err);
 extern GLboolean sregl_loadfunctions(struct sregl_functions* funcs, void* (*pGetProcAddress)(const char* proc));
+extern GLboolean sregl_loadfunctions21(struct sregl_functions21* funcs, void* (*pGetProcAddress)(const char* proc));
 
 #ifdef __cplusplus
     }

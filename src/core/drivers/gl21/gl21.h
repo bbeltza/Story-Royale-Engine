@@ -12,14 +12,53 @@ struct sre_Sampler
     int happy;
 };
 
+// Common shader uniform names (shared between draw1 and draw2)
+struct sregl21_csu
+{
+    GLint viewport;
+    GLint camera;
+    GLint color; // unsigned int vector containing the raw color data (note that color will be converted from 1 byte to 4 bytes each component)
+};
+
+struct sregl21_d1su
+{
+    GLint model; // 4x4 "matrix" containing all of the draw1 state (position, size, anchor and rotation ; Color is already in the common data)
+                    // It's not a model matrix, the shader will still have to rearrange the data to make it work
+};
+
+// Dependencies structure for draw1
+struct sregl21_draw1dep
+{
+    GLuint program;
+    GLuint vbo;
+    GLuint ibo;
+
+    struct sregl21_csu common_uniforms;
+    struct sregl21_d1su depend_uniforms;
+};
+
+struct sregl21_draw2dep
+{
+    GLuint program;
+    GLuint vbo;
+    GLsizei bufsize;
+
+    struct sregl21_csu common_uniforms;
+};
+
 typedef struct sregl21_inst
 {
     sre_RenderInterface interface;
     
+    struct sregl_functions glfuncs;
+    struct sregl_functions21 glfuncs21;
+
     SDL_GLContext context;
     SDL_Window* window;
 
-    struct sregl_functions glfuncs;
+    // Common uniforms
+    struct sregl21_draw1dep draw1data;
+    struct sregl21_draw2dep draw2data;
 } sregl21_inst;
 
 SRE_CAPI_BEGIN

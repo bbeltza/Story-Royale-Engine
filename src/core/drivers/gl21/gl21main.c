@@ -33,7 +33,8 @@ static sre_RenderInterface* sregl21_main(SDL_Window* window)
     if (!sregl_loadfunctions(&inst->glfuncs, SDL_GL_GetProcAddress))
         goto CLEAN_NFAIL;
 
-
+    if (!sregl_loadfunctions21(&inst->glfuncs21, SDL_GL_GetProcAddress))
+        goto CLEAN_NFAIL;
 
     inst->window = window;
     inst->interface.vftptr = &sregl21_vft;
