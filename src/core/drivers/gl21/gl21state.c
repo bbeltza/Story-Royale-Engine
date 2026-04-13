@@ -6,7 +6,19 @@ bool sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
     sregl21_inst* inst = _inst;
     SRE_GLCTXMAKE(false);
 
-    SRE_GLCALL(inst->glfuncs.Viewport(0, 0, w, h));
+    SRE_GLCALLF(inst->glfuncs.Viewport(0, 0, w, h));
+
+    GLfloat VIEWPORT[4*4] = {
+        (2.0f/w)*scale, 0.0f, 0.0f, 0.0f,
+        0.0f, (-2.0f/h)*scale, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0, 1.0
+    };
+
+    SRE_GLCALLF(inst->glfuncs21.UseProgram(inst->draw1data.program));
+    SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw1data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
+    SRE_GLCALLF(inst->glfuncs21.UseProgram(inst->draw2data.program));
+    SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw2data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
     return true;
 }
 
@@ -17,7 +29,7 @@ bool sregl21_set_blendstate(void* _inst, sre_blendMode blending)
 
     if (blending == SRE_BLEND_NONE)
     {
-        SRE_GLCALL(inst->glfuncs.Disable(GL_BLEND));
+        SRE_GLCALLF(inst->glfuncs.Disable(GL_BLEND));
         return true;
     }
 
@@ -44,8 +56,8 @@ bool sregl21_set_blendstate(void* _inst, sre_blendMode blending)
         default: abort(); return false;
     }
 
-    SRE_GLCALL(inst->glfuncs.Enable(GL_BLEND));
-    SRE_GLCALL(inst->glfuncs.BlendFunc(sfactor, dfactor));
+    SRE_GLCALLF(inst->glfuncs.Enable(GL_BLEND));
+    SRE_GLCALLF(inst->glfuncs.BlendFunc(sfactor, dfactor));
     return true;
 
     return true;

@@ -9,7 +9,7 @@
 
 struct sre_Sampler
 {
-    int happy;
+    int w, h;
 };
 
 // Common shader uniform names (shared between draw1 and draw2)
@@ -22,7 +22,7 @@ struct sregl21_csu
 
 struct sregl21_d1su
 {
-    GLint model; // 4x4 "matrix" containing all of the draw1 state (position, size, anchor and rotation ; Color is already in the common data)
+    GLint model; // 4x3 "matrix" containing all of the draw1 state (position, size, anchor and rotation ; Color is already in the common data)
                     // It's not a model matrix, the shader will still have to rearrange the data to make it work
 };
 
@@ -79,6 +79,9 @@ bool sregl21_setup_texture(void* inst, sre_Sampler* texture, sre_pixelFormat for
 bool sregl21_update_texture(void* inst, sre_Sampler* texture, const void* pixels, int pitch);
 bool sregl21_query_texture(void* inst, sre_Sampler* texture, int size[2], sre_pixelFormat* format);
 void sregl21_destroy_texture(void* inst, sre_Sampler* texture);
+
+bool sregl21setupbuffers(sregl21_inst* instance);
+void sregl21bindbuffer(sregl21_inst* instance, GLint vbo);
 
 SRE_CAPI_END
 

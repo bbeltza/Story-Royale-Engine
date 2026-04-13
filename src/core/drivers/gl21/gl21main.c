@@ -30,11 +30,19 @@ static sre_RenderInterface* sregl21_main(SDL_Window* window)
     if (!inst->context)
         goto CLEAN_NFAIL;
 
+    // Load functions (We're loading every single OpenGL function including the legacy ones that we need, since we don't link against OpenGL statically)
+
     if (!sregl_loadfunctions(&inst->glfuncs, SDL_GL_GetProcAddress))
         goto CLEAN_NFAIL;
-
     if (!sregl_loadfunctions21(&inst->glfuncs21, SDL_GL_GetProcAddress))
         goto CLEAN_NFAIL;
+
+    //
+    // Setup state
+    if (!sregl21setupbuffers(inst))
+        goto CLEAN_NFAIL;
+
+    //
 
     inst->window = window;
     inst->interface.vftptr = &sregl21_vft;
