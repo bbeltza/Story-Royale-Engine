@@ -105,5 +105,14 @@ void sregl21_flush_queueinstances2(void* _inst, const sre_RenderInstance2* insta
         SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_count, instance->points));
     }
 
-    SRE_GLCALL(inst->glfuncs.DrawArrays(instance->mode == SRE_DRAW2_JOINED ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, point_count));
+    GLenum mode;
+    switch (instance->mode)
+    {
+        case SRE_DRAW2_JOINED: mode = GL_TRIANGLE_FAN; break;
+        case SRE_DRAW2_STRIP: mode = GL_TRIANGLE_STRIP; break;
+        case SRE_DRAW2_TRIANGLE: mode = GL_TRIANGLES; break;
+        default: assert(0);
+    }
+
+    SRE_GLCALL(inst->glfuncs.DrawArrays(mode, 0, point_count));
 }

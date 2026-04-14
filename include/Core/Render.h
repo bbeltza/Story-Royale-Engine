@@ -27,6 +27,7 @@ typedef enum sre_blendMode
 typedef enum sre_draw2mode // Primitive rendering mode for draw2
 {
     SRE_DRAW2_JOINED,
+    SRE_DRAW2_STRIP,
     SRE_DRAW2_TRIANGLE
 } sre_draw2mode;
 

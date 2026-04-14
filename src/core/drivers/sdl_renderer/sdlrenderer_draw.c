@@ -147,6 +147,7 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2
                 NULL, 0, point_count, NULL, 0, 0
             );
         } break;
+        case SRE_DRAW2_STRIP:
         case SRE_DRAW2_JOINED: {
             assert(point_count >= 3);
             size_t indice_count = (point_count-3) * 3 + 3;
@@ -154,9 +155,10 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2
             indices[0] = 0;
             indices[1] = 1;
             indices[2] = 2;
+
             for (size_t i = 3; i < indice_count; i += 3)
             {
-                indices[i+0] = (unsigned short)(i/3+0);
+                indices[i+0] = instance->mode == SRE_DRAW2_STRIP ? (unsigned short)(i/3+0) : 0;
                 indices[i+1] = (unsigned short)(i/3+1);
                 indices[i+2] = (unsigned short)(i/3+2);
             }

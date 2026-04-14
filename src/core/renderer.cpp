@@ -17,9 +17,9 @@
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
 VIDEOINIT_DEF(gl21)					\
+VIDEOINIT_DEF(d3d11)				\
 //VIDEOINIT_DEF(opengl)				\
 //VIDEOINIT_DEF(d3d12)				\
-//VIDEOINIT_DEF(d3d11)				\
 //VIDEOINIT_DEF(softwarerender)
 
 #define VIDEOINIT_DEF(x) extern "C" const sre::RenderDriverData sre##x;
@@ -87,7 +87,7 @@ void __setup_renderer()
 		SRE_RENDERDRIVER_OPENGL_21,
 		SRE_RENDERDRIVER_DIRECTX_11,
 
-		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_21
+		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_11
 	};
 
 	auto driverdata = video_drivers[SRE_RENDERDRIVER_DEFAULT];

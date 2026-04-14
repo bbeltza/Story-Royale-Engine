@@ -9,13 +9,30 @@
 
 #include <dxgi1_2.h>
 #include <d3d11.h>
+#include <dxcommon/dxcommon.h>
 
-namespace sred3d11
+#define SRE_DX11CALL(x) SRE_DXCALL(x); m_success = m_success && SUCCEEDED(hr)
+
+struct sre_Sampler
+{
+    ID3D11Texture2D* dxtexture;
+};
+
+namespace sreD3D11
 {
     struct Interface: sre::RenderInterface
     {
         Interface(SDL_Window* window);
+        ~Interface();
 
+        bool successful() const { return m_success; }
+
+        private:
+            bool m_success = true;
+
+            ID3D11Device* m_dxdevice{};
+            ID3D11DeviceContext* m_dxdevicecontext{};
+            IDXGISwapChain1* m_dxswapchain{};
         protected:
             // Instance drawing functions
             virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags) override {}

@@ -2,13 +2,13 @@
 
 #include <SDL_syswm.h>
 
-extern "C" sre::RenderDriverData sre_d3d11 = {
-    [](SDL_Window* window) -> sre::RenderInterface* { return new sred3d11::Interface(window); },
-    [](sre::RenderInterface* renderer) { delete static_cast<sred3d11::Interface*>(renderer); },
-    0 // sizeof(sre::Sampler) -> struct sre_Sampler { ... } in the "d3d11.h" header
+extern "C" sre::RenderDriverData sred3d11 = {
+    [](SDL_Window* window) -> sre::RenderInterface* { auto inst = new sreD3D11::Interface(window); if (inst->successful()) return inst; delete inst; return NULL; },
+    [](sre::RenderInterface* renderer) { delete static_cast<sreD3D11::Interface*>(renderer); },
+    sizeof(sre::Sampler) //-> struct sre_Sampler { ... } in the "d3d11.h" header
 };
 
-using namespace sred3d11;
+using namespace sreD3D11;
 
 Interface::Interface(SDL_Window* window)
 {
@@ -21,13 +21,9 @@ Interface::Interface(SDL_Window* window)
     // Get necessary symbols (We are not linking D3D11.lib)
     HMODULE d3d11dll = LoadLibraryA("D3D11.dll");
     auto pD3D11CreateDeviceAndSwapChain = reinterpret_cast<PFN_D3D11_CREATE_DEVICE_AND_SWAP_CHAIN>(GetProcAddress(d3d11dll, "D3D11CreateDeviceAndSwapChain"));
-    FreeLibrary(d3d11dll);
-
+    
     // Setup
-    HRESULT hr{};
-    ID3D11Device* dxdevice;
-    ID3D11DeviceContext* dxdevicecontext;
-    IDXGISwapChain1* dxswapchain;
+    HRESULT hr;
 
     DXGI_SWAP_CHAIN_DESC swapchain_desc{};
     swapchain_desc.BufferCount = 2;
@@ -35,19 +31,37 @@ Interface::Interface(SDL_Window* window)
     swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     swapchain_desc.SampleDesc.Count = 1;
     swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapchain_desc.Windowed = TRUE;
     swapchain_desc.OutputWindow = swm_info.info.win.window;
 
-    pD3D11CreateDeviceAndSwapChain(
+    #ifndef NDEBUG
+        #define _DBGFLAGS D3D11_CREATE_DEVICE_DEBUG
+    #else
+        #define _DBGFLAGS 0
+    #endif
+
+    IDXGISwapChain* dxswapchain;
+    SRE_DX11CALL(pD3D11CreateDeviceAndSwapChain(
         NULL,
         D3D_DRIVER_TYPE_HARDWARE,
         NULL,
-        #ifndef NDEBUG
-            D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_DEBUGGABLE |
-        #endif
-        0,
+        _DBGFLAGS |
+        D3D11_CREATE_DEVICE_SINGLETHREADED,
         NULL, 0,
         D3D11_SDK_VERSION,
-        &swapchain_desc, reinterpret_cast<IDXGISwapChain**>(&dxswapchain),
-        &dxdevice, NULL, &dxdevicecontext
-    );
+        &swapchain_desc, &dxswapchain,
+        &m_dxdevice, NULL, &m_dxdevicecontext
+    ));
+
+    SRE_DX11CALL(dxswapchain->QueryInterface(&m_dxswapchain));
+    
+    dxswapchain->Release();
+    FreeLibrary(d3d11dll);
+}
+
+Interface::~Interface()
+{
+    m_dxdevice->Release();
+    m_dxdevicecontext->Release();
+    m_dxswapchain->Release();
 }
