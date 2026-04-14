@@ -11,21 +11,45 @@
 static const GLchar* COMMON_FS =
                         "#version 120\n"
                         ""
+                        "uniform sampler2D u_sampler;"
+                        "varying vec2 o_uv;"
                         "varying vec4 o_col;"
                         "void main() {"
-                            "gl_FragColor = o_col;"
+                            "gl_FragColor = texture2D(u_sampler, o_uv) * o_col;"
                         "}";
 static const GLchar* DRAW1_VS =                         
                         "#version 120\n"                
                         ""                              
                         "uniform ivec4 u_col4;"         
                         "uniform mat3x4 u_model;"       
-                        "uniform mat4 u_viewport;"       
-                        "attribute vec4 i_pos;"         
+                        "uniform mat4 u_viewport;"
+                        "uniform vec2 u_camera;"
+                        ""
+                        "attribute vec4 i_pos;"
+                        "varying vec2 o_uv;"
                         "varying vec4 o_col;"           
                         "void main() {"                 
-                            "o_col = u_col4/255.0f;"    
-                            "gl_Position = u_viewport * vec4((i_pos.xy-u_model[1].xy) * u_model[0].zw + u_model[0].xy, 0.0, 1.0);"
+                            "o_col = u_col4/255.0f;"
+                            "o_uv = u_model[2].zw + u_model[2].xy*i_pos.xy;"
+
+                            "float c = cos(u_model[1].z);"
+                            "float s = sin(u_model[1].z);"
+                            "mat4 rot = mat4("
+                                "c, s, 0, 0,"
+                                "-s, c, 0, 0,"
+                                "0, 0, 1, 0,"
+                                "u_model[0].xy + u_camera, 0, 1"
+                            ");"
+                            "mat4 mat = mat4("
+                                "u_model[0].z, 0, 0, 0,"
+                                "0, u_model[0].w, 0, 0,"
+                                "0, 0, 1, 0,"
+                                "0, 0, 0, 1"
+                            ");"
+                            "gl_Position = rot * mat * vec4(i_pos.xy-u_model[1].xy, 0.0, 1.0);"
+                            "gl_Position = floor(gl_Position * u_viewport[2][2]);"
+                            "gl_Position.w = 1;"
+                            "gl_Position = u_viewport * gl_Position;"
                         "}";
 
 static const GLchar* DRAW2_VS = 
@@ -103,6 +127,7 @@ static void sreglsetupcommonuniforms(sregl21_inst* inst, GLuint program, struct 
     uniforms->color = inst->glfuncs21.GetUniformLocation(program, "u_col4");
     uniforms->camera = inst->glfuncs21.GetUniformLocation(program, "u_camera");
     uniforms->viewport = inst->glfuncs21.GetUniformLocation(program, "u_viewport");
+    uniforms->sampler = inst->glfuncs21.GetUniformLocation(program, "u_sampler");
 }
 
 bool sregl21setupbuffers(sregl21_inst* inst)
@@ -189,6 +214,16 @@ bool sregl21setupbuffers(sregl21_inst* inst)
     sreglsetupcommonuniforms(inst, inst->draw2data.program, &inst->draw2data.common_uniforms);
 
     inst->draw1data.depend_uniforms.model = inst->glfuncs21.GetUniformLocation(inst->draw1data.program, "u_model");
+
+    //
+
+    SRE_GLCALLF(inst->glfuncs.GenTextures(1, &inst->basic_texture));
+    SRE_GLCALLF(inst->glfuncs.BindTexture(GL_TEXTURE_2D, inst->basic_texture));
+    {
+        int WHITE = -1; // 0xFFFFFFFF
+        SRE_GLCALLF(inst->glfuncs.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &WHITE));
+    }
+
 
     return true;   
 }

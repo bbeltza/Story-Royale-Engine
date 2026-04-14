@@ -10,6 +10,7 @@
 struct sre_Sampler
 {
     int w, h;
+    GLint gltex;
 };
 
 // Common shader uniform names (shared between draw1 and draw2)
@@ -18,6 +19,8 @@ struct sregl21_csu
     GLint viewport;
     GLint camera;
     GLint color; // unsigned int vector containing the raw color data (note that color will be converted from 1 byte to 4 bytes each component)
+    GLint sampler; // Unused by draw2. Note that draw2 is planned to support textures pretty soon
+                    // Also note that the fragment shader uses it so it has to still be bound (it is now, to the basic texture)
 };
 
 struct sregl21_d1su
@@ -46,6 +49,17 @@ struct sregl21_draw2dep
     struct sregl21_csu common_uniforms;
 };
 
+struct sregl21_drawcache
+{
+    sre_Sampler* last_texture;
+    int last_draw;
+
+    bool last_cam1;
+    bool last_cam2;
+
+    GLfloat camera[2];
+};
+
 typedef struct sregl21_inst
 {
     sre_RenderInterface interface;
@@ -56,9 +70,13 @@ typedef struct sregl21_inst
     SDL_GLContext context;
     SDL_Window* window;
 
-    // Common uniforms
+    // Draw dependencies
     struct sregl21_draw1dep draw1data;
     struct sregl21_draw2dep draw2data;
+
+    struct sregl21_drawcache cache;
+
+    GLint basic_texture;
 } sregl21_inst;
 
 SRE_CAPI_BEGIN

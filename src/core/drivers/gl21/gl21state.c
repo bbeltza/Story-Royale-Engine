@@ -9,16 +9,18 @@ bool sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
     SRE_GLCALLF(inst->glfuncs.Viewport(0, 0, w, h));
 
     GLfloat VIEWPORT[4*4] = {
-        (2.0f/w)*scale, 0.0f, 0.0f, 0.0f,
-        0.0f, (-2.0f/h)*scale, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, 1.0f, 0.0, 1.0
+        (2.0f/w), 0.0f, 0.0f, 0.0f,
+        0.0f, (-2.0f/h), 0.0f, 0.0f,
+        0.0f, 0.0f, scale, 0.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f
     };
 
     SRE_GLCALLF(inst->glfuncs21.UseProgram(inst->draw1data.program));
     SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw1data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
     SRE_GLCALLF(inst->glfuncs21.UseProgram(inst->draw2data.program));
     SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw2data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
+
+    inst->cache.last_draw = 0;
     return true;
 }
 
@@ -68,23 +70,35 @@ bool sregl21_set_camerastate(void* _inst, sre_unit x, sre_unit y)
     sregl21_inst* inst = _inst;
     SRE_GLCTXCHECK;
 
+    inst->cache.camera[0] = x;
+    inst->cache.camera[1] = y;
+
     return true;
 }
 
 void sregl21_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
 {
+    return; // clipping is not set up correctly
+
     sregl21_inst* inst = _inst;
     SRE_GLCTXCHECK;
 
     int w, h;
     SDL_GL_GetDrawableSize(inst->window, &w, &h);
 
-    SRE_GLCALL(inst->glfuncs.Scissor(
-        rectangle->x,
-        h - rectangle->y + rectangle->h,
-        rectangle->w,
-        rectangle->h
-    ));
+    if (rectangle)
+    {
+        SRE_GLCALL(inst->glfuncs.Scissor(
+            rectangle->x,
+            h - rectangle->y + rectangle->h,
+            rectangle->w,
+            rectangle->h
+        ));
+    }
+    else
+    {
+        SRE_GLCALL(inst->glfuncs.Scissor(0, 0, w, h));
+    }
 }
 
 void sregl21_set_vsync(void* _inst, bool enable)

@@ -12,6 +12,12 @@ typedef void (APIENTRYP PFNGLENABLEPROC)(GLenum cap);
 typedef void (APIENTRYP PFNGLDISABLEPROC)(GLenum cap);
 typedef void (APIENTRYP PFNGLBLENDFUNCPROC)(GLenum sfactor, GLenum dfactor);
 typedef void (APIENTRYP PFNGLDRAWELEMENTSPROC)(GLenum mode, GLsizei count, GLenum type, const void* indices);
+typedef void (APIENTRYP PFNGLGENTEXTURESPROC)(GLsizei n, GLuint* textures);
+typedef void (APIENTRYP PFNGLDELETETEXTURESPROC)(GLsizei n, const GLuint* textures);
+typedef void (APIENTRYP PFNGLBINDTEXTUREPROC)(GLenum target, GLuint texture);
+typedef void (APIENTRYP PFNGLACTIVETEXTUREPROC)(GLenum texture);
+typedef void (APIENTRYP PFNGLTEXPARAMETERIPROC)(GLenum target, GLenum pname, GLint param);
+typedef void (APIENTRYP PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void * data);
 
 #define SRE_GLFUNCS                                   \
         SRE_GLPFNDEF(PFNGLCLEARPROC, Clear)           \
@@ -22,7 +28,13 @@ typedef void (APIENTRYP PFNGLDRAWELEMENTSPROC)(GLenum mode, GLsizei count, GLenu
         SRE_GLPFNDEF(PFNGLDISABLEPROC, Enable)        \
         SRE_GLPFNDEF(PFNGLENABLEPROC, Disable)        \
         SRE_GLPFNDEF(PFNGLBLENDFUNCPROC, BlendFunc)   \
-        SRE_GLPFNDEF(PFNGLDRAWELEMENTSPROC, DrawElements)   \
+        SRE_GLPFNDEF(PFNGLDRAWELEMENTSPROC, DrawElements)         \
+        SRE_GLPFNDEF(PFNGLGENTEXTURESPROC, GenTextures)           \
+        SRE_GLPFNDEF(PFNGLDELETETEXTURESPROC, DeleteTextures)     \
+        SRE_GLPFNDEF(PFNGLBINDTEXTUREPROC, BindTexture)           \
+        SRE_GLPFNDEF(PFNGLACTIVETEXTUREPROC, ActiveTexture)       \
+        SRE_GLPFNDEF(PFNGLTEXPARAMETERIPROC, TexParameteri)       \
+        SRE_GLPFNDEF(PFNGLTEXIMAGE2DPROC, TexImage2D)             \
 
 #define SRE_GLFUNCS21                                               \
         SRE_GLPFNDEF(PFNGLGENBUFFERSPROC, GenBuffers)               \
@@ -48,7 +60,9 @@ typedef void (APIENTRYP PFNGLDRAWELEMENTSPROC)(GLenum mode, GLsizei count, GLenu
         SRE_GLPFNDEF(PFNGLDISABLEVERTEXATTRIBARRAYPROC, DisableVertexAttribArray) \
         SRE_GLPFNDEF(PFNGLVERTEXATTRIBPOINTERPROC, VertexAttribPointer)           \
         SRE_GLPFNDEF(PFNGLGETUNIFORMLOCATIONPROC, GetUniformLocation)             \
+        SRE_GLPFNDEF(PFNGLUNIFORM2FPROC, Uniform2f)                      \
         SRE_GLPFNDEF(PFNGLUNIFORM4IPROC, Uniform4i)                      \
+        SRE_GLPFNDEF(PFNGLUNIFORM2FVPROC, Uniform2fv)                      \
         SRE_GLPFNDEF(PFNGLUNIFORMMATRIX4FVPROC, UniformMatrix4fv)                 \
         SRE_GLPFNDEF(PFNGLUNIFORMMATRIX3X4FVPROC, UniformMatrix3x4fv)             \
 

@@ -4,7 +4,8 @@ void sregl21_present(void* _inst)
 {
     sregl21_inst* inst = _inst;
     SDL_GL_SwapWindow(inst->window);    
-    SDL_GL_MakeCurrent(NULL, NULL);
+    
+    SRE_GLCTXEND();
 }
 
 bool sregl21_clear(void* _inst, float color[3])
@@ -15,21 +16,44 @@ bool sregl21_clear(void* _inst, float color[3])
     SRE_GLCALLF(inst->glfuncs.ClearColor(color[0], color[1], color[2], 1));
     SRE_GLCALLF(inst->glfuncs.Clear(GL_COLOR_BUFFER_BIT));
 
+    inst->cache.last_texture = (void*)-1;
+
     return true;
 }
+
+static GLfloat NO_CAM[2];
 
 void sregl21_flush_queueinstances1(void* _inst, sre_Sampler*const* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags)
 {
     sregl21_inst* inst = _inst;
     SRE_GLCTXCHECK;
 
-    sregl21bindbuffer(inst, inst->draw1data.vbo);
-    SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw1data.program));
-    SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->draw1data.ibo));
+    if (inst->cache.last_draw != 1)
+    {
+        sregl21bindbuffer(inst, inst->draw1data.vbo);
+        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw1data.program));
+        SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->draw1data.ibo));
+        
+        inst->cache.last_draw = 1;
+    }
+
+    bool usecam = flags & SRE_DRAWFLAG_CAMERA;
+    if (inst->cache.last_cam1 != usecam)
+    {
+        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw1data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
+        inst->cache.last_cam1 = usecam;
+    }
 
     for (size_t i = 0; i < instance_count; i++)
     {
         const sre_RenderInstance1* dinst = &instances[i];
+        sre_Sampler* dsampler = inst_textures[i];
+
+        if (inst->cache.last_texture != dsampler)
+        {
+            SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !dsampler ? inst->basic_texture : dsampler->gltex));
+            inst->cache.last_texture = dsampler;
+        }
 
         GLfloat model[4*3] = {
             dinst->rectangle.x, dinst->rectangle.y, dinst->rectangle.w, dinst->rectangle.h,
