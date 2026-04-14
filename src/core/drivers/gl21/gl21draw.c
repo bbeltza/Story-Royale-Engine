@@ -114,5 +114,5 @@ void sregl21_flush_queueinstances2(void* _inst, const sre_RenderInstance2* insta
         default: assert(0);
     }
 
-    SRE_GLCALL(inst->glfuncs.DrawArrays(mode, 0, point_count));
+    SRE_GLCALL(inst->glfuncs.DrawArrays(mode, 0, (GLsizei)point_count));
 }

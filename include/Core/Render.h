@@ -105,7 +105,7 @@ struct sre_SamplerNew
 
         short _blendmode;
 
-        long long _vector_data1[3][4];
+        void* _vector_data1[4][4];
     } sre_RenderInterface;
     extern sre_RenderInterface* sre_getrenderer();
 

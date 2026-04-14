@@ -144,7 +144,7 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2
                 NULL,
                 &vertices->x, sizeof(sre_vec2f),
                 (const SDL_Color*)&instance->color, 0,
-                NULL, 0, point_count, NULL, 0, 0
+                NULL, 0, (int)point_count, NULL, 0, 0
             );
         } break;
         case SRE_DRAW2_STRIP:
@@ -168,8 +168,8 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2
                 NULL,
                 &vertices->x, sizeof(sre_vec2f),
                 (const SDL_Color*)&instance->color, 0,
-                NULL, 0, point_count,
-                indices, indice_count, 2
+                NULL, 0, (int)point_count,
+                indices, (int)indice_count, 2
             );
             SDL_stack_free(indices);
         } break;
