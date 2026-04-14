@@ -20,8 +20,8 @@ static const GLchar* COMMON_FS =
 static const GLchar* DRAW1_VS =                         
                         "#version 120\n"                
                         ""                              
-                        "uniform ivec4 u_col4;"         
-                        "uniform mat3x4 u_model;"       
+                        "uniform mat3x4 u_model;"
+                        "uniform ivec4 u_col4;"
                         "uniform mat4 u_viewport;"
                         "uniform vec2 u_camera;"
                         ""
@@ -38,7 +38,7 @@ static const GLchar* DRAW1_VS =
                                 "c, s, 0, 0,"
                                 "-s, c, 0, 0,"
                                 "0, 0, 1, 0,"
-                                "u_model[0].xy + u_camera, 0, 1"
+                                "u_model[0].xy, 0, 1"
                             ");"
                             "mat4 mat = mat4("
                                 "u_model[0].z, 0, 0, 0,"
@@ -48,6 +48,7 @@ static const GLchar* DRAW1_VS =
                             ");"
                             "gl_Position = rot * mat * vec4(i_pos.xy-u_model[1].xy, 0.0, 1.0);"
                             "gl_Position = floor(gl_Position * u_viewport[2][2]);"
+                            "gl_Position.xy += u_camera;"
                             "gl_Position.w = 1;"
                             "gl_Position = u_viewport * gl_Position;"
                         "}";
@@ -55,9 +56,18 @@ static const GLchar* DRAW1_VS =
 static const GLchar* DRAW2_VS = 
                         "#version 120\n"
                         ""
+                        "uniform ivec4 u_col4;"
+                        "uniform mat4 u_viewport;"
+                        "uniform vec2 u_camera;"
+                        ""
                         "attribute vec4 i_pos;"
+                        "varying vec4 o_col;"
                         "void main() {"
-                            "gl_Position = i_pos;"
+                            "o_col = u_col4/255.0f;"
+                            "gl_Position = i_pos*u_viewport[2][2];"
+                            "gl_Position.xy += u_camera;"
+                            "gl_Position.w = 1;"
+                            "gl_Position = u_viewport * gl_Position;"
                         "}";
 
 static const GLfloat DRAW1_VERTICES[] = {
@@ -209,6 +219,10 @@ bool sregl21setupbuffers(sregl21_inst* inst)
     SRE_GLCALLF(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, sizeof(DRAW1_VERTICES), DRAW1_VERTICES, GL_STATIC_DRAW));
     SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->draw1data.ibo));
     SRE_GLCALLF(inst->glfuncs21.BufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(DRAW1_INDICES), DRAW1_INDICES, GL_STATIC_DRAW));
+    
+    SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_ARRAY_BUFFER, inst->draw2data.vbo));
+    SRE_GLCALLF(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, 256*2*sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW));
+    inst->draw2data.bufsize = 256;
 
     sreglsetupcommonuniforms(inst, inst->draw1data.program, &inst->draw1data.common_uniforms);
     sreglsetupcommonuniforms(inst, inst->draw2data.program, &inst->draw2data.common_uniforms);

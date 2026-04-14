@@ -11,6 +11,7 @@ typedef void (APIENTRYP PFNGLSCISSORPROC)(GLint x, GLint y, GLsizei w, GLsizei h
 typedef void (APIENTRYP PFNGLENABLEPROC)(GLenum cap);
 typedef void (APIENTRYP PFNGLDISABLEPROC)(GLenum cap);
 typedef void (APIENTRYP PFNGLBLENDFUNCPROC)(GLenum sfactor, GLenum dfactor);
+typedef void (APIENTRYP PFNGLDRAWARRAYSPROC)(GLenum mode, GLint first, GLsizei count);
 typedef void (APIENTRYP PFNGLDRAWELEMENTSPROC)(GLenum mode, GLsizei count, GLenum type, const void* indices);
 typedef void (APIENTRYP PFNGLGENTEXTURESPROC)(GLsizei n, GLuint* textures);
 typedef void (APIENTRYP PFNGLDELETETEXTURESPROC)(GLsizei n, const GLuint* textures);
@@ -28,6 +29,7 @@ typedef void (APIENTRYP PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint i
         SRE_GLPFNDEF(PFNGLDISABLEPROC, Enable)        \
         SRE_GLPFNDEF(PFNGLENABLEPROC, Disable)        \
         SRE_GLPFNDEF(PFNGLBLENDFUNCPROC, BlendFunc)   \
+        SRE_GLPFNDEF(PFNGLDRAWARRAYSPROC, DrawArrays)             \
         SRE_GLPFNDEF(PFNGLDRAWELEMENTSPROC, DrawElements)         \
         SRE_GLPFNDEF(PFNGLGENTEXTURESPROC, GenTextures)           \
         SRE_GLPFNDEF(PFNGLDELETETEXTURESPROC, DeleteTextures)     \
@@ -40,6 +42,7 @@ typedef void (APIENTRYP PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint i
         SRE_GLPFNDEF(PFNGLGENBUFFERSPROC, GenBuffers)               \
         SRE_GLPFNDEF(PFNGLBINDBUFFERPROC, BindBuffer)               \
         SRE_GLPFNDEF(PFNGLBUFFERDATAPROC, BufferData)               \
+        SRE_GLPFNDEF(PFNGLBUFFERSUBDATAPROC, BufferSubData)         \
         SRE_GLPFNDEF(PFNGLCREATESHADERPROC, CreateShader)           \
         SRE_GLPFNDEF(PFNGLDELETESHADERPROC, DeleteShader)           \
         SRE_GLPFNDEF(PFNGLCREATEPROGRAMPROC, CreateProgram)         \

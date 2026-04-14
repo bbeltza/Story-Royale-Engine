@@ -37,14 +37,19 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler*const* inst_t
     sresdlrenderer_interface* inst = _inst;
     for (size_t i = 0; i < instance_count; i++)
     {
-        #define Tround SDL_floorf
+        #define Tround SDL_ceilf
         const sre_RenderInstance1* dinst = &instances[i];
         sre_rect2Dut srect = {
-            (dinst->rectangle.x + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0)) * inst->scaling,
-            (dinst->rectangle.y + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0)) * inst->scaling,
+            dinst->rectangle.x * inst->scaling,
+            dinst->rectangle.y * inst->scaling,
             dinst->rectangle.w * inst->scaling,
             dinst->rectangle.h * inst->scaling
         };
+
+        srect.x = srect.x + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0);
+        srect.y = srect.y + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0);
+        srect.w = srect.w;
+        srect.h = srect.h;
 
         float positions[4*2];
 
@@ -127,8 +132,8 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2
     sre_vec2f *vertices = SDL_stack_alloc(sre_vec2f, point_count);
     for (size_t i = 0; i < point_count; i++)
     {
-        vertices[i].x = (instance->points[i].x + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0)) * inst->scaling;
-        vertices[i].y = (instance->points[i].y + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0)) * inst->scaling;
+        vertices[i].x = (instance->points[i].x * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0);
+        vertices[i].y = (instance->points[i].y * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0);
     }
 
     switch (instance->mode)

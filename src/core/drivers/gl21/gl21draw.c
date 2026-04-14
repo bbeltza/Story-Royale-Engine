@@ -71,4 +71,39 @@ void sregl21_flush_queueinstances2(void* _inst, const sre_RenderInstance2* insta
 {
     sregl21_inst* inst = _inst;
     SRE_GLCTXCHECK;
+
+    if (inst->cache.last_draw != 2)
+    {
+        sregl21bindbuffer(inst, inst->draw2data.vbo);
+        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw2data.program));
+        
+        inst->cache.last_draw = 2;
+    }
+
+    bool usecam = flags & SRE_DRAWFLAG_CAMERA;
+    if (inst->cache.last_cam2 != usecam)
+    {
+        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw2data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
+        inst->cache.last_cam2 = usecam;
+    }
+    if (inst->cache.last_texture != NULL)
+    {
+        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, inst->basic_texture));
+        inst->cache.last_texture = NULL;
+    }
+
+
+    SRE_GLCALL(inst->glfuncs21.Uniform4i(inst->draw2data.common_uniforms.color, instance->color.r, instance->color.g, instance->color.b, instance->color.a));
+    
+    if ((GLsizei)point_count > inst->draw2data.bufsize)
+    {
+        inst->draw2data.bufsize *= 2;
+        SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, inst->draw2data.bufsize*2*sizeof(GLfloat), instance->points, GL_DYNAMIC_DRAW));
+    }
+    else
+    {
+        SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_count, instance->points));
+    }
+
+    SRE_GLCALL(inst->glfuncs.DrawArrays(instance->mode == SRE_DRAW2_JOINED ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, point_count));
 }

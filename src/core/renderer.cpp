@@ -85,6 +85,7 @@ void __setup_renderer()
 	{
 		SRE_RENDERDRIVER_SDLRENDERER,
 		SRE_RENDERDRIVER_OPENGL_21,
+		SRE_RENDERDRIVER_DIRECTX_11,
 
 		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_21
 	};
@@ -154,7 +155,8 @@ void __update_viewport(int w, int h)
 	}
 
 	sre::unit scale = static_cast<sre::unit>(integer_scale);
-	sre::vec2ut size = sre::vec2ut{ w, h } / scale;
+	sre::vec2ut fsize{ w, h };
+	sre::vec2ut size = fsize / scale;
 	
 	sre::vec2ut center = size / 2.0_ut;
 
@@ -170,10 +172,14 @@ void __update_viewport(int w, int h)
 	sre::CoreRenderer::set_viewport(w, h, scale);
 }
 
+size_t last_renderedframe;
+
 void __display_render()
 {
 	if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN)
 		return;
+
+	last_renderedframe = engine.frame;
 
 #ifndef IMGUI_DISABLE
 	auto imgui = engine.video->imgui;
@@ -245,14 +251,14 @@ void __display_render()
 
 	sre::afterRender.fire();
 
-	sre::CoreRenderer::render(bg,
-		sre::vec2ut{ engine.vcenter_x, engine.vcenter_y } - (currscn != NULL ? currscn->camera.processed_position() : 0));
+	sre::CoreRenderer::render(bg, 
+		sre::vec2ut{engine.vcenter_x, engine.vcenter_y} - (currscn != NULL ? currscn->camera.processed_position() : 0));
 }
 
 void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 {
 	engine.video->clear(bg);
-	engine.video->set_camerastate(camoffset.x, camoffset.y);
+	engine.video->set_camerastate(ceil(camoffset.x*engine.scale), ceil(camoffset.y*engine.scale));
 	
 	engine.video->m_blendmode = -1;
 	// Perform flushes

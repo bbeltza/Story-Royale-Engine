@@ -73,6 +73,9 @@ bool sregl21_set_camerastate(void* _inst, sre_unit x, sre_unit y)
     inst->cache.camera[0] = x;
     inst->cache.camera[1] = y;
 
+    inst->cache.last_cam1 = false;
+    inst->cache.last_cam2 = false;
+
     return true;
 }
 

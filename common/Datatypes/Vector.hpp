@@ -77,6 +77,8 @@ namespace sre
         constexpr vec2 lerp(const vec2& dst, double alpha) const { return { ut_lerp(x, dst.x, alpha), ut_lerp(y, dst.y, alpha) }; }
 
         constexpr vec2 abs() const { return { ut::abs(x), ut::abs(y) }; }
+        constexpr vec2 round() const { return { std::round(x), std::round(y) }; }
+        constexpr vec2 ceil() const { return { std::ceil(x), std::ceil(y) }; }
         constexpr vec2 floor() const { return { std::floor(x), std::floor(y) }; }
         constexpr vec2 floor_grid(T size) const { return { std::floor(x/size) * size, std::floor(y/size) * size }; }
         template <typename T2>

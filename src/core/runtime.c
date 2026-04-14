@@ -26,7 +26,7 @@ static int game_loop(void* running)
         SDL_Event ev;
         ev.type = SDL_USEREVENT;
         ev.user.code = ENGINE_EVENT_RENDER;
-
+        
         engine.frame++;
 
         ticks(&engine.frameend_time);
@@ -41,7 +41,6 @@ static int game_loop(void* running)
         __update_ecs();
 
         //
-
     #if _WIN32
         if (!engine.exposing)
         {
@@ -52,22 +51,23 @@ static int game_loop(void* running)
             if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
             {
                 sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
-                //assert(0 && "You must debug this");
+                SDL_TriggerBreakpoint();
             }
         }
         else
             sre_log(SRE_LOGCATEGORY_ERROR, "SDL_PeepEvents failed... %s", SDL_GetError());
-    #if _WIN32
-        }
-        else
-        {
-            if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
-            {
-                sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
-                assert(0 && "You must debug this too");
+
+        #if _WIN32
             }
-        }
-    #endif
+            else
+            {
+                if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
+                {
+                    sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
+                    assert(0 && "You must debug this too");
+                }
+            }
+        #endif
 
         //
         
@@ -84,6 +84,8 @@ static int game_loop(void* running)
 
 void __run_engine()
 {
+    SDL_RegisterEvents(1);
+
     int running = 1;
     engine.game_loop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
@@ -136,15 +138,14 @@ void __run_engine()
                 if (SDL_CondBroadcast(engine.render_cond) < 0) assert(0 && "This should not happen!");
                 SDL_UnlockMutex(engine.render_mutex);
                 break;
-            case ENGINE_EVENT_ENTRY:
-            {
-                int w, h;
-                SDL_GetWindowSize(engine.sdl_windowhndl, &w, &h);
-                __update_viewport(w, h);
-            }
-                SDL_ShowWindow(engine.sdl_windowhndl);
-                SDL_RaiseWindow(engine.sdl_windowhndl);
-                break;
+            case ENGINE_EVENT_ENTRY: {
+                    int w, h;
+                    SDL_GetWindowSize(engine.sdl_windowhndl, &w, &h);
+                    __update_viewport(w, h);
+
+                    SDL_ShowWindow(engine.sdl_windowhndl);
+                    SDL_RaiseWindow(engine.sdl_windowhndl);
+                } break;
             }
             break;
         default:
