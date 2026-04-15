@@ -19,6 +19,7 @@ struct sre_Sampler
 {
     int w, h;
     ID3D11Texture2D* dxtexture;
+    ID3D11ShaderResourceView* dxsrv;
 };
 
 namespace sreD3D11
@@ -70,6 +71,7 @@ namespace sreD3D11
 
             ID3D11Buffer* m_cbuffers[2];
 
+            ID3D11ShaderResourceView* m_basictexture;
             sre::unit m_scaling; // Temporal, to test on camera rendering
         protected:
             // Instance drawing functions

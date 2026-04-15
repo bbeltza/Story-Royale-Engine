@@ -117,7 +117,35 @@ Instance::Instance(SDL_Window* window)
             { FALSE, FALSE, { {TRUE, D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD, D3D11_BLEND_ONE, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL} } }
         };
 
-        m_dxdevice->CreateBlendState(&BLENDSTATES[i], &m_dxblendstates[i]);
+        SRE_DX11CALL(m_dxdevice->CreateBlendState(&BLENDSTATES[i], &m_dxblendstates[i]));
+    }
+
+    {
+        D3D11_TEXTURE2D_DESC tex_desc{};
+        tex_desc.Width = 1;
+        tex_desc.Height = 1;
+        tex_desc.ArraySize = 1;
+		tex_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		tex_desc.SampleDesc.Count = 1;
+		tex_desc.SampleDesc.Quality = 0;
+		tex_desc.Usage = D3D11_USAGE_IMMUTABLE;
+		tex_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+        const UINT WHITE = UINT_MAX;
+        D3D11_SUBRESOURCE_DATA subres_data{};
+        subres_data.pSysMem = &WHITE;
+        subres_data.SysMemPitch = 4;
+        subres_data.SysMemSlicePitch = 4;
+
+        ID3D11Texture2D* basictex;
+        SRE_DX11CALL(m_dxdevice->CreateTexture2D(&tex_desc, &subres_data, &basictex));
+
+        D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+        srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srv_desc.Texture2D.MipLevels = 1;
+
+        SRE_DX11CALL(m_dxdevice->CreateShaderResourceView(basictex, &srv_desc, &m_basictexture));
     }
 
     m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);

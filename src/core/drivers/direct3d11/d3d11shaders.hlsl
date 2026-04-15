@@ -74,6 +74,5 @@ Texture2D tex: register(t0);
 
 float4 PSmain(PSinput input): COLOR
 {
-    return input.color;
-    //return tex.Sample(sstate, input.tuv) * input.color;
+    return tex.Sample(sstate, input.tuv) * input.color;
 }
