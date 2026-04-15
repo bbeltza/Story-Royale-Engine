@@ -8,9 +8,9 @@ bool Instance::setup_texture(sre::Sampler* texture, sre::pixelFormat format, int
 	texture->h = y;
 	return true;
 }
-bool Instance::update_texture(sre::Sampler* texture, const void* pixels, int pitch = 0)
+bool Instance::update_texture(sre::Sampler* texture, const void* pixels, int pitch)
 {
-	return false;
+	return true;
 }
 
 bool Instance::query_texture(sre::Sampler* texture, sre::vec2i* size, sre::pixelFormat* format)

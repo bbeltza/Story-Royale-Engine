@@ -66,13 +66,6 @@ Instance::Instance(SDL_Window* window)
         dxswapchain->Release();
     }
 
-    {   // Setup render target view (only 1 buffer... Is there double-buffering already...?)
-        ID3D11Resource* rtres{};
-        SRE_DX11CALL(m_dxswapchain->GetBuffer(0, IID_PPV_ARGS(&rtres)));
-        SRE_DX11CALL(m_dxdevice->CreateRenderTargetView(rtres, NULL, &m_dxrendertargetview));
-        rtres->Release();
-    }
-
     m_success &= m_shaders.setup(m_dxdevice);
 
     {
@@ -101,9 +94,30 @@ Instance::Instance(SDL_Window* window)
         buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
         buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
         buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        buffer_desc.StructureByteStride = sizeof(sre::RenderInstance1);
-        
+
         SRE_DX11CALL(m_dxdevice->CreateBuffer(&buffer_desc, NULL, &m_d1buffer));
+    }
+
+    {
+        D3D11_BUFFER_DESC cbuffer_desc{};
+        cbuffer_desc.ByteWidth = sizeof(CBuffer);
+        cbuffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+        cbuffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        cbuffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+        for (int i = 0; i < 2; i++) {
+            SRE_DX11CALL(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffers[i]));
+        }
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+        static D3D11_BLEND_DESC BLENDSTATES[5] = {
+            { FALSE, FALSE, { {FALSE} } },
+            { FALSE, FALSE, { {TRUE, D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD, D3D11_BLEND_ONE, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL} } }
+        };
+
+        m_dxdevice->CreateBlendState(&BLENDSTATES[i], &m_dxblendstates[i]);
     }
 
     m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);
@@ -112,7 +126,6 @@ Instance::Instance(SDL_Window* window)
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
     m_dxdevicecontext->IASetInputLayout(m_shaders.d1IL);
     m_dxdevicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
 }
 
 Instance::~Instance()

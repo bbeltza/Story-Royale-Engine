@@ -24,7 +24,7 @@ struct PSinput
 
 cbuffer CBuniforms: register(b0)
 {
-    float2 _VIEWPORT;
+    float2 VIEWPORT;
     float2 CAMERA;
 };
 
@@ -44,8 +44,6 @@ PSinput VSmain(VSinput input, uint vid: SV_VertexID)
         0, 0, 1, 0,
         input.transform.xy + CAMERA, 0, 1
     );
-    
-    float2 VIEWPORT = float2(320, 180);
 
     float4x4 projection = float4x4(
         2.0/VIEWPORT.x, 0.0, 0.0,  0.0,
