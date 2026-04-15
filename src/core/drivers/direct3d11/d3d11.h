@@ -17,6 +17,7 @@
 
 struct sre_Sampler
 {
+    int w, h;
     ID3D11Texture2D* dxtexture;
 };
 
@@ -54,20 +55,22 @@ namespace sreD3D11
 
             Shaders m_shaders{};
 
-            // Undone yet
             ID3D11BlendState* m_dxblendstates[5];
             ID3D11RasterizerState* m_dxrasterizerstate;
             ID3D11SamplerState* m_dxsamplerstate;
+
+            ID3D11Buffer* m_d1buffer;
+            ID3D11Buffer* m_d2buffer;
         protected:
             // Instance drawing functions
-            virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags) override {}
+            virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler* const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags) override;
             virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags) override {}
             
             virtual void SRE_RENDERCALL present() override;
             virtual bool SRE_RENDERCALL clear(float color[3]) override;
     
             // State functions
-            virtual bool SRE_RENDERCALL set_viewportstate(int w, int h, sre::unit scale) override { return false; }
+            virtual bool SRE_RENDERCALL set_viewportstate(int w, int h, sre::unit scale) override;
             virtual bool SRE_RENDERCALL set_blendstate(sre::blendMode blending) override { return false; }
             virtual bool SRE_RENDERCALL set_camerastate(sre::unit x, sre::unit y) override { return false; }
             virtual void SRE_RENDERCALL set_clipstate(const sre::rect2Di* rectangle) override {}
@@ -77,7 +80,7 @@ namespace sreD3D11
             virtual bool SRE_RENDERCALL setup_texture(sre::Sampler* texture, sre::pixelFormat format, int x, int y) override { return false; }
             virtual bool SRE_RENDERCALL update_texture(sre::Sampler* texture, const void* pixels, int pitch=0) override { return false; }
             virtual bool SRE_RENDERCALL query_texture(sre::Sampler* texture, sre::vec2i* size, sre::pixelFormat* format) override { return false; }
-            virtual bool SRE_RENDERCALL destroy_texture(sre::Sampler* texture) override { return false; }
+            virtual void SRE_RENDERCALL destroy_texture(sre::Sampler* texture) override {}
     };
 };
 

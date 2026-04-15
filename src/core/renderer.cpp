@@ -52,7 +52,7 @@ namespace sre
         virtual bool SRE_RENDERCALL setup_texture(sre::Sampler* texture, sre::pixelFormat format, int x, int y) override { return false; }
         virtual bool SRE_RENDERCALL update_texture(sre::Sampler* texture, const void* pixels, int pitch=0) override { return false; }
         virtual bool SRE_RENDERCALL query_texture(sre::Sampler* texture, sre::vec2i* size, sre::pixelFormat* format) override { return false; }
-        virtual bool SRE_RENDERCALL destroy_texture(sre::Sampler* texture) override { return false; }
+        virtual void SRE_RENDERCALL destroy_texture(sre::Sampler* texture) override {}
 	};
 
 	class CoreRenderer

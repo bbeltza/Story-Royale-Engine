@@ -1,8 +1,8 @@
 // Shaders used by d3d11 (They were the original shaders for d3d12 too)
 // They are compiled and put into `d3d11shaders.cpp` as an array of bytes with the command line tool `fxc`
 
-//      fxc /T ps_4_0 /Fh ps.h /E PSmain shaders.hlsl /Gec
-//      fxc /T vs_4_0 /Fh vs.h /E VSmain shaders.hlsl /Gec
+//      fxc /T ps_4_0 /Fh ps.h /E PSmain d3d11shaders.hlsl /Gec
+//      fxc /T vs_4_0 /Fh vs.h /E VSmain d3d11shaders.hlsl /Gec
 
 struct VSinput
 {
@@ -24,17 +24,18 @@ struct PSinput
 
 cbuffer CBuniforms: register(b0)
 {
-    float2 VIEWPORT;
+    float2 _VIEWPORT;
     float2 CAMERA;
 };
 
 PSinput VSmain(VSinput input, uint vid: SV_VertexID)
 {
-    static float4 VERTICES[] = {
+    static float4 VERTICES[] =
+    {
         float4(0, 0, 0, 1),
         float4(1, 0, 0, 1),
-        float4(1, 1, 0, 1),
-        float4(0, 1, 0, 1)
+        float4(0, 1, 0, 1),
+        float4(1, 1, 0, 1)
     };
 
     float4x4 transform = float4x4(
@@ -43,6 +44,8 @@ PSinput VSmain(VSinput input, uint vid: SV_VertexID)
         0, 0, 1, 0,
         input.transform.xy + CAMERA, 0, 1
     );
+    
+    float2 VIEWPORT = float2(320, 180);
 
     float4x4 projection = float4x4(
         2.0/VIEWPORT.x, 0.0, 0.0,  0.0,
@@ -73,5 +76,6 @@ Texture2D tex: register(t0);
 
 float4 PSmain(PSinput input): COLOR
 {
-    return tex.Sample(sstate, input.tuv) * input.color;
+    return input.color;
+    //return tex.Sample(sstate, input.tuv) * input.color;
 }

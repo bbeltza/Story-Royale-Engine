@@ -74,6 +74,45 @@ Instance::Instance(SDL_Window* window)
     }
 
     m_success &= m_shaders.setup(m_dxdevice);
+
+    {
+        D3D11_RASTERIZER_DESC rasterizer_desc{};
+        rasterizer_desc.FillMode = D3D11_FILL_SOLID;
+        rasterizer_desc.CullMode = D3D11_CULL_NONE;
+        rasterizer_desc.ScissorEnable = TRUE;
+
+        SRE_DX11CALL(m_dxdevice->CreateRasterizerState(&rasterizer_desc, &m_dxrasterizerstate));
+    }
+
+    {
+        D3D11_SAMPLER_DESC sampler_desc{};
+        sampler_desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+        sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+
+        SRE_DX11CALL(m_dxdevice->CreateSamplerState(&sampler_desc, &m_dxsamplerstate));
+    }
+
+    {
+        D3D11_BUFFER_DESC buffer_desc{};
+        buffer_desc.ByteWidth = sizeof(sre::RenderInstance1) * 256;
+        buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+        buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        buffer_desc.StructureByteStride = sizeof(sre::RenderInstance1);
+        
+        SRE_DX11CALL(m_dxdevice->CreateBuffer(&buffer_desc, NULL, &m_d1buffer));
+    }
+
+    m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);
+    m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
+    m_dxdevicecontext->VSSetShader(m_shaders.d1VS, NULL, 0);
+    m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
+    m_dxdevicecontext->IASetInputLayout(m_shaders.d1IL);
+    m_dxdevicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
 }
 
 Instance::~Instance()

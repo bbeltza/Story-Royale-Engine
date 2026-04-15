@@ -14,3 +14,27 @@ bool Instance::clear(float color[3])
     m_dxdevicecontext->ClearRenderTargetView(m_dxrendertargetview, color);
     return true;
 }
+
+void Instance::flush_queueinstances1(sre::Sampler* const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags)
+{
+    HRESULT hr;
+    UINT offs = 0;
+
+    for (size_t i = 0; i < instance_count; i++)
+    {
+        if (inst_textures[i]) continue;
+        if (!instances[i].color.a) continue;
+
+        
+
+        break;
+    }
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    SRE_DXCALL(m_dxdevicecontext->Map(m_d1buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
+    memcpy(mapped.pData, instances, sizeof(*instances)*instance_count);
+    m_dxdevicecontext->Unmap(m_d1buffer, 0);
+
+    m_dxdevicecontext->IASetVertexBuffers(0, 1, &m_d1buffer, &offs, &offs);
+    m_dxdevicecontext->DrawInstanced(4, static_cast<UINT>(instance_count), 0, 0);
+}

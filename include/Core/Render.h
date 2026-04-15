@@ -211,7 +211,7 @@ struct sre_SamplerNew
                 virtual bool SRE_RENDERCALL setup_texture(Sampler* texture, pixelFormat format, int x, int y) = 0;
                 virtual bool SRE_RENDERCALL update_texture(Sampler* texture, const void* pixels, int pitch) = 0;
                 virtual bool SRE_RENDERCALL query_texture(Sampler* texture, sre::vec2i* size, pixelFormat* format) = 0;
-                virtual bool SRE_RENDERCALL destroy_texture(Sampler* texture) = 0;
+                virtual void SRE_RENDERCALL destroy_texture(Sampler* texture) = 0;
                 
                 RenderInterface();
                 ~RenderInterface();
