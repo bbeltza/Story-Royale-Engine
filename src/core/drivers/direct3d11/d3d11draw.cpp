@@ -26,7 +26,7 @@ bool Instance::clear(float color[3])
 void Instance::flush_queueinstances1(sre::Sampler* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags)
 {
     UINT inst_num = m_d1buffer.index / sizeof(sre::RenderInstance1);
-    if (m_d1buffer.append(m_dxdevicecontext, instances, sizeof(*instances)*instance_count))
+    if (m_d1buffer.append(m_dxdevicecontext, instances, static_cast<UINT>(sizeof(*instances)*instance_count)))
     {
         switch_flags |= SRE_RENDER_SWITCHTYPE;    
         inst_num = 0;

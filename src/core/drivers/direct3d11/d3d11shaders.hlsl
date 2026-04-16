@@ -57,7 +57,7 @@ PSinput VSmain(VSinput input, uint vid: SV_VertexID)
 
     float4 vert = VERTICES[vid] - float4(input.anchor, 0.0, 0.0);
     vert = mul(vert, mul(transform, rotation));
-    vert = ceil(vert * VIEWPORT[2][2]) + float4(CAMERA, 0, 0);
+    vert = floor(vert * VIEWPORT[2][2]) + float4(CAMERA, 0, 0);
     vert.w = 1;
     vert = mul(VIEWPORT, vert);
 
