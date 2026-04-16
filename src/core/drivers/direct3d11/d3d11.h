@@ -38,16 +38,30 @@ namespace sreD3D11
             bool setup(ID3D11Device* dxdevice);
     };
 
-    struct CBuffer
+    struct alignas(16) CBuffer
     {
-        sre::vec2f viewport;
+        FLOAT viewport[16];
         sre::vec2f camera;
     };
 
     struct InstCaches
     {
-        sre::vec2ut viewport;
-        sre::unit scaling;
+        FLOAT viewport[16]{};
+        bool vsync{};
+    };
+
+    struct DrawBuffer
+    {
+        ID3D11Buffer* dxbuffer;
+        UINT index;
+        UINT capacity;
+
+        ~DrawBuffer() { dxbuffer->Release(); }
+
+        bool init(ID3D11Device* dxdevice, UINT base_capacity);
+        void reset() { index = 0; }
+        bool resize(ID3D11Device* dxdevice, UINT new_width);
+        bool append(ID3D11DeviceContext* dxdevicecontext, const void* data, UINT size);
     };
 
     struct Instance: sre::RenderInterface
@@ -72,8 +86,8 @@ namespace sreD3D11
             ID3D11RasterizerState* m_dxrasterizerstate;
             ID3D11SamplerState* m_dxsamplerstate;
 
-            ID3D11Buffer* m_d1buffer;
-            ID3D11Buffer* m_d2buffer;
+            DrawBuffer m_d1buffer;
+            DrawBuffer m_d2buffer;
 
             ID3D11Buffer* m_cbuffers[2];
 
@@ -93,7 +107,7 @@ namespace sreD3D11
             virtual bool SRE_RENDERCALL set_blendstate(sre::blendMode blending) override;
             virtual bool SRE_RENDERCALL set_camerastate(sre::unit x, sre::unit y) override;
             virtual void SRE_RENDERCALL set_clipstate(const sre::rect2Di* rectangle) override {}
-            virtual void SRE_RENDERCALL set_vsync(bool enable) override {}
+            virtual void SRE_RENDERCALL set_vsync(bool enable) override { m_caches.vsync = enable; }
                 
             // Texture functions
             virtual bool SRE_RENDERCALL setup_texture(sre::Sampler* texture, sre::pixelFormat format, int x, int y) override;

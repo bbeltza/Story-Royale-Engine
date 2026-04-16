@@ -291,7 +291,6 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 			{
 			case 1:
 				assert(insti1 + queue.count <= engine.video->m_rinst1cache.size());
-				assert(insti1 + queue.count <= engine.video->m_texturecache.size());
 				engine.video->flush_queueinstances1(queue.texture,
 													&engine.video->m_rinst1cache.at(insti1),
 													queue.count,

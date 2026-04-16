@@ -8,3 +8,6 @@ build
 android
 
 scripts/__pycache__
+
+src/core/drivers/direct3d11/ps.h
+src/core/drivers/direct3d11/vs.h

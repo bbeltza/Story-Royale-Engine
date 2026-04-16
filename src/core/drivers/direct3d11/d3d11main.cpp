@@ -36,10 +36,10 @@ Instance::Instance(SDL_Window* window)
         DXGI_SWAP_CHAIN_DESC swapchain_desc{};
         swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        swapchain_desc.BufferCount = 1;
+        swapchain_desc.BufferCount = 2;
         swapchain_desc.SampleDesc.Count = 1;
         swapchain_desc.Windowed = TRUE;
-        //swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+        swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapchain_desc.OutputWindow = swm_info.info.win.window;
 
         #ifndef NDEBUG
@@ -79,25 +79,17 @@ Instance::Instance(SDL_Window* window)
 
     {
         D3D11_SAMPLER_DESC sampler_desc{};
-        sampler_desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+        sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
         sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
         sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
         sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-        sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+        sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 
         SRE_DX11CALL(m_dxdevice->CreateSamplerState(&sampler_desc, &m_dxsamplerstate));
     }
 
-    {
-        D3D11_BUFFER_DESC buffer_desc{};
-        buffer_desc.ByteWidth = sizeof(sre::RenderInstance1) * 256;
-        buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
-        buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-        SRE_DX11CALL(m_dxdevice->CreateBuffer(&buffer_desc, NULL, &m_d1buffer));
-    }
-
+    m_success &= m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 256);
+    m_success &= m_d2buffer.init(m_dxdevice, sizeof(sre::vec2ut) * 256);
     {
         D3D11_BUFFER_DESC cbuffer_desc{};
         cbuffer_desc.ByteWidth = sizeof(CBuffer);

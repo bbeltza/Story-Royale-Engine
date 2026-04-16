@@ -69,15 +69,14 @@ void sregl21_flush_queueinstances2(void* _inst, const sre_RenderInstance2* insta
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
         switch_flags |= /*SRE_RENDER_SWITCHTEXTURE |*/ SRE_RENDER_SWITCHCAMERA; // Have to switch everything if there's a type check in here!
-        sregl21bindbuffer(inst, inst->draw1data.vbo);
-        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw1data.program));
-        SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->draw1data.ibo));
+        sregl21bindbuffer(inst, inst->draw2data.vbo);
+        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw2data.program));
     }
     
     if (switch_flags & SRE_RENDER_SWITCHCAMERA)
     {
         bool usecam = flags & SRE_DRAWFLAG_CAMERA;
-        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw1data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
+        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw2data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
     }
 
     /*

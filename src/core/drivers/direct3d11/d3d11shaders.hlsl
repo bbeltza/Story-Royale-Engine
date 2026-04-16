@@ -9,6 +9,7 @@ struct VSinput
     float4 transform: POSITION0;
     float2 anchor: POSITION1;
     uint4 color: COLOR;
+    float angle: PSIZE;
 
     float2 tuv: TEXCOORD0;
     float2 toffset: TEXCOORD1;
@@ -24,7 +25,7 @@ struct PSinput
 
 cbuffer CBuniforms: register(b0)
 {
-    float2 VIEWPORT;
+    float4x4 VIEWPORT;
     float2 CAMERA;
 };
 
@@ -42,27 +43,33 @@ PSinput VSmain(VSinput input, uint vid: SV_VertexID)
         input.transform.z, 0, 0, 0,
         0, input.transform.w, 0, 0,
         0, 0, 1, 0,
-        input.transform.xy + CAMERA, 0, 1
+        input.transform.xy, 0, 1
     );
 
-    float4x4 projection = float4x4(
-        2.0/VIEWPORT.x, 0.0, 0.0,  0.0,
-        0.0, 2.0/-VIEWPORT.y, 0.0, 0.0,
-        0.0, 0.0,    1.0, 0.0,
-        -1.0, 1.0, 0.0,    1.0
+    float cx = cos(input.angle);
+    float sx = sin(input.angle);
+    float4x4 rotation = float4x4(
+        cx, sx, 0, 0,
+        -sx, cx, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1 
     );
 
-    float4x4 mat = mul(transform, projection);
     float4 vert = VERTICES[vid] - float4(input.anchor, 0.0, 0.0);
+    vert = mul(vert, mul(transform, rotation));
+    vert = ceil(vert * VIEWPORT[2][2]) + float4(CAMERA, 0, 0);
+    vert.w = 1;
+    vert = mul(VIEWPORT, vert);
+
     float4 color = float4(
         input.color.r/255.0f,
         input.color.g/255.0f,
         input.color.b/255.0f,
         input.color.a/255.0f
-        );
+    );
 
     PSinput output = {
-        mul(vert, mat),
+        vert,
         color,
         VERTICES[vid].xy * input.tuv + input.toffset,
     };

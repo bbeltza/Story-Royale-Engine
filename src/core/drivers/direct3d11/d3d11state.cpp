@@ -12,9 +12,9 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 		m_dxrendertargetview->Release();
 		m_dxrendertargetview = NULL;
 	}
-	SRE_DXCALL(m_dxswapchain->ResizeBuffers(1, w, h, DXGI_FORMAT_UNKNOWN, 0));
+	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, 0));
 
-	{   // Setup render target view (only 1 buffer... Is there double-buffering already...?)
+	{
         ID3D11Resource* rtres{};
         SRE_DX11CALL(m_dxswapchain->GetBuffer(0, IID_PPV_ARGS(&rtres)));
         SRE_DX11CALL(m_dxdevice->CreateRenderTargetView(rtres, NULL, &m_dxrendertargetview));
@@ -23,19 +23,22 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 
 	D3D11_VIEWPORT viewport{ 0, 0, static_cast<FLOAT>(w), static_cast<FLOAT>(h) };
 	m_dxdevicecontext->RSSetViewports(1, &viewport);
-	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
 	{
+		m_caches.viewport[0] = 2.0f/w;
+		m_caches.viewport[5] = -2.0f/h;
+		m_caches.viewport[10] = scale;
+		m_caches.viewport[12] = -1;
+		m_caches.viewport[13] = 1;
+		m_caches.viewport[15] = 1;
+
 		D3D11_MAPPED_SUBRESOURCE mapped;
 		for (int i = 0; i < 2; i++)
 		{
 			SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[i], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-			static_cast<CBuffer*>(mapped.pData)->viewport = { w/scale, h/scale };
+			memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
 			m_dxdevicecontext->Unmap(m_cbuffers[i], 0);
 		}
 	}
-
-	m_caches.scaling = scale;
-	m_caches.viewport = { w/scale, h/scale };
 	return true;
 }
 
@@ -50,8 +53,8 @@ bool Instance::set_camerastate(sre::unit x, sre::unit y)
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mapped;
 	SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[1], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-	static_cast<CBuffer*>(mapped.pData)->viewport = m_caches.viewport;
-	static_cast<CBuffer*>(mapped.pData)->camera = { x/m_caches.scaling, y/m_caches.scaling };
+	memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
+	static_cast<CBuffer*>(mapped.pData)->camera = { x, y };
 	m_dxdevicecontext->Unmap(m_cbuffers[1], 0);
 
 	return SUCCEEDED(hr);
