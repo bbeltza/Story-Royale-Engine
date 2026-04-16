@@ -16,44 +16,38 @@ bool sregl21_clear(void* _inst, float color[3])
     SRE_GLCALLF(inst->glfuncs.ClearColor(color[0], color[1], color[2], 1));
     SRE_GLCALLF(inst->glfuncs.Clear(GL_COLOR_BUFFER_BIT));
 
-    inst->cache.last_texture = (void*)-1;
-
     return true;
 }
 
 static GLfloat NO_CAM[2];
 
-void sregl21_flush_queueinstances1(void* _inst, sre_Sampler*const* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags)
+void sregl21_flush_queueinstances1(void* _inst, sre_Sampler* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl21_inst* inst = _inst;
     SRE_GLCTXCHECK;
 
-    if (inst->cache.last_draw != 1)
+    if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
+        switch_flags |= SRE_RENDER_SWITCHTEXTURE | SRE_RENDER_SWITCHCAMERA; // Have to switch everything if there's a type check in here!
         sregl21bindbuffer(inst, inst->draw1data.vbo);
         SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw1data.program));
         SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->draw1data.ibo));
-        
-        inst->cache.last_draw = 1;
+    }
+    
+    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+    {
+        bool usecam = flags & SRE_DRAWFLAG_CAMERA;
+        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw1data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
     }
 
-    bool usecam = flags & SRE_DRAWFLAG_CAMERA;
-    if (inst->cache.last_cam1 != usecam)
+    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
-        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw1data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
-        inst->cache.last_cam1 = usecam;
+        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->basic_texture : texture->gltex));
     }
 
     for (size_t i = 0; i < instance_count; i++)
     {
         const sre_RenderInstance1* dinst = &instances[i];
-        sre_Sampler* dsampler = inst_textures[i];
-
-        if (inst->cache.last_texture != dsampler)
-        {
-            SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !dsampler ? inst->basic_texture : dsampler->gltex));
-            inst->cache.last_texture = dsampler;
-        }
 
         GLfloat model[4*3] = {
             dinst->rectangle.x, dinst->rectangle.y, dinst->rectangle.w, dinst->rectangle.h,
@@ -67,34 +61,33 @@ void sregl21_flush_queueinstances1(void* _inst, sre_Sampler*const* inst_textures
     }
 }
 
-void sregl21_flush_queueinstances2(void* _inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags)
+void sregl21_flush_queueinstances2(void* _inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl21_inst* inst = _inst;
     SRE_GLCTXCHECK;
 
-    if (inst->cache.last_draw != 2)
+    if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
-        sregl21bindbuffer(inst, inst->draw2data.vbo);
-        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw2data.program));
-        
-        inst->cache.last_draw = 2;
+        switch_flags |= /*SRE_RENDER_SWITCHTEXTURE |*/ SRE_RENDER_SWITCHCAMERA; // Have to switch everything if there's a type check in here!
+        sregl21bindbuffer(inst, inst->draw1data.vbo);
+        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw1data.program));
+        SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->draw1data.ibo));
+    }
+    
+    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+    {
+        bool usecam = flags & SRE_DRAWFLAG_CAMERA;
+        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw1data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
     }
 
-    bool usecam = flags & SRE_DRAWFLAG_CAMERA;
-    if (inst->cache.last_cam2 != usecam)
+    /*
+    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
-        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw2data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
-        inst->cache.last_cam2 = usecam;
+        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->basic_texture : texture->gltex));
     }
-    if (inst->cache.last_texture != NULL)
-    {
-        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, inst->basic_texture));
-        inst->cache.last_texture = NULL;
-    }
-
+        */
 
     SRE_GLCALL(inst->glfuncs21.Uniform4i(inst->draw2data.common_uniforms.color, instance->color.r, instance->color.g, instance->color.b, instance->color.a));
-    
     if ((GLsizei)point_count > inst->draw2data.bufsize)
     {
         inst->draw2data.bufsize *= 2;

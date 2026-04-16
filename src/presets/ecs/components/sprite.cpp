@@ -44,7 +44,7 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
             { region.size.x ? region.size.x / texture_fsize.x : 1, region.size.y ? region.size.y / texture_fsize.y : 1 },
             { region.position.x / texture_fsize.x, region.position.y / texture_fsize.y }
         }},
-        {texture.operator sre::Sampler *()}
+        texture
     );
 }
 

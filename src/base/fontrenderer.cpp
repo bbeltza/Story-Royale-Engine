@@ -139,7 +139,7 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
                 0,
                 { 1, 1 },
                 { 0, 0 }
-            }}, { texture }
+            }}, texture
         );
 
         render_rect.position.x += render_rect.size.x;

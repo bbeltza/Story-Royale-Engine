@@ -83,7 +83,7 @@ Instance::Instance(SDL_Window* window)
         sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
         sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
         sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-        sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+        sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 
         SRE_DX11CALL(m_dxdevice->CreateSamplerState(&sampler_desc, &m_dxsamplerstate));
     }
@@ -112,9 +112,13 @@ Instance::Instance(SDL_Window* window)
 
     for (int i = 0; i < 5; i++)
     {
+        #define SRE_D3D11_BLEND_DESC(srcFactor, dstFactor, op) { FALSE, FALSE, { {TRUE, srcFactor, dstFactor, op, D3D11_BLEND_ONE, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL} } }
         static D3D11_BLEND_DESC BLENDSTATES[5] = {
-            { FALSE, FALSE, { {FALSE} } },
-            { FALSE, FALSE, { {TRUE, D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD, D3D11_BLEND_ONE, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL} } }
+            { FALSE, FALSE, { {FALSE} } }, // TODO: None blend mode SHOULD be removed
+            /* BLEND */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD),
+            /* ADD   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD),
+            /* MOD   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_DEST_COLOR, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD),
+            /* MUL   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_DEST_COLOR, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD)
         };
 
         SRE_DX11CALL(m_dxdevice->CreateBlendState(&BLENDSTATES[i], &m_dxblendstates[i]));
@@ -153,7 +157,7 @@ Instance::Instance(SDL_Window* window)
     m_dxdevicecontext->VSSetShader(m_shaders.d1VS, NULL, 0);
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
     m_dxdevicecontext->IASetInputLayout(m_shaders.d1IL);
-    m_dxdevicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    m_dxdevicecontext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }
 
 Instance::~Instance()

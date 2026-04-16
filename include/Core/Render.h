@@ -36,6 +36,13 @@ enum sre_drawFlags
     SRE_DRAWFLAG_CAMERA = 1 << 0
 };
 
+enum _sre_drawSwitchFlags
+{
+    SRE_RENDER_SWITCHTYPE = 1 << 0, // Switch from draw1 to draw2, or vice-versa. The render driver can keep the drawing state if two render flushes are from the same draw function, which increases performance
+    SRE_RENDER_SWITCHCAMERA = 1 << 1,
+    SRE_RENDER_SWITCHTEXTURE = 1 << 2
+};
+
 struct SDL_Window;
 
 struct sre_SamplerNew
@@ -76,8 +83,8 @@ struct sre_SamplerNew
     // C interface, experimental
     struct _sre_RenderInterfacevft
     {
-        void (SRE_RENDERCALL *const flush_queueinstances1)(void*, sre_Sampler*const* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags);
-        void (SRE_RENDERCALL *const flush_queueinstances2)(void*, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags);
+        void (SRE_RENDERCALL *const flush_queueinstances1)(void*, sre_Sampler* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
+        void (SRE_RENDERCALL *const flush_queueinstances2)(void*, /*sre_Sampler* _texture,*/ const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
 
         void (SRE_RENDERCALL *const present)(void*);
         bool (SRE_RENDERCALL *const clear)(void*, float color[3]);
@@ -155,6 +162,7 @@ struct sre_SamplerNew
         struct RenderQueue
         {
             size_t count;
+            sre::Sampler* texture;
             char type; // 1 for RenderInstance1, or 2 for RenderInstance2
             short blendmode;
             sre::flags32 flags;
@@ -174,11 +182,11 @@ struct sre_SamplerNew
             void blend(sre::blendMode blend) { m_blendmode = blend; }
             void blend() { m_blendmode = SRE_BLEND_DEFAULT; }
 
-            void draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler*const samplers[]=NULL);
+            void draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture=NULL);
             void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2Mode mode=SRE_DRAW2_JOINED);
 
             template <size_t n>
-            void draw1(sre::flags32 flags, const RenderInstance1 (&instances)[n], Sampler*const (&samplers)[n]={NULL}) { draw1(flags, instances, n, samplers); }
+            void draw1(sre::flags32 flags, const RenderInstance1 (&instances)[n], Sampler* texture=NULL) { draw1(flags, instances, n, texture); }
 
             template <size_t n>
             void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&points)[n], sre::draw2Mode mode=SRE_DRAW2_JOINED) { return draw2(flags, color, points, n, mode); }
@@ -194,8 +202,8 @@ struct sre_SamplerNew
 
             protected: // Full interface
                 // Instance drawing functions
-                virtual void SRE_RENDERCALL flush_queueinstances1(Sampler*const* inst_textures, const RenderInstance1* instances, size_t instance_count, sre::u32 flags) = 0;
-                virtual void SRE_RENDERCALL flush_queueinstances2(const RenderInstance2& instance, size_t point_count, sre::u32 flags) = 0;
+                virtual void SRE_RENDERCALL flush_queueinstances1(Sampler* texture, const RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags) = 0;
+                virtual void SRE_RENDERCALL flush_queueinstances2(/* Sampler* texture,*/ const RenderInstance2& instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags) = 0;
 
                 virtual void SRE_RENDERCALL present() = 0; // Present the screen, acts as the last function to be run in the current frame
                 virtual bool SRE_RENDERCALL clear(float color[3]) = 0; // Clear the screen and more likely the target buffer, also acts as the rendering frame setup function
@@ -224,7 +232,6 @@ struct sre_SamplerNew
 
                 short m_blendmode = SRE_BLEND_DEFAULT;
 
-                std::vector<Sampler*> m_texturecache;
                 std::vector<RenderInstance1> m_rinst1cache;
                 std::vector<sre::byte> m_rinst2cache; // sre::byte to be more like a point buffer. RenderInstance2's size varies
 

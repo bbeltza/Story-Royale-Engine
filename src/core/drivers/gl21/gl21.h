@@ -51,12 +51,6 @@ struct sregl21_draw2dep
 
 struct sregl21_drawcache
 {
-    sre_Sampler* last_texture;
-    int last_draw;
-
-    bool last_cam1;
-    bool last_cam2;
-
     GLfloat camera[2];
 };
 
@@ -81,8 +75,8 @@ typedef struct sregl21_inst
 
 SRE_CAPI_BEGIN
 
-void sregl21_flush_queueinstances1(void* inst, sre_Sampler*const* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags);
-void sregl21_flush_queueinstances2(void* inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags);
+void sregl21_flush_queueinstances1(void* inst, sre_Sampler* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
+void sregl21_flush_queueinstances2(void* inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
 
 void sregl21_present(void* inst);
 bool sregl21_clear(void* inst, float color[3]);

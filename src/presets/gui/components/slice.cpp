@@ -73,17 +73,5 @@ void Slice::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* ren
         { rects[8], sre::vec2ut::ZERO, modulate, 0,  uvs[8], uvoffsets[8]}
     };
 
-    sre::Sampler* samplers[9] = {
-        texture,
-        texture,
-        texture,
-        texture,
-        texture,
-        texture,
-        texture,
-        texture,
-        texture
-    };
-
-    renderer->draw1(0, instances, samplers);
+    renderer->draw1(0, instances, texture);
 }

@@ -35,8 +35,8 @@ namespace sre
 {
 	class DummyInterface: sre::RenderInterface
 	{
-		virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler*const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags) override {}
-        virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags) override {}
+		virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags) override {}
+        virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags) override {}
             
         virtual void SRE_RENDERCALL present() override {}
         virtual bool SRE_RENDERCALL clear(float color[3]) override { return false; }
@@ -264,20 +264,39 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 	// Perform flushes
 		size_t insti1 = 0;
 		size_t insti2 = 0;
+
+		static const sre::RenderQueue _DUMMY_QUEUE = {
+			SIZE_MAX,
+			reinterpret_cast<sre::Sampler*>(PTRDIFF_MAX),
+			CHAR_MAX,
+			INT16_MAX,
+			UINT32_MAX
+		};
+
+		const auto* last_queue = &_DUMMY_QUEUE;
 		for (auto& queue : engine.video->m_renderqueues)
 		{
 			if (queue.blendmode != engine.video->m_blendmode)
+			{
 				engine.video->set_blendstate(static_cast<sre::blendMode>(queue.blendmode));
+				engine.video->m_blendmode = queue.blendmode;
+			}
 
+			sre::u32 switchflags = (queue.type != last_queue->type ? SRE_RENDER_SWITCHTYPE : 0)
+								 | ((queue.flags&SRE_DRAWFLAG_CAMERA) != (last_queue->flags&SRE_DRAWFLAG_CAMERA) || last_queue == &_DUMMY_QUEUE ? SRE_RENDER_SWITCHCAMERA : 0 )
+								 | (queue.texture != last_queue->texture ? SRE_RENDER_SWITCHTEXTURE : 0);
+
+			last_queue = &queue;
 			switch (queue.type)
 			{
 			case 1:
 				assert(insti1 + queue.count <= engine.video->m_rinst1cache.size());
 				assert(insti1 + queue.count <= engine.video->m_texturecache.size());
-				engine.video->flush_queueinstances1(&engine.video->m_texturecache.at(insti1),
+				engine.video->flush_queueinstances1(queue.texture,
 													&engine.video->m_rinst1cache.at(insti1),
 													queue.count,
-													queue.flags
+													queue.flags,
+													switchflags
 												);
 				insti1 += queue.count;
 				break;
@@ -285,7 +304,8 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 				engine.video->flush_queueinstances2(
 					reinterpret_cast<RenderInstance2&>(engine.video->m_rinst2cache.at(insti2)),
 					queue.count,
-					queue.flags
+					queue.flags,
+					switchflags
 				);
 				insti2 += queue.count*sizeof(RenderInstance2::points[0]) + sizeof(RenderInstance2::color) + sizeof(RenderInstance2::mode);
 			default:
@@ -294,7 +314,6 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 		}
 		engine.video->m_rinst1cache.clear();
 		engine.video->m_rinst2cache.clear();
-		engine.video->m_texturecache.clear();
 		engine.video->m_renderqueues.clear();
 
 		engine.video->m_blendmode = SRE_BLEND_DEFAULT;
@@ -326,19 +345,16 @@ void sre::RenderInterface::clip_set(sre::rect2Dut zone)
 	set_clipstate(&rect);
 }
 
-void sre::RenderInterface::draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler*const samplers[])
+void sre::RenderInterface::draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture)
 {
 	m_rinst1cache.insert(m_rinst1cache.end(), instances, instances + instcount);
-	if (samplers)
-		m_texturecache.insert(m_texturecache.end(), samplers, samplers + instcount); // Some textures can be NULL, in this case, either let the driver do the work, or do it ourselves with a basic texture
-	else
-		m_texturecache.insert(m_texturecache.end(), instcount, NULL);
 	
 	auto* back = m_renderqueues.empty() ? NULL : &m_renderqueues.back();
-	if (!back || back->type != 1 || back->flags != flags || back->blendmode != m_blendmode)
+	if (!back || back->texture != texture || back->type != 1 || back->flags != flags || back->blendmode != m_blendmode)
 	{
 		m_renderqueues.push_back({
 			instcount,
+			texture,
 			1,
 			m_blendmode,
 			flags
@@ -358,6 +374,7 @@ void sre::RenderInterface::draw2(sre::flags32 flags, sre::col4 color, const sre:
 	m_rinst2cache.insert(m_rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
 	m_renderqueues.push_back({
 		pcount,
+		NULL, // draw2 will support textures
 		2,
 		m_blendmode,
 		flags

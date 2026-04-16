@@ -28,8 +28,10 @@ void sresdlrenderer_present(void* _inst)
     SDL_RenderPresent(inst->renderer);
 }
 
-void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler*const* inst_textures, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags)
+void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
 {
+    (void)switch_flags;
+
     static const uint8_t DRAW1_INDICES[6] = {
         0, 1, 2,
         2, 3, 0
@@ -107,7 +109,7 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler*const* inst_t
         };
 
         int res = SDL_RenderGeometryRaw(
-            inst->renderer, inst_textures[i] ? inst_textures[i]->texture : NULL,
+            inst->renderer, texture ? texture->texture : NULL,
             positions, sizeof(float)*2,
             (SDL_Color*)&dinst->color, 0,
             uvs, sizeof(float)*2,
@@ -124,7 +126,7 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler*const* inst_t
     }
 }
 
-void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags)
+void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switchflags)
 {
     sresdlrenderer_interface* inst = _inst;
     int res;

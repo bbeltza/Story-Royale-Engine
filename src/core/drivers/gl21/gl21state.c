@@ -19,8 +19,6 @@ bool sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
     SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw1data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
     SRE_GLCALLF(inst->glfuncs21.UseProgram(inst->draw2data.program));
     SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw2data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
-
-    inst->cache.last_draw = 0;
     return true;
 }
 
@@ -72,9 +70,6 @@ bool sregl21_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 
     inst->cache.camera[0] = x;
     inst->cache.camera[1] = y;
-
-    inst->cache.last_cam1 = false;
-    inst->cache.last_cam2 = false;
 
     return true;
 }

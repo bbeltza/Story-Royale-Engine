@@ -44,6 +44,12 @@ namespace sreD3D11
         sre::vec2f camera;
     };
 
+    struct InstCaches
+    {
+        sre::vec2ut viewport;
+        sre::unit scaling;
+    };
+
     struct Instance: sre::RenderInterface
     {
         Instance(SDL_Window* window);
@@ -72,11 +78,12 @@ namespace sreD3D11
             ID3D11Buffer* m_cbuffers[2];
 
             ID3D11ShaderResourceView* m_basictexture;
-            sre::unit m_scaling; // Temporal, to test on camera rendering
+
+            InstCaches m_caches;
         protected:
             // Instance drawing functions
-            virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler* const* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags) override;
-            virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags) override {}
+            virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags) override;
+            virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags) override;
             
             virtual void SRE_RENDERCALL present() override;
             virtual bool SRE_RENDERCALL clear(float color[3]) override;

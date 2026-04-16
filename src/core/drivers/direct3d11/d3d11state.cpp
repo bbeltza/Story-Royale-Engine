@@ -34,7 +34,8 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 		}
 	}
 
-	m_scaling = scale;
+	m_caches.scaling = scale;
+	m_caches.viewport = { w/scale, h/scale };
 	return true;
 }
 
@@ -48,8 +49,9 @@ bool Instance::set_camerastate(sre::unit x, sre::unit y)
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mapped;
-	SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[1], 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &mapped));
-	static_cast<CBuffer*>(mapped.pData)->camera = { x/m_scaling, y/m_scaling };
+	SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[1], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
+	static_cast<CBuffer*>(mapped.pData)->viewport = m_caches.viewport;
+	static_cast<CBuffer*>(mapped.pData)->camera = { x/m_caches.scaling, y/m_caches.scaling };
 	m_dxdevicecontext->Unmap(m_cbuffers[1], 0);
 
 	return SUCCEEDED(hr);
