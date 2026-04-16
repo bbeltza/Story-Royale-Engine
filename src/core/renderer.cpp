@@ -69,13 +69,6 @@ namespace sre
 void __cleanup_renderer()
 {
 	engine.video_quit(engine.video);
-	/*
-	delete[] engine.video->texture_fl;
-	delete[] engine.video->clipstack_base;
-	operator delete (engine.video->textures);
-	operator delete (engine.video);
-	*/
-
 	engine.video = NULL;
 }
 
@@ -366,8 +359,8 @@ void sre::RenderInterface::draw1(sre::flags32 flags, const RenderInstance1 insta
 void sre::RenderInterface::draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2Mode mode)
 {
 	sre::RenderInstance2 dummy{
-		color,
-		mode
+		mode,
+		color
 	};
 	m_rinst2cache.insert(m_rinst2cache.end(), reinterpret_cast<sre::byte*>(&dummy), reinterpret_cast<sre::byte*>(&dummy.points));
 	m_rinst2cache.insert(m_rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));

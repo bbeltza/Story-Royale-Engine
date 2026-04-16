@@ -87,7 +87,8 @@ namespace sreD3D11
             ID3D11SamplerState* m_dxsamplerstate;
 
             DrawBuffer m_d1buffer;
-            DrawBuffer m_d2buffer;
+            DrawBuffer m_d2bufferc; // Color draw2 buffer
+            DrawBuffer m_d2bufferp; // Vertex draw2 buffer
 
             ID3D11Buffer* m_cbuffers[2];
 
@@ -106,7 +107,7 @@ namespace sreD3D11
             virtual bool SRE_RENDERCALL set_viewportstate(int w, int h, sre::unit scale) override;
             virtual bool SRE_RENDERCALL set_blendstate(sre::blendMode blending) override;
             virtual bool SRE_RENDERCALL set_camerastate(sre::unit x, sre::unit y) override;
-            virtual void SRE_RENDERCALL set_clipstate(const sre::rect2Di* rectangle) override {}
+            virtual void SRE_RENDERCALL set_clipstate(const sre::rect2Di* rectangle) override;
             virtual void SRE_RENDERCALL set_vsync(bool enable) override { m_caches.vsync = enable; }
                 
             // Texture functions

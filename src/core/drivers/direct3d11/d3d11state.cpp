@@ -48,6 +48,29 @@ bool Instance::set_blendstate(sre::blendMode blending)
 	return true;
 }
 
+void Instance::set_clipstate(const sre::rect2Di* rectangle)
+{
+	if (!rectangle)
+	{
+		DXGI_SWAP_CHAIN_DESC desc;
+		m_dxswapchain->GetDesc(&desc);
+		D3D11_RECT rect = {
+			0, 0,
+			static_cast<LONG>(desc.BufferDesc.Width),
+			static_cast<LONG>(desc.BufferDesc.Height)
+		};
+		return m_dxdevicecontext->RSSetScissorRects(1, &rect);
+	}
+	
+	D3D11_RECT rect = {
+		rectangle->position.x,
+		rectangle->position.y,
+		rectangle->position.x + rectangle->size.x,
+		rectangle->position.y + rectangle->size.y
+	};
+	m_dxdevicecontext->RSSetScissorRects(1, &rect);
+}
+
 bool Instance::set_camerastate(sre::unit x, sre::unit y)
 {
 	HRESULT hr;

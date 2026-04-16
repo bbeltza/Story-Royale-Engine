@@ -89,7 +89,8 @@ Instance::Instance(SDL_Window* window)
     }
 
     m_success &= m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 256);
-    m_success &= m_d2buffer.init(m_dxdevice, sizeof(sre::vec2ut) * 256);
+    m_success &= m_d2bufferc.init(m_dxdevice, sizeof(sre::col4) * 256);
+    m_success &= m_d2bufferp.init(m_dxdevice, sizeof(sre::vec2ut) * 256);
     {
         D3D11_BUFFER_DESC cbuffer_desc{};
         cbuffer_desc.ByteWidth = sizeof(CBuffer);
@@ -146,10 +147,7 @@ Instance::Instance(SDL_Window* window)
 
     m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);
     m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
-    m_dxdevicecontext->VSSetShader(m_shaders.d1VS, NULL, 0);
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
-    m_dxdevicecontext->IASetInputLayout(m_shaders.d1IL);
-    m_dxdevicecontext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }
 
 Instance::~Instance()

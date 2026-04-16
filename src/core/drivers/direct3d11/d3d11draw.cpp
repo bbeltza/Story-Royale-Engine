@@ -18,7 +18,8 @@ bool Instance::clear(float color[3])
 	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
     m_dxdevicecontext->ClearRenderTargetView(m_dxrendertargetview, color4);
     m_d1buffer.reset();
-    m_d2buffer.reset();
+    m_d2bufferc.reset();
+    m_d2bufferp.reset();
 
     return true;
 }
@@ -26,7 +27,7 @@ bool Instance::clear(float color[3])
 void Instance::flush_queueinstances1(sre::Sampler* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags)
 {
     UINT inst_num = m_d1buffer.index / sizeof(sre::RenderInstance1);
-    if (m_d1buffer.append(m_dxdevicecontext, instances, sizeof(*instances)*instance_count))
+    if (m_d1buffer.append(m_dxdevicecontext, instances, static_cast<UINT>(sizeof(*instances)*instance_count)))
     {
         switch_flags |= SRE_RENDER_SWITCHTYPE;    
         inst_num = 0;
@@ -39,6 +40,9 @@ void Instance::flush_queueinstances1(sre::Sampler* texture, const sre::RenderIns
         UINT offsets[] = { 0 };
         UINT strides[] = { sizeof(sre::RenderInstance1) };
         m_dxdevicecontext->IASetVertexBuffers(0, 1, &m_d1buffer.dxbuffer, strides, offsets);
+        m_dxdevicecontext->VSSetShader(m_shaders.d1VS, NULL, 0);
+        m_dxdevicecontext->IASetInputLayout(m_shaders.d1IL);
+        m_dxdevicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     }
 
     if (switch_flags & SRE_RENDER_SWITCHCAMERA)
@@ -55,6 +59,60 @@ void Instance::flush_queueinstances1(sre::Sampler* texture, const sre::RenderIns
 void Instance::flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
 {
 
+    bool doswitch = false;
+
+    UINT offscol = m_d2bufferc.index;
+    UINT offspos = m_d2bufferp.index;
+    if (m_d2bufferc.append(m_dxdevicecontext, &instance.color, sizeof(instance.color)))
+    {
+        offscol = 0;
+        doswitch = true;
+    }
+    if (m_d2bufferp.append(m_dxdevicecontext, instance.points, static_cast<UINT>(sizeof(instance.points[0])*point_count)))
+    {
+        offspos = 0;
+        doswitch = true;
+    }
+
+    if (switch_flags & SRE_RENDER_SWITCHTYPE)
+    {
+        doswitch = true;
+        m_dxdevicecontext->VSSetShader(m_shaders.d2VS, NULL, 0);
+        m_dxdevicecontext->IASetInputLayout(m_shaders.d2IL);
+        // Temporary
+        m_dxdevicecontext->PSSetShaderResources(0, 1, &m_basictexture);
+    }
+
+    if (doswitch)
+    {
+        UINT offsets[] = { offscol, offspos };
+        UINT strides[] = { sizeof(sre::col4), sizeof(sre::vec2ut) };
+        ID3D11Buffer* buffers[] = { m_d2bufferc.dxbuffer, m_d2bufferp.dxbuffer };
+        m_dxdevicecontext->IASetVertexBuffers(0, 2, buffers, strides, offsets);
+    }
+
+    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+        m_dxdevicecontext->VSSetConstantBuffers(0, 1, m_cbuffers + ((flags & SRE_DRAWFLAG_CAMERA) != 0));
+
+    D3D11_PRIMITIVE_TOPOLOGY topology;
+    switch (instance.mode)
+    {
+        case SRE_DRAW2_JOINED: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN; sre::log<sre::LOGCATEGORY_WARN>("SRE_DRAW2_JOINED is unimplemented on d3d11, and may soon become unsupported. It only renders points right now."); break;
+        case SRE_DRAW2_STRIP: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
+        case SRE_DRAW2_TRIANGLE: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
+        default: abort();
+    }
+
+    m_dxdevicecontext->IASetPrimitiveTopology(topology);
+
+    /*
+    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
+    {
+        m_dxdevicecontext->PSSetShaderResources(0, 1, texture ? &texture->dxsrv : &m_basictexture);
+    }
+    */
+
+    m_dxdevicecontext->Draw(point_count, 0);
 }
 
 //

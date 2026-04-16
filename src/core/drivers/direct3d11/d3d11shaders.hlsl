@@ -2,9 +2,10 @@
 // They are compiled and put into `d3d11shaders.cpp` as an array of bytes with the command line tool `fxc`
 
 //      fxc /T ps_4_0 /Fh ps.h /E PSmain d3d11shaders.hlsl /Gec
-//      fxc /T vs_4_0 /Fh vs.h /E VSmain d3d11shaders.hlsl /Gec
+//      fxc /T vs_4_0 /Fh vs1.h /E D1main d3d11shaders.hlsl /Gec
+//      fxc /T vs_4_0 /Fh vs2.h /E D2main d3d11shaders.hlsl /Gec
 
-struct VSinput
+struct D1input
 {
     float4 transform: POSITION0;
     float2 anchor: POSITION1;
@@ -13,6 +14,12 @@ struct VSinput
 
     float2 tuv: TEXCOORD0;
     float2 toffset: TEXCOORD1;
+};
+
+struct D2input
+{
+    uint4 color: COLOR;
+    float2 position: POSITION;
 };
 
 struct PSinput
@@ -29,7 +36,7 @@ cbuffer CBuniforms: register(b0)
     float2 CAMERA;
 };
 
-PSinput VSmain(VSinput input, uint vid: SV_VertexID)
+PSinput D1main(D1input input, uint vid: SV_VertexID)
 {
     static float4 VERTICES[] =
     {
@@ -57,21 +64,32 @@ PSinput VSmain(VSinput input, uint vid: SV_VertexID)
 
     float4 vert = VERTICES[vid] - float4(input.anchor, 0.0, 0.0);
     vert = mul(vert, mul(transform, rotation));
-    vert = ceil(vert * VIEWPORT[2][2]) + float4(CAMERA, 0, 0);
+    vert = floor(vert * VIEWPORT[2][2]) + float4(CAMERA, 0, 0);
     vert.w = 1;
     vert = mul(VIEWPORT, vert);
 
-    float4 color = float4(
-        input.color.r/255.0f,
-        input.color.g/255.0f,
-        input.color.b/255.0f,
-        input.color.a/255.0f
-    );
+    float4 color = float4(input.color)/255;
 
     PSinput output = {
         vert,
         color,
         VERTICES[vid].xy * input.tuv + input.toffset,
+    };
+    return output;
+}
+
+PSinput D2main(D2input input)
+{
+    float4 vert = float4(input.position, 0, 1);
+    vert.xy = floor(vert.xy * VIEWPORT[2][2]);
+    vert.xy += CAMERA;
+    vert = mul(VIEWPORT, vert);
+
+    float4 color = float4(input.color)/255;
+    PSinput output = {
+        vert,
+        color,
+        float2(0, 0)
     };
     return output;
 }

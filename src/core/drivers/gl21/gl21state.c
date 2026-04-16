@@ -76,8 +76,6 @@ bool sregl21_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 
 void sregl21_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
 {
-    return; // clipping is not set up correctly
-
     sregl21_inst* inst = _inst;
     SRE_GLCTXCHECK;
 
@@ -86,6 +84,7 @@ void sregl21_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
 
     if (rectangle)
     {
+        SRE_GLCALL(inst->glfuncs.Enable(GL_SCISSOR_TEST));
         SRE_GLCALL(inst->glfuncs.Scissor(
             rectangle->x,
             h - rectangle->y + rectangle->h,
@@ -95,7 +94,7 @@ void sregl21_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
     }
     else
     {
-        SRE_GLCALL(inst->glfuncs.Scissor(0, 0, w, h));
+        SRE_GLCALL(inst->glfuncs.Disable(GL_SCISSOR_TEST));
     }
 }
 

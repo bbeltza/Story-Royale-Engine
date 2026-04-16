@@ -154,8 +154,8 @@ struct sre_SamplerNew
         };
         struct RenderInstance2 // Render instance for all line & geometry draw calls
         {
-            sre::col4 color;
             sre::draw2Mode mode;
+            sre::col4 color;
             sre::vec2ut points[1]; // Size set to 1, don't bother, it's in the `point_count` parameter in `flush_queueinstances2`
         };
 
