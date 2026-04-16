@@ -3,7 +3,7 @@
 void sregl21_present(void* _inst)
 {
     sregl21_inst* inst = _inst;
-    SDL_GL_SwapWindow(inst->window);    
+    SDL_GL_SwapWindow(inst->window);
     
     SRE_GLCTXEND();
 }
@@ -21,9 +21,10 @@ bool sregl21_clear(void* _inst, float color[3])
 
 static GLfloat NO_CAM[2];
 
-void sregl21_flush_queueinstances1(void* _inst, sre_Sampler* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
+void sregl21_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl21_inst* inst = _inst;
+    sregl21_texture* texture = _texture;
     SRE_GLCTXCHECK;
 
     if (switch_flags & SRE_RENDER_SWITCHTYPE)

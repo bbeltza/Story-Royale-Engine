@@ -198,49 +198,40 @@ void Object::call_update()
     updated.fire();
 }
 
-void Object::call_render(sre::RenderInterface* renderer)
+void Object::call_render()
 {
     bool has_clip = flags.has(F_CLIP);
 
-    pre_render(renderer);
+    pre_render();
 
     if (has_clip)
     {
         s_clipstack.push(m_absolute);
+        sre::render_clipset(s_clipstack.top());
     }
     
     for (auto& comp : components)
     {
         if (comp.enabled())
-            comp.on_render(m_absolute, renderer);
+            comp.on_render(m_absolute);
     }
     
     for (auto& obj : children)
     {
         if (!obj.flags.has(F_ENABLED)) continue;
 
-        obj.call_render(renderer);
+        obj.call_render();
     }
 
     if (has_clip)
     {
         if (s_clipstack.pop())
-            renderer->clip_set(s_clipstack.top());
+            sre::render_clipset(s_clipstack.top());
         else
-            renderer->clip_reset();
+            sre::render_clipreset();
     }
 
-    post_render(renderer);
-
-    /*
-    sre::draw(sre::DDRect{
-        SRE_DRAWFLAGS_STROKE,
-        sre::col4::RED,
-
-        m_absolute,
-        sre::vec2ut::ZERO
-    });
-    */
+    post_render();
 
     rendered.fire();
 }

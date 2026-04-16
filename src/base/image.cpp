@@ -64,7 +64,7 @@ void Image::blit(const Image& img, const sre::vec2i& pos, const sre::vec2f& anch
     SDL_UpperBlit(img.sdl_surface, NULL, sdl_surface, &rect);
 }
 
-sre_Sampler* Image::to_sampler() const
+sre::Sampler* Image::to_sampler() const
 {
     #define IMG_TSERR(...) sre::log<LOGCATEGORY_ERROR>("Image::to_sampler() - " __VA_ARGS__)
 
@@ -74,21 +74,17 @@ sre_Sampler* Image::to_sampler() const
         return NULL;
     }
 
-    sre::RenderInterface* renderer = sre::get_renderer();
-
-    sre_Sampler* sampler = renderer->sampler(static_cast<sre::pixelFormat>(this->SDLformat()), sdl_surface->w, sdl_surface->h);
+    sre::Sampler* sampler = sre::sampler(static_cast<sre::pixelFormat>(this->SDLformat()), sdl_surface->w, sdl_surface->h);
     if (!sampler)
     {
         IMG_TSERR("RenderInterface::sampler() failed");
         return NULL;
     }
 
-    sre::pixelFormat format;
-    renderer->sampler_query(sampler, NULL, &format);
-
+    sre::pixelFormat format = sampler->format();
     if (format == SDLformat())
     {
-        if (!renderer->sampler_update(sampler, sdl_surface->pixels, sdl_surface->pitch))
+        if (!sampler->update(sdl_surface->pixels, sdl_surface->pitch))
             IMG_TSERR("RenderInterface::sampler_update() failed");
     }
     else
@@ -98,7 +94,7 @@ sre_Sampler* Image::to_sampler() const
             IMG_TSERR("SDL_ConvertSurfaceFormat() failed: %s", SDL_GetError());
         else
         {
-            if (!renderer->sampler_update(sampler, copy->pixels, copy->pitch))
+            if (!sampler->update(copy->pixels, copy->pitch))
                 IMG_TSERR("RenderInterface::sampler_update() failed");
             
             SDL_FreeSurface(copy);

@@ -14,6 +14,29 @@
 	#include <backends/imgui_impl_null.cpp>
 //
 
+namespace sre
+{
+	struct RenderQueue
+	{
+	    size_t count;
+	    sre::Sampler* texture;
+	    char type; // 1 for RenderInstance1, or 2 for RenderInstance2
+	    short blendmode;
+	    sre::flags32 flags;
+		sre::rect2Di clip_rect;
+	};
+
+	struct RenderVectors // What _vector_data in engine.video contains
+	{
+		std::vector<RenderInstance1> rinst1cache;
+		std::vector<sre::byte> rinst2cache; // sre::byte to be more like a point buffer. RenderInstance2's size varies
+            
+        // Render queue, what will be inserted in the draw functions
+        std::vector<RenderQueue> renderqueues;
+	};
+}
+
+
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
 VIDEOINIT_DEF(gl21)					\
@@ -22,54 +45,20 @@ VIDEOINIT_DEF(d3d11)				\
 //VIDEOINIT_DEF(d3d12)				\
 //VIDEOINIT_DEF(softwarerender)
 
-#define VIDEOINIT_DEF(x) extern "C" const sre::RenderDriverData sre##x;
+#define VIDEOINIT_DEF(x) extern "C" const sre_RenderDriverData sre##x;
 VIDEO_DRIVERS
 #undef VIDEOINIT_DEF
 
 #define VIDEOINIT_DEF(x) sre##x,
-static const sre::RenderDriverData video_drivers[] = {
+static const sre_RenderDriverData video_drivers[] = {
 	VIDEO_DRIVERS
 };
 
-namespace sre
-{
-	class DummyInterface: sre::RenderInterface
-	{
-		virtual void SRE_RENDERCALL flush_queueinstances1(sre::Sampler* inst_textures, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags) override {}
-        virtual void SRE_RENDERCALL flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags) override {}
-            
-        virtual void SRE_RENDERCALL present() override {}
-        virtual bool SRE_RENDERCALL clear(float color[3]) override { return false; }
-    
-        // State functions
-        virtual bool SRE_RENDERCALL set_viewportstate(int w, int h, sre::unit scale) override { return false; }
-        virtual bool SRE_RENDERCALL set_blendstate(sre::blendMode blending) override { return false; }
-        virtual bool SRE_RENDERCALL set_camerastate(sre::unit x, sre::unit y) override { return false; }
-        virtual void SRE_RENDERCALL set_clipstate(const sre::rect2Di* rectangle) override {}
-        virtual void SRE_RENDERCALL set_vsync(bool enable) override {}
-                
-        // Texture functions
-        virtual bool SRE_RENDERCALL setup_texture(sre::Sampler* texture, sre::pixelFormat format, int x, int y) override { return false; }
-        virtual bool SRE_RENDERCALL update_texture(sre::Sampler* texture, const void* pixels, int pitch=0) override { return false; }
-        virtual bool SRE_RENDERCALL query_texture(sre::Sampler* texture, sre::vec2i* size, sre::pixelFormat* format) override { return false; }
-        virtual void SRE_RENDERCALL destroy_texture(sre::Sampler* texture) override {}
-	};
-
-	class CoreRenderer
-	{
-		public:
-			static inline bool set_viewport(int w, int h, sre::unit scale) { return engine.video->set_viewportstate(w, h, scale); }
-			static inline void render(float bg[3], sre::vec2ut camoffset);
-
-			static void constructor(sre_RenderInterface* inter) { new(inter) DummyInterface(); }
-			static void destructor(sre_RenderInterface* inter) { inter->~RenderInterface(); }
-	};
-}
-
 void __cleanup_renderer()
 {
-	engine.video_quit(engine.video);
-	engine.video = NULL;
+	(*engine.video.vfptr)->destructor(engine.video.vfptr+1);
+	operator delete(engine.video.vfptr);
+	engine.video.vfptr = NULL;
 }
 
 void __setup_renderer()
@@ -85,18 +74,19 @@ void __setup_renderer()
 
 	auto driverdata = video_drivers[SRE_RENDERDRIVER_DEFAULT];
 	assert(driverdata.initialize != NULL);
-	assert(driverdata.destroy != NULL);
+	assert(driverdata.renderer_size >= sizeof(void*));
 	assert(driverdata.texture_size >= sizeof(int));
 
-	engine.video_quit = driverdata.destroy;
-	engine.video = driverdata.initialize(engine.sdl_windowhndl);
-	engine.video_tsize = driverdata.texture_size;
-
-	if (!engine.video)
+	engine.video.vfptr = static_cast<const sre_RenderVFT**>(operator new(sizeof(void*) + driverdata.renderer_size));
+	if (!driverdata.initialize(engine.video.vfptr, engine.video.vfptr+1, engine.sdl_windowhndl))
 	{
+		operator delete(engine.video.vfptr);
 		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
 		exit(-1);
 	}
+
+	new(engine.video._vector_data) sre::RenderVectors{};
+	engine.video.texture_size = driverdata.texture_size;
 
 #ifndef IMGUI_DISABLE
 	const sre_videodriverImGuiInterface* imgui = engine.video->imgui;
@@ -162,10 +152,12 @@ void __update_viewport(int w, int h)
 	engine.vcenter_x = center.x;
 	engine.vcenter_y = center.y;
 
-	sre::CoreRenderer::set_viewport(w, h, scale);
+	SRE_VIDEO(engine.video.vfptr, set_viewportstate, w, h, scale);
 }
 
 size_t last_renderedframe;
+
+static void flush_rendercmds(float bg[3], sre::vec2ut camoffset);
 
 void __display_render()
 {
@@ -189,6 +181,8 @@ void __display_render()
 	sre::onUpdate.fire();
 
 	// Render current world
+
+	sre::render_clipreset();
 
 	float bg[3];
 	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
@@ -223,7 +217,7 @@ void __display_render()
 
 		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
 		if (fg.a)
-			engine.video->fill(fg);
+			sre::render_fill(fg);
 	}
 	else
 	{
@@ -244,16 +238,20 @@ void __display_render()
 
 	sre::afterRender.fire();
 
-	sre::CoreRenderer::render(bg, 
+	flush_rendercmds(bg, 
 		sre::vec2ut{engine.vcenter_x, engine.vcenter_y} - (currscn != NULL ? currscn->camera.processed_position() : 0));
 }
 
-void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
+#define m reinterpret_cast<sre::RenderVectors&>(engine.video._vector_data)
+
+static void flush_rendercmds(float bg[3], sre::vec2ut camoffset)
 {
-	engine.video->clear(bg);
-	engine.video->set_camerastate(ceil(camoffset.x*engine.scale), ceil(camoffset.y*engine.scale));
+	using namespace sre;
+
+	SRE_VIDEO(engine.video.vfptr, clear, bg);
+	SRE_VIDEO(engine.video.vfptr, set_camerastate, ceil(camoffset.x*engine.scale), ceil(camoffset.y*engine.scale));
 	
-	engine.video->m_blendmode = -1;
+	engine.video.blendmode = -1;
 	// Perform flushes
 		size_t insti1 = 0;
 		size_t insti2 = 0;
@@ -267,12 +265,17 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 		};
 
 		const auto* last_queue = &_DUMMY_QUEUE;
-		for (auto& queue : engine.video->m_renderqueues)
+		for (auto& queue : m.renderqueues)
 		{
-			if (queue.blendmode != engine.video->m_blendmode)
+			if (queue.blendmode != engine.video.blendmode)
 			{
-				engine.video->set_blendstate(static_cast<sre::blendMode>(queue.blendmode));
-				engine.video->m_blendmode = queue.blendmode;
+				SRE_VIDEO(engine.video.vfptr, set_blendstate, static_cast<sre::blendMode>(queue.blendmode));
+				engine.video.blendmode = queue.blendmode;
+			}
+			if (queue.clip_rect != engine.video.clip_rect)
+			{
+				SRE_VIDEO(engine.video.vfptr, set_clipstate, &queue.clip_rect);
+				engine.video.clip_rect = queue.clip_rect;
 			}
 
 			sre::u32 switchflags = (queue.type != last_queue->type ? SRE_RENDER_SWITCHTYPE : 0)
@@ -283,32 +286,35 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 			switch (queue.type)
 			{
 			case 1:
-				assert(insti1 + queue.count <= engine.video->m_rinst1cache.size());
-				engine.video->flush_queueinstances1(queue.texture,
-													&engine.video->m_rinst1cache.at(insti1),
-													queue.count,
-													queue.flags,
-													switchflags
-												);
+				assert(insti1 + queue.count <= m.rinst1cache.size());
+				SRE_VIDEO(engine.video.vfptr,
+							flush_queueinstances1,
+							queue.texture,
+							&m.rinst1cache.at(insti1),
+							queue.count,
+							queue.flags,
+							switchflags
+						);
 				insti1 += queue.count;
 				break;
 			case 2:
-				engine.video->flush_queueinstances2(
-					reinterpret_cast<RenderInstance2&>(engine.video->m_rinst2cache.at(insti2)),
-					queue.count,
-					queue.flags,
-					switchflags
+				SRE_VIDEO(engine.video.vfptr,
+							flush_queueinstances2,
+							&reinterpret_cast<RenderInstance2&>(m.rinst2cache.at(insti2)),
+							queue.count,
+							queue.flags,
+							switchflags
 				);
 				insti2 += queue.count*sizeof(RenderInstance2::points[0]) + sizeof(RenderInstance2::color) + sizeof(RenderInstance2::mode);
 			default:
 				break;
 			}
 		}
-		engine.video->m_rinst1cache.clear();
-		engine.video->m_rinst2cache.clear();
-		engine.video->m_renderqueues.clear();
+		m.rinst1cache.clear();
+		m.rinst2cache.clear();
+		m.renderqueues.clear();
 
-		engine.video->m_blendmode = SRE_BLEND_DEFAULT;
+		engine.video.blendmode = SRE_BLEND_DEFAULT;
 	//
 
 	#ifndef IMGUI_DISABLE
@@ -317,69 +323,71 @@ void sre::CoreRenderer::render(float bg[3], sre::vec2ut camoffset)
 		imgui->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
 	#endif
 
-	engine.video->present();
+	SRE_VIDEOV(engine.video.vfptr, present);
 }
 
-// All of sre::RenderInterface's code
+// All sre::render_ functions
 
-sre::RenderInterface* sre::get_renderer() { assert(engine.video != NULL); return engine.video; }
+void sre::render_clipreset() { engine.video.clip_rect = {0, 0, engine.osize_x, engine.osize_y}; }
 
-void sre::RenderInterface::clip_reset() { set_clipstate(NULL); }
-
-void sre::RenderInterface::clip_set(sre::rect2Dut zone)
+void sre::render_clipset(sre::rect2Dut zone)
 {
-	sre::rect2Di rect{
+	engine.video.clip_rect = {
 		static_cast<int>(zone.position.x * engine.scale),
 		static_cast<int>(zone.position.y * engine.scale),
 		static_cast<int>(zone.size.x * engine.scale),
 		static_cast<int>(zone.size.y * engine.scale)
 	};
-	set_clipstate(&rect);
 }
 
-void sre::RenderInterface::draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture)
+void sre::render_draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture)
 {
-	m_rinst1cache.insert(m_rinst1cache.end(), instances, instances + instcount);
+	m.rinst1cache.insert(m.rinst1cache.end(), instances, instances + instcount);
 	
-	auto* back = m_renderqueues.empty() ? NULL : &m_renderqueues.back();
-	if (!back || back->texture != texture || back->type != 1 || back->flags != flags || back->blendmode != m_blendmode)
+	auto* back = m.renderqueues.empty() ? NULL : &m.renderqueues.back();
+	if (!back || back->texture != texture || back->type != 1 || back->flags != flags || back->blendmode != engine.video.blendmode || back->clip_rect != engine.video.clip_rect)
 	{
-		m_renderqueues.push_back({
+		m.renderqueues.push_back({
 			instcount,
-			texture,
+			texture ? texture+1 : NULL,
 			1,
-			m_blendmode,
-			flags
+			engine.video.blendmode,
+			flags,
+			engine.video.clip_rect
 		});
 	}
 	else
 		back->count+= instcount;
 }
 
-void sre::RenderInterface::draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2Mode mode)
+void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2mode mode)
 {
 	sre::RenderInstance2 dummy{
 		mode,
 		color
 	};
-	m_rinst2cache.insert(m_rinst2cache.end(), reinterpret_cast<sre::byte*>(&dummy), reinterpret_cast<sre::byte*>(&dummy.points));
-	m_rinst2cache.insert(m_rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
-	m_renderqueues.push_back({
+	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<sre::byte*>(&dummy), reinterpret_cast<sre::byte*>(&dummy.points));
+	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
+	m.renderqueues.push_back({
 		pcount,
 		NULL, // draw2 will support textures
 		2,
-		m_blendmode,
-		flags
+		engine.video.blendmode,
+		flags,
+		engine.video.clip_rect
 	});
 }
 
-sre::RenderInterface::RenderInterface()
-{
-}
+void sre::render_blend(sre::blendMode blend) { engine.video.blendmode = blend; }
 
-sre::RenderInterface::~RenderInterface()
-{
-}
+// C wrappers
 
-extern "C" void sre_RIconstructor(sre_RenderInterface* inter) { sre::CoreRenderer::constructor(inter); }
-extern "C" void sre_RIdestructor(sre_RenderInterface* inter) { sre::CoreRenderer::destructor(inter); }
+extern "C" void sre_render_clipreset() { sre::render_clipreset(); }
+extern "C" void sre_render_clipset(const sre_rect2Dut* zone) { sre::render_clipset(*zone); }
+
+extern "C" void sre_render_blend(sre_blendMode blend) { sre::render_blend(blend); }
+
+extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Sampler* texture) { sre::render_draw1(flags, instances, instcount, texture); }
+extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_vec2ut points[], size_t pcount, sre_draw2mode mode) { sre::render_draw2(flags, *color, points, pcount, mode); }
+
+extern "C" void sre_render_fill(const sre_col4* color) { sre::render_fill(*color); }

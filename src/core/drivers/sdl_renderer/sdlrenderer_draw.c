@@ -11,7 +11,7 @@
 
 bool sresdlrenderer_clear(void* _inst, float color[3])
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
     SDL_SetRenderDrawColor(inst->renderer,
         (Uint8)(color[0] * 255),
         (Uint8)(color[1] * 255),
@@ -24,11 +24,11 @@ bool sresdlrenderer_clear(void* _inst, float color[3])
 
 void sresdlrenderer_present(void* _inst)
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
     SDL_RenderPresent(inst->renderer);
 }
 
-void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
+void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
 {
     (void)switch_flags;
 
@@ -36,7 +36,8 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler* texture, con
         0, 1, 2,
         2, 3, 0
     };
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
+    sresdlrenderer_texture* texture = _texture;
     for (size_t i = 0; i < instance_count; i++)
     {
         #define Tround SDL_ceilf
@@ -128,7 +129,7 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, sre_Sampler* texture, con
 
 void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switchflags)
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
     int res;
 
     sre_vec2f *vertices = SDL_stack_alloc(sre_vec2f, point_count);

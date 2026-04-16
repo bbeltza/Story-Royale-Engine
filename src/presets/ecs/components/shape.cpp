@@ -44,7 +44,7 @@ bool Shape::in_screen_point(Entity &entity, sre::vec2ut pt) const
 	}
 }
 
-void Shape::on_render(Entity &entity, sre::RenderInterface* renderer)
+void Shape::on_render(Entity &entity)
 {
 	if (!this->flags.has(F_VISIBLE))
 		return;
@@ -59,7 +59,7 @@ void Shape::on_render(Entity &entity, sre::RenderInterface* renderer)
 	default:
 	{
 		sre::rect2Dut render_rect = real_rect(entity);
-		renderer->draw1(
+		sre::render_draw1(
 			SRE_DRAWFLAG_CAMERA,
 			{{ render_rect, sre::vec2ut::CENTER, color }}
 		);

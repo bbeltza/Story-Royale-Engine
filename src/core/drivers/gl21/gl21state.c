@@ -87,7 +87,7 @@ void sregl21_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
         SRE_GLCALL(inst->glfuncs.Enable(GL_SCISSOR_TEST));
         SRE_GLCALL(inst->glfuncs.Scissor(
             rectangle->x,
-            h - rectangle->y + rectangle->h,
+            h - rectangle->y - rectangle->h,
             rectangle->w,
             rectangle->h
         ));

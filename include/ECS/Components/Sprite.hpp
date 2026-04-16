@@ -32,7 +32,7 @@ namespace sreECS
 
         void attach(sre::RSampler&&);
     private:
-        void on_render(Entity&, sre::RenderInterface*) override;
+        void on_render(Entity&) override;
 
         std::vector<sre::RSampler> textures;
 

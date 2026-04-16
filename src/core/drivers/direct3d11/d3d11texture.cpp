@@ -2,11 +2,9 @@
 
 using namespace sreD3D11;
 
-bool Instance::setup_texture(sre::Sampler* texture, sre::pixelFormat format, int w, int h)
+bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat)
 {
 	HRESULT hr;
-	texture->w = w;
-	texture->h = h;
 
 	{
 		D3D11_TEXTURE2D_DESC tex_desc{};
@@ -33,25 +31,16 @@ bool Instance::setup_texture(sre::Sampler* texture, sre::pixelFormat format, int
 		SRE_DXCALL(m_dxdevice->CreateShaderResourceView(texture->dxtexture, &srv_desc, &texture->dxsrv));
 	}
 
+	*outformat = SDL_PIXELFORMAT_RGBA32;
 	return SUCCEEDED(hr);
 }
-bool Instance::update_texture(sre::Sampler* texture, const void* pixels, int pitch)
+bool Instance::texture_update(Texture* texture, const void* pixels, int pitch)
 {
 	m_dxdevicecontext->UpdateSubresource(texture->dxtexture, 0, NULL, pixels, pitch, 0);
 	return true;
 }
 
-bool Instance::query_texture(sre::Sampler* texture, sre::vec2i* size, sre::pixelFormat* format)
-{
-	if (size)
-		*size = { texture->w, texture->h };
-	if (format)
-		*format = SDL_PIXELFORMAT_ABGR8888;
-
-	return true;
-}
-
-void Instance::destroy_texture(sre::Sampler* texture)
+void Instance::texture_destroy(Texture* texture)
 {
 	if (texture->dxtexture)
 		texture->dxtexture->Release();

@@ -4,9 +4,9 @@
 
 using namespace sreGUI;
 
-void Fill::on_render(const sre::rect2Dut& dimensions, sre::RenderInterface* renderer)
+void Fill::on_render(const sre::rect2Dut& dimensions)
 {
-    renderer->draw1(
+    sre::render_draw1(
         0, {{
             dimensions,
             sre::vec2ut::ZERO,

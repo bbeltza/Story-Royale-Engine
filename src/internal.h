@@ -7,11 +7,9 @@
 #include <Datatypes/TimeStamp.h>
 #include <ints.h>
 
-SRE_CAPI_BEGIN
-	#ifndef sre_RenderInterface
-		struct sre_RenderInterface;
-	#endif
+#include <Core/Render.h>
 
+SRE_CAPI_BEGIN
 	struct _win_settings
 	{
 		const char* title;
@@ -32,6 +30,27 @@ SRE_CAPI_BEGIN
     	void* userdata;
     	SDL_sem* sem;
     	sre_sptr ret;
+	};
+
+	struct _vector_data
+	{
+		size_t size;
+		size_t capacity;
+	};
+
+	#define SRE_VIDEOV(x, func) (*x)->func(x+1)
+	#define SRE_VIDEO(x, func, ...) (*x)->func(x+1, __VA_ARGS__)
+	struct _engine_renderdata
+	{
+		const struct sre_RenderVFT** vfptr;
+		
+		size_t texture_size;
+
+		short blendmode;
+		
+		sre_rect2Di clip_rect;
+
+		void* _vector_data[4][3];
 	};
 
 	#if defined(_MSC_VER)
@@ -75,9 +94,7 @@ SRE_CAPI_BEGIN
 		
 		// Renderer data
 		
-		struct sre_RenderInterface* video;
-		void (*video_quit)(struct sre_RenderInterface* interface);
-		size_t video_tsize;
+		struct _engine_renderdata video;
 
 		SDL_cond* render_cond;
 		SDL_mutex* render_mutex;

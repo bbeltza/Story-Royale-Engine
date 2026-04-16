@@ -12,17 +12,15 @@ void Image::fit(Transform& transform)
         return;
     }
 
-    sre::RenderInterface* renderer = sre::get_renderer();
-    sre::vec2i size;
-    renderer->sampler_query(texture, &size, NULL);
+    sre::vec2i size = texture->size();
     transform.size = sre::udim2::fromoffset(sre::vec2ut{size});
 }
 
-void Image::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* renderer)
+void Image::on_render(const sre::rect2Dut &dimensions)
 {
     if (!texture) return;
 
-    renderer->draw1(
+    sre::render_draw1(
         0, {{
             dimensions,
             sre::vec2ut::ZERO,
@@ -30,6 +28,6 @@ void Image::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* ren
             0,
             {1, 1}
         }},
-        texture
+        texture.get()
     );
 }

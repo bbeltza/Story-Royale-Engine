@@ -3,13 +3,12 @@
 
 using namespace sreGUI;
 
-void Slice::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* renderer)
+void Slice::on_render(const sre::rect2Dut &dimensions)
 {
     if (!texture)
         return;
 
-    sre::vec2i size;
-    renderer->sampler_query(texture, &size, NULL);
+    sre::vec2i size = texture->size();
 
     sre::vec2f sizef{size};
     sre::rect2Df centerslicef{center_slice};
@@ -73,5 +72,5 @@ void Slice::on_render(const sre::rect2Dut &dimensions, sre::RenderInterface* ren
         { rects[8], sre::vec2ut::ZERO, modulate, 0,  uvs[8], uvoffsets[8]}
     };
 
-    renderer->draw1(0, instances, texture);
+    sre::render_draw1(0, instances, texture.get());
 }

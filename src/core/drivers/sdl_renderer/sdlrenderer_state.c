@@ -2,7 +2,7 @@
 
 bool sresdlrenderer_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
 
     (void)w;
     (void)h;
@@ -13,7 +13,7 @@ bool sresdlrenderer_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
 
 bool sresdlrenderer_set_blendstate(void* _inst, sre_blendMode blending)
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
     SDL_BlendMode mode;
     switch (blending)
     {
@@ -30,7 +30,7 @@ bool sresdlrenderer_set_blendstate(void* _inst, sre_blendMode blending)
 
 bool sresdlrenderer_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
 
     inst->camera = (sre_vec2ut){ x, y };
     return true;
@@ -38,14 +38,14 @@ bool sresdlrenderer_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 
 void sresdlrenderer_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
 
     SDL_RenderSetClipRect(inst->renderer, (const SDL_Rect*)rectangle);
 }
 
 void sresdlrenderer_set_vsync(void* _inst, bool enable)
 {
-    sresdlrenderer_interface* inst = _inst;
+    sresdlrenderer_inst* inst = _inst;
 
     SDL_RenderSetVSync(inst->renderer, enable);
 }

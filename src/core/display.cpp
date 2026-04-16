@@ -11,8 +11,6 @@ sre::unit sre::display_scale() { return engine.scale; }
 
 bool sre::display_setscale(int scale)
 {
-    if (!engine.video)
-        return false;
     if (engine.auto_scalex || engine.auto_scaley)
         return false;
 
@@ -33,18 +31,9 @@ void sre::display_autoscale_off()
     engine.auto_scaley = 0;
 }
 
-namespace sre
-{
-    class CoreRenderer
-    {
-        public:
-            static void vsync(bool enable) { engine.video->set_vsync(enable); }
-    };
-}
-
 void sre::display_vsync(bool enable)
 {
     sre_defer([](void* enable) { 
-        CoreRenderer::vsync(enable != NULL);
+        SRE_VIDEO(engine.video.vfptr, set_vsync, enable != NULL);
      }, reinterpret_cast<void*>(enable));
 }

@@ -137,13 +137,13 @@ void __render_scene() { sre::ECS::render_scene(); }
 void sre::ECS::render_ui()
 {
     if (engine.current_guilayer)
-        currlayer->call_render(engine.video);
+        currlayer->call_render();
 }
 
 void sre::ECS::render_scene()
 {
     assert(engine.current_world != NULL);
-    currscn->call_render(engine.video);
+    currscn->call_render();
 }
 
 //

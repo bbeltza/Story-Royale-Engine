@@ -155,8 +155,8 @@ namespace sreECS
     protected:
         virtual void update() {}
         virtual void pupdate() {}
-        virtual void pre_render(sre::RenderInterface* renderer) {}
-        virtual void post_render(sre::RenderInterface* renderer) {}
+        virtual void pre_render() {}
+        virtual void post_render() {}
 
         #ifndef IMGUI_DISABLE
 		    virtual void ImGuiUpdate() {} // User function for ImGui frame updates
@@ -166,7 +166,7 @@ namespace sreECS
         sre::Signal<sre::empty_t> rendered{this};
     private:
         void call_update();
-        void call_render(sre::RenderInterface* renderer);
+        void call_render();
         bool call_query(sre::vec2ut screen_coords) const;
     };
 

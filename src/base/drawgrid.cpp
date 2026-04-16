@@ -17,9 +17,7 @@ bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin,
 
     ut_dynsalloc(sre::vec2ut, points, numgridsx + numgridsy);
 
-    
-    sre::RenderInterface* renderer = sre::get_renderer();
-    renderer->draw2(
+    sre::render_draw2(
         0, color, points, numgridsx + numgridsy
     );
 

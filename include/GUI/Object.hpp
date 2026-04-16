@@ -222,12 +222,12 @@ namespace sreGUI
         static bool hovering_anything() { return s_querying != NULL; /*This should be the equivalent of !((Object*)nullptr)->is_hovering()*/ }
     protected:
         virtual void update() {}
-        virtual void pre_render(sre::RenderInterface* renderer) {}
-        virtual void post_render(sre::RenderInterface* renderer) {}
+        virtual void pre_render() {}
+        virtual void post_render() {}
     private:
         bool call_query(sre::vec2ut pt) const;
         void call_update();
-        void call_render(sre::RenderInterface* renderer);
+        void call_render();
 
         void call_process();
         void call_processchildren();

@@ -32,15 +32,25 @@
                 }
 
                 const Rect& toprect = m_stack.back();
+                Vec bounding;
+                if (!toprect.size.x || !toprect.size.y)
+                    goto EMPTY_RECT;
                 
                 rectangle.position.x = toprect.position.x > rectangle.position.x ? toprect.position.x : rectangle.position.x;
-                rectangle.position.x = toprect.position.y > rectangle.position.y ? toprect.position.y : rectangle.position.y;
-
-                Vec bounding = (toprect.position + toprect.size) - (rectangle.position + rectangle.size);
+                rectangle.position.y = toprect.position.y > rectangle.position.y ? toprect.position.y : rectangle.position.y;
+                
+                bounding = (toprect.position + toprect.size) - (rectangle.position + rectangle.size);
                 rectangle.size.x = bounding.x < 0 ? rectangle.size.x + bounding.x : rectangle.size.x;
                 rectangle.size.y = bounding.y < 0 ? rectangle.size.y + bounding.y : rectangle.size.y;
 
+                if (rectangle.size.x < 0 || rectangle.size.y < 0)
+                    goto EMPTY_RECT;
+
                 m_stack.push_back(rectangle);
+                return;
+
+                EMPTY_RECT:
+                m_stack.push_back({0, 0, 0, 0});
             }
 
             Rect top() const {

@@ -10,7 +10,7 @@ void Sprite::attach(sre::RSampler&& texture)
     textures.push_back(std::move(texture));
 }
 
-void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
+void Sprite::on_render(Entity& entity)
 {
     if (textures.empty()) return;
 
@@ -18,8 +18,7 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
     current_frame = frame;
 
     sre::RSampler& texture = textures[frame];
-    sre::vec2i texture_size;
-    renderer->sampler_query(texture, &texture_size, NULL);
+    sre::vec2i texture_size = texture->size();
     
     sre::vec2f texture_fsize{texture_size};
     if (region.size.x)
@@ -34,7 +33,7 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
     );
     sre::s32 flags = SRE_DRAWFLAG_CAMERA;
 
-    renderer->draw1(
+    sre::render_draw1(
         flags,
         {sre::RenderInstance1{
             render_rect,
@@ -44,7 +43,7 @@ void Sprite::on_render(Entity& entity, sre::RenderInterface* renderer)
             { region.size.x ? region.size.x / texture_fsize.x : 1, region.size.y ? region.size.y / texture_fsize.y : 1 },
             { region.position.x / texture_fsize.x, region.position.y / texture_fsize.y }
         }},
-        texture
+        texture.get()
     );
 }
 

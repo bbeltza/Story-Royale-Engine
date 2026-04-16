@@ -3,11 +3,7 @@
 #include <SDL_syswm.h>
 #include <utils/mem.h>
 
-extern "C" sre::RenderDriverData sred3d11 = {
-    [](SDL_Window* window) -> sre::RenderInterface* { auto inst = new sreD3D11::Instance(window); if (inst->successful()) return inst; delete inst; return NULL; },
-    [](sre::RenderInterface* renderer) { delete static_cast<sreD3D11::Instance*>(renderer); },
-    sizeof(sre::Sampler) //-> struct sre_Sampler { ... } in the "d3d11.h" header
-};
+extern "C" sre::RenderDriverHelper<sreD3D11::Instance, sreD3D11::Texture> sred3d11{};
 
 using namespace sreD3D11;
 

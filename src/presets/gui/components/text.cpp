@@ -13,7 +13,7 @@ void Text::load(const std::string& path)
 
 #define FONTCHECK if (!m_font) return;
 
-void Text::on_render(const sre::rect2Dut& dimensions, sre::RenderInterface*)
+void Text::on_render(const sre::rect2Dut& dimensions)
 {
     FONTCHECK
 

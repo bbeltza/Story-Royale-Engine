@@ -18,7 +18,9 @@ typedef void (APIENTRYP PFNGLDELETETEXTURESPROC)(GLsizei n, const GLuint* textur
 typedef void (APIENTRYP PFNGLBINDTEXTUREPROC)(GLenum target, GLuint texture);
 typedef void (APIENTRYP PFNGLACTIVETEXTUREPROC)(GLenum texture);
 typedef void (APIENTRYP PFNGLTEXPARAMETERIPROC)(GLenum target, GLenum pname, GLint param);
+typedef void (APIENTRYP PFNGLGETTEXLEVELPARAMETERIVPROC)(GLenum target, GLint level, GLenum pname, GLint *params);
 typedef void (APIENTRYP PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void * data);
+typedef void (APIENTRYP PFNGLTEXSUBIMAGE2DPROC)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void * pixels);
 
 #define SRE_GLFUNCS                                   \
         SRE_GLPFNDEF(PFNGLCLEARPROC, Clear)           \
@@ -29,14 +31,16 @@ typedef void (APIENTRYP PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint i
         SRE_GLPFNDEF(PFNGLDISABLEPROC, Enable)        \
         SRE_GLPFNDEF(PFNGLENABLEPROC, Disable)        \
         SRE_GLPFNDEF(PFNGLBLENDFUNCPROC, BlendFunc)   \
-        SRE_GLPFNDEF(PFNGLDRAWARRAYSPROC, DrawArrays)             \
-        SRE_GLPFNDEF(PFNGLDRAWELEMENTSPROC, DrawElements)         \
-        SRE_GLPFNDEF(PFNGLGENTEXTURESPROC, GenTextures)           \
-        SRE_GLPFNDEF(PFNGLDELETETEXTURESPROC, DeleteTextures)     \
-        SRE_GLPFNDEF(PFNGLBINDTEXTUREPROC, BindTexture)           \
-        SRE_GLPFNDEF(PFNGLACTIVETEXTUREPROC, ActiveTexture)       \
-        SRE_GLPFNDEF(PFNGLTEXPARAMETERIPROC, TexParameteri)       \
-        SRE_GLPFNDEF(PFNGLTEXIMAGE2DPROC, TexImage2D)             \
+        SRE_GLPFNDEF(PFNGLDRAWARRAYSPROC, DrawArrays)                \
+        SRE_GLPFNDEF(PFNGLDRAWELEMENTSPROC, DrawElements)            \
+        SRE_GLPFNDEF(PFNGLGENTEXTURESPROC, GenTextures)              \
+        SRE_GLPFNDEF(PFNGLDELETETEXTURESPROC, DeleteTextures)        \
+        SRE_GLPFNDEF(PFNGLBINDTEXTUREPROC, BindTexture)              \
+        SRE_GLPFNDEF(PFNGLACTIVETEXTUREPROC, ActiveTexture)          \
+        SRE_GLPFNDEF(PFNGLTEXPARAMETERIPROC, TexParameteri)          \
+        SRE_GLPFNDEF(PFNGLGETTEXLEVELPARAMETERIVPROC, GetTexLevelParameteriv) \
+        SRE_GLPFNDEF(PFNGLTEXIMAGE2DPROC, TexImage2D)                \
+        SRE_GLPFNDEF(PFNGLTEXSUBIMAGE2DPROC, TexSubImage2D)             \
 
 #define SRE_GLFUNCS21                                               \
         SRE_GLPFNDEF(PFNGLGENBUFFERSPROC, GenBuffers)               \

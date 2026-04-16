@@ -2,7 +2,9 @@
 
 #include <SDL_hints.h>
 
-const struct _sre_RenderInterfacevft sresdlrenderer_vft = {
+static void sresdlrenderer_destroy(void* _inst);
+const struct sre_RenderVFT sresdlrenderer_vft = {
+    sresdlrenderer_destroy,
     sresdlrenderer_flush_queueinstances1,
     sresdlrenderer_flush_queueinstances2,
     sresdlrenderer_present,
@@ -14,41 +16,33 @@ const struct _sre_RenderInterfacevft sresdlrenderer_vft = {
     sresdlrenderer_set_vsync,
     sresdlrenderer_setup_texture,
     sresdlrenderer_update_texture,
-    sresdlrenderer_query_texture,
     sresdlrenderer_destroy_texture
 };
 
-sre_RenderInterface* sresdlrenderer_main(SDL_Window* window)
+bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Window* window)
 {
-    sresdlrenderer_interface* inst = SDL_calloc(1, sizeof(sresdlrenderer_interface));
-    if (!inst)
-        return NULL;
-
-    sre_RIconstructor(&inst->inter);
+    sresdlrenderer_inst* inst = _inst;
     
-    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
-    inst->inter.vftptr = &sresdlrenderer_vft;
+   // SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
     inst->renderer = SDL_CreateRenderer(window, -1, 0);
     if (!inst->renderer)
     {
         SDL_free(inst);
-        return NULL;
+        return false;
     }
-
-    return &inst->inter;
+    
+    *vft = &sresdlrenderer_vft;
+    return true;
 }
 
-void sresdlrenderer_destroy(sre_RenderInterface* _inst)
+void sresdlrenderer_destroy(void* _inst)
 {
-    sresdlrenderer_interface* inst = (sresdlrenderer_interface*)_inst;
+    sresdlrenderer_inst* inst = _inst;
     SDL_DestroyRenderer(inst->renderer);
-    SDL_free(inst->renderer);
-
-    sre_RIdestructor(_inst);
 }
 
 sre_RenderDriverData sresdlrenderer = {
-    .init = sresdlrenderer_main,
-    .destroy = sresdlrenderer_destroy,
-    .texture_size = sizeof(SDL_Texture*)
+    .initialize = sresdlrenderer_main,
+    .renderer_size = sizeof(sresdlrenderer_inst),
+    .texture_size = sizeof(sresdlrenderer_texture)
 };

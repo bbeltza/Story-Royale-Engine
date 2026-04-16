@@ -11,7 +11,7 @@ namespace sreGUI
 
         sre::rect2Di center_slice;
         protected:
-        void on_render(const sre::rect2Dut &dimensions, sre::RenderInterface*) override;
+        void on_render(const sre::rect2Dut &dimensions) override;
     };
 }
 

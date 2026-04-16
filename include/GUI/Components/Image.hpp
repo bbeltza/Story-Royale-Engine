@@ -19,7 +19,7 @@ namespace sreGUI
 
         void fit(Transform& transform);
     protected:
-        void on_render(const sre::rect2Dut &dimensions, sre::RenderInterface*) override;
+        void on_render(const sre::rect2Dut &dimensions) override;
     };
 }
 

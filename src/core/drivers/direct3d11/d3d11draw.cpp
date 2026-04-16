@@ -24,7 +24,7 @@ bool Instance::clear(float color[3])
     return true;
 }
 
-void Instance::flush_queueinstances1(sre::Sampler* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags)
+void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags)
 {
     UINT inst_num = m_d1buffer.index / sizeof(sre::RenderInstance1);
     if (m_d1buffer.append(m_dxdevicecontext, instances, static_cast<UINT>(sizeof(*instances)*instance_count)))
@@ -56,19 +56,19 @@ void Instance::flush_queueinstances1(sre::Sampler* texture, const sre::RenderIns
     m_dxdevicecontext->DrawInstanced(4, static_cast<UINT>(instance_count), 0, inst_num);
 }
 
-void Instance::flush_queueinstances2(const sre::RenderInstance2& instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
+void Instance::flush_queueinstances2(const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
 {
 
     bool doswitch = false;
 
     UINT offscol = m_d2bufferc.index;
     UINT offspos = m_d2bufferp.index;
-    if (m_d2bufferc.append(m_dxdevicecontext, &instance.color, sizeof(instance.color)))
+    if (m_d2bufferc.append(m_dxdevicecontext, &instance->color, sizeof(instance->color)))
     {
         offscol = 0;
         doswitch = true;
     }
-    if (m_d2bufferp.append(m_dxdevicecontext, instance.points, static_cast<UINT>(sizeof(instance.points[0])*point_count)))
+    if (m_d2bufferp.append(m_dxdevicecontext, instance->points, static_cast<UINT>(sizeof(instance->points[0])*point_count)))
     {
         offspos = 0;
         doswitch = true;
@@ -95,7 +95,7 @@ void Instance::flush_queueinstances2(const sre::RenderInstance2& instance, size_
         m_dxdevicecontext->VSSetConstantBuffers(0, 1, m_cbuffers + ((flags & SRE_DRAWFLAG_CAMERA) != 0));
 
     D3D11_PRIMITIVE_TOPOLOGY topology;
-    switch (instance.mode)
+    switch (instance->mode)
     {
         case SRE_DRAW2_JOINED: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN; sre::log<sre::LOGCATEGORY_WARN>("SRE_DRAW2_JOINED is unimplemented on d3d11, and may soon become unsupported. It only renders points right now."); break;
         case SRE_DRAW2_STRIP: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
