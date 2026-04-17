@@ -12,16 +12,85 @@ struct sre_Sampler
     sre_pixelFormat format;
 };
 
-#include <Base/Log.h>
+struct _texture_container
+{
+	struct _texture_container* next;
+	char data[1];
+};
+
+#define ARENA_TEXTURE_COUNT 64
+#define TEXTURE_SIZE (sizeof(sre_Sampler) + engine.video.texture_size)
+
+#define FL_BASE 0
+#define FL_SIZE 1
+#define FL_CAP 2
+
+void __cleanup_textures()
+{
+    while (engine.video.textures.head)
+    {
+        struct _texture_container* current = engine.video.textures.head;
+        engine.video.textures.head = current->next;
+
+        for (size_t i = 0; i < engine.video.textures.last; i++)
+        {
+            bool isinfreelist = false;
+            sre_Sampler* sampler = (sre_Sampler*)&current->data[i*TEXTURE_SIZE];
+            for (sre_Sampler** fi = engine.video.textures.freelist[FL_BASE]; fi < engine.video.textures.freelist[FL_SIZE]; fi++)
+            {
+                if (*fi != sampler)
+                    continue;
+            
+                isinfreelist = true;
+                break;
+            }
+            if (isinfreelist) continue;
+
+            SRE_VIDEO(engine.video.vfptr, texture_destroy, sampler+1);
+        }
+
+        engine.video.textures.last = ARENA_TEXTURE_COUNT;
+        free(current);
+    }
+}
 
 sre_Sampler* texture_alloc()
 {
-    return sre_new(sizeof(sre_Sampler) + engine.video.texture_size);
+    if (engine.video.textures.freelist[FL_BASE] != engine.video.textures.freelist[FL_SIZE])
+        return *--engine.video.textures.freelist[FL_SIZE];
+
+    if (!engine.video.textures.head || engine.video.textures.last >= ARENA_TEXTURE_COUNT)
+    {
+        struct _texture_container* lasthead = engine.video.textures.head;
+        engine.video.textures.head = malloc(offsetof(struct _texture_container, data) + TEXTURE_SIZE * ARENA_TEXTURE_COUNT);
+        if (!engine.video.textures.head)
+            return NULL;  
+        
+        engine.video.textures.head->next = lasthead;
+        engine.video.textures.last = 0;
+    }
+
+    sre_Sampler* sampler = (sre_Sampler*)&engine.video.textures.head->data[engine.video.textures.last * TEXTURE_SIZE];
+    engine.video.textures.last++;
+    return sampler;
 }
 
 void texture_free(sre_Sampler* sampler)
 {
-    free(sampler);
+    if (engine.video.textures.freelist[FL_SIZE] >= engine.video.textures.freelist[FL_CAP])
+    {
+        size_t last_size = engine.video.textures.freelist[FL_SIZE] - engine.video.textures.freelist[FL_BASE];
+        size_t last_cap = engine.video.textures.freelist[FL_CAP] - engine.video.textures.freelist[FL_BASE];
+        size_t newcap = last_cap ? last_cap*2 : 32;
+        engine.video.textures.freelist[FL_BASE] = realloc(engine.video.textures.freelist[FL_BASE], newcap*sizeof(void*));
+        assert(engine.video.textures.freelist != NULL);
+
+        engine.video.textures.freelist[FL_SIZE] = engine.video.textures.freelist[FL_BASE] + last_size;
+        engine.video.textures.freelist[FL_CAP] = engine.video.textures.freelist[FL_BASE] + newcap;
+    }
+
+    *engine.video.textures.freelist[FL_SIZE] = sampler;
+    engine.video.textures.freelist[FL_SIZE]++;
 }
 
 struct d_setup_texture
@@ -120,7 +189,7 @@ int sre_sampler_aquire(sre_Sampler* sampler)
 int sre_sampler_release(sre_Sampler* sampler)
 {
     if (!sampler) return 0;
-    assert(engine.video.vfptr != NULL);
+    if (!engine.video.vfptr) return 0;
 
     int ref = SDL_AtomicAdd((SDL_atomic_t*)&sampler->refcount, -1);
     if (ref != 1)

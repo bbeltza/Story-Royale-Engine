@@ -54,8 +54,11 @@ static const sre_RenderDriverData video_drivers[] = {
 	VIDEO_DRIVERS
 };
 
+extern "C" void __cleanup_textures();
+
 void __cleanup_renderer()
 {
+	__cleanup_textures();
 	(*engine.video.vfptr)->destructor(engine.video.vfptr+1);
 	operator delete(engine.video.vfptr);
 	engine.video.vfptr = NULL;

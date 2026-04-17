@@ -32,12 +32,15 @@ SRE_CAPI_BEGIN
     	sre_sptr ret;
 	};
 
-	struct _vector_data
+	struct _texture_container;
+	struct _texture_env
 	{
-		size_t size;
-		size_t capacity;
+		struct _texture_container* head;
+		sre_Sampler** freelist[3];
+		size_t last;
 	};
 
+	
 	#define SRE_VIDEOV(x, func) (*x)->func(x+1)
 	#define SRE_VIDEO(x, func, ...) (*x)->func(x+1, __VA_ARGS__)
 	struct _engine_renderdata
@@ -45,9 +48,9 @@ SRE_CAPI_BEGIN
 		const struct sre_RenderVFT** vfptr;
 		
 		size_t texture_size;
+		struct _texture_env textures;
 
 		short blendmode;
-		
 		sre_rect2Di clip_rect;
 
 		void* _vector_data[4][3];

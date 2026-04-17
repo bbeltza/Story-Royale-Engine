@@ -11,7 +11,7 @@ namespace sre
 
         public:
             constexpr RSampler() = default;
-            RSampler(sre::Sampler* sampler): m_ptr(sampler) { sampler->aquire(); }
+            RSampler(sre::Sampler* sampler, bool aquire=false): m_ptr(sampler) { if (aquire) sampler->aquire(); }
             ~RSampler() { m_ptr->release(); }
 
             RSampler(const RSampler& copy): m_ptr(copy.m_ptr) { m_ptr->aquire(); };

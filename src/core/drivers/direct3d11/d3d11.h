@@ -20,7 +20,6 @@ namespace sreD3D11
 {
     struct Texture
     {
-        int w, h;
         ID3D11Texture2D* dxtexture;
         ID3D11ShaderResourceView* dxsrv;
     };
