@@ -36,15 +36,18 @@ namespace sre
 	};
 }
 
+#if _WIN32
+	#define VIDEOINIT_DEF_WIN32 VIDEOINIT_DEF
+#else
+	#define VIDEOINIT_DEF_WIN32(x)
+#endif
 
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
 VIDEOINIT_DEF(gl21)					\
 VIDEOINIT_DEF(gl32)					\
-VIDEOINIT_DEF(d3d11)				\
-//VIDEOINIT_DEF(opengl)				\
-//VIDEOINIT_DEF(d3d12)				\
-//VIDEOINIT_DEF(softwarerender)
+VIDEOINIT_DEF_WIN32(d3d11)			\
+//VIDEOINIT_DEF_WIN32(d3d12)		\
 
 #define VIDEOINIT_DEF(x) extern "C" const sre_RenderDriverData sre##x;
 VIDEO_DRIVERS
@@ -72,9 +75,12 @@ void __setup_renderer()
 		SRE_RENDERDRIVER_SDLRENDERER,
 		SRE_RENDERDRIVER_OPENGL_21,
 		SRE_RENDERDRIVER_OPENGL_32, // OpenGL 3.2 is unimplemented yet
-		SRE_RENDERDRIVER_DIRECTX_11,
-
-		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_11
+		#if _WIN32
+			SRE_RENDERDRIVER_DIRECTX_11,
+			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_11
+		#else
+			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_32
+		#endif
 	};
 
 	auto driverdata = video_drivers[SRE_RENDERDRIVER_DEFAULT];
@@ -264,7 +270,7 @@ static void flush_rendercmds(float bg[3], sre::vec2ut camoffset)
 		static const sre::RenderQueue _DUMMY_QUEUE = {
 			SIZE_MAX,
 			reinterpret_cast<sre::Sampler*>(PTRDIFF_MAX),
-			CHAR_MAX,
+			INT8_MAX,
 			INT16_MAX,
 			UINT32_MAX
 		};

@@ -1,0 +1,1 @@
+SRE_DRIVERBUILD(sre_gl11 "gl11main.c")

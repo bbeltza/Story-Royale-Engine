@@ -21,6 +21,7 @@ typedef void (APIENTRYP PFNGLTEXPARAMETERIPROC)(GLenum target, GLenum pname, GLi
 typedef void (APIENTRYP PFNGLGETTEXLEVELPARAMETERIVPROC)(GLenum target, GLint level, GLenum pname, GLint *params);
 typedef void (APIENTRYP PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void * data);
 typedef void (APIENTRYP PFNGLTEXSUBIMAGE2DPROC)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void * pixels);
+typedef void (APIENTRYP PFNGLPIXELSTOREIPROC)(GLenum pname, GLint param);
 
 #define SRE_GLFUNCS                                   \
         SRE_GLPFNDEF(PFNGLCLEARPROC, Clear)           \
@@ -40,7 +41,8 @@ typedef void (APIENTRYP PFNGLTEXSUBIMAGE2DPROC)(GLenum target, GLint level, GLin
         SRE_GLPFNDEF(PFNGLTEXPARAMETERIPROC, TexParameteri)          \
         SRE_GLPFNDEF(PFNGLGETTEXLEVELPARAMETERIVPROC, GetTexLevelParameteriv) \
         SRE_GLPFNDEF(PFNGLTEXIMAGE2DPROC, TexImage2D)                \
-        SRE_GLPFNDEF(PFNGLTEXSUBIMAGE2DPROC, TexSubImage2D)             \
+        SRE_GLPFNDEF(PFNGLTEXSUBIMAGE2DPROC, TexSubImage2D)          \
+        SRE_GLPFNDEF(PFNGLPIXELSTOREIPROC, PixelStorei)          \
 
 #define SRE_GLFUNCS21                                               \
         SRE_GLPFNDEF(PFNGLGENBUFFERSPROC, GenBuffers)               \
@@ -74,7 +76,7 @@ typedef void (APIENTRYP PFNGLTEXSUBIMAGE2DPROC)(GLenum target, GLint level, GLin
         SRE_GLPFNDEF(PFNGLUNIFORMMATRIX3X4FVPROC, UniformMatrix3x4fv)             \
 
 #define SRE_GLFUNCS32   \
-        SRE_GLPFNDEF(PFNGLDRAWARRAYSINSTANCEDPROC)
+        SRE_GLPFNDEF(PFNGLDRAWARRAYSINSTANCEDPROC, glDrawArraysInstanced)
 
 #ifndef SRE_GLPFNDEF
     #define SRE_GLPFNDEF(t, n) t n;

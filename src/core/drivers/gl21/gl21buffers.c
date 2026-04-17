@@ -233,16 +233,6 @@ bool sregl21setupbuffers(sregl21_inst* inst)
 
     inst->draw1data.depend_uniforms.model = inst->glfuncs21.GetUniformLocation(inst->draw1data.program, "u_model");
 
-    //
-
-    SRE_GLCALLF(inst->glfuncs.GenTextures(1, &inst->basic_texture));
-    SRE_GLCALLF(inst->glfuncs.BindTexture(GL_TEXTURE_2D, inst->basic_texture));
-    {
-        int WHITE = -1; // 0xFFFFFFFF
-        SRE_GLCALLF(inst->glfuncs.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &WHITE));
-    }
-
-
     return true;   
 }
 

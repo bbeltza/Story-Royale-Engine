@@ -1,1 +1,1 @@
-SRE_DRIVERBUILD(sre_glcommon "glcommon.c") # It's technically not a driver but it is still useful
+SRE_DRIVERBUILD(sre_glcommon "glcommon.c" "glcommonw.c") # It's technically not a driver but it is still useful

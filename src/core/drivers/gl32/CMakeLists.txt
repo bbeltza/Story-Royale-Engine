@@ -1,1 +1,1 @@
-SRE_DRIVERBUILD(sre_gl32 "gl32main.c")
+SRE_DRIVERBUILD(sre_gl32 "gl32main.c" "gl32draw.c" "gl32state.c" "gl32texture.c" "gl32buffers.c")

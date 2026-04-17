@@ -1,16 +1,9 @@
 #ifndef SRE_GL21_H
 #define SRE_GL21_H
 
-#include <Core/Render.h>
-#include <SDL_video.h>
 #include <assert.h>
 
 #include <glcommon/glcommon.h>
-
-typedef struct sregl21_texture
-{
-    GLint gltex;
-} sregl21_texture;
 
 // Common shader uniform names (shared between draw1 and draw2)
 struct sregl21_csu
@@ -53,24 +46,33 @@ struct sregl21_drawcache
     GLfloat camera[2];
 };
 
+// Data that's shared accross both OpenGL 2.1 and 3.2
+typedef struct sregl21_cominst
+{
+    sregl_cominst common;
+
+    GLint basic_texture;
+} sregl21_cominst;
+
 typedef struct sregl21_inst
 {
+    sregl21_cominst common21;
     struct sregl_functions glfuncs;
     struct sregl_functions21 glfuncs21;
-
-    SDL_GLContext context;
-    SDL_Window* window;
 
     // Draw dependencies
     struct sregl21_draw1dep draw1data;
     struct sregl21_draw2dep draw2data;
 
     struct sregl21_drawcache cache;
-
-    GLint basic_texture;
 } sregl21_inst;
 
 SRE_CAPI_BEGIN
+
+bool sregl21_commonsetup(sregl21_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs, struct sregl_functions21* glfuncs21);
+#define sregl21_commondestroy(inst) sregl_commondestroy(&(inst)->common)
+
+//
 
 void sregl21_flush_queueinstances1(void* inst, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
 void sregl21_flush_queueinstances2(void* inst, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
@@ -84,9 +86,9 @@ bool sregl21_set_camerastate(void* inst, sre_unit x, sre_unit y);
 void sregl21_set_clipstate(void* inst, const sre_rect2Di* rectangle);
 void sregl21_set_vsync(void* inst, bool enable);
 
-bool sregl21_setup_texture(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-bool sregl21_update_texture(void* inst, void* texture, const void* pixels, int pitch);
-void sregl21_destroy_texture(void* inst, void* texture);
+bool sregl21_texture_setup(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
+bool sregl21_texture_update(void* inst, void* texture, const void* pixels, int pitch);
+void sregl21_texture_destroy(void* inst, void* texture);
 
 bool sregl21setupbuffers(sregl21_inst* instance);
 void sregl21bindbuffer1(sregl21_inst* instance, GLint vbo);

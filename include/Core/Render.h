@@ -220,7 +220,7 @@ SRE_CAPI_END
 
         inline Sampler* sampler(pixelFormat format, int w, int h) { return sre_sampler(format, w, h); }
 
-        template <typename R, typename T=R::texture_type>
+        template <typename R, typename T=typename R::texture_type>
         struct RenderDriverHelper: sre_RenderDriverData
         {
             RenderDriverHelper(): sre_RenderDriverData{

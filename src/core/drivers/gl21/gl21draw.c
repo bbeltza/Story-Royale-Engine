@@ -3,19 +3,13 @@
 void sregl21_present(void* _inst)
 {
     sregl21_inst* inst = _inst;
-    SDL_GL_SwapWindow(inst->window);
-    
-    SRE_GLCTXEND();
+    SREGL_PRESENT(inst->common21.common);
 }
 
 bool sregl21_clear(void* _inst, float color[3])
 {
     sregl21_inst* inst = _inst;
-    SRE_GLCTXMAKE(false);
-
-    SRE_GLCALLF(inst->glfuncs.ClearColor(color[0], color[1], color[2], 1));
-    SRE_GLCALLF(inst->glfuncs.Clear(GL_COLOR_BUFFER_BIT));
-
+    SREGL_CLEAR(inst->glfuncs, color);
     return true;
 }
 
@@ -24,8 +18,7 @@ static GLfloat NO_CAM[2];
 void sregl21_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl21_inst* inst = _inst;
-    sregl21_texture* texture = _texture;
-    SRE_GLCTXCHECK;
+    sregl_texture* texture = _texture;
 
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
@@ -43,7 +36,7 @@ void sregl21_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
 
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
-        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->basic_texture : texture->gltex));
+        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->common21.basic_texture : texture->gltex));
     }
 
     for (size_t i = 0; i < instance_count; i++)
@@ -65,8 +58,7 @@ void sregl21_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
 void sregl21_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl21_inst* inst = _inst;
-    sregl21_texture* texture = _texture;
-    SRE_GLCTXCHECK;
+    sregl_texture* texture = _texture;
 
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
@@ -83,7 +75,7 @@ void sregl21_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
 
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
-        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->basic_texture : texture->gltex));
+        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->common21.basic_texture : texture->gltex));
     }
 
     SRE_GLCALL(inst->glfuncs21.Uniform4i(inst->draw2data.common_uniforms.color, instance->color.r, instance->color.g, instance->color.b, instance->color.a));

@@ -18,17 +18,47 @@ extern const char* SRE_GLERRFMT(GLenum err)
 }
 
 #undef SRE_GLPFNDEF
-#define SRE_GLPFNDEF(t, x) funcs->x = (t)pGetProcAddress("gl" #x); if (!funcs->x) { SRE_GLLOG("Failed to load function: 'gl" #x"'"); return GL_FALSE; }
-extern GLboolean sregl_loadfunctions(struct sregl_functions* funcs, void* (*pGetProcAddress)(const char* proc))
+#define SRE_GLPFNDEF(t, x) funcs->x = (t)pGetProcAddress("gl" #x); if (!funcs->x) { SRE_GLLOG("Failed to load function: 'gl" #x"'"); return false; }
+bool sregl_loadfunctions(struct sregl_functions* funcs, void* (*pGetProcAddress)(const char* proc))
 {
     SRE_GLFUNCS
 
-    return GL_TRUE;
+    return true;
 }
 
-extern GLboolean sregl_loadfunctions21(struct sregl_functions21* funcs, void* (*pGetProcAddress)(const char* proc))
+bool sregl_loadfunctions21(struct sregl_functions21* funcs, void* (*pGetProcAddress)(const char* proc))
 {
     SRE_GLFUNCS21
 
-    return GL_TRUE;
+    return true;
+}
+
+bool sregl_loadfunctions32(struct sregl_functions32* funcs, void* (*pGetProcAddress)(const char* proc))
+{
+    SRE_GLFUNCS32
+
+    return true;
+}
+
+
+extern bool sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs)
+{
+    SDL_GLContext ctx = SDL_GL_CreateContext(window);
+    if (!ctx)
+        return false;
+    
+    if (!sregl_loadfunctions(glfuncs, SDL_GL_GetProcAddress))
+    {
+        SDL_GL_DeleteContext(inst->context);
+        return false;
+    }
+    
+    inst->context = ctx;
+    inst->window = window;
+    return true;
+}
+
+extern void sregl_commondestroy(sregl_cominst* inst)
+{
+    SDL_GL_DeleteContext(inst->context);
 }

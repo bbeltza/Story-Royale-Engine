@@ -4,8 +4,6 @@
 bool sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
 {
     sregl21_inst* inst = _inst;
-    SRE_GLCTXMAKE(false);
-
     SRE_GLCALLF(inst->glfuncs.Viewport(0, 0, w, h));
 
     GLfloat VIEWPORT[4*4] = {
@@ -22,93 +20,27 @@ bool sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
     return true;
 }
 
-bool sregl21_set_blendstate(void* _inst, sre_blendMode blending)
-{
-    sregl21_inst* inst = _inst;
-    SRE_GLCTXCHECK;
-
-    if (blending == SRE_BLEND_NONE)
-    {
-        SRE_GLCALLF(inst->glfuncs.Disable(GL_BLEND));
-        return true;
-    }
-
-    GLenum sfactor;
-    GLenum dfactor;
-    switch (blending)
-    {
-        case SRE_BLEND_BLEND:
-            sfactor = GL_SRC_ALPHA;
-            dfactor = GL_ONE_MINUS_SRC_ALPHA;
-            break;
-        case SRE_BLEND_ADD:
-            sfactor = GL_SRC_ALPHA;
-            dfactor = GL_ONE;
-            break;
-        case SRE_BLEND_MOD:
-            sfactor = GL_DST_COLOR;
-            dfactor = GL_ZERO;
-            break;
-        case SRE_BLEND_MUL:
-            sfactor = GL_DST_COLOR;
-            dfactor = GL_ONE_MINUS_SRC_ALPHA;
-            break;
-        default: abort(); return false;
-    }
-
-    SRE_GLCALLF(inst->glfuncs.Enable(GL_BLEND));
-    SRE_GLCALLF(inst->glfuncs.BlendFunc(sfactor, dfactor));
-    return true;
-
-    return true;
-}
 
 bool sregl21_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 {
     sregl21_inst* inst = _inst;
-    SRE_GLCTXCHECK;
-
+    
     inst->cache.camera[0] = x;
     inst->cache.camera[1] = y;
-
+    
     return true;
+}
+
+bool sregl21_set_blendstate(void* _inst, sre_blendMode blendmode)
+{
+    sregl21_inst* inst = _inst;
+    return sregl_set_blendstate(&inst->glfuncs, blendmode);
 }
 
 void sregl21_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
 {
     sregl21_inst* inst = _inst;
-    SRE_GLCTXCHECK;
-
-    int w, h;
-    SDL_GL_GetDrawableSize(inst->window, &w, &h);
-
-    if (rectangle)
-    {
-        SRE_GLCALL(inst->glfuncs.Enable(GL_SCISSOR_TEST));
-        SRE_GLCALL(inst->glfuncs.Scissor(
-            rectangle->x,
-            h - rectangle->y - rectangle->h,
-            rectangle->w,
-            rectangle->h
-        ));
-    }
-    else
-    {
-        SRE_GLCALL(inst->glfuncs.Disable(GL_SCISSOR_TEST));
-    }
+    sregl_set_clipstate(&inst->glfuncs, inst->common21.common.window, rectangle);
 }
 
-void sregl21_set_vsync(void* _inst, bool enable)
-{
-    sregl21_inst* inst = _inst;
-    SRE_GLCTXCHECK;
-
-    if (!enable) goto DISABLE;
-
-    if (SDL_GL_SetSwapInterval(-1) != 0)
-        SDL_GL_SetSwapInterval(1);
-    return;
-    
-    DISABLE:
-        SDL_GL_SetSwapInterval(0);
-}
+void sregl21_set_vsync(void* _inst, bool enable) { (void)_inst; sregl_set_vsync(enable); }
