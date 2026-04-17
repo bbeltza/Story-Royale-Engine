@@ -39,6 +39,14 @@ Image::Image(Image&& other) noexcept : sdl_surface(other.sdl_surface)
     other.sdl_surface = NULL;
 }
 
+void Image::operator=(SDL_Surface* from_surface)
+{
+    if (sdl_surface)
+        SDL_FreeSurface(sdl_surface);
+    
+    sdl_surface = from_surface;
+}
+
 Image::~Image()
 {
     SDL_Surface* tmp = sdl_surface;

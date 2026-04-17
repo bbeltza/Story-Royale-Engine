@@ -127,16 +127,17 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
     }
 }
 
-void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switchflags)
+void sresdlrenderer_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switchflags)
 {
     sresdlrenderer_inst* inst = _inst;
+    sresdlrenderer_texture* texture = _texture;
     int res;
 
     sre_vec2f *vertices = SDL_stack_alloc(sre_vec2f, point_count);
     for (size_t i = 0; i < point_count; i++)
     {
-        vertices[i].x = (instance->points[i].x * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0);
-        vertices[i].y = (instance->points[i].y * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0);
+        vertices[i].x = (instance->points[i].pos.x * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0);
+        vertices[i].y = (instance->points[i].pos.y * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0);
     }
 
     switch (instance->mode)
@@ -144,10 +145,11 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2
         case SRE_DRAW2_TRIANGLE: {
             res = SDL_RenderGeometryRaw(
                 inst->renderer,
-                NULL,
+                !texture ? NULL : texture->texture,
                 &vertices->x, sizeof(sre_vec2f),
                 (const SDL_Color*)&instance->color, 0,
-                NULL, 0, (int)point_count, NULL, 0, 0
+                &instance->points->uv.x, sizeof(sre_RenderPoint),
+                (int)point_count, NULL, 0, 0
             );
         } break;
         case SRE_DRAW2_STRIP:
@@ -168,10 +170,11 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, const sre_RenderInstance2
 
             res = SDL_RenderGeometryRaw(
                 inst->renderer,
-                NULL,
+                !texture ? NULL : texture->texture,
                 &vertices->x, sizeof(sre_vec2f),
                 (const SDL_Color*)&instance->color, 0,
-                NULL, 0, (int)point_count,
+                &instance->points->uv.x, sizeof(sre_RenderPoint),
+                (int)point_count,
                 indices, (int)indice_count, 2
             );
             SDL_stack_free(indices);

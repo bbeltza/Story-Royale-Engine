@@ -40,6 +40,7 @@ namespace sre
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
 VIDEOINIT_DEF(gl21)					\
+VIDEOINIT_DEF(gl32)					\
 VIDEOINIT_DEF(d3d11)				\
 //VIDEOINIT_DEF(opengl)				\
 //VIDEOINIT_DEF(d3d12)				\
@@ -70,6 +71,7 @@ void __setup_renderer()
 	{
 		SRE_RENDERDRIVER_SDLRENDERER,
 		SRE_RENDERDRIVER_OPENGL_21,
+		SRE_RENDERDRIVER_OPENGL_32, // OpenGL 3.2 is unimplemented yet
 		SRE_RENDERDRIVER_DIRECTX_11,
 
 		SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_11
@@ -284,6 +286,7 @@ static void flush_rendercmds(float bg[3], sre::vec2ut camoffset)
 			sre::u32 switchflags = (queue.type != last_queue->type ? SRE_RENDER_SWITCHTYPE : 0)
 								 | ((queue.flags&SRE_DRAWFLAG_CAMERA) != (last_queue->flags&SRE_DRAWFLAG_CAMERA) || last_queue == &_DUMMY_QUEUE ? SRE_RENDER_SWITCHCAMERA : 0 )
 								 | (queue.texture != last_queue->texture ? SRE_RENDER_SWITCHTEXTURE : 0);
+			queue.texture = queue.texture ? queue.texture+1 : NULL;
 
 			last_queue = &queue;
 			switch (queue.type)
@@ -303,6 +306,7 @@ static void flush_rendercmds(float bg[3], sre::vec2ut camoffset)
 			case 2:
 				SRE_VIDEO(engine.video.vfptr,
 							flush_queueinstances2,
+							queue.texture,
 							&reinterpret_cast<RenderInstance2&>(m.rinst2cache.at(insti2)),
 							queue.count,
 							queue.flags,
@@ -352,7 +356,7 @@ void sre::render_draw1(sre::flags32 flags, const RenderInstance1 instances[], si
 	{
 		m.renderqueues.push_back({
 			instcount,
-			texture ? texture+1 : NULL,
+			texture,
 			1,
 			engine.video.blendmode,
 			flags,
@@ -363,7 +367,7 @@ void sre::render_draw1(sre::flags32 flags, const RenderInstance1 instances[], si
 		back->count+= instcount;
 }
 
-void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2mode mode)
+void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoint points[], size_t pcount, sre::draw2mode mode, sre::Sampler* texture)
 {
 	sre::RenderInstance2 dummy{
 		mode,
@@ -373,7 +377,7 @@ void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut po
 	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
 	m.renderqueues.push_back({
 		pcount,
-		NULL, // draw2 will support textures
+		texture,
 		2,
 		engine.video.blendmode,
 		flags,
@@ -391,6 +395,6 @@ extern "C" void sre_render_clipset(const sre_rect2Dut* zone) { sre::render_clips
 extern "C" void sre_render_blend(sre_blendMode blend) { sre::render_blend(blend); }
 
 extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Sampler* texture) { sre::render_draw1(flags, instances, instcount, texture); }
-extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_vec2ut points[], size_t pcount, sre_draw2mode mode) { sre::render_draw2(flags, *color, points, pcount, mode); }
+extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2mode mode, sre_Sampler* texture) { sre::render_draw2(flags, *color, points, pcount, mode, texture); }
 
 extern "C" void sre_render_fill(const sre_col4* color) { sre::render_fill(*color); }

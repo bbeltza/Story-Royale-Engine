@@ -61,10 +61,11 @@ static const GLchar* DRAW2_VS =
                         "uniform vec2 u_camera;"
                         ""
                         "attribute vec4 i_pos;"
+                        "attribute vec2 i_uv;"
                         "varying vec4 o_col;"
                         "varying vec2 o_uv;"
                         "void main() {"
-                            "o_uv = vec2(0);"
+                            "o_uv = i_uv;"
                             "o_col = u_col4/255.0f;"
                             "gl_Position = i_pos*u_viewport[2][2];"
                             "gl_Position.xy += u_camera;"
@@ -191,6 +192,10 @@ bool sregl21setupbuffers(sregl21_inst* inst)
     SRE_GLCALLF(inst->glfuncs21.AttachShader(inst->draw2data.program, cofs));
     SRE_GLCALLF(inst->glfuncs21.AttachShader(inst->draw2data.program, d2vs));
 
+    SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(inst->draw1data.program, 0, "i_pos"));
+    SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(inst->draw2data.program, 0, "i_pos"));
+    SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(inst->draw2data.program, 1, "i_uv"));
+
     SRE_GLCALL(inst->glfuncs21.LinkProgram(inst->draw1data.program));
     SRE_GLCALL(inst->glfuncs21.LinkProgram(inst->draw2data.program));
 
@@ -211,9 +216,6 @@ bool sregl21setupbuffers(sregl21_inst* inst)
     SRE_GLCALL(inst->glfuncs21.DeleteShader(cofs));
     SRE_GLCALL(inst->glfuncs21.DeleteShader(d1vs));
     SRE_GLCALL(inst->glfuncs21.DeleteShader(d2vs));
-
-    SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(inst->draw1data.program, 0, "i_pos"));
-    SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(inst->draw2data.program, 0, "i_pos"));
     
     //
 
@@ -223,7 +225,7 @@ bool sregl21setupbuffers(sregl21_inst* inst)
     SRE_GLCALLF(inst->glfuncs21.BufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(DRAW1_INDICES), DRAW1_INDICES, GL_STATIC_DRAW));
     
     SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_ARRAY_BUFFER, inst->draw2data.vbo));
-    SRE_GLCALLF(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, 256*2*sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW));
+    SRE_GLCALLF(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, 256*sizeof(sre_RenderPoint), NULL, GL_DYNAMIC_DRAW));
     inst->draw2data.bufsize = 256;
 
     sreglsetupcommonuniforms(inst, inst->draw1data.program, &inst->draw1data.common_uniforms);
@@ -244,9 +246,18 @@ bool sregl21setupbuffers(sregl21_inst* inst)
     return true;   
 }
 
-void sregl21bindbuffer(sregl21_inst* inst, GLint vbo)
+void sregl21bindbuffer1(sregl21_inst* inst, GLint vbo)
 {
     SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ARRAY_BUFFER, vbo));
     SRE_GLCALL(inst->glfuncs21.EnableVertexAttribArray(0));
     SRE_GLCALL(inst->glfuncs21.VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0));
+}
+
+void sregl21bindbuffer2(sregl21_inst* inst, GLint vbo)
+{
+    SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ARRAY_BUFFER, vbo));
+    SRE_GLCALL(inst->glfuncs21.EnableVertexAttribArray(0));
+    SRE_GLCALL(inst->glfuncs21.EnableVertexAttribArray(1));
+    SRE_GLCALL(inst->glfuncs21.VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, pos)));
+    SRE_GLCALL(inst->glfuncs21.VertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, uv)));
 }

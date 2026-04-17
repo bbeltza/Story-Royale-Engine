@@ -73,7 +73,7 @@ typedef struct sregl21_inst
 SRE_CAPI_BEGIN
 
 void sregl21_flush_queueinstances1(void* inst, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
-void sregl21_flush_queueinstances2(void* inst, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
+void sregl21_flush_queueinstances2(void* inst, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
 
 void sregl21_present(void* inst);
 bool sregl21_clear(void* inst, float color[3]);
@@ -89,7 +89,8 @@ bool sregl21_update_texture(void* inst, void* texture, const void* pixels, int p
 void sregl21_destroy_texture(void* inst, void* texture);
 
 bool sregl21setupbuffers(sregl21_inst* instance);
-void sregl21bindbuffer(sregl21_inst* instance, GLint vbo);
+void sregl21bindbuffer1(sregl21_inst* instance, GLint vbo);
+void sregl21bindbuffer2(sregl21_inst* instance, GLint vbo);
 
 SRE_CAPI_END
 

@@ -73,6 +73,9 @@ typedef void (APIENTRYP PFNGLTEXSUBIMAGE2DPROC)(GLenum target, GLint level, GLin
         SRE_GLPFNDEF(PFNGLUNIFORMMATRIX4FVPROC, UniformMatrix4fv)                 \
         SRE_GLPFNDEF(PFNGLUNIFORMMATRIX3X4FVPROC, UniformMatrix3x4fv)             \
 
+#define SRE_GLFUNCS32   \
+        SRE_GLPFNDEF(PFNGLDRAWARRAYSINSTANCEDPROC)
+
 #ifndef SRE_GLPFNDEF
     #define SRE_GLPFNDEF(t, n) t n;
 #endif

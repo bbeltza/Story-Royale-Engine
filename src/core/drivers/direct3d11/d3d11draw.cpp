@@ -56,7 +56,7 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
     m_dxdevicecontext->DrawInstanced(4, static_cast<UINT>(instance_count), 0, inst_num);
 }
 
-void Instance::flush_queueinstances2(const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
+void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
 {
 
     bool doswitch = false;
@@ -79,14 +79,12 @@ void Instance::flush_queueinstances2(const sre::RenderInstance2* instance, size_
         doswitch = true;
         m_dxdevicecontext->VSSetShader(m_shaders.d2VS, NULL, 0);
         m_dxdevicecontext->IASetInputLayout(m_shaders.d2IL);
-        // Temporary
-        m_dxdevicecontext->PSSetShaderResources(0, 1, &m_basictexture);
     }
 
     if (doswitch)
     {
         UINT offsets[] = { offscol, offspos };
-        UINT strides[] = { sizeof(sre::col4), sizeof(sre::vec2ut) };
+        UINT strides[] = { sizeof(sre::col4), sizeof(sre::RenderPoint) };
         ID3D11Buffer* buffers[] = { m_d2bufferc.dxbuffer, m_d2bufferp.dxbuffer };
         m_dxdevicecontext->IASetVertexBuffers(0, 2, buffers, strides, offsets);
     }
@@ -105,12 +103,10 @@ void Instance::flush_queueinstances2(const sre::RenderInstance2* instance, size_
 
     m_dxdevicecontext->IASetPrimitiveTopology(topology);
 
-    /*
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
         m_dxdevicecontext->PSSetShaderResources(0, 1, texture ? &texture->dxsrv : &m_basictexture);
     }
-    */
 
     m_dxdevicecontext->Draw(point_count, 0);
 }

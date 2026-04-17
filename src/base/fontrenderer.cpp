@@ -107,13 +107,8 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
             break;
         
         Sampler* texture;
-
-        if (text[n] > 0)
-        {
-            texture = ascii.at(text[n] - 1).get();
-            n++;
-        }
-        else
+        sre::rect2Df uv{0, 0, 1, 1};
+        if (text[n] < 0)
         {
             char utf8[8];
             int codepoint;
@@ -125,9 +120,15 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
             
             texture = unicode.at(codepoint).get();
         }
-
-        sre::vec2i tsize = texture->size();
-        render_rect.size = sre::vec2ut{tsize};
+        else
+        {
+            texture = ascii_atlas.get();
+            uv = ascii_uvs.at(text[n] - 1);
+            n++;
+        }
+        
+        assert(texture != NULL);
+        render_rect.size = texture->size() * uv.size;
 
         sre::render_draw1(
             0, {{
@@ -135,8 +136,8 @@ void Font::render_line(const sre::vec2ut &start, const sre::col4 &color, const c
                 vec2ut::ZERO,
                 color,
                 0,
-                { 1, 1 },
-                { 0, 0 }
+                uv.size,
+                uv.position
             }}, texture
         );
 

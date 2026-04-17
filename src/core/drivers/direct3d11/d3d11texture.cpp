@@ -12,7 +12,7 @@ bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, i
 		D3D11_TEXTURE2D_DESC tex_desc{};
 		tex_desc.Width = w;
 		tex_desc.Height = h;
-		tex_desc.ArraySize = 1; // Uh I might experiment with texture arrays to make instancing work...
+		tex_desc.ArraySize = 1;
 		tex_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		tex_desc.SampleDesc.Count = 1;
 		tex_desc.SampleDesc.Quality = 0;

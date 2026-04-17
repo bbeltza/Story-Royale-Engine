@@ -31,7 +31,7 @@ Instance::Instance(SDL_Window* window)
 
         DXGI_SWAP_CHAIN_DESC swapchain_desc{};
         swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
         swapchain_desc.BufferCount = 2;
         swapchain_desc.SampleDesc.Count = 1;
         swapchain_desc.Windowed = TRUE;
@@ -153,4 +153,14 @@ Instance::~Instance()
     m_dxswapchain->Release();
 
     m_dxrendertargetview->Release();
+
+    for (int i = 0; i < _countof(m_dxblendstates); i++)
+        m_dxblendstates[i]->Release();
+    
+    for (int i = 0; i < _countof(m_cbuffers); i++)
+        m_cbuffers[i]->Release();
+    
+    m_dxrasterizerstate->Release();
+    m_dxsamplerstate->Release();
+    m_basictexture->Release();
 }

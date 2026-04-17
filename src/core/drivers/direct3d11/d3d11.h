@@ -32,6 +32,14 @@ namespace sreD3D11
         ID3D11VertexShader* d2VS;
         ID3D11PixelShader* cPS; // Common pixel shader
 
+        ~Shaders()
+        {
+            d1IL->Release();
+            d2IL->Release();
+            d1VS->Release();
+            d2VS->Release();
+            cPS->Release();
+        }
         private:
             friend struct Instance;
 
@@ -66,6 +74,8 @@ namespace sreD3D11
 
     struct Instance
     {
+        using texture_type = Texture;
+
         Instance(SDL_Window* window);
         ~Instance();
 
@@ -98,7 +108,7 @@ namespace sreD3D11
         public:
             // Instance drawing functions
             void flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags);
-            void flush_queueinstances2(const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
+            void flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
             
             void present();
             bool clear(float color[3]);

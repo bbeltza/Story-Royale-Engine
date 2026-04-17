@@ -33,7 +33,8 @@ namespace sre
 
         std::vector<std::string> linebuf;
 
-        std::array<RSampler, 127> ascii; // Fast access ascii texture table
+        RSampler ascii_atlas;
+        std::array<sre::rect2Df, 127> ascii_uvs; // Fast access ascii uv table
         std::unordered_map<int, RSampler> unicode;
     };
 }

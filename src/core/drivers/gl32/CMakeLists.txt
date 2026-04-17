@@ -1,0 +1,1 @@
+SRE_DRIVERBUILD(sre_gl32 "gl32main.c")

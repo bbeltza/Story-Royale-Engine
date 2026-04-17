@@ -20,6 +20,7 @@ struct D2input
 {
     uint4 color: COLOR;
     float2 position: POSITION;
+    float2 uv: TEXCOORD;
 };
 
 struct PSinput
@@ -89,7 +90,7 @@ PSinput D2main(D2input input)
     PSinput output = {
         vert,
         color,
-        float2(0, 0)
+        input.uv
     };
     return output;
 }

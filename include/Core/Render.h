@@ -90,6 +90,12 @@ struct sre_SamplerNew
     void* renderer;
 };
 
+typedef struct sre_RenderPoint
+{
+    sre_vec2ut pos;
+    sre_vec2f uv;
+} sre_RenderPoint;
+
 typedef struct sre_RenderInstance1
 {
     sre_rect2Dut rectangle;
@@ -105,7 +111,7 @@ typedef struct sre_RenderInstance2
 {
     sre_draw2mode mode;
     sre_col4 color;
-    sre_vec2ut points[
+    sre_RenderPoint points[
         #ifdef __cplusplus
             1
         #endif
@@ -117,7 +123,7 @@ struct sre_RenderVFT
     void (* destructor)(void*);
 
     void (* flush_queueinstances1)(void*, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
-    void (* flush_queueinstances2)(void*, /*void* _texture,*/ const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
+    void (* flush_queueinstances2)(void*, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
 
     void (* present)(void*);
     bool (* clear)(void*, float color[3]);
@@ -161,7 +167,7 @@ void sre_render_clipset(const sre_rect2Dut* zone);
 void sre_render_blend(sre_blendMode blend);
 
 void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Sampler* texture);
-void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_vec2ut points[], size_t pcount, sre_draw2mode mode);
+void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2mode mode, sre_Sampler* texture);
 
 void sre_render_fill(const sre_col4* color);
 
@@ -182,7 +188,8 @@ SRE_CAPI_END
         using draw2mode = sre_draw2mode;
 
         using RenderInstance1 = sre_RenderInstance1; // Render instance for all rectangle draw calls
-        using RenderInstance2 = sre_RenderInstance2; // Render instance for all line & geometry draw calls
+        using RenderInstance2 = sre_RenderInstance2; // Render instance for all line & complex geometry draw calls
+        using RenderPoint = sre_RenderPoint;
 
         void render_clipreset();
         void render_clipset(sre::rect2Dut zone);
@@ -191,19 +198,29 @@ SRE_CAPI_END
         inline void render_blend() { render_blend(SRE_BLEND_DEFAULT); }
 
         void render_draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture=NULL);
-        void render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut points[], size_t pcount, sre::draw2mode mode=SRE_DRAW2_JOINED);
+        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint points[], size_t pcount, sre::draw2mode mode=SRE_DRAW2_JOINED, Sampler* texture=NULL);
 
         template <size_t n>
         void render_draw1(sre::flags32 flags, const RenderInstance1 (&instances)[n], Sampler* texture=NULL) { render_draw1(flags, instances, n, texture); }
         
         template <size_t n>
-        void render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&points)[n], sre::draw2mode mode=SRE_DRAW2_JOINED) { return render_draw2(flags, color, points, n, mode); }
+        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint (&points)[n], sre::draw2mode mode=SRE_DRAW2_JOINED, Sampler* texture=NULL) { return render_draw2(flags, color, points, n, mode, texture); }
+
+        template <size_t n>
+        void render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&positions)[n], sre::draw2mode mode=SRE_DRAW2_JOINED)
+        {
+            RenderPoint points[n];
+            for (auto i = 0; i < n; i++)
+                points[i].pos = positions[i];
+
+            return render_draw2(flags, color, points, n, mode);
+        }
 
         inline void render_fill(sre::col4 color) { render_draw1(0, {{ {0, 65536}, 0, color }}); }
 
         inline Sampler* sampler(pixelFormat format, int w, int h) { return sre_sampler(format, w, h); }
 
-        template <typename R, typename T>
+        template <typename R, typename T=R::texture_type>
         struct RenderDriverHelper: sre_RenderDriverData
         {
             RenderDriverHelper(): sre_RenderDriverData{
@@ -214,8 +231,8 @@ SRE_CAPI_END
                         [](void* inst, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags) {
                             static_cast<R*>(inst)->flush_queueinstances1(static_cast<T*>(texture), instances, instance_count, flags, switch_flags);
                         },
-                        [](void* inst, /*void* _texture,*/ const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags) {
-                            static_cast<R*>(inst)->flush_queueinstances2(instance, point_count, flags, switch_flags);
+                        [](void* inst, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags) {
+                            static_cast<R*>(inst)->flush_queueinstances2(static_cast<T*>(texture), instance, point_count, flags, switch_flags);
                         },
                         [](void* inst) { static_cast<R*>(inst)->present(); },
                         [](void* inst, float color[3]) { return static_cast<R*>(inst)->clear(color); },
