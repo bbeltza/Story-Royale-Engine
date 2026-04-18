@@ -121,7 +121,7 @@ namespace sreD3D11
             void set_vsync(bool enable) { m_caches.vsync = enable; }
                 
             // Texture functions
-            bool texture_setup(Texture* texture, sre::pixelFormat format, int x, int y, sre::pixelFormat* outformat);
+            bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
             bool texture_update(Texture* texture, const void* pixels, int pitch);
             void texture_destroy(Texture* texture);
     };

@@ -65,5 +65,7 @@ do { if (FAILED(hr)) {                                                          
                                                                                                                             \
 }} while(0)
 
+#define SRE_DXCALLR(x, ret) SRE_DXCALL(x); if (FAILED(hr)) return ret
+#define SRE_DXCALLF(x) SRE_DXCALLR(x, false)
 
 #endif

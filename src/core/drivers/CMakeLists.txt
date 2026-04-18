@@ -8,6 +8,6 @@ add_subdirectory(gl21)
 add_subdirectory(gl32)
 
 if (WIN32)
-    #add_subdirectory("direct3d12 (joke)")
+    add_subdirectory("direct3d12 (joke)")
     add_subdirectory("direct3d11")
 endif()

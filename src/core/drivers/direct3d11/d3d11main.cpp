@@ -4,7 +4,7 @@
 #include <SDL_hints.h>
 #include <utils/mem.h>
 
-extern "C" sre::RenderDriverHelper<sreD3D11::Instance, sreD3D11::Texture> sred3d11{};
+extern "C" sre::RenderDriverHelper<sreD3D11::Instance> sred3d11{};
 
 using namespace sreD3D11;
 
