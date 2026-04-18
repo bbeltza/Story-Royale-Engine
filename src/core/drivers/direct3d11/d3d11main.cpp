@@ -1,6 +1,7 @@
 #include "d3d11.h"
 
 #include <SDL_syswm.h>
+#include <SDL_hints.h>
 #include <utils/mem.h>
 
 extern "C" sre::RenderDriverHelper<sreD3D11::Instance, sreD3D11::Texture> sred3d11{};
@@ -37,6 +38,7 @@ Instance::Instance(SDL_Window* window)
         swapchain_desc.Windowed = TRUE;
         swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapchain_desc.OutputWindow = swm_info.info.win.window;
+        swapchain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
         #ifndef NDEBUG
             #define _DBGFLAGS D3D11_CREATE_DEVICE_DEBUG
@@ -60,6 +62,14 @@ Instance::Instance(SDL_Window* window)
 
         SRE_DX11CALL(dxswapchain->QueryInterface(&m_dxswapchain));
         dxswapchain->Release();
+    }
+
+    { // Disable alt-enter automatic fullscreen toggling by DXGI. It switches to non-borderless fullscreen and that is not properly implemented
+        IDXGIFactory1* factory{};
+        SRE_DXCALL(m_dxswapchain->GetParent(IID_PPV_ARGS(&factory)));
+        SRE_DXCALL(factory->MakeWindowAssociation(swm_info.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
+
+        factory->Release();
     }
 
     m_success &= m_shaders.setup(m_dxdevice);

@@ -1,5 +1,7 @@
 #include "gl11.h"
 #include <utils/math.h>
+#include <math.h>
+#include <assert.h>
 
 // state
 
@@ -8,6 +10,7 @@ bool sregl11_set_camerastate(void* _inst, sre_unit x, sre_unit y)
     sregl11_inst* inst = _inst;
     inst->camera_cache[0] = x;
     inst->camera_cache[1] = y;
+    return true;
 }
 
 bool sregl11_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
@@ -15,23 +18,24 @@ bool sregl11_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
     sregl11_inst* inst = _inst;
     SRE_GLCALLF(inst->glfuncs.Viewport(0, 0, w, h));
 
-    SRE_GLCALLF(glMatrixMode(GL_PROJECTION));
-    SRE_GLCALLF(glLoadIdentity());
-    SRE_GLCALLF(glOrtho(0, w, h, 0, 0, 1));
-    SRE_GLCALLF(glMatrixMode(GL_MODELVIEW));
+    SRE_GLCALLF(inst->glfuncs11.MatrixMode(GL_PROJECTION));
+    SRE_GLCALLF(inst->glfuncs11.LoadIdentity());
+    SRE_GLCALLF(inst->glfuncs11.Ortho(0, w, h, 0, 0, 1));
+    SRE_GLCALLF(inst->glfuncs11.MatrixMode(GL_MODELVIEW));
     inst->scale_cache = scale;
+    return true;
 }
 
 // draw
 
 #define SREGL11_CHECK_FORSWITCHES() if (switch_flags & SRE_RENDER_SWITCHCAMERA)                                             \
                                     {                                                                                       \
-                                        SRE_GLCALL(glLoadIdentity());                                                       \
+                                        SRE_GLCALL(inst->glfuncs11.LoadIdentity());                                                       \
                                         if (flags & SRE_DRAWFLAG_CAMERA)                                                    \
                                         {                                                                                   \
-                                            SRE_GLCALL(glTranslatef(inst->camera_cache[0], inst->camera_cache[1], 0));      \
+                                            SRE_GLCALL(inst->glfuncs11.Translatef(inst->camera_cache[0], inst->camera_cache[1], 0));      \
                                         }                                                                                   \
-                                        SRE_GLCALL(glScalef(inst->scale_cache, inst->scale_cache, 1));                      \
+                                        SRE_GLCALL(inst->glfuncs11.Scalef(inst->scale_cache, inst->scale_cache, 1));                      \
                                                                                                                             \
                                     }                                                                                       \
                                                                                                                             \
@@ -52,7 +56,7 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
     #if 0
     for (size_t i = 0; i < instance_count; i++)
     {
-        SRE_GLCALL(glPushMatrix());
+        SRE_GLCALL(inst->glfuncs11.PushMatrix());
 
         const sre_RenderInstance1* dinst = &instances[i];
         GLfloat minx = 0.0f - dinst->anchor.x;
@@ -60,12 +64,12 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
         GLfloat maxx = 1.0f - dinst->anchor.x;
         GLfloat maxy = 1.0f - dinst->anchor.y;
 
-        SRE_GLCALL(glTranslatef(dinst->rectangle.x, dinst->rectangle.y, 0));
-        SRE_GLCALL(glRotatef(ut_deg(dinst->angle), 0, 0, 1));
-        SRE_GLCALL(glScalef(dinst->rectangle.w, dinst->rectangle.h, 1));
+        SRE_GLCALL(inst->glfuncs11.Translatef(dinst->rectangle.x, dinst->rectangle.y, 0));
+        SRE_GLCALL(inst->glfuncs11.Rotatef((GLfloat)ut_deg(dinst->angle), 0, 0, 1));
+        SRE_GLCALL(inst->glfuncs11.Scalef(dinst->rectangle.w, dinst->rectangle.h, 1));
 
-        glBegin(GL_QUADS);
-            glColor4ubv(&dinst->color.r);
+        inst->glfuncs11.Begin(GL_QUADS);
+            inst->glfuncs11.Color4ubv(&dinst->color.r);
             
             if (texture)
             {
@@ -74,30 +78,30 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
                 GLfloat maxu = minu + dinst->uv.x;
                 GLfloat maxv = minv + dinst->uv.y;
 
-                glTexCoord2f(minu, minv);
-                glVertex2f(minx, miny);
-                glTexCoord2f(maxu, minv);
-                glVertex2f(maxx, miny);
-                glTexCoord2f(maxu, maxv);
-                glVertex2f(maxx, maxy);
-                glTexCoord2f(minu, maxv);
-                glVertex2f(minx, maxy);
+                inst->glfuncs11.TexCoord2f(minu, minv);
+                inst->glfuncs11.Vertex2f(minx, miny);
+                inst->glfuncs11.TexCoord2f(maxu, minv);
+                inst->glfuncs11.Vertex2f(maxx, miny);
+                inst->glfuncs11.TexCoord2f(maxu, maxv);
+                inst->glfuncs11.Vertex2f(maxx, maxy);
+                inst->glfuncs11.TexCoord2f(minu, maxv);
+                inst->glfuncs11.Vertex2f(minx, maxy);
             }
             else
             {
-                glVertex2f(minx, miny);
-                glVertex2f(maxx, miny);
-                glVertex2f(maxx, maxy);
-                glVertex2f(minx, maxy);
+                inst->glfuncs11.Vertex2f(minx, miny);
+                inst->glfuncs11.Vertex2f(maxx, miny);
+                inst->glfuncs11.Vertex2f(maxx, maxy);
+                inst->glfuncs11.Vertex2f(minx, maxy);
             }
             
-        SRE_GLCALL(glEnd());
-        SRE_GLCALL(glPopMatrix());
+        SRE_GLCALL(inst->glfuncs11.End());
+        SRE_GLCALL(inst->glfuncs11.PopMatrix());
     }
 
     #else
 
-    glBegin(GL_QUADS);
+    inst->glfuncs11.Begin(GL_QUADS);
 
     for (size_t i = 0; i < instance_count; i++)
     {
@@ -153,7 +157,7 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
             }
         }
 
-        glColor4ubv(&dinst->color.r);
+        inst->glfuncs11.Color4ubv(&dinst->color.r);
         if (texture)
         {
             GLfloat minu = dinst->uv_offset.x;
@@ -161,25 +165,25 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
             GLfloat maxu = minu + dinst->uv.x;
             GLfloat maxv = minv + dinst->uv.y;
 
-            glTexCoord2f(minu, minv);
-            glVertex2fv(v + 0);
-            glTexCoord2f(maxu, minv);
-            glVertex2fv(v + 2);
-            glTexCoord2f(maxu, maxv);
-            glVertex2fv(v + 4);
-            glTexCoord2f(minu, maxv);
-            glVertex2fv(v + 6);
+            inst->glfuncs11.TexCoord2f(minu, minv);
+            inst->glfuncs11.Vertex2fv(v + 0);
+            inst->glfuncs11.TexCoord2f(maxu, minv);
+            inst->glfuncs11.Vertex2fv(v + 2);
+            inst->glfuncs11.TexCoord2f(maxu, maxv);
+            inst->glfuncs11.Vertex2fv(v + 4);
+            inst->glfuncs11.TexCoord2f(minu, maxv);
+            inst->glfuncs11.Vertex2fv(v + 6);
         }
         else
         {
-            glVertex2fv(v + 0);
-            glVertex2fv(v + 2);
-            glVertex2fv(v + 4);
-            glVertex2fv(v + 6);
+            inst->glfuncs11.Vertex2fv(v + 0);
+            inst->glfuncs11.Vertex2fv(v + 2);
+            inst->glfuncs11.Vertex2fv(v + 4);
+            inst->glfuncs11.Vertex2fv(v + 6);
         }
     }
 
-    SRE_GLCALL(glEnd());
+    SRE_GLCALL(inst->glfuncs11.End());
     #endif
 }
 
@@ -192,19 +196,19 @@ void sregl11_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
 
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: glBegin(GL_TRIANGLE_FAN); break;
-        case SRE_DRAW2_STRIP: glBegin(GL_TRIANGLE_STRIP); break;
-        case SRE_DRAW2_TRIANGLE: glBegin(GL_TRIANGLES); break;
-        default: abort(); return;
+        case SRE_DRAW2_JOINED: inst->glfuncs11.Begin(GL_TRIANGLE_FAN); break;
+        case SRE_DRAW2_STRIP: inst->glfuncs11.Begin(GL_TRIANGLE_STRIP); break;
+        case SRE_DRAW2_TRIANGLE: inst->glfuncs11.Begin(GL_TRIANGLES); break;
+        default: assert(0); return;
     }
 
-    glColor4ubv(&instance->color.r);
+    inst->glfuncs11.Color4ubv(&instance->color.r);
     for (size_t i = 0; i < point_count; i++)
     {
         const sre_RenderPoint* pt = &instance->points[i];
-        glTexCoord2f(pt->uv.x, pt->uv.y);
-        glVertex2f(pt->pos.x, pt->pos.y);
+        inst->glfuncs11.TexCoord2f(pt->uv.x, pt->uv.y);
+        inst->glfuncs11.Vertex2f(pt->pos.x, pt->pos.y);
     }
 
-    SRE_GLCALL(glEnd());
+    SRE_GLCALL(inst->glfuncs11.End());
 }

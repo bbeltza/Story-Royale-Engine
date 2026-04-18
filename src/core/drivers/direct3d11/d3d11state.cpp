@@ -12,7 +12,7 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 		m_dxrendertargetview->Release();
 		m_dxrendertargetview = NULL;
 	}
-	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, 0));
+	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING));
 
 	{
         ID3D11Resource* rtres{};

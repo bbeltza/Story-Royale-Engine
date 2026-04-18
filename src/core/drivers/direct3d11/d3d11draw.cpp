@@ -6,7 +6,7 @@ void Instance::present()
 {
     HRESULT hr;
     
-    SRE_DXCALL(m_dxswapchain->Present(m_caches.vsync, 0));
+    SRE_DXCALL(m_dxswapchain->Present(m_caches.vsync, DXGI_PRESENT_ALLOW_TEARING));
 }
 
 bool Instance::clear(float color[3])

@@ -23,6 +23,22 @@ typedef void (APIENTRYP PFNGLTEXIMAGE2DPROC)(GLenum target, GLint level, GLint i
 typedef void (APIENTRYP PFNGLTEXSUBIMAGE2DPROC)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void * pixels);
 typedef void (APIENTRYP PFNGLPIXELSTOREIPROC)(GLenum pname, GLint param);
 
+typedef void (APIENTRYP PFNGLVERTEX2FPROC)(GLfloat x, GLfloat y);
+typedef void (APIENTRYP PFNGLVERTEX2FVPROC)(const GLfloat *v);
+typedef void (APIENTRYP PFNGLTEXCOORD2FPROC)(GLfloat s, GLfloat t);
+typedef void (APIENTRYP PFNGLCOLORUBVPROC)(const GLubyte *v);
+typedef void (APIENTRYP PFNGLBEGINPROC)(GLenum mode);
+typedef void (APIENTRYP PFNGLENDPROC)(void);
+typedef void (APIENTRYP PFNGLMATRIXMODEPROC)(GLenum mode);
+typedef void (APIENTRYP PFNGLLOADIDENTITYPROC)(void);
+typedef void (APIENTRYP PFNGLORTHOPROC)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble nearVal, GLdouble farVal);
+typedef void (APIENTRYP PFNGLSCALEFPROC)(GLfloat x, GLfloat y, GLfloat z);
+typedef void (APIENTRYP PFNGLTRANSLATEFPROC)(GLfloat x, GLfloat y, GLfloat z);
+
+typedef void (APIENTRYP PFNGLPUSHMATRIXPROC)(void);
+typedef void (APIENTRYP PFNGLPOPMATRIXPROC)(void);
+typedef void (APIENTRYP PFNGLROTATEFPROC)(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+
 #define SRE_GLFUNCS                                   \
         SRE_GLPFNDEF(PFNGLCLEARPROC, Clear)           \
         SRE_GLPFNDEF(PFNGLCLEARCOLORPROC, ClearColor) \
@@ -84,7 +100,22 @@ typedef void (APIENTRYP PFNGLPIXELSTOREIPROC)(GLenum pname, GLint param);
         SRE_GLPFNDEF(PFNGLBINDBUFFERRANGEPROC, BindBufferRange)         \
         SRE_GLPFNDEF(PFNGLBINDBUFFERBASEPROC, BindBufferBase)           \
 
-#define SRE_GLFUNCS11
+#define SRE_GLFUNCS11                                                           \
+        SRE_GLPFNDEF(PFNGLVERTEX2FPROC, Vertex2f)                               \
+        SRE_GLPFNDEF(PFNGLVERTEX2FVPROC, Vertex2fv)                             \
+        SRE_GLPFNDEF(PFNGLTEXCOORD2FPROC, TexCoord2f)                           \
+        SRE_GLPFNDEF(PFNGLCOLORUBVPROC, Color4ubv)                              \
+        SRE_GLPFNDEF(PFNGLBEGINPROC, Begin)                                     \
+        SRE_GLPFNDEF(PFNGLENDPROC, End)                                         \
+        SRE_GLPFNDEF(PFNGLMATRIXMODEPROC, MatrixMode)                           \
+        SRE_GLPFNDEF(PFNGLLOADIDENTITYPROC, LoadIdentity)                       \
+        SRE_GLPFNDEF(PFNGLORTHOPROC, Ortho)                                     \
+        SRE_GLPFNDEF(PFNGLSCALEFPROC, Scalef)                                   \
+        SRE_GLPFNDEF(PFNGLTRANSLATEFPROC, Translatef)                           \
+        \
+        SRE_GLPFNDEF(PFNGLPUSHMATRIXPROC, PushMatrix)                           \
+        SRE_GLPFNDEF(PFNGLPOPMATRIXPROC, PopMatrix)                             \
+        SRE_GLPFNDEF(PFNGLROTATEFPROC, Rotatef)                                 \
 
 #ifndef SRE_GLPFNDEF
     #define SRE_GLPFNDEF(t, n) t n;
