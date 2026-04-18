@@ -76,7 +76,13 @@ typedef void (APIENTRYP PFNGLPIXELSTOREIPROC)(GLenum pname, GLint param);
         SRE_GLPFNDEF(PFNGLUNIFORMMATRIX3X4FVPROC, UniformMatrix3x4fv)             \
 
 #define SRE_GLFUNCS32   \
-        SRE_GLPFNDEF(PFNGLDRAWARRAYSINSTANCEDPROC, glDrawArraysInstanced)
+        SRE_GLPFNDEF(PFNGLGENVERTEXARRAYSPROC, GenVertexArrays)                 \
+        SRE_GLPFNDEF(PFNGLBINDVERTEXARRAYPROC, BindVertexArray)                 \
+        SRE_GLPFNDEF(PFNGLDRAWARRAYSINSTANCEDPROC, DrawArraysInstanced)         \
+        SRE_GLPFNDEF(PFNGLGETUNIFORMBLOCKINDEXPROC, GetUniformBlockIndex)       \
+        SRE_GLPFNDEF(PFNGLUNIFORMBLOCKBINDINGPROC, UniformBlockBinding)         \
+        SRE_GLPFNDEF(PFNGLBINDBUFFERRANGEPROC, BindBufferRange)         \
+        SRE_GLPFNDEF(PFNGLBINDBUFFERBASEPROC, BindBufferBase)           \
 
 #ifndef SRE_GLPFNDEF
     #define SRE_GLPFNDEF(t, n) t n;

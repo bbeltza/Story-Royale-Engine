@@ -84,7 +84,7 @@ static const GLubyte DRAW1_INDICES[] = {
     2, 3, 0
 };
 
-static bool SREGL_CHECKSHADER(struct sregl_functions21* funcs, GLuint shader, const char* tag)
+bool SREGL21_CHECKSHADER(struct sregl_functions21* funcs, GLuint shader, const char* tag)
 {
     
     GLint status;
@@ -103,7 +103,7 @@ static bool SREGL_CHECKSHADER(struct sregl_functions21* funcs, GLuint shader, co
     return false;
 }
 
-static bool SREGL_CHECKPROGRAM(struct sregl_functions21* funcs, GLuint program, const char* tag)
+bool SREGL21_CHECKPROGRAM(struct sregl_functions21* funcs, GLuint program, const char* tag)
 {
     GLint status;
     funcs->GetProgramiv(program, GL_LINK_STATUS, &status);
@@ -173,9 +173,9 @@ bool sregl21setupbuffers(sregl21_inst* inst)
 
     {
         bool succ = true;
-        succ &= SREGL_CHECKSHADER(&inst->glfuncs21, cofs, "cofs");
-        succ &= SREGL_CHECKSHADER(&inst->glfuncs21, d1vs, "d1vs");
-        succ &= SREGL_CHECKSHADER(&inst->glfuncs21, d2vs, "d2vs");
+        succ &= SREGL21_CHECKSHADER(&inst->glfuncs21, cofs, "cofs");
+        succ &= SREGL21_CHECKSHADER(&inst->glfuncs21, d1vs, "d1vs");
+        succ &= SREGL21_CHECKSHADER(&inst->glfuncs21, d2vs, "d2vs");
 
         if (!succ)
             return false;
@@ -201,8 +201,8 @@ bool sregl21setupbuffers(sregl21_inst* inst)
 
     {
         bool succ = true;
-        succ &= SREGL_CHECKPROGRAM(&inst->glfuncs21, inst->draw1data.program, "draw1");
-        succ &= SREGL_CHECKPROGRAM(&inst->glfuncs21, inst->draw2data.program, "draw2");
+        succ &= SREGL21_CHECKPROGRAM(&inst->glfuncs21, inst->draw1data.program, "draw1");
+        succ &= SREGL21_CHECKPROGRAM(&inst->glfuncs21, inst->draw2data.program, "draw2");
 
         if (!succ)
             return false;

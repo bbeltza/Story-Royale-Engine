@@ -94,6 +94,9 @@ bool sregl21setupbuffers(sregl21_inst* instance);
 void sregl21bindbuffer1(sregl21_inst* instance, GLint vbo);
 void sregl21bindbuffer2(sregl21_inst* instance, GLint vbo);
 
+bool SREGL21_CHECKSHADER(struct sregl_functions21* funcs, GLuint shader, const char* tag);
+bool SREGL21_CHECKPROGRAM(struct sregl_functions21* funcs, GLuint program, const char* tag);
+
 SRE_CAPI_END
 
 #endif

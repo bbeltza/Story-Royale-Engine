@@ -39,7 +39,8 @@ static bool sregl32_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Wind
         return false;
     }
 
-    sre_log(SRE_LOGCATEGORY_DEBUG, "%p", SDL_GL_GetProcAddress("glVertexAttribDivisor"));
+    if (!sregl32setupbuffers(inst))
+        return false;
 
     *vft = &sregl32_vft;
     return true;
