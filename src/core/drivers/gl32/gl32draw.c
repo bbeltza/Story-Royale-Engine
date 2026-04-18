@@ -30,7 +30,7 @@ void sregl32_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
         unsigned colors[4*255];
         GLsizeiptr max_count = instance_count > 255 ? 255 : instance_count;
 
-        for (size_t i = 0; i < max_count; i++)
+        for (GLsizeiptr i = 0; i < max_count; i++)
         {
             sre_col4 packed = instances[i].color;
             colors[4*i + 0] = packed.r;
@@ -63,17 +63,18 @@ void sregl32_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
         case SRE_DRAW2_JOINED: mode = GL_TRIANGLE_FAN; break;
         case SRE_DRAW2_STRIP: mode = GL_TRIANGLE_STRIP; break;
         case SRE_DRAW2_TRIANGLE: mode = GL_TRIANGLES; break;
-        default: abort(); return;
+        default: assert(0); return;
     }
 
-    if (inst->d2data.vbosize < point_count)
+    GLsizeiptr point_counti = (GLsizeiptr)point_count;
+    if (inst->d2data.vbosize < point_counti)
     {
-        inst->d2data.vbosize *= 2;
+        inst->d2data.vbosize = point_counti*2;
         SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, sizeof(instance->points[0])*inst->d2data.vbosize, instance->points, GL_DYNAMIC_DRAW));
     }
     else
     {
-        SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_count, instance->points));
+        SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_counti, instance->points));
     }
     SRE_GLCALL(inst->glfuncs21.Uniform4i(inst->d2data.coluniform, instance->color.r, instance->color.g, instance->color.b, instance->color.a));
     SRE_GLCALL(inst->glfuncs.DrawArrays(mode, 0, (GLsizei)point_count));
@@ -89,4 +90,5 @@ bool sregl32_clear(void* _inst, float color[3])
 {
     sregl32_inst* inst = _inst;
     SREGL_CLEAR(inst->glfuncs, color);
+    return true;
 }

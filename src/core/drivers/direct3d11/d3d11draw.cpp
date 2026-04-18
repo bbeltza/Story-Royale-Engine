@@ -108,7 +108,7 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
         m_dxdevicecontext->PSSetShaderResources(0, 1, texture ? &texture->dxsrv : &m_basictexture);
     }
 
-    m_dxdevicecontext->Draw(point_count, 0);
+    m_dxdevicecontext->Draw(static_cast<UINT>(point_count), 0);
 }
 
 //

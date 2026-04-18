@@ -1,4 +1,5 @@
 #include "glcommon.h"
+#include <stdlib.h>
 
 #undef SRE_GLGETERROR
 #define SRE_GLGETERROR glfuncs->GetError

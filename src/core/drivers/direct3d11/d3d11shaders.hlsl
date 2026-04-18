@@ -51,7 +51,7 @@ PSinput D1main(D1input input, uint vid: SV_VertexID)
         input.transform.z, 0, 0, 0,
         0, input.transform.w, 0, 0,
         0, 0, 1, 0,
-        input.transform.xy, 0, 1
+        0, 0, 0, 1
     );
 
     float cx = cos(input.angle);
@@ -60,12 +60,12 @@ PSinput D1main(D1input input, uint vid: SV_VertexID)
         cx, sx, 0, 0,
         -sx, cx, 0, 0,
         0, 0, 1, 0,
-        0, 0, 0, 1 
+        input.transform.xy, 0, 1 
     );
 
     float4 vert = VERTICES[vid] - float4(input.anchor, 0.0, 0.0);
     vert = mul(vert, mul(transform, rotation));
-    vert = floor(vert * VIEWPORT[2][2]) + float4(CAMERA, 0, 0);
+    vert = floor(vert * VIEWPORT[2][2] + float4(CAMERA, 0, 0));
     vert.w = 1;
     vert = mul(VIEWPORT, vert);
 

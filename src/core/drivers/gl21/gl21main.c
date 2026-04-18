@@ -40,6 +40,7 @@ static bool sregl21_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Wind
 
     CLEAN_NFAIL:
         sregl21_commondestroy(&inst->common21);
+        return false;
 }
 
 static void sregl21_destroy(void* _inst)

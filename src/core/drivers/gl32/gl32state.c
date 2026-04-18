@@ -46,4 +46,5 @@ bool sregl32_set_camerastate(void* _inst, sre_unit x, sre_unit y)
     GLfloat camera[2] = {x, y};
     SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->stateubo));
     SRE_GLCALLF(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, sizeof(struct sregl32_stateubo) + offsetof(struct sregl32_stateubo, camera), sizeof(camera), camera));
+    return true;
 }
