@@ -7,6 +7,7 @@ void sregl32_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
 
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
+        switch_flags |= SRE_RENDER_SWITCHCAMERA | SRE_RENDER_SWITCHTEXTURE; // Of course, like before in Direct3D 11!
         SRE_GLCALL(inst->glfuncs21.UseProgram(inst->d1data.program));
         SRE_GLCALL(inst->glfuncs32.BindVertexArray(inst->d1data.vao));
     }
@@ -23,9 +24,10 @@ void sregl32_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
     }
     
     
-    do {
+    while (instance_count)
+    {
         unsigned colors[4*255];
-        GLsizeiptr max_count = instance_count & 255;
+        GLsizeiptr max_count = instance_count > 255 ? 255 : instance_count;
 
         for (size_t i = 0; i < max_count; i++)
         {
@@ -43,7 +45,8 @@ void sregl32_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
         SRE_GLCALL(inst->glfuncs32.DrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)max_count));
 
         instance_count -= max_count;
-    } while (instance_count);
+        instances += max_count;
+    } 
 }
 
 void sregl32_flush_queueinstances2(void* inst, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
