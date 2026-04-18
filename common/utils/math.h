@@ -12,6 +12,7 @@
 #define ut_setclamp(x, min, max) x = ut_clamp(x, min, max)
 
 #define ut_rad(x) ((x) * UT_PI_180)
+#define ut_deg(x) ((x) * UT_180_PI)
 
 // Math macro defines
 #define UT_E        2.71828182845904523536   // e
@@ -29,3 +30,4 @@
 #define UT_SQRT1_2  0.707106781186547524401  // 1/sqrt(2)
 #define UT_PI_180   0.0174532925199432957692 // pi/180
 #define UT_RAD_1DEG UT_PI_180                // Radians in a dregree (just pi/180)
+#define UT_180_PI   (180/UT_PI)

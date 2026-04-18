@@ -130,7 +130,7 @@ struct sre_RenderVFT
     bool (* clear)(void*, float color[3]);
     
     bool (* set_viewportstate)(void*, int w, int h, sre_unit scale);
-    bool (* set_blendstate)(void*, sre_blendMode blending);
+    bool (* set_blendstate)(void*, sre_blendMode blendmode);
     bool (* set_camerastate)(void*, sre_unit x, sre_unit y);
     void (* set_clipstate)(void*, const sre_rect2Di* rectangle);
     void (* set_vsync)(void*, bool enable);

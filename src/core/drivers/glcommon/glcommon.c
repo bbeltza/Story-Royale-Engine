@@ -40,6 +40,13 @@ bool sregl_loadfunctions32(struct sregl_functions32* funcs, void* (*pGetProcAddr
     return true;
 }
 
+bool sregl_loadfunctions11(struct sregl_functions11* funcs, void* (*pGetProcAddress)(const char* proc))
+{
+    SRE_GLFUNCS11
+
+    return true;
+}
+
 
 extern bool sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs)
 {

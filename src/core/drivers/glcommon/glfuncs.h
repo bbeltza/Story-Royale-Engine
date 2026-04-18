@@ -84,6 +84,8 @@ typedef void (APIENTRYP PFNGLPIXELSTOREIPROC)(GLenum pname, GLint param);
         SRE_GLPFNDEF(PFNGLBINDBUFFERRANGEPROC, BindBufferRange)         \
         SRE_GLPFNDEF(PFNGLBINDBUFFERBASEPROC, BindBufferBase)           \
 
+#define SRE_GLFUNCS11
+
 #ifndef SRE_GLPFNDEF
     #define SRE_GLPFNDEF(t, n) t n;
 #endif

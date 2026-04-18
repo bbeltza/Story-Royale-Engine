@@ -44,6 +44,7 @@ namespace sre
 
 #define VIDEO_DRIVERS				\
 VIDEOINIT_DEF(sdlrenderer)			\
+VIDEOINIT_DEF(gl11)					\
 VIDEOINIT_DEF(gl21)					\
 VIDEOINIT_DEF(gl32)					\
 VIDEOINIT_DEF_WIN32(d3d11)			\
@@ -73,13 +74,14 @@ void __setup_renderer()
 	enum sre_RenderDrivers
 	{
 		SRE_RENDERDRIVER_SDLRENDERER,
+		SRE_RENDERDRIVER_OPENGL_11,
 		SRE_RENDERDRIVER_OPENGL_21,
 		SRE_RENDERDRIVER_OPENGL_32,
 		#if _WIN32
 			SRE_RENDERDRIVER_DIRECTX_11,
 			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_11
 		#else
-			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_32
+			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_11
 		#endif
 	};
 
@@ -89,12 +91,15 @@ void __setup_renderer()
 	assert(driverdata.texture_size >= sizeof(int));
 
 	engine.video.vfptr = static_cast<const sre_RenderVFT**>(operator new(sizeof(void*) + driverdata.renderer_size));
+	*engine.video.vfptr = NULL;
 	if (!driverdata.initialize(engine.video.vfptr, engine.video.vfptr+1, engine.sdl_windowhndl))
 	{
 		operator delete(engine.video.vfptr);
 		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
 		exit(-1);
 	}
+
+	assert((*engine.video.vfptr) != NULL && "Maybe forgot to set up the vft? (virtual function table)");
 
 	new(engine.video._vector_data) sre::RenderVectors{};
 	engine.video.texture_size = driverdata.texture_size;
