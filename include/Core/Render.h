@@ -70,7 +70,8 @@ typedef enum sre_draw2mode // Primitive rendering mode for draw2
 
 enum sre_drawFlags
 {
-    SRE_DRAWFLAG_CAMERA = 1 << 0
+    SRE_DRAWFLAG_CAMERA = 1 << 0,
+    SRE_DRAWFLAG_LINE = 1 << 1 // Draw lines instead of filling the elements, it is not completely implemented right now
 };
 
 enum _sre_drawSwitchFlags

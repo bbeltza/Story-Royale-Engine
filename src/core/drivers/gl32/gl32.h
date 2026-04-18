@@ -24,6 +24,16 @@ struct sregl32_d1data
     GLuint instcolubo;
 };
 
+struct sregl32_d2data
+{
+    GLuint program;
+    GLuint vao;
+    GLuint vbo;
+
+    GLuint coluniform;
+    GLsizeiptr vbosize;
+};
+
 typedef struct sregl32_inst
 {
     sregl21_cominst common21;
@@ -32,6 +42,7 @@ typedef struct sregl32_inst
     struct sregl_functions32 glfuncs32;
 
     struct sregl32_d1data d1data;
+    struct sregl32_d2data d2data;
 
     GLuint stateubo;
 } sregl32_inst;
