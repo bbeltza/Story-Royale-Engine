@@ -1,6 +1,7 @@
 #include <Core/Render.h>
 #include <Core/Object.hpp>
 #include <Core/Display.hpp>
+#include <Core/Runtime.hpp>
 
 #include "../internal.h"
 
@@ -32,7 +33,9 @@ class sre::ECS
         {
             update_scene();
             update_layer();
+            sre::onUpdate.fire();
         }
+        static bool call_render();
         static void render_ui();
         static void render_scene();
 };
@@ -131,9 +134,6 @@ void sre::ECS::update_layer()
 
 //
 
-void __render_ui() { sre::ECS::render_ui(); }
-void __render_scene() { sre::ECS::render_scene(); }
-
 void sre::ECS::render_ui()
 {
     if (engine.current_guilayer)
@@ -146,14 +146,96 @@ void sre::ECS::render_scene()
     currscn->call_render();
 }
 
+extern void __render_clearqueues();
+
+bool sre::ECS::call_render()
+{
+    if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN)
+        return false;
+
+#ifndef IMGUI_DISABLE
+	auto imgui = engine.video->imgui;
+	if (imgui)
+	{
+		imgui->imgui_newframe();
+		ImGui_ImplSDL2_NewFrame();
+	}
+	else
+		ImGui_ImplNull_NewFrame();
+	ImGui::NewFrame();
+#endif
+
+    // Render current world
+
+    sre::render_clipreset();
+
+    float bg[3];
+    if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
+    {
+    	bg[0] = current->background.r / 255.0f;
+    	bg[1] = current->background.g / 255.0f;
+    	bg[2] = current->background.b / 255.0f;
+
+    	//// Aliases for the background and the foreground (kind of old)
+    	const sre::col4& fg = current->foreground;
+
+    #ifndef IMGUI_DISABLE
+    	ImGui::Begin("Current scene"); {
+    		float colb[4] = { current->background.r/255.0f, current->background.g/255.0f, current->background.b/255.0f, current->background.a/255.0f };
+    		if (ImGui::ColorEdit4("Background", colb))
+    			current->background = sre::col4::fromNormalized(colb[0], colb[1], colb[2], colb[3]);
+        
+    		float colf[4] = { fg.r/255.0f, fg.g/255.0f, fg.b/255.0f, fg.a/255.0f };
+    		if (ImGui::ColorEdit4("Foreground", colf))
+    			current->foreground = sre::col4::fromNormalized(colf[0], colf[1], colf[2], colf[3]);
+    	}
+    	ImGui::End();
+    #endif
+
+    	//// Clearing the screen with the background color
+
+    	sre::beforeRender.fire();
+
+    	//// Drawing all the entities (doesn't run if the foreground is full opaque)
+    	if (fg.a < 255)
+    		sre::ECS::render_scene();
+
+    	//// Finally, filling the foreground (doesn't run if the foreground is invisible)
+    	if (fg.a)
+    		sre::render_fill(fg);
+    }
+    else
+    {
+		#if 0 // Debug easier on black backgrounds
+			bg[0] = 0.3f;
+			bg[1] = 0.3f;
+			bg[2] = 0.3f;
+		#else
+			bg[0] = 0.0f;
+    		bg[1] = 0.0f;
+    		bg[2] = 0.0f;
+    	#endif
+    	sre::beforeRender.fire();
+    }
+
+	// Draw the GUI layer
+	sre::ECS::render_ui();
+
+	sre::afterRender.fire();
+
+    return true;
+}
+
 //
 
-void __update_ecs()
+bool __update_ecs()
 {
     sre::ECS::destroy_queue();
     sre::ECS::call_query();
     sre::ECS::call_update();
     sre::ECS::destroy_queue();
+    bool wantrender = sre::ECS::call_render();
+    return wantrender;
 }
 
 void __cleanup_ecs()

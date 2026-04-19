@@ -99,8 +99,7 @@ SRE_CAPI_BEGIN
 		
 		struct _engine_renderdata video;
 
-		SDL_cond* render_cond;
-		SDL_mutex* render_mutex;
+		SDL_sem* render_sem;
 		int osize_x, osize_y;
 		sre_unit vsize_x, vsize_y;
 		sre_unit vcenter_x, vcenter_y;
@@ -111,7 +110,6 @@ SRE_CAPI_BEGIN
 		SDL_AudioDeviceID audio_device;
 
 		#if _WIN32
-				int exposing;
 				int quit; // Check if the SDL_QUIT event has been sent before rendering (on windows and OpenGL, rendering causes an error after a window closes)
 		#endif
 
@@ -155,7 +153,6 @@ SRE_CAPI_BEGIN
 
 	extern void __poll_input(SDL_Event* ev);
 
-	extern int __event_filter(void*, SDL_Event* ev);
 	extern int __signal_events(SDL_Event* ev);
 	extern void __queue_events();
 
@@ -163,11 +160,8 @@ SRE_CAPI_BEGIN
 
 	extern void __query_objects();
 
-	extern void __update_ecs();
-	extern void __render_scene();
-	extern void __render_ui();
-
-	extern void __display_render();
+	extern bool __update_ecs();
+	extern void __render_flush();
 
 	extern void __cleanup_ecs();
 SRE_CAPI_END

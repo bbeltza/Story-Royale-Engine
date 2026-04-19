@@ -6,6 +6,17 @@
 
 #if _WIN32
     #include "time/win32.c"
+
+    static CONDITION_VARIABLE win32_rendercond;
+    static SRWLOCK win32_rendersrw;
+
+    static void win32_renderflush(void* userdata)
+    {
+        AcquireSRWLockExclusive(&win32_rendersrw);
+        if (!engine.quit) __render_flush();
+        WakeAllConditionVariable(&win32_rendercond);
+        ReleaseSRWLockExclusive(&win32_rendersrw);
+    }
 #elif __unix__
     #include "time/unix.c"
 #else
@@ -19,7 +30,10 @@ static int game_loop(void* running)
     const long long FREQUENCY = frequency();
     ticks(&engine.framestart_time);
 
-    SDL_LockMutex(engine.render_mutex); // Lock the mutex once, it will be unlocked every time SDL_CondWait gets called
+    #if _WIN32
+        AcquireSRWLockExclusive(&win32_rendersrw);
+    #endif
+
     while (*(int*)running)
     {
         sre_timeStamp elapsed;
@@ -31,6 +45,7 @@ static int game_loop(void* running)
 
         ticks(&engine.frameend_time);
         engine.last_dt = (engine.frameend_time - engine.framestart_time) / SRE_TS(FREQUENCY);
+        if (!engine.last_dt) continue;
         assert(engine.last_dt > 0);
 
         engine.framestart_time = engine.frameend_time;
@@ -38,39 +53,22 @@ static int game_loop(void* running)
         //
 
         __queue_events();
-        __update_ecs();
-
-        //
-    #if _WIN32
-        if (!engine.exposing)
-        {
-    #endif
         
-        if (SDL_PeepEvents(&ev, 1, SDL_ADDEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) == 1)
-        {
-            if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
-            {
-                sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
-                SDL_TriggerBreakpoint();
-            }
-        }
-        else
-            sre_log(SRE_LOGCATEGORY_ERROR, "SDL_PeepEvents failed... %s", SDL_GetError());
-
         #if _WIN32
-            }
-            else
+            if (__update_ecs())
             {
-                if (SDL_CondWaitTimeout(engine.render_cond, engine.render_mutex, 5000) == SDL_MUTEX_TIMEDOUT)
-                {
-                    sre_log(SRE_LOGCATEGORY_ERROR, "SDL_CondWaitTimeout() just timed-out...");
-                    assert(0 && "You must debug this too");
-                }
+                sre_defer(win32_renderflush, NULL);
+                SleepConditionVariableSRW(&win32_rendercond, &win32_rendersrw, 5000, 0);
+            }
+        #else
+            if (__update_ecs())
+            {
+                sre_defer((sre_deferFunction)__render_flush, NULL);
+                SDL_SemWait(engine.render_sem);
             }
         #endif
 
-        //
-        
+       
         ticks(&engine.frameend_time);
         elapsed = (engine.frameend_time - engine.framestart_time) / SRE_TS(FREQUENCY);
         elapsed = engine.target_dt - elapsed;
@@ -82,6 +80,40 @@ static int game_loop(void* running)
     return 0;
 }
 
+#if _WIN32
+
+    static int win32_eventwatch(void* userdata, SDL_Event* ev)
+    {
+        if (ev->type == SDL_QUIT)
+            engine.quit = 1;
+
+        SDL_threadID thrd = SDL_ThreadID();
+        if (thrd != engine.main_thrd)
+            return 1;
+
+        if (ev->type == SDL_WINDOWEVENT)
+        {
+            switch (ev->window.event)
+            {
+                case SDL_WINDOWEVENT_EXPOSED:
+                    if (TryAcquireSRWLockExclusive(&win32_rendersrw))
+                    {
+                        __render_flush();
+                        ReleaseSRWLockExclusive(&win32_rendersrw);
+                    }
+                    WakeAllConditionVariable(&win32_rendercond);
+                    break;
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    __update_viewport(ev->window.data1, ev->window.data2);
+                    break;
+            }
+        }
+
+        return 1;
+    }
+
+#endif
+
 void __run_engine()
 {
     SDL_RegisterEvents(1);
@@ -89,7 +121,11 @@ void __run_engine()
     int running = 1;
     engine.game_loop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
-    SDL_SetEventFilter(__event_watch, NULL);
+    #if _WIN32
+        InitializeConditionVariable(&win32_rendercond);
+        InitializeSRWLock(&win32_rendersrw);
+        SDL_SetEventFilter(win32_eventwatch, NULL);
+    #endif
 
     SDL_Event ev;
     while (SDL_WaitEvent(&ev))
@@ -102,13 +138,8 @@ void __run_engine()
         case SDL_WINDOWEVENT:
             switch (ev.window.event)
             {
-            case SDL_WINDOWEVENT_CLOSE:
-                break;
-            case SDL_WINDOWEVENT_EXPOSED:
-                #if _WIN32
-                    engine.exposing = false;
-                    SDL_CondBroadcast(engine.render_cond);
-                #endif
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                __update_viewport(ev.window.data1, ev.window.data2);
                 break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
                 SDL_ResetKeyboard();
@@ -126,18 +157,6 @@ void __run_engine()
                 defer->ret = ((sre_deferResponseFunction)ev.user.data1)(defer->userdata);
                 SDL_SemPost(defer->sem);
             } break;
-            case ENGINE_EVENT_RENDER:
-                #if _WIN32
-                    if (engine.quit)
-                        break;
-                #endif
-                SDL_LockMutex(engine.render_mutex);
-
-                __display_render();
-
-                if (SDL_CondBroadcast(engine.render_cond) < 0) assert(0 && "This should not happen!");
-                SDL_UnlockMutex(engine.render_mutex);
-                break;
             case ENGINE_EVENT_ENTRY: {
                     int w, h;
                     SDL_GetWindowSize(engine.sdl_windowhndl, &w, &h);
@@ -157,52 +176,6 @@ void __run_engine()
                               // I'll make sure to make it fire once I make the QUIT event
     }
 
-    
-    SDL_LockMutex(engine.render_mutex);
-        running = 0;
-        SDL_CondBroadcast(engine.render_cond);
-        SDL_DestroyCond(engine.render_cond); // Destroy cond and mutex here before waiting for thread
-    SDL_UnlockMutex(engine.render_mutex);
-
+    running = 0;
     SDL_WaitThread(engine.game_loop, NULL);
-
-    SDL_DestroyMutex(engine.render_mutex);
-}
-
-static int __event_watch(void *data, SDL_Event *ev)
-{
-    #if _WIN32
-        if (ev->type == SDL_QUIT)
-            engine.quit = 1;
-    #endif
-
-    SDL_threadID id = SDL_ThreadID();
-    if (id != engine.main_thrd)
-        return 1;
-
-    if (!__event_filter(data, ev))
-        return 0;
-
-    if (ev->type == SDL_WINDOWEVENT)
-    {
-        switch (ev->window.event)
-        {
-            #if _WIN32
-            case SDL_WINDOWEVENT_EXPOSED:
-                if (SDL_TryLockMutex(engine.render_mutex) == 0)
-                {
-                    engine.exposing = true;
-                    __display_render();
-                    SDL_UnlockMutex(engine.render_mutex);
-                }
-                SDL_CondBroadcast(engine.render_cond);
-                break;
-            #endif
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                __update_viewport(ev->window.data1, ev->window.data2);
-                break;
-        }
-    }
-
-    return 1;
 }

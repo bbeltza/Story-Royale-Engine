@@ -79,9 +79,10 @@ void __setup_renderer()
 		SRE_RENDERDRIVER_OPENGL_21,
 		SRE_RENDERDRIVER_OPENGL_32,
 		#if _WIN32
+			//SRE_RENDERDRIVER_DIRECTX_9,
 			SRE_RENDERDRIVER_DIRECTX_11,
 			SRE_RENDERDRIVER_DIRECTX_12,
-			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_12
+			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_11
 		#else
 			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_32
 		#endif
@@ -136,9 +137,7 @@ void __setup_renderer()
 		ImGui_ImplNull_Init();
 	}
 #endif
-
-	engine.render_mutex = SDL_CreateMutex();
-	engine.render_cond = SDL_CreateCond();
+	engine.render_sem = SDL_CreateSemaphore(0);
 }
 
 void __update_viewport(int w, int h)
@@ -173,101 +172,29 @@ void __update_viewport(int w, int h)
 	SRE_VIDEO(engine.video.vfptr, set_viewportstate, w, h, scale);
 }
 
-size_t last_renderedframe;
-
-static void flush_rendercmds(float bg[3], sre::vec2ut camoffset);
-
-void __display_render()
-{
-	if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN)
-		return;
-
-	last_renderedframe = engine.frame;
-
-#ifndef IMGUI_DISABLE
-	auto imgui = engine.video->imgui;
-	if (imgui)
-	{
-		imgui->imgui_newframe();
-		ImGui_ImplSDL2_NewFrame();
-	}
-	else
-		ImGui_ImplNull_NewFrame();
-	ImGui::NewFrame();
-#endif
-
-	sre::onUpdate.fire();
-
-	// Render current world
-
-	sre::render_clipreset();
-
-	float bg[3];
-	if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
-	{
-		bg[0] = current->background.r / 255.0f;
-		bg[1] = current->background.g / 255.0f;
-		bg[2] = current->background.b / 255.0f;
-
-		//// Aliases for the background and the foreground (kind of old)
-		const sre::col4& fg = current->foreground;
-
-	#ifndef IMGUI_DISABLE
-		ImGui::Begin("Current scene"); {
-			float colb[4] = { current->background.r/255.0f, current->background.g/255.0f, current->background.b/255.0f, current->background.a/255.0f };
-			if (ImGui::ColorEdit4("Background", colb))
-				current->background = sre::col4::fromNormalized(colb[0], colb[1], colb[2], colb[3]);
-			
-			float colf[4] = { fg.r/255.0f, fg.g/255.0f, fg.b/255.0f, fg.a/255.0f };
-			if (ImGui::ColorEdit4("Foreground", colf))
-				current->foreground = sre::col4::fromNormalized(colf[0], colf[1], colf[2], colf[3]);
-		}
-		ImGui::End();
-	#endif
-
-		//// Clearing the screen with the background color
-
-		sre::beforeRender.fire();
-
-		//// Drawing all the entities (doesn't run if the foreground is full opaque)
-		if (fg.a < 255)
-			__render_scene();
-
-		//// Finally, filling the foreground (doesn't run if the foreground is invisible)
-		if (fg.a)
-			sre::render_fill(fg);
-	}
-	else
-	{
-		#if 0 // Debug easier on black backgrounds
-			bg[0] = 0.3f;
-			bg[1] = 0.3f;
-			bg[2] = 0.3f;
-		#else
-			bg[0] = 0.0f;
-			bg[1] = 0.0f;
-			bg[2] = 0.0f;
-		#endif
-		sre::beforeRender.fire();
-	}
-
-	// Drawing the Gui layer
-	__render_ui();
-
-	sre::afterRender.fire();
-
-	flush_rendercmds(bg, 
-		sre::vec2ut{engine.vcenter_x, engine.vcenter_y} - (currscn != NULL ? currscn->camera.processed_position() : 0));
-}
-
 #define m reinterpret_cast<sre::RenderVectors&>(engine.video._vector_data)
 
-static void flush_rendercmds(float bg[3], sre::vec2ut camoffset)
+void __render_flush()
 {
+	assert(SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN);
+
+	if (m.renderqueues.empty()) return;
+
 	using namespace sre;
 
+	float bg[4] = {0, 0, 0, 1};
+	if (engine.current_world)
+	{
+		bg[0] = currscn->background.r / 255.0f;
+		bg[1] = currscn->background.g / 255.0f;
+		bg[2] = currscn->background.b / 255.0f;
+	}
+
+	sre::vec2ut camoffset = sre::vec2ut{engine.vcenter_x, engine.vcenter_y} - (currscn != NULL ? currscn->camera.processed_position() : 0);
+	camoffset = (camoffset*engine.scale).ceil();
+
 	SRE_VIDEO(engine.video.vfptr, clear, bg);
-	SRE_VIDEO(engine.video.vfptr, set_camerastate, ceil(camoffset.x*engine.scale), ceil(camoffset.y*engine.scale));
+	SRE_VIDEO(engine.video.vfptr, set_camerastate, camoffset.x, camoffset.y);
 	
 	engine.video.blendmode = -1;
 	// Perform flushes
@@ -330,6 +257,7 @@ static void flush_rendercmds(float bg[3], sre::vec2ut camoffset)
 				break;
 			}
 		}
+
 		m.rinst1cache.clear();
 		m.rinst2cache.clear();
 		m.renderqueues.clear();
@@ -344,6 +272,8 @@ static void flush_rendercmds(float bg[3], sre::vec2ut camoffset)
 	#endif
 
 	SRE_VIDEOV(engine.video.vfptr, present);
+
+	SDL_SemPost(engine.render_sem);
 }
 
 // All sre::render_ functions
