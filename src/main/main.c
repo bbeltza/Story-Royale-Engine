@@ -43,35 +43,8 @@ static void handle_arg(const char* arg, char* argv[])
     sre_log(SRE_LOGCATEGORY_WARN, "Unrecognized option: %s", arg-j);
 }
 
-#if _WIN32 && !defined(NDEBUG) && 1
-    #define ENABLE_DX12DEBUG
-#endif
-
-#ifdef ENABLE_DX12DEBUG
-    #pragma comment(lib, "dxguid.lib")
-    #include <d3d12.h>
-#endif
-
 int main(int argc, char* argv[])
 {
-    // Useful dx debugger!
-    #ifdef ENABLE_DX12DEBUG
-        HMODULE d3d12dll = LoadLibraryA("d3d12.dll"); if (!d3d12dll) goto justignore;
-        PFN_D3D12_GET_DEBUG_INTERFACE pD3D12GetDebugInterface = (void*)GetProcAddress(d3d12dll, "D3D12GetDebugInterface");
-        if (!pD3D12GetDebugInterface) goto freeandjustignore;
-
-        ID3D12Debug* dxdebug = NULL;
-        if (pD3D12GetDebugInterface(&IID_ID3D12Debug, &dxdebug) == S_OK)
-        {
-            dxdebug->lpVtbl->EnableDebugLayer(dxdebug);
-            dxdebug->lpVtbl->Release(dxdebug);
-        }
-    
-    freeandjustignore:
-        FreeLibrary(d3d12dll);
-    justignore:
-    #endif
-
 	for (int i = 1; i < argc; i++)
         handle_arg(argv[i], argv);
 

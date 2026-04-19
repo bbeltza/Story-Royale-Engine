@@ -49,7 +49,7 @@ sre_Signal* sre_signalcreate(void* userdata)
     signal->userdata = userdata;
 
     signal->coroutines_capacity = 16;
-    signal->coroutines_size = 16;
+    signal->coroutines_size = 0;
     signal->coroutines = sre_newclear(sizeof(signal->coroutines) * 16);
 
     return signal;
