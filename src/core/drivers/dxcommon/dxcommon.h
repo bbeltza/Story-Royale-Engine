@@ -8,6 +8,13 @@ inline static const char* DXHRTOSTRING(HRESULT hr)
     #define _FMT_CASE(x) case x: return #x
     switch (hr)
     {
+        #ifdef D3DERR_NOTAVAILABLE
+        _FMT_CASE(D3DERR_NOTAVAILABLE);
+        _FMT_CASE(D3DERR_DEVICELOST);
+        _FMT_CASE(D3DERR_INVALIDCALL);
+        _FMT_CASE(D3DERR_OUTOFVIDEOMEMORY);
+        #endif
+
         _FMT_CASE(DXGI_ERROR_ACCESS_DENIED);
         _FMT_CASE(DXGI_ERROR_ACCESS_LOST);
         _FMT_CASE(DXGI_ERROR_ALREADY_EXISTS);
