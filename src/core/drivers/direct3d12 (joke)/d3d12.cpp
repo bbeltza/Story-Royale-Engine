@@ -624,28 +624,30 @@ struct sred3d12_dbuff
 public:
     ~sred3d12_dbuff();
 
-    inline void reset() { index = 0; freequeued(); }
-    void freequeued();
+    inline void reset() { index = 0; _freequeued(); }
     bool init(ID3D12Device* dxdevice, UINT base_capacity);
     bool resize(ID3D12Device* dxdevice, UINT new_capacity);
-
+    
     UINT append(ID3D12Device* dxdevice, const void* data, UINT size)
     {
         if (index + size > capacity)
         {
             resize(dxdevice, capacity * 2 + size);
         }   
-
+        
         memcpy(mapped + index, data, size);
         index += size;
         return index - size;
     }
+private:
+    void _freequeued();
 };
 
 struct sred3d12_texture
 {
     ID3D12Resource* dxresource{};
     UINT srvoffset{};
+    UINT srvid{}; // Last srv capacity value in which gpu_descriptor was set during binding, gpu_descriptor is just a cache value
     D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor{};
 };
 
@@ -670,7 +672,7 @@ private:
     ID3D12CommandQueue* dxcmd_queue;
     ID3D12GraphicsCommandList* dxcmd_list;
     ID3D12DescriptorHeap* dxrtvheap;
-    ID3D12DescriptorHeap* dxsrvheap;
+    ID3D12DescriptorHeap* dxsrvheaps[2]{}; // One is a staging heap for copying, and the other one is a shader-visible heap
     ID3D12RootSignature* dxrootsignature;
 
     ID3D12PipelineState* dxpipeline_blendstates1[5];
@@ -855,12 +857,16 @@ sred3d12_inst::~sred3d12_inst()
     this->dxdevice->Release();
     this->dxswapchain->Release();
     this->dxrtvheap->Release();
-    this->dxsrvheap->Release();
     this->dxrootsignature->Release();
     this->dxfence->Release();
 
     this->cbuffer->Release();
 
+    if (dxsrvheaps[0]) // What if we don't have textures? Huh?
+    {
+        for (int i = 0; i < sre::countof(dxsrvheaps); i++)
+            dxsrvheaps[i]->Release();
+    }
     for (int i = 0; i < sre::countof(dxrender_targets); i++)
         dxrender_targets[i]->Release();
     for (int i = 0; i < sre::countof(dxpipeline_blendstates1); i++)
@@ -1077,7 +1083,7 @@ bool sred3d12_dbuff::resize(ID3D12Device* dxdevice, UINT capacity)
     return init(dxdevice, capacity);
 }
 
-void sred3d12_dbuff::freequeued()
+void sred3d12_dbuff::_freequeued()
 {
     for (auto res : dxfreequeue)
         res->Release();
@@ -1089,13 +1095,13 @@ sred3d12_dbuff::~sred3d12_dbuff()
 {
     if (!dxresource)
     {
-        sre::log<sre::LOGCATEGORY_WARN>("[DirectX]: You got a resource buffer that hasn't been initialized yet! Likely to be the buffer for draw2");
+        sre::log<sre::LOGCATEGORY_WARN>("[DirectX]: You got a resource buffer that hasn't been initialized yet");
         return;
     }
 
     dxresource->Unmap(0, NULL);
     dxresource->Release();
-    freequeued();
+    _freequeued();
 }
 
 bool sred3d12_inst::clear(float color[3])
@@ -1106,7 +1112,7 @@ bool sred3d12_inst::clear(float color[3])
     SRE_DXCALL(dxcmd_list->Reset(dxcmd_allocator, NULL));
 
     D3D12_RECT scr{0, 0, (LONG)caches.viewport.Width, (LONG)caches.viewport.Height};
-    dxcmd_list->SetDescriptorHeaps(1, &dxsrvheap);
+    dxcmd_list->SetDescriptorHeaps(1, &dxsrvheaps[1]);
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
     dxcmd_list->RSSetViewports(1, &caches.viewport);
     dxcmd_list->RSSetScissorRects(1, &scr);
@@ -1158,6 +1164,8 @@ void sred3d12_inst::present()
     SRE_DXCALL(dxswapchain->Present(caches.vsync, !caches.vsync ? DXGI_PRESENT_ALLOW_TEARING : 0));
     if (hr == DXGI_ERROR_DEVICE_REMOVED)
     {
+        HRESULT reason = dxdevice->GetDeviceRemovedReason();
+        sre::log<sre::LOGCATEGORY_ERROR>("[Direct3D 12]: The device has been removed. Reason: '%s' (%X)", DXHRTOSTRING(reason), reason);
         abort();
         return;
     }
@@ -1249,6 +1257,13 @@ void sred3d12_inst::_setdstate(texture_type* texture, sre::u32 flags, sre::u32 s
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
         texture = texture ? texture : reinterpret_cast<sred3d12_texture*>(basictexture);
+        if (texture->srvid != srvcap)
+        {
+            D3D12_GPU_DESCRIPTOR_HANDLE gpudesc = dxsrvheaps[1]->GetGPUDescriptorHandleForHeapStart();
+            gpudesc.ptr += texture->srvoffset;
+            texture->gpu_descriptor = gpudesc;
+            texture->srvid = srvcap;
+        }
         dxcmd_list->SetGraphicsRootDescriptorTable(1, texture->gpu_descriptor);
     }
 }
@@ -1257,7 +1272,6 @@ void sred3d12_inst::flush_queueinstances1(texture_type* texture, const sre::Rend
 {
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
-        // Code that's going to switch pipeline states...
         dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
         dxcmd_list->SetPipelineState(dxpipeline_blendstates1[current_blendstate]);
         current_drawtype = 1;
@@ -1319,22 +1333,43 @@ UINT sred3d12_inst::_srvallocate()
 
         if (srvlast / srvheap_increment > srvcap)
         {
-            assert(srvcap == 0 && "Heap descriptor resizing isn't currently implemented. Try increasing the increment number in the line below?");
-            srvcap += 1024;
+            UINT old_cap = srvcap;
+            srvcap += 16;
 
-            //ID3D12DescriptorHeap* old_dheap = dxsrvheap;
+            ID3D12DescriptorHeap* old_dheaps[2] = { dxsrvheaps[0], dxsrvheaps[1] };
 
             D3D12_DESCRIPTOR_HEAP_DESC dheap_desc{};
             dheap_desc.NumDescriptors = srvcap; // I guess this will be resized and recreated... Ughh
             dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheaps[0])));
             dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-            SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheap)));
-            
+            SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheaps[1])));
+
+            if (old_cap)
+            {
+                assert(old_dheaps[0] != NULL);
+                assert(old_dheaps[1] != NULL);
+
+                dxdevice->CopyDescriptorsSimple(old_cap,
+                                                dxsrvheaps[0]->GetCPUDescriptorHandleForHeapStart(),
+                                                old_dheaps[0]->GetCPUDescriptorHandleForHeapStart(),
+                                                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+                                            );
+                old_dheaps[0]->Release();
+                old_dheaps[1]->Release();
+
+                dxdevice->CopyDescriptorsSimple(old_cap,
+                                                dxsrvheaps[1]->GetCPUDescriptorHandleForHeapStart(),
+                                                dxsrvheaps[0]->GetCPUDescriptorHandleForHeapStart(),
+                                                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+                                            );
+            }
         }
     }
     else
     {
-        assert(dxsrvheap != NULL);
+        assert(dxsrvheaps[0] != NULL);
+        assert(dxsrvheaps[1] != NULL);
         
         offset = srvfreelist.top();
         srvfreelist.pop();
@@ -1389,13 +1424,16 @@ bool sred3d12_inst::texture_setup(texture_type* texture, sre::pixelFormat format
         srv_desc.Texture2D.MipLevels = 1;
         srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandle = dxsrvheap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandle = dxsrvheaps[0]->GetCPUDescriptorHandleForHeapStart();
         cpuhandle.ptr += offset;
         dxdevice->CreateShaderResourceView(texture->dxresource, &srv_desc, cpuhandle);
 
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandledst = dxsrvheaps[1]->GetCPUDescriptorHandleForHeapStart();
+        cpuhandledst.ptr += offset;
+        dxdevice->CopyDescriptorsSimple(1, cpuhandledst, cpuhandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
         texture->srvoffset = offset;
-        texture->gpu_descriptor = dxsrvheap->GetGPUDescriptorHandleForHeapStart();
-        texture->gpu_descriptor.ptr += offset;
+        texture->srvid = 0;
         if (outformat)
             *outformat = SDL_PIXELFORMAT_RGBA32;
 
