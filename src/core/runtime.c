@@ -177,5 +177,7 @@ void __run_engine()
     }
 
     running = 0;
+    SDL_SemPost(engine.render_sem);
     SDL_WaitThread(engine.game_loop, NULL);
+    SDL_DestroySemaphore(engine.render_sem);
 }

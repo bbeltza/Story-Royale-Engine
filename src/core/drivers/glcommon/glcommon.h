@@ -9,12 +9,15 @@
 #include <Core/Render.h>
 #include <Base/Log.h>
 
-#define SRE_GLCALLR(x, ...) x; do { GLenum _err = SRE_GLGETERROR(); if (_err == GL_NO_ERROR) break; SRE_GLLOG("[OpenGL error]: '" #x "' failed: '%s' | line: %d file: '%s'", SRE_GLERRFMT(_err), __LINE__, __FILE__); __VA_ARGS__; } while (1)
+#include <stdlib.h>
+#include <stdio.h>
+
+#define SRE_GLCALLR(x, ...) x; do { GLenum _err = SRE_GLGETERROR(); if (_err == GL_NO_ERROR) break; SRE_GLLOG("[OpenGL error]: '" #x "' failed: '%s' | line: %d file: '%s'", SRE_GLERRFMT(_err), __LINE__, __FILE__); abort(); __VA_ARGS__; } while (1)
 #define SRE_GLCALLF(x) SRE_GLCALLR(x, return false)
 #define SRE_GLCALL(x) SRE_GLCALLR(x)
 
 #define SRE_GLGETERROR inst->glfuncs.GetError // Macro to the variable to hold glGetError, it's usually inst->glfuncs.GetError but it can be changed
-#define SRE_GLLOG(...) sre_log(SRE_LOGCATEGORY_ERROR, __VA_ARGS__) // You'd need #include <Base/Log.h> for the default definition
+#define SRE_GLLOG(...) fprintf(stderr, __VA_ARGS__) // You'd need #include <Base/Log.h> for the default definition
 
 
 struct sregl_functions

@@ -10,7 +10,7 @@
                                             if (switch_flags & SRE_RENDER_SWITCHCAMERA)                                                                                                                         \
                                             {                                                                                                                                                                   \
                                                 bool switchcam = flags & SRE_DRAWFLAG_CAMERA;                                                                                                                   \
-                                                SRE_GLCALL(inst->glfuncs32.BindBufferRange(GL_UNIFORM_BUFFER, 0, inst->stateubo, sizeof(struct sregl32_stateubo)*switchcam, sizeof(struct sregl32_stateubo)));  \
+                                                SRE_GLCALL(inst->glfuncs32.BindBufferRange(GL_UNIFORM_BUFFER, 0, inst->stateubo, inst->UBO_STATEALIGN*switchcam, sizeof(struct sregl32_stateubo)));  \
                                             }                                                                                                                                                                   \
                                                                                                                                                                                                                 \
                                             if (switch_flags & SRE_RENDER_SWITCHTEXTURE)                                                                                                                        \

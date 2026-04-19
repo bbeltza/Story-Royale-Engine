@@ -137,10 +137,13 @@ bool sregl32setupbuffers(sregl32_inst* inst)
     }
 
     {
+        SRE_GLCALLF(inst->glfuncs.GetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &inst->UBO_ALIGNMENT));
+        inst->UBO_STATEALIGN = (sizeof(struct sregl32_stateubo)+inst->UBO_ALIGNMENT-1)/inst->UBO_ALIGNMENT * inst->UBO_ALIGNMENT;
+
         GLuint ubos[3];
         SRE_GLCALLF(inst->glfuncs21.GenBuffers(3, ubos));
         SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, ubos[0]));
-        SRE_GLCALLF(inst->glfuncs21.BufferData(GL_UNIFORM_BUFFER, sizeof(struct sregl32_stateubo)*2, NULL, GL_DYNAMIC_DRAW));
+        SRE_GLCALLF(inst->glfuncs21.BufferData(GL_UNIFORM_BUFFER, inst->UBO_STATEALIGN*2, NULL, GL_DYNAMIC_DRAW));
         SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, ubos[1]));
         SRE_GLCALLF(inst->glfuncs21.BufferData(GL_UNIFORM_BUFFER, sizeof(struct sre_RenderInstance1)*255, NULL, GL_DYNAMIC_DRAW));
         SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, ubos[2]));

@@ -11,7 +11,6 @@ struct sregl32_stateubo
 {
     GLfloat viewport[16];
     GLfloat camera[2];
-    GLfloat _padding[2];
 };
 
 struct sregl32_d1data
@@ -45,6 +44,8 @@ typedef struct sregl32_inst
     struct sregl32_d2data d2data;
 
     GLuint stateubo;
+    GLuint UBO_ALIGNMENT;
+    GLuint UBO_STATEALIGN;
 } sregl32_inst;
 
 void sregl32_flush_queueinstances1(void* inst, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
