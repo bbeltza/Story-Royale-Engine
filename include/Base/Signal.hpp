@@ -14,10 +14,17 @@ namespace sre
 		using ptr = sre_Connection*;
 	public:
 		constexpr Connection() = default;
-		Connection(sre_Connection* ptr): m_ptr(sre_signalaquire(ptr)) {}
-		~Connection() { sre_signalunaquire(m_ptr); }
+		Connection(sre_Connection* ptr, bool acquire=false): m_ptr(ptr) { if (acquire) sre_signalacquire(ptr); }
+		~Connection() { sre_signalrelease(m_ptr); }
 
-		void disconnect() { sre_signalunaquire(m_ptr); sre_signaldisconnect(m_ptr); m_ptr = NULL; }
+		Connection(const Connection& copying): m_ptr(sre_signalacquire(copying.m_ptr)) {}
+		Connection(Connection&& moving): m_ptr(moving.m_ptr) { moving.m_ptr = NULL; }
+
+		/* TODO: Add copy & move assignment operators for class (I don't need them for now though) */
+		
+		//
+
+		void disconnect() { sre_signaldisconnect(m_ptr); m_ptr = NULL; }
 		bool connected() { return m_ptr != NULL; }
 	};
 

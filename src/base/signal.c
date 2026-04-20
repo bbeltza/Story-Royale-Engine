@@ -86,7 +86,7 @@ sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction funct
     connection->signal = signal;
     connection->next = signal->connection_head;
     connection->prev = NULL;
-    connection->reference.value = 0;
+    connection->reference.value = 1;
 
     if (signal->connection_head)
         signal->connection_head->prev = connection;
@@ -104,11 +104,8 @@ sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction funct
     return connection;
 }
 
-void sre_signaldisconnect(sre_Connection* connection)
+static void s_detachconnection(sre_Connection* connection)
 {
-    if (!connection) return;
-    if (!connection->signal) return;
-
     if (connection->next) connection->next->prev = connection->prev;
     if (connection->prev) connection->prev->next = connection->next;
     else {
@@ -117,10 +114,19 @@ void sre_signaldisconnect(sre_Connection* connection)
     }
 
     connection->signal = NULL;
-    if (connection->reference.value <= 0) sre_delete(connection);
 }
 
-sre_Connection* sre_signalaquire(sre_Connection* connection)
+void sre_signaldisconnect(sre_Connection* connection)
+{
+    if (!connection) return;
+    if (!connection->signal) return;
+
+    s_detachconnection(connection);
+    
+    if (SDL_AtomicAdd(&connection->reference, -1) <= 1) sre_delete(connection);
+}
+
+sre_Connection* sre_signalacquire(sre_Connection* connection)
 {
     assert(connection != NULL);
 
@@ -128,11 +134,15 @@ sre_Connection* sre_signalaquire(sre_Connection* connection)
     return connection;
 }
 
-void sre_signalunaquire(sre_Connection* connection)
+void sre_signalrelease(sre_Connection* connection)
 {
     if (!connection) return;
-    if (SDL_AtomicAdd(&connection->reference, -1) <= 1 && !connection->signal)
+    if (SDL_AtomicAdd(&connection->reference, -1) <= 1)
+    {
+        if (connection->signal)
+            s_detachconnection(connection);
         sre_delete(connection);
+    }
 }
 
 void* sre_signalwait(sre_Signal* signal)
@@ -150,6 +160,7 @@ void* sre_signalwait(sre_Signal* signal)
     return sre_coroutinesuspendEx(&signal->coroutines[signal->coroutines_size++]);
 }
 
+#include <Base/Log.h>
 bool sre_signalfire(sre_Signal* signal, void* data)
 {
     if (!signal) return false;

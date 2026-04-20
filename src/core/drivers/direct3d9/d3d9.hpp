@@ -15,17 +15,44 @@ namespace sreD3D9
         IDirect3DVertexBuffer9* dxbuff_vert;
         IDirect3DVertexBuffer9* dxbuff_inst;
 
-        ~DrawData()
+        void releaseresources()
         {
+            if (!dxdecl)
+                return;
+
             dxdecl->Release();
             dxbuff_vert->Release();
             dxbuff_inst->Release();
+
+            dxdecl = NULL;
+            dxbuff_vert = NULL;
+            dxbuff_inst = NULL;
+        }
+    };
+
+    struct Draw1Data: DrawData
+    {
+        IDirect3DIndexBuffer9* dxibuff;
+
+        void releaseresources()
+        {
+            DrawData::releaseresources();
+            _released1resources();
+        }
+    private:
+        void _released1resources()
+        {
+            if (!dxibuff)
+                return;
+            dxibuff->Release();
+            dxibuff = NULL;
         }
     };
 
     struct Texture
     {
         IDirect3DTexture9* dxtexture;
+        int height_cache;
     };
 
     struct Instance
@@ -36,8 +63,8 @@ namespace sreD3D9
         ~Instance();
     private:
         bool m_success = true;
+        bool m_needsetup = true;
         IDirect3D9* m_dxd3d9;
-        HWND m_hwnd;
 
         IDirect3DDevice9* m_dxdevice;
 
@@ -45,8 +72,14 @@ namespace sreD3D9
         IDirect3DVertexShader9* m_dxd1vs;
         IDirect3DVertexShader9* m_dxd2vs;
 
-        DrawData m_d1data{};
+        IDirect3DTexture9* m_dxbasictexture{};
+
+        Draw1Data m_d1data{};
         DrawData m_d2data{};
+
+        D3DPRESENT_PARAMETERS m_pparamcache{};
+        FLOAT m_viewportcache[16];
+        FLOAT m_cameracache[2];
     public:
         bool succeeded() const { return m_success; }
 
@@ -69,6 +102,12 @@ namespace sreD3D9
     private:
         bool _shadersetup();
         bool _statesetup();
+        void _resetdevice();
+        void _releaseresources()
+        {
+            m_d1data.releaseresources();
+            m_d2data.releaseresources();
+        }
     };
 }
 

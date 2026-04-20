@@ -115,21 +115,20 @@ void sre::ECS::update_scene()
 
 void sre::ECS::update_layer()
 {
-    BEGIN:
 	sreGUI::Object* current = currlayer;
 	
 	if (!current) return;
-    sre::unit insets = sreGUI::get_insets();
-	current->m_absolute.size = sre::display_size() - vec2ut{insets*2, 0};
-	current->m_absolute.position = sre::vec2ut::ZERO + vec2ut{insets, 0};
 	
     current->call_update();
 
+	current = currlayer;
+	
+    sre::unit insets = sreGUI::get_insets();
+	current->m_absolute.size = sre::display_size() - vec2ut{insets*2, 0};
+	current->m_absolute.position = sre::vec2ut::ZERO + vec2ut{insets, 0};
 	current->call_process();
 	current->call_processchildren();
 	current->call_prerender();
-
-	if (current != engine.current_guilayer) goto BEGIN;
 }
 
 //

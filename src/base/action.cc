@@ -4,8 +4,16 @@
 
 #include "../internal.h"
 
+#define ACTION_ISNULL sre::log<sre::LOGCATEGORY_ERROR>("%s: 'action' is NULL", __FUNCTION__)
+
 bool sre_actionpressed(const sre_Action action)
 {
+    if (!action)
+    {
+        ACTION_ISNULL;
+        return false;
+    }
+
     const sre_ActionInput* current = action;
     while (current->type)
     {
@@ -30,6 +38,12 @@ bool sre_actionpressed(const sre_Action action)
 
 bool sre_actionjustpressed(const sre_Action action)
 {
+    if (!action)
+    {
+        ACTION_ISNULL;
+        return false;
+    }
+
     const sre_ActionInput* current = action;
     while (current->type)
     {
