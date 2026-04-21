@@ -43,7 +43,7 @@ Instance::Instance(SDL_Window* window)
         CONSTRUCTOR_FAIL;
 
     D3DLOCKED_RECT rect;
-    SRE_DX9CALL(m_dxdevice->CreateTexture(1, 1, 1, 0, D3DFMT_X8B8G8R8, D3DPOOL_MANAGED, &m_dxbasictexture, NULL));
+    SRE_DX9CALL(m_dxdevice->CreateTexture(1, 1, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &m_dxbasictexture, NULL));
     SRE_DX9CALL(m_dxbasictexture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD));
         *static_cast<DWORD*>(rect.pBits) = 0xFFFFFFFF;
     SRE_DX9CALL(m_dxbasictexture->UnlockRect(0));
@@ -197,15 +197,14 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
 
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
-        SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, D3DSTREAMSOURCE_INDEXEDDATA | point_count));
-        SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d2data.dxbuff_vert, 0, sizeof(sre::RenderPoint)));
+        SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, 1));
+        SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(1, 1));
         
-        SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(1, D3DSTREAMSOURCE_INSTANCEDATA | 1));
-        SRE_DXCALL(m_dxdevice->SetStreamSource(1, m_d2data.dxbuff_inst, 0, sizeof(sre::col4)));
+        SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d2data.dxbuff_vert, 0, sizeof(sre::RenderPoint)));
+        SRE_DXCALL(m_dxdevice->SetStreamSource(1, m_d2data.dxbuff_inst, 0, 0));
 
         SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d2data.dxdecl));
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd2vs));
-        SRE_DXCALL(m_dxdevice->SetPixelShader(m_dxcps));
     }
 
     SRE_DXCALL(m_dxdevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, point_count/3));
@@ -243,8 +242,13 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
     _resetdevice();
 
     HRESULT hr;
-    float VPMATRIX[3] = { static_cast<float>(w), static_cast<float>(h), scale };
-    SRE_DXCALLF(m_dxdevice->SetVertexShaderConstantF(0, VPMATRIX, 1));
+    float VPMATRIX[] = {
+        2.0f/w, 0.0f, 0.0f, 0.0f,
+        0.0f, -2.0f/h, 0.0f, 0.0f,
+        0.0f, 0.0f, scale, 0.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f
+    };
+    SRE_DXCALLF(m_dxdevice->SetVertexShaderConstantF(0, VPMATRIX, 4));
     return true;
 }
 

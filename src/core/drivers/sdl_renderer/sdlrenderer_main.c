@@ -19,6 +19,7 @@ const struct sre_RenderVFT sresdlrenderer_vft = {
     sresdlrenderer_destroy_texture
 };
 
+#include <Base/Log.h>
 bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Window* window)
 {
     sresdlrenderer_inst* inst = _inst;
@@ -30,6 +31,10 @@ bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Wind
         SDL_free(inst);
         return false;
     }
+
+    SDL_RendererInfo info;
+    SDL_GetRendererInfo(inst->renderer, &info);
+    sre_log(SRE_LOGCATEGORY_DEBUG, "%s", info.name);
     
     *vft = &sresdlrenderer_vft;
     return true;

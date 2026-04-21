@@ -139,6 +139,14 @@ sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction functio
     return coroutine;
 }
 
+sre_coroutine* sre_coroutinecurrent(void)
+{
+    if (SDL_ThreadID() != current_instance->thread_id)
+        return NULL;
+    
+    return current_instance->current;
+}
+
 bool sre_coroutineresume(sre_coroutine* coroutine, void* data)
 {
     if (!coroutine) return false;
@@ -159,33 +167,25 @@ bool sre_coroutinerunning()
     return current_instance->current->state == SRE_COROUTINESTATE_RUNNING;
 }
 
-bool sre_coroutinesuspend()
-{
-    sre_coroutine* current;
-    sre_coroutinesuspendEx(&current);
-    return current != NULL;
-}
+bool sre_coroutinesuspend() { return sre_coroutinesuspendEx(NULL); }
 
-void* sre_coroutinesuspendEx(sre_coroutine** current)
+bool sre_coroutinesuspendEx(void** data)
 {
-    static sre_coroutine* dummy;
-    if (!current) current = &dummy;
-
     if (SDL_ThreadID() != current_instance->thread_id)
-    {
-        *current = NULL;
-        return NULL;
-    }
+        return false;
+
     assert(current_instance->current != NULL);
-    *current = current_instance->current;
 
     if (current_instance->current->state == SRE_COROUTINESTATE_CANCELLED) goto END_FUNC;
+
     current_instance->current->state = SRE_COROUTINESTATE_SUSPENDED;
     current_instance->current->resume_tick = 0;
     sys_coroutineswitch(&current_instance->thread_native, &current_instance->current->native);
 
     END_FUNC:
-    return current_instance->current->data;
+    if (data)
+        *data = current_instance->current->data;
+    return true;
 }
 
 bool sre_coroutineyield(sre_timeStamp time)

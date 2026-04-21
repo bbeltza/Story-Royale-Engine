@@ -20,19 +20,36 @@ Instance::Instance(SDL_Window* window)
     HRESULT hr;
 
     { // Device and swapchain setup
-        
         // Get necessary symbols (We are not linking D3D11.lib)
-        HMODULE d3d11dll = LoadLibraryA("D3D11.dll");
-        auto pD3D11CreateDeviceAndSwapChain = reinterpret_cast<PFN_D3D11_CREATE_DEVICE_AND_SWAP_CHAIN>(GetProcAddress(d3d11dll, "D3D11CreateDeviceAndSwapChain"));
-        if (!pD3D11CreateDeviceAndSwapChain)
+        SRE_DXGETADDR(D3D11CreateDevice, PFN_D3D11_CREATE_DEVICE, m_dlls.d3d11);
+        SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, m_dlls.dxgi);
+        if (!pD3D11CreateDevice || !pCreateDXGIFactory1)
         {
             m_success = false;
             return;
         }
 
+        UINT device_flags = D3D11_CREATE_DEVICE_SINGLETHREADED;
+        #ifndef NDEBUG
+            device_flags |= D3D11_CREATE_DEVICE_DEBUG;
+        #endif
+
+        SRE_DX11CALL(pD3D11CreateDevice(
+            NULL,
+            D3D_DRIVER_TYPE_HARDWARE,
+            NULL,
+            device_flags,
+            NULL, 0,
+            D3D11_SDK_VERSION,
+            &m_dxdevice, NULL, &m_dxdevicecontext
+        ));
+
+        IDXGIFactory1* dxfactory;
+        SRE_DX11CALL(pCreateDXGIFactory1(IID_PPV_ARGS(&dxfactory)));
+        
         DXGI_SWAP_CHAIN_DESC swapchain_desc{};
         swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
+        swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         swapchain_desc.BufferCount = 2;
         swapchain_desc.SampleDesc.Count = 1;
         swapchain_desc.Windowed = TRUE;
@@ -40,36 +57,32 @@ Instance::Instance(SDL_Window* window)
         swapchain_desc.OutputWindow = swm_info.info.win.window;
         swapchain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
-        #ifndef NDEBUG
-            #define _DBGFLAGS D3D11_CREATE_DEVICE_DEBUG
-        #else
-            #define _DBGFLAGS 0
-        #endif
+        SRE_DXCALL(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
+        if (FAILED(hr))
+        {
+            if (hr != DXGI_ERROR_INVALID_CALL)
+            {
+                m_success = false;
+                return;
+            }
 
-        IDXGISwapChain* dxswapchain;
-        SRE_DX11CALL(pD3D11CreateDeviceAndSwapChain(
-            NULL,
-            D3D_DRIVER_TYPE_HARDWARE,
-            NULL,
-            _DBGFLAGS |
-            D3D11_CREATE_DEVICE_SINGLETHREADED,
-            NULL, 0,
-            D3D11_SDK_VERSION,
-            &swapchain_desc, &dxswapchain,
-            &m_dxdevice, NULL, &m_dxdevicecontext
-        ));
-        FreeLibrary(d3d11dll);
+            sre::log<sre::LOGCATEGORY_INFO>("[Direct3D11]: Switching to legacy swapchain");
 
-        SRE_DX11CALL(dxswapchain->QueryInterface(&m_dxswapchain));
-        dxswapchain->Release();
-    }
+            // Double-buffering might not be supported, create a legacy single-buffered swap-chain
+            swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
+            swapchain_desc.Flags = 0;
+            swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
+            SRE_DX11CALL(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
+            m_uselegacy = true;
+        }
 
-    { // Disable alt-enter automatic fullscreen toggling by DXGI. It switches to non-borderless fullscreen and that is not properly implemented
-        IDXGIFactory1* factory{};
-        SRE_DXCALL(m_dxswapchain->GetParent(IID_PPV_ARGS(&factory)));
-        SRE_DXCALL(factory->MakeWindowAssociation(swm_info.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
+        // Disable alt-enter automatic fullscreen toggling by DXGI. It switches to non-borderless fullscreen and that is not properly implemented
 
-        factory->Release();
+        IDXGIFactory1* parentfactory{};
+        SRE_DXCALL(m_dxswapchain->GetParent(IID_PPV_ARGS(&parentfactory)));
+        SRE_DXCALL(parentfactory->MakeWindowAssociation(swm_info.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
+        dxfactory->Release();
+        parentfactory->Release();
     }
 
     m_success &= m_shaders.setup(m_dxdevice);
@@ -149,11 +162,12 @@ Instance::Instance(SDL_Window* window)
         srv_desc.Texture2D.MipLevels = 1;
 
         SRE_DX11CALL(m_dxdevice->CreateShaderResourceView(basictex, &srv_desc, &m_basictexture));
+        basictex->Release();
     }
 
     m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);
-    m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
+    m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
 }
 
 Instance::~Instance()

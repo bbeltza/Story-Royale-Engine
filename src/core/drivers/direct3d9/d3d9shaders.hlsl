@@ -33,7 +33,7 @@ struct PSinput
     float2 uv: TEXCOORD;
 };
 
-float3 VIEWPORT: register(c0);
+float4x4 VIEWPORT: register(c0);
 float2 CAMERA: register(c4);
 
 PSinput D1main(D1input input)
@@ -56,11 +56,9 @@ PSinput D1main(D1input input)
 
     float4 vert = input.vpos - float4(input.anchor, 0.0, 0.0);
     vert = mul(vert, mul(transform, rotation));
-    vert = floor(vert*VIEWPORT.z) + float4(CAMERA, 0, 0);
-    vert.xy /= VIEWPORT.xy;
-    vert.y = 1 - vert.y*2;
-    vert.x = vert.x*2 - 1;
-    vert.w = 1;
+    vert.xy = ceil(vert.xy*VIEWPORT[2][2] + (input.vpos.xy));
+    vert.xy += CAMERA;
+    vert = mul(VIEWPORT, vert);
 
     PSinput output = {
         input.color,

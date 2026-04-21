@@ -5,8 +5,7 @@ using namespace sreD3D11;
 void Instance::present()
 {
     HRESULT hr;
-    
-    SRE_DXCALL(m_dxswapchain->Present(m_caches.vsync, !m_caches.vsync ? DXGI_PRESENT_ALLOW_TEARING : 0));
+    SRE_DXCALL(m_dxswapchain->Present(m_caches.vsync, !m_uselegacy && !m_caches.vsync ? DXGI_PRESENT_ALLOW_TEARING : 0));
 }
 
 bool Instance::clear(float color[3])
@@ -17,6 +16,7 @@ bool Instance::clear(float color[3])
 
 	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
     m_dxdevicecontext->ClearRenderTargetView(m_dxrendertargetview, color4);
+    
     m_d1buffer.reset();
     m_d2bufferc.reset();
     m_d2bufferp.reset();

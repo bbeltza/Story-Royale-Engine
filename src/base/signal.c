@@ -144,7 +144,7 @@ void sre_signalrelease(sre_Connection* connection)
         sre_delete(connection);
     }
 }
-
+#include <Base/Log.h>
 void* sre_signalwait(sre_Signal* signal)
 {
     if (signal->coroutines_capacity <= signal->coroutines_size)
@@ -157,16 +157,34 @@ void* sre_signalwait(sre_Signal* signal)
         signal->coroutines = new_block;
         signal->coroutines_capacity = new_capacity;
     }
-    return sre_coroutinesuspendEx(&signal->coroutines[signal->coroutines_size++]);
+
+    sre_coroutine* current = sre_coroutinecurrent();
+    if (!current)
+    {
+        sre_log(SRE_LOGCATEGORY_ERROR, "Calling sre_signalwait() on a thread that doesn't run any coroutine. Cannot wait for the signal since only waiting inside coroutines are supported.");
+        return NULL;
+    }
+
+    signal->coroutines[signal->coroutines_size] = current;
+    signal->coroutines_size++;
+
+    void* data = NULL;
+    sre_coroutinesuspendEx(&data);
+    return data;
 }
 
 #include <Base/Log.h>
+#include <stdlib.h>
 bool sre_signalfire(sre_Signal* signal, void* data)
 {
     if (!signal) return false;
 
     while (signal->coroutines_size)
-        sre_coroutineresume(signal->coroutines[--signal->coroutines_size], data);
+    {
+        sre_coroutine* coroutine = signal->coroutines[--signal->coroutines_size];
+        if (!sre_coroutineresume(coroutine, data))
+            sre_log(SRE_LOGCATEGORY_ERROR, "%s: sre_coroutineresume failed when trying to resume all suspending coroutines", __FUNCTION__);
+    }
     
     for (sre_Connection* connection = signal->connection_head; connection != NULL; connection = connection->next)
         connection->function(signal->userdata, connection->flags & SRE_CONNECTION_HASDATA ? (void**)(connection + 1) : NULL, data);

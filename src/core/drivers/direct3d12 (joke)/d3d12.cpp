@@ -651,6 +651,18 @@ struct sred3d12_texture
     D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor{};
 };
 
+struct sred3d12_dlls
+{
+    HMODULE d3d12 = LoadLibrary("D3D12.dll");
+    HMODULE dxgi = LoadLibrary("dxgi.dll");
+
+    ~sred3d12_dlls()
+    {
+        FreeLibrary(d3d12);
+        FreeLibrary(dxgi);
+    }
+};
+
 #define SRE_DX12CALL(x) SRE_DXCALL(x); success = success && SUCCEEDED(hr)
 
 struct sred3d12_inst
@@ -664,6 +676,7 @@ struct sred3d12_inst
 private:
     bool success = true;
 
+    sred3d12_dlls dlls;
     // DirectX members
     IDXGISwapChain3* dxswapchain;
     
@@ -758,34 +771,22 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
         IDXGIFactory4* dxfactory = NULL;
         
         {        
-            #define SRE_DX12GETADDR(x, t, dll) t p##x = reinterpret_cast<t>(GetProcAddress(dll, #x))
-            HMODULE dxgidll = LoadLibraryA("DXGI.dll");
-            HMODULE d3d12dll = LoadLibraryA("D3D12.dll");
-            if (!d3d12dll)
-            {
-                success = false;
-                return;
-            } assert(dxgidll != NULL);
-
+            #ifndef NDEBUG
             {
                 ID3D12Debug* dxdebug = NULL;
-                SRE_DX12GETADDR(D3D12GetDebugInterface, PFN_D3D12_GET_DEBUG_INTERFACE, d3d12dll);
+                SRE_DXGETADDR(D3D12GetDebugInterface, PFN_D3D12_GET_DEBUG_INTERFACE, dlls.d3d12);
                 if (pD3D12GetDebugInterface && pD3D12GetDebugInterface(IID_PPV_ARGS(&dxdebug)) == S_OK)
                 {
                     dxdebug->EnableDebugLayer();
                     dxdebug->Release();
                 }
             }
-            
-            using PFN_CREATE_DXGI_FACTORY1 = HRESULT (WINAPI*)(REFIID riid, _COM_Outptr_ void **ppFactory);
-            
-            SRE_DX12GETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dxgidll);
-            SRE_DX12GETADDR(D3D12CreateDevice, PFN_D3D12_CREATE_DEVICE, d3d12dll);
+            #endif
+                        
+            SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dlls.dxgi);
+            SRE_DXGETADDR(D3D12CreateDevice, PFN_D3D12_CREATE_DEVICE, dlls.d3d12);
             SRE_DX12CALL(pCreateDXGIFactory1(IID_PPV_ARGS(&dxfactory)));
             SRE_DX12CALL(pD3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dxdevice)));
-
-            FreeLibrary(dxgidll);
-            FreeLibrary(d3d12dll);
         }
         
 
@@ -937,8 +938,7 @@ bool sred3d12_inst::_pipelinesetup()
         rsdesc.NumStaticSamplers = 1;
         rsdesc.pStaticSamplers = &sampler_desc;
 
-        HMODULE d3d12dll = LoadLibraryA("D3D12.dll");
-        SRE_DX12GETADDR(D3D12SerializeRootSignature, PFN_D3D12_SERIALIZE_ROOT_SIGNATURE, d3d12dll);
+        SRE_DXGETADDR(D3D12SerializeRootSignature, PFN_D3D12_SERIALIZE_ROOT_SIGNATURE, dlls.d3d12);
         assert(pD3D12SerializeRootSignature != NULL);
 
         SRE_DXCALL(pD3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));

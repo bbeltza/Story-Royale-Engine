@@ -75,4 +75,8 @@ do { if (FAILED(hr)) {                                                          
 #define SRE_DXCALLR(x, ret) SRE_DXCALL(x); if (FAILED(hr)) return ret
 #define SRE_DXCALLF(x) SRE_DXCALLR(x, false)
 
+#define SRE_DXGETADDR(x, t, dll) t p##x = reinterpret_cast<t>(GetProcAddress(dll, #x))
+
+using PFN_CREATE_DXGI_FACTORY1 = HRESULT (WINAPI*)(REFIID riid, _COM_Outptr_ void **ppFactory);
+
 #endif

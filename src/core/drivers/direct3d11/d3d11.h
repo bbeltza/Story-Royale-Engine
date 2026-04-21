@@ -7,7 +7,7 @@
 
 #include <Core/Render.h>
 
-#include <dxgi1_2.h>
+#include <dxgi.h>
 #include <d3d11.h>
 #include <dxcommon/dxcommon.h>
 
@@ -72,6 +72,18 @@ namespace sreD3D11
         bool append(ID3D11DeviceContext* dxdevicecontext, const void* data, UINT size);
     };
 
+    struct DLLS
+    {
+        HMODULE d3d11 = LoadLibrary("d3d11.dll");
+        HMODULE dxgi = LoadLibrary("dxgi.dll");
+
+        ~DLLS()
+        {
+            FreeLibrary(d3d11);
+            FreeLibrary(dxgi);
+        }
+    };
+
     struct Instance
     {
         using texture_type = Texture;
@@ -83,10 +95,13 @@ namespace sreD3D11
 
         private:
             bool m_success = true;
+            bool m_uselegacy = false;
+
+            DLLS m_dlls{};
 
             ID3D11Device* m_dxdevice{};
             ID3D11DeviceContext* m_dxdevicecontext{};
-            IDXGISwapChain1* m_dxswapchain{};
+            IDXGISwapChain* m_dxswapchain{};
             
             ID3D11RenderTargetView* m_dxrendertargetview{};
 

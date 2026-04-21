@@ -26,6 +26,8 @@ void _coroutine_coreinit(void* running);
 // Create new coroutine handle
 // @return Handle to the coroutine, or `NULL` if creation fails
 sre_coroutine* sre_coroutinecreate(bool suspended, sre_coroutineFunction function, void* userdata);
+// Get the current coroutine, or `NULL` if the calling thread doesn't come from a coroutine
+sre_coroutine* sre_coroutinecurrent();
 
 bool sre_coroutineresume(sre_coroutine* coroutine, void* data);
 
@@ -33,8 +35,8 @@ bool sre_coroutineresume(sre_coroutine* coroutine, void* data);
 bool sre_coroutinesuspend(); // Suspend calling coroutine
 bool sre_coroutineyield(sre_timeStamp delay); // Yield current coroutine for `time` seconds
 
-// Retrieve the current coroutine, suspend the coroutine and retrieve data from it
-void* sre_coroutinesuspendEx(sre_coroutine** current);
+// Suspend the current coroutine and retrieve data from it
+bool sre_coroutinesuspendEx(void** data);
 
 sre_coroutineState sre_coroutinestate(const sre_coroutine* coroutine);
 bool sre_coroutinerunning(); // Check if current coroutine is running
