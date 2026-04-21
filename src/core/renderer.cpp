@@ -138,6 +138,9 @@ void __setup_renderer()
 	}
 #endif
 	engine.render_sem = SDL_CreateSemaphore(0);
+	engine.scale = 1;
+
+	SRE_VIDEO(engine.video.vfptr, set_vsync, true);
 }
 
 void __update_viewport(int w, int h)

@@ -173,13 +173,15 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
         SRE_DXCALL(m_dxdevice->SetTexture(0, texture ? texture->dxtexture : m_dxbasictexture));
     }
 
+    UINT UINT_instcount = static_cast<UINT>(instance_count);
+
     void* mapped;
-    SRE_DXCALL(m_d1data.dxbuff_inst->Lock(0, sizeof(sre::RenderInstance1)*instance_count, &mapped, D3DLOCK_DISCARD));
-        memcpy(mapped, instances, sizeof(sre::RenderInstance1)*instance_count);
+    SRE_DXCALL(m_d1data.dxbuff_inst->Lock(0, sizeof(sre::RenderInstance1)*UINT_instcount, &mapped, D3DLOCK_DISCARD));
+        memcpy(mapped, instances, sizeof(sre::RenderInstance1)*UINT_instcount);
     SRE_DXCALL(m_d1data.dxbuff_inst->Unlock());
 
-    SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, D3DSTREAMSOURCE_INDEXEDDATA | instance_count));
-    SRE_DXCALL(m_dxdevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2*instance_count));
+    SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, D3DSTREAMSOURCE_INDEXEDDATA | UINT_instcount));
+    SRE_DXCALL(m_dxdevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2*UINT_instcount));
 }
 
 void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
@@ -207,7 +209,7 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd2vs));
     }
 
-    SRE_DXCALL(m_dxdevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, point_count/3));
+    SRE_DXCALL(m_dxdevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, static_cast<UINT>(point_count/3)));
 }
 
 //

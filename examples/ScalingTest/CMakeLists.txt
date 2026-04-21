@@ -1,6 +1,5 @@
-include(sre)
-project(ScalingTest)
+project(sretestscaling)
 
 set(SOURCES ScalingTest.cpp)
 
-srEngine_build(ScalingTest scaling SOURCES)
+SRE_BUILD(sretestscaling SOURCES)

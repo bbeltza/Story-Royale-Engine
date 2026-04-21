@@ -12,16 +12,16 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 		m_dxrendertargetview->Release();
 		m_dxrendertargetview = NULL;
 	}
-	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, m_uselegacy ? 0 : DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING));
+	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, 0));
 
 	{
-        ID3D11Resource* rtres{};
+        ID3D11Texture2D* rtres{};
         SRE_DX11CALL(m_dxswapchain->GetBuffer(0, IID_PPV_ARGS(&rtres)));
         SRE_DX11CALL(m_dxdevice->CreateRenderTargetView(rtres, NULL, &m_dxrendertargetview));
         rtres->Release();
     }
 
-	D3D11_VIEWPORT viewport{ 0, 0, static_cast<FLOAT>(w), static_cast<FLOAT>(h) };
+	D3D11_VIEWPORT viewport{ 0, 0, static_cast<FLOAT>(w), static_cast<FLOAT>(h), 0, 1 };
 	m_dxdevicecontext->RSSetViewports(1, &viewport);
 	{
 		m_caches.viewport[0] = 2.0f/w;
@@ -40,6 +40,7 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 		}
 	}
 
+	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
 	return true;
 }
 

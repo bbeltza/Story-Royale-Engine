@@ -770,25 +770,23 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
     {
         IDXGIFactory4* dxfactory = NULL;
         
-        {        
-            #ifndef NDEBUG
+        #ifndef NDEBUG
+        {
+            ID3D12Debug* dxdebug = NULL;
+            SRE_DXGETADDR(D3D12GetDebugInterface, PFN_D3D12_GET_DEBUG_INTERFACE, dlls.d3d12);
+            if (pD3D12GetDebugInterface && pD3D12GetDebugInterface(IID_PPV_ARGS(&dxdebug)) == S_OK)
             {
-                ID3D12Debug* dxdebug = NULL;
-                SRE_DXGETADDR(D3D12GetDebugInterface, PFN_D3D12_GET_DEBUG_INTERFACE, dlls.d3d12);
-                if (pD3D12GetDebugInterface && pD3D12GetDebugInterface(IID_PPV_ARGS(&dxdebug)) == S_OK)
-                {
-                    dxdebug->EnableDebugLayer();
-                    dxdebug->Release();
-                }
+                dxdebug->EnableDebugLayer();
+                dxdebug->Release();
             }
-            #endif
-                        
-            SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dlls.dxgi);
-            SRE_DXGETADDR(D3D12CreateDevice, PFN_D3D12_CREATE_DEVICE, dlls.d3d12);
-            SRE_DX12CALL(pCreateDXGIFactory1(IID_PPV_ARGS(&dxfactory)));
-            SRE_DX12CALL(pD3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dxdevice)));
         }
-        
+        #endif
+                        
+        SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dlls.dxgi);
+        SRE_DXGETADDR(D3D12CreateDevice, PFN_D3D12_CREATE_DEVICE, dlls.d3d12);
+        SRE_DX12CALL(pCreateDXGIFactory1(IID_PPV_ARGS(&dxfactory)));
+
+        SRE_DX12CALL(pD3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dxdevice)));
 
         D3D12_COMMAND_QUEUE_DESC cmdqueue_desc{};
         cmdqueue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -1279,11 +1277,12 @@ void sred3d12_inst::flush_queueinstances1(texture_type* texture, const sre::Rend
 
     _setdstate(texture, flags, switch_flags);
 
-    UINT index = d1data.append(dxdevice, instances, sizeof(sre::RenderInstance1)*instance_count);
+    UINT UINT_instcount = static_cast<UINT>(instance_count);
+    UINT index = d1data.append(dxdevice, instances, sizeof(sre::RenderInstance1)*UINT_instcount);
 
     D3D12_VERTEX_BUFFER_VIEW vboview{};
     vboview.BufferLocation = d1data.baseaddr + index;
-    vboview.SizeInBytes = sizeof(sre::RenderInstance1)*instance_count;
+    vboview.SizeInBytes = sizeof(sre::RenderInstance1)*UINT_instcount;
     vboview.StrideInBytes = sizeof(sre::RenderInstance1);
     dxcmd_list->IASetVertexBuffers(0, 1, &vboview);
     dxcmd_list->DrawInstanced(4, static_cast<UINT>(instance_count), 0, 0);
@@ -1307,18 +1306,19 @@ void sred3d12_inst::flush_queueinstances2(texture_type* texture, const sre::Rend
         default: abort();
     }
 
+    UINT UINT_ptcount = static_cast<UINT>(point_count);
     UINT indexc = d2datac.append(dxdevice, &instance->color, sizeof(sre::col4));
-    UINT indexp = d2datap.append(dxdevice, instance->points, sizeof(sre::RenderPoint)*point_count);
+    UINT indexp = d2datap.append(dxdevice, instance->points, sizeof(sre::RenderPoint)*UINT_ptcount);
 
     D3D12_VERTEX_BUFFER_VIEW vboviews[2]{};
     vboviews[0].BufferLocation = d2datac.baseaddr + indexc;
     vboviews[0].SizeInBytes = sizeof(sre::col4);
     vboviews[0].StrideInBytes = sizeof(sre::col4);
     vboviews[1].BufferLocation = d2datap.baseaddr + indexp;
-    vboviews[1].SizeInBytes = sizeof(sre::RenderPoint)*point_count;
+    vboviews[1].SizeInBytes = sizeof(sre::RenderPoint)*UINT_ptcount;
     vboviews[1].StrideInBytes = sizeof(sre::RenderPoint);
     dxcmd_list->IASetVertexBuffers(0, 2, vboviews);
-    dxcmd_list->DrawInstanced(point_count, 1, 0, 0);
+    dxcmd_list->DrawInstanced(UINT_ptcount, 1, 0, 0);
 }
 
 

@@ -7,7 +7,7 @@
 #include <Core/Display.hpp>
 #include <Core/Window.hpp>
 #include <Core/Input.hpp>
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 
 #include <ECS/scene.hpp>
 
@@ -38,29 +38,18 @@ struct DisplayText: public sreGUI::Object
     void update() override { rot += sre::dt * 80; }
 };
 
-sre::DDRect mouseRect{
-    SRE_DRAWFLAGS_USECAM,
-    { 0, 0, 0, 255 },
-
-    {0, 0, 100, 50},
-    sre::vec2ut::CENTER
-};
-
-const sre::DDRect staticRect{
-    SRE_DRAWFLAGS_USECAM,
-    { 255, 255, 255, 255 }, // REMARK: using sre::col4::WHITE causes it to be black as sre::col4::WHITE hasn't been initialized yet
-                            // That is a problem...
-
-    {0, 20, 250, 90},
-    sre::vec2ut::CENTER
+sre::RenderInstance1 instances[2] = {
+    { {0, 20, 250, 90}, sre::vec2ut::CENTER, sre::WHITE },
+    { {0, 0, 100, 50}, sre::vec2ut::CENTER, sre::BLACK }
 };
 
 void handle_events(void* signal_data, void* connection_data, sre::Event event)
 {
-    switch (event.type)
+    switch (event.type())
     {
         case sre::EVENT_MOUSEWHEEL:
-            mouseRect.rect.size += sre::vec2ut{event.mouse_wheel.amount * 10};
+            using namespace sre::events;
+            instances[1].rectangle.size += sre::vec2ut{event.get<MouseWheel>().amount * 10};
             break;
     }
     
@@ -68,25 +57,15 @@ void handle_events(void* signal_data, void* connection_data, sre::Event event)
 
 void DisplayText::post_render()
 {
-    if (mouseRect.rect.intersects(staticRect.rect))
-        mouseRect.color = sre::GREEN;
+    if (instances[1].rectangle.intersects(instances[0].rectangle))
+        instances[1].color = sre::GREEN;
     else
-        mouseRect.color = sre::RED;
+        instances[1].color = sre::RED;
         
     sre::vec2ut mPos = sreECS::mouse_worldcoords();
-    mouseRect.rect.position = mPos;
-    //mPos.display();
+    instances[1].rectangle.position = mPos;
 
-    staticRect.color.display();
-    staticRect.rect.display();
-    sre::draw(staticRect);
-    sre::draw(mouseRect);
-    /*
-    Display::DrawDebug(mouseRect.top_left());
-    Display::DrawDebug(mouseRect.top_right());
-    Display::DrawDebug(mouseRect.bottom_left());
-    Display::DrawDebug(mouseRect.bottom_right());
-    */
+    sre::render_draw1(SRE_DRAWFLAG_CAMERA, instances);
 }
 
 const int START_WIDTH = 480;

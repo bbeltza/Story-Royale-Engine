@@ -1,27 +1,24 @@
 #include <Core/Runtime.hpp>
 #include <Core/Display.hpp>
 #include <Core/Window.hpp>
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 #include <Core/Input.hpp>
 
 #include <Entry.h>
 
 void Render()
 {
-    static double t = 0;
+    static float t = 0;
     sre::vec2ut mpos = sre::mouse_screencoords();
     
-    sre::draw(sre::DDRRect{
-        {
-            SRE_DRAWFLAGS_STROKE & 0,
-            sre::WHITE,
-            { mpos, {10, 10} },
-            sre::vec2ut::CENTER
-        },
-        t
-    });
+    sre::render_draw1(SRE_DRAWFLAG_LINE, { {
+                { mpos, {10, 10} },
+                sre::vec2ut::CENTER,
+                sre::WHITE,
+                t
+        } });
 
-    t += 1;
+    t += UT_PI/360;
 }
 
 void sre::initialize()

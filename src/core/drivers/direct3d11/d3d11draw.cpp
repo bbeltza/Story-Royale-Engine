@@ -5,13 +5,34 @@ using namespace sreD3D11;
 void Instance::present()
 {
     HRESULT hr;
-    SRE_DXCALL(m_dxswapchain->Present(m_caches.vsync, !m_uselegacy && !m_caches.vsync ? DXGI_PRESENT_ALLOW_TEARING : 0));
+    UINT flags;
+    if (m_caches.vsync)
+    {
+        flags = 0;
+    }
+    else
+    {
+        flags = DXGI_PRESENT_DO_NOT_WAIT;
+    }
+
+    hr = m_dxswapchain->Present(m_caches.vsync, flags);
+    if (FAILED(hr))
+    {
+        if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+        {
+            return;
+        }
+
+        DX_LOGERR("[D3D11]: IDXGISwapChain::Present() failed: '%s' (%X)", DXHRTOSTRING(hr), hr);
+    }
+
+    
 }
 
 bool Instance::clear(float color[3])
 {
     const FLOAT color4[4] = {
-        color[0], color[1], color[2], 1.0f
+        color[0], color[1], color[2], 0.0f
     };
 
 	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
@@ -66,22 +87,18 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     if (m_d2bufferc.append(m_dxdevicecontext, &instance->color, sizeof(instance->color)))
     {
         offscol = 0;
-        doswitch = true;
     }
     if (m_d2bufferp.append(m_dxdevicecontext, instance->points, static_cast<UINT>(sizeof(instance->points[0])*point_count)))
     {
         offspos = 0;
-        doswitch = true;
     }
 
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
-        doswitch = true;
         m_dxdevicecontext->VSSetShader(m_shaders.d2VS, NULL, 0);
         m_dxdevicecontext->IASetInputLayout(m_shaders.d2IL);
     }
 
-    if (doswitch)
     {
         UINT offsets[] = { offscol, offspos };
         UINT strides[] = { sizeof(sre::col4), sizeof(sre::RenderPoint) };

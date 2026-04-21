@@ -1,6 +1,5 @@
-include(sre)
-project(LogsTest)
+project(sretestlog)
 
 set(SOURCES logtest.cpp)
 
-srEngine_build(LogsTest logtest SOURCES)
+SRE_BUILD(sretestlog SOURCES)
