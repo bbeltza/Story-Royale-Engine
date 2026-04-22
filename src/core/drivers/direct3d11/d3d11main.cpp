@@ -19,7 +19,8 @@ Instance::Instance(SDL_Window* window)
     // Setup
     HRESULT hr;
 
-    { // Device and swapchain setup
+    { // Device and swapchain setup       
+
         // Get necessary symbols (We are not linking D3D11.lib)
         SRE_DXGETADDR(D3D11CreateDevice, PFN_D3D11_CREATE_DEVICE, m_dlls.d3d11);
         SRE_DXGETADDR(CreateDXGIFactory, PFN_CREATE_DXGI_FACTORY1, m_dlls.dxgi);
@@ -36,8 +37,8 @@ Instance::Instance(SDL_Window* window)
 
         DXGI_ADAPTER_DESC adapterdesc{};
         SRE_DX11CALL(dxadapter->GetDesc(&adapterdesc));
-        sre::log("Description: %ls ; VendorId: %u ; DeviceId: %u ; SubsysId: %u ; Revision: %u ; DedicatedVideoMemory: %zu ; DedicatedSystemMemory: %zu ; SharedSystemMemory: %zu ; AdapterLuid: %p",
-            adapterdesc.Description, adapterdesc.VendorId, adapterdesc.DeviceId, adapterdesc.SubSysId, adapterdesc.Revision, adapterdesc.DedicatedVideoMemory, adapterdesc.DedicatedSystemMemory, adapterdesc.SharedSystemMemory, adapterdesc.AdapterLuid);
+        // sre::log("Description: %ls ; VendorId: %u ; DeviceId: %u ; SubsysId: %u ; Revision: %u ; DedicatedVideoMemory: %zu ; DedicatedSystemMemory: %zu ; SharedSystemMemory: %zu ; AdapterLuid: %p",
+        //     adapterdesc.Description, adapterdesc.VendorId, adapterdesc.DeviceId, adapterdesc.SubSysId, adapterdesc.Revision, adapterdesc.DedicatedVideoMemory, adapterdesc.DedicatedSystemMemory, adapterdesc.SharedSystemMemory, adapterdesc.AdapterLuid);
 
         UINT device_flags = D3D11_CREATE_DEVICE_SINGLETHREADED | D3D11_CREATE_DEVICE_BGRA_SUPPORT;
         #ifndef NDEBUG
@@ -73,10 +74,10 @@ Instance::Instance(SDL_Window* window)
                 return;
             }
 
-            sre::log<sre::LOGCATEGORY_INFO>("[Direct3D11]: Switching to legacy swapchain");
+            sre::log<sre::LOGCATEGORY_INFO>("[Direct3D11]: Switching to legacy swapchain...");
 
             // Double-buffering might not be supported, create a legacy single-buffered swap-chain
-            swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
+            //swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
             swapchain_desc.BufferCount = 1;
             swapchain_desc.Flags = 0;
             swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
@@ -92,8 +93,16 @@ Instance::Instance(SDL_Window* window)
         dxadapter->Release();
         dxfactory->Release();
         parentfactory->Release();
-    }
 
+        IDXGIDevice1* dxgidevice{};
+        SRE_DXCALL(m_dxdevice->QueryInterface(IID_PPV_ARGS(&dxgidevice)));
+        if (dxgidevice)
+        {
+            dxgidevice->SetMaximumFrameLatency(1);
+            dxgidevice->Release();
+        }
+    }
+    
     m_success &= m_shaders.setup(m_dxdevice);
 
     {

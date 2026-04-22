@@ -138,6 +138,8 @@ namespace sreD3D11
             bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
             bool texture_update(Texture* texture, const void* pixels, int pitch);
             void texture_destroy(Texture* texture);
+        private:
+            bool _setuprendertargets();
     };
 };
 

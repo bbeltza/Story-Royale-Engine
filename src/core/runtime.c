@@ -4,23 +4,39 @@
 #include <Core/Defer.h>
 #include <Base/Log.h>
 
+#if _WIN32 && 1
+    #define WIN32_HANDLE_WINDOW_BLOCKING
+#endif
+
 #if _WIN32
     #include "time/win32.c"
 
-    static CONDITION_VARIABLE win32_rendercond;
-    static SRWLOCK win32_rendersrw;
+    #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+        static CONDITION_VARIABLE win32_rendercond;
+        static SRWLOCK win32_rendersrw;
 
-    static void win32_renderflush(void* userdata)
-    {
-        AcquireSRWLockExclusive(&win32_rendersrw);
-        if (!engine.quit) __render_flush();
-        WakeAllConditionVariable(&win32_rendercond);
-        ReleaseSRWLockExclusive(&win32_rendersrw);
-    }
+        static void win32_renderflush(void* userdata)
+        {
+            AcquireSRWLockExclusive(&win32_rendersrw);
+            if (!engine.quit) __render_flush();
+            WakeAllConditionVariable(&win32_rendercond);
+            ReleaseSRWLockExclusive(&win32_rendersrw);
+        }
+    #endif
 #elif __unix__
     #include "time/unix.c"
 #else
     #error "Implement your own sleep!!"
+#endif
+
+#ifndef WIN32_HANDLE_WINDOW_BLOCKING
+        static SDL_sem* sdl_rendersem;
+        static void sem_renderflush(void* userdata)
+        {
+            assert(sdl_rendersem != NULL);
+            __render_flush();
+            SDL_SemPost(sdl_rendersem);
+        }
 #endif
 
 static int __event_watch(void *, SDL_Event *);
@@ -30,7 +46,7 @@ static int game_loop(void* running)
     const long long FREQUENCY = frequency();
     ticks(&engine.framestart_time);
 
-    #if _WIN32
+    #ifdef WIN32_HANDLE_WINDOW_BLOCKING
         AcquireSRWLockExclusive(&win32_rendersrw);
     #endif
 
@@ -54,7 +70,7 @@ static int game_loop(void* running)
 
         __queue_events();
         
-        #if _WIN32
+        #ifdef WIN32_HANDLE_WINDOW_BLOCKING
             if (__update_ecs())
             {
                 sre_defer(win32_renderflush, NULL);
@@ -63,8 +79,8 @@ static int game_loop(void* running)
         #else
             if (__update_ecs())
             {
-                sre_defer((sre_deferFunction)__render_flush, NULL);
-                SDL_SemWait(engine.render_sem);
+                sre_defer(sem_renderflush, NULL);
+                SDL_SemWait(sdl_rendersem);
             }
         #endif
 
@@ -80,7 +96,7 @@ static int game_loop(void* running)
     return 0;
 }
 
-#if _WIN32
+#ifdef WIN32_HANDLE_WINDOW_BLOCKING
 
     static int win32_eventwatch(void* userdata, SDL_Event* ev)
     {
@@ -118,13 +134,15 @@ void __run_engine()
 {
     SDL_RegisterEvents(1);
 
-    int running = 1;
-    engine.game_loop = SDL_CreateThread(game_loop, "Game Loop", &running);
+    static int running = 1;
+    SDL_Thread* gameloop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
-    #if _WIN32
+    #ifdef WIN32_HANDLE_WINDOW_BLOCKING
         InitializeConditionVariable(&win32_rendercond);
         InitializeSRWLock(&win32_rendersrw);
         SDL_SetEventFilter(win32_eventwatch, NULL);
+    #else
+        sdl_rendersem = SDL_CreateSemaphore(0);
     #endif
 
     SDL_Event ev;
@@ -177,7 +195,11 @@ void __run_engine()
     }
 
     running = 0;
-    SDL_SemPost(engine.render_sem);
-    SDL_WaitThread(engine.game_loop, NULL);
-    SDL_DestroySemaphore(engine.render_sem);
+    #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+        SDL_WaitThread(gameloop, NULL);
+    #else
+        SDL_SemPost(sdl_rendersem);
+        SDL_WaitThread(gameloop, NULL);
+        SDL_DestroySemaphore(sdl_rendersem);
+    #endif
 }

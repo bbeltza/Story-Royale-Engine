@@ -2,6 +2,16 @@
 
 using namespace sreD3D11;
 
+bool Instance::_setuprendertargets()
+{
+	HRESULT hr;
+    ID3D11Texture2D* rtres{};
+    SRE_DXCALLF(m_dxswapchain->GetBuffer(0, IID_PPV_ARGS(&rtres)));
+    SRE_DXCALLF(m_dxdevice->CreateRenderTargetView(rtres, NULL, &m_dxrendertargetview));
+    rtres->Release();
+	return true;
+}
+
 bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 {
 	HRESULT hr;
@@ -14,12 +24,8 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 	}
 	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, 0));
 
-	{
-        ID3D11Texture2D* rtres{};
-        SRE_DX11CALL(m_dxswapchain->GetBuffer(0, IID_PPV_ARGS(&rtres)));
-        SRE_DX11CALL(m_dxdevice->CreateRenderTargetView(rtres, NULL, &m_dxrendertargetview));
-        rtres->Release();
-    }
+	if (!_setuprendertargets())
+		return false;
 
 	D3D11_VIEWPORT viewport{ 0, 0, static_cast<FLOAT>(w), static_cast<FLOAT>(h), 0, 1 };
 	m_dxdevicecontext->RSSetViewports(1, &viewport);
@@ -35,12 +41,12 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 		for (int i = 0; i < 2; i++)
 		{
 			SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[i], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-			memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
+				memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
+				static_cast<CBuffer*>(mapped.pData)->camera = {};
 			m_dxdevicecontext->Unmap(m_cbuffers[i], 0);
 		}
 	}
 
-	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
 	return true;
 }
 

@@ -86,7 +86,6 @@ SRE_CAPI_BEGIN
 		SDL_mutex* destroyqueue_mutex;
 
 		void* coroutine_thread;
-		void* game_loop;
 		bool cor_running;
 
 		// Window data
@@ -99,7 +98,6 @@ SRE_CAPI_BEGIN
 		
 		struct _engine_renderdata video;
 
-		SDL_sem* render_sem;
 		int osize_x, osize_y;
 		sre_unit vsize_x, vsize_y;
 		sre_unit vcenter_x, vcenter_y;

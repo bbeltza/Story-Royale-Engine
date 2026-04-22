@@ -106,6 +106,7 @@ void __setup_renderer()
 
 	new(engine.video._vector_data) sre::RenderVectors{};
 	engine.video.texture_size = driverdata.texture_size;
+	engine.video.blendmode = SRE_BLEND_DEFAULT;
 
 #ifndef IMGUI_DISABLE
 	const sre_videodriverImGuiInterface* imgui = engine.video->imgui;
@@ -137,7 +138,6 @@ void __setup_renderer()
 		ImGui_ImplNull_Init();
 	}
 #endif
-	engine.render_sem = SDL_CreateSemaphore(0);
 	engine.scale = 1;
 
 	SRE_VIDEO(engine.video.vfptr, set_vsync, true);
@@ -146,6 +146,9 @@ void __setup_renderer()
 void __update_viewport(int w, int h)
 {
 	int integer_scale;
+	
+	if (engine.osize_x == w && engine.osize_y == h) // Have to check for any scale changes
+		return;
 
 	if (engine.auto_scalex && engine.auto_scaley)
 	{
@@ -200,6 +203,7 @@ void __render_flush()
 	SRE_VIDEO(engine.video.vfptr, set_camerastate, camoffset.x, camoffset.y);
 	
 	engine.video.blendmode = -1;
+	engine.video.clip_rect = { 0, 0 };
 	// Perform flushes
 		size_t insti1 = 0;
 		size_t insti2 = 0;
@@ -275,8 +279,6 @@ void __render_flush()
 	#endif
 
 	SRE_VIDEOV(engine.video.vfptr, present);
-
-	SDL_SemPost(engine.render_sem);
 }
 
 // All sre::render_ functions
