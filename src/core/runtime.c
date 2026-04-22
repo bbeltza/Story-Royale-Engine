@@ -4,21 +4,22 @@
 #include <Core/Defer.h>
 #include <Base/Log.h>
 
-#if _WIN32 && 1
+#if _WIN32 && 01
     #define WIN32_HANDLE_WINDOW_BLOCKING
 #endif
 
 #if _WIN32
     #include "time/win32.c"
 
+    static int win32_quit; // Check if the SDL_QUIT event has been sent before rendering (on windows and OpenGL, rendering causes an error after a window closes)
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
         static CONDITION_VARIABLE win32_rendercond;
         static SRWLOCK win32_rendersrw;
 
         static void win32_renderflush(void* userdata)
-        {
+        {           
             AcquireSRWLockExclusive(&win32_rendersrw);
-            if (!engine.quit) __render_flush();
+            if (!win32_quit) __render_flush();
             WakeAllConditionVariable(&win32_rendercond);
             ReleaseSRWLockExclusive(&win32_rendersrw);
         }
@@ -34,7 +35,15 @@
         static void sem_renderflush(void* userdata)
         {
             assert(sdl_rendersem != NULL);
+
+            #if _WIN32
+                if (win32_quit)
+                    goto POST;
+            #endif
+
+            
             __render_flush();
+            POST:
             SDL_SemPost(sdl_rendersem);
         }
 #endif
@@ -96,39 +105,37 @@ static int game_loop(void* running)
     return 0;
 }
 
-#ifdef WIN32_HANDLE_WINDOW_BLOCKING
+static int win32_eventwatch(void* userdata, SDL_Event* ev)
+{
+    if (ev->type == SDL_QUIT)
+        win32_quit = 1;
+    
+    #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+            SDL_threadID thrd = SDL_ThreadID();
+            if (thrd != engine.main_thrd)
+                return 1;
 
-    static int win32_eventwatch(void* userdata, SDL_Event* ev)
-    {
-        if (ev->type == SDL_QUIT)
-            engine.quit = 1;
-
-        SDL_threadID thrd = SDL_ThreadID();
-        if (thrd != engine.main_thrd)
-            return 1;
-
-        if (ev->type == SDL_WINDOWEVENT)
-        {
-            switch (ev->window.event)
+            if (ev->type == SDL_WINDOWEVENT)
             {
-                case SDL_WINDOWEVENT_EXPOSED:
-                    if (TryAcquireSRWLockExclusive(&win32_rendersrw))
-                    {
-                        __render_flush();
-                        ReleaseSRWLockExclusive(&win32_rendersrw);
-                    }
-                    WakeAllConditionVariable(&win32_rendercond);
-                    break;
-                case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    __update_viewport(ev->window.data1, ev->window.data2);
-                    break;
+                switch (ev->window.event)
+                {
+                    case SDL_WINDOWEVENT_EXPOSED:
+                        if (TryAcquireSRWLockExclusive(&win32_rendersrw))
+                        {
+                            __render_flush();
+                            ReleaseSRWLockExclusive(&win32_rendersrw);
+                        }
+                        WakeAllConditionVariable(&win32_rendercond);
+                        break;
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        __update_viewport(ev->window.data1, ev->window.data2);
+                        break;
+                }
             }
-        }
+    #endif
+    return 1;
+}
 
-        return 1;
-    }
-
-#endif
 
 void __run_engine()
 {
@@ -137,10 +144,12 @@ void __run_engine()
     static int running = 1;
     SDL_Thread* gameloop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
+    #if _WIN32
+        SDL_AddEventWatch(win32_eventwatch, NULL);
+    #endif
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
         InitializeConditionVariable(&win32_rendercond);
         InitializeSRWLock(&win32_rendersrw);
-        SDL_SetEventFilter(win32_eventwatch, NULL);
     #else
         sdl_rendersem = SDL_CreateSemaphore(0);
     #endif

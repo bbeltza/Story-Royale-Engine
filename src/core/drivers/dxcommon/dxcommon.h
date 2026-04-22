@@ -50,6 +50,7 @@ inline static const char* DXHRTOSTRING(HRESULT hr)
         _FMT_CASE(E_INVALIDARG);
         _FMT_CASE(E_OUTOFMEMORY);
         _FMT_CASE(E_NOTIMPL);
+        _FMT_CASE(E_NOINTERFACE);
         _FMT_CASE(S_FALSE);
         _FMT_CASE(S_OK);
 

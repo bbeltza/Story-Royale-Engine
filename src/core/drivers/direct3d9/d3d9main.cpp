@@ -25,8 +25,8 @@ Instance::Instance(SDL_Window* window)
 
     m_pparamcache.hDeviceWindow = wminfo.info.win.window;
     m_pparamcache.BackBufferFormat = D3DFMT_UNKNOWN;
-    m_pparamcache.BackBufferCount = 2;
-    m_pparamcache.SwapEffect = D3DSWAPEFFECT_FLIP;
+    m_pparamcache.BackBufferCount = 1;
+    m_pparamcache.SwapEffect = D3DSWAPEFFECT_DISCARD;
     m_pparamcache.Windowed = TRUE;
     m_pparamcache.Flags = D3DPRESENTFLAG_VIDEO;
     m_pparamcache.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -78,9 +78,9 @@ bool Instance::_statesetup()
     };
 
     static const D3DVERTEXELEMENT9 D2_DECLARATION[] = {
-        {0, 0, D3DDECLTYPE_UBYTE4N, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
-        {1, offsetof(sre::RenderPoint, pos), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-        {1, offsetof(sre::RenderPoint, uv), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+        {0, offsetof(sre::RenderPoint, pos), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+        {0, offsetof(sre::RenderPoint, uv), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+        {1, 0, D3DDECLTYPE_UBYTE4N, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
         D3DDECL_END()
     };
 
@@ -98,26 +98,26 @@ bool Instance::_statesetup()
     {
         FLOAT* mapped_vertices = NULL;
         USHORT* mapped_indices = NULL;
-        SRE_DXCALLF(m_d1data.dxbuff_vert->Lock(0, 0, reinterpret_cast<void**>(&mapped_vertices), D3DLOCK_NOOVERWRITE));
+        SRE_DXCALLF(m_d1data.dxbuff_vert->Lock(0, 0, reinterpret_cast<void**>(&mapped_vertices), D3DLOCK_DISCARD));
             mapped_vertices[0] = 0.0f;
             mapped_vertices[1] = 0.0f;
 
-            mapped_vertices[2] = 1.0f;
-            mapped_vertices[3] = 0.0f;
+            mapped_vertices[2] = 0.0f;
+            mapped_vertices[3] = 1.0f;
 
-            mapped_vertices[4] = 0.0f;
+            mapped_vertices[4] = 1.0f;
             mapped_vertices[5] = 1.0f;
-
+        
             mapped_vertices[6] = 1.0f;
-            mapped_vertices[7] = 1.0f;
+            mapped_vertices[7] = 0.0f;
         SRE_DXCALLF(m_d1data.dxbuff_vert->Unlock());
-        SRE_DXCALLF(m_d1data.dxibuff->Lock(0, 0, reinterpret_cast<void**>(&mapped_indices), D3DLOCK_NOOVERWRITE));
+        SRE_DXCALLF(m_d1data.dxibuff->Lock(0, 0, reinterpret_cast<void**>(&mapped_indices), D3DLOCK_DISCARD));
             mapped_indices[0] = 0;
             mapped_indices[1] = 1;
             mapped_indices[2] = 2;
-            mapped_indices[3] = 1;
-            mapped_indices[4] = 2;
-            mapped_indices[5] = 3;
+            mapped_indices[3] = 2;
+            mapped_indices[4] = 3;
+            mapped_indices[5] = 0;
         SRE_DXCALLF(m_d1data.dxibuff->Unlock());
     }
 
@@ -125,9 +125,10 @@ bool Instance::_statesetup()
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_LIGHTING, FALSE));
 
+
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP));
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP));
-    SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT));
+    SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
 
     m_needsetup = false;
@@ -152,8 +153,6 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
     HRESULT hr;
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
-        switch_flags |= SRE_RENDER_SWITCHCAMERA | SRE_RENDER_SWITCHTEXTURE;
-
         SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d1data.dxdecl));
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd1vs));
         SRE_DXCALL(m_dxdevice->SetIndices(m_d1data.dxibuff));
@@ -181,21 +180,14 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
     SRE_DXCALL(m_d1data.dxbuff_inst->Unlock());
 
     SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, D3DSTREAMSOURCE_INDEXEDDATA | UINT_instcount));
+
+    SRE_DXCALL(m_dxdevice->SetPixelShader(m_dxcps));
     SRE_DXCALL(m_dxdevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2*UINT_instcount));
 }
 
 void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
 {
     HRESULT hr;
-    void* mapped_points;
-    void* mapped_color;
-    // For now we will just use D3DLOCK_DISCARD, I'll be looking for D3DLOCK_NOOVERWRITE
-    SRE_DXCALL(m_d2data.dxbuff_vert->Lock(0, static_cast<UINT>(sizeof(instance->points[0])*point_count), &mapped_points, D3DLOCK_DISCARD));
-    SRE_DXCALL(m_d2data.dxbuff_inst->Lock(0, static_cast<UINT>(sizeof(instance->color)), &mapped_color, D3DLOCK_DISCARD));
-    memcpy(mapped_color, &instance->color, sizeof(instance->color));
-    memcpy(mapped_points, instance->points, sizeof(instance->points[0])*point_count);
-    SRE_DXCALL(m_d2data.dxbuff_vert->Unlock());
-    SRE_DXCALL(m_d2data.dxbuff_inst->Unlock());
 
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
@@ -209,7 +201,45 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd2vs));
     }
 
-    SRE_DXCALL(m_dxdevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, static_cast<UINT>(point_count/3)));
+    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+    {
+        sre::vec2f camera = flags & SRE_DRAWFLAG_CAMERA ? sre::vec2f{m_cameracache[0], m_cameracache[1]} : sre::vec2f::ZERO;
+        SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(4, &camera.x, 1));
+    }
+
+    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
+    {
+        SRE_DXCALL(m_dxdevice->SetTexture(0, texture ? texture->dxtexture : m_dxbasictexture));
+    }
+
+    void* mapped_points;
+    void* mapped_color;
+    // For now we will just use D3DLOCK_DISCARD, I'll be looking for D3DLOCK_NOOVERWRITE
+    SRE_DXCALL(m_d2data.dxbuff_vert->Lock(0, static_cast<UINT>(sizeof(instance->points[0])*point_count), &mapped_points, D3DLOCK_DISCARD));
+    SRE_DXCALL(m_d2data.dxbuff_inst->Lock(0, static_cast<UINT>(sizeof(instance->color)), &mapped_color, D3DLOCK_DISCARD));
+        memcpy(mapped_color, &instance->color, sizeof(instance->color));
+        memcpy(mapped_points, instance->points, sizeof(instance->points[0])*point_count);
+    SRE_DXCALL(m_d2data.dxbuff_vert->Unlock());
+    SRE_DXCALL(m_d2data.dxbuff_inst->Unlock());
+
+    UINT primcount;
+    D3DPRIMITIVETYPE primtype;
+    switch (instance->mode)
+    {
+        case SRE_DRAW2_JOINED:
+        case SRE_DRAW2_STRIP:
+            primcount = 1 + (point_count-3);
+            primtype = instance->mode == SRE_DRAW2_JOINED ? D3DPT_TRIANGLEFAN : D3DPT_TRIANGLESTRIP;
+            break;
+        case SRE_DRAW2_TRIANGLE:
+            primcount = static_cast<UINT>(point_count/3);
+            primtype = D3DPT_TRIANGLELIST;
+            break;
+        default:
+            return;
+    }
+
+    SRE_DXCALL(m_dxdevice->DrawPrimitive(primtype, 0, primcount));
 }
 
 //

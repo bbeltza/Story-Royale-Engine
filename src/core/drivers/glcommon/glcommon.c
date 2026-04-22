@@ -50,6 +50,10 @@ bool sregl_loadfunctions11(struct sregl_functions11* funcs, void* (*pGetProcAddr
 
 extern bool sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs)
 {
+    #ifndef NDEBUG
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+    #endif
+
     SDL_GLContext ctx = SDL_GL_CreateContext(window);
     if (!ctx)
         return false;

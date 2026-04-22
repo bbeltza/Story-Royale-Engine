@@ -36,6 +36,11 @@ bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Wind
     SDL_GetRendererInfo(inst->renderer, &info);
     sre_log(SRE_LOGCATEGORY_DEBUG, "%s", info.name);
     
+    inst->vbuf = NULL;
+    inst->vbuf_size = 0;
+    inst->ibuf = NULL;
+    inst->ibuf_size = 0;
+
     *vft = &sresdlrenderer_vft;
     return true;
 }
@@ -43,6 +48,8 @@ bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Wind
 void sresdlrenderer_destroy(void* _inst)
 {
     sresdlrenderer_inst* inst = _inst;
+    SDL_free(inst->ibuf);
+    SDL_free(inst->vbuf);
     SDL_DestroyRenderer(inst->renderer);
 }
 

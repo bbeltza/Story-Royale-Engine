@@ -54,7 +54,6 @@ typedef void (APIENTRYP PFNGLROTATEFPROC)(GLfloat angle, GLfloat x, GLfloat y, G
         SRE_GLPFNDEF(PFNGLGENTEXTURESPROC, GenTextures)              \
         SRE_GLPFNDEF(PFNGLDELETETEXTURESPROC, DeleteTextures)        \
         SRE_GLPFNDEF(PFNGLBINDTEXTUREPROC, BindTexture)              \
-        SRE_GLPFNDEF(PFNGLACTIVETEXTUREPROC, ActiveTexture)          \
         SRE_GLPFNDEF(PFNGLTEXPARAMETERIPROC, TexParameteri)          \
         SRE_GLPFNDEF(PFNGLGETTEXLEVELPARAMETERIVPROC, GetTexLevelParameteriv) \
         SRE_GLPFNDEF(PFNGLTEXIMAGE2DPROC, TexImage2D)                \

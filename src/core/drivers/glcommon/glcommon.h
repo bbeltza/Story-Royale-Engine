@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define SRE_GLCALLR(x, ...) x; do { GLenum _err = SRE_GLGETERROR(); if (_err == GL_NO_ERROR) break; SRE_GLLOG("[OpenGL error]: '" #x "' failed: '%s' | line: %d file: '%s'", SRE_GLERRFMT(_err), __LINE__, __FILE__); abort(); __VA_ARGS__; } while (1)
+#define SRE_GLCALLR(x, ...) x; do { GLenum _err = SRE_GLGETERROR(); if (_err == GL_NO_ERROR) break; SRE_GLLOG("[OpenGL error]: '" #x "' failed: '%s' | line: %d file: '%s'", SRE_GLERRFMT(_err), __LINE__, __FILE__); __VA_ARGS__; } while (1)
 #define SRE_GLCALLF(x) SRE_GLCALLR(x, return false)
 #define SRE_GLCALL(x) SRE_GLCALLR(x)
 

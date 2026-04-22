@@ -45,6 +45,8 @@ static void handle_arg(const char* arg, char* argv[])
 
 int main(int argc, char* argv[])
 {
+    sre_logsimple(SRE_LOGCATEGORY_DEBUG, "Hello World!");
+
 	for (int i = 1; i < argc; i++)
         handle_arg(argv[i], argv);
 

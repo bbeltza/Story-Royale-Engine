@@ -9,12 +9,19 @@
 namespace sre
 {
     using EventQueue = std::deque<sre::Event>;
-    using EventMutex = std::mutex;
-    using EventGuard = std::lock_guard<EventMutex>;
+
+    class RAIIMutex
+    {
+        SDL_mutex* mutex = SDL_CreateMutex();
+
+    public:
+        ~RAIIMutex() { SDL_DestroyMutex(mutex); }
+        operator SDL_mutex*() const { return mutex; }
+    };
 }
 
 static sre::EventQueue queue;
-static sre::EventMutex mutex;
+static sre::RAIIMutex mutex;
 sre::Signal<sre::Event> sre::onEvent;
 
 int __event_filter(void* userdata, SDL_Event* ev)
@@ -35,7 +42,7 @@ int __event_filter(void* userdata, SDL_Event* ev)
 
 int __signal_events(SDL_Event* ev)
 {
-    sre::EventGuard guard{mutex};
+    SDL_LockMutex(mutex);
 
     switch (ev->type)
     {
@@ -91,9 +98,10 @@ int __signal_events(SDL_Event* ev)
         });
         break;
     default:
-        return 1;
+        break;
     }
 
+    SDL_UnlockMutex(mutex);
     return 1;
 }
 
@@ -133,10 +141,10 @@ void __queue_events()
 
     while (!queue.empty())
     {
-        mutex.lock();
+        SDL_LockMutex(mutex);
             sre::Event ev = std::move(queue.front());
             queue.pop_front();
-        mutex.unlock();
+        SDL_UnlockMutex(mutex);
         // Don't forget to fire with the mutex unlocked, having the mutex locked can cause softlocks
         sre::onEvent.fire(ev);
     }

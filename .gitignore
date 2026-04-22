@@ -12,3 +12,7 @@ scripts/__pycache__
 src/core/drivers/direct3d11/ps.h
 src/core/drivers/direct3d11/vs1.h
 src/core/drivers/direct3d11/vs2.h
+
+src/core/drivers/direct3d9/ps.h
+src/core/drivers/direct3d9/vs1.h
+src/core/drivers/direct3d9/vs2.h

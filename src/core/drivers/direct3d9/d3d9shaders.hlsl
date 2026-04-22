@@ -10,7 +10,7 @@
 
 struct D1input
 {
-    float4 vpos: POSITION;
+    float2 vpos: POSITION;
 
     float4 color: COLOR;
     float4 transform: POSITION1;
@@ -38,13 +38,7 @@ float2 CAMERA: register(c4);
 
 PSinput D1main(D1input input)
 {
-    float4x4 transform = float4x4(
-        input.transform.z, 0, 0, 0,
-        0, input.transform.w, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    );
-
+    float scale = VIEWPORT[2][2];
     float cx = cos(input.angle);
     float sx = sin(input.angle);
     float4x4 rotation = float4x4(
@@ -54,11 +48,12 @@ PSinput D1main(D1input input)
         input.transform.xy, 0, 1 
     );
 
-    float4 vert = input.vpos - float4(input.anchor, 0.0, 0.0);
-    vert = mul(vert, mul(transform, rotation));
-    vert.xy = ceil(vert.xy*VIEWPORT[2][2] + (input.vpos.xy));
-    vert.xy += CAMERA;
+    float4 vert = float4(input.vpos - input.anchor, 0.0, 1.0);
+    vert.xy *= input.transform.zw;
+    vert = mul(vert, rotation);
+    vert.xy = (vert.xy*scale + CAMERA);
     vert = mul(VIEWPORT, vert);
+    vert.zw = float2(0, 1);
 
     PSinput output = {
         input.color,
@@ -71,7 +66,9 @@ PSinput D1main(D1input input)
 PSinput D2main(D2input input)
 {
     float4 vert = float4(input.pos, 0.0f, 1.0f);
-    vert.xy /= 300;
+    vert.xy *= VIEWPORT[2][2];
+    vert.xy += CAMERA;
+    vert = mul(VIEWPORT, vert);
 
     PSinput output = {
         input.color,
@@ -86,4 +83,11 @@ sampler2D tex: register(s0);
 float4 PSmain(PSinput input): COLOR
 {
     return tex2D(tex, input.uv) * input.color;
+}
+
+// fxc /T ps_2_0 /E PSmain_debug /Fh ps.h d3d9shaders.hlsl
+
+float4 PSmain_debug(): COLOR
+{
+    return float4(1.0f, 0.0f, 0.0f, .1f);
 }

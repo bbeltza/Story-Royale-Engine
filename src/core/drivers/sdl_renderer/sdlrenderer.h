@@ -4,6 +4,20 @@
 #include <Core/Render.h>
 #include <SDL_render.h>
 
+union sresdlrenderer_iprim
+{
+    struct
+    {
+        unsigned l0;
+        unsigned l1;
+        unsigned l2;
+        unsigned r0;
+        unsigned r1;
+        unsigned r2;
+    };
+    unsigned i[6];    
+};
+
 typedef struct sresdlrenderer_texture
 {
     SDL_Texture* texture;
@@ -12,8 +26,15 @@ typedef struct sresdlrenderer_texture
 typedef struct sresdlrenderer_inst
 {
     SDL_Renderer* renderer;
+
     sre_unit scaling;
     sre_vec2ut camera;
+
+    SDL_Vertex* vbuf;
+    size_t vbuf_size;
+
+    union sresdlrenderer_iprim* ibuf;
+    size_t ibuf_size;
 } sresdlrenderer_inst;
 
 SRE_CAPI_BEGIN

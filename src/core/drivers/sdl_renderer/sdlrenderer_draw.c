@@ -38,10 +38,41 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
     };
     sresdlrenderer_inst* inst = _inst;
     sresdlrenderer_texture* texture = _texture;
+
+    if (inst->vbuf_size < instance_count)
+    {
+        SDL_free(inst->vbuf);
+        inst->vbuf_size += instance_count;
+        inst->vbuf = SDL_malloc(inst->vbuf_size*4 * sizeof(SDL_Vertex));
+        assert(inst->vbuf);
+    }
+
+    if (inst->ibuf_size < instance_count)
+    {
+        size_t old_size = inst->ibuf_size;
+        inst->ibuf_size += instance_count;
+        inst->ibuf = SDL_realloc(inst->ibuf, sizeof(*inst->ibuf)*inst->ibuf_size);
+        assert(inst->ibuf);
+        
+        unsigned first_index = old_size ? inst->ibuf[old_size-1].r2 + 1 : 0;
+        for (size_t i = old_size; i < inst->ibuf_size; i++)
+        {
+            inst->ibuf[i].l0 = first_index + 0;
+            inst->ibuf[i].l1 = first_index + 1;
+            inst->ibuf[i].l2 = first_index + 2;
+            inst->ibuf[i].r0 = first_index + 1;
+            inst->ibuf[i].r1 = first_index + 2;
+            inst->ibuf[i].r2 = first_index + 3;
+            first_index += 4;
+        }
+    }
+
     for (size_t i = 0; i < instance_count; i++)
     {
         #define Tround SDL_ceilf
         const sre_RenderInstance1* dinst = &instances[i];
+        SDL_Vertex *positions = &inst->vbuf[i*4];
+
         sre_rect2Dut srect = {
             dinst->rectangle.x * inst->scaling,
             dinst->rectangle.y * inst->scaling,
@@ -54,21 +85,19 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
         srect.w = srect.w;
         srect.h = srect.h;
 
-        float positions[4*2];
-
         if (dinst->angle / 360 == ((int)dinst->angle) / 360 && 01)
         {
-            positions[0] = Tround(srect.x - dinst->anchor.x * srect.w);
-            positions[1] = Tround(srect.y - dinst->anchor.y * srect.h);
+            positions[0].position.x = Tround(srect.x - dinst->anchor.x * srect.w);
+            positions[0].position.y = Tround(srect.y - dinst->anchor.y * srect.h);
 
-            positions[2] = positions[0] + srect.w,
-            positions[3] = positions[1];
+            positions[1].position.x = positions[0].position.x + srect.w,
+            positions[1].position.y = positions[0].position.y;
 
-            positions[4] = positions[0] + srect.w;
-            positions[5] = positions[1] + srect.h;
-                
-            positions[6] = positions[0];
-            positions[7] = positions[1] + srect.h;
+            positions[2].position.x = positions[0].position.x;
+            positions[2].position.y = positions[0].position.y + srect.h;
+
+            positions[3].position.x = positions[0].position.x + srect.w;
+            positions[3].position.y = positions[0].position.y + srect.h;
         }
         else
         {
@@ -78,8 +107,8 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
             float space[4*2] = {
                 -dinst->anchor.x, -dinst->anchor.y,
                 space[0] + 1.0f, space[1],
-                space[0] + 1.0f, space[1] + 1.0f,
-                space[0],        space[1] + 1.0f
+                space[0],        space[1] + 1.0f,
+                space[0] + 1.0f, space[1] + 1.0f
             };
 
             float s = SDL_sinf(dinst->angle);
@@ -95,36 +124,31 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
                 space[i+1] = spacex * s + spacey * c;
             }
 
-            for (int i = 0; i < 4*2; i++)
+            for (int i = 0; i < 4; i++)
             {
-                positions[i] = (&srect.x)[i%2] + space[i];
+                positions[i].position.x = srect.x + space[i*2 + 0];
+                positions[i].position.y = srect.y + space[i*2 + 1];
             }
         }
         
+        positions[0].tex_coord = (SDL_FPoint){ dinst->uv_offset.x, dinst->uv_offset.y };
+        positions[1].tex_coord = (SDL_FPoint){ dinst->uv_offset.x + dinst->uv.x, dinst->uv_offset.y };
+        positions[2].tex_coord = (SDL_FPoint){ dinst->uv_offset.x, dinst->uv_offset.y + dinst->uv.y };
+        positions[3].tex_coord = (SDL_FPoint){ dinst->uv_offset.x + dinst->uv.x, dinst->uv_offset.y + dinst->uv.y };
 
-        const float uvs[4*2] = {
-            dinst->uv_offset.x, dinst->uv_offset.y,
-            dinst->uv_offset.x + dinst->uv.x, dinst->uv_offset.y,
-            dinst->uv_offset.x + dinst->uv.x, dinst->uv_offset.y + dinst->uv.y,
-            dinst->uv_offset.x, dinst->uv_offset.y + dinst->uv.y,
-        };
-
-        int res = SDL_RenderGeometryRaw(
-            inst->renderer, texture ? texture->texture : NULL,
-            positions, sizeof(float)*2,
-            (SDL_Color*)&dinst->color, 0,
-            uvs, sizeof(float)*2,
-            4, DRAW1_INDICES, 6, 1
-        );
+        for (int i = 0; i < 4; i++)
+            positions[i].color = *(SDL_Color*)&dinst->color;
 
         #if 0
             SDL_SetRenderDrawColor(inst->renderer, 255, 0, 0, 255);
             SDL_RenderDrawPointsF(inst->renderer, (SDL_FPoint*)positions, 4);
         #endif
 
-        assert(res == 0);
-            
     }
+    
+    int int_count = (int)instance_count;
+    int res = SDL_RenderGeometry(inst->renderer, texture ? texture->texture : NULL, inst->vbuf, int_count*4, inst->ibuf->i, 6*int_count);
+    assert(res == 0);
 }
 
 void sresdlrenderer_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switchflags)

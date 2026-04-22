@@ -107,10 +107,6 @@ SRE_CAPI_BEGIN
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
 
-		#if _WIN32
-				int quit; // Check if the SDL_QUIT event has been sent before rendering (on windows and OpenGL, rendering causes an error after a window closes)
-		#endif
-
 		void* audio_queue;
 		size_t audio_queuesize;
 		size_t audio_queuecap;
