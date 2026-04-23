@@ -663,19 +663,13 @@ struct sred3d12_dlls
     }
 };
 
-#define SRE_DX12CALL(x) SRE_DXCALL(x); success = success && SUCCEEDED(hr)
-
-struct sred3d12_inst
+struct sred3d12_inst: sre::RenderDriver
 {
     using texture_type = sred3d12_texture;
 
-    sred3d12_inst(SDL_Window* window);
+    sred3d12_inst(SDL_Window* window, int* outstatus);
     ~sred3d12_inst();
-
-    bool succeeded() const { return success; }
 private:
-    bool success = true;
-
     sred3d12_dlls dlls;
     // DirectX members
     IDXGISwapChain3* dxswapchain;
@@ -746,9 +740,9 @@ private:
     bool _pipelinesetup();
 };
 
-extern "C" sre::RenderDriverHelper<sred3d12_inst> sred3d12{}; 
+extern "C" sre::RenderDriverHelper<sred3d12_inst> sred3d12{"Direct3D 12 (joke/fun)"}; 
 
-sred3d12_inst::sred3d12_inst(SDL_Window* window)
+sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 {
     // I can do two things on the window to make a Direct3D 12 device
     // 1- Create an SDL renderer (with the d3d12 hint or driver index), then call SDL_RenderGetD3D12Device and work with the returned device
@@ -760,7 +754,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
     SDL_VERSION(&syswm.version);
     if (SDL_GetWindowWMInfo(window, &syswm) == SDL_FALSE || syswm.subsystem != SDL_SYSWM_WINDOWS)
     {
-        success = false;
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
         return;
     }
 
@@ -784,17 +778,28 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
                         
         SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dlls.dxgi);
         SRE_DXGETADDR(D3D12CreateDevice, PFN_D3D12_CREATE_DEVICE, dlls.d3d12);
-        SRE_DX12CALL(pCreateDXGIFactory1(IID_PPV_ARGS(&dxfactory)));
+        if (!pD3D12CreateDevice || !pCreateDXGIFactory1)
+        {
+            *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+            return;
+        }
 
-        SRE_DX12CALL(pD3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dxdevice)));
+        SRE_DXCALLC(pCreateDXGIFactory1(IID_PPV_ARGS(&dxfactory))); // Enum adapters? Maybe?
+        SRE_DXCALL(pD3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dxdevice)));
+        if (FAILED(hr))
+        {
+            if (hr == DXGI_ERROR_UNSUPPORTED)
+                *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+            return;
+        }
 
         D3D12_COMMAND_QUEUE_DESC cmdqueue_desc{};
         cmdqueue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-        SRE_DX12CALL(dxdevice->CreateCommandQueue(&cmdqueue_desc, IID_PPV_ARGS(&dxcmd_queue)));
-        SRE_DX12CALL(dxdevice->CreateCommandAllocator(cmdqueue_desc.Type, IID_PPV_ARGS(&dxcmd_allocator)));
-        SRE_DX12CALL(dxdevice->CreateCommandList(0, cmdqueue_desc.Type, dxcmd_allocator, NULL, IID_PPV_ARGS(&dxcmd_list)));
-        SRE_DX12CALL(dxcmd_list->Close());
+        SRE_DXCALLC(dxdevice->CreateCommandQueue(&cmdqueue_desc, IID_PPV_ARGS(&dxcmd_queue)));
+        SRE_DXCALLC(dxdevice->CreateCommandAllocator(cmdqueue_desc.Type, IID_PPV_ARGS(&dxcmd_allocator)));
+        SRE_DXCALLC(dxdevice->CreateCommandList(0, cmdqueue_desc.Type, dxcmd_allocator, NULL, IID_PPV_ARGS(&dxcmd_list)));
+        SRE_DXCALLC(dxcmd_list->Close());
 
         DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
         swapchain_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -804,7 +809,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
         swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapchain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
-        SRE_DX12CALL(dxfactory->CreateSwapChainForHwnd(
+        SRE_DXCALLC(dxfactory->CreateSwapChainForHwnd(
             dxcmd_queue,
             syswm.info.win.window, // Window gotten from SDL_Window*
             &swapchain_desc,
@@ -813,7 +818,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
             (IDXGISwapChain1**)&dxswapchain
         ));
 
-        SRE_DX12CALL(dxfactory->MakeWindowAssociation(syswm.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
+        SRE_DXCALLC(dxfactory->MakeWindowAssociation(syswm.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
         dxfactory->Release();
     }
 
@@ -822,7 +827,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
         dheap_desc.NumDescriptors = 2;
         dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
-        SRE_DX12CALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxrtvheap)));
+        SRE_DXCALLC(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxrtvheap)));
 
         rtvheap_increment = dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
         srvheap_increment = dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -831,17 +836,18 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window)
     if (!_pipelinesetup())
         return;
 
-    SRE_DX12CALL(dxdevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&dxfence)));
+    SRE_DXCALLC(dxdevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&dxfence)));
     hfence = CreateEvent(NULL, FALSE, FALSE, NULL);
     if (!hfence)
-    {
-        success = false;
         return;
-    }
 
     UINT32 WHITE = UINT32_MAX;
-    success &= texture_setup(reinterpret_cast<texture_type*>(basictexture), SDL_PIXELFORMAT_UNKNOWN, 1, 1, NULL);
-    success &= texture_update(reinterpret_cast<texture_type*>(basictexture), &WHITE, 4);
+    if (!texture_setup(reinterpret_cast<texture_type*>(basictexture), SDL_PIXELFORMAT_UNKNOWN, 1, 1, NULL))
+        return;
+    if (!texture_update(reinterpret_cast<texture_type*>(basictexture), &WHITE, 4))
+        return;
+    
+    *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }
 
 sred3d12_inst::~sred3d12_inst()

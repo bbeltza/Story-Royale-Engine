@@ -50,6 +50,24 @@
     };
 #endif
 
+#define SRE_RENDERSTATUS_SUCCEEDED 0
+#define SRE_RENDERSTATUS_UNSUPPORTED 1
+#define SRE_RENDERSTATUS_FAILED -1
+
+typedef enum sre_renderDriver
+{
+    SRE_RENDERDRIVER_SDLRENDERER,
+	SRE_RENDERDRIVER_OPENGL_11,
+	SRE_RENDERDRIVER_OPENGL_21,
+	SRE_RENDERDRIVER_OPENGL_32,
+
+		SRE_RENDERDRIVER_DIRECTX_9,
+		SRE_RENDERDRIVER_DIRECTX_11,
+		SRE_RENDERDRIVER_DIRECTX_12,
+
+    SRE_NUM_RENDERDRIVERS
+} sre_renderDriver;
+
 typedef enum sre_blendMode
 {
     SRE_BLEND_NONE,
@@ -144,9 +162,16 @@ struct sre_RenderVFT
 // Structure used to define driver initialization data
 typedef struct sre_RenderDriverData
 {
-    bool (*initialize)(const struct sre_RenderVFT** interface, void* renderdata, struct SDL_Window* window);
+    // Initialization function, should write to `interface` and return either of these values:
+    //
+        // `SRE_RENDERSTATUS_SUCCEEDED` (0): Initialization has succeeded, the engine can properly use the render driver
+        // `SRE_RENDERSTATUS_FAILED` (-1): Initialization has failed, an error has occurred and has to be looked into
+        // `SRE_RENDERSTATUS_UNSUPPORTED` (1): The render driver was found unsupported by the system. The engine needs to switch to another driver that can be supported
+    int (*initialize)(const struct sre_RenderVFT** interface, void* renderdata, struct SDL_Window* window);
     size_t renderer_size; // The size, in bytes of the renderer structure
     size_t texture_size; // The size, in bytes of a texture
+
+    const char* name; // Name tag of the render driver. It is technically optional, but very recommended
 } sre_RenderDriverData;
 
 SRE_CAPI_BEGIN
@@ -224,8 +249,8 @@ SRE_CAPI_END
         template <typename R, typename T=typename R::texture_type>
         struct RenderDriverHelper: sre_RenderDriverData
         {
-            RenderDriverHelper(): sre_RenderDriverData{
-                [](const sre_RenderVFT** interface, void* inst, SDL_Window* window)
+            RenderDriverHelper(const char* name=NULL): sre_RenderDriverData{
+                [](const sre_RenderVFT** interface, void* inst, SDL_Window* window) -> int
                 {
                     static const sre_RenderVFT this_interface = {
                         [](void* inst) { static_cast<R*>(inst)->~R(); },
@@ -249,15 +274,44 @@ SRE_CAPI_END
                         [](void* inst, void* texture) { static_cast<R*>(inst)->texture_destroy(static_cast<T*>(texture)); }
                     };
 
-                    new(inst) R(window);
-                    if (!static_cast<R*>(inst)->succeeded()) return false;
+                    int status = -1;
+                    new(inst) R(window, &status);
+                    if (status != SRE_RENDERSTATUS_SUCCEEDED) return status;
 
                     *interface = &this_interface;
-                    return true;
+                    return SRE_RENDERSTATUS_SUCCEEDED;
                 },
                 sizeof(R),
-                sizeof(T)
+                sizeof(T),
+
+                name
             } {}
+        };
+
+        // Inheritable render driver template struct to be used with `RenderDriverHelper`
+        struct RenderDriver
+        {
+            using texture_type = void*; // To be defined
+
+            RenderDriver(SDL_Window* window, int* outstatus) {}
+        protected:
+            RenderDriver() = default;
+        public:
+            void flush_queueinstances1(texture_type* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags) {}
+            void flush_queueinstances2(texture_type* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags) {}
+            
+            void present() {}
+            bool clear(float color[3]) { return false; }
+    
+            bool set_viewportstate(int w, int h, sre::unit scale) { return false; }
+            bool set_blendstate(sre::blendMode blending) { return false; }
+            bool set_camerastate(sre::unit x, sre::unit y) { return false; }
+            void set_clipstate(const sre::rect2Di* rectangle) {}
+            void set_vsync(bool enable) {}
+                
+            bool texture_setup(texture_type* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat) { return false; }
+            bool texture_update(texture_type* texture, const void* pixels, int pitch) { return false; }
+            void texture_destroy(texture_type* texture) {}
         };
     }
 #endif

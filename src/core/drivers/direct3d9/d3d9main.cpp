@@ -5,33 +5,40 @@
 #include "d3d9.hpp"
 #include <SDL_syswm.h>
 
-extern "C" sre::RenderDriverHelper<sreD3D9::Instance> sred3d9{};
+extern "C" sre::RenderDriverHelper<sreD3D9::Instance> sred3d9{"Direct3D 9"};
 
 using namespace sreD3D9;
 
-#define CONSTRUCTOR_FAIL { m_success = false; return; } do; while(0)
-
-Instance::Instance(SDL_Window* window)
+Instance::Instance(SDL_Window* window, int* outstatus)
 {
     SDL_SysWMinfo wminfo;
     SDL_GetVersion(&wminfo.version);
     if (!SDL_GetWindowWMInfo(window, &wminfo) || wminfo.subsystem != SDL_SYSWM_WINDOWS)
-        CONSTRUCTOR_FAIL;
+    {
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+        return;
+    }
+
+    using PFN_DIRECT3DCREATE9_PROC = IDirect3D9 * (WINAPI*)(UINT SDKVersion);
+    SRE_DXGETADDR(Direct3DCreate9, PFN_DIRECT3DCREATE9_PROC, m_dlls.d3d9);
 
     HRESULT hr;
-    m_dxd3d9 = Direct3DCreate9(D3D_SDK_VERSION);
+    m_dxd3d9 = pDirect3DCreate9(D3D_SDK_VERSION);
     if (!m_dxd3d9)
-        CONSTRUCTOR_FAIL;
+    {
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+        return;
+    }
 
     m_pparamcache.hDeviceWindow = wminfo.info.win.window;
     m_pparamcache.BackBufferFormat = D3DFMT_UNKNOWN;
-    m_pparamcache.BackBufferCount = 1;
+    m_pparamcache.BackBufferCount = 1; // Use two buffers? Or one? I've seen performance be better on only 1 back-buffer
     m_pparamcache.SwapEffect = D3DSWAPEFFECT_DISCARD;
     m_pparamcache.Windowed = TRUE;
     m_pparamcache.Flags = D3DPRESENTFLAG_VIDEO;
     m_pparamcache.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
-    SRE_DX9CALL(m_dxd3d9->CreateDevice(D3DADAPTER_DEFAULT,
+    SRE_DXCALLC(m_dxd3d9->CreateDevice(D3DADAPTER_DEFAULT,
                                    D3DDEVTYPE_HAL,
                                    NULL,
                                    D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_NOWINDOWCHANGES | D3DCREATE_FPU_PRESERVE,
@@ -40,13 +47,15 @@ Instance::Instance(SDL_Window* window)
     ));
 
     if (!_shadersetup())
-        CONSTRUCTOR_FAIL;
+        return;
 
     D3DLOCKED_RECT rect;
-    SRE_DX9CALL(m_dxdevice->CreateTexture(1, 1, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &m_dxbasictexture, NULL));
-    SRE_DX9CALL(m_dxbasictexture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD));
+    SRE_DXCALLC(m_dxdevice->CreateTexture(1, 1, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &m_dxbasictexture, NULL));
+    SRE_DXCALLC(m_dxbasictexture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD));
         *static_cast<DWORD*>(rect.pBits) = 0xFFFFFFFF;
-    SRE_DX9CALL(m_dxbasictexture->UnlockRect(0));
+    SRE_DXCALLC(m_dxbasictexture->UnlockRect(0));
+
+    *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }
 
 Instance::~Instance()
@@ -122,6 +131,7 @@ bool Instance::_statesetup()
     }
 
     SRE_DXCALLF(m_dxdevice->SetPixelShader(m_dxcps));
+    SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_LIGHTING, FALSE));
 
@@ -214,7 +224,6 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
 
     void* mapped_points;
     void* mapped_color;
-    // For now we will just use D3DLOCK_DISCARD, I'll be looking for D3DLOCK_NOOVERWRITE
     SRE_DXCALL(m_d2data.dxbuff_vert->Lock(0, static_cast<UINT>(sizeof(instance->points[0])*point_count), &mapped_points, D3DLOCK_DISCARD));
     SRE_DXCALL(m_d2data.dxbuff_inst->Lock(0, static_cast<UINT>(sizeof(instance->color)), &mapped_color, D3DLOCK_DISCARD));
         memcpy(mapped_color, &instance->color, sizeof(instance->color));
@@ -300,7 +309,6 @@ bool Instance::set_blendstate(sre::blendMode blending)
         SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE));
         return true;
     }
-    //SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
     
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_SRCBLEND, D3D9_BLENDMODES[blending][0]));
@@ -317,12 +325,22 @@ bool Instance::set_camerastate(sre::unit x, sre::unit y)
 
 void Instance::set_clipstate(const sre::rect2Di* rectangle)
 {
+    RECT rect = {
+        rectangle->position.x,
+        rectangle->position.y,
+        rectangle->position.x + rectangle->size.x,
+        rectangle->position.y + rectangle->size.y
+    };
 
+    HRESULT hr;
+    SRE_DXCALL(m_dxdevice->SetScissorRect(&rect));
 }
 
 void Instance::set_vsync(bool enable)
 {
+    m_pparamcache.PresentationInterval = enable ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
 
+    _resetdevice();
 }
 
 //
@@ -341,7 +359,13 @@ bool Instance::texture_update(Texture* texture, const void* pixels, int pitch)
     HRESULT hr;
     D3DLOCKED_RECT rect;
     SRE_DXCALLF(texture->dxtexture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD));
-        memcpy(rect.pBits, pixels, rect.Pitch * texture->height_cache); // Texture update with identical pitch
+        if (!pitch || rect.Pitch == pitch)
+            memcpy(rect.pBits, pixels, rect.Pitch * texture->height_cache); // Texture update with identical pitch
+        else
+        {
+            for (int i = 0; i < texture->height_cache; i++)
+                memcpy(static_cast<BYTE*>(rect.pBits) + i*rect.Pitch, static_cast<const BYTE*>(pixels) + i*pitch, pitch);
+        }
     SRE_DXCALLF(texture->dxtexture->UnlockRect(0));
     return true;
 }

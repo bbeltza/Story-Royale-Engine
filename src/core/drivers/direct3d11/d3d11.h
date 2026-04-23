@@ -12,9 +12,6 @@
 
 #include <array>
 
-#define SRE_DX11CALL(x) SRE_DXCALL(x); m_success = m_success && SUCCEEDED(hr)
-
-
 namespace sreD3D11
 {
     struct Texture
@@ -83,18 +80,15 @@ namespace sreD3D11
         }
     };
 
-    struct Instance
+    struct Instance: sre::RenderDriver
     {
         using texture_type = Texture;
 
-        Instance(SDL_Window* window);
+        Instance(SDL_Window* window, int* outstatus);
         ~Instance();
 
-        bool succeeded() const { return m_success; }
-
         private:
-            bool m_success = true;
-            bool m_uselegacy = false;
+            //bool m_uselegacy = false;
 
             DLLS m_dlls{};
 

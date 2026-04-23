@@ -1,4 +1,6 @@
 SRE_BUILD_SRC(sre_core
+	"hints.c"
+
 	"audio.c"
 	"texture.c"
 	"defer.c"

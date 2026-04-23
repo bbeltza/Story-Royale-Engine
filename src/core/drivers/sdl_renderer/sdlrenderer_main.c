@@ -20,7 +20,7 @@ const struct sre_RenderVFT sresdlrenderer_vft = {
 };
 
 #include <Base/Log.h>
-bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Window* window)
+static int sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Window* window)
 {
     sresdlrenderer_inst* inst = _inst;
     
@@ -29,12 +29,12 @@ bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Wind
     if (!inst->renderer)
     {
         SDL_free(inst);
-        return false;
+        return SRE_RENDERSTATUS_FAILED;
     }
 
     SDL_RendererInfo info;
     SDL_GetRendererInfo(inst->renderer, &info);
-    sre_log(SRE_LOGCATEGORY_DEBUG, "%s", info.name);
+    //sre_log(SRE_LOGCATEGORY_DEBUG, "%s", info.name);
     
     inst->vbuf = NULL;
     inst->vbuf_size = 0;
@@ -42,10 +42,10 @@ bool sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Wind
     inst->ibuf_size = 0;
 
     *vft = &sresdlrenderer_vft;
-    return true;
+    return SRE_RENDERSTATUS_SUCCEEDED;
 }
 
-void sresdlrenderer_destroy(void* _inst)
+static void sresdlrenderer_destroy(void* _inst)
 {
     sresdlrenderer_inst* inst = _inst;
     SDL_free(inst->ibuf);
@@ -56,5 +56,6 @@ void sresdlrenderer_destroy(void* _inst)
 sre_RenderDriverData sresdlrenderer = {
     .initialize = sresdlrenderer_main,
     .renderer_size = sizeof(sresdlrenderer_inst),
-    .texture_size = sizeof(sresdlrenderer_texture)
+    .texture_size = sizeof(sresdlrenderer_texture),
+    .name = "SDLRenderer"
 };

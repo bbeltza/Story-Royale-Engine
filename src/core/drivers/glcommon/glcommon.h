@@ -14,6 +14,7 @@
 
 #define SRE_GLCALLR(x, ...) x; do { GLenum _err = SRE_GLGETERROR(); if (_err == GL_NO_ERROR) break; SRE_GLLOG("[OpenGL error]: '" #x "' failed: '%s' | line: %d file: '%s'", SRE_GLERRFMT(_err), __LINE__, __FILE__); __VA_ARGS__; } while (1)
 #define SRE_GLCALLF(x) SRE_GLCALLR(x, return false)
+#define SRE_GLCALLC(x) SRE_GLCALLR(x, return SRE_RENDERSTATUS_FAILED)
 #define SRE_GLCALL(x) SRE_GLCALLR(x)
 
 #define SRE_GLGETERROR inst->glfuncs.GetError // Macro to the variable to hold glGetError, it's usually inst->glfuncs.GetError but it can be changed
@@ -62,7 +63,7 @@ extern bool sregl_loadfunctions21(struct sregl_functions21* funcs, void* (*pGetP
 extern bool sregl_loadfunctions32(struct sregl_functions32* funcs, void* (*pGetProcAddress)(const char* proc));
 extern bool sregl_loadfunctions11(struct sregl_functions11* funcs, void* (*pGetProcAddress)(const char* proc));
 
-extern bool sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs);
+extern int sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs);
 extern void sregl_commondestroy(sregl_cominst* inst);
 
 extern bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);

@@ -4,17 +4,20 @@
 #include <SDL_hints.h>
 #include <utils/mem.h>
 
-extern "C" sre::RenderDriverHelper<sreD3D11::Instance> sred3d11{};
+extern "C" sre::RenderDriverHelper<sreD3D11::Instance> sred3d11{"Direct3D 11"};
 
 using namespace sreD3D11;
 
-Instance::Instance(SDL_Window* window)
+Instance::Instance(SDL_Window* window, int* outstatus)
 {
     // Get HWND
-    SDL_SysWMinfo swm_info;
-    SDL_GetVersion(&swm_info.version);
-    if (!SDL_GetWindowWMInfo(window, &swm_info))
+    SDL_SysWMinfo wminfo;
+    SDL_GetVersion(&wminfo.version);
+    if (!SDL_GetWindowWMInfo(window, &wminfo) || wminfo.subsystem != SDL_SYSWM_WINDOWS)
+    {
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
         return;
+    }
 
     // Setup
     HRESULT hr;
@@ -26,17 +29,17 @@ Instance::Instance(SDL_Window* window)
         SRE_DXGETADDR(CreateDXGIFactory, PFN_CREATE_DXGI_FACTORY1, m_dlls.dxgi);
         if (!pD3D11CreateDevice || !pCreateDXGIFactory)
         {
-            m_success = false;
+            *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
             return;
         }
 
         IDXGIFactory* dxfactory;
         IDXGIAdapter* dxadapter;
-        SRE_DX11CALL(pCreateDXGIFactory(IID_PPV_ARGS(&dxfactory)));
-        SRE_DX11CALL(dxfactory->EnumAdapters(0, &dxadapter));
+        SRE_DXCALLC(pCreateDXGIFactory(IID_PPV_ARGS(&dxfactory)));
+        SRE_DXCALLC(dxfactory->EnumAdapters(0, &dxadapter));
 
         DXGI_ADAPTER_DESC adapterdesc{};
-        SRE_DX11CALL(dxadapter->GetDesc(&adapterdesc));
+        SRE_DXCALLC(dxadapter->GetDesc(&adapterdesc));
         // sre::log("Description: %ls ; VendorId: %u ; DeviceId: %u ; SubsysId: %u ; Revision: %u ; DedicatedVideoMemory: %zu ; DedicatedSystemMemory: %zu ; SharedSystemMemory: %zu ; AdapterLuid: %p",
         //     adapterdesc.Description, adapterdesc.VendorId, adapterdesc.DeviceId, adapterdesc.SubSysId, adapterdesc.Revision, adapterdesc.DedicatedVideoMemory, adapterdesc.DedicatedSystemMemory, adapterdesc.SharedSystemMemory, adapterdesc.AdapterLuid);
 
@@ -46,7 +49,7 @@ Instance::Instance(SDL_Window* window)
         #endif
         
         D3D_FEATURE_LEVEL feature;
-        SRE_DX11CALL(pD3D11CreateDevice(
+        SRE_DXCALLC(pD3D11CreateDevice(
             dxadapter,
             D3D_DRIVER_TYPE_UNKNOWN,
             NULL,
@@ -63,16 +66,13 @@ Instance::Instance(SDL_Window* window)
         swapchain_desc.SampleDesc.Count = 1;
         swapchain_desc.Windowed = TRUE;
         swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-        swapchain_desc.OutputWindow = swm_info.info.win.window;
+        swapchain_desc.OutputWindow = wminfo.info.win.window;
 
         SRE_DXCALL(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
         if (FAILED(hr))
         {
             if (hr != DXGI_ERROR_INVALID_CALL)
-            {
-                m_success = false;
                 return;
-            }
 
             sre::log<sre::LOGCATEGORY_INFO>("[Direct3D11]: Switching to legacy swapchain...");
 
@@ -81,15 +81,14 @@ Instance::Instance(SDL_Window* window)
             swapchain_desc.BufferCount = 1;
             swapchain_desc.Flags = 0;
             swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
-            SRE_DX11CALL(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
-            m_uselegacy = true;
+            SRE_DXCALLC(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
+            // m_uselegacy = true;
         }
 
         // Disable alt-enter automatic fullscreen toggling by DXGI. It switches to non-borderless fullscreen and that is not properly implemented
-
         IDXGIFactory* parentfactory{};
-        SRE_DXCALL(m_dxswapchain->GetParent(IID_PPV_ARGS(&parentfactory)));
-        SRE_DXCALL(parentfactory->MakeWindowAssociation(swm_info.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
+        SRE_DXCALLC(m_dxswapchain->GetParent(IID_PPV_ARGS(&parentfactory)));
+        SRE_DXCALLC(parentfactory->MakeWindowAssociation(wminfo.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
         dxadapter->Release();
         dxfactory->Release();
         parentfactory->Release();
@@ -98,12 +97,14 @@ Instance::Instance(SDL_Window* window)
         SRE_DXCALL(m_dxdevice->QueryInterface(IID_PPV_ARGS(&dxgidevice)));
         if (dxgidevice)
         {
+            // This apparently improves performance, by a LOT. It's used in SDL's implementation too
             dxgidevice->SetMaximumFrameLatency(1);
             dxgidevice->Release();
         }
     }
     
-    m_success &= m_shaders.setup(m_dxdevice);
+    if (!m_shaders.setup(m_dxdevice))
+        return;
 
     {
         D3D11_RASTERIZER_DESC rasterizer_desc{};
@@ -111,7 +112,7 @@ Instance::Instance(SDL_Window* window)
         rasterizer_desc.CullMode = D3D11_CULL_NONE;
         rasterizer_desc.ScissorEnable = TRUE;
 
-        SRE_DX11CALL(m_dxdevice->CreateRasterizerState(&rasterizer_desc, &m_dxrasterizerstate));
+        SRE_DXCALLC(m_dxdevice->CreateRasterizerState(&rasterizer_desc, &m_dxrasterizerstate));
     }
 
     {
@@ -122,12 +123,14 @@ Instance::Instance(SDL_Window* window)
         sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
         sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 
-        SRE_DX11CALL(m_dxdevice->CreateSamplerState(&sampler_desc, &m_dxsamplerstate));
+        SRE_DXCALLC(m_dxdevice->CreateSamplerState(&sampler_desc, &m_dxsamplerstate));
     }
 
-    m_success &= m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 256);
-    m_success &= m_d2bufferc.init(m_dxdevice, sizeof(sre::col4) * 256);
-    m_success &= m_d2bufferp.init(m_dxdevice, sizeof(sre::vec2ut) * 256);
+    if (!(m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 256) &&
+          m_d2bufferc.init(m_dxdevice, sizeof(sre::col4) * 256)           &&
+          m_d2bufferp.init(m_dxdevice, sizeof(sre::vec2ut) * 256)
+    )) return;
+
     {
         D3D11_BUFFER_DESC cbuffer_desc{};
         cbuffer_desc.ByteWidth = sizeof(CBuffer);
@@ -136,7 +139,7 @@ Instance::Instance(SDL_Window* window)
         cbuffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
         for (int i = 0; i < 2; i++) {
-            SRE_DX11CALL(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffers[i]));
+            SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffers[i]));
         }
     }
 
@@ -151,7 +154,7 @@ Instance::Instance(SDL_Window* window)
             /* MUL   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_DEST_COLOR, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD)
         };
 
-        SRE_DX11CALL(m_dxdevice->CreateBlendState(&BLENDSTATES[i], &m_dxblendstates[i]));
+        SRE_DXCALLC(m_dxdevice->CreateBlendState(&BLENDSTATES[i], &m_dxblendstates[i]));
     }
 
     {
@@ -172,20 +175,22 @@ Instance::Instance(SDL_Window* window)
         subres_data.SysMemSlicePitch = 4;
 
         ID3D11Texture2D* basictex;
-        SRE_DX11CALL(m_dxdevice->CreateTexture2D(&tex_desc, &subres_data, &basictex));
+        SRE_DXCALLC(m_dxdevice->CreateTexture2D(&tex_desc, &subres_data, &basictex));
 
         D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc{};
         srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
         srv_desc.Texture2D.MipLevels = 1;
 
-        SRE_DX11CALL(m_dxdevice->CreateShaderResourceView(basictex, &srv_desc, &m_basictexture));
+        SRE_DXCALLC(m_dxdevice->CreateShaderResourceView(basictex, &srv_desc, &m_basictexture));
         basictex->Release();
     }
 
     m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
     m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
+
+    *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }
 
 Instance::~Instance()

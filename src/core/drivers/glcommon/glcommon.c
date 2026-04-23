@@ -48,7 +48,7 @@ bool sregl_loadfunctions11(struct sregl_functions11* funcs, void* (*pGetProcAddr
 }
 
 
-extern bool sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs)
+extern int sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs)
 {
     #ifndef NDEBUG
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
@@ -56,17 +56,21 @@ extern bool sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sr
 
     SDL_GLContext ctx = SDL_GL_CreateContext(window);
     if (!ctx)
-        return false;
+        return SRE_RENDERSTATUS_FAILED;
     
     if (!sregl_loadfunctions(glfuncs, SDL_GL_GetProcAddress))
     {
         SDL_GL_DeleteContext(inst->context);
-        return false;
+        #if 0
+            return SRE_RENDERSTATUS_FAILED;
+        #else
+            return SRE_RENDERSTATUS_UNSUPPORTED;
+        #endif
     }
     
     inst->context = ctx;
     inst->window = window;
-    return true;
+    return SRE_RENDERSTATUS_SUCCEEDED;
 }
 
 extern void sregl_commondestroy(sregl_cominst* inst)

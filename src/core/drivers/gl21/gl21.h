@@ -69,7 +69,7 @@ typedef struct sregl21_inst
 
 SRE_CAPI_BEGIN
 
-bool sregl21_commonsetup(sregl21_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs, struct sregl_functions21* glfuncs21);
+int sregl21_commonsetup(sregl21_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs, struct sregl_functions21* glfuncs21);
 #define sregl21_commondestroy(inst) sregl_commondestroy(&(inst)->common)
 
 //

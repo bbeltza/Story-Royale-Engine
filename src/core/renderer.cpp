@@ -5,6 +5,7 @@
 
 #include <ECS/Scene.hpp>
 #include <GUI/Object.hpp>
+#include <Hints.h>
 
 #include <utils/mem.h>
 
@@ -60,49 +61,92 @@ static const sre_RenderDriverData video_drivers[] = {
 	VIDEO_DRIVERS
 };
 
+static void render_panic()
+{
+	sre::log<sre::LOGCATEGORY_INFO>("Press any key to continue...");
+	getchar();
+	exit(-1);
+}
+
 extern "C" void __cleanup_textures();
 
 void __cleanup_renderer()
 {
 	__cleanup_textures();
-	(*engine.video.vfptr)->destructor(engine.video.vfptr+1);
+	SRE_VIDEOV(engine.video.vfptr, destructor);
 	operator delete(engine.video.vfptr);
 	engine.video.vfptr = NULL;
 }
 
 void __setup_renderer()
 {
-	enum sre_RenderDrivers
-	{
-		SRE_RENDERDRIVER_SDLRENDERER,
-		SRE_RENDERDRIVER_OPENGL_11,
-		SRE_RENDERDRIVER_OPENGL_21,
-		SRE_RENDERDRIVER_OPENGL_32,
-		#if _WIN32
-			SRE_RENDERDRIVER_DIRECTX_9,
-			SRE_RENDERDRIVER_DIRECTX_11,
-			SRE_RENDERDRIVER_DIRECTX_12,
-			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_DIRECTX_9
-		#else
-			SRE_RENDERDRIVER_DEFAULT = SRE_RENDERDRIVER_OPENGL_32
-		#endif
-	};
+	#if _WIN32
+		constexpr int DEFAULT_RENDERER = SRE_RENDERDRIVER_DIRECTX_11;
+	#else
+		constexpr int DEFAULT_RENDERER = SRE_RENDERDRIVER_OPENGL_32;
+	#endif
 
-	auto driverdata = video_drivers[SRE_RENDERDRIVER_DEFAULT];
+	int renderer = DEFAULT_RENDERER;
+	{
+		const void* hint = sre::gethint("RENDERDRIVER");
+		if (hint)
+		{
+			unsigned hintvalue = *static_cast<const unsigned*>(hint);
+			if (hintvalue >= SRE_NUM_RENDERDRIVERS)
+				sre::log<sre::LOGCATEGORY_ERROR>("Could not get render driver from hint. Value out of bounds. Using default... (Hint value: %d ; Last render index: %d)", hintvalue, SRE_NUM_RENDERDRIVERS-1);
+			else
+				renderer = hintvalue;
+		}
+	}
+
+	auto driverdata = video_drivers[renderer];
 	assert(driverdata.initialize != NULL);
 	assert(driverdata.renderer_size >= sizeof(void*));
 	assert(driverdata.texture_size >= sizeof(int));
 
+	sre::log<sre::LOGCATEGORY_INFO>("Using render driver: %s", driverdata.name);
+
 	engine.video.vfptr = static_cast<const sre_RenderVFT**>(operator new(sizeof(void*) + driverdata.renderer_size));
 	*engine.video.vfptr = NULL;
-	if (!driverdata.initialize(engine.video.vfptr, engine.video.vfptr+1, engine.sdl_windowhndl))
+
+	int status = driverdata.initialize(engine.video.vfptr, engine.video.vfptr+1, engine.sdl_windowhndl);
+	if (status != SRE_RENDERSTATUS_SUCCEEDED)
 	{
 		operator delete(engine.video.vfptr);
-		sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
-		exit(-1);
+
+		switch (status)
+		{
+			case SRE_RENDERSTATUS_FAILED:
+				sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
+				break;
+			case SRE_RENDERSTATUS_UNSUPPORTED:
+				sre::log<sre::LOGCATEGORY_ERROR>("Render driver unsupported. Falling back is currently unimplemented");
+				break;
+			default:
+				sre::log<sre::LOGCATEGORY_ERROR>("Render driver initialization hasn't succeeded, but it returned an unknown code (%d - %x)", status, status);
+				break;
+		}
+
+		render_panic();
 	}
 
 	assert((*engine.video.vfptr) != NULL && "Maybe forgot to set up the vft? (virtual function table)");
+
+	#define _CHECKFORFUNC(x) if (!(*engine.video.vfptr)->x) { sre::log<sre::LOGCATEGORY_ERROR>("Render driver setup error: function '" #x "' is missing"); render_panic(); }
+		_CHECKFORFUNC(destructor);
+		_CHECKFORFUNC(flush_queueinstances1);
+		_CHECKFORFUNC(flush_queueinstances2);
+		_CHECKFORFUNC(present);
+		_CHECKFORFUNC(clear);
+		_CHECKFORFUNC(set_viewportstate);
+		_CHECKFORFUNC(set_blendstate);
+		_CHECKFORFUNC(set_camerastate);
+		_CHECKFORFUNC(set_clipstate);
+		_CHECKFORFUNC(set_vsync);
+		_CHECKFORFUNC(texture_setup);
+		_CHECKFORFUNC(texture_update);
+		_CHECKFORFUNC(texture_destroy);
+	#undef _CHECKFORFUNC
 
 	new(engine.video._vector_data) sre::RenderVectors{};
 	engine.video.texture_size = driverdata.texture_size;
@@ -288,10 +332,10 @@ void sre::render_clipreset() { engine.video.clip_rect = {0, 0, engine.osize_x, e
 void sre::render_clipset(sre::rect2Dut zone)
 {
 	engine.video.clip_rect = {
-		static_cast<int>(zone.position.x * engine.scale),
-		static_cast<int>(zone.position.y * engine.scale),
-		static_cast<int>(zone.size.x * engine.scale),
-		static_cast<int>(zone.size.y * engine.scale)
+		static_cast<int>(ceil(zone.position.x * engine.scale)),
+		static_cast<int>(ceil(zone.position.y * engine.scale)),
+		static_cast<int>(ceil(zone.size.x * engine.scale)),
+		static_cast<int>(ceil(zone.size.y * engine.scale))
 	};
 }
 

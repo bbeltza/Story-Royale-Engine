@@ -600,14 +600,13 @@ using namespace sreD3D11;
 bool Shaders::setup(ID3D11Device* dxdevice)
 {
     HRESULT hr;
-    bool m_success = true;
 
-    SRE_DX11CALL(dxdevice->CreatePixelShader(C_PS, sizeof(C_PS), NULL, &cPS));
-    SRE_DX11CALL(dxdevice->CreateVertexShader(D1_VS, sizeof(D1_VS), NULL, &d1VS));
-    SRE_DX11CALL(dxdevice->CreateVertexShader(D2_VS, sizeof(D2_VS), NULL, &d2VS));
+    SRE_DXCALLF(dxdevice->CreatePixelShader(C_PS, sizeof(C_PS), NULL, &cPS));
+    SRE_DXCALLF(dxdevice->CreateVertexShader(D1_VS, sizeof(D1_VS), NULL, &d1VS));
+    SRE_DXCALLF(dxdevice->CreateVertexShader(D2_VS, sizeof(D2_VS), NULL, &d2VS));
 
-    SRE_DX11CALL(dxdevice->CreateInputLayout(D1_INPUTS, _countof(D1_INPUTS), D1_VS, sizeof(D1_VS), &d1IL));
-    SRE_DX11CALL(dxdevice->CreateInputLayout(D2_INPUTS, _countof(D2_INPUTS), D2_VS, sizeof(D2_VS), &d2IL));
+    SRE_DXCALLF(dxdevice->CreateInputLayout(D1_INPUTS, _countof(D1_INPUTS), D1_VS, sizeof(D1_VS), &d1IL));
+    SRE_DXCALLF(dxdevice->CreateInputLayout(D2_INPUTS, _countof(D2_INPUTS), D2_VS, sizeof(D2_VS), &d2IL));
 
-    return m_success;
+    return true;
 }

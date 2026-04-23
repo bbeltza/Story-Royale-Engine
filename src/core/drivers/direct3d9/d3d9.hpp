@@ -5,10 +5,14 @@
 #include <d3d9.h>
 #include <dxcommon/dxcommon.h>
 
-#define SRE_DX9CALL(x) SRE_DXCALL(x); m_success = m_success && SUCCEEDED(hr)
-
 namespace sreD3D9
 {
+    struct DLLS
+    {
+        HMODULE d3d9 = LoadLibrary("D3d9.dll");
+        ~DLLS() { FreeLibrary(d3d9); }
+    };
+
     struct DrawData
     {
         IDirect3DVertexDeclaration9* dxdecl;
@@ -55,14 +59,15 @@ namespace sreD3D9
         int height_cache;
     };
 
-    struct Instance
+    struct Instance: sre::RenderDriver
     {
         using texture_type = Texture;
 
-        Instance(SDL_Window* window);
+        Instance(SDL_Window* window, int* outstatus);
         ~Instance();
     private:
-        bool m_success = true;
+        DLLS m_dlls;
+    private:
         bool m_needsetup = true;
         IDirect3D9* m_dxd3d9;
 
@@ -81,8 +86,6 @@ namespace sreD3D9
         FLOAT m_viewportcache[16];
         FLOAT m_cameracache[2];
     public:
-        bool succeeded() const { return m_success; }
-
         void flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags);
         void flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
             
