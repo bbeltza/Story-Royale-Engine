@@ -2,7 +2,7 @@
 #include <SDL_loadso.h>
 
 const void* sre_gethint(const char* name)
-{
+{    
     if (!name)
         return NULL; // Might abort but at least have erroring
 

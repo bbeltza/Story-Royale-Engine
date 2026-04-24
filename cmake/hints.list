@@ -1,0 +1,4 @@
+# Exports all available symbols starting with "SRE_HINT_"
+{
+    SRE_HINT_*;
+};

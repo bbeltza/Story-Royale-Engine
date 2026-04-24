@@ -63,9 +63,7 @@ typedef enum sre_renderDriver
 
 		SRE_RENDERDRIVER_DIRECTX_9,
 		SRE_RENDERDRIVER_DIRECTX_11,
-		SRE_RENDERDRIVER_DIRECTX_12,
-
-    SRE_NUM_RENDERDRIVERS
+		SRE_RENDERDRIVER_DIRECTX_12
 } sre_renderDriver;
 
 typedef enum sre_blendMode

@@ -54,6 +54,7 @@ else()
     endif()
     target_compile_options(sre_werror INTERFACE "-Werror")
     target_link_options(sre INTERFACE "-Wl,--start-group") # Incremental linking, this is needed for non-MSVC compilers
+    target_link_options(sre INTERFACE "-Wl,--dynamic-list=${CMAKE_MODULE_PATH}/hints.list")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

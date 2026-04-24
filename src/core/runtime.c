@@ -105,6 +105,7 @@ static int game_loop(void* running)
     return 0;
 }
 
+#if _WIN32
 static int win32_eventwatch(void* userdata, SDL_Event* ev)
 {
     if (ev->type == SDL_QUIT)
@@ -135,6 +136,7 @@ static int win32_eventwatch(void* userdata, SDL_Event* ev)
     #endif
     return 1;
 }
+#endif
 
 
 void __run_engine()

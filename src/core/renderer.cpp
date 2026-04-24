@@ -37,28 +37,30 @@ namespace sre
 	};
 }
 
-#if _WIN32
-	#define VIDEOINIT_DEF_WIN32 VIDEOINIT_DEF
-#else
-	#define VIDEOINIT_DEF_WIN32(x)
-#endif
+#define NAME_RENDERDRIVER(x) sre##x
+#define DECL_RENDERDRIVER(x) extern "C" const sre_RenderDriverData NAME_RENDERDRIVER(x)
 
-#define VIDEO_DRIVERS				\
-VIDEOINIT_DEF(sdlrenderer)			\
-VIDEOINIT_DEF(gl11)					\
-VIDEOINIT_DEF(gl21)					\
-VIDEOINIT_DEF(gl32)					\
-VIDEOINIT_DEF_WIN32(d3d9)			\
-VIDEOINIT_DEF_WIN32(d3d11)			\
-VIDEOINIT_DEF_WIN32(d3d12)			\
+DECL_RENDERDRIVER(sdlrenderer);
+DECL_RENDERDRIVER(gl11);
+DECL_RENDERDRIVER(gl21);
+DECL_RENDERDRIVER(gl32);
+DECL_RENDERDRIVER(d3d9);
+DECL_RENDERDRIVER(d3d11);
+DECL_RENDERDRIVER(d3d12);
 
-#define VIDEOINIT_DEF(x) extern "C" const sre_RenderDriverData sre##x;
-VIDEO_DRIVERS
-#undef VIDEOINIT_DEF
+static const sre_RenderDriverData* render_drivers[] = {
+	#if _WIN32
+		&NAME_RENDERDRIVER(d3d11),
+		&NAME_RENDERDRIVER(d3d9),
+	#endif
+	&NAME_RENDERDRIVER(gl32),
+	&NAME_RENDERDRIVER(gl21),
+	&NAME_RENDERDRIVER(gl11),
+	&NAME_RENDERDRIVER(sdlrenderer)
 
-#define VIDEOINIT_DEF(x) sre##x,
-static const sre_RenderDriverData video_drivers[] = {
-	VIDEO_DRIVERS
+	#if _WIN32
+	,	&NAME_RENDERDRIVER(d3d12),
+	#endif
 };
 
 static void render_panic()
@@ -66,6 +68,89 @@ static void render_panic()
 	sre::log<sre::LOGCATEGORY_INFO>("Press any key to continue...");
 	getchar();
 	exit(-1);
+}
+
+static int render_setupenv(const sre_RenderDriverData* driver)
+{
+	assert(driver->initialize != NULL);
+	assert(driver->renderer_size >= sizeof(void*));
+	assert(driver->texture_size >= sizeof(int));
+
+	operator delete(engine.video.vfptr);
+	engine.video.vfptr = static_cast<const sre_RenderVFT**>(operator new(sizeof(void*) + driver->renderer_size));
+	*engine.video.vfptr = NULL;
+
+	return driver->initialize(engine.video.vfptr, engine.video.vfptr+1, engine.sdl_windowhndl);
+}
+
+static const sre_RenderDriverData* render_choosedriver(int hint)
+{
+	const sre_RenderDriverData* driver = NULL;
+	switch (hint)
+	{
+		case SRE_RENDERDRIVER_SDLRENDERER: driver = &sresdlrenderer; break;
+		case SRE_RENDERDRIVER_OPENGL_11: driver = &sregl11; break;
+		case SRE_RENDERDRIVER_OPENGL_21: driver = &sregl21; break;
+		case SRE_RENDERDRIVER_OPENGL_32: driver = &sregl32; break;
+
+	#ifndef _WIN32
+		case SRE_RENDERDRIVER_DIRECTX_9:
+		case SRE_RENDERDRIVER_DIRECTX_11:
+		case SRE_RENDERDRIVER_DIRECTX_12:
+			sre::log<sre::LOGCATEGORY_ERROR>("DirectX render drivers are only supported on Windows");
+			break;
+	#else
+		case SRE_RENDERDRIVER_DIRECTX_9: driver = &sred3d9; break;
+		case SRE_RENDERDRIVER_DIRECTX_11: driver = &sred3d11; break;
+		case SRE_RENDERDRIVER_DIRECTX_12: driver = &sred3d12; break;
+	#endif
+		case -1: break;
+		default:
+			sre::log<sre::LOGCATEGORY_ERROR>("Unknown render driver hint: %d", hint);
+			break;
+	}
+
+	if (driver)
+	{
+		int status = render_setupenv(driver);
+		switch (status)
+		{
+			case SRE_RENDERSTATUS_SUCCEEDED: goto SUCCEED;
+			case SRE_RENDERSTATUS_FAILED: goto FAIL;
+			case SRE_RENDERSTATUS_UNSUPPORTED:
+				sre::log<sre::LOGCATEGORY_WARN>("Render driver '%s' is declared as the hint, but was found unsupported. Switching to the default drivers...", driver->name);
+				break;
+			default:
+				sre::log<sre::LOGCATEGORY_ERROR>("Unknown status: '%d'. Failing...", status);
+				goto FAIL;
+		}
+	}
+
+	for (int i = 0; i < ut_arrcount(render_drivers); i++)
+	{
+		driver = render_drivers[i];
+		int status = render_setupenv(driver);
+		switch (status)
+		{
+			case SRE_RENDERSTATUS_SUCCEEDED: goto SUCCEED;
+			case SRE_RENDERSTATUS_FAILED: goto FAIL;
+			case SRE_RENDERSTATUS_UNSUPPORTED:
+				sre::log<sre::LOGCATEGORY_WARN>("Render driver '%s' is unsupported", driver->name);
+				break;
+			default:
+				sre::log<sre::LOGCATEGORY_ERROR>("Unknown status: '%d'. Failing...", status);
+				goto FAIL;
+		}
+	}
+
+		sre::log<sre::LOGCATEGORY_ERROR>("Could not find any supported video drivers... This should not happen assuming that every piece of hardware supports SDL Renderer with its software fallback...");
+		return NULL;
+	SUCCEED:
+		sre::log<sre::LOGCATEGORY_INFO>("Using render driver: %s", driver->name);
+		return driver;
+	FAIL:
+		sre::log<sre::LOGCATEGORY_INFO>("Driver initialization for '%s' failed!", driver->name);
+		return NULL;
 }
 
 extern "C" void __cleanup_textures();
@@ -80,55 +165,19 @@ void __cleanup_renderer()
 
 void __setup_renderer()
 {
-	#if _WIN32
-		constexpr int DEFAULT_RENDERER = SRE_RENDERDRIVER_DIRECTX_11;
-	#else
-		constexpr int DEFAULT_RENDERER = SRE_RENDERDRIVER_OPENGL_32;
-	#endif
-
-	int renderer = DEFAULT_RENDERER;
+	int renderhint = -1;
 	{
 		const void* hint = sre::gethint("RENDERDRIVER");
 		if (hint)
 		{
 			unsigned hintvalue = *static_cast<const unsigned*>(hint);
-			if (hintvalue >= SRE_NUM_RENDERDRIVERS)
-				sre::log<sre::LOGCATEGORY_ERROR>("Could not get render driver from hint. Value out of bounds. Using default... (Hint value: %d ; Last render index: %d)", hintvalue, SRE_NUM_RENDERDRIVERS-1);
-			else
-				renderer = hintvalue;
+			renderhint = hintvalue;
 		}
 	}
 
-	auto driverdata = video_drivers[renderer];
-	assert(driverdata.initialize != NULL);
-	assert(driverdata.renderer_size >= sizeof(void*));
-	assert(driverdata.texture_size >= sizeof(int));
-
-	sre::log<sre::LOGCATEGORY_INFO>("Using render driver: %s", driverdata.name);
-
-	engine.video.vfptr = static_cast<const sre_RenderVFT**>(operator new(sizeof(void*) + driverdata.renderer_size));
-	*engine.video.vfptr = NULL;
-
-	int status = driverdata.initialize(engine.video.vfptr, engine.video.vfptr+1, engine.sdl_windowhndl);
-	if (status != SRE_RENDERSTATUS_SUCCEEDED)
-	{
-		operator delete(engine.video.vfptr);
-
-		switch (status)
-		{
-			case SRE_RENDERSTATUS_FAILED:
-				sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing the render driver");
-				break;
-			case SRE_RENDERSTATUS_UNSUPPORTED:
-				sre::log<sre::LOGCATEGORY_ERROR>("Render driver unsupported. Falling back is currently unimplemented");
-				break;
-			default:
-				sre::log<sre::LOGCATEGORY_ERROR>("Render driver initialization hasn't succeeded, but it returned an unknown code (%d - %x)", status, status);
-				break;
-		}
-
+	const sre_RenderDriverData* driverdata = render_choosedriver(renderhint);
+	if (!driverdata)
 		render_panic();
-	}
 
 	assert((*engine.video.vfptr) != NULL && "Maybe forgot to set up the vft? (virtual function table)");
 
@@ -149,7 +198,7 @@ void __setup_renderer()
 	#undef _CHECKFORFUNC
 
 	new(engine.video._vector_data) sre::RenderVectors{};
-	engine.video.texture_size = driverdata.texture_size;
+	engine.video.texture_size = driverdata->texture_size;
 	engine.video.blendmode = SRE_BLEND_DEFAULT;
 
 #ifndef IMGUI_DISABLE

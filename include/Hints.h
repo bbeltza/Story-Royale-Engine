@@ -12,8 +12,10 @@
 
 #if _WIN32
     #define SRE_EXPORT_HINT SRE_EXTERN_C __declspec(dllexport)
+#elif __GNUC__ && 0 // It's probably.. not needed yet :)
+    #define SRE_EXPORT_HINT __attribute__((__visibility__("default")))
 #else
-    #define SRE_EXPORT_HINT SRE_EXTERN_C
+    #define SRE_EXPORT_HINT
 #endif
 
 // Get the address of a hint declared by the user, `name` is a null-terminated string and shouldn't include the `SRE_HINT_` prefix
