@@ -1,5 +1,3 @@
-#include <Core/Draw.hpp>
-
 #include <ECS/Entity.hpp>
 #include <ECS/Scene.hpp>
 
@@ -7,9 +5,9 @@
 
 using namespace sreECS;
 
-void Sprite::attach(sre::Texture& texture)
+void Sprite::attach(sre::RSampler&& texture)
 {
-    textures.push_back(&texture);
+    textures.push_back(std::move(texture));
 }
 
 void Sprite::on_render(Entity& entity)
@@ -18,9 +16,11 @@ void Sprite::on_render(Entity& entity)
 
     auto frame = ut_min(current_frame, textures.size() - 1);
     current_frame = frame;
-    const sre::Texture& texture = *textures[frame];
-    sre::vec2i texture_size = texture.size();
 
+    sre::RSampler& texture = textures[frame];
+    sre::vec2i texture_size = texture->size();
+    
+    sre::vec2f texture_fsize{texture_size};
     if (region.size.x)
         texture_size.x = region.size.x;
 
@@ -31,17 +31,20 @@ void Sprite::on_render(Entity& entity)
         entity.position + offset,
         texture_size * scale
     );
-    sre::s32 flags = SRE_DRAWFLAGS_USECAM | (render_rect.size.x < 0 ? SRE_DRAWFLAGS_FLIPX : 0) | (render_rect.size.y < 0 ? SRE_DRAWFLAGS_FLIPY : 0);
-    render_rect.size = render_rect.size.abs();
+    sre::s32 flags = SRE_DRAWFLAG_CAMERA;
 
-    sre::draw(sre::DDTexture{
+    sre::render_draw1(
         flags,
-        modulate,
-        render_rect,
-        sre::vec2ut::CENTER,
-        texture.handle(),
-        region
-    });
+        {sre::RenderInstance1{
+            render_rect,
+            sre::vec2ut::CENTER,
+            modulate,
+            0,
+            { region.size.x ? region.size.x / texture_fsize.x : 1, region.size.y ? region.size.y / texture_fsize.y : 1 },
+            { region.position.x / texture_fsize.x, region.position.y / texture_fsize.y }
+        }},
+        texture.get()
+    );
 }
 
 #ifndef IMGUI_DISABLE

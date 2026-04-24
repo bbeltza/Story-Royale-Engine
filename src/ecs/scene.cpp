@@ -4,7 +4,6 @@
 
 #include <Core/Display.hpp>
 #include <Core/Input.hpp>
-#include <Core/Draw.hpp>
 
 #include "../internal.h"
 

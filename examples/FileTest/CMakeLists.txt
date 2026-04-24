@@ -1,7 +1,6 @@
-include(sre)
-project(FileTest)
+project(sretestfile)
 
 set(SOURCES FileTest.cpp)
 
-srEngine_property(FileTest PROPERTIES RESOURCES "assets")
-srEngine_build(FileTest file SOURCES)
+SRE_PROPERTY(sretestfile PROPERTIES RESOURCES "assets")
+SRE_BUILD(sretestfile SOURCES)

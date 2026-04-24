@@ -99,6 +99,10 @@ namespace sre
     #include <Windows.h>
 #endif
 
+#include <SDL_thread.h>
+#include <SDL_mutex.h>
+#include <thread>
+
 namespace sre
 {
     // Structure containing a log message
@@ -175,7 +179,9 @@ namespace sre
     struct Log
     {
         std::deque<LogMsg, MallocAllocator<LogMsg>> msg_queue;
-        std::recursive_mutex mutex;
+
+        SDL_mutex* mutex = SDL_CreateMutex();
+        ~Log() { SDL_DestroyMutex(mutex); }
 
         void flush();
     };
@@ -221,9 +227,6 @@ namespace
     };
 }
 
-#include <SDL_thread.h>
-#include <thread>
-
 static sre::Log* inst;
 int init_logsifnoinst()
 {
@@ -254,7 +257,7 @@ static int _ = init_logsifnoinst();
 
 void sre::Log::flush()
 {
-    std::lock_guard<std::recursive_mutex> guard{mutex};
+    SDL_LockMutex(mutex);
     while (!msg_queue.empty())
     {
         static constexpr char extra_characters[] = "[]: ";
@@ -325,6 +328,7 @@ void sre::Log::flush()
         //
         msg_queue.pop_front();
     }
+    SDL_UnlockMutex(mutex);
 }
 
 int sre_logEx(int type, int category, const char* fmt, va_list va)
@@ -333,7 +337,7 @@ int sre_logEx(int type, int category, const char* fmt, va_list va)
     assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
 
     init_logsifnoinst();
-    std::lock_guard<std::recursive_mutex> guard{inst->mutex};
+    SDL_LockMutex(inst->mutex);
 
     va_list cpy;
     va_copy(cpy, va);
@@ -348,9 +352,10 @@ int sre_logEx(int type, int category, const char* fmt, va_list va)
     if (len == 1)
         msg.buffer[0] = '\0';
     else
-        vsnprintf(msg.buffer, msg.size, fmt, va);
+        vsnprintf(msg.buffer, len, fmt, va);
 
-    return msg.size - 1;
+    SDL_UnlockMutex(inst->mutex);
+    return len - 1;
 }
 
 int sre_logsimpleEx(int type, int category, const char* str)
@@ -359,8 +364,8 @@ int sre_logsimpleEx(int type, int category, const char* str)
     assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
 
     init_logsifnoinst();
-
-    std::lock_guard<std::recursive_mutex> barney{inst->mutex};
+    SDL_LockMutex(inst->mutex);
+    
     int len = static_cast<int>(strlen(str) + 1);
     inst->msg_queue.emplace_back(
         type,
@@ -369,6 +374,7 @@ int sre_logsimpleEx(int type, int category, const char* str)
     );
     strncpy(inst->msg_queue.back().buffer, str, len);
 
+    SDL_UnlockMutex(inst->mutex);
     return len - 1;
 }
 

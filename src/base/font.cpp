@@ -1,5 +1,6 @@
 #include <Base/Font.hpp>
 #include <Base/File.hpp>
+#include <Base/Image.hpp>
 
 using namespace sre;
 
@@ -14,27 +15,63 @@ Font::Font(const sre::File& file, int pt)
 
     m_rwops = file.to_RWops();
     m_font = TTF_OpenFontRW(m_rwops, 1, pt);
+
     if (!m_font)
     {
         sre::log<LOGCATEGORY_ERROR>("Font::Font() could not load font: %s", TTF_GetError());
         if (m_rwops)
-            goto FAIL_CLOSE;
+        {
+            SDL_RWclose(m_rwops);
+            m_rwops = NULL;
+            return;
+        }
     }
 
     // Setup ascii textures
-        for (size_t code = 0; code < ascii.size(); code++)
+        int wsum = 0;
+        int hmax = 0;
+        std::array<sre::Image, 127> images;
+        for (size_t code = 0; code < images.size(); code++)
         {
             char str[2] = { static_cast<char>(code + 1), '\0' };
+            auto& img = images.at(code);
+            img = TTF_RenderUTF8_Solid(m_font, str, sre::WHITE.toSDL());
 
-            auto& tex = ascii.at(code);
-            tex = sre::Image{TTF_RenderUTF8_Solid(m_font, str, sre::WHITE.toSDL())};
+            sre::vec2i size = img.size();
+            wsum += size.x;
+            hmax = ut_max(hmax, size.y);
         }
-    //
-    return;
 
-    FAIL_CLOSE:
-    SDL_RWclose(m_rwops);
-    m_rwops = NULL;
+        constexpr int BASE_MULTIPLE = 64;
+        int dim = BASE_MULTIPLE;
+        while ((wsum/dim) > (dim/hmax))
+            dim += BASE_MULTIPLE;
+        assert(hmax < dim);
+        sre::Image ascii_imgatlas{dim};
+
+        sre::vec2i pos;
+        for (size_t i = 0; i < images.size(); i++)
+        {
+            auto &img = images.at(i);
+            sre::vec2i size = img.size();
+            if (pos.x + size.x > dim)
+            {
+                pos.x = 0;
+                pos.y += hmax;
+            }
+
+            ascii_imgatlas.blit(img, pos, 0);
+            auto &uv = ascii_uvs.at(i);
+            uv = {
+                pos / static_cast<float>(dim),
+                size / static_cast<float>(dim)
+            };
+
+            pos.x += size.x;
+        }
+
+        ascii_atlas = ascii_imgatlas.to_sampler();
+    //
 }
 
 Font::~Font()

@@ -99,7 +99,7 @@ namespace sre
     extern "C++" {
         namespace sre
         {
-            inline int _loglegacy(int category, const char* fmt, ...)
+            static inline int _loglegacy(int category, const char* fmt, ...)
             {
                 va_list va;
                 int n;

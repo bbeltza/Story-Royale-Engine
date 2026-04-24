@@ -1,7 +1,6 @@
-include(sre)
-project(AudioTest)
+project(sretestaudio)
 
 set(SOURCES AudioTest.cpp)
 
-srEngine_property(AudioTest PROPERTIES RESOURCES "res")
-srEngine_build(AudioTest audio SOURCES NO_BIND)
+SRE_PROPERTY(sretestaudio PROPERTIES RESOURCES "res")
+SRE_BUILD(sretestaudio SOURCES NO_BIND)

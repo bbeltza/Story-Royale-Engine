@@ -7,9 +7,9 @@
 #include <Datatypes/TimeStamp.h>
 #include <ints.h>
 
-SRE_CAPI_BEGIN
-	struct sre_videodriver;
+#include <Core/Render.h>
 
+SRE_CAPI_BEGIN
 	struct _win_settings
 	{
 		const char* title;
@@ -30,6 +30,30 @@ SRE_CAPI_BEGIN
     	void* userdata;
     	SDL_sem* sem;
     	sre_sptr ret;
+	};
+
+	struct _texture_container;
+	struct _texture_env
+	{
+		struct _texture_container* head;
+		sre_Sampler** freelist[3];
+		size_t last;
+	};
+
+	
+	#define SRE_VIDEOV(x, func) (*x)->func(x+1)
+	#define SRE_VIDEO(x, func, ...) (*x)->func(x+1, __VA_ARGS__)
+	struct _engine_renderdata
+	{
+		const struct sre_RenderVFT** vfptr;
+		
+		size_t texture_size;
+		struct _texture_env textures;
+
+		short blendmode;
+		sre_rect2Di clip_rect;
+
+		void* _vector_data[4][3];
 	};
 
 	#if defined(_MSC_VER)
@@ -62,7 +86,6 @@ SRE_CAPI_BEGIN
 		SDL_mutex* destroyqueue_mutex;
 
 		void* coroutine_thread;
-		void* game_loop;
 		bool cor_running;
 
 		// Window data
@@ -73,20 +96,16 @@ SRE_CAPI_BEGIN
 		
 		// Renderer data
 		
-		struct sre_videodriver* video;
+		struct _engine_renderdata video;
 
-		SDL_cond* render_cond;
-		SDL_mutex* render_mutex;
 		int osize_x, osize_y;
+		sre_unit vsize_x, vsize_y;
+		sre_unit vcenter_x, vcenter_y;
 
 		// Audio data
 
 		SDL_AudioSpec audio_spec;
 		SDL_AudioDeviceID audio_device;
-
-		#if _WIN32
-				int exposing;
-		#endif
 
 		void* audio_queue;
 		size_t audio_queuesize;
@@ -103,7 +122,8 @@ SRE_CAPI_BEGIN
 		sre_unit mouse_x, mouse_y;
 		sre_u16 mouse_press;
 		sre_u16 mouse_framepress;
-		sre_unit scale_ratio; /* 1 / video->scale */
+		sre_unit scale;
+		sre_unit scale_ratio; /* 1 / engine.scale */
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 		sre_u8 keyboard_framestate[SDL_NUM_SCANCODES / 8];
 
@@ -127,7 +147,6 @@ SRE_CAPI_BEGIN
 
 	extern void __poll_input(SDL_Event* ev);
 
-	extern int __event_filter(void*, SDL_Event* ev);
 	extern int __signal_events(SDL_Event* ev);
 	extern void __queue_events();
 
@@ -135,11 +154,8 @@ SRE_CAPI_BEGIN
 
 	extern void __query_objects();
 
-	extern void __update_ecs();
-	extern void __render_scene();
-	extern void __render_ui();
-
-	extern void __display_render();
+	extern bool __update_ecs();
+	extern void __render_flush();
 
 	extern void __cleanup_ecs();
 SRE_CAPI_END

@@ -4,6 +4,11 @@
 #include <Datatypes/Rect.hpp>
 #include <Datatypes/Flags.hpp>
 
+namespace sre
+{
+    struct RenderInterface;
+}
+
 namespace sreGUI
 {
     struct Component

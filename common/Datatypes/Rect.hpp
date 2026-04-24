@@ -97,7 +97,7 @@ namespace sre
         constexpr vec rotated_bottomright(double angle) const { return position + xrotated_offset(angle) + yrotated_offset(angle); }
 
         constexpr bool operator ==(const rect2D& other) const { return position == other.position && size == other.size; }
-        constexpr bool operator !=(const rect2D& other) const { return position != other.position && size != other.size; }
+        constexpr bool operator !=(const rect2D& other) const { return position != other.position || size != other.size; }
     };
 
     // A rect2D datatype composed of ints.

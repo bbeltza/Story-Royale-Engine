@@ -14,6 +14,7 @@
 namespace sre
 {
     class ECS;
+    struct RenderInterface;
 }
 
 namespace sreECS

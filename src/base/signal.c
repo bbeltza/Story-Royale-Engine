@@ -49,7 +49,7 @@ sre_Signal* sre_signalcreate(void* userdata)
     signal->userdata = userdata;
 
     signal->coroutines_capacity = 16;
-    signal->coroutines_size = 16;
+    signal->coroutines_size = 0;
     signal->coroutines = sre_newclear(sizeof(signal->coroutines) * 16);
 
     return signal;
@@ -86,7 +86,7 @@ sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction funct
     connection->signal = signal;
     connection->next = signal->connection_head;
     connection->prev = NULL;
-    connection->reference.value = 0;
+    connection->reference.value = 1;
 
     if (signal->connection_head)
         signal->connection_head->prev = connection;
@@ -104,11 +104,8 @@ sre_Connection* sre_signalconnectEx(sre_Signal* signal, sre_signalfunction funct
     return connection;
 }
 
-void sre_signaldisconnect(sre_Connection* connection)
+static void s_detachconnection(sre_Connection* connection)
 {
-    if (!connection) return;
-    if (!connection->signal) return;
-
     if (connection->next) connection->next->prev = connection->prev;
     if (connection->prev) connection->prev->next = connection->next;
     else {
@@ -117,10 +114,19 @@ void sre_signaldisconnect(sre_Connection* connection)
     }
 
     connection->signal = NULL;
-    if (connection->reference.value <= 0) sre_delete(connection);
 }
 
-sre_Connection* sre_signalaquire(sre_Connection* connection)
+void sre_signaldisconnect(sre_Connection* connection)
+{
+    if (!connection) return;
+    if (!connection->signal) return;
+
+    s_detachconnection(connection);
+    
+    if (SDL_AtomicAdd(&connection->reference, -1) <= 1) sre_delete(connection);
+}
+
+sre_Connection* sre_signalacquire(sre_Connection* connection)
 {
     assert(connection != NULL);
 
@@ -128,13 +134,17 @@ sre_Connection* sre_signalaquire(sre_Connection* connection)
     return connection;
 }
 
-void sre_signalunaquire(sre_Connection* connection)
+void sre_signalrelease(sre_Connection* connection)
 {
     if (!connection) return;
-    if (SDL_AtomicAdd(&connection->reference, -1) <= 1 && !connection->signal)
+    if (SDL_AtomicAdd(&connection->reference, -1) <= 1)
+    {
+        if (connection->signal)
+            s_detachconnection(connection);
         sre_delete(connection);
+    }
 }
-
+#include <Base/Log.h>
 void* sre_signalwait(sre_Signal* signal)
 {
     if (signal->coroutines_capacity <= signal->coroutines_size)
@@ -147,15 +157,34 @@ void* sre_signalwait(sre_Signal* signal)
         signal->coroutines = new_block;
         signal->coroutines_capacity = new_capacity;
     }
-    return sre_coroutinesuspendEx(&signal->coroutines[signal->coroutines_size++]);
+
+    sre_coroutine* current = sre_coroutinecurrent();
+    if (!current)
+    {
+        sre_log(SRE_LOGCATEGORY_ERROR, "Calling sre_signalwait() on a thread that doesn't run any coroutine. Cannot wait for the signal since only waiting inside coroutines are supported.");
+        return NULL;
+    }
+
+    signal->coroutines[signal->coroutines_size] = current;
+    signal->coroutines_size++;
+
+    void* data = NULL;
+    sre_coroutinesuspendEx(&data);
+    return data;
 }
 
+#include <Base/Log.h>
+#include <stdlib.h>
 bool sre_signalfire(sre_Signal* signal, void* data)
 {
     if (!signal) return false;
 
     while (signal->coroutines_size)
-        sre_coroutineresume(signal->coroutines[--signal->coroutines_size], data);
+    {
+        sre_coroutine* coroutine = signal->coroutines[--signal->coroutines_size];
+        if (!sre_coroutineresume(coroutine, data))
+            sre_log(SRE_LOGCATEGORY_ERROR, "%s: sre_coroutineresume failed when trying to resume all suspending coroutines", __FUNCTION__);
+    }
     
     for (sre_Connection* connection = signal->connection_head; connection != NULL; connection = connection->next)
         connection->function(signal->userdata, connection->flags & SRE_CONNECTION_HASDATA ? (void**)(connection + 1) : NULL, data);

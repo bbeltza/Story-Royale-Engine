@@ -1,5 +1,5 @@
 #include <GUI/Components/Slice.hpp>
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 
 using namespace sreGUI;
 
@@ -7,151 +7,70 @@ void Slice::on_render(const sre::rect2Dut &dimensions)
 {
     if (!texture)
         return;
-    
-    const sre::vec2i size = texture->size();
-    sre::DDTexture data{
-        0,
-        modulate,
-        {dimensions.position, { center_slice.position.x, center_slice.position.y }},
-        sre::vec2ut::ZERO,
 
-        texture->handle(),
-        { sre::vec2i::ZERO, center_slice.position }
+    sre::vec2i size = texture->size();
+
+    sre::vec2f sizef{size};
+    sre::rect2Df centerslicef{center_slice};
+    sre::rect2Df centerslice_uv{ centerslicef.position / sizef, centerslicef.size / sizef };
+
+    sre::vec2f uvs[9] = {
+        /* Left-top      */ {centerslice_uv.position.x, centerslice_uv.position.y},
+        /* Middle-top    */ {centerslice_uv.size.x,     centerslice_uv.position.y},
+        /* Right-top     */ {1 - centerslice_uv.size.x - centerslice_uv.position.x, centerslice_uv.position.y},
+        /* Left-middle   */ {centerslice_uv.position.x, centerslice_uv.size.y},
+        /* Center        */ {centerslice_uv.size.x, centerslice_uv.size.y},
+        /* Right-middle  */ {1 - centerslice_uv.size.x - centerslice_uv.position.x, centerslice_uv.size.y},
+        /* Left-bottom   */ {centerslice_uv.position.x, 1 - centerslice_uv.size.y - centerslice_uv.position.y},
+        /* Middle-bottom */ {centerslice_uv.size.x, 1 - centerslice_uv.size.y - centerslice_uv.position.y},
+        /* Right-bottom  */ {1 - centerslice_uv.size.x - centerslice_uv.position.x, 1 - centerslice_uv.size.y - centerslice_uv.position.y}
     };
-    
-    // Top-left corner, no additional setup is required since everything has already been initialized
-    sre::draw(data);
-
-    // Top-right
-    data.region.position.x = center_slice.position.x + center_slice.size.x;
-    data.region.size.x = size.x - data.region.position.x;
-    data.rect.position.x += dimensions.size.x;
-    data.rect.size.x = static_cast<sre::unit>(data.region.size.x);
-    data.anchor.x = 1;
-    sre::draw(data);
-    
-    // Bottom-right
-    data.region.position.y = center_slice.position.y + center_slice.size.y;
-    data.region.size.y = size.y - data.region.position.y;
-    data.rect.position.y += dimensions.size.y;
-    data.rect.size.y = static_cast<sre::unit>(data.region.size.y);
-    data.anchor.y = 1;
-    sre::draw(data);
-    
-    // Bottom-left
-    data.region.position.x = 0;
-    data.region.size.x = center_slice.position.x;
-    data.rect.position.x = dimensions.position.x;
-    data.rect.size.x = static_cast<sre::unit>(data.region.size.x);
-    data.anchor.x = 0;
-    sre::draw(data);
-
-    // Edges
-    // Left
-    data.rect.position.y -= data.region.size.y;
-    data.region.position.y = center_slice.position.y;
-    data.region.size.y = center_slice.size.y;
-
-    data.rect.size.y = dimensions.size.y - (size.y - center_slice.size.y);
-    sre::draw(data);
-
-    // Right
-    data.region.position.x = center_slice.position.x + center_slice.size.x;
-    data.region.size.x = size.x - data.region.position.x;
-    data.rect.position.x = dimensions.position.x + dimensions.size.x;
-    data.rect.size.x = static_cast<sre::unit>(data.region.size.x);
-    data.anchor.x = 1;
-    sre::draw(data);
-
-    // Bottom
-    data.rect.position.y = dimensions.position.y + dimensions.size.y;
-    data.rect.position.x -= data.region.size.x;
-    data.region.position = { center_slice.position.x, center_slice.position.y + center_slice.size.y };
-    data.region.size.x = center_slice.size.x;
-    data.region.size.y = size.y - data.region.position.y;
-    data.rect.size.x = dimensions.size.x - ( size.y - center_slice.size.y );
-    data.rect.size.y = static_cast<sre::unit>(data.region.size.y);
-    data.anchor.y = 1;
-    sre::draw(data);
-
-    // Top
-    data.region.position = { center_slice.position.x, 0 };
-    data.region.size.y = center_slice.position.y;
-    data.rect.position.y = dimensions.position.y;
-    data.rect.size.y = static_cast<sre::unit>(data.region.size.y);
-    data.anchor.y = 0;
-    sre::draw(data);
-
-    // Center
-    data.rect.position.y += data.region.size.y;
-    data.rect.size.y = dimensions.size.y - ( size.y - center_slice.size.y );
-    data.region = center_slice;
-    sre::draw(data);
-
-    /*
-    //
-    auto check_yregion = [&]()
-    {
-        if (data.region.size.y >= 0)
-            return;
-        data.region.size.y = -data.region.size.y;
-        data.region.position.y -= data.region.size.y;
+    sre::vec2f uvoffsets[9] = {
+        {0, 0},
+        {centerslice_uv.position.x, 0},
+        {centerslice_uv.position.x + centerslice_uv.size.x, 0},
+        {0, centerslice_uv.position.y},
+        {centerslice_uv.position.x, centerslice_uv.position.y},
+        {centerslice_uv.position.x + centerslice_uv.size.x, centerslice_uv.position.y},
+        {0, centerslice_uv.position.y + centerslice_uv.size.y},
+        {centerslice_uv.position.x, centerslice_uv.position.y + centerslice_uv.size.y},
+        {centerslice_uv.position.x + centerslice_uv.size.x, centerslice_uv.position.y + centerslice_uv.size.y}
     };
 
-    auto check_xregion = [&]()
-    {
-        if (data.region.size.x >= 0)
-            return;
-        data.region.size.x = -data.region.size.x;
-        data.region.position.x -= data.region.size.x;
+    sre::rect2Dut rects[9] = {
+        { { dimensions.position.x, dimensions.position.y },
+            { centerslicef.position.x, centerslicef.position.y } },
+        { { dimensions.position.x + centerslicef.position.x, rects[0].position.y },
+            { dimensions.size.x - sizef.x + centerslicef.size.y, rects[0].size.y } },
+        { { rects[1].position.x + rects[1].size.x, rects[0].position.y },
+            { sizef.x - centerslicef.position.x - centerslicef.size.x, rects[0].size.y } },
+
+        { { rects[0].position.x, dimensions.position.y + centerslicef.position.y },
+            { rects[0].size.x, dimensions.size.y - sizef.y + centerslicef.size.y } },
+        { { rects[1].position.x, rects[3].position.y },
+            { rects[1].size.x, rects[3].size.y } },
+        { { rects[2].position.x, rects[3].position.y },
+            { rects[2].size.x, rects[3].size.y } },
+
+        { { rects[0].position.x, rects[3].position.y + rects[3].size.y },
+            { rects[0].size.x, sizef.y - centerslicef.position.y - centerslicef.size.y } },
+        { { rects[1].position.x, rects[6].position.y },
+            { rects[1].size.x, rects[6].size.y } },
+        { { rects[2].position.x, rects[6].position.y },
+            { rects[2].size.x, rects[6].size.y } }
     };
-    //
 
-    // Edges!!!
-    // Left edge
-    data.region.position.y = region_corners.y;
-    data.region.size.y = size.y - region_corners2.y;
-    check_yregion();
+    sre::RenderInstance1 instances[9] = { // Doesn't work for now, `rect` has to be set
+        { rects[0], sre::vec2ut::ZERO, modulate, 0,  uvs[0], uvoffsets[0]},
+        { rects[1], sre::vec2ut::ZERO, modulate, 0,  uvs[1], uvoffsets[1]},
+        { rects[2], sre::vec2ut::ZERO, modulate, 0,  uvs[2], uvoffsets[2]},
+        { rects[3], sre::vec2ut::ZERO, modulate, 0,  uvs[3], uvoffsets[3]},
+        { rects[4], sre::vec2ut::ZERO, modulate, 0,  uvs[4], uvoffsets[4]},
+        { rects[5], sre::vec2ut::ZERO, modulate, 0,  uvs[5], uvoffsets[5]},
+        { rects[6], sre::vec2ut::ZERO, modulate, 0,  uvs[6], uvoffsets[6]},
+        { rects[7], sre::vec2ut::ZERO, modulate, 0,  uvs[7], uvoffsets[7]},
+        { rects[8], sre::vec2ut::ZERO, modulate, 0,  uvs[8], uvoffsets[8]}
+    };
 
-    data.rect.position.y -= region_corners.y;
-    data.rect.size.y = dimensions.size.y - region_corners2.y;
-    sre::draw(data);
-    //
-    // Right edge
-    data.region.position.x = size.x - region_corners.x;
-    data.rect.position.x = dimensions.position.x + dimensions.size.x;
-    data.anchor.x = 1;
-    sre::draw(data);
-    //
-    // Bottom edge
-    data.region.position.x = region_corners.x;
-    data.region.position.y = size.y - region_corners.y;
-    data.region.size.x = size.x - region_corners2.x;
-    check_xregion();
-
-    data.region.size.y = region_corners.y;
-    data.rect.position.y = dimensions.position.y + dimensions.size.y;
-    data.rect.position.x -= region_corners.x;
-    data.rect.size.y = static_cast<sre::unit>(region_corners.y); // "possible loss of data"
-    data.rect.size.x = dimensions.size.x - region_corners2.x;
-    sre::draw(data);
-    //
-    // Top edge
-    data.region.position.y = 0;
-    data.rect.position.y = dimensions.position.y;
-    data.anchor.y = 0;
-    sre::draw(data);
-    //
-    // Center
-    data.region.position = region_corners;
-    data.region.size = size - region_corners2;
-    check_xregion();
-    check_yregion();
-
-    data.rect.position = dimensions.position + region_corners;
-    data.rect.size = dimensions.size - region_corners2;
-    data.anchor = sre::vec2ut::ZERO;
-    sre::draw(data);
-    //
-    */
+    sre::render_draw1(0, instances, texture.get());
 }

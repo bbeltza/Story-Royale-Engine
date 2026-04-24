@@ -6,6 +6,11 @@
 
 #include <imgui.h>
 
+namespace sre
+{
+	struct RenderInterface;
+}
+
 namespace sreECS
 {
 	class Entity;

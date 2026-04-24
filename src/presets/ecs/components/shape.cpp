@@ -2,7 +2,7 @@
 #include <ECS/Components/Shape.hpp>
 #include <ECS/Scene.hpp>
 
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 
 #include <SDL_shape.h>
 
@@ -54,17 +54,16 @@ void Shape::on_render(Entity &entity)
 	switch (shape)
 	{
 	case S_CIRCLE:
-		sre_draw(SRE_DRAW_CIRCLE, NULL);
+		abort();
 		break;
 	default:
 	{
 		sre::rect2Dut render_rect = real_rect(entity);
-		sre::draw(sre::DDRect{
-			SRE_DRAWFLAGS_USECAM,
-			color,
-			render_rect,
-			sre::vec2ut::CENTER
-		});
+		sre::render_draw1(
+			SRE_DRAWFLAG_CAMERA,
+			{{ render_rect, sre::vec2ut::CENTER, color }}
+		);
+
 		break;
 	}
 	}

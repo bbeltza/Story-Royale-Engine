@@ -2,7 +2,7 @@
 #define SREGUI_IMAGE_HPP
 
 #include <GUI/Component.hpp>
-#include <Core/Texture.hpp>
+#include <Base/Sampler.hpp>
 #include <Datatypes/Color.hpp>
 
 namespace sreGUI
@@ -11,7 +11,10 @@ namespace sreGUI
 
     struct Image : public Component
     {
-        const sre::Texture* texture = NULL;
+        Image() = default;
+        Image(sre::RSampler&& sampler): texture(std::move(sampler)) {}
+
+        sre::RSampler texture;
         sre::col4 modulate = sre::WHITE;
 
         void fit(Transform& transform);

@@ -1,9 +1,10 @@
 // This is all of the code present for d3d12, it will be thousands of lines long, I'm not thinking of expanding not separating it
 // Thus the class definitions will be put here
-#include <drivers.h>
+#include <Core/Render.h>
 
 #include <dxgi1_4.h>
 #include <d3d12.h>
+#include <dxcommon/dxcommon.h>
 
 #include <SDL_syswm.h>
 
@@ -11,22 +12,22 @@
 #include <cassert>
 
 // All shader bytecode
-static const BYTE VS_BYTES[] = {
-     68,  88,  66,  67, 158,  65, 
-    222, 209, 173, 179, 245, 210, 
-    114, 222,  72, 121, 175, 172, 
-     27,  23,   1,   0,   0,   0, 
-     40,   6,   0,   0,   5,   0, 
+static const BYTE D1_VS[] = {
+     68,  88,  66,  67, 102,  84, 
+    131, 191, 101, 133, 128,  44, 
+    174, 114, 251, 175, 152,  14, 
+     85, 220,   1,   0,   0,   0, 
+    176,   6,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
-     24,   1,   0,   0, 220,   1, 
-      0,   0,  80,   2,   0,   0, 
-    172,   5,   0,   0,  82,  68, 
-     69,  70, 220,   0,   0,   0, 
+     40,   1,   0,   0,  12,   2, 
+      0,   0, 128,   2,   0,   0, 
+     52,   6,   0,   0,  82,  68, 
+     69,  70, 236,   0,   0,   0, 
       1,   0,   0,   0,  72,   0, 
       0,   0,   1,   0,   0,   0, 
      28,   0,   0,   0,   0,   4, 
     254, 255,   0,  17,   0,   0, 
-    179,   0,   0,   0,  60,   0, 
+    196,   0,   0,   0,  60,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -36,62 +37,70 @@ static const BYTE VS_BYTES[] = {
     111, 114, 109, 115,   0, 171, 
      60,   0,   0,   0,   2,   0, 
       0,   0,  96,   0,   0,   0, 
-     16,   0,   0,   0,   0,   0, 
+     80,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
     144,   0,   0,   0,   0,   0, 
-      0,   0,   8,   0,   0,   0, 
+      0,   0,  64,   0,   0,   0, 
       2,   0,   0,   0, 156,   0, 
       0,   0,   0,   0,   0,   0, 
-    172,   0,   0,   0,   8,   0, 
+    172,   0,   0,   0,  64,   0, 
       0,   0,   8,   0,   0,   0, 
-      2,   0,   0,   0, 156,   0, 
+      2,   0,   0,   0, 180,   0, 
       0,   0,   0,   0,   0,   0, 
      86,  73,  69,  87,  80,  79, 
      82,  84,   0, 171, 171, 171, 
+      3,   0,   3,   0,   4,   0, 
+      4,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,  67,  65, 
+     77,  69,  82,  65,   0, 171, 
       1,   0,   3,   0,   1,   0, 
       2,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,  67,  65, 
-     77,  69,  82,  65,   0,  77, 
-    105,  99, 114, 111, 115, 111, 
-    102, 116,  32,  40,  82,  41, 
-     32,  72,  76,  83,  76,  32, 
-     83, 104,  97, 100, 101, 114, 
-     32,  67, 111, 109, 112, 105, 
-    108, 101, 114,  32,  49,  48, 
-     46,  49,   0, 171,  73,  83, 
-     71,  78, 188,   0,   0,   0, 
-      6,   0,   0,   0,   8,   0, 
-      0,   0, 152,   0,   0,   0, 
+      0,   0,   0,   0,  77, 105, 
+     99, 114, 111, 115, 111, 102, 
+    116,  32,  40,  82,  41,  32, 
+     72,  76,  83,  76,  32,  83, 
+    104,  97, 100, 101, 114,  32, 
+     67, 111, 109, 112, 105, 108, 
+    101, 114,  32,  49,  48,  46, 
+     49,   0,  73,  83,  71,  78, 
+    220,   0,   0,   0,   7,   0, 
+      0,   0,   8,   0,   0,   0, 
+    176,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   3,   0,   0,   0, 
-      0,   0,   0,   0,  15,  15, 
-      0,   0, 161,   0,   0,   0, 
+      3,   0,   0,   0,   0,   0, 
+      0,   0,  15,  15,   0,   0, 
+    176,   0,   0,   0,   1,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   1,   0,   0,   0, 
-      1,   0,   0,   0,  15,  15, 
-      0,   0, 152,   0,   0,   0, 
-      1,   0,   0,   0,   0,   0, 
-      0,   0,   3,   0,   0,   0, 
-      2,   0,   0,   0,   3,   3, 
-      0,   0, 167,   0,   0,   0, 
+      3,   0,   0,   0,   1,   0, 
+      0,   0,   3,   3,   0,   0, 
+    185,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   3,   0,   0,   0, 
-      3,   0,   0,   0,   3,   3, 
-      0,   0, 167,   0,   0,   0, 
-      1,   0,   0,   0,   0,   0, 
-      0,   0,   3,   0,   0,   0, 
-      4,   0,   0,   0,   3,   3, 
-      0,   0, 176,   0,   0,   0, 
-      0,   0,   0,   0,   6,   0, 
-      0,   0,   1,   0,   0,   0, 
-      5,   0,   0,   0,   1,   1, 
-      0,   0,  80,  79,  83,  73, 
-     84,  73,  79,  78,   0,  67, 
-     79,  76,  79,  82,   0,  84, 
-     69,  88,  67,  79,  79,  82, 
-     68,   0,  83,  86,  95,  86, 
-    101, 114, 116, 101, 120,  73, 
-     68,   0,  79,  83,  71,  78, 
+      1,   0,   0,   0,   2,   0, 
+      0,   0,  15,  15,   0,   0, 
+    191,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   3,   0, 
+      0,   0,   1,   1,   0,   0, 
+    197,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   4,   0, 
+      0,   0,   3,   3,   0,   0, 
+    197,   0,   0,   0,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   5,   0, 
+      0,   0,   3,   3,   0,   0, 
+    206,   0,   0,   0,   0,   0, 
+      0,   0,   6,   0,   0,   0, 
+      1,   0,   0,   0,   6,   0, 
+      0,   0,   1,   1,   0,   0, 
+     80,  79,  83,  73,  84,  73, 
+     79,  78,   0,  67,  79,  76, 
+     79,  82,   0,  80,  83,  73, 
+     90,  69,   0,  84,  69,  88, 
+     67,  79,  79,  82,  68,   0, 
+     83,  86,  95,  86, 101, 114, 
+    116, 101, 120,  73,  68,   0, 
+    171, 171,  79,  83,  71,  78, 
     108,   0,   0,   0,   3,   0, 
       0,   0,   8,   0,   0,   0, 
      80,   0,   0,   0,   0,   0, 
@@ -111,23 +120,25 @@ static const BYTE VS_BYTES[] = {
      67,  79,  76,  79,  82,   0, 
      84,  69,  88,  67,  79,  79, 
      82,  68,   0, 171,  83,  72, 
-     68,  82,  84,   3,   0,   0, 
-     64,   0,   1,   0, 213,   0, 
+     68,  82, 172,   3,   0,   0, 
+     64,   0,   1,   0, 235,   0, 
       0,   0,  89,   0,   0,   4, 
      70, 142,  32,   0,   0,   0, 
-      0,   0,   1,   0,   0,   0, 
+      0,   0,   5,   0,   0,   0, 
      95,   0,   0,   3, 242,  16, 
      16,   0,   0,   0,   0,   0, 
-     95,   0,   0,   3, 242,  16, 
+     95,   0,   0,   3,  50,  16, 
      16,   0,   1,   0,   0,   0, 
-     95,   0,   0,   3,  50,  16, 
+     95,   0,   0,   3, 242,  16, 
      16,   0,   2,   0,   0,   0, 
-     95,   0,   0,   3,  50,  16, 
+     95,   0,   0,   3,  18,  16, 
      16,   0,   3,   0,   0,   0, 
      95,   0,   0,   3,  50,  16, 
      16,   0,   4,   0,   0,   0, 
-     96,   0,   0,   4,  18,  16, 
+     95,   0,   0,   3,  50,  16, 
      16,   0,   5,   0,   0,   0, 
+     96,   0,   0,   4,  18,  16, 
+     16,   0,   6,   0,   0,   0, 
       6,   0,   0,   0, 103,   0, 
       0,   4, 242,  32,  16,   0, 
       0,   0,   0,   0,   1,   0, 
@@ -155,18 +166,18 @@ static const BYTE VS_BYTES[] = {
      50,  48,  32,   0,   0,   0, 
       0,   0,   2,   0,   0,   0, 
       2,  64,   0,   0,   0,   0, 
-    128,  63,   0,   0, 128,  63, 
+      0,   0,   0,   0, 128,  63, 
       0,   0,   0,   0,   0,   0, 
       0,   0,  54,   0,   0,   9, 
      50,  48,  32,   0,   0,   0, 
       0,   0,   3,   0,   0,   0, 
       2,  64,   0,   0,   0,   0, 
-      0,   0,   0,   0, 128,  63, 
+    128,  63,   0,   0, 128,  63, 
       0,   0,   0,   0,   0,   0, 
       0,   0,  54,   0,   0,   5, 
      18,   0,  16,   0,   0,   0, 
       0,   0,  10,  16,  16,   0, 
-      5,   0,   0,   0,  54,   0, 
+      6,   0,   0,   0,  54,   0, 
       0,   7,  50,   0,  16,   0, 
       0,   0,   0,   0,  70,  48, 
      32,   4,   0,   0,   0,   0, 
@@ -174,7 +185,7 @@ static const BYTE VS_BYTES[] = {
       0,   0,  54,   0,   0,   5, 
     194,   0,  16,   0,   0,   0, 
       0,   0,   6,  20,  16,   0, 
-      2,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
       0,   8,  50,   0,  16,   0, 
       1,   0,   0,   0, 230,  10, 
      16, 128,  65,   0,   0,   0, 
@@ -184,92 +195,281 @@ static const BYTE VS_BYTES[] = {
      16,   0,   2,   0,   0,   0, 
      70,   0,  16,   0,   0,   0, 
       0,   0,  70,  16,  16,   0, 
-      3,   0,   0,   0,  70,  16, 
-     16,   0,   4,   0,   0,   0, 
-      0,   0,   0,   8,  50,   0, 
+      4,   0,   0,   0,  70,  16, 
+     16,   0,   5,   0,   0,   0, 
+     54,   0,   0,   5,  66,   0, 
      16,   0,   0,   0,   0,   0, 
-     70,  16,  16,   0,   0,   0, 
-      0,   0, 230, 138,  32,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,  14,   0,   0,   8, 
-     18,   0,  16,   0,   2,   0, 
-      0,   0,   1,  64,   0,   0, 
-      0,   0,   0,  64,  10, 128, 
-     32,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,  54,   0, 
-      0,   5,  66,   0,  16,   0, 
-      0,   0,   0,   0,   1,  64, 
-      0,   0,   0,   0, 128,  63, 
-     54,   0,   0,   8, 162,   0, 
-     16,   0,   2,   0,   0,   0, 
-      2,  64,   0,   0,   0,   0, 
-      0,   0,   0,   0, 128, 191, 
-      0,   0,   0,   0,   0,   0, 
-    128,  63,  15,   0,   0,   7, 
-     34,   0,  16,   0,   3,   0, 
-      0,   0, 134,   0,  16,   0, 
-      0,   0,   0,   0,  70,   0, 
-     16,   0,   2,   0,   0,   0, 
-     14,   0,   0,   9,  66,   0, 
-     16,   0,   2,   0,   0,   0, 
-      1,  64,   0,   0,   0,   0, 
-      0,  64,  26, 128,  32, 128, 
-     65,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-     56,   0,   0,   7,  82,   0, 
-     16,   0,   3,   0,   0,   0, 
-      6,   2,  16,   0,   2,   0, 
-      0,   0, 166,  27,  16,   0, 
-      0,   0,   0,   0,  15,   0, 
-      0,   7, 130,   0,  16,   0, 
-      3,   0,   0,   0, 150,   5, 
-     16,   0,   0,   0,   0,   0, 
-    230,  10,  16,   0,   2,   0, 
+     26,  16,  16,   0,   0,   0, 
       0,   0,  54,   0,   0,   5, 
      66,   0,  16,   0,   1,   0, 
       0,   0,   1,  64,   0,   0, 
-      0,   0, 128,  63,  15,   0, 
-      0,   7,  18,  32,  16,   0, 
-      0,   0,   0,   0, 134,   0, 
-     16,   0,   1,   0,   0,   0, 
-     70,   0,  16,   0,   3,   0, 
-      0,   0,  15,   0,   0,   7, 
-     34,  32,  16,   0,   0,   0, 
-      0,   0, 150,   5,  16,   0, 
-      1,   0,   0,   0, 230,  10, 
+      0,   0, 128,  63,  77,   0, 
+      0,   7,  18,   0,  16,   0, 
+      2,   0,   0,   0,  18,   0, 
      16,   0,   3,   0,   0,   0, 
-     54,   0,   0,   8, 194,  32, 
+     10,  16,  16,   0,   3,   0, 
+      0,   0,  56,   0,   0,   7, 
+     18,   0,  16,   0,   0,   0, 
+      0,   0,  10,   0,  16,   0, 
+      2,   0,   0,   0,  42,  16, 
      16,   0,   0,   0,   0,   0, 
-      2,  64,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-    128,  63,  86,   0,   0,   5, 
-    242,   0,  16,   0,   0,   0, 
-      0,   0,  70,  30,  16,   0, 
-      1,   0,   0,   0,  56,   0, 
-      0,  10, 242,  32,  16,   0, 
-      1,   0,   0,   0,  70,  14, 
+     56,   0,   0,   7,  50,   0, 
+     16,   0,   3,   0,   0,   0, 
+      6,   0,  16,   0,   3,   0, 
+      0,   0, 230,  26,  16,   0, 
+      0,   0,   0,   0,  56,   0, 
+      0,   8,  66,   0,  16,   0, 
+      3,   0,   0,   0,  10,   0, 
+     16, 128,  65,   0,   0,   0, 
+      2,   0,   0,   0,  58,  16, 
      16,   0,   0,   0,   0,   0, 
-      2,  64,   0,   0, 129, 128, 
-    128,  59, 129, 128, 128,  59, 
+     54,   0,   0,   5,  34,   0, 
+     16,   0,   0,   0,   0,   0, 
+     26,   0,  16,   0,   3,   0, 
+      0,   0,  16,   0,   0,   7, 
+     34,   0,  16,   0,   0,   0, 
+      0,   0,  70,   2,  16,   0, 
+      1,   0,   0,   0,  70,   2, 
+     16,   0,   0,   0,   0,   0, 
+     54,   0,   0,   5, 130,   0, 
+     16,   0,   3,   0,   0,   0, 
+     10,  16,  16,   0,   0,   0, 
+      0,   0,  16,   0,   0,   7, 
+     18,   0,  16,   0,   0,   0, 
+      0,   0,  70,   2,  16,   0, 
+      1,   0,   0,   0, 134,   3, 
+     16,   0,   3,   0,   0,   0, 
+     50,   0,   0,  11,  50,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70,   0,  16,   0,   0,   0, 
+      0,   0, 166, 138,  32,   0, 
+      0,   0,   0,   0,   2,   0, 
+      0,   0,  70, 128,  32,   0, 
+      0,   0,   0,   0,   4,   0, 
+      0,   0,  65,   0,   0,   5, 
+     50,   0,  16,   0,   0,   0, 
+      0,   0,  70,   0,  16,   0, 
+      0,   0,   0,   0,  56,   0, 
+      0,   8, 242,   0,  16,   0, 
+      1,   0,   0,   0,  86,   5, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+     50,   0,   0,  10, 242,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      6,   0,  16,   0,   0,   0, 
+      0,   0,  70,  14,  16,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   8, 242,  32,  16,   0, 
+      0,   0,   0,   0,  70,  14, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+     86,   0,   0,   5, 242,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70,  30,  16,   0,   2,   0, 
+      0,   0,  56,   0,   0,  10, 
+    242,  32,  16,   0,   1,   0, 
+      0,   0,  70,  14,  16,   0, 
+      0,   0,   0,   0,   2,  64, 
+      0,   0, 129, 128, 128,  59, 
     129, 128, 128,  59, 129, 128, 
-    128,  59,  62,   0,   0,   1, 
-     83,  84,  65,  84, 116,   0, 
-      0,   0,  24,   0,   0,   0, 
+    128,  59, 129, 128, 128,  59, 
+     62,   0,   0,   1,  83,  84, 
+     65,  84, 116,   0,   0,   0, 
+     27,   0,   0,   0,   4,   0, 
+      0,   0,   0,   0,   0,   0, 
+     10,   0,   0,   0,  13,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   4,   0, 
+      0,   0,   5,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   6,   0, 
+      0,   0,   0,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0
+};
+
+static const BYTE D2_VS[] = {
+     68,  88,  66,  67, 144, 147, 
+    172,  23, 248, 148,  69, 234, 
+    104, 166, 100,  69, 134, 200, 
+    253,  59,   1,   0,   0,   0, 
+     12,   4,   0,   0,   5,   0, 
+      0,   0,  52,   0,   0,   0, 
+     40,   1,   0,   0, 152,   1, 
+      0,   0,  12,   2,   0,   0, 
+    144,   3,   0,   0,  82,  68, 
+     69,  70, 236,   0,   0,   0, 
+      1,   0,   0,   0,  72,   0, 
+      0,   0,   1,   0,   0,   0, 
+     28,   0,   0,   0,   0,   4, 
+    254, 255,   0,  17,   0,   0, 
+    196,   0,   0,   0,  60,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,   1,   0,   0,   0, 
+     67,  66, 117, 110, 105, 102, 
+    111, 114, 109, 115,   0, 171, 
+     60,   0,   0,   0,   2,   0, 
+      0,   0,  96,   0,   0,   0, 
+     80,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+    144,   0,   0,   0,   0,   0, 
+      0,   0,  64,   0,   0,   0, 
+      2,   0,   0,   0, 156,   0, 
+      0,   0,   0,   0,   0,   0, 
+    172,   0,   0,   0,  64,   0, 
+      0,   0,   8,   0,   0,   0, 
+      2,   0,   0,   0, 180,   0, 
+      0,   0,   0,   0,   0,   0, 
+     86,  73,  69,  87,  80,  79, 
+     82,  84,   0, 171, 171, 171, 
+      3,   0,   3,   0,   4,   0, 
       4,   0,   0,   0,   0,   0, 
-      0,   0,   9,   0,   0,   0, 
-     11,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,  67,  65, 
+     77,  69,  82,  65,   0, 171, 
+      1,   0,   3,   0,   1,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,  77, 105, 
+     99, 114, 111, 115, 111, 102, 
+    116,  32,  40,  82,  41,  32, 
+     72,  76,  83,  76,  32,  83, 
+    104,  97, 100, 101, 114,  32, 
+     67, 111, 109, 112, 105, 108, 
+    101, 114,  32,  49,  48,  46, 
+     49,   0,  73,  83,  71,  78, 
+    104,   0,   0,   0,   3,   0, 
+      0,   0,   8,   0,   0,   0, 
+     80,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,  15,  15,   0,   0, 
+     86,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   1,   0, 
+      0,   0,   3,   3,   0,   0, 
+     95,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,   2,   0, 
+      0,   0,   3,   3,   0,   0, 
+     67,  79,  76,  79,  82,   0, 
+     80,  79,  83,  73,  84,  73, 
+     79,  78,   0,  84,  69,  88, 
+     67,  79,  79,  82,  68,   0, 
+     79,  83,  71,  78, 108,   0, 
+      0,   0,   3,   0,   0,   0, 
+      8,   0,   0,   0,  80,   0, 
+      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   3,   0, 
+      0,   0,   0,   0,   0,   0, 
+     15,   0,   0,   0,  92,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   3,   0, 
+      0,   0,   1,   0,   0,   0, 
+     15,   0,   0,   0,  98,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   3,   0, 
+      0,   0,   2,   0,   0,   0, 
+      3,  12,   0,   0,  83,  86, 
+     95,  80, 111, 115, 105, 116, 
+    105, 111, 110,   0,  67,  79, 
+     76,  79,  82,   0,  84,  69, 
+     88,  67,  79,  79,  82,  68, 
+      0, 171,  83,  72,  68,  82, 
+    124,   1,   0,   0,  64,   0, 
+      1,   0,  95,   0,   0,   0, 
+     89,   0,   0,   4,  70, 142, 
+     32,   0,   0,   0,   0,   0, 
+      5,   0,   0,   0,  95,   0, 
+      0,   3, 242,  16,  16,   0, 
+      0,   0,   0,   0,  95,   0, 
+      0,   3,  50,  16,  16,   0, 
+      1,   0,   0,   0,  95,   0, 
+      0,   3,  50,  16,  16,   0, 
+      2,   0,   0,   0, 103,   0, 
+      0,   4, 242,  32,  16,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0, 101,   0,   0,   3, 
+    242,  32,  16,   0,   1,   0, 
+      0,   0, 101,   0,   0,   3, 
+     50,  32,  16,   0,   2,   0, 
+      0,   0, 104,   0,   0,   2, 
+      2,   0,   0,   0,  56,   0, 
+      0,   8,  50,   0,  16,   0, 
+      0,   0,   0,   0,  70,  16, 
+     16,   0,   1,   0,   0,   0, 
+    166, 138,  32,   0,   0,   0, 
+      0,   0,   2,   0,   0,   0, 
+     65,   0,   0,   5,  50,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70,   0,  16,   0,   0,   0, 
+      0,   0,   0,   0,   0,   8, 
+     50,   0,  16,   0,   0,   0, 
+      0,   0,  70,   0,  16,   0, 
+      0,   0,   0,   0,  70, 128, 
+     32,   0,   0,   0,   0,   0, 
+      4,   0,   0,   0,  56,   0, 
+      0,   8, 242,   0,  16,   0, 
+      1,   0,   0,   0,  86,   5, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+     50,   0,   0,  10, 242,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      6,   0,  16,   0,   0,   0, 
+      0,   0,  70,  14,  16,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   8, 242,  32,  16,   0, 
+      0,   0,   0,   0,  70,  14, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+     86,   0,   0,   5, 242,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70,  30,  16,   0,   0,   0, 
+      0,   0,  56,   0,   0,  10, 
+    242,  32,  16,   0,   1,   0, 
+      0,   0,  70,  14,  16,   0, 
+      0,   0,   0,   0,   2,  64, 
+      0,   0, 129, 128, 128,  59, 
+    129, 128, 128,  59, 129, 128, 
+    128,  59, 129, 128, 128,  59, 
+     54,   0,   0,   5,  50,  32, 
+     16,   0,   2,   0,   0,   0, 
+     70,  16,  16,   0,   2,   0, 
+      0,   0,  62,   0,   0,   1, 
+     83,  84,  65,  84, 116,   0, 
+      0,   0,  10,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   6,   0,   0,   0, 
+      7,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       1,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      4,   0,   0,   0,   5,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      6,   0,   0,   0,   0,   0, 
-      0,   0,   1,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,   2,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -277,7 +477,7 @@ static const BYTE VS_BYTES[] = {
       0,   0,   0,   0
 };
 
-static const BYTE PS_BYTES[] = {
+static const BYTE C_PS[] = {
      68,  88,  66,  67,  85, 143, 
       4, 154,  26, 237, 247,  69, 
     188,  94,  49, 161,  59,  78, 
@@ -397,107 +597,81 @@ namespace sre
     constexpr inline int countof(T &el) { return 1; }
 }
 
-#ifndef NDEBUG
-    #define __BREAK if (IsDebuggerPresent()) DebugBreak();
-#else
-    #define __BREAK
-#endif
-
-// Since cleaning up would turn into a hazy mess, this does ONLY report for errors, it doesn't return execution! (At least for now)
-#define SRE_DXCALL(x) hr = x;                                                                           \
-do { if (FAILED(hr)) {                                                                                  \
-    sre::log<sre::LOGCATEGORY_ERROR>("DIRECT3D12: '" #x "' failed, line %u: '%s' (0x%X)", __LINE__, DXHRTOSTRING(hr), hr); \
-    __BREAK                                                                                             \
-}} while(0)
-
 #define SRE_DXRELEASE(iunknown) if (iunknown) (iunknown)->Release()
 #define SRE_DXSAFERELEASE(iunknown) SRE_DXRELEASE(iunknown); iunknown = nullptr
 
-// Convert HRESULT error codes into a constant string
-const char* DXHRTOSTRING(HRESULT hr)
+struct sred3d12_cache
 {
-    #define _FMT_CASE(x) case x: return #x
-    switch (hr)
-    {
-        _FMT_CASE(DXGI_ERROR_ACCESS_DENIED);
-        _FMT_CASE(DXGI_ERROR_ACCESS_LOST);
-        _FMT_CASE(DXGI_ERROR_ALREADY_EXISTS);
-        _FMT_CASE(DXGI_ERROR_CANNOT_PROTECT_CONTENT);
-        _FMT_CASE(DXGI_ERROR_DEVICE_HUNG);
-        _FMT_CASE(DXGI_ERROR_DEVICE_REMOVED);
-        _FMT_CASE(DXGI_ERROR_DEVICE_RESET);
-        _FMT_CASE(DXGI_ERROR_DRIVER_INTERNAL_ERROR);
-        _FMT_CASE(DXGI_ERROR_FRAME_STATISTICS_DISJOINT);
-        _FMT_CASE(DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE);
-        _FMT_CASE(DXGI_ERROR_INVALID_CALL);
-        _FMT_CASE(DXGI_ERROR_MORE_DATA);
-        _FMT_CASE(DXGI_ERROR_NAME_ALREADY_EXISTS);
-        _FMT_CASE(DXGI_ERROR_NONEXCLUSIVE);
-        _FMT_CASE(DXGI_ERROR_NOT_CURRENTLY_AVAILABLE);
-        _FMT_CASE(DXGI_ERROR_NOT_FOUND);
-        _FMT_CASE(DXGI_ERROR_RESTRICT_TO_OUTPUT_STALE);
-        _FMT_CASE(DXGI_ERROR_SDK_COMPONENT_MISSING);
-        _FMT_CASE(DXGI_ERROR_SESSION_DISCONNECTED);
-        _FMT_CASE(DXGI_ERROR_UNSUPPORTED);
-        _FMT_CASE(DXGI_ERROR_WAIT_TIMEOUT);
-        _FMT_CASE(DXGI_ERROR_WAS_STILL_DRAWING);
-        
-        _FMT_CASE(D3D12_ERROR_ADAPTER_NOT_FOUND);
-        _FMT_CASE(D3D12_ERROR_DRIVER_VERSION_MISMATCH);
-        _FMT_CASE(E_FAIL);
-        _FMT_CASE(E_INVALIDARG);
-        _FMT_CASE(E_OUTOFMEMORY);
-        _FMT_CASE(E_NOTIMPL);
-        _FMT_CASE(S_FALSE);
-        _FMT_CASE(S_OK);
-
-        _FMT_CASE(DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED);
-        _FMT_CASE(DXGI_ERROR_REMOTE_OUTOFMEMORY);
-        default: return NULL;
-    }
-    #undef _FMT_CASE
-}
-
-// This??
-typedef IDXGIFactory4 ID3D12Factory;
-typedef IDXGISwapChain3 ID3D12SwapChain;
-
-#define __inst static_cast<sre_d3d12*>(video->userdata)
-#define __tex static_cast<sre_d3d12texture*>(texture)
-
-struct sre_d3d12;
-
-struct sre_d3d12texture
-{
-    sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format);
-    ~sre_d3d12texture();
-    
-    bool valid() { return m_resource != NULL; }
-    
-    bool update(const void* pixels, int pitch);
-    bool size(int* pw, int* ph) { *pw = m_size.x; *ph = m_size.y; return true; }
-    SDL_PixelFormatEnum format() { return m_format; }
-    
-    void bind(ID3D12GraphicsCommandList* dxcmd_list);
-    void free(sre_d3d12* video);
-
-    int getx() { return m_size.x; }
-    int gety() { return m_size.y; }
-private:
-    SDL_PixelFormatEnum m_format = SDL_PIXELFORMAT_UNKNOWN;
-    sre::vec2i m_size{};
-
-    ID3D12Resource* m_resource{};
-    UINT m_srvoffset{};
-    D3D12_GPU_DESCRIPTOR_HANDLE m_gpudesc{};
+    D3D12_VIEWPORT viewport;
+    bool vsync;
 };
 
-struct sre_d3d12
+struct alignas(256) sred3d12_cbuffer
 {
-    ~sre_d3d12();
+    FLOAT viewport[16];
+    FLOAT camera[2];
+};
 
+struct sred3d12_dbuff
+{
+    std::vector<ID3D12Resource*> dxfreequeue;
+    ID3D12Resource* dxresource;
+    D3D12_GPU_VIRTUAL_ADDRESS baseaddr;
+    UINT index;
+    UINT capacity;
+
+    BYTE* mapped;
+public:
+    ~sred3d12_dbuff();
+
+    inline void reset() { index = 0; _freequeued(); }
+    bool init(ID3D12Device* dxdevice, UINT base_capacity);
+    bool resize(ID3D12Device* dxdevice, UINT new_capacity);
+    
+    UINT append(ID3D12Device* dxdevice, const void* data, UINT size)
+    {
+        if (index + size > capacity)
+        {
+            resize(dxdevice, capacity * 2 + size);
+        }   
+        
+        memcpy(mapped + index, data, size);
+        index += size;
+        return index - size;
+    }
+private:
+    void _freequeued();
+};
+
+struct sred3d12_texture
+{
+    ID3D12Resource* dxresource{};
+    UINT srvoffset{};
+    UINT srvid{}; // Last srv capacity value in which gpu_descriptor was set during binding, gpu_descriptor is just a cache value
+    D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor{};
+};
+
+struct sred3d12_dlls
+{
+    HMODULE d3d12 = LoadLibrary("D3D12.dll");
+    HMODULE dxgi = LoadLibrary("dxgi.dll");
+
+    ~sred3d12_dlls()
+    {
+        FreeLibrary(d3d12);
+        FreeLibrary(dxgi);
+    }
+};
+
+struct sred3d12_inst: sre::RenderDriver
+{
+    using texture_type = sred3d12_texture;
+
+    sred3d12_inst(SDL_Window* window, int* outstatus);
+    ~sred3d12_inst();
+private:
+    sred3d12_dlls dlls;
     // DirectX members
-    IDXGIFactory4* dxfactory;
     IDXGISwapChain3* dxswapchain;
     
     ID3D12Device* dxdevice;
@@ -505,118 +679,70 @@ struct sre_d3d12
     ID3D12CommandQueue* dxcmd_queue;
     ID3D12GraphicsCommandList* dxcmd_list;
     ID3D12DescriptorHeap* dxrtvheap;
-    ID3D12DescriptorHeap* dxsrvheap;
+    ID3D12DescriptorHeap* dxsrvheaps[2]{}; // One is a staging heap for copying, and the other one is a shader-visible heap
     ID3D12RootSignature* dxrootsignature;
-    ID3D12Heap* dxheap;
 
-    ID3D12PipelineState* dxpipeline_blendstates[5];
-    ID3D12Resource* dxrender_targets[2];
-
-    int current_dxpipelinestate;
+    ID3D12PipelineState* dxpipeline_blendstates1[5];
+    ID3D12PipelineState* dxpipeline_blendstates2[5];
+    ID3D12Resource* dxrender_targets[2]{};
     
     // Some DirectX state members
+    UINT current_blendstate;
+    UINT current_drawtype;
+
     UINT current_frameindex;
     UINT rtvheap_increment;
     UINT srvheap_increment;
-
-private:
     // Data to handle SRV heap descriptors
-    UINT m_srvlast;
-    UINT m_srvcap = 0;
-    std::stack<UINT> m_srvfreelist;
-    
-public:
+    UINT srvlast = 0;
+    UINT srvcap = 0;
+    std::stack<UINT> srvfreelist;
+
     ID3D12Fence* dxfence;
     HANDLE hfence;
 
-    struct VBO_INPUT
-    {
-        sre::rect2Dut rect;
-        sre::col4 color;
-        sre::vec2ut anchor;
-
-        sre::vec2f tuv;
-        sre::vec2f toffset;
-    };
-    struct alignas(256) CBUFFER
-    {
-        sre::vec2f viewport;
-        sre::vec2f camera;
-    };
-
     ID3D12Resource* cbuffer;
-    ID3D12Resource* basicvbo_container; // Basic container for rect data, holds 64kb in total of rect data
-    D3D12_GPU_VIRTUAL_ADDRESS basic_vboaddr;
-    sre::uptr basicvbo_index;
+    sred3d12_cbuffer* cbuffermap;
 
-    CBUFFER* cbuffermap;
-    VBO_INPUT* basicvbomap;
+    sred3d12_dbuff d1data{};
+    sred3d12_dbuff d2datac{};
+    sred3d12_dbuff d2datap{};
 
-    alignas(sre_d3d12texture) char basictexture[sizeof(sre_d3d12texture)]; // Allocate it as buffer of bytes to initialize it later
-private:
-    D3D12_VIEWPORT m_viewport;
-    bool m_vsync = 0;
+    alignas(sred3d12_texture) char basictexture[sizeof(sred3d12_texture)]; // Allocate it as buffer of bytes to initialize it later
+
+    sred3d12_cache caches{};
 public:
+    void flush_queueinstances1(texture_type* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags);
+    void flush_queueinstances2(texture_type* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
+            
     void present();
-    bool viewport(sre::vec2i osize, sre::vec2ut vsize);
-    bool vsync(int mode) { m_vsync = mode != 0; return true; }
-    bool blend(sre_DrawBlending blend);
+    bool clear(float color[3]);
+    
+    bool set_viewportstate(int w, int h, sre::unit scale);
+    bool set_blendstate(sre::blendMode blending);
+    bool set_camerastate(sre::unit x, sre::unit y);
+    void set_clipstate(const sre::rect2Di* rectangle);
+    void set_vsync(bool enable) { caches.vsync = enable; }
+                
+    bool texture_setup(texture_type* texture, sre::pixelFormat format, int x, int y, sre::pixelFormat* outformat);
+    bool texture_update(texture_type* texture, const void* pixels, int pitch);
+    void texture_destroy(texture_type* texture);
 
-    bool clear(sre::col4 color, sre::vec2f camera);
-    bool clip(sre::rect2Dut rect) { return false; }
+private:
+    void _setdstate(texture_type* texture, sre::u32 flags, sre::u32 switch_flags);
 
-    bool draw_fill(const sre_DDFill* data);
-    bool draw_lines(const sre_DDLines* data) { return false; }
-    bool draw_rect(const sre_DDRect* data);
-    bool draw_rrect(const sre_DDRRect* data) { return false; }
-    bool draw_texture(const sre_DDTexture* data);
-    bool draw_rtexture(const sre_DDRTexture* data) { return false; }
+    UINT _srvallocate();
+    void _srvfree(UINT offs);
+    
+    void _waitforgpu(); // Wait for the GPU to finish all commands
 
-    UINT srvallocate();
-    void srvfree(UINT offs);
-    private:
-        void _waitforgpu(); // Wait for the GPU to finish all commands
-
-        void _drawvbo(const VBO_INPUT& input);
-        void _setcameracbuf(bool usecam);
-
-    #ifndef IMGUI_DISABLE
-        public:
-            bool imgui_init();
-    #endif
+    void _setcameracbuf(bool usecam);
+    bool _pipelinesetup();
 };
 
-static const sre_videodriverInterface sred3d12_interface{
-    [](sre_videodriver* video) { delete __inst; },
-    [](const sre_videodriver* video) { __inst->present(); },
-    [](const sre_videodriver* video, int w, int h) { return __inst->viewport({w, h}, video->size); },
-    [](const sre_videodriver* video, int vsync) { return __inst->vsync(vsync); },
-    [](const sre_videodriver* video, sre_DrawBlending blend) { return __inst->blend(blend); },
-    [](const sre_videodriver* video, void* texture, int w, int h, SDL_PixelFormatEnum format) { new(texture) sre_d3d12texture(__inst, {w, h}, format); return __tex->valid(); },
-    [](const sre_videodriver* video, void* texture, const void* pixels, int pitch) { return __tex->update(pixels, pitch); },
-    [](const sre_videodriver* video, void* texture) { __tex->free(__inst); __tex->~sre_d3d12texture(); },
-    [](const sre_videodriver* video, void* texture, int* w, int* h) { return __tex->size(w, h); },
-    [](const sre_videodriver* video, void* texture) { return __tex->format(); },
+extern "C" sre::RenderDriverHelper<sred3d12_inst> sred3d12{"Direct3D 12 (joke/fun)"}; 
 
-    [](const sre_videodriver* video, const sre::col4* color) { return __inst->clear(*color, video->center - video->camera); },
-    [](const sre_videodriver* video, const sre::rect2Dut* rect) { return __inst->clip(*rect); },
-
-    [](const sre_videodriver* video, const sre_DDFill* data) { return __inst->draw_fill(data); },
-    [](const sre_videodriver* video, const sre_DDLines* data) { return __inst->draw_lines(data); },
-    [](const sre_videodriver* video, const sre_DDRect* data) { return __inst->draw_rect(data); },
-    [](const sre_videodriver* video, const sre_DDRRect* data) { return __inst->draw_rrect(data); },
-    [](const sre_videodriver* video, const sre_DDTexture* data) { return __inst->draw_texture(data); },   
-    [](const sre_videodriver* video, const sre_DDRTexture* data) { return __inst->draw_rtexture(data); }    
-};
-
-#ifndef IMGUI_DISABLE
-    extern const sre_videodriverImGuiInterface sred3d12imgui_interface;
-#endif
-
-static bool setup_pipeline(sre_d3d12* inst);
-static bool create_targets(sre_d3d12* inst);
-
-extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
+sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 {
     // I can do two things on the window to make a Direct3D 12 device
     // 1- Create an SDL renderer (with the d3d12 hint or driver index), then call SDL_RenderGetD3D12Device and work with the returned device
@@ -626,45 +752,74 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
 
     SDL_SysWMinfo syswm;
     SDL_VERSION(&syswm.version);
-    if (SDL_GetWindowWMInfo(window, &syswm) == SDL_FALSE)
-        return false;
-    SDL_assert(syswm.subsystem == SDL_SYSWM_WINDOWS); // WINRT too?
-
-    auto inst = new sre_d3d12{};
-    std::unique_ptr<sre_d3d12> _holder{inst};
+    if (SDL_GetWindowWMInfo(window, &syswm) == SDL_FALSE || syswm.subsystem != SDL_SYSWM_WINDOWS)
+    {
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+        return;
+    }
 
     HRESULT hr;
 
-    // Create factory and maybe get an adapter?
-    SRE_DXCALL(CreateDXGIFactory1(IID_PPV_ARGS(&inst->dxfactory)));
-    SRE_DXCALL(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&inst->dxdevice)));
-
+    // TODO: Load these functions dynamically, and maybe look if I can try and find adapters
     {
+        IDXGIFactory4* dxfactory = NULL;
+        
+        #ifndef NDEBUG
+        {
+            ID3D12Debug* dxdebug = NULL;
+            SRE_DXGETADDR(D3D12GetDebugInterface, PFN_D3D12_GET_DEBUG_INTERFACE, dlls.d3d12);
+            if (pD3D12GetDebugInterface && pD3D12GetDebugInterface(IID_PPV_ARGS(&dxdebug)) == S_OK)
+            {
+                dxdebug->EnableDebugLayer();
+                dxdebug->Release();
+            }
+        }
+        #endif
+                        
+        SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dlls.dxgi);
+        SRE_DXGETADDR(D3D12CreateDevice, PFN_D3D12_CREATE_DEVICE, dlls.d3d12);
+        if (!pD3D12CreateDevice || !pCreateDXGIFactory1)
+        {
+            *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+            return;
+        }
+
+        SRE_DXCALLC(pCreateDXGIFactory1(IID_PPV_ARGS(&dxfactory))); // Enum adapters? Maybe?
+        SRE_DXCALL(pD3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dxdevice)));
+        if (FAILED(hr))
+        {
+            if (hr == DXGI_ERROR_UNSUPPORTED)
+                *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+            return;
+        }
+
         D3D12_COMMAND_QUEUE_DESC cmdqueue_desc{};
         cmdqueue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-        SRE_DXCALL(inst->dxdevice->CreateCommandQueue(&cmdqueue_desc, IID_PPV_ARGS(&inst->dxcmd_queue)));
-        SRE_DXCALL(inst->dxdevice->CreateCommandAllocator(cmdqueue_desc.Type, IID_PPV_ARGS(&inst->dxcmd_allocator)));
-        SRE_DXCALL(inst->dxdevice->CreateCommandList(0, cmdqueue_desc.Type, inst->dxcmd_allocator, NULL, IID_PPV_ARGS(&inst->dxcmd_list)));
-        SRE_DXCALL(inst->dxcmd_list->Close());
-    }
+        SRE_DXCALLC(dxdevice->CreateCommandQueue(&cmdqueue_desc, IID_PPV_ARGS(&dxcmd_queue)));
+        SRE_DXCALLC(dxdevice->CreateCommandAllocator(cmdqueue_desc.Type, IID_PPV_ARGS(&dxcmd_allocator)));
+        SRE_DXCALLC(dxdevice->CreateCommandList(0, cmdqueue_desc.Type, dxcmd_allocator, NULL, IID_PPV_ARGS(&dxcmd_list)));
+        SRE_DXCALLC(dxcmd_list->Close());
 
-    {
         DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
         swapchain_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         swapchain_desc.SampleDesc.Count = 1;
         swapchain_desc.BufferCount = 2;
         swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        swapchain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
-        SRE_DXCALL(inst->dxfactory->CreateSwapChainForHwnd(
-            inst->dxcmd_queue,
+        SRE_DXCALLC(dxfactory->CreateSwapChainForHwnd(
+            dxcmd_queue,
             syswm.info.win.window, // Window gotten from SDL_Window*
             &swapchain_desc,
             NULL,
             NULL,
-            (IDXGISwapChain1**)&inst->dxswapchain
+            (IDXGISwapChain1**)&dxswapchain
         ));
+
+        SRE_DXCALLC(dxfactory->MakeWindowAssociation(syswm.info.win.window, DXGI_MWA_NO_WINDOW_CHANGES));
+        dxfactory->Release();
     }
 
     {
@@ -672,73 +827,62 @@ extern "C" bool sred3d12_init(sre_videodriver* video, SDL_Window* window)
         dheap_desc.NumDescriptors = 2;
         dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
-        SRE_DXCALL(inst->dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&inst->dxrtvheap)));
+        SRE_DXCALLC(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxrtvheap)));
 
-        inst->rtvheap_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-        inst->srvheap_increment = inst->dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        rtvheap_increment = dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        srvheap_increment = dxdevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
-    
-    if (!SUCCEEDED(hr))
-        return false;
+    if (!_pipelinesetup())
+        return;
 
-    if (!create_targets(inst))
-        return false;
-
-    if (!setup_pipeline(inst))
-        return false;
-
-    SRE_DXCALL(inst->dxdevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&inst->dxfence)));
-    inst->hfence = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (!inst->hfence)
-        return false;
+    SRE_DXCALLC(dxdevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&dxfence)));
+    hfence = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (!hfence)
+        return;
 
     UINT32 WHITE = UINT32_MAX;
-    new(inst->basictexture) sre_d3d12texture(inst, 1, SDL_PIXELFORMAT_UNKNOWN);
-    reinterpret_cast<sre_d3d12texture*>(inst->basictexture)->update(&WHITE, 4);
-
-    #undef interface
-
-    _holder.release();
-    video->texture_size = sizeof(sre_d3d12texture);
-    video->userdata = inst;
-    video->interface = &sred3d12_interface;
-
-    #ifndef IMGUI_DISABLE
-        video->imgui = &sred3d12imgui_interface;
-    #endif
-
-    return true;
+    if (!texture_setup(reinterpret_cast<texture_type*>(basictexture), SDL_PIXELFORMAT_UNKNOWN, 1, 1, NULL))
+        return;
+    if (!texture_update(reinterpret_cast<texture_type*>(basictexture), &WHITE, 4))
+        return;
+    
+    *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }
 
-sre_d3d12::~sre_d3d12()
+sred3d12_inst::~sred3d12_inst()
 {
     this->_waitforgpu();
 
-    reinterpret_cast<sre_d3d12texture*>(this->basictexture)->~sre_d3d12texture();
+    texture_destroy(reinterpret_cast<texture_type*>(basictexture));
 
     this->dxcmd_allocator->Release();
     this->dxcmd_list->Release();
     this->dxcmd_queue->Release();
     this->dxdevice->Release();
-    this->dxfactory->Release();
     this->dxswapchain->Release();
     this->dxrtvheap->Release();
-    this->dxsrvheap->Release();
     this->dxrootsignature->Release();
     this->dxfence->Release();
-    this->dxheap->Release();
 
-    this->basicvbo_container->Release();
+    this->cbuffer->Release();
+
+    if (dxsrvheaps[0]) // What if we don't have textures? Huh?
+    {
+        for (int i = 0; i < sre::countof(dxsrvheaps); i++)
+            dxsrvheaps[i]->Release();
+    }
     for (int i = 0; i < sre::countof(dxrender_targets); i++)
         dxrender_targets[i]->Release();
-    for (int i = 0; i < sre::countof(dxpipeline_blendstates); i++)
-        SRE_DXRELEASE(dxpipeline_blendstates[i]);
+    for (int i = 0; i < sre::countof(dxpipeline_blendstates1); i++)
+        dxpipeline_blendstates1[i]->Release();
+    for (int i = 0; i < sre::countof(dxpipeline_blendstates2); i++)
+        dxpipeline_blendstates2[i]->Release();
 
     CloseHandle(this->hfence);
 }
 
-void sre_d3d12::_waitforgpu()
+void sred3d12_inst::_waitforgpu()
 {
     HRESULT hr;
     SRE_DXCALL(dxcmd_queue->Signal(dxfence, 1));
@@ -750,31 +894,24 @@ void sre_d3d12::_waitforgpu()
     }
 }
 
-bool create_targets(sre_d3d12* inst)
-{
-    HRESULT hr;
-
-    D3D12_CPU_DESCRIPTOR_HANDLE cpudesc = inst->dxrtvheap->GetCPUDescriptorHandleForHeapStart();
-    for (int i = 0; i < sre::countof(inst->dxrender_targets); i++, cpudesc.ptr+=inst->rtvheap_increment)
-    {
-        SRE_DXCALL(inst->dxswapchain->GetBuffer(i, IID_PPV_ARGS(&inst->dxrender_targets[i])));
-        inst->dxdevice->CreateRenderTargetView(inst->dxrender_targets[i], NULL, cpudesc);
-    }
-
-    return SUCCEEDED(hr);
-}
-
 extern void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc);
 
-bool setup_pipeline(sre_d3d12* inst)
+bool sred3d12_inst::_pipelinesetup()
 {
-    static const D3D12_INPUT_ELEMENT_DESC INPUTS[] = {
+    static const D3D12_INPUT_ELEMENT_DESC D1_INPUTS[] = {
         /* transform      */ {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
-        /* color          */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
         /* anchor         */ {"POSITION", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
-        /* texture's max uv value */ {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
-        /* texture's offset       */ {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
+        /* color          */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* angle          */ {"PSIZE", 0, DXGI_FORMAT_R32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* uv             */ {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* uv_offset      */ {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
     };
+    static const D3D12_INPUT_ELEMENT_DESC D2_INPUTS[] = {
+        /* color  */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
+        /* points.pos */ {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+        /* points.uv  */ {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}        
+    };
+
     static const D3D12_DESCRIPTOR_RANGE DESCRANGES[] = {
         { D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 }
     };
@@ -805,7 +942,10 @@ bool setup_pipeline(sre_d3d12* inst)
         rsdesc.NumStaticSamplers = 1;
         rsdesc.pStaticSamplers = &sampler_desc;
 
-        SRE_DXCALL(D3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
+        SRE_DXGETADDR(D3D12SerializeRootSignature, PFN_D3D12_SERIALIZE_ROOT_SIGNATURE, dlls.d3d12);
+        assert(pD3D12SerializeRootSignature != NULL);
+
+        SRE_DXCALL(pD3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
         if (rserr)
         {
             sre::log<sre::LOGCATEGORY_ERROR>("Failed serializing D3D12 root signature: %.*s", rserr->GetBufferSize(), rserr->GetBufferPointer());
@@ -813,15 +953,13 @@ bool setup_pipeline(sre_d3d12* inst)
             return false;
         }
 
-        SRE_DXCALL(inst->dxdevice->CreateRootSignature(0, rsblob->GetBufferPointer(), rsblob->GetBufferSize(), IID_PPV_ARGS(&inst->dxrootsignature)));
+        SRE_DXCALL(dxdevice->CreateRootSignature(0, rsblob->GetBufferPointer(), rsblob->GetBufferSize(), IID_PPV_ARGS(&dxrootsignature)));
         rsblob->Release();
     }
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pstate_desc{};
-    pstate_desc.pRootSignature = inst->dxrootsignature;
+    pstate_desc.pRootSignature = dxrootsignature;
     pstate_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    pstate_desc.InputLayout.NumElements = sre::countof(INPUTS);
-    pstate_desc.InputLayout.pInputElementDescs = INPUTS;
     pstate_desc.NumRenderTargets = 1;
     pstate_desc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
     pstate_desc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
@@ -833,52 +971,49 @@ bool setup_pipeline(sre_d3d12* inst)
     pstate_desc.SampleDesc.Count = 1;
     pstate_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-    pstate_desc.VS.pShaderBytecode = VS_BYTES;
-    pstate_desc.VS.BytecodeLength = sizeof(VS_BYTES);
-    pstate_desc.PS.pShaderBytecode = PS_BYTES;
-    pstate_desc.PS.BytecodeLength = sizeof(PS_BYTES);
-    
     pstate_desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
     pstate_desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
     pstate_desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
     pstate_desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-    for (int i = 0; i < sre::countof(inst->dxpipeline_blendstates); i++)
+
+    pstate_desc.PS.pShaderBytecode = C_PS;
+    pstate_desc.PS.BytecodeLength = sizeof(C_PS);
+
+    // draw1 setup
+    pstate_desc.VS.pShaderBytecode = D1_VS;
+    pstate_desc.VS.BytecodeLength = sizeof(D1_VS);
+
+    pstate_desc.InputLayout.pInputElementDescs = D1_INPUTS;
+    pstate_desc.InputLayout.NumElements = sre::countof(D1_INPUTS);
+    
+    for (int i = 0; i < sre::countof(dxpipeline_blendstates1); i++)
     {
         blend_functions[i](pstate_desc.BlendState.RenderTarget[0]);
-        SRE_DXCALL(inst->dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&inst->dxpipeline_blendstates[i])));
+        SRE_DXCALL(dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&dxpipeline_blendstates1[i])));
     }
 
+    // draw2 setup
+    pstate_desc.VS.pShaderBytecode = D2_VS;
+    pstate_desc.VS.BytecodeLength = sizeof(D2_VS);
+
+    pstate_desc.InputLayout.pInputElementDescs = D2_INPUTS;
+    pstate_desc.InputLayout.NumElements = sre::countof(D2_INPUTS);
+
+    for (int i = 0; i < sre::countof(dxpipeline_blendstates1); i++)
     {
-        D3D12_HEAP_DESC heap_desc{};
-        heap_desc.Flags = D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
-        heap_desc.Alignment = 0;
-        heap_desc.SizeInBytes = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-        heap_desc.Properties.Type = D3D12_HEAP_TYPE_CUSTOM;
-        heap_desc.Properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-        heap_desc.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-
-        SRE_DXCALL(inst->dxdevice->CreateHeap(&heap_desc, IID_PPV_ARGS(&inst->dxheap)));
-
-        D3D12_RESOURCE_DESC resource_desc{};
-        resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        resource_desc.Width = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-        resource_desc.Height = 1;
-        resource_desc.DepthOrArraySize = 1;
-        resource_desc.MipLevels = 1;
-        resource_desc.Format = DXGI_FORMAT_UNKNOWN;
-        resource_desc.SampleDesc.Count = 1;
-        resource_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-        SRE_DXCALL(inst->dxdevice->CreatePlacedResource(
-            inst->dxheap, 0,
-            &resource_desc,
-            D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
-            NULL,
-            IID_PPV_ARGS(&inst->basicvbo_container)
-        ));
-        
-        inst->basic_vboaddr = inst->basicvbo_container->GetGPUVirtualAddress();
+        blend_functions[i](pstate_desc.BlendState.RenderTarget[0]);
+        SRE_DXCALL(dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&dxpipeline_blendstates2[i])));
     }
+
+    //
+
+    if (!d1data.init(dxdevice, sizeof(sre::RenderInstance1)*255))
+        return false;
+    
+    if (!d2datac.init(dxdevice, sizeof(sre::col4)*255))
+        return false;
+    if (!d2datap.init(dxdevice, sizeof(sre::RenderPoint)*255))
+        return false;
 
     {   // Constant buffers
         D3D12_HEAP_PROPERTIES heap_properties{};
@@ -886,7 +1021,7 @@ bool setup_pipeline(sre_d3d12* inst)
 
         D3D12_RESOURCE_DESC resource_desc{};
         resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        resource_desc.Width = sizeof(sre_d3d12::CBUFFER)*2; // Two identical cbuffers where the first one doesn't contain any camera offset, while the second one does!
+        resource_desc.Width = sizeof(sred3d12_cbuffer)*2; // Two identical cbuffers where the first one doesn't contain any camera offset, while the second one does!
         resource_desc.Height = 1;
         resource_desc.DepthOrArraySize = 1;
         resource_desc.MipLevels = 1;
@@ -894,37 +1029,97 @@ bool setup_pipeline(sre_d3d12* inst)
         resource_desc.SampleDesc.Count = 1;
         resource_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-        SRE_DXCALL(inst->dxdevice->CreateCommittedResource(
+        SRE_DXCALL(dxdevice->CreateCommittedResource(
             &heap_properties,
             D3D12_HEAP_FLAG_NONE,
             &resource_desc,
             D3D12_RESOURCE_STATE_COMMON,
             NULL,
-            IID_PPV_ARGS(&inst->cbuffer)
+            IID_PPV_ARGS(&cbuffer)
         ));
     }
     D3D12_RANGE range{0, 0};
-    SRE_DXCALL(inst->basicvbo_container->Map(0, &range, reinterpret_cast<void**>(&inst->basicvbomap)));
-    SRE_DXCALL(inst->cbuffer->Map(0, &range, reinterpret_cast<void**>(&inst->cbuffermap)));
+    SRE_DXCALL(cbuffer->Map(0, &range, reinterpret_cast<void**>(&cbuffermap)));
     
     return SUCCEEDED(hr);
 }
 
-bool sre_d3d12::clear(sre::col4 color, sre::vec2f camera)
+bool sred3d12_dbuff::init(ID3D12Device* dxdevice, UINT base_capacity)
+{
+    HRESULT hr;
+    D3D12_HEAP_PROPERTIES heap_properties{};
+    heap_properties.Type = D3D12_HEAP_TYPE_CUSTOM;
+    heap_properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+    heap_properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+
+    D3D12_RESOURCE_DESC resource_desc{};
+    resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    resource_desc.Width = base_capacity;
+    resource_desc.Height = 1;
+    resource_desc.DepthOrArraySize = 1;
+    resource_desc.MipLevels = 1;
+    resource_desc.Format = DXGI_FORMAT_UNKNOWN;
+    resource_desc.SampleDesc.Count = 1;
+    resource_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+    SRE_DXCALLF(dxdevice->CreateCommittedResource(
+        &heap_properties, D3D12_HEAP_FLAG_NONE,
+        //dxheap, 0,
+        &resource_desc,
+        D3D12_RESOURCE_STATE_COMMON,
+        NULL,
+        IID_PPV_ARGS(&dxresource)
+    ));
+    
+    this->baseaddr = dxresource->GetGPUVirtualAddress();
+    this->capacity = base_capacity;
+    this->index = 0;
+
+    D3D12_RANGE range{0, 0};
+    SRE_DXCALLF(dxresource->Map(0, &range, reinterpret_cast<void**>(&mapped)));
+    return true;
+}
+
+bool sred3d12_dbuff::resize(ID3D12Device* dxdevice, UINT capacity)
+{
+    dxresource->Unmap(0, NULL);
+    dxfreequeue.push_back(dxresource);
+    return init(dxdevice, capacity);
+}
+
+void sred3d12_dbuff::_freequeued()
+{
+    for (auto res : dxfreequeue)
+        res->Release();
+
+    dxfreequeue.clear();
+}
+
+sred3d12_dbuff::~sred3d12_dbuff()
+{
+    if (!dxresource)
+    {
+        sre::log<sre::LOGCATEGORY_WARN>("[DirectX]: You got a resource buffer that hasn't been initialized yet");
+        return;
+    }
+
+    dxresource->Unmap(0, NULL);
+    dxresource->Release();
+    _freequeued();
+}
+
+bool sred3d12_inst::clear(float color[3])
 {
     HRESULT hr{};
-    _waitforgpu();
     
     SRE_DXCALL(dxcmd_allocator->Reset());
-    SRE_DXCALL(dxcmd_list->Reset(dxcmd_allocator, dxpipeline_blendstates[current_dxpipelinestate]));
+    SRE_DXCALL(dxcmd_list->Reset(dxcmd_allocator, NULL));
 
-    D3D12_RECT scr{0, 0, (LONG)m_viewport.Width, (LONG)m_viewport.Height};
-    dxcmd_list->SetDescriptorHeaps(1, &dxsrvheap);
+    D3D12_RECT scr{0, 0, (LONG)caches.viewport.Width, (LONG)caches.viewport.Height};
+    dxcmd_list->SetDescriptorHeaps(1, &dxsrvheaps[1]);
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
-    dxcmd_list->RSSetViewports(1, &m_viewport);
+    dxcmd_list->RSSetViewports(1, &caches.viewport);
     dxcmd_list->RSSetScissorRects(1, &scr);
-    dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN);
-    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
 
     D3D12_RESOURCE_BARRIER rbtransition{};
     rbtransition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -938,24 +1133,20 @@ bool sre_d3d12::clear(sre::col4 color, sre::vec2f camera)
         D3D12_CPU_DESCRIPTOR_HANDLE rtv = dxrtvheap->GetCPUDescriptorHandleForHeapStart();
         rtv.ptr += current_frameindex*rtvheap_increment;
 
-        FLOAT fcolor[4] = {
-            color.r/255.0f,
-            color.g/255.0f,
-            color.b/255.0f,
-            1
-        };
-
         dxcmd_list->OMSetRenderTargets(1, &rtv, FALSE, NULL);
-        dxcmd_list->ClearRenderTargetView(rtv, fcolor, 0, NULL);
+        dxcmd_list->ClearRenderTargetView(rtv, color, 0, NULL);
     }
 
-    basicvbo_index = 0;
-    cbuffermap[1].camera = camera;
+    d1data.reset();
+    d2datac.reset();
+    d2datap.reset();
+
+    current_drawtype = 0;
 
     return SUCCEEDED(hr);
 }
 
-void sre_d3d12::present()
+void sred3d12_inst::present()
 {
     HRESULT hr;
     
@@ -974,22 +1165,39 @@ void sre_d3d12::present()
     
     ID3D12CommandList* cmd_lists[] = { dxcmd_list };
     dxcmd_queue->ExecuteCommandLists(1, cmd_lists);
-    SRE_DXCALL(dxswapchain->Present(m_vsync, 0));
+    SRE_DXCALL(dxswapchain->Present(caches.vsync, !caches.vsync ? DXGI_PRESENT_ALLOW_TEARING : 0));
+    if (hr == DXGI_ERROR_DEVICE_REMOVED)
+    {
+        HRESULT reason = dxdevice->GetDeviceRemovedReason();
+        sre::log<sre::LOGCATEGORY_ERROR>("[Direct3D 12]: The device has been removed. Reason: '%s' (%X)", DXHRTOSTRING(reason), reason);
+        abort();
+        return;
+    }
     
     current_frameindex = dxswapchain->GetCurrentBackBufferIndex();
+    _waitforgpu();
 }
 
-bool sre_d3d12::viewport(sre::vec2i osize, sre::vec2ut vsize)
+bool sred3d12_inst::set_viewportstate(int w, int h, sre::unit scale)
 {
     _waitforgpu();
 
     HRESULT hr;
 
-    cbuffermap[0].viewport = vsize;
-    cbuffermap[1].viewport = vsize;
+    FLOAT fw = static_cast<FLOAT>(w), fh = static_cast<FLOAT>(h);
 
-    m_viewport.Width = static_cast<FLOAT>(osize.x);
-    m_viewport.Height = static_cast<FLOAT>(osize.y);
+    caches.viewport.Width = fw;
+    caches.viewport.Height = fh;
+
+    FLOAT mat[16] = {
+        2.0f/fw, 0.0f, 0.0f, 0.0f,
+        0.0f, -2.0f/fh, 0.0f, 0.0f,
+        0.0f, 0.0f, scale, 0.0,
+        -1.0f, 1.0f, 0.0f, 1.0f
+    };
+
+    memcpy(cbuffermap[0].viewport, mat, sizeof(mat));
+    memcpy(cbuffermap[1].viewport, mat, sizeof(mat));
 
     for (int i = 0; i < sre::countof(dxrender_targets); i++)
     {
@@ -997,174 +1205,199 @@ bool sre_d3d12::viewport(sre::vec2i osize, sre::vec2ut vsize)
         dxrender_targets[i]->Release();
         dxrender_targets[i] = NULL;
     }
-    SRE_DXCALL(dxswapchain->ResizeBuffers(sre::countof(dxrender_targets), osize.x, osize.y, DXGI_FORMAT_UNKNOWN, 0));
+    SRE_DXCALLF(dxswapchain->ResizeBuffers(sre::countof(dxrender_targets), w, h, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING));
 
-    if (!create_targets(this))
-        abort();
+    D3D12_CPU_DESCRIPTOR_HANDLE cpudesc = dxrtvheap->GetCPUDescriptorHandleForHeapStart();
+    for (int i = 0; i < sre::countof(dxrender_targets); i++, cpudesc.ptr+=rtvheap_increment)
+    {
+        SRE_DXCALLF(dxswapchain->GetBuffer(i, IID_PPV_ARGS(&dxrender_targets[i])));
+        dxdevice->CreateRenderTargetView(dxrender_targets[i], NULL, cpudesc);
+    }
 
     current_frameindex = 0;
 
     return true;
 }
 
-bool sre_d3d12::blend(sre_DrawBlending blend)
+bool sred3d12_inst::set_blendstate(sre::blendMode blendmode)
 {
-    int state;
-    switch (blend)
+    current_blendstate = blendmode;
+    
+    ID3D12PipelineState** ppstatearr;
+    switch (current_drawtype)
     {
-        case SRE_BLEND_NONE: state = 0; break;
-        case SRE_BLEND_BLEND: state = 1; break;
-        case SRE_BLEND_ADD: state = 2; break;
-        case SRE_BLEND_MOD: state = 3; break;
-        case SRE_BLEND_MUL: state = 4; break;
-        default: abort(); return false;
+        case 1: ppstatearr = dxpipeline_blendstates1; break;
+        case 2: ppstatearr = dxpipeline_blendstates2; break;
+        default: return true;
     }
 
-    current_dxpipelinestate = state;
-    dxcmd_list->SetPipelineState(dxpipeline_blendstates[state]);
+    dxcmd_list->SetPipelineState(ppstatearr[blendmode]);
     return true;
 }
 
-void sre_d3d12::_drawvbo(const VBO_INPUT& input)
+bool sred3d12_inst::set_camerastate(sre::unit x, sre::unit y)
 {
+    cbuffermap[1].camera[0] = x;
+    cbuffermap[1].camera[1] = y;
+    return true;
+}
+
+void sred3d12_inst::set_clipstate(const sre::rect2Di* rectangle)
+{
+    D3D12_RECT scissors = {
+        rectangle->position.x,
+        rectangle->position.y,
+        rectangle->position.x + rectangle->size.x,
+        rectangle->position.y + rectangle->size.y,
+    };
+    dxcmd_list->RSSetScissorRects(1, &scissors);
+}
+
+void sred3d12_inst::_setdstate(texture_type* texture, sre::u32 flags, sre::u32 switch_flags)
+{
+    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+        dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress() + sizeof(sred3d12_cbuffer) * ((flags & SRE_DRAWFLAG_CAMERA) != 0));
+
+    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
+    {
+        texture = texture ? texture : reinterpret_cast<sred3d12_texture*>(basictexture);
+        if (texture->srvid != srvcap)
+        {
+            D3D12_GPU_DESCRIPTOR_HANDLE gpudesc = dxsrvheaps[1]->GetGPUDescriptorHandleForHeapStart();
+            gpudesc.ptr += texture->srvoffset;
+            texture->gpu_descriptor = gpudesc;
+            texture->srvid = srvcap;
+        }
+        dxcmd_list->SetGraphicsRootDescriptorTable(1, texture->gpu_descriptor);
+    }
+}
+
+void sred3d12_inst::flush_queueinstances1(texture_type* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags)
+{
+    if (switch_flags & SRE_RENDER_SWITCHTYPE)
+    {
+        dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+        dxcmd_list->SetPipelineState(dxpipeline_blendstates1[current_blendstate]);
+        current_drawtype = 1;
+    }
+
+    _setdstate(texture, flags, switch_flags);
+
+    UINT UINT_instcount = static_cast<UINT>(instance_count);
+    UINT index = d1data.append(dxdevice, instances, sizeof(sre::RenderInstance1)*UINT_instcount);
+
     D3D12_VERTEX_BUFFER_VIEW vboview{};
-    vboview.BufferLocation = basic_vboaddr + basicvbo_index * sizeof(VBO_INPUT);
-    vboview.SizeInBytes = sizeof(VBO_INPUT);
-
-    basicvbomap[basicvbo_index] = input;
-    basicvbo_index++;
-
+    vboview.BufferLocation = d1data.baseaddr + index;
+    vboview.SizeInBytes = sizeof(sre::RenderInstance1)*UINT_instcount;
+    vboview.StrideInBytes = sizeof(sre::RenderInstance1);
     dxcmd_list->IASetVertexBuffers(0, 1, &vboview);
-    dxcmd_list->DrawInstanced(4, 1, 0, 0);
+    dxcmd_list->DrawInstanced(4, static_cast<UINT>(instance_count), 0, 0);
 }
 
-void sre_d3d12::_setcameracbuf(bool usecam)
+void sred3d12_inst::flush_queueinstances2(texture_type* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
 {
-    // if (lastcamstate != usecam)
-    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress() + sizeof(CBUFFER) * usecam);
-}
-
-bool sre_d3d12::draw_fill(const sre_DDFill* data)
-{
-    if (!data->color.a) return true;
-
-    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
-    _setcameracbuf(false);
-    _drawvbo({
-        { 0, {D3D12_FLOAT32_MAX} }, // FLOAT32_MAX hell yeah!
-        data->color,
-        0
-        });
-
-    return true;
-}
-
-bool sre_d3d12::draw_rect(const sre_DDRect* data)
-{
-    if (!data->color.a) return true;
-
-    reinterpret_cast<sre_d3d12texture*>(basictexture)->bind(dxcmd_list);
-
-    _setcameracbuf(data->flags & SRE_DRAWFLAGS_USECAM);
-    _drawvbo({
-        data->rect,
-        data->color,
-        data->anchor
-        });
-
-    return true; // As DX command lists run directly on the GPU they return void so there'd be little to no purpose on returning a status code in these draw functions
-}
-
-bool sre_d3d12::draw_texture(const sre_DDTexture* data)
-{
-    auto* texture = static_cast<sre_d3d12texture*>(sre_get_texture(data->texture));
-    texture->bind(dxcmd_list);
-
-    sre::vec2f uv{1};
-    sre::vec2f offs{0};
-    if (data->region.size.x)
+    if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
-        float size = static_cast<float>(texture->getx());
-        uv.x = data->region.size.x / size;
-        if (data->region.position.x)
-            offs.x = data->region.position.x / size;
-    }
-    if (data->region.size.y)
-    {
-        float size = static_cast<float>(texture->gety());
-        uv.y = data->region.size.y / size;
-        if (data->region.position.y)
-            offs.y = data->region.position.y / size;
+        dxcmd_list->SetPipelineState(dxpipeline_blendstates2[current_blendstate]);
+        current_drawtype = 2;
     }
 
-    if (data->flags & SRE_DRAWFLAGS_FLIPX)
+    _setdstate(texture, flags, switch_flags);
+
+    switch (instance->mode)
     {
-        offs.x += uv.x;
-        uv.x = -uv.x;
-    }
-    if (data->flags & SRE_DRAWFLAGS_FLIPY)
-    {
-        offs.y += uv.y;
-        uv.y = -uv.y;
+        case SRE_DRAW2_JOINED: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN); break;
+        case SRE_DRAW2_STRIP: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); break;
+        case SRE_DRAW2_TRIANGLE: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); break;
+        default: abort();
     }
 
-    _setcameracbuf(data->flags & SRE_DRAWFLAGS_USECAM);
-    _drawvbo({
-        data->rect,
-        data->modulate,
-        data->anchor,
-        uv,
-        offs
-    });
-    return true;
+    UINT UINT_ptcount = static_cast<UINT>(point_count);
+    UINT indexc = d2datac.append(dxdevice, &instance->color, sizeof(sre::col4));
+    UINT indexp = d2datap.append(dxdevice, instance->points, sizeof(sre::RenderPoint)*UINT_ptcount);
+
+    D3D12_VERTEX_BUFFER_VIEW vboviews[2]{};
+    vboviews[0].BufferLocation = d2datac.baseaddr + indexc;
+    vboviews[0].SizeInBytes = sizeof(sre::col4);
+    vboviews[0].StrideInBytes = sizeof(sre::col4);
+    vboviews[1].BufferLocation = d2datap.baseaddr + indexp;
+    vboviews[1].SizeInBytes = sizeof(sre::RenderPoint)*UINT_ptcount;
+    vboviews[1].StrideInBytes = sizeof(sre::RenderPoint);
+    dxcmd_list->IASetVertexBuffers(0, 2, vboviews);
+    dxcmd_list->DrawInstanced(UINT_ptcount, 1, 0, 0);
 }
 
-UINT sre_d3d12::srvallocate()
+
+UINT sred3d12_inst::_srvallocate()
 {
     HRESULT hr;
     UINT offset;
-    if (m_srvfreelist.empty())
+    if (srvfreelist.empty())
     {
-        offset = m_srvlast;
-        m_srvlast += srvheap_increment;
+        offset = srvlast;
+        srvlast += srvheap_increment;
 
-        if (m_srvlast / srvheap_increment > m_srvcap)
+        if (srvlast / srvheap_increment > srvcap)
         {
-            assert(m_srvcap == 0 && "Heap descriptor resizing isn't currently implemented. Try increasing the increment number in the line below?");
-            m_srvcap += 1024;
+            UINT old_cap = srvcap;
+            srvcap += 16;
 
-            //ID3D12DescriptorHeap* old_dheap = dxsrvheap;
+            ID3D12DescriptorHeap* old_dheaps[2] = { dxsrvheaps[0], dxsrvheaps[1] };
 
             D3D12_DESCRIPTOR_HEAP_DESC dheap_desc{};
-            dheap_desc.NumDescriptors = m_srvcap; // I guess this will be resized and recreated... Ughh
+            dheap_desc.NumDescriptors = srvcap; // I guess this will be resized and recreated... Ughh
             dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheaps[0])));
             dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-            SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheap)));
-            
+            SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheaps[1])));
+
+            if (old_cap)
+            {
+                assert(old_dheaps[0] != NULL);
+                assert(old_dheaps[1] != NULL);
+
+                dxdevice->CopyDescriptorsSimple(old_cap,
+                                                dxsrvheaps[0]->GetCPUDescriptorHandleForHeapStart(),
+                                                old_dheaps[0]->GetCPUDescriptorHandleForHeapStart(),
+                                                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+                                            );
+                old_dheaps[0]->Release();
+                old_dheaps[1]->Release();
+
+                dxdevice->CopyDescriptorsSimple(old_cap,
+                                                dxsrvheaps[1]->GetCPUDescriptorHandleForHeapStart(),
+                                                dxsrvheaps[0]->GetCPUDescriptorHandleForHeapStart(),
+                                                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+                                            );
+            }
         }
     }
     else
     {
-        assert(dxsrvheap != NULL);
+        assert(dxsrvheaps[0] != NULL);
+        assert(dxsrvheaps[1] != NULL);
         
-        offset = m_srvfreelist.top();
-        m_srvfreelist.pop();
+        offset = srvfreelist.top();
+        srvfreelist.pop();
     }
 
     return offset;
 }
 
-void sre_d3d12::srvfree(UINT offs)
+void sred3d12_inst::_srvfree(UINT offs)
 {
-    m_srvfreelist.push(offs);
+    srvfreelist.push(offs);
 }
 
-sre_d3d12texture::~sre_d3d12texture()
+void sred3d12_inst::texture_destroy(texture_type* texture)
 {
-    SRE_DXRELEASE(m_resource);
+    if (texture->dxresource)
+        texture->dxresource->Release();
+
+    _srvfree(texture->srvoffset);
 }
 
-sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelFormatEnum format)
+bool sred3d12_inst::texture_setup(texture_type* texture, sre::pixelFormat formathint, int w, int h, sre::pixelFormat* outformat)
 {
     HRESULT hr;
 
@@ -1173,24 +1406,23 @@ sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelF
 
     D3D12_RESOURCE_DESC texture_desc{};
     texture_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    texture_desc.Width = size.x;
-    texture_desc.Height = size.y;
+    texture_desc.Width = w;
+    texture_desc.Height = h;
     texture_desc.DepthOrArraySize = 1;
     texture_desc.MipLevels = 1;
     texture_desc.Format = DXGI_FORMAT_R8G8B8A8_UINT; // Default format for now, might make a function to chose the best format for this but for now using the exact same Swapchain's format is enough
                                                         // Note that `format` is just a hint to chose a seemimgly better format for conversions, you must get the format of the texture returned in order to convert it and update its pixels
     texture_desc.SampleDesc.Count = 1;
 
-    SRE_DXCALL(video->dxdevice->CreateCommittedResource(
+    SRE_DXCALLF(dxdevice->CreateCommittedResource(
         &heap_properties, D3D12_HEAP_FLAG_NONE,
         &texture_desc,
         D3D12_RESOURCE_STATE_COMMON,
-        NULL, IID_PPV_ARGS(&m_resource)
+        NULL, IID_PPV_ARGS(&texture->dxresource)
     ));
 
-    if (SUCCEEDED(hr))
     {
-        UINT offset = video->srvallocate();
+        UINT offset = _srvallocate();
 
         D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
         srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -1198,39 +1430,33 @@ sre_d3d12texture::sre_d3d12texture(sre_d3d12* video, sre::vec2i size, SDL_PixelF
         srv_desc.Texture2D.MipLevels = 1;
         srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandle = video->dxsrvheap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandle = dxsrvheaps[0]->GetCPUDescriptorHandleForHeapStart();
         cpuhandle.ptr += offset;
-        video->dxdevice->CreateShaderResourceView(m_resource, &srv_desc, cpuhandle);
+        dxdevice->CreateShaderResourceView(texture->dxresource, &srv_desc, cpuhandle);
 
-        m_srvoffset = offset;
-        m_gpudesc = video->dxsrvheap->GetGPUDescriptorHandleForHeapStart();
-        m_gpudesc.ptr += offset;
-        m_size = size;
-        m_format = SDL_PIXELFORMAT_RGBA32;
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandledst = dxsrvheaps[1]->GetCPUDescriptorHandleForHeapStart();
+        cpuhandledst.ptr += offset;
+        dxdevice->CopyDescriptorsSimple(1, cpuhandledst, cpuhandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+        texture->srvoffset = offset;
+        texture->srvid = 0;
+        if (outformat)
+            *outformat = SDL_PIXELFORMAT_RGBA32;
+
+        return true;
     }
 }
 
-void sre_d3d12texture::free(sre_d3d12* video)
-{
-    video->srvfree(m_srvoffset);
-}
-
-bool sre_d3d12texture::update(const void* pixels, int pitch)
+bool sred3d12_inst::texture_update(texture_type* texture, const void* pixels, int pitch)
 {
     HRESULT hr;
 
-    SRE_DXCALL(m_resource->Map(0, NULL, NULL));
-    SRE_DXCALL(m_resource->WriteToSubresource(0, NULL, pixels, pitch, 1));
+    SRE_DXCALL(texture->dxresource->Map(0, NULL, NULL));
+    SRE_DXCALL(texture->dxresource->WriteToSubresource(0, NULL, pixels, pitch, 1));
     
     D3D12_RANGE range{};
-    m_resource->Unmap(0, &range);
+    texture->dxresource->Unmap(0, &range);
     return SUCCEEDED(hr);
-}
-
-void sre_d3d12texture::bind(ID3D12GraphicsCommandList* dxcmd_list)
-{
-    // Code to bind texture, I DON'T know yet how to do it...
-    dxcmd_list->SetGraphicsRootDescriptorTable(1, m_gpudesc);
 }
 
 //

@@ -1,15 +1,16 @@
 #include <GUI/Components/Fill.hpp>
 
-#include <Core/Draw.hpp>
+#include <Core/Render.h>
 
 using namespace sreGUI;
 
 void Fill::on_render(const sre::rect2Dut& dimensions)
 {
-    sre::draw(sre::DDRect{
-        0,
-        *this,
-        dimensions,
-        sre::vec2ut::ZERO
-    });
+    sre::render_draw1(
+        0, {{
+            dimensions,
+            sre::vec2ut::ZERO,
+            color
+        }}
+    );
 }

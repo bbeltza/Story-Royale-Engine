@@ -2,6 +2,8 @@
 #include <Base/Image.hpp>
 #include <Base/File.hpp>
 
+#include <Core/Render.h>
+
 using namespace sre;
 
 Image::Image(int w, int h):
@@ -28,7 +30,7 @@ Image::Image(const char* path)
     }
 }
 
-Image::Image(const Image& other): sdl_surface(copy_SDLsurface(other.sdl_surface))
+Image::Image(const Image& other): sdl_surface(SDL_DuplicateSurface(other.sdl_surface))
 {
 }
 
@@ -37,21 +39,20 @@ Image::Image(Image&& other) noexcept : sdl_surface(other.sdl_surface)
     other.sdl_surface = NULL;
 }
 
+void Image::operator=(SDL_Surface* from_surface)
+{
+    if (sdl_surface)
+        SDL_FreeSurface(sdl_surface);
+    
+    sdl_surface = from_surface;
+}
+
 Image::~Image()
 {
     SDL_Surface* tmp = sdl_surface;
     sdl_surface = NULL;
 
     SDL_FreeSurface(tmp);
-}
-
-SDL_Surface* Image::copy_SDLsurface(const SDL_Surface* other)
-{
-    SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, other->w, other->h, 0, other->format->format);
-    if (surface)
-        SDL_memcpy(surface->pixels, other->pixels, surface->h * surface->pitch);
-
-    return surface;
 }
 
 void Image::blit(const Image& img, const sre::vec2i& pos, const sre::vec2f& anchor)
@@ -69,4 +70,44 @@ void Image::blit(const Image& img, const sre::vec2i& pos, const sre::vec2f& anch
 
 
     SDL_UpperBlit(img.sdl_surface, NULL, sdl_surface, &rect);
+}
+
+sre::Sampler* Image::to_sampler() const
+{
+    #define IMG_TSERR(...) sre::log<LOGCATEGORY_ERROR>("Image::to_sampler() - " __VA_ARGS__)
+
+    if (!sdl_surface)
+    {
+        IMG_TSERR("image does not contain any surface. It is not valid");
+        return NULL;
+    }
+
+    sre::Sampler* sampler = sre::sampler(static_cast<sre::pixelFormat>(this->SDLformat()), sdl_surface->w, sdl_surface->h);
+    if (!sampler)
+    {
+        IMG_TSERR("RenderInterface::sampler() failed");
+        return NULL;
+    }
+
+    sre::pixelFormat format = sampler->format();
+    if (format == SDLformat())
+    {
+        if (!sampler->update(sdl_surface->pixels, sdl_surface->pitch))
+            IMG_TSERR("RenderInterface::sampler_update() failed");
+    }
+    else
+    {
+        SDL_Surface *copy = SDL_ConvertSurfaceFormat(sdl_surface, format, 0);
+        if (!copy)
+            IMG_TSERR("SDL_ConvertSurfaceFormat() failed: %s", SDL_GetError());
+        else
+        {
+            if (!sampler->update(copy->pixels, copy->pitch))
+                IMG_TSERR("RenderInterface::sampler_update() failed");
+            
+            SDL_FreeSurface(copy);
+        }
+    }
+
+    return sampler;
 }

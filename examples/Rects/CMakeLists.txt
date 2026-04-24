@@ -1,8 +1,7 @@
-include(sre)
-project(RectsTest)
+project(sretestrects)
 
 set(SOURCES Rects.cpp)
 
-srEngine_property(RectsTest PROPERTIES TITLE     "Rectangles Test"
+SRE_PROPERTY(sretestrects PROPERTIES TITLE     "Rectangles Test"
                                        RESOURCES "res")
-srEngine_build(RectsTest rects SOURCES)
+SRE_BUILD(sretestrects SOURCES)

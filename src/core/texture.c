@@ -1,170 +1,203 @@
-#include <Core/Texture.h>
+#include <Core/Render.h>
 #include <Core/Defer.h>
 
-#include "drivers/drivers.h"
 #include "../internal.h"
 
 #include <utils/mem.h>
 
-size_t sre_isinfreelist(sre_Texture id)
+struct sre_Sampler
 {
-    for (size_t i = 0; i < engine.video->texture_flcount; i++)
-        if (engine.video->texture_fl[i] == id) return i;
-    return -1;
-}
-
-void* sre_get_texture(sre_Texture id)
-{
-    if (!id) return NULL;
-    if (sre_isinfreelist(id) != -1) return NULL;
-
-    id--;
-    if (id > engine.video->textures_count) return NULL;
-    return (char*)engine.video->textures + id * engine.video->texture_size;   
-}
-
-struct defer_texcreate
-{
-    void* texture;
-    int w;
-    int h;
-    SDL_PixelFormatEnum format;
+    int refcount;
+    int w, h;
+    sre_pixelFormat format;
 };
 
-struct defer_texupdate
+struct _texture_container
 {
-    void* texture;
+	struct _texture_container* next;
+	char data[1];
+};
+
+#define ARENA_TEXTURE_COUNT 64
+#define TEXTURE_SIZE (sizeof(sre_Sampler) + engine.video.texture_size)
+
+#define FL_BASE 0
+#define FL_SIZE 1
+#define FL_CAP 2
+
+void __cleanup_textures()
+{
+    while (engine.video.textures.head)
+    {
+        struct _texture_container* current = engine.video.textures.head;
+        engine.video.textures.head = current->next;
+
+        for (size_t i = 0; i < engine.video.textures.last; i++)
+        {
+            bool isinfreelist = false;
+            sre_Sampler* sampler = (sre_Sampler*)&current->data[i*TEXTURE_SIZE];
+            for (sre_Sampler** fi = engine.video.textures.freelist[FL_BASE]; fi < engine.video.textures.freelist[FL_SIZE]; fi++)
+            {
+                if (*fi != sampler)
+                    continue;
+            
+                isinfreelist = true;
+                break;
+            }
+            if (isinfreelist) continue;
+
+            SRE_VIDEO(engine.video.vfptr, texture_destroy, sampler+1);
+        }
+
+        engine.video.textures.last = ARENA_TEXTURE_COUNT;
+        free(current);
+    }
+}
+
+sre_Sampler* texture_alloc()
+{
+    if (engine.video.textures.freelist[FL_BASE] != engine.video.textures.freelist[FL_SIZE])
+        return *--engine.video.textures.freelist[FL_SIZE];
+
+    if (!engine.video.textures.head || engine.video.textures.last >= ARENA_TEXTURE_COUNT)
+    {
+        struct _texture_container* lasthead = engine.video.textures.head;
+        engine.video.textures.head = malloc(offsetof(struct _texture_container, data) + TEXTURE_SIZE * ARENA_TEXTURE_COUNT);
+        if (!engine.video.textures.head)
+            return NULL;  
+        
+        engine.video.textures.head->next = lasthead;
+        engine.video.textures.last = 0;
+    }
+
+    sre_Sampler* sampler = (sre_Sampler*)&engine.video.textures.head->data[engine.video.textures.last * TEXTURE_SIZE];
+    engine.video.textures.last++;
+    return sampler;
+}
+
+void texture_free(sre_Sampler* sampler)
+{
+    if (engine.video.textures.freelist[FL_SIZE] >= engine.video.textures.freelist[FL_CAP])
+    {
+        size_t last_size = engine.video.textures.freelist[FL_SIZE] - engine.video.textures.freelist[FL_BASE];
+        size_t last_cap = engine.video.textures.freelist[FL_CAP] - engine.video.textures.freelist[FL_BASE];
+        size_t newcap = last_cap ? last_cap*2 : 32;
+        engine.video.textures.freelist[FL_BASE] = realloc(engine.video.textures.freelist[FL_BASE], newcap*sizeof(void*));
+        assert(engine.video.textures.freelist != NULL);
+
+        engine.video.textures.freelist[FL_SIZE] = engine.video.textures.freelist[FL_BASE] + last_size;
+        engine.video.textures.freelist[FL_CAP] = engine.video.textures.freelist[FL_BASE] + newcap;
+    }
+
+    *engine.video.textures.freelist[FL_SIZE] = sampler;
+    engine.video.textures.freelist[FL_SIZE]++;
+}
+
+struct d_setup_texture
+{
+    sre_Sampler* sampler;
+    sre_pixelFormat formathint;
+    int w, h;
+    sre_pixelFormat* outformat;
+};
+static sre_sptr d_setup_texture(void* _data)
+{
+    const struct d_setup_texture* data = _data;
+    return SRE_VIDEO(engine.video.vfptr,
+        texture_setup,
+        data->sampler+1,
+        data->formathint,
+        data->w, data->h,
+        data->outformat
+    );
+}
+
+struct d_update_texture
+{
+    sre_Sampler* sampler;
     const void* pixels;
-    const int pitch;
+    int pitch;
 };
 
-sre_sptr deferred_texcreate(struct defer_texcreate* data)
+static sre_sptr d_update_texture(void* _data)
 {
-    return engine.video->interface->tex_create(engine.video,
-        data->texture,
-        data->w,
-        data->h,
-        data->format
+    const struct d_update_texture* data = _data;
+    return SRE_VIDEO(engine.video.vfptr,
+        texture_update,
+        data->sampler+1,
+        data->pixels, data->pitch
     );
 }
 
-sre_sptr deferred_texupdate(struct defer_texupdate* data)
+struct d_destroy_texture
 {
-    return engine.video->interface->tex_update(engine.video,
-        data->texture,
-        data->pixels,
-        data->pitch
-    );
+    sre_Sampler* sampler;
+};
+
+static void d_destroy_texture(void* _data)
+{
+    struct d_destroy_texture* data = _data;
+    SRE_VIDEO(engine.video.vfptr, texture_destroy, data->sampler+1);
+    texture_free(data->sampler);
+    sre_delete(data);
 }
 
-sre_Texture sre_tex_create(int w, int h, SDL_PixelFormatEnum format)
-{
-    sre_Texture id = 0;
-    for (size_t i = 0; i < engine.video->texture_flcount; i++)
-    {
-        if (!engine.video->texture_fl[i]) continue;
+//
 
-        id = engine.video->texture_fl[i];
-        engine.video->texture_fl[i] = 0;
-        break;
+sre_Sampler* sre_sampler(sre_pixelFormat formathint, int w, int h)
+{
+    sre_Sampler* sampler = texture_alloc(); assert(sampler != NULL);
+    if (!sre_defer_response(d_setup_texture, &(struct d_setup_texture){ sampler, formathint, w, h, &sampler->format }))
+    {
+        texture_free(sampler);
+        return false;
     }
 
-    if (!id)
+    sampler->refcount = 1;
+    sampler->w = w;
+    sampler->h = h;
+    return sampler;
+}
+
+bool sre_sampler_update(sre_Sampler* sampler, const void* pixels, int pitch)
+{
+    return sre_defer_response(d_update_texture, &(struct d_update_texture){ sampler, pixels, pitch });
+}
+
+bool sre_sampler_query(sre_Sampler* sampler, int size[2], sre_pixelFormat* format)
+{
+    if (!sampler) return false;
+
+    if (size)
     {
-        if (engine.video->textures_count >= engine.video->textures_capacity)
-        {
-            size_t new_capacity = engine.video->textures_capacity * 2;
-            void* ptr = sre_newclear(new_capacity * engine.video->texture_size);
-
-            ptr = memcpy(ptr, engine.video->textures, engine.video->textures_capacity * engine.video->texture_size);
-            if (!ptr) goto FAIL;
-
-            sre_delete(engine.video->textures);
-            engine.video->textures = ptr;
-            engine.video->textures_capacity = new_capacity;
-        }
-
-        id = (sre_Texture)(1 + engine.video->textures_count);
-        engine.video->textures_count++;
+        size[0] = sampler->w;
+        size[1] = sampler->h;
+    }
+    if (format)
+    {
+        *format = sampler->format;
     }
 
-    struct defer_texcreate data = {
-        .texture = (char*)engine.video->textures + (id - 1) * engine.video->texture_size,
-        .w = w,
-        .h = h,
-        .format = format
-    };
-
-    if (!sre_defer_response((sre_deferResponseFunction)deferred_texcreate, &data))
-        goto FAIL;
-
-    return id;
-
-    FAIL:
-    sre_tex_destroy(id);
-    return 0;
+    return true;
 }
 
-bool sre_tex_update(sre_Texture id, const void* pixels, int pitch)
+int sre_sampler_aquire(sre_Sampler* sampler)
 {
-    void* texture = sre_get_texture(id);
-    if (!texture) return false;
-
-    struct defer_texupdate data = {
-        .texture = texture,
-        .pixels = pixels,
-        .pitch = pitch
-    };
-
-    return sre_defer_response((sre_deferResponseFunction)deferred_texupdate, &data);
+    return SDL_AtomicAdd((SDL_atomic_t*)&sampler->refcount, 1);
 }
 
-void deferred_texdestroy(void* texture) { engine.video->interface->tex_destroy(engine.video, texture); }
-void sre_tex_destroy(sre_Texture id)
+int sre_sampler_release(sre_Sampler* sampler)
 {
-    if (!id) return;
-    if (!engine.video) return;
-    size_t target = -1;
+    if (!sampler) return 0;
+    if (!engine.video.vfptr) return 0;
 
-    for (size_t i = 0; i < engine.video->texture_flcount; i++)
-    {
-        if (!engine.video->texture_fl[i]) target = i;
-        else if (engine.video->texture_fl[i] == id) return;
-    }
+    int ref = SDL_AtomicAdd((SDL_atomic_t*)&sampler->refcount, -1);
+    if (ref != 1)
+        return ref;
+    
+    struct d_destroy_texture* ddata = sre_new(sizeof(struct d_destroy_texture));
+    ddata->sampler = sampler;
 
-    if (target == -1)
-    {
-        if (engine.video->texture_flcount >= engine.video->texture_flcapacity)
-        {
-            size_t new_capacity = engine.video->texture_flcapacity * 2;
-            void* ptr = sre_newclear(new_capacity * sizeof(sre_Texture));
-
-            ptr = memcpy(ptr, engine.video->texture_fl, engine.video->texture_flcapacity * sizeof(sre_Texture));
-            assert(ptr);
-
-            engine.video->texture_fl = ptr;
-            engine.video->texture_flcapacity = new_capacity;
-        }
-
-        target = (int)engine.video->texture_flcount;
-        engine.video->texture_flcount++;
-    }
-
-    sre_defer(deferred_texdestroy, (char*)engine.video->textures + (id - 1) * engine.video->texture_size);
-}
-
-SDL_PixelFormatEnum sre_tex_format(sre_Texture id)
-{
-    void* texture = sre_get_texture(id);
-    if (!texture) return SDL_PIXELFORMAT_UNKNOWN;
-
-    return engine.video->interface->tex_format(engine.video, texture);
-}
-
-bool sre_tex_size(sre_Texture id, int* w, int* h)
-{
-    void* texture = sre_get_texture(id);
-    if (!texture) return false;
-
-    return engine.video->interface->tex_size(engine.video, texture, w, h);
+    sre_defer(d_destroy_texture, ddata);
+    return ref;
 }

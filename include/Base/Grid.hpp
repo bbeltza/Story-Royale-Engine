@@ -1,7 +1,9 @@
 #ifndef SRE_GRID_HPP
 #define SRE_GRID_HPP
 
-#include <Core/Draw.h>
+#include <Datatypes/Color.hpp>
+#include <Datatypes/Vector.hpp>
+#include <ints.h>
 
 namespace sre
 {
