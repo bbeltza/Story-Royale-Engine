@@ -3,33 +3,19 @@
 #include <C_API.h>
 #include <stdarg.h>
 
+#ifdef __cplusplus
+    #include <sstream>
+#endif
+
+#define SRE_LOG_DEBUG "" // Does nothing, it's the default if you don't specify anything
+#define SRE_LOG_INFO "\x01"
+#define SRE_LOG_WARN "\x02"
+
 SRE_CAPI_BEGIN
 
-enum sre_LogCategory
-{
-    SRE_LOGCATEGORY_INFO,
-    SRE_LOGCATEGORY_DEBUG,
-    SRE_LOGCATEGORY_WARN,
-    SRE_LOGCATEGORY_ERROR,
-    SRE_NUM_LOGCATEGORIES
-};
-
 #ifdef __cplusplus
-extern "C++"
-{
-    #include <sstream>
-}
 namespace sre
 {
-    enum LogCategory
-    {
-        LOGCATEGORY_INFO = SRE_LOGCATEGORY_INFO,
-        LOGCATEGORY_DEBUG = SRE_LOGCATEGORY_DEBUG,
-        LOGCATEGORY_WARN = SRE_LOGCATEGORY_WARN,
-        LOGCATEGORY_ERROR = SRE_LOGCATEGORY_ERROR,
-        NUM_LOGCATEGORIES = SRE_NUM_LOGCATEGORIES
-    };
-
     extern "C++"
     {
         #ifndef SRE_DISABLE_LOGS
@@ -48,14 +34,12 @@ namespace sre
         extern sre::ostream odbg;
         extern sre::ostream oinfo;
         extern sre::ostream owarn;
-        extern sre::ostream oerr;
 
         #ifdef SRE
             // Engine output streams
             extern sre::ostream edbg;
             extern sre::ostream einfo;
             extern sre::ostream ewarn;
-            extern sre::ostream eerr;
         #endif
 
         #ifdef extern
@@ -67,84 +51,104 @@ namespace sre
 }
 #endif
 
-#ifdef SRE_DISABLE_LOGS
-    #define sre_logEx(t, c, fmt, va) (void)0
-    #define sre_logsimpleEx(t, c, str) (void)0
 
-    #ifdef __cplusplus
-    extern "C++" {
-        namespace sre
-        {
-            template <LogCategory category=LOGCATEGORY_DEBUG, typename... Args>
-            inline int log(const char* fmt, Args&&... args)
-            {
-                (void)fmt;
-                
-                return 0;
-            }
-        }
-    }
-    #endif
-#else
+#ifndef SRE_DISABLE_LOGS
     #if SRE
-        #define __LTYPE 1
+        #define SRE_LOGGING_TYPE 1
     #else
-        #define __LTYPE 0
+        #define SRE_LOGGING_TYPE 0
     #endif
+
+    // extern int sre_internallog(int type, int category, const char* fmt, va_list va)
+    // extern int sre_internallogmsg(int type, int category, const char* msg, int length)
+
+    static inline int sre_log(const char* fmt, ...)
+    {
+        extern int sre_internallog(int type, int category, const char* fmt, va_list va);
+
+        int category;
+        switch (fmt[0])
+        {
+            case '\x01':
+            case '\x02':
+            case '\x03':
+            case '\x04':
+                category = fmt[0];
+                fmt++;
+                break;
+            default:
+                category = 0;
+        }
+
+        int res;
+        va_list va;
+        va_start(va, fmt);
+            res = sre_internallog(SRE_LOGGING_TYPE, category, fmt, va);
+        va_end(va);
+
+        return res;
+    }
+
+    static inline int sre_logmsg(const char* msg, const char* category_tag, int length)
+    {
+        extern int sre_internallogmsg(int type, int category, const char* msg, int length);
+        return sre_internallogmsg(SRE_LOGGING_TYPE, category_tag ? category_tag[0] : 0, msg, length);
+    }
 
     extern int sre_logEx(int type, int category, const char* fmt, va_list va);
     extern int sre_logsimpleEx(int type, int category, const char* str);
 
     #ifdef __cplusplus
-    extern "C++" {
-        namespace sre
-        {
-            static inline int _loglegacy(int category, const char* fmt, ...)
+        extern "C++" {
+            namespace sre
             {
-                va_list va;
-                int n;
-                va_start(va, fmt);
-                n = sre_logEx(__LTYPE, category, fmt, va);
-                va_end(va);
-                return n;
+                template <typename... Args>
+                static inline int log(const char* fmt, Args... args) { return sre_log(fmt, args...); }
+                static inline int logmsg(const char* msg, const char* category=SRE_LOG_DEBUG, int length=0) { return sre_logmsg(msg, category, length); }
+
+                static inline int log(const char* msg)
+                {
+                    const char* category_tag;
+                    switch (msg[0])
+                    {
+                        case '\x01':
+                        case '\x02':
+                        case '\x03':
+                            category_tag = msg;
+                            msg++;
+                            break;
+                        default:
+                            category_tag = NULL;
+                    }
+
+                    return sre_logmsg(msg, category_tag, 0);
+                }
             }
-
-            template <LogCategory category=LOGCATEGORY_DEBUG, typename... Args>
-            static inline int log(const char* fmt, Args... args)
-            {
-                return _loglegacy(category, fmt, args...); 
-            }
-
-            template <LogCategory category=LOGCATEGORY_INFO>
-            static inline int log(const char* str) { return sre_logsimpleEx(__LTYPE, category, str); }
-
-            
         }
-    }
-    #else
-    static inline int sre_log(enum sre_LogCategory category, const char* fmt, ...)
-    {
-        va_list va;
-        int n;
-        va_start(va, fmt);
-        n = sre_logEx(
-            __LTYPE,
-            category,
-            fmt,
-            va
-        );
-        va_end(va);
-        return n;
-    }
+    #endif
+#else
+    #define sre_log(fmt, ...) (void)0
+    #define sre_logmsg(msg, cat, len) (void)0
 
-    static inline int sre_logsimple(enum sre_LogCategory category, const char* str)
-    {
-        return sre_logsimpleEx(
-            __LTYPE,
-            category,
-            str
-        );
-    }
+    #ifdef __cplusplus
+        extern "C++" {
+            namespace sre
+            {
+                template <typename... Args>
+                inline int log(const char* fmt, Args&&... args)
+                {
+                    (void)fmt;
+                    return 0;
+                }
+                inline int log(const char* msg, const char* category=SRE_LOG_DEBUG, int length=0)
+                {
+                    (void)msg;
+                    (void)category;
+                    (void)length;
+                    return 0;
+                }
+            }
+        }
     #endif
 #endif
 

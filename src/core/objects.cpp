@@ -146,23 +146,15 @@ void sre::ECS::render_scene()
 }
 
 extern void __render_clearqueues();
+extern void __beginframe_imgui();
 
 bool sre::ECS::call_render()
 {
     if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN)
         return false;
 
-#ifndef IMGUI_DISABLE
-	auto imgui = engine.video->imgui;
-	if (imgui)
-	{
-		imgui->imgui_newframe();
-		ImGui_ImplSDL2_NewFrame();
-	}
-	else
-		ImGui_ImplNull_NewFrame();
-	ImGui::NewFrame();
-#endif
+	if (engine.imgui)
+		__beginframe_imgui();
 
     // Render current world
 
@@ -177,19 +169,6 @@ bool sre::ECS::call_render()
 
     	//// Aliases for the background and the foreground (kind of old)
     	const sre::col4& fg = current->foreground;
-
-    #ifndef IMGUI_DISABLE
-    	ImGui::Begin("Current scene"); {
-    		float colb[4] = { current->background.r/255.0f, current->background.g/255.0f, current->background.b/255.0f, current->background.a/255.0f };
-    		if (ImGui::ColorEdit4("Background", colb))
-    			current->background = sre::col4::fromNormalized(colb[0], colb[1], colb[2], colb[3]);
-        
-    		float colf[4] = { fg.r/255.0f, fg.g/255.0f, fg.b/255.0f, fg.a/255.0f };
-    		if (ImGui::ColorEdit4("Foreground", colf))
-    			current->foreground = sre::col4::fromNormalized(colf[0], colf[1], colf[2], colf[3]);
-    	}
-    	ImGui::End();
-    #endif
 
     	//// Clearing the screen with the background color
 

@@ -1,6 +1,7 @@
 #include <Base/Font.hpp>
 #include <Base/File.hpp>
 #include <Base/Image.hpp>
+#include <Base/Error.h>
 
 using namespace sre;
 
@@ -18,7 +19,8 @@ Font::Font(const sre::File& file, int pt)
 
     if (!m_font)
     {
-        sre::log<LOGCATEGORY_ERROR>("Font::Font() could not load font: %s", TTF_GetError());
+        sre::error(SRE_ERR_CREATE, "Font::Font() could not load font");
+        sre::error(SRE_ERR_SDL);
         if (m_rwops)
         {
             SDL_RWclose(m_rwops);

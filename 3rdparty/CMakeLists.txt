@@ -21,5 +21,3 @@ add_subdirectory(SDL_image)
 # Rest of the lib(s)
 add_subdirectory(stb)
 #add_subdirectory(zlib)
-
-include(imgui.cmake)

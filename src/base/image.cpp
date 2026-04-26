@@ -1,6 +1,7 @@
 #include <SDL_image.h>
 #include <Base/Image.hpp>
 #include <Base/File.hpp>
+#include <Base/Error.h>
 
 #include <Core/Render.h>
 
@@ -16,7 +17,7 @@ Image::Image(const char* path)
     File file(path, FILE_READ);
     if (!file.valid())
     {
-        sre::log<LOGCATEGORY_ERROR>("Image::Image: Failed loading %s");
+        sre::error(SRE_ERR_CREATE, "Failed loading image from file");
         return;
     }
 
@@ -25,7 +26,8 @@ Image::Image(const char* path)
 
     if (!this->sdl_surface)
     {
-        sre::log<LOGCATEGORY_ERROR>("Image::Image: Could not load %s, file is not an image or format is unsupported (SDL Error: `%s`)", path, IMG_GetError());
+        sre::error(SRE_ERR_CREATE, "Failed loading image from IMG_Load_RW");
+        sre::error(SRE_ERR_SDL);
         return;
     }
 }
@@ -74,36 +76,28 @@ void Image::blit(const Image& img, const sre::vec2i& pos, const sre::vec2f& anch
 
 sre::Sampler* Image::to_sampler() const
 {
-    #define IMG_TSERR(...) sre::log<LOGCATEGORY_ERROR>("Image::to_sampler() - " __VA_ARGS__)
-
     if (!sdl_surface)
-    {
-        IMG_TSERR("image does not contain any surface. It is not valid");
-        return NULL;
-    }
+        return sre::error(SRE_ERR_CREATE, "Image doesn't contain any surface, it is not valid.") ? nullptr : nullptr;
 
     sre::Sampler* sampler = sre::sampler(static_cast<sre::pixelFormat>(this->SDLformat()), sdl_surface->w, sdl_surface->h);
     if (!sampler)
-    {
-        IMG_TSERR("RenderInterface::sampler() failed");
         return NULL;
-    }
 
     sre::pixelFormat format = sampler->format();
     if (format == SDLformat())
     {
         if (!sampler->update(sdl_surface->pixels, sdl_surface->pitch))
-            IMG_TSERR("RenderInterface::sampler_update() failed");
+            return NULL;
     }
     else
     {
         SDL_Surface *copy = SDL_ConvertSurfaceFormat(sdl_surface, format, 0);
         if (!copy)
-            IMG_TSERR("SDL_ConvertSurfaceFormat() failed: %s", SDL_GetError());
+            return sre::error(SRE_ERR_SDL) ? nullptr : nullptr;
         else
         {
             if (!sampler->update(copy->pixels, copy->pitch))
-                IMG_TSERR("RenderInterface::sampler_update() failed");
+                return NULL;
             
             SDL_FreeSurface(copy);
         }

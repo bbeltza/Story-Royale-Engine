@@ -1,10 +1,11 @@
 #include <Core/Input.hpp>
 #include <Base/Action.h>
 #include <Base/Signal.h>
+#include <Base/Error.h>
 
 #include "../internal.h"
 
-#define ACTION_ISNULL sre::log<sre::LOGCATEGORY_ERROR>("%s: 'action' is NULL", __FUNCTION__)
+#define ACTION_ISNULL sre::error(SRE_ERR_INVALID_VALUE, "action", NULL)
 
 bool sre_actionpressed(const sre_Action action)
 {

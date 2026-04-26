@@ -1,22 +1,12 @@
 #pragma once
 #include <SDL_pixels.h>
-#include <Datatypes/common.hpp>
 #include <utils/math.h>
+#include <ints.h>
 
 namespace sre
 {
 	struct col3
 	{
-		SRE_IMPLEMENT_DATATYPE("{ %d, %d, %d } ( %g%%, %g%%, %g%% )",
-			r,
-			g,
-			b,
-
-			r / 255.0 * 100,
-			g / 255.0 * 100,
-			b / 255.0 * 100
-		)
-
 		using T = uint8_t;
 
 		constexpr col3() = default;
@@ -53,18 +43,6 @@ namespace sre
 
 	struct col4: public col3
 	{
-		SRE_IMPLEMENT_DATATYPE("{ %d, %d, %d, %d } ( %g%%, %g%%, %g%%, %g%% )",
-			r,
-			g,
-			b,
-			a,
-
-			r / 255.0 * 100,
-			g / 255.0 * 100,
-			b / 255.0 * 100,
-			a / 255.0 * 100
-		)
-
 		constexpr col4() = default;
 		constexpr col4(T r, T g, T b): col3(r, g, b) {}
 		constexpr col4(T r, T g, T b, T alpha): col3(r, g, b), a(alpha) {}

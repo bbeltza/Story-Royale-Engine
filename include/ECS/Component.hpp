@@ -4,8 +4,6 @@
 #include <Datatypes/Vector.hpp>
 #include <Datatypes/Flags.hpp>
 
-#include <imgui.h>
-
 namespace sre
 {
 	struct RenderInterface;

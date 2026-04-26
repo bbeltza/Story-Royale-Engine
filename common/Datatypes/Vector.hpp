@@ -1,5 +1,4 @@
 #pragma once
-#include <Datatypes/common.hpp>
 #include <Datatypes/Units.h>
 
 #include <cmath>
@@ -141,6 +140,6 @@ namespace sre
 template <typename Char, typename Traits, typename T>
 std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& os, const sre::vec2<T>& pos)
 {
-    os << "{ " << (pos.x + 0) << " ; " << (pos.y + 0) << " }";
+    os << "( " << (pos.x + 0) << " ; " << (pos.y + 0) << " )";
     return os;
 }

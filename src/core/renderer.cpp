@@ -1,5 +1,7 @@
 #include <Core/Render.h>
 #include <Core/Runtime.hpp>
+#include <Base/Error.h>
+#include <Base/Log.h>
 
 #include "../internal.h"
 
@@ -8,12 +10,6 @@
 #include <Hints.h>
 
 #include <utils/mem.h>
-
-// ImGUI setup!
-	#include <imgui.h>
-	#include <backends/imgui_impl_sdl2.cpp> // Compile SDL2 ImGui implementation!
-	#include <backends/imgui_impl_null.cpp>
-//
 
 namespace sre
 {
@@ -65,7 +61,7 @@ static const sre_RenderDriverData* render_drivers[] = {
 
 static void render_panic()
 {
-	sre::log<sre::LOGCATEGORY_INFO>("Press any key to continue...");
+	sre::log("Press any key to continue...", SRE_LOG_INFO);
 	getchar();
 	exit(-1);
 }
@@ -97,7 +93,7 @@ static const sre_RenderDriverData* render_choosedriver(int hint)
 		case SRE_RENDERDRIVER_DIRECTX_9:
 		case SRE_RENDERDRIVER_DIRECTX_11:
 		case SRE_RENDERDRIVER_DIRECTX_12:
-			sre::log<sre::LOGCATEGORY_ERROR>("DirectX render drivers are only supported on Windows");
+			sre::error(SRE_ERR_CORE, "DirectX render drivers are only supported on Windows");
 			break;
 	#else
 		case SRE_RENDERDRIVER_DIRECTX_9: driver = &sred3d9; break;
@@ -106,7 +102,7 @@ static const sre_RenderDriverData* render_choosedriver(int hint)
 	#endif
 		case -1: break;
 		default:
-			sre::log<sre::LOGCATEGORY_ERROR>("Unknown render driver hint: %d", hint);
+			sre::error(SRE_ERR_INVALID_HINT, "RENDERDRIVER");
 			break;
 	}
 
@@ -118,10 +114,10 @@ static const sre_RenderDriverData* render_choosedriver(int hint)
 			case SRE_RENDERSTATUS_SUCCEEDED: goto SUCCEED;
 			case SRE_RENDERSTATUS_FAILED: goto FAIL;
 			case SRE_RENDERSTATUS_UNSUPPORTED:
-				sre::log<sre::LOGCATEGORY_WARN>("Render driver '%s' is declared as the hint, but was found unsupported. Switching to the default drivers...", driver->name);
+				sre::log(SRE_LOG_WARN "Render driver '%s' is declared as the hint, but was found unsupported. Switching to the default drivers...", driver->name);
 				break;
 			default:
-				sre::log<sre::LOGCATEGORY_ERROR>("Unknown status: '%d'. Failing...", status);
+				sre::log(SRE_LOG_WARN "Unknown status: '%d'. Failing...", status);
 				goto FAIL;
 		}
 	}
@@ -135,28 +131,34 @@ static const sre_RenderDriverData* render_choosedriver(int hint)
 			case SRE_RENDERSTATUS_SUCCEEDED: goto SUCCEED;
 			case SRE_RENDERSTATUS_FAILED: goto FAIL;
 			case SRE_RENDERSTATUS_UNSUPPORTED:
-				sre::log<sre::LOGCATEGORY_WARN>("Render driver '%s' is unsupported", driver->name);
+				sre::log(SRE_LOG_WARN "Render driver '%s' is unsupported", driver->name);
 				break;
 			default:
-				sre::log<sre::LOGCATEGORY_ERROR>("Unknown status: '%d'. Failing...", status);
+				sre::log(SRE_LOG_WARN "Unknown status: '%d'. Failing...", status);
 				goto FAIL;
 		}
 	}
 
-		sre::log<sre::LOGCATEGORY_ERROR>("Could not find any supported video drivers... This should not happen assuming that every piece of hardware supports SDL Renderer with its software fallback...");
+		sre::error(SRE_ERR_CORE, "Could not find any supported video drivers... This should not happen assuming that every piece of hardware supports SDL Renderer with its software fallback...");
 		return NULL;
 	SUCCEED:
-		sre::log<sre::LOGCATEGORY_INFO>("Using render driver: %s", driver->name);
+		sre::log(SRE_LOG_INFO "Using render driver: %s", driver->name);
 		return driver;
 	FAIL:
-		sre::log<sre::LOGCATEGORY_INFO>("Driver initialization for '%s' failed!", driver->name);
+		sre::log(SRE_LOG_INFO "Driver initialization for '%s' failed!", driver->name);
 		return NULL;
 }
+
+static void __shutdown_imgui();
+static void __endframe_imgui();
 
 extern "C" void __cleanup_textures();
 
 void __cleanup_renderer()
 {
+	if (engine.imgui)
+		__shutdown_imgui();
+
 	__cleanup_textures();
 	SRE_VIDEOV(engine.video.vfptr, destructor);
 	operator delete(engine.video.vfptr);
@@ -181,7 +183,7 @@ void __setup_renderer()
 
 	assert((*engine.video.vfptr) != NULL && "Maybe forgot to set up the vft? (virtual function table)");
 
-	#define _CHECKFORFUNC(x) if (!(*engine.video.vfptr)->x) { sre::log<sre::LOGCATEGORY_ERROR>("Render driver setup error: function '" #x "' is missing"); render_panic(); }
+	#define _CHECKFORFUNC(x) if (!(*engine.video.vfptr)->x) { sre::error(SRE_ERR_CORE, "Render driver setup error: function '" #x "' is missing"); render_panic(); }
 		_CHECKFORFUNC(destructor);
 		_CHECKFORFUNC(flush_queueinstances1);
 		_CHECKFORFUNC(flush_queueinstances2);
@@ -201,36 +203,16 @@ void __setup_renderer()
 	engine.video.texture_size = driverdata->texture_size;
 	engine.video.blendmode = SRE_BLEND_DEFAULT;
 
-#ifndef IMGUI_DISABLE
-	const sre_videodriverImGuiInterface* imgui = engine.video->imgui;
-	
-	if (imgui)
+	engine.video.index = -1;
+	for (int i = 0; i < ut_arrcount(render_drivers); i++) // Very fancy
 	{
-		PFN_CHECK(imgui, imgui_init);
-		PFN_CHECK(imgui, imgui_newframe);
-		PFN_CHECK(imgui, imgui_renderdrawdata);
-
-		IMGUI_CHECKVERSION();
-		ImGuiContext* context = ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
-					   |  ImGuiConfigFlags_NavEnableGamepad;
-		
-		if (!ImGui_ImplSDL2_InitForOther(engine.sdl_windowhndl) ||
-			!imgui->imgui_init(engine.video))
+		if (render_drivers[i] == driverdata)
 		{
-			sre::log<sre::LOGCATEGORY_ERROR>("Failed initializing ImGui, video driver error");
-			ImGui::DestroyContext(context);
+			engine.video.index = i;
+			break;
 		}
-	}
-	else
-	{
-		sre::log<sre::LOGCATEGORY_WARN>("ImGui is not implemented in the current video driver");
-		// Create dummy context
-		ImGui::CreateContext();
-		ImGui_ImplNull_Init();
-	}
-#endif
+	} assert(engine.video.index >= 0);
+
 	engine.scale = 1;
 
 	SRE_VIDEO(engine.video.vfptr, set_vsync, true);
@@ -365,11 +347,8 @@ void __render_flush()
 		engine.video.blendmode = SRE_BLEND_DEFAULT;
 	//
 
-	#ifndef IMGUI_DISABLE
-	ImGui::Render();
-	if (imgui)
-		imgui->imgui_renderdrawdata(ImGui::GetDrawData(), engine.video);
-	#endif
+	if (engine.imgui)
+		__endframe_imgui();
 
 	SRE_VIDEOV(engine.video.vfptr, present);
 }
@@ -439,3 +418,33 @@ extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instan
 extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2mode mode, sre_Sampler* texture) { sre::render_draw2(flags, *color, points, pcount, mode, texture); }
 
 extern "C" void sre_render_fill(const sre_col4* color) { sre::render_fill(*color); }
+
+// ImGui setup
+
+#include <ImGui.hpp>
+
+extern "C" void __initialize_imgui(void* _imgui)
+{
+	sre::ImGuiInterface* imgui_interface = static_cast<sre::ImGuiInterface*>(_imgui);
+
+	int status = imgui_interface->initialize(engine.sdl_windowhndl, engine.video.vfptr+1, engine.video.index);
+	switch (status)
+	{
+		case SRE_RENDERSTATUS_SUCCEEDED: break;
+		case SRE_RENDERSTATUS_UNSUPPORTED:
+			sre::logmsg("ImGui is unsupported in the current render driver", SRE_LOG_WARN);
+			return;
+		case SRE_RENDERSTATUS_FAILED:
+			sre::critical(SRE_ERR_CORE, "Failed initializing ImGui");
+			return;
+		default:
+			abort();
+	}
+
+	sre::logmsg("ImGui has successfully been initialized!", SRE_LOG_INFO);
+	engine.imgui = imgui_interface;
+}
+
+static void __shutdown_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->shutdown(); }
+static void __endframe_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->end_frame(); }
+void __beginframe_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->begin_frame(); }

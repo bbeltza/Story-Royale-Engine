@@ -1,1 +1,1 @@
-SRE_DRIVERBUILD(sre_d3d11 "d3d11main.cpp" "d3d11draw.cpp" "d3d11state.cpp" "d3d11texture.cpp" "d3d11shaders.cpp")
+SRE_DRIVERBUILD(sre_d3d11 "d3d11main.cpp" "d3d11draw.cpp" "d3d11state.cpp" "d3d11texture.cpp" "d3d11shaders.cpp" "d3d11imgui.cpp")

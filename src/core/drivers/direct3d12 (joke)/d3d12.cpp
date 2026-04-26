@@ -666,6 +666,7 @@ struct sred3d12_dlls
 struct sred3d12_inst: sre::RenderDriver
 {
     using texture_type = sred3d12_texture;
+    friend struct sreD3D12ImGuiData;
 
     sred3d12_inst(SDL_Window* window, int* outstatus);
     ~sred3d12_inst();
@@ -765,6 +766,12 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
         IDXGIFactory4* dxfactory = NULL;
         
         #ifndef NDEBUG
+        if (SDL_GetWindowFlags(window) & SDL_WINDOW_OPENGL)
+        {
+            // Give a welcoming warning, but still proceed
+            sre::logmsg("DirectX 12: Enabling the debug layer on an OpenGL window (one that has the SDL_WINDOW_OPENGL flag) is broken, and would thus not allow any device creation. If you still want the debug layer, please remove or comment the SDL_WINDOW_OPENGL flag in the window creation code right at \"src/core/window.c\". Thanks!", SRE_LOG_WARN);
+        }
+        else
         {
             ID3D12Debug* dxdebug = NULL;
             SRE_DXGETADDR(D3D12GetDebugInterface, PFN_D3D12_GET_DEBUG_INTERFACE, dlls.d3d12);
@@ -948,7 +955,7 @@ bool sred3d12_inst::_pipelinesetup()
         SRE_DXCALL(pD3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
         if (rserr)
         {
-            sre::log<sre::LOGCATEGORY_ERROR>("Failed serializing D3D12 root signature: %.*s", rserr->GetBufferSize(), rserr->GetBufferPointer());
+            sre::error(SRE_ERR_FAIL, rserr->GetBufferPointer());
             rserr->Release();
             return false;
         }
@@ -1099,7 +1106,7 @@ sred3d12_dbuff::~sred3d12_dbuff()
 {
     if (!dxresource)
     {
-        sre::log<sre::LOGCATEGORY_WARN>("[DirectX]: You got a resource buffer that hasn't been initialized yet");
+        sre::log(SRE_LOG_WARN "[DirectX]: You got a resource buffer that hasn't been initialized yet");
         return;
     }
 
@@ -1169,7 +1176,7 @@ void sred3d12_inst::present()
     if (hr == DXGI_ERROR_DEVICE_REMOVED)
     {
         HRESULT reason = dxdevice->GetDeviceRemovedReason();
-        sre::log<sre::LOGCATEGORY_ERROR>("[Direct3D 12]: The device has been removed. Reason: '%s' (%X)", DXHRTOSTRING(reason), reason);
+        sre::critical(SRE_ERR_DIRECTX_HR, "The device has been removed. Reason: ", DXHRTOSTRING(reason), reason);
         abort();
         return;
     }
@@ -1499,23 +1506,42 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
 
 // ImGui
 
-#ifndef IMGUI_DISABLE
-    #include <backends/imgui_impl_dx12.h>
+#if 1
+    #include <ImGui.hpp>
 
-    static const sre_videodriverImGuiInterface sred3d12imgui_interface = {
-        [](const sre_videodriver* video) { return __inst->imgui_init(); },
-        []() { ImGui_ImplDX12_NewFrame(); },
-        [](struct ImDrawData* ImDrawData, const sre_videodriver* video) { ImGui_ImplDX12_RenderDrawData(ImDrawData, __inst->dxcmd_list); }
+    // Apparently ImGui's d3d12 implementation uses CreateDXGIFactory1, linked statically so we're handling that
+    static HRESULT WINAPI _CreateDXGIFactory1(REFIID riid, _COM_Outptr_ void **ppFactory)
+    {
+        HMODULE dxgidll = GetModuleHandleA("dxgi.dll"); // We have DXGI's dll already loaded in and owned so a simple GetModuleHandle is what we want
+        SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dxgidll);
+        return pCreateDXGIFactory1(riid, ppFactory);
+    }
+    
+    #define CreateDXGIFactory1 _CreateDXGIFactory1
+    #include <../imgui/backends/imgui_impl_dx12.cpp>
+    #undef CreateDXGIFactory1
+
+    struct sreD3D12ImGuiData: sre::ImGuiRenderInterface<sred3d12_inst>
+    {
+        int Init(driver_type* inst, SDL_Window* window) override;
+        void NewFrame(driver_type* inst) override;
+        void RenderDrawData(driver_type* inst, ImDrawData* imDrawData) override;
+        void Shutdown() override;
+
+        static void imgui_srvalloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* ocpu, D3D12_GPU_DESCRIPTOR_HANDLE* ogpu);
+        static void imgui_srvfree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu);
     };
 
-    static void imgui_srvalloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* ocpu, D3D12_GPU_DESCRIPTOR_HANDLE* ogpu)
-    {
-        auto inst = static_cast<sre_d3d12*>(info->UserData);
-        
-        D3D12_CPU_DESCRIPTOR_HANDLE cpu = inst->dxsrvheap->GetCPUDescriptorHandleForHeapStart();
-        D3D12_GPU_DESCRIPTOR_HANDLE gpu = inst->dxsrvheap->GetGPUDescriptorHandleForHeapStart();
+    extern "C" sreD3D12ImGuiData sred3d12imgui{};
 
-        UINT offs = inst->srvallocate();
+    void sreD3D12ImGuiData::imgui_srvalloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* ocpu, D3D12_GPU_DESCRIPTOR_HANDLE* ogpu)
+    {
+        auto inst = static_cast<sred3d12_inst*>(info->UserData);
+        
+        D3D12_CPU_DESCRIPTOR_HANDLE cpu = inst->dxsrvheaps[1]->GetCPUDescriptorHandleForHeapStart();
+        D3D12_GPU_DESCRIPTOR_HANDLE gpu = inst->dxsrvheaps[1]->GetGPUDescriptorHandleForHeapStart();
+
+        UINT offs = inst->_srvallocate();
 
         cpu.ptr += offs;
         gpu.ptr += offs;
@@ -1524,30 +1550,35 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         *ogpu = gpu;
     }
 
-    static void imgui_srvfree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu)
+    void sreD3D12ImGuiData::imgui_srvfree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu)
     {
         // Does nothing for now, should implement the free list allocator soon
+        auto inst = static_cast<sred3d12_inst*>(info->UserData);
+        
+        D3D12_CPU_DESCRIPTOR_HANDLE basecpu = inst->dxsrvheaps[1]->GetCPUDescriptorHandleForHeapStart();
+
+        inst->_srvfree(static_cast<UINT>(cpu.ptr - basecpu.ptr));
     }
 
-    bool sre_d3d12::imgui_init()
+    int sreD3D12ImGuiData::Init(driver_type* inst, SDL_Window* window)
     {
         ImGui_ImplDX12_InitInfo info{};
-        info.UserData = this;
-        info.Device = dxdevice;
-        info.CommandQueue = dxcmd_queue;
-        info.NumFramesInFlight = sre::countof(dxrender_targets);
+        info.UserData = inst;
+        info.Device = inst->dxdevice;
+        info.CommandQueue = inst->dxcmd_queue;
+        info.NumFramesInFlight = sre::countof(inst->dxrender_targets);
         info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-        info.SrvDescriptorHeap = dxsrvheap; // Using my srv descriptor heap, I was going to separate it but I don't care
+        info.SrvDescriptorHeap = inst->dxsrvheaps[0]; // Using my srv descriptor heap, I was going to separate it but I don't care
         info.SrvDescriptorAllocFn = imgui_srvalloc;
         info.SrvDescriptorFreeFn = imgui_srvfree;
 
-        if (ImGui_ImplDX12_Init(&info))
-        {
-
-            return true;
-        }
-
-        return false;
+        if (!ImGui_ImplDX12_Init(&info))
+            return SRE_RENDERSTATUS_FAILED;
+        return SRE_RENDERSTATUS_SUCCEEDED;
     }
+
+    void sreD3D12ImGuiData::NewFrame(driver_type*) { ImGui_ImplDX12_NewFrame(); }
+    void sreD3D12ImGuiData::RenderDrawData(driver_type* inst, ImDrawData* imDrawData) { ImGui_ImplDX12_RenderDrawData(imDrawData, inst->dxcmd_list); }
+    void sreD3D12ImGuiData::Shutdown() { ImGui_ImplDX12_Shutdown(); }
 #endif

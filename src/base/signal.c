@@ -1,5 +1,6 @@
 #include <Base/Signal.h>
 #include <Base/Coroutine.h>
+#include <Base/Error.h>
 
 #include <utils/mem.h>
 
@@ -161,7 +162,7 @@ void* sre_signalwait(sre_Signal* signal)
     sre_coroutine* current = sre_coroutinecurrent();
     if (!current)
     {
-        sre_log(SRE_LOGCATEGORY_ERROR, "Calling sre_signalwait() on a thread that doesn't run any coroutine. Cannot wait for the signal since only waiting inside coroutines are supported.");
+        sre_error(SRE_ERR_INVALID_STATE, "Calling sre_signalwait() on a thread that doesn't run any coroutine. Cannot wait for the signal since only waiting inside coroutines are supported.");
         return NULL;
     }
 
@@ -183,7 +184,7 @@ bool sre_signalfire(sre_Signal* signal, void* data)
     {
         sre_coroutine* coroutine = signal->coroutines[--signal->coroutines_size];
         if (!sre_coroutineresume(coroutine, data))
-            sre_log(SRE_LOGCATEGORY_ERROR, "%s: sre_coroutineresume failed when trying to resume all suspending coroutines", __FUNCTION__);
+            sre_error(SRE_ERR_FAIL, __FUNCTION__, "sre_coroutineresume failed when trying to resume all suspending coroutines");
     }
     
     for (sre_Connection* connection = signal->connection_head; connection != NULL; connection = connection->next)

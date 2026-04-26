@@ -28,7 +28,6 @@ set(SRE_3RDPARTYLIBS
     SDL2_image::SDL2_image${_SDL_LIB_SUFFIX}
     
     stb
-    imgui
     #zlib${_ZLIB_SUFFIX}
 )
 

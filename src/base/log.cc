@@ -1,18 +1,40 @@
 #include <Base/Log.h>
 #include <utils/mem.h>
+#include <utils/lockfile.h>
 
 #include <standard>
 
+extern "C" int sre_internallogmsg(int type, int category, const char* msg, int length);
+extern "C" int sre_internallog(int type, int category, const char* fmt, va_list va);
+
+enum sreLogType
+{
+    LOGTYPE_APP,
+    LOGTYPE_ENGINE,
+    LOGTYPE_SDL
+};
+
+enum sreLogCategory
+{
+    LOGCATEGORY_DEBUG = 0x00,
+    LOGCATEGORY_INFO = 0x01,
+    LOGCATEGORY_WARN = 0x02,
+    LOGCATEGORY_ERROR = 0x03,
+    LOGCATEGORY_CRITICAL = 0x04,
+
+    NUM_CATEGORIES
+};
+
 namespace sre
 {
-    template <LogCategory category=LOGCATEGORY_DEBUG, int type=0>
+    template <int category, int type=0>
     class _strbuf: public std::stringbuf
     {
         int sync() override
         {
             auto s = str();
             if (s.back() == '\n') s.pop_back();
-            sre_logsimpleEx(type, category, s.c_str());
+            sre_internallogmsg(type, category, s.c_str(), s.size());
             str("");
             return 0;
         }
@@ -21,26 +43,16 @@ namespace sre
         static _strbuf buffer;
     };
 
-    template <LogCategory category, int type>
+    template <int category, int type>
     _strbuf<category, type> _strbuf<category, type>::buffer;
 
-    sre::ostream out{&_strbuf<>::buffer};
-    sre::ostream odbg{&_strbuf<LOGCATEGORY_DEBUG>::buffer};
+    sre::ostream out{&_strbuf<LOGCATEGORY_DEBUG>::buffer};
     sre::ostream oinfo{&_strbuf<LOGCATEGORY_INFO>::buffer};
     sre::ostream owarn{&_strbuf<LOGCATEGORY_WARN>::buffer};
-    sre::ostream oerr{&_strbuf<LOGCATEGORY_ERROR>::buffer};
 
     sre::ostream edbg{&_strbuf<LOGCATEGORY_DEBUG, 1>::buffer};
     sre::ostream einfo{&_strbuf<LOGCATEGORY_INFO, 1>::buffer};
     sre::ostream ewarn{&_strbuf<LOGCATEGORY_WARN, 1>::buffer};
-    sre::ostream eerr{&_strbuf<LOGCATEGORY_ERROR, 1>::buffer};
-
-    enum LogType
-    {
-        LOGTYPE_APP,
-        LOGTYPE_ENGINE,
-        LOGTYPE_SDL
-    };
 }
 
 #ifdef ANDROID
@@ -84,18 +96,24 @@ namespace sre
         return ANDROID_LOG_UNKNOWN;
     }
 
-    extern "C" int sre_logEx(int type, int category, const char* fmt, va_list va)
+    extern "C" int sre_internallog(int type, int category, const char* fmt, va_list va)
     {
         return __android_log_vprint(map_cat_prio(category), map_type_tag(type), fmt, va);
     }
 
-    extern "C" int sre_logsimpleEx(int type, int category, const char* str)
+    extern "C" int sre_internallogmsg(int type, int category, const char* str, int length)
     {
-        return __android_log_write(map_cat_prio(category), map_type_tag(type), str);
+        if (!length)
+            return __android_log_write(map_cat_prio(category), map_type_tag(type), str);
+        
+        ut_dynsalloc(char, buf, length + 1);
+        strncpy(buf, str, length);
+        buf[length] = '\0';
+        return __android_log_write(map_cat_prio(category), map_type_tag(type), buf);
     }
 #else
 
-#if _WIN32 && _DEBUG
+#if _WIN32
     #include <Windows.h>
 #endif
 
@@ -189,60 +207,73 @@ namespace sre
 
 namespace
 {
-    constexpr char CSTRING_INFO[] = "INFO";
-    constexpr char CSTRING_DEBUG[] = "DEBUG";
-    constexpr char CSTRING_WARN[] = "WARN";
-    constexpr char CSTRING_ERROR[] = "ERROR";
+    namespace strs
+    {
+        static constexpr char CAT1[] = "DEBUG";
+        static constexpr char CAT2[] = "INFO";
+        static constexpr char CAT3[] = "WARN";
+        static constexpr char CAT4[] = "ERROR";
+        static constexpr char CAT5[] = "CRITICAL";
+
+        static constexpr char TYPE1[] = "APP";
+        static constexpr char TYPE2[] = "ENGINE";
+        static constexpr char TYPE3[] = "SDL";
+    };
 
     constexpr const char* CATEGORY_STRINGS[] = {
-        CSTRING_INFO,
-        CSTRING_DEBUG,
-        CSTRING_WARN,
-        CSTRING_ERROR
+        strs::CAT1,
+        strs::CAT2,
+        strs::CAT3,
+        strs::CAT4,
+        strs::CAT5
     };
     constexpr size_t CATEGORY_SIZES[] = {
-        sizeof(CSTRING_INFO) - 1,
-        sizeof(CSTRING_DEBUG) - 1,
-        sizeof(CSTRING_WARN) - 1,
-        sizeof(CSTRING_ERROR) - 1
+        sizeof(strs::CAT1) - 1,
+        sizeof(strs::CAT2) - 1,
+        sizeof(strs::CAT3) - 1,
+        sizeof(strs::CAT4) - 1,
+        sizeof(strs::CAT5) - 1
+    };
+
+    constexpr const char* TYPE_STRINGS[] = {
+        strs::TYPE1,
+        strs::TYPE2,
+        strs::TYPE3
+    };
+    constexpr size_t TYPE_SIZES[] = {
+        sizeof(strs::TYPE1) - 1,
+        sizeof(strs::TYPE2) - 1,
+        sizeof(strs::TYPE3) - 1
     };
 
     static_assert(
         ut_arrcount(CATEGORY_STRINGS) == ut_arrcount(CATEGORY_SIZES) &&
-        ut_arrcount(CATEGORY_STRINGS) == sre::NUM_LOGCATEGORIES,
-        "Log category string count mismatching with the enum categories");
-
-    constexpr char TSTRING_APP[] = "APP";
-    constexpr char TSTRING_ENGINE[] = "ENGINE";
-    constexpr char TSTRING_SDL[] = "SDL";
-    constexpr const char* TYPE_STRINGS[] = {
-        TSTRING_APP,
-        TSTRING_ENGINE,
-        TSTRING_SDL
-    };
-    constexpr size_t TYPE_SIZES[] = {
-        sizeof(TSTRING_APP) - 1,
-        sizeof(TSTRING_ENGINE) - 1,
-        sizeof(TSTRING_SDL) - 1
-    };
+        ut_arrcount(CATEGORY_STRINGS) == NUM_CATEGORIES,
+        "Log category string count mismatching with the existing categories");
 }
 
 static sre::Log* inst;
+static int logloop_func(void*)
+{
+    size_t niterations = 0;
+    sre::Log instance;
+    inst = &instance;
+    while (true)
+    {
+        instance.flush();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        niterations++;
+    }
+
+    return 0;
+}
+
 int init_logsifnoinst()
 {
     if (!inst)
     {
-        SDL_Thread* thrd = SDL_CreateThread([](void*) {
-            sre::Log instance;
-            inst = &instance;
-            while (true)
-            {
-                instance.flush();
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
-
-            return 0;
-        }, "Logging loop", NULL);
+        SDL_Thread* thrd = SDL_CreateThread(logloop_func, "Logging loop", NULL);
         SDL_DetachThread(thrd);
 
         while (!inst)
@@ -260,95 +291,120 @@ void sre::Log::flush()
     SDL_LockMutex(mutex);
     while (!msg_queue.empty())
     {
-        static constexpr char extra_characters[] = "[]: ";
-        static constexpr char style_characters_begin[] = "\033[30;1m";
-        static constexpr char style_characters_end[] = "\033[0m";
-
         auto& msg = msg_queue.front();
 
+        const char* const typestr = TYPE_STRINGS[msg.type];
+        const char* const catstr = CATEGORY_STRINGS[msg.category];
         const size_t typestr_size = TYPE_SIZES[msg.type];
         const size_t catstr_size = CATEGORY_SIZES[msg.category];
-        size_t buffer_size = typestr_size + catstr_size + msg.size + sizeof(extra_characters) + sizeof(style_characters_begin) + sizeof(style_characters_end);
+        
+        size_t header_size = 1 + typestr_size + 2 + catstr_size + 3; // Header: "[(TYPE)][(CATEGORY)]: \0"
+        ut_dynsalloc(char, header_buf, header_size);
 
-        const char* const strings[] = {
-            style_characters_begin,
-            extra_characters,
-            TYPE_STRINGS[msg.type],
-            extra_characters + 1,
-            extra_characters,
-            CATEGORY_STRINGS[msg.category],
-            extra_characters + 1,
-            style_characters_end,
-
-            msg.buffer
-        };
-        const size_t sizes[] = {
-            sizeof(style_characters_begin) - 1,
-            1,
-            typestr_size,
-            1,
-            1,
-            catstr_size,
-            sizeof(extra_characters) - 2,
-            sizeof(style_characters_end) - 1,
-
-            static_cast<size_t>(msg.size)
-        };
-        constexpr int STRINGS_COUNT = ut_arrcount(strings);
-
-        ut_dynsalloc(char, buffer, buffer_size);
-        char* buffptr = buffer;
-        for (int i = 0; i < STRINGS_COUNT; i++)
         {
-            strncpy(buffptr, strings[i], sizes[i]);
-            buffptr += sizes[i];
-        }
-        *buffptr = '\n';
-
-        switch (msg.category)
-        {
-        case sre::LOGCATEGORY_WARN:
-            buffer[3] = '3';
-            break;
-        case sre::LOGCATEGORY_ERROR:
-            buffer[3] = '1';
-            break;
-        case sre::LOGCATEGORY_INFO:
-            buffer[3] = '6';
-            break;
-        default:
-            buffer[2] = '0';
-            buffer[3] = '0';
-            break;
+            char* headerptr = header_buf;
+            headerptr[0] = '[';
+            headerptr += 1;
+            strncpy(headerptr, typestr, typestr_size);
+            headerptr += typestr_size;
+            headerptr[0] = ']';
+            headerptr[1] = '[';
+            headerptr += 2;
+            strncpy(headerptr, catstr, catstr_size);
+            headerptr += catstr_size;
+            headerptr[0] = ']';
+            headerptr[1] = ':';
+            headerptr[2] = ' ';
         }
 
         // Console writing code
-        FILE* console = msg.category == sre::LOGCATEGORY_INFO ? stdout : stderr;
-        fwrite(buffer, buffer_size, 1, console);
+        msg.buffer[msg.size-1] = '\n';
+
+        FILE* console = msg.category == LOGCATEGORY_INFO ? stdout : stderr;
+        flockfile(console);
+            #if _WIN32
+                HANDLE hcon = GetStdHandle(msg.category == LOGCATEGORY_INFO ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
+                
+                DWORD dmode;
+                GetConsoleMode(hcon, &dmode);
+                if (!(dmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+                {
+                    static constexpr WORD cat_attribs[] = {
+                        0,
+                        FOREGROUND_BLUE | FOREGROUND_GREEN,
+                        FOREGROUND_RED | FOREGROUND_GREEN,
+                        FOREGROUND_RED,
+                        FOREGROUND_RED | FOREGROUND_BLUE // Critical will be purple! :D (I just wanted a darker tone for this...)
+                    };
+                    WORD wattribs = FOREGROUND_INTENSITY | cat_attribs[msg.category];
+
+                    CONSOLE_SCREEN_BUFFER_INFO old_buffinfo;
+                    GetConsoleScreenBufferInfo(hcon, &old_buffinfo);
+                    SetConsoleTextAttribute(hcon, wattribs);
+                        WriteConsoleA(hcon, header_buf, header_size, NULL, NULL);
+                    SetConsoleTextAttribute(hcon, old_buffinfo.wAttributes);
+                        WriteConsoleA(hcon, msg.buffer, msg.size, NULL, NULL);
+                    
+                    goto WIN32_FINISHCONSOLE;
+                }                
+            #endif
+
+            static const char RESET_ESC[] = "\033[0m";
+            char escape[] = "\033[1;1;30m";
+            switch (msg.category)
+            {
+                case LOGCATEGORY_DEBUG: break; // "30"
+                case LOGCATEGORY_INFO: escape[7] = '6'; break;
+                case LOGCATEGORY_WARN: escape[7] = '3'; break;
+                case LOGCATEGORY_ERROR: escape[7] = '1'; break;
+                case LOGCATEGORY_CRITICAL: escape[7] = '1'; escape[2] = '2'; break;
+                default: break;
+            }
+
+            fwrite_unlocked(escape, 1, sizeof(escape), console);
+                fwrite_unlocked(header_buf, 1, header_size, console);
+            fwrite_unlocked(RESET_ESC, 1, sizeof(RESET_ESC), console);
+                fwrite_unlocked(msg.buffer, 1, msg.size, console);
+            #if _WIN32
+                WIN32_FINISHCONSOLE:
+            #endif
+        funlockfile(console);
+
         //
         msg_queue.pop_front();
     }
     SDL_UnlockMutex(mutex);
 }
 
-int sre_logEx(int type, int category, const char* fmt, va_list va)
+static sre::LogMsg& newlog(int type, int category, int len)
 {
-    assert(fmt != NULL);
-    assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
-
+    assert(category >= LOGCATEGORY_DEBUG && category <= LOGCATEGORY_CRITICAL);
+    assert(type >= LOGTYPE_APP && type <= LOGTYPE_SDL);
     init_logsifnoinst();
     SDL_LockMutex(inst->mutex);
 
-    va_list cpy;
-    va_copy(cpy, va);
-    int len = vsnprintf(NULL, 0, fmt, cpy) + 1;
     inst->msg_queue.emplace_back(
         type,
         category,
         len
     );
-    auto& msg = inst->msg_queue.back();
 
+    return inst->msg_queue.back();
+    // CAUTION: It doesn't lock the instance's mutex
+}
+
+int sre_internallog(int type, int category, const char* fmt, va_list va)
+{
+    assert(fmt != NULL);
+
+    int len;
+    {
+        va_list cpy;
+        va_copy(cpy, va);
+        len = vsnprintf(NULL, 0, fmt, cpy) + 1;
+    }
+    
+    auto &msg = newlog(type, category, len);
     if (len == 1)
         msg.buffer[0] = '\0';
     else
@@ -358,20 +414,13 @@ int sre_logEx(int type, int category, const char* fmt, va_list va)
     return len - 1;
 }
 
-int sre_logsimpleEx(int type, int category, const char* str)
+int sre_internallogmsg(int type, int category, const char* str, int length)
 {
     assert(str != NULL);
-    assert(type >= sre::LOGTYPE_APP && type <= sre::LOGTYPE_SDL);
+    assert(type >= LOGTYPE_APP && type <= LOGTYPE_SDL);
 
-    init_logsifnoinst();
-    SDL_LockMutex(inst->mutex);
-    
-    int len = static_cast<int>(strlen(str) + 1);
-    inst->msg_queue.emplace_back(
-        type,
-        category,
-        len
-    );
+    int len = length ? length + 1 : static_cast<int>(strlen(str) + 1);
+    auto &msg = newlog(type, category, len);
     strncpy(inst->msg_queue.back().buffer, str, len);
 
     SDL_UnlockMutex(inst->mutex);

@@ -62,6 +62,7 @@ namespace sreD3D9
     struct Instance: sre::RenderDriver
     {
         using texture_type = Texture;
+        friend struct ImGuiData;
 
         Instance(SDL_Window* window, int* outstatus);
         ~Instance();
@@ -101,7 +102,6 @@ namespace sreD3D9
         bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
         bool texture_update(Texture* texture, const void* pixels, int pitch);
         void texture_destroy(Texture* texture);
-
     private:
         bool _shadersetup();
         bool _statesetup();
@@ -111,6 +111,8 @@ namespace sreD3D9
             m_d1data.releaseresources();
             m_d2data.releaseresources();
         }
+
+        void _invalidateimgui();
     };
 }
 

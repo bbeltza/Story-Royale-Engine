@@ -1,0 +1,17 @@
+- Some game engine hit ideas:
+    - SRE_HINT_ARG_HANDLER & SRE_HINT_ARG_HANDLERS: ARG_HANDLER is a pointer to a function, taking the signature of `main` (although I'm not sure about the return type) that is used to handle command line arguments.
+                                                      so the game can now handle arguments, the function is run on the main thread before any initialization is done so be careful!
+                                                        this might also be used to change hints at runtime (ex: the currently existing renderer driver hint whether you decide on the command line to specify a special argument)
+                                                      if ARG_HANDLERS is present, then ARG_HANDLER will be taken as an array of function pointers with that same signature, ARG_HANDLERS being the amount of argument handlers present in that array.
+                                                      if there's no ARG_HANDLERS, then it is assumed for ARG_HANDLER to have only 1 function, so you could either declare it as an array of a single function or just a function pointer, it doesn't really matter.
+    - SRE_HINT_WINDOW_SIZE: It's an array of two integers (so you can declare it as a vec2i, just a C array or an std::array<int>, or heck even a long long if you're careful about endianess!). The array defines the dimensions of the window on startup.
+                                Obviously, you know, the first element of the array will contain the width, and the second element the height. Very simple. More of these hints will be also there.
+                                If there's no SRE_HINT_WINDOW_SIZE, then the engine will create a window with a default size of 800x600 pixels.
+
+- Continuing the port to android (I was just too stuck with the graphics so I couldn't be locked in it)
+- More reference counting systems, specially on sreECS and sreGUI objects
+- Line rendering (which I'll work on very soon), and scaled rendering (rendering that takes place on a viewport of the game's scaled resolution. Would be pretty neat for pixel-art)
+- Animation/Keyframe API
+
+- Standard audio formats? (The thing is, I said I would be using SDL's audio streams but they used quite a lot of memory on initialization so I don't know...)
+- An old one: aking the game run on a separate process or "module" to the engine?

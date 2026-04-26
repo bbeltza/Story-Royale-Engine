@@ -1,1 +1,1 @@
-SRE_DRIVERBUILD(sre_d3d9 "d3d9main.cpp" "d3d9shaders.cpp")
+SRE_DRIVERBUILD(sre_d3d9 "d3d9main.cpp" "d3d9shaders.cpp" "d3d9imgui.cpp")

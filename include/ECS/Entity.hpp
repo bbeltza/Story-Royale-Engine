@@ -5,8 +5,7 @@
 #include <Datatypes/Vector.hpp>
 
 #include <cassert>
-
-#include <imgui.h>
+#include <ints.h>
 
 namespace sreECS
 {
@@ -31,9 +30,6 @@ namespace sreECS
         Entity(const Entity& copy) = delete;
         Entity(Entity&& moving); // For world reparenting, might start using it I don't know..
 
-        #ifndef IMGUI_DISABLE
-		    virtual void ImGuiUpdate() {}
-	    #endif
     public:
         // The current position of the entity
         sre::vec2ut position;

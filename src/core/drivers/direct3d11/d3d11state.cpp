@@ -1,4 +1,4 @@
-#include "d3d11.h"
+#include "d3d11.hpp"
 
 using namespace sreD3D11;
 

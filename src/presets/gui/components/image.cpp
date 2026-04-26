@@ -1,6 +1,7 @@
 #include <GUI/Components/Image.hpp>
 #include <GUI/Components/Transform.hpp>
 #include <Core/Render.h>
+#include <Base/Log.h>
 
 using namespace sreGUI;
 
@@ -8,7 +9,7 @@ void Image::fit(Transform& transform)
 {
     if (!texture)
     {
-        sre::log<sre::LOGCATEGORY_WARN>("Calling Image::fit on NULL image");
+        sre::log(SRE_LOG_WARN "Calling Image::fit on NULL image");
         return;
     }
 

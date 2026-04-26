@@ -1,5 +1,6 @@
 #include <ECS/Entity.hpp>
 #include <ECS/Scene.hpp>
+#include <Base/Log.h>
 
 using namespace sreECS;
 
@@ -42,7 +43,7 @@ void Entity::setup_components(Component* const components[], size_t count)
 {
 	if (m_components)
 	{
-		sre::log<sre::LOGCATEGORY_WARN>("setup_components(): Current entity already has components attached to it, they will be deattached");
+		sre::log(SRE_LOG_WARN "setup_components(): Current entity already has components attached to it, they will be deattached");
 		if (m_componentcount != count)
 		{
 			operator delete (m_components);

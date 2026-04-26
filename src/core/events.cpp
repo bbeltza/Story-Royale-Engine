@@ -2,10 +2,6 @@
 
 #include <Core/Event.hpp>
 
-// So since this is the only cpp source that has access to every single event, I'm processing ImGui's events here!
-    #include <backends/imgui_impl_sdl2.h>
-//
-
 namespace sre
 {
     using EventQueue = std::deque<sre::Event>;
@@ -23,22 +19,6 @@ namespace sre
 static sre::EventQueue queue;
 static sre::RAIIMutex mutex;
 sre::Signal<sre::Event> sre::onEvent;
-
-int __event_filter(void* userdata, SDL_Event* ev)
-{
-    #ifndef IMGUI_DISABLE
-    if (ev->type == SDL_QUIT) return 1;
-    if (ev->type == SDL_WINDOWEVENT) return 1;
-    if (engine.video && engine.video->imgui)
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui_ImplSDL2_ProcessEvent(ev);
-        if (io.WantCaptureKeyboard)
-            return 0;
-    }
-    #endif
-    return 1;
-}
 
 int __signal_events(SDL_Event* ev)
 {

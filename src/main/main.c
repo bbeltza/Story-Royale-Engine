@@ -40,7 +40,7 @@ static void handle_arg(const char* arg, char* argv[])
         return;
     }
 
-    sre_log(SRE_LOGCATEGORY_WARN, "Unrecognized option: %s", arg-j);
+    sre_log(SRE_LOG_WARN "Unrecognized option: %s", arg-j);
 }
 
 int main(int argc, char* argv[])

@@ -46,17 +46,3 @@ void Sprite::on_render(Entity& entity)
         texture.get()
     );
 }
-
-#ifndef IMGUI_DISABLE
-    void Sprite::ImGuiUpdate()
-    {
-        ImGui::DragFloat2("offset", offset);
-        ImGui::DragFloat2("scale", scale, 0.1f);
-        ImGui::DragInt4("region", region.position);
-        ImGui::SliderInt("current_frame", &reinterpret_cast<int&>(current_frame), 0, static_cast<int>(textures.size() - 1));
-    
-        float v[4] = { modulate.r/255.0f, modulate.g/255.0f, modulate.b/255.0f, modulate.a/255.0f };
-        if (ImGui::ColorEdit4("modulate", v))
-            modulate = sre::col4::fromNormalized(v[0], v[1], v[2], v[3]);
-    }
-#endif

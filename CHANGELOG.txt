@@ -1,0 +1,12 @@
+- April 26th 2026: 0.103.26
+    - Changelog file: All of the major changes can and will be seen in this file. It's, I think generally better than seeing the commits made spred accross every file
+    - Ideas file:
+        - Designed to replace the TODO.txt from back then. There are currently no objectives for this engine, and if there are then they'd be noted in the aforementioned changelog file in the `experimental` branch which we will go after later
+        - It is going to have some ideas that I would want to add, but that I'm not working on them. Very simple.
+    - New branching model: Major, more stable and tested versions will stay on the `master` branch while I work and experiment on the engine on a separate `experimental` branch. More exotic experiments may be made on even another branch too!
+    - Error API: There's now proper error handling. Logging has also change a little bit and made more convenient, specially for C. However, you can't now log errors anymore, errors will be logged depending on the user's choice from the error API.
+                    However, you can still give warnings, and log normally, but some migration to the new logging system will have to be made.
+    - ImGui is back! A new and possibly more convenient method has been used, using a separate static library sre_imguiglue to be able to use ImGui, which uses the new SRE_HINT_IMGUI_GLUE hint. However, you can make your own implementation of it with that hint
+                        without linking sre_imguiglue. You may also want to extract the render driver specific implementations suffixed with 'imgui' (for example, for d3d11 the ImGui implementation would be 'sred3d11imgui')
+- April 24th 2026: 0.103.24
+    - New renderer interface, having over 6 render drivers (7 with d3d12's joke driver) all made in the `renderer` branch (More info in the pull request)

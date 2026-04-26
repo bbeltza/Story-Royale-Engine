@@ -1,6 +1,7 @@
 #include <Core/Audio.hpp>
 #include <Core/Audio.h>
 #include <Base/File.hpp>
+#include <Base/Error.h>
 #include <Base/Log.h>
 
 #include <utils/math.hpp>
@@ -15,7 +16,7 @@ void Audio::play()
 {
 	if (!m_chunk)
 	{
-		sre::log<LOGCATEGORY_WARN>("Calling audio::play() while no chunk has been attached");
+		sre::log(SRE_LOG_WARN "Calling audio::play() while no chunk has been attached");
 		return;
 	}
 	if (!m_id)
@@ -58,14 +59,14 @@ AudioChunk Audio::load(const File& from_file)
 	AudioChunk chunk{from_file};
 	if (!chunk)
 	{
-		sre::log<LOGCATEGORY_ERROR>("Audio::load() failed loading the audio file");
+		sre::error(SRE_ERR_CREATE, "Audio::load() failed loading the audio file");
 		return NULL;
 	}
 
 	chunk = sre::convertchunk(chunk);
 	if (!chunk)
 	{
-		sre::log<LOGCATEGORY_ERROR>("Audio::load() failed converting the audio file to the engine's format");
+		sre::error(SRE_ERR_CREATE, "Audio::load() failed converting the audio file to the engine's format");
 		return NULL;
 	}
 

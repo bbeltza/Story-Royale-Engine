@@ -15,7 +15,5 @@ namespace sreECS
         // @param speed the speed to multiply with
         void normalize(sre::unit speed=1.0);
         void on_pupdate(Entity&) override;
-
-        void ImGuiUpdate();
     };
 }

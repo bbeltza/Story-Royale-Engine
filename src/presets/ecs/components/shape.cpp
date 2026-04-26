@@ -115,22 +115,3 @@ void Shape::on_pupdate(Entity& entity)
         }
     }
 }
-
-#ifndef IMGUI_DISABLE
-	void Shape::ImGuiUpdate()
-	{
-		if (ImGui::TreeNode("flags"))
-		{
-			ImGui::CheckboxFlags("F_VISIBLE", (unsigned*)&flags, F_VISIBLE);
-			ImGui::CheckboxFlags("F_ANCHORED", (unsigned*)&flags, F_ANCHORED);
-			ImGui::CheckboxFlags("F_CANCOLLIDE", (unsigned*)&flags, F_CANCOLLIDE);
-			ImGui::CheckboxFlags("F_CANQUERY", (unsigned*)&flags, F_CANQUERY);
-			ImGui::TreePop();
-		}
-	
-	    ImGui::DragFloat4("rect", rect.position);
-	    float v[4] = { color.r/255.0f, color.g/255.0f, color.b/255.0f, color.a/255.0f };
-	    if (ImGui::ColorEdit4("color", v))
-	        color = sre::col4::fromNormalized(v[0], v[1], v[2], v[3]);
-	}
-#endif

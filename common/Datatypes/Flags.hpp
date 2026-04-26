@@ -1,7 +1,7 @@
 #pragma once
-#include <Datatypes/common.hpp>
-
 #include <utils/math.h>
+#include <ints.h>
+#include <type_traits>
 
 namespace sre
 {
@@ -38,16 +38,7 @@ namespace sre
 
         inline void println() const
         {
-            constexpr size_t bitsize = sizeof(m_data) * 8;
-            char buff[sizeof(m_data)][9] = { 0 };
-
-            for (size_t i = 0; i < bitsize; i++)
-                buff[(sizeof(m_data) - 1) - i / 8][7 - i % 8] = '0' + ((m_data >> i) & 1);
-
-            for (int i = 0; i < sizeof(m_data) - 1; i++)
-                buff[i][8] = ' ';
-
-            sre::log("{ %s (0x%x) }", buff, m_data);
+            
         }
     private:
         T m_data{};
@@ -58,4 +49,19 @@ namespace sre
     using flags32 = flags<uint32_t>;
     using flags64 = flags<uint64_t>;
     using flagsptr = flags<size_t>;
+}
+
+#include <ostream>
+#include <bitset>
+#include <climits>
+
+template <typename Char, typename Traits, typename T>
+std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& os, const sre::flags<T>& flags)
+{
+    T data = flags.get();
+    std::bitset<sizeof(data) * CHAR_BIT> bitset{data};
+
+    auto oldflags = os.setf(std::ios::hex);
+    os << "{ " << bitset << "(" << data << ") }";
+    return os;
 }

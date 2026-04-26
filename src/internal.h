@@ -39,7 +39,6 @@ SRE_CAPI_BEGIN
 		sre_Sampler** freelist[3];
 		size_t last;
 	};
-
 	
 	#define SRE_VIDEOV(x, func) (*x)->func(x+1)
 	#define SRE_VIDEO(x, func, ...) (*x)->func(x+1, __VA_ARGS__)
@@ -50,11 +49,15 @@ SRE_CAPI_BEGIN
 		size_t texture_size;
 		struct _texture_env textures;
 
+		int index;
+
 		short blendmode;
 		sre_rect2Di clip_rect;
 
 		void* _vector_data[4][3];
 	};
+
+	#define SRE_pIMGUI static_cast<::sre::ImGuiInterface*>(engine.imgui)
 
 	#if defined(_MSC_VER)
 		#define SRE_ALIGN(x) __declspec(align(x))
@@ -97,6 +100,7 @@ SRE_CAPI_BEGIN
 		// Renderer data
 		
 		struct _engine_renderdata video;
+		void* imgui;
 
 		int osize_x, osize_y;
 		sre_unit vsize_x, vsize_y;
@@ -142,6 +146,8 @@ SRE_CAPI_BEGIN
 	extern void __create_window();
 	extern void __setup_renderer();
 	extern void __cleanup_renderer();
+
+	extern void __initialize_imgui(void* imgui);
 	
 	extern void __setup_audio_device();
 

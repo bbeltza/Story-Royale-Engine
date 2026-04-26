@@ -14,7 +14,7 @@ else()
     set(SRE_ISDEBUG OFF)
 endif()
 
-option(SRE_IMGUI "Integrate ImGui. A GUI library that's useful for debugging, along with its integration with the engine's world/entity system" OFF)
+#option(SRE_IMGUI "Integrate ImGui. A GUI library that's useful for debugging, along with its integration with the engine's world/entity system" OFF)
 option(SRE_EXAMPLES "Build example applications" ${SRE_ISTOP})
 option(SRE_TESTS "Build and run tests (Kinda abandoned)" ON)
 option(SRE_INSTALL "Enable engine install targets (very experimental and currently being tested)" ${SRE_ISTOP})
@@ -40,6 +40,7 @@ include(sre/checkheaders)
 include(sre/installhelper)
 
 add_subdirectory(src)
+add_subdirectory(imgui_glue)
 
 project(sre_private)
 add_library(sre_private INTERFACE)
@@ -55,10 +56,6 @@ if(NOT SRE_ISTOP)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SRE_CMAKE_MODULE_PATH} PARENT_SCOPE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} PARENT_SCOPE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} PARENT_SCOPE)
-endif()
-
-if (NOT SRE_IMGUI)
-    target_compile_definitions(sre INTERFACE "IMGUI_DISABLE=1")
 endif()
 
 if (SRE_EXAMPLES)

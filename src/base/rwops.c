@@ -1,7 +1,7 @@
 #include <Base/RWops.h>
 #include <Base/File.h>
 #include <Base/Chunk.h>
-#include <Base/Log.h>
+#include <Base/Error.h>
 
 static int sdlrw_close(SDL_RWops *rw)
 {
@@ -36,7 +36,8 @@ SDL_RWops* sre_filetorwops(const sre_File* file)
 
     if (!rw)
     {
-        sre_log(SRE_LOGCATEGORY_ERROR, "Failed to create RWops structure from File: %s", SDL_GetError());
+        sre_error(SRE_ERR_CREATE, "RWops structure creation failed");
+        sre_error(SRE_ERR_SDL);
         return NULL;
     }
 

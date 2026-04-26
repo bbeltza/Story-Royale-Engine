@@ -47,7 +47,5 @@ namespace sreECS
 
         inline sre::rect2Dut real_rect(Entity& entity) const { return {entity.position + rect.position, rect.size}; }
         inline bool collides(Entity& entity, const sre::rect2Dut &other_Rect) const { return real_rect(entity).intersects(other_Rect); }
-
-        void ImGuiUpdate();
     };
 }

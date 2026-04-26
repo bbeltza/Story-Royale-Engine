@@ -7,12 +7,6 @@ namespace sre
     template <typename T>
     struct rect2D
     {
-        SRE_IMPLEMENT_DATATYPE("{ {%g, %g} ; {%g, %g} }",
-            static_cast<double>(position.x),
-            static_cast<double>(position.y),
-            static_cast<double>(size.x),
-            static_cast<double>(size.y))
-
         using type = T;
         using vec = vec2<type>;
 
@@ -119,4 +113,11 @@ namespace sre
             (bottom_right - top_left)
         };
     }
+}
+
+template <typename Char, typename Traits, typename T>
+std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& os, const sre::rect2D<T>& rect)
+{
+    os << "( " << (rect.position.x + 0) << " ; " << (rect.position.y + 0) << " | " << (rect.size.x + 0) << " ; " << (rect.size.y) << " )";
+    return os;
 }

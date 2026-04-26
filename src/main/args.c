@@ -34,7 +34,7 @@ static void handle_ac(const char* arg, char* argv[])
 {
     (void)arg;
     (void)argv;
-    sre_log(SRE_LOGCATEGORY_WARN, "Option \"alloc-console\" is only supported on Windows");
+    sre_log(SRE_LOG_WARN "Option \"alloc-console\" is only supported on Windows");
     return;
 }
 #else
@@ -44,7 +44,7 @@ static void handle_ac(const char* arg, char* argv[])
 {
     if (!winmain_enter)
     {
-        sre_log(SRE_LOGCATEGORY_WARN, "Specified \"alloc-console\" but application already has a console");
+        sre_log(SRE_LOG_WARN "Specified \"alloc-console\" but application already has a console");
         return;
     }
 

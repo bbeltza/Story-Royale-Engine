@@ -6,6 +6,7 @@ function(SRE_DRIVERBUILD TARGET)
     add_library(${TARGET} OBJECT ${ARGN})
 
     target_include_directories(${TARGET} PRIVATE "../")
+    target_include_directories(${TARGET} PRIVATE "${SRE_DIR}/common/imgui")
     target_link_libraries(${TARGET} PRIVATE sre)
     target_link_libraries(${TARGET} PRIVATE sre_private)
     target_link_libraries(sre_drivers INTERFACE ${TARGET} $<TARGET_OBJECTS:${TARGET}>) # Be careful with includes!

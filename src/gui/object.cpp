@@ -2,6 +2,8 @@
 #include <GUI/Component.hpp>
 #include <Core/Display.hpp>
 #include <Core/Render.h>
+#include <Base/Error.h>
+#include <Base/Log.h>
 
 #include <utils/mem.h>
 
@@ -41,12 +43,12 @@ void Object::set_parent(Object* parent)
 {
     if (engine.current_guilayer == this)
     {
-        sre::log<sre::LOGCATEGORY_ERROR>("Calling set_parent() on root Object, this is unimplemented");
+        sre::error(SRE_ERR_INVALID_STATE, "Calling set_parent() on root Object, this is unimplemented");
         return;
     }
     if (!parent)
     {
-        sre::log<sre::LOGCATEGORY_WARN>("Calling set_parent(NULL), it is not implemented, use set_root() instead");
+        sre::log(SRE_LOG_WARN "Calling set_parent(NULL), it is not implemented, use set_root() instead");
         return;
     }
     if (m_parent == parent) return;
@@ -60,7 +62,7 @@ void Object::set_root(bool destroy_old)
 {
     if (engine.current_guilayer == this)
     {
-        sre::log<sre::LOGCATEGORY_WARN>("Calling sreGUI::Object::set_rot() on root layer");
+        sre::log(SRE_LOG_WARN "Calling sreGUI::Object::set_rot() on root layer");
         return;
     }
     if (m_parent)

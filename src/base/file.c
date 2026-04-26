@@ -1,5 +1,5 @@
 #include <Base/File.h>
-#include <Base/Log.h>
+#include <Base/Error.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -117,7 +117,7 @@ bool sre_fileopen(sre_File* file, const char* path, int mode)
 	}
 
 	if (!ret)
-		sre_log(SRE_LOGCATEGORY_ERROR, "Could not open file '%s': %s", path, strerror(errno));
+		sre_error(SRE_ERR_FILE_OPEN, path, strerror(errno));
 	return ret;
 }
 

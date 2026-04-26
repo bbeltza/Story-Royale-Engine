@@ -29,7 +29,7 @@ bool IniFile::load(const char* from_path)
     // Perform a debug extension check
     const char* extension = strrchr(from_path, '.');
     if (!extension || strcmp(extension, ".ini"))
-        sre::log<LOGCATEGORY_WARN>("IniFile::load(): Path '%s' does not have the '.ini' extension. Is it intended?", from_path);
+        sre::log(SRE_LOG_WARN "IniFile::load(): Path '%s' does not have the '.ini' extension. Is it intended?", from_path);
 
     File f(from_path, FILE_READ);
     return load(f);

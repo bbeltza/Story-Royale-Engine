@@ -1,6 +1,8 @@
 #ifndef SRE_DXCOMMON_H
 #define SRE_DXCOMMON_H
 #include <winerror.h>
+#include <Base/Error.h>
+#include <Base/Log.h>
 
 // Convert HRESULT error codes into a constant string
 inline static const char* DXHRTOSTRING(HRESULT hr)
@@ -61,15 +63,9 @@ inline static const char* DXHRTOSTRING(HRESULT hr)
     #undef _FMT_CASE
 }
 
-#ifdef __cplusplus
-    #define DX_LOGERR sre::log<sre::LOGCATEGORY_ERROR>
-#else
-    #define DX_LOGERR(...) sre_log(SRE_LOGCATEGORY_ERROR, __VA_ARGS__)
-#endif
-
 #define SRE_DXCALL(x) hr = x;                                                                                               \
 do { if (FAILED(hr)) {                                                                                                      \
-    DX_LOGERR("[DirectX - error]: '" #x "' failed: '%s' (0x%X) | line: %u ; file: %s", DXHRTOSTRING(hr), hr, __LINE__, __FILE__);  \
+    sre_error(SRE_ERR_DIRECTX_HR_DBG, "'" #x "' failed:", DXHRTOSTRING(hr), hr, __LINE__, __FILE__);  \
                                                                                                                             \
 }} while(0)
 

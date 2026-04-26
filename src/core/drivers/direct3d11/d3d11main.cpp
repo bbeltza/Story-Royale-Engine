@@ -1,4 +1,4 @@
-#include "d3d11.h"
+#include "d3d11.hpp"
 
 #include <SDL_syswm.h>
 #include <SDL_hints.h>
@@ -74,7 +74,7 @@ Instance::Instance(SDL_Window* window, int* outstatus)
             if (hr != DXGI_ERROR_INVALID_CALL)
                 return;
 
-            sre::log<sre::LOGCATEGORY_INFO>("[Direct3D11]: Switching to legacy swapchain...");
+            sre::log(SRE_LOG_INFO "[Direct3D11]: Switching to legacy swapchain...");
 
             // Double-buffering might not be supported, create a legacy single-buffered swap-chain
             //swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;

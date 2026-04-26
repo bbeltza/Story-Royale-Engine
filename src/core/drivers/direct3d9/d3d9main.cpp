@@ -96,6 +96,7 @@ bool Instance::_statesetup()
     SRE_DXCALLF(m_dxdevice->CreateVertexDeclaration(D1_DECLARATION, &m_d1data.dxdecl));
     SRE_DXCALLF(m_dxdevice->CreateVertexDeclaration(D2_DECLARATION, &m_d2data.dxdecl));
 
+    // Buffer resizing? Maybe?? (this now is unsafe...)
     SRE_DXCALLF(m_dxdevice->CreateVertexBuffer(sizeof(FLOAT[2*4]), D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &m_d1data.dxbuff_vert, NULL));
     SRE_DXCALLF(m_dxdevice->CreateVertexBuffer(sizeof(sre::RenderInstance1)*255, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &m_d1data.dxbuff_inst, NULL));
     
@@ -148,6 +149,7 @@ bool Instance::_statesetup()
 void Instance::_resetdevice()
 {
     HRESULT hr;
+    _invalidateimgui();
     _releaseresources();
     SRE_DXCALL(m_dxdevice->Reset(&m_pparamcache));
     if (FAILED(hr))

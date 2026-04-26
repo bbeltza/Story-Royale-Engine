@@ -11,7 +11,10 @@
 #include <utils/mem.h>
 
 #include <Base/Log.h>
+#include <Base/Error.h>
 #include <Base/Coroutine.h>
+
+#include <Hints.h>
 
 extern bool sre_coroutinecoreinit();
 extern void sre_coroutinecorequit();
@@ -45,22 +48,28 @@ static inline void __setup_engine_data()
     engine.cor_running = true;
     engine.coroutine_thread = SDL_CreateThread(__run_coroutine, "Coroutine Engine", &engine.cor_running);
     sre_coroutinecreate(false, __invoke_entry, NULL);
+
+    void* imgui_hint = (void*)sre_gethint("IMGUI_GLUE");
+    if (imgui_hint)
+        __initialize_imgui(imgui_hint);
 }
 
 static void sdl_log_callback(void *userdata, int category, SDL_LogPriority priority, const char *message)
 {
+    extern int sre_internallogmsg(int type, int category, const char* msg, int length);
+
     int cat;
     switch (category)
     {
     case SDL_LOG_CATEGORY_ERROR:
-        cat = SRE_LOGCATEGORY_ERROR;
+        cat = '\x03';
         break;
     default:
-        cat = SRE_LOGCATEGORY_DEBUG;
+        cat = '\x00';
         break;
     }
 
-    sre_logsimpleEx(2, cat, message);
+    sre_internallogmsg(2, cat, message, 0);
 }
 
 void __initialize_engine()
@@ -70,13 +79,17 @@ void __initialize_engine()
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0"); // Don't interpret touch events as mouse events
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
 
+#ifdef SDL_VIDEO_DRIVER_WAYLAND
+    SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland");
+#endif
 #ifdef SDL_VIDEO_DRIVER_WINDOWS // Replace the "SDL_app" window class name
     SDL_RegisterApp("Story Royale Engine", 0x0003, NULL);
 #endif
 
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
     {
-        sre_log(SRE_LOGCATEGORY_ERROR, "SDL ERROR: Could not initialize SDL Subsystems: '%s'", SDL_GetError());
+        sre_error(SRE_ERR_CORE, "Could not initialize SDL Subsystems");
+        sre_error(SRE_ERR_SDL, SDL_GetError());
         exit(-1);
     }
     IMG_Init(IMG_INIT_PNG);

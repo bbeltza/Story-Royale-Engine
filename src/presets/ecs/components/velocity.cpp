@@ -29,10 +29,3 @@ void Velocity::on_pupdate(Entity& e)
 {
     e.position += velocity * sre::pdt;
 }
-
-#ifndef IMGUI_DISABLE
-    void Velocity::ImGuiUpdate()
-    {
-        ImGui::DragFloat2("velocity", velocity);
-    }
-#endif

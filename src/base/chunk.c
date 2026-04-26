@@ -1,6 +1,7 @@
 #include <Base/File.h>
 #include <Base/Chunk.h>
 #include <Base/Log.h>
+#include <Base/Error.h>
 
 #include <utils/lockfile.h>
 #include <utils/mem.h>
@@ -8,20 +9,14 @@
 const sre_Chunk *sre_fileallocate(const sre_File* file, size_t max_size)
 {
     if (!file->impl)
-    {
-        sre_logsimple(SRE_LOGCATEGORY_ERROR, "Failed to allocate file data. File is not valid");
-        return NULL;
-    }
+        return sre_error(SRE_ERR_CREATE, "File is not valid. Cannot allocate chunk") ? NULL : NULL;
 
     size_t filesize = sre_filesize(file);
     if (!filesize)
-    {
-        sre_logsimple(SRE_LOGCATEGORY_ERROR, "File size will be equal to 0 when allocating chunk");
-        return NULL;
-    }
+        return sre_error(SRE_ERR_CREATE, "File size will be equal to 0 when allocating chunk!") ? NULL : NULL;
 
     if (max_size > filesize)
-        sre_log(SRE_LOGCATEGORY_WARN, "'max_size' with a value of %zd is larger than the %zd file size", max_size, filesize);
+        sre_log(SRE_LOG_WARN "'max_size' with a value of %zd is larger than the %zd file size", max_size, filesize);
     else
         filesize = max_size ? max_size : filesize;
 
