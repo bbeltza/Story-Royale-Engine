@@ -34,7 +34,7 @@ namespace sre
         {
             auto s = str();
             if (s.back() == '\n') s.pop_back();
-            sre_internallogmsg(type, category, s.c_str(), s.size());
+            sre_internallogmsg(type, category, s.c_str(), static_cast<int>(s.size()));
             str("");
             return 0;
         }
@@ -341,7 +341,7 @@ void sre::Log::flush()
                     CONSOLE_SCREEN_BUFFER_INFO old_buffinfo;
                     GetConsoleScreenBufferInfo(hcon, &old_buffinfo);
                     SetConsoleTextAttribute(hcon, wattribs);
-                        WriteConsoleA(hcon, header_buf, header_size, NULL, NULL);
+                        WriteConsoleA(hcon, header_buf, static_cast<DWORD>(header_size), NULL, NULL);
                     SetConsoleTextAttribute(hcon, old_buffinfo.wAttributes);
                         WriteConsoleA(hcon, msg.buffer, msg.size, NULL, NULL);
                     

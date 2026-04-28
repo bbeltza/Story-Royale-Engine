@@ -239,7 +239,7 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     {
         case SRE_DRAW2_JOINED:
         case SRE_DRAW2_STRIP:
-            primcount = 1 + (point_count-3);
+            primcount = static_cast<UINT>(1 + (point_count-3));
             primtype = instance->mode == SRE_DRAW2_JOINED ? D3DPT_TRIANGLEFAN : D3DPT_TRIANGLESTRIP;
             break;
         case SRE_DRAW2_TRIANGLE:
