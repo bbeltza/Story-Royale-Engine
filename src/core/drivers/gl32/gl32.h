@@ -5,7 +5,6 @@
 // It'll be the main renderer for linux systems, and any other system that supports it, but isn't either Windows (for d3d11) or Apple (for Metal which will be added sometime)
 
 #include <gl21/gl21.h>
-#define SREGL32_MAXINSTANCECOUNT 255
 
 struct sregl32_stateubo
 {
@@ -18,9 +17,8 @@ struct sregl32_d1data
     GLuint program;
     GLuint vao;
     GLuint vbo;
-    
-    GLuint instubo;
-    GLuint instcolubo;
+
+    GLsizeiptr vbosize;
 };
 
 struct sregl32_d2data

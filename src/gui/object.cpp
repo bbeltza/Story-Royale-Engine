@@ -202,6 +202,8 @@ void Object::call_update()
 
 void Object::call_render()
 {
+    if (!flags.has(F_ENABLED)) return;
+
     bool has_clip = flags.has(F_CLIP);
 
     pre_render();
@@ -220,8 +222,6 @@ void Object::call_render()
     
     for (auto& obj : children)
     {
-        if (!obj.flags.has(F_ENABLED)) continue;
-
         obj.call_render();
     }
 
