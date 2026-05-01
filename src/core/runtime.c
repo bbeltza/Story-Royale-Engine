@@ -17,7 +17,8 @@
         static SRWLOCK win32_rendersrw;
 
         static void win32_renderflush(void* userdata)
-        {           
+        {
+            // TODO: This blocks when something else gets deferred and waited for (sre_deferResponse) to the main thread. Figure out how to fix it
             AcquireSRWLockExclusive(&win32_rendersrw);
             if (!win32_quit) __render_flush();
             WakeAllConditionVariable(&win32_rendercond);

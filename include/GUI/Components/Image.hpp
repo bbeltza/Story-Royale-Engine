@@ -11,11 +11,17 @@ namespace sreGUI
 
     struct Image : public Component
     {
+        enum Flags
+        {
+            F_REGION = ut_bit(1)
+        };
+
         Image() = default;
         Image(sre::RSampler&& sampler): texture(std::move(sampler)) {}
 
         sre::RSampler texture;
         sre::col4 modulate = sre::WHITE;
+        sre::rect2Di region{0, 0};
 
         void fit(Transform& transform);
     protected:

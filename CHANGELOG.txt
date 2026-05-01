@@ -1,3 +1,12 @@
+(If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- May Xth 2026: 0.104.XX
+    - New hint: SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
+                    but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers
+                        that aren't meant to be included in the game but are made out of curiosity, which will also allow me to test this feature.)
+    - Error API improvements: A small bugfix from sre::error/critical... And error callbacks
+    - OpenGL 3.2's backend uses geometry shaders now! This is a way still implement instancing when all you know that you have is data shared per-instance... It should also perform better than before
+                    (although it doesn't still perform the best out of OpenGL 1.1)
+    - sreGUI: sreGUI::Image supports now regions (By enabling the F_REGION flag)
 - April 26th 2026: 0.103.26
     - Changelog file: All of the major changes can and will be seen in this file. It's, I think generally better than seeing the commits made spred accross every file
     - Ideas file:

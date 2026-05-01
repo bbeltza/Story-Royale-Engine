@@ -80,8 +80,14 @@ typedef enum sre_draw2mode // Primitive rendering mode for draw2
 
 enum sre_drawFlags
 {
-    SRE_DRAWFLAG_CAMERA = 1 << 0,
-    SRE_DRAWFLAG_LINE = 1 << 1 // Draw lines instead of filling the elements, it is not completely implemented right now
+    // Individual camera axis flags. Not out yet
+    SRE_DRAWFLAG_CAMERAX = 1 << 0,
+    SRE_DRAWFLAG_CAMERAY = 1 << 0,
+
+    SRE_DRAWFLAG_CAMERA = SRE_DRAWFLAG_CAMERAX | SRE_DRAWFLAG_CAMERAY,
+    SRE_DRAWFLAG_LINE = 1 << 1, // Draw lines instead of filling the elements, it is not completely implemented right now
+    SRE_DRAWFLAG_SCALED = 1 << 2 // Draw as if it was drawn in non-scaled viewport coordinates, then scale it back to the window to get more pixelated results if the game has viewport scaling.
+                                    // If it doesn't have any viewport scaling, then it won't do anything
 };
 
 enum _sre_drawSwitchFlags
@@ -92,14 +98,6 @@ enum _sre_drawSwitchFlags
 };
 
 struct SDL_Window;
-
-struct sre_SamplerNew
-{
-    int _refcount;
-    int w, h;
-    sre_pixelFormat format;
-    void* renderer;
-};
 
 typedef struct sre_RenderPoint
 {
