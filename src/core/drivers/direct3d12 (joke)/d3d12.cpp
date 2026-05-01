@@ -1,4 +1,4 @@
-// This is all of the code present for d3d12, it will be thousands of lines long, I'm not thinking of expanding not separating it
+// This is all of the code present for d3d12, it will be thousands of lines long, I'm not thinking of expanding nor separating it
 // Thus the class definitions will be put here
 #include <Core/Render.h>
 
@@ -761,7 +761,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 
     HRESULT hr;
 
-    // TODO: Load these functions dynamically, and maybe look if I can try and find adapters
+    // Load these functions dynamically, maybe look someday if I can try and find adapters
     {
         IDXGIFactory4* dxfactory = NULL;
         
@@ -1352,7 +1352,7 @@ UINT sred3d12_inst::_srvallocate()
             ID3D12DescriptorHeap* old_dheaps[2] = { dxsrvheaps[0], dxsrvheaps[1] };
 
             D3D12_DESCRIPTOR_HEAP_DESC dheap_desc{};
-            dheap_desc.NumDescriptors = srvcap; // I guess this will be resized and recreated... Ughh
+            dheap_desc.NumDescriptors = srvcap;
             dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheaps[0])));
             dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;

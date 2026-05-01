@@ -117,7 +117,7 @@ bool sre_fileopen(sre_File* file, const char* path, int mode)
 	}
 
 	if (!ret)
-		sre_error(SRE_ERR_FILE_OPEN, path, strerror(errno));
+		sre_error(SRE_ERR_FILE_OPENING, path, strerror(errno));
 	return ret;
 }
 

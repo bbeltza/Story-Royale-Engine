@@ -168,16 +168,42 @@ void __cleanup_renderer()
 void __setup_renderer()
 {
 	int renderhint = -1;
+	const sre_RenderDriverData* driverdata = NULL;
 	{
-		const void* hint = sre::gethint("RENDERDRIVER");
-		if (hint)
+		auto externalhint = static_cast<const sre_RenderDriverData*const*>(sre::gethint("EXTERN_RENDERDRIVER"));
+		if (externalhint)
 		{
-			unsigned hintvalue = *static_cast<const unsigned*>(hint);
-			renderhint = hintvalue;
+			driverdata = *externalhint;
+			if (!driverdata)
+				sre::critical(SRE_ERR_CORE, "SRE_HINT_EXTERN_RENDERDRIVER is NULL...");
+
+			sre::log("FOUND external render driver: \"%s\"", driverdata->name);
+			int status = render_setupenv(driverdata);
+			
+			if (status == SRE_RENDERSTATUS_FAILED)
+				sre::critical(SRE_ERR_FAIL, "External render driver failed to initialize!");
+
+			if (status == SRE_RENDERSTATUS_UNSUPPORTED)
+			{
+				sre::log(SRE_LOG_WARN "External render driver '%s' is unsupported", driverdata->name);
+				driverdata = NULL;
+			}
+		}
+
+		// Look for the existing render drivers now
+		if (!driverdata)
+		{
+			const void* hint = sre::gethint("RENDERDRIVER");
+			if (hint)
+			{
+				unsigned hintvalue = *static_cast<const unsigned*>(hint);
+				renderhint = hintvalue;
+			}
+			
+			driverdata = render_choosedriver(renderhint);
 		}
 	}
 
-	const sre_RenderDriverData* driverdata = render_choosedriver(renderhint);
 	if (!driverdata)
 		render_panic();
 

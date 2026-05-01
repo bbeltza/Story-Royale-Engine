@@ -3,12 +3,6 @@
 #include <C_API.h>
 #include <ints.h>
 
-#if _WIN32
-    #define SRE_RENDERCALL __cdecl
-#else
-    #define SRE_RENDERCALL
-#endif
-
 #ifndef __cplusplus
     #include <Datatypes/CRect.h>
     #include <Datatypes/CColor.h>
@@ -158,6 +152,12 @@ struct sre_RenderVFT
 
 
 // Structure used to define driver initialization data
+//
+// You shouldn't bother using this structure in your game at all.
+// But if you want to make your own render driver (when external drivers become available) you will be able to use this structure to make your own render driver
+// by declaring a global/static variable/constant of this type, and pointing to it with the future SRE_HINT_EXTERN_RENDERDRIVER hint.
+// If you're on C++, you may also want to look at the sre::RenderDriverHelper template, it inherits this structure and lets you implement your render driver
+//  with a custom class as a more "clean" way
 typedef struct sre_RenderDriverData
 {
     // Initialization function, should write to `interface` and return either of these values:
@@ -166,8 +166,8 @@ typedef struct sre_RenderDriverData
         // `SRE_RENDERSTATUS_FAILED` (-1): Initialization has failed, an error has occurred and has to be looked into
         // `SRE_RENDERSTATUS_UNSUPPORTED` (1): The render driver was found unsupported by the system. The engine needs to switch to another driver that can be supported
     int (*initialize)(const struct sre_RenderVFT** interface, void* renderdata, struct SDL_Window* window);
-    size_t renderer_size; // The size, in bytes of the renderer structure
-    size_t texture_size; // The size, in bytes of a texture
+    size_t renderer_size; // The size, in bytes to allocate for the renderer structure
+    size_t texture_size; // The size, in bytes to allocate for every texture
 
     const char* name; // Name tag of the render driver. It is technically optional, but very recommended
 } sre_RenderDriverData;

@@ -25,10 +25,10 @@ typedef enum sreErrorCategory
     SRE_ERR_FAIL,
     SRE_ERR_SDL,
 
-    SRE_ERR_FILE_OPEN,
+    SRE_ERR_FILE_OPENING,
 
     // DirectX HRESULT failing errors
-    // The one with DBG just adds the line and the file in which the error happened
+    // The one with _DBG just adds the line and the file in which the error happened
     SRE_ERR_DIRECTX_HR,
     SRE_ERR_DIRECTX_HR_DBG,
 
@@ -48,6 +48,13 @@ bool sre_clearerrors();
 int sre_error(sreErrorCategory category, ...);
 // Drop a critical error, and possibly crash the program. Critical errors tell the program that it cannot proceed anymore
 int sre_CRITICAL(sreErrorCategory category, ...);
+
+// Set a callback function that will be run everytime an error occurs (unimplemented)
+// @param level The level of the error, whether the error comes from `sre_error` or `sre_CRITICAL`, so either `SRE_ERROR` or `SRE_CRITICAL`
+// @param callback The callback function to be run
+// @param override Whether to override any default behavior on the error (logging for normal errors or terminating on top of that for critical errors) or keep the default behavior
+// @remark if `override` is set to `false`, then the callback function will always run before the default behavior gets run.
+void sre_errorcallback(sreErrorLevel level, void (*callback)(sreErrorCategory category, const char* msg), bool override);
 
 SRE_CAPI_END
 

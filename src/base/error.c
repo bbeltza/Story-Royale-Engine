@@ -74,7 +74,7 @@ static const char* err_getfmtstr(unsigned cat)
         "Fail: %s",                                     /* SRE_ERR_FAIL */
         "SDL Error: %s",                                /* SRE_ERR_SDL */
         
-        "Failed opening file '%s': %s",                  /* SRE_ERR_FILE_OPEN */
+        "Failed opening file '%s': %s",                  /* SRE_ERR_FILE_OPENING */
 
         "DirectX error: %s '%s' (%X)",
         "DirectX error: %s '%s' (%X) | line: %d | file: %s"
