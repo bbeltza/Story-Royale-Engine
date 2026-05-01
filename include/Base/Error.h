@@ -61,8 +61,10 @@ SRE_CAPI_END
 #ifdef __cplusplus
     namespace sre
     {
-        inline int error(sreErrorCategory category, ...) { return sre_error(category); }
-        inline int critical(sreErrorCategory category, ...) { return sre_CRITICAL(category); }
+        template <typename... Args>
+        inline int error(sreErrorCategory category, Args... args) { return sre_error(category, args...); }
+        template <typename... Args>
+        inline int critical(sreErrorCategory category, Args... args) { return sre_CRITICAL(category, args...); }
     }
 #endif
 
