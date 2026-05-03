@@ -1,9 +1,11 @@
 #include "../internal.h"
 
+#include <SDL_vulkan.h>
+
 extern const char __game_title[];
 
 void __create_window()
-{
+{	
     static const int DEFAULT_WIDTH = 640;
     static const int DEFAULT_HEIGHT = 480;
     

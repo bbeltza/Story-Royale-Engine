@@ -40,9 +40,16 @@ bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, i
 	*/
 	return SUCCEEDED(hr);
 }
-bool Instance::texture_update(Texture* texture, const void* pixels, int pitch)
+bool Instance::texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch)
 {
-	m_dxdevicecontext->UpdateSubresource(texture->dxtexture, 0, NULL, pixels, pitch, 0);
+	D3D11_BOX box{};
+	box.left = region->position.x;
+	box.top = region->position.y;
+	box.right = region->position.x + region->size.x;
+	box.bottom = region->position.y + region->size.y;
+	box.back = 1;
+
+	m_dxdevicecontext->UpdateSubresource(texture->dxtexture, 0, &box, pixels, pitch, 0);
 	return true;
 }
 

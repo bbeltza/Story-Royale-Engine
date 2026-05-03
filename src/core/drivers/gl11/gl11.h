@@ -29,7 +29,7 @@ extern void sregl11_set_clipstate(void* _inst, const sre_rect2Di* rectangle);
 extern void sregl11_set_vsync(void* _inst, bool enable);
 
 extern bool sregl11_texture_setup(void* _inst, void* _texture, sre_pixelFormat formathint, int w, int h, sre_pixelFormat* outformat);
-extern bool sregl11_texture_update(void* _inst, void* _texture, const void* pixels, int pitch);
+extern bool sregl11_texture_update(void* _inst, void* _texture, const sre_rect2Di* region, const void* pixels, int pitch);
 extern void sregl11_texture_destroy(void* _inst, void* _texture);
 
 SRE_CAPI_END

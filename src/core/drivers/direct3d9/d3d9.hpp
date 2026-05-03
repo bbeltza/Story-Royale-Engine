@@ -100,7 +100,7 @@ namespace sreD3D9
         void set_vsync(bool enable);
                 
         bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
-        bool texture_update(Texture* texture, const void* pixels, int pitch);
+        bool texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch);
         void texture_destroy(Texture* texture);
     private:
         bool _shadersetup();

@@ -59,7 +59,7 @@ void sregl32_set_clipstate(void* inst, const sre_rect2Di* rectangle);
 void sregl32_set_vsync(void* inst, bool enable);
 
 bool sregl32_texture_setup(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-bool sregl32_texture_update(void* inst, void* texture, const void* pixels, int pitch);
+bool sregl32_texture_update(void* inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
 void sregl32_texture_destroy(void* inst, void* texture);
 
 bool sregl32setupbuffers(sregl32_inst* instance);

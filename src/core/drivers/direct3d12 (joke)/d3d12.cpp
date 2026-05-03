@@ -726,7 +726,7 @@ public:
     void set_vsync(bool enable) { caches.vsync = enable; }
                 
     bool texture_setup(texture_type* texture, sre::pixelFormat format, int x, int y, sre::pixelFormat* outformat);
-    bool texture_update(texture_type* texture, const void* pixels, int pitch);
+    bool texture_update(texture_type* texture, const sre::rect2Di* region, const void* pixels, int pitch);
     void texture_destroy(texture_type* texture);
 
 private:
@@ -849,9 +849,10 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
         return;
 
     UINT32 WHITE = UINT32_MAX;
+    sre::rect2Di whiteregion{ 0, 1 };
     if (!texture_setup(reinterpret_cast<texture_type*>(basictexture), SDL_PIXELFORMAT_UNKNOWN, 1, 1, NULL))
         return;
-    if (!texture_update(reinterpret_cast<texture_type*>(basictexture), &WHITE, 4))
+    if (!texture_update(reinterpret_cast<texture_type*>(basictexture), &whiteregion, &WHITE, 4))
         return;
     
     *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
@@ -1454,12 +1455,19 @@ bool sred3d12_inst::texture_setup(texture_type* texture, sre::pixelFormat format
     }
 }
 
-bool sred3d12_inst::texture_update(texture_type* texture, const void* pixels, int pitch)
+bool sred3d12_inst::texture_update(texture_type* texture, const sre::rect2Di* region, const void* pixels, int pitch)
 {
     HRESULT hr;
 
+    D3D12_BOX box{};
+    box.left = region->position.x;
+    box.top = region->position.y;
+    box.right = region->position.x + region->size.x;
+    box.bottom = region->position.y + region->size.y;
+	box.back = 1;
+
     SRE_DXCALL(texture->dxresource->Map(0, NULL, NULL));
-    SRE_DXCALL(texture->dxresource->WriteToSubresource(0, NULL, pixels, pitch, 1));
+    SRE_DXCALL(texture->dxresource->WriteToSubresource(0, &box, pixels, pitch, 1));
     
     D3D12_RANGE range{};
     texture->dxresource->Unmap(0, &range);

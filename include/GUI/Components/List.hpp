@@ -16,13 +16,13 @@ namespace sreGUI
             VERTICAL
         };
 
-        constexpr List(Direction dir=VERTICAL, sre::Alignment align=sre::A_LEFT, const sre::udim& padding=sre::UDIM_ZERO):
+        constexpr List(Direction dir=VERTICAL, sre::alignment align=sre::ALIGN_LEFT, const sre::udim& padding=sre::UDIM_ZERO):
                     direction(dir),
                     alignment(align),
                     padding(padding) {}
     public:
         Direction direction;
-        sre::Alignment alignment;
+        sre::alignment alignment;
         sre::udim padding;
     protected:
         void process_children(const sre::rect2Dut& parent, sre::rect2Dut children[], size_t count) override;

@@ -7,8 +7,8 @@
 
 using namespace sre;
 
-Image::Image(int w, int h):
-    sdl_surface(SDL_CreateRGBSurfaceWithFormat(0, w, h, 0, SDL_PIXELFORMAT_RGBA8888))
+Image::Image(int w, int h, sre::pixelFormat format):
+    sdl_surface(SDL_CreateRGBSurfaceWithFormat(0, w, h, 0, format))
 {
 }
 

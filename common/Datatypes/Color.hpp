@@ -41,7 +41,7 @@ namespace sre
 		static constexpr col3 fromNormalized(double r, double g, double b) { return col3{ static_cast<T>(r * 255), static_cast<T>(g * 255), static_cast<T>(b * 255) }; }
 	};
 
-	struct col4: public col3
+	struct alignas(int) col4: public col3
 	{
 		constexpr col4() = default;
 		constexpr col4(T r, T g, T b): col3(r, g, b) {}

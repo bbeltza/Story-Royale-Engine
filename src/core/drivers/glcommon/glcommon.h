@@ -72,7 +72,7 @@ extern int sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sre
 extern void sregl_commondestroy(sregl_cominst* inst);
 
 extern bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-extern bool sregl_texture_update(struct sregl_functions* glfuncs, sregl_texture* texture, const void* pixels, int pitch);
+extern bool sregl_texture_update(struct sregl_functions* glfuncs, sregl_texture* texture, const sre_rect2Di* region, const void* pixels, int pitch);
 extern void sregl_texture_destroy(struct sregl_functions* glfuncs, sregl_texture* texture);
 
 extern void sregl_set_vsync(bool enable);

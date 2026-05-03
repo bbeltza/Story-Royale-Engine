@@ -6,6 +6,14 @@
 /* 
     - SRE_HINT_RENDERDRIVER: `int`/`sre_renderDriver` ; May work being a char on little endian systems
         It choses what render driver to use, in the `sre_renderDriver` enum included in <Core/Render.h>
+    - SRE_HINT_EXTERN_RENDERDRIVER: Pointer to a `sre_RenderDriverData`/`sre::RenderDriverHelper` ; It will be treated as read only, so it can be `const`
+        It allows you to run a custom external render driver in your game, by pointing this hint into a valid `sre_RenderDriverData` structure.
+
+    - SRE_HINT_ARG_HANDLER: `int (*)(const char* arg, int argc, const char* argv[])` ; Pointer to a valid callack function that will run for every command line argument
+                                in the engine's `main` function BEFORE initializing anything, with the ability to optionally use the original `argc` and `argv` values
+                                It's used to handle arguments for your game, the function also returns a status code indicating whether the program should keep running or not.
+                                If the function returns 0, then the program should continue, otherwise, exit.
+                                Utilities for parsing arguments like this may be built in the future.
     - SRE_HINT_IMGUI_GLUE: Used by sre_imguiglue so if you link it, you don't have to bother with it, nor you should
         It is a sre::ImGuiInterface inherited object (So it can be of any class type that INHERITS it).
         The interface definition is included in <ImGui.hpp> for C++ only since ImGui is included with C++

@@ -1,4 +1,3 @@
-#include <SDL_ttf.h>
 #include <SDL_image.h>
 #include "../internal.h"
 
@@ -93,7 +92,6 @@ void __initialize_engine()
         exit(-1);
     }
     IMG_Init(IMG_INIT_PNG);
-    TTF_Init();
 
     __setup_audio_device();
     __create_window();
@@ -117,7 +115,6 @@ void __end_engine()
     SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
 
-    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 

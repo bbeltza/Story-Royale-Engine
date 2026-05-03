@@ -24,9 +24,9 @@ endif()
 
 set(SRE_3RDPARTYLIBS
     SDL2::SDL2${_SDL_LIB_SUFFIX}
-    SDL2_ttf::SDL2_ttf${_SDL_LIB_SUFFIX}
     SDL2_image::SDL2_image${_SDL_LIB_SUFFIX}
     
+    freetype
     stb
     #zlib${_ZLIB_SUFFIX}
 )

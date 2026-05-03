@@ -52,7 +52,7 @@ void sresdlrenderer_set_clipstate(void* inst, const sre_rect2Di* rectangle);
 void sresdlrenderer_set_vsync(void* inst, bool enable);
 
 bool sresdlrenderer_setup_texture(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-bool sresdlrenderer_update_texture(void* inst, void* texture, const void* pixels, int pitch);
+bool sresdlrenderer_update_texture(void* inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
 void sresdlrenderer_destroy_texture(void* inst, void* texture);
 
 SRE_CAPI_END

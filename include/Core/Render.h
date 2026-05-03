@@ -34,6 +34,7 @@
         sre::pixelFormat format() const { return _format; }
 
         inline bool update(const void* pixels, int pitch);
+        inline bool update(const sre::rect2Di* region, const void* pixels, int pitch);
         inline int aquire();
         inline int release();
 
@@ -86,8 +87,8 @@ enum sre_drawFlags
 
     SRE_DRAWFLAG_CAMERA = SRE_DRAWFLAG_CAMERAX | SRE_DRAWFLAG_CAMERAY,
     SRE_DRAWFLAG_LINE = 1 << 1, // Draw lines instead of filling the elements, it is not completely implemented right now
-    SRE_DRAWFLAG_SCALED = 1 << 2 // Draw as if it was drawn in non-scaled viewport coordinates, then scale it back to the window to get more pixelated results if the game has viewport scaling.
-                                    // If it doesn't have any viewport scaling, then it won't do anything
+    SRE_DRAWFLAG_SCALED = 1 << 2 // Draw as if it was drawn in non-scaled viewport coordinates, then scale it back to the window to get more a pixelated result if the game has viewport scaling.
+                                    // If it doesn't have any viewport scaling, then it won't do anything. It is a no-op
 };
 
 enum _sre_drawSwitchFlags
@@ -144,7 +145,7 @@ struct sre_RenderVFT
     void (* set_vsync)(void*, bool enable);
 
     bool (* texture_setup)(void*, void* texture, sre_pixelFormat formathint, int w, int h, sre_pixelFormat* outformat);
-    bool (* texture_update)(void*, void* texture, const void* pixels, int pitch);
+    bool (* texture_update)(void*, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
     void (* texture_destroy)(void*, void* texture);
 };
 
@@ -175,7 +176,7 @@ SRE_CAPI_BEGIN
 // Sampler API
 
 sre_Sampler* sre_sampler(sre_pixelFormat format, int x, int y);
-bool sre_sampler_update(sre_Sampler* sampler, const void* pixels, int pitch);
+bool sre_sampler_update(sre_Sampler* sampler, const sre_rect2Di* region, const void* pixels, int pitch);
 bool sre_sampler_query(sre_Sampler* sampler, int size[2], sre_pixelFormat* format);
 
 int sre_sampler_aquire(sre_Sampler* sampler);
@@ -199,7 +200,8 @@ SRE_CAPI_END
 #ifdef __cplusplus
     #include <vector>
 
-    inline bool sre_Sampler::update(const void* pixels, int pitch) { return sre_sampler_update(this, pixels, pitch); }
+    inline bool sre_Sampler::update(const sre::rect2Di* region, const void* pixels, int pitch) { return sre_sampler_update(this, region, pixels, pitch); }
+    inline bool sre_Sampler::update(const void* pixels, int pitch) { return sre_sampler_update(this, NULL, pixels, pitch); }
     inline int sre_Sampler::aquire() { return sre_sampler_aquire(this); }
     inline int sre_Sampler::release() { return sre_sampler_release(this); }
 
@@ -240,7 +242,7 @@ SRE_CAPI_END
 
         inline void render_fill(sre::col4 color) { render_draw1(0, {{ {0, 65536}, 0, color }}); }
 
-        inline Sampler* sampler(pixelFormat format, int w, int h) { return sre_sampler(format, w, h); }
+        inline Sampler* sampler(pixelFormat formathint, int w, int h) { return sre_sampler(formathint, w, h); }
 
         template <typename R, typename T=typename R::texture_type>
         struct RenderDriverHelper: sre_RenderDriverData
@@ -266,7 +268,7 @@ SRE_CAPI_END
                         [](void* inst, bool enable) { static_cast<R*>(inst)->set_vsync(enable); },
 
                         [](void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat) { return static_cast<R*>(inst)->texture_setup(static_cast<T*>(texture), format, w, h, outformat); },
-                        [](void* inst, void* texture, const void* pixels, int pitch) { return static_cast<R*>(inst)->texture_update(static_cast<T*>(texture), pixels, pitch); },
+                        [](void* inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch) { return static_cast<R*>(inst)->texture_update(static_cast<T*>(texture), region, pixels, pitch); },
                         [](void* inst, void* texture) { static_cast<R*>(inst)->texture_destroy(static_cast<T*>(texture)); }
                     };
 
@@ -306,7 +308,7 @@ SRE_CAPI_END
             void set_vsync(bool enable) {}
                 
             bool texture_setup(texture_type* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat) { return false; }
-            bool texture_update(texture_type* texture, const void* pixels, int pitch) { return false; }
+            bool texture_update(texture_type* texture, const sre::rect2Di* region, const void* pixels, int pitch) { return false; }
             void texture_destroy(texture_type* texture) {}
         };
     }

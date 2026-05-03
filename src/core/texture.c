@@ -1,5 +1,6 @@
 #include <Core/Render.h>
 #include <Core/Defer.h>
+#include <Base/Error.h>
 
 #include "../internal.h"
 
@@ -115,6 +116,7 @@ static sre_sptr d_setup_texture(void* _data)
 struct d_update_texture
 {
     sre_Sampler* sampler;
+    const sre_rect2Di* region;
     const void* pixels;
     int pitch;
 };
@@ -125,7 +127,7 @@ static sre_sptr d_update_texture(void* _data)
     return SRE_VIDEO(engine.video.vfptr,
         texture_update,
         data->sampler+1,
-        data->pixels, data->pitch
+        data->region, data->pixels, data->pitch
     );
 }
 
@@ -159,9 +161,35 @@ sre_Sampler* sre_sampler(sre_pixelFormat formathint, int w, int h)
     return sampler;
 }
 
-bool sre_sampler_update(sre_Sampler* sampler, const void* pixels, int pitch)
+bool sre_sampler_update(sre_Sampler* sampler, const sre_rect2Di* region, const void* pixels, int pitch)
 {
-    return sre_defer_response(d_update_texture, &(struct d_update_texture){ sampler, pixels, pitch });
+    if (!sampler)
+        return sre_error(SRE_ERR_INVALID_PARAMETER, "Parameter `sampler` is NULL") && false;
+    if (!pixels)
+        return sre_error(SRE_ERR_INVALID_PARAMETER, "Parameter `pixels` is NULL") && false;
+
+    sre_rect2Di outregion;
+    if (!region)
+    {
+        outregion = (sre_rect2Di){
+            .position = { 0, 0 },
+            .size = { sampler->w, sampler->h }
+        };
+    }
+    else
+    {
+        outregion = *region;
+        if (outregion.x < 0 || outregion.y < 0)
+            return sre_error(SRE_ERR_INVALID_VALUE, "`region`'s coordinates are negative. This is not possible since base coordinates start at the top-left corner of the texture, so writing to negative coordinates would overflow") && false;
+        
+        if (outregion.w <= 0 || outregion.h <= 0)
+            return sre_error(SRE_ERR_INVALID_VALUE, "`region`'s size is lower or equal to zero. You won't be able to write to a texture") && false;
+
+        if ((outregion.x + outregion.w) > sampler->w || (outregion.y + outregion.h) > sampler->h)
+            return sre_error(SRE_ERR_INVALID_VALUE, "`region` overflows the total texture area.") && false;
+    }
+
+    return sre_defer_response(d_update_texture, &(struct d_update_texture){ sampler, &outregion, pixels, pitch });
 }
 
 bool sre_sampler_query(sre_Sampler* sampler, int size[2], sre_pixelFormat* format)

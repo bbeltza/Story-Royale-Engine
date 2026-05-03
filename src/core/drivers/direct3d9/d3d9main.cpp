@@ -356,17 +356,23 @@ bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, i
     return true;
 }
 
-bool Instance::texture_update(Texture* texture, const void* pixels, int pitch)
+bool Instance::texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch)
 {
     HRESULT hr;
-    D3DLOCKED_RECT rect;
-    SRE_DXCALLF(texture->dxtexture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD));
-        if (!pitch || rect.Pitch == pitch)
-            memcpy(rect.pBits, pixels, rect.Pitch * texture->height_cache); // Texture update with identical pitch
+    D3DLOCKED_RECT locked;
+    RECT rect;
+    rect.left = region->position.x;
+    rect.top = region->position.y;
+    rect.right = region->position.x + region->size.x;
+    rect.bottom = region->position.y + region->size.y;
+
+    SRE_DXCALLF(texture->dxtexture->LockRect(0, &locked, &rect, D3DLOCK_NOOVERWRITE));
+        if (!pitch || locked.Pitch == pitch)
+            memcpy(locked.pBits, pixels, locked.Pitch * texture->height_cache); // Texture update with identical pitch
         else
         {
             for (int i = 0; i < texture->height_cache; i++)
-                memcpy(static_cast<BYTE*>(rect.pBits) + i*rect.Pitch, static_cast<const BYTE*>(pixels) + i*pitch, pitch);
+                memcpy(static_cast<BYTE*>(locked.pBits) + i*locked.Pitch, static_cast<const BYTE*>(pixels) + i*pitch, pitch);
         }
     SRE_DXCALLF(texture->dxtexture->UnlockRect(0));
     return true;

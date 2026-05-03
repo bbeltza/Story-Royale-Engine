@@ -202,6 +202,8 @@ void __setup_renderer()
 			
 			driverdata = render_choosedriver(renderhint);
 		}
+		else
+			engine.video.index = -1;
 	}
 
 	if (!driverdata)
@@ -229,15 +231,18 @@ void __setup_renderer()
 	engine.video.texture_size = driverdata->texture_size;
 	engine.video.blendmode = SRE_BLEND_DEFAULT;
 
-	engine.video.index = -1;
-	for (int i = 0; i < ut_arrcount(render_drivers); i++) // Very fancy
+	if (engine.video.index == 0)
 	{
-		if (render_drivers[i] == driverdata)
+		engine.video.index = -1;
+		for (int i = 0; i < ut_arrcount(render_drivers); i++) // Very fancy
 		{
-			engine.video.index = i;
-			break;
-		}
-	} assert(engine.video.index >= 0);
+			if (render_drivers[i] == driverdata)
+			{
+				engine.video.index = i;
+				break;
+			}
+		} assert(engine.video.index >= 0);
+	}
 
 	engine.scale = 1;
 
@@ -285,7 +290,7 @@ void __render_flush()
 {
 	assert(SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN);
 
-	if (m.renderqueues.empty()) return;
+	//if (m.renderqueues.empty()) return;
 
 	using namespace sre;
 

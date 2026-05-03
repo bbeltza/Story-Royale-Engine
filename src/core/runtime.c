@@ -60,7 +60,7 @@ static int game_loop(void* running)
         AcquireSRWLockExclusive(&win32_rendersrw);
     #endif
 
-    while (*(int*)running)
+    while (*(volatile int*)running)
     {
         sre_timeStamp elapsed;
         SDL_Event ev;
@@ -103,6 +103,9 @@ static int game_loop(void* running)
             wait(elapsed);
     }
 
+    #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+        ReleaseSRWLockExclusive(&win32_rendersrw);
+    #endif
     return 0;
 }
 
@@ -208,6 +211,9 @@ void __run_engine()
 
     running = 0;
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+        AcquireSRWLockExclusive(&win32_rendersrw);
+        WakeAllConditionVariable(&win32_rendercond);
+        ReleaseSRWLockExclusive(&win32_rendersrw);
         SDL_WaitThread(gameloop, NULL);
     #else
         SDL_SemPost(sdl_rendersem);
