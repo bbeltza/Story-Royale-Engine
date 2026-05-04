@@ -5,10 +5,14 @@
                         that aren't meant to be included in the game but are made out of curiosity, which will also allow me to test this feature.)
                  - SRE_HINT_ARG_HANDLER & SRE_HINT_ARG_HANDLERS: The way you handle command line arguments in your game, finally!
     - Error API improvements: A small bugfix from sre::error/critical... And error callbacks
-    - OpenGL 3.2's backend uses geometry shaders now! This is a way still implement instancing when all you know that you have is data shared per-instance... It should also perform better than before
+    - OpenGL 3.2's backend uses geometry shaders now! This is a way to still implement instancing when all you know that you have is data shared per-instance... It should also perform better than before
                     (although it doesn't still perform the best out of OpenGL 1.1)
     - sreGUI: sreGUI::Image supports now regions (By enabling the F_REGION flag)
-    - New Font API! The font class has finally (will be) been remade! with more features and more control
+    - New Font API! The font class has finally (will be) been remade! with more features and more control.
+                    Unicode support has been dropped for now, there will be new objects called UnicodeSets that allow you to render text with unicode codepoints.
+                    Font rendering is possible thanks to FontAtlases, you can make your own without needing a Font object, or a ttf file, with just an image.
+                    Indeed, the font atlas doesn't know anything about the original Font, all that Font does is build a FontAtlas (and soon a UnicodeSet) from font data.
+                    Using the library freetype, instead of SDL_ttf previously, which is build on top of that. Story Royale's engine doesn't use SDL_ttf anymore!
 - April 26th 2026: 0.103.26
     - Changelog file: All of the major changes can and will be seen in this file. It's, I think generally better than seeing the commits made spred accross every file
     - Ideas file:

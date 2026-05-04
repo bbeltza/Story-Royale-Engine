@@ -52,6 +52,7 @@ SRE_CAPI_BEGIN
 		int index;
 
 		short blendmode;
+		bool wantclear;
 		sre_rect2Di clip_rect;
 
 		void* _vector_data[4][3];

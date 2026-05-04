@@ -67,8 +67,8 @@ void FontAtlas::render_text(const FontRenderData& renderdata, const FontRenderTe
     };
 
     thread_local std::vector<LineData> linebuf;
-    unsigned curr_numchars = 0;
-    sre::unit curr_extent = 0;
+    const char* last_space = NULL;
+    sre::unit lastextent_space = 0;
 
     linebuf.clear();
     linebuf.emplace_back(renderdata.text);
@@ -90,21 +90,45 @@ void FontAtlas::render_text(const FontRenderData& renderdata, const FontRenderTe
             continue;
 
         chr_index -= 32;
+
         const sre::Glyph& glyph = m_glyphset[chr_index];
         LineData* linedat = &linebuf.back();
-        bool isnewline = chr_index == static_cast<unsigned>('\n' - 32);
-        if (isnewline || linedat->extent + glyph.advance > textdata.area.size.x)
+
+        if (chr_index == 0)
         {
-            linebuf.emplace_back(linedat->ptr + linedat->num_chars + isnewline);
+            last_space = renderdata.text + i;
+            lastextent_space = linedat->extent + glyph.advance;
+        }
+        else if (chr_index == static_cast<unsigned>('\n' - 32))
+        {
+            last_space = NULL;
+            linebuf.emplace_back(linedat->ptr + linedat->num_chars + 1);
+            continue;
+        }
+
+        if (linedat->extent + glyph.advance > textdata.area.size.x)
+        {
+            int spacediff;
+            sre::unit extentdiff;
+            if (last_space)
+            {
+                extentdiff = linedat->extent - lastextent_space;
+                spacediff = &renderdata.text[i] - last_space - 1;
+                linedat->num_chars -= spacediff;
+                linedat->extent = lastextent_space;
+            }
             
-            if (isnewline)
-                continue;
+            linebuf.emplace_back(linedat->ptr + linedat->num_chars);
             linedat = &linebuf.back();
+            if (last_space)
+            {
+                linedat->num_chars += spacediff;
+                linedat->extent += extentdiff;
+                last_space = NULL;
+            }
         }
 
         linedat->num_chars++;
-
-        sre::log("%c %f", renderdata.text[i], linedat->extent);
         linedat->extent += glyph.advance;
     }
 
@@ -121,8 +145,6 @@ void FontAtlas::render_text(const FontRenderData& renderdata, const FontRenderTe
 
     for (const LineData& linedat : linebuf)
     {
-        sre::log("%f", linedat.extent);
-
         switch (textdata.h_alignment)
         {
             case sre::ALIGN_LEFT: break;
@@ -139,6 +161,7 @@ void FontAtlas::render_text(const FontRenderData& renderdata, const FontRenderTe
             break;
         charsleft -= linedat.num_chars;
         cursor.y += m_lineskip;
+        cursor.x = textdata.area.position.x;
     }
 }
 
@@ -184,7 +207,5 @@ void FontAtlas::render_line(const FontRenderData& renderdata, sre::vec2ut toplef
         sre::render_draw1(renderdata.renderflags, data, m_atlas.get());
 
         topleft_begin.x += glyph.advance;
-        // TODO: to use in render_text()
-        //topleft_begin.y += m_lineskip;
     }
 }    

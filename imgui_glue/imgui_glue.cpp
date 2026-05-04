@@ -58,9 +58,22 @@ int sreImGui_glue::initialize(SDL_Window* window, void* renderdriver, int render
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
+    sre::ImGuiRenderInterface<>* driver;
+    if (renderindex < 0)
+    {
+        // Find for external render ImGui driver hint
+        auto imguidriverhint = static_cast<sre::ImGuiRenderInterface<>* const *>(sre::gethint("IMGUI_EXTERN_RENDERDRIVER"));
+        if (!imguidriverhint)
+            return SRE_RENDERSTATUS_UNSUPPORTED;
+
+        driver = *imguidriverhint;
+    }
+    else
+        driver = render_drivers[renderindex];
+    
     if (!ImGui_ImplSDL2_InitForOther(window))
         return SRE_RENDERSTATUS_FAILED;
-    sre::ImGuiRenderInterface<>* driver = render_drivers[renderindex];
+    
     int renderstatus = driver->Init(renderdriver, window);
     if (renderstatus != SRE_RENDERSTATUS_SUCCEEDED)
         return renderstatus;

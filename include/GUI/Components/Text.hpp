@@ -30,6 +30,9 @@ namespace sreGUI
 
         sre::alignment h_alignment = sre::ALIGN_LEFT;
         sre::alignment v_alignment = sre::ALIGN_TOP;
+
+        void* modifier_pointer = NULL;
+        sre::fontRenderCallback modifier_callback = NULL;
     protected:
         void on_render(const sre::rect2Dut& dimensions) override;
     private:

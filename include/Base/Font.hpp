@@ -15,6 +15,7 @@ namespace sre
 
     class UnicodeSet;
 
+    using fontRenderCallback = void (*)(void* pointer, sre::RenderInstance1* renderdata, int character, unsigned index);
     struct FontRenderData
     {
         const char* text;
@@ -22,7 +23,7 @@ namespace sre
         sre::flags32 renderflags;
         sre::col4 color;
 
-        void (*modifier_callback)(void* userdata, sre::RenderInstance1* renderdata, int character, unsigned index) = NULL;
+        fontRenderCallback modifier_callback = NULL;
     };
 
     struct FontRenderTextData

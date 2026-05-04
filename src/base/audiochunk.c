@@ -6,8 +6,9 @@
 #include <utils/mem.h>
 
 #include <SDL_audio.h>
-#include <vorbis.h>
 #include <assert.h>
+
+#include "stb_vorbis.h"
 
 const size_t SRE_AUDIOCHUNK_METASIZE = offsetof(sre_AudioChunk, samples);
 

@@ -12,12 +12,11 @@ void Text::on_render(const sre::rect2Dut& dimensions)
         m_str.c_str(),
         -1, 0,
         color,
-        NULL // Aimed to exist!
+        modifier_callback
     }, {
         dimensions,
         h_alignment,
         v_alignment,
         count
-    });
-    //m_font->render(dimensions, color, m_str.c_str(), count, h_alignment, v_alignment);
+    }, NULL, modifier_pointer);
 }

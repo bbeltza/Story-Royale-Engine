@@ -290,7 +290,8 @@ void __render_flush()
 {
 	assert(SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN);
 
-	//if (m.renderqueues.empty()) return;
+	if (!engine.video.wantclear && m.renderqueues.empty()) return;
+	engine.video.wantclear = false;
 
 	using namespace sre;
 

@@ -80,6 +80,7 @@ static int game_loop(void* running)
 
         __queue_events();
         
+        engine.video.wantclear = true;
         #ifdef WIN32_HANDLE_WINDOW_BLOCKING
             if (__update_ecs())
             {

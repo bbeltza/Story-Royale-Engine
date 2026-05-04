@@ -27,7 +27,6 @@ set(SRE_3RDPARTYLIBS
     SDL2_image::SDL2_image${_SDL_LIB_SUFFIX}
     
     freetype
-    stb
     #zlib${_ZLIB_SUFFIX}
 )
 

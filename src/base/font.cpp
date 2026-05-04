@@ -167,7 +167,6 @@ bool Font::load(const sre::byte* data, sre::size_t size)
 
     ftface->stream->close = ft_streamclose;
 
-    sre::log("%x", ftface->style_flags);
     fterr = FT_Set_Pixel_Sizes(ftface, 0, 12);
     assert(fterr == FT_Err_Ok);
     
@@ -189,9 +188,7 @@ bool Font::load(const sre::byte* data, sre::size_t size)
             sre::error(SRE_ERR_FAIL, "FT_Load_Char failed");
             return false;
         }
-
-        sre::log("(%c) w: %d h: %d", i+32, ftface->glyph->bitmap.width, ftface->glyph->bitmap.rows);
-
+        
         SDL_Surface* sdlsurface = SDL_CreateRGBSurfaceWithFormat(0, (int)ftface->glyph->bitmap.width, (int)ftface->glyph->bitmap.rows, 0, SDL_PIXELFORMAT_INDEX1MSB);
         SDL_SetPaletteColors(sdlsurface->format->palette, colors, 0, 2);
         for (unsigned i = 0; i < ftface->glyph->bitmap.rows; i++)

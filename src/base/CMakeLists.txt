@@ -19,4 +19,6 @@ SRE_BUILD_SRC(sre_base
 
     "error.c"
     "log.cc"
+
+    "stb.c"
 )
