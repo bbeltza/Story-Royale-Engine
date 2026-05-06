@@ -8,12 +8,12 @@ void Text::on_render(const sre::rect2Dut& dimensions)
         return;
 
     sre::FontAtlas& atlas = m_fonthandle.get_atlas();
-    atlas.render_text({
+    atlas.render_text(sre::FontRenderData{
         m_str.c_str(),
         -1, 0,
         color,
         modifier_callback
-    }, {
+    }, sre::FontRenderTextData{
         dimensions,
         h_alignment,
         v_alignment,

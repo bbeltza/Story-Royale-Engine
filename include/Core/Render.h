@@ -74,7 +74,6 @@ typedef enum sre_blendMode
 
 typedef enum sre_draw2mode // Primitive rendering mode for draw2
 {
-    SRE_DRAW2_JOINED,
     SRE_DRAW2_STRIP,
     SRE_DRAW2_TRIANGLE
 } sre_draw2mode;
@@ -222,16 +221,16 @@ SRE_CAPI_END
         inline void render_blend() { render_blend(SRE_BLEND_DEFAULT); }
 
         void render_draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture=NULL);
-        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint points[], size_t pcount, sre::draw2mode mode=SRE_DRAW2_JOINED, Sampler* texture=NULL);
+        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint points[], size_t pcount, sre::draw2mode mode=SRE_DRAW2_TRIANGLE, Sampler* texture=NULL);
 
         template <size_t n>
         void render_draw1(sre::flags32 flags, const RenderInstance1 (&instances)[n], Sampler* texture=NULL) { render_draw1(flags, instances, n, texture); }
         
         template <size_t n>
-        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint (&points)[n], sre::draw2mode mode=SRE_DRAW2_JOINED, Sampler* texture=NULL) { return render_draw2(flags, color, points, n, mode, texture); }
+        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint (&points)[n], sre::draw2mode mode=SRE_DRAW2_TRIANGLE, Sampler* texture=NULL) { return render_draw2(flags, color, points, n, mode, texture); }
 
         template <size_t n>
-        void render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&positions)[n], sre::draw2mode mode=SRE_DRAW2_JOINED)
+        void render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&positions)[n], sre::draw2mode mode=SRE_DRAW2_TRIANGLE)
         {
             RenderPoint points[n];
             for (auto i = 0; i < n; i++)

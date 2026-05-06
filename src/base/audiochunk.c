@@ -10,7 +10,7 @@
 
 #include "stb_vorbis.h"
 
-const size_t SRE_AUDIOCHUNK_METASIZE = offsetof(sre_AudioChunk, samples);
+const size_t SRE_AUDIOCHUNK_METASIZE = sizeof(sre_AudioChunk);
 
 const sre_AudioChunk* sre_audioload(size_t size, const sre_byte* rawdata)
 {

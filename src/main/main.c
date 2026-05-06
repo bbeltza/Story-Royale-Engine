@@ -48,7 +48,7 @@ static void handle_arg(const char* arg, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    (void)handle_arg;
+    (void)handle_arg; // Note: handle_arg is no longer used, at least for now. Do we need integrated engine argument options?
     const sreArgumentHandler* arg_handler = sre_gethint("ARG_HANDLER");
     if (arg_handler)
     {

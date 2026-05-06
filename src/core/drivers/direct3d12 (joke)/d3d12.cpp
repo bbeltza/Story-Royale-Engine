@@ -741,7 +741,7 @@ private:
     bool _pipelinesetup();
 };
 
-extern "C" sre::RenderDriverHelper<sred3d12_inst> sred3d12{"Direct3D 12 (joke/fun)"}; 
+SRE_EXTERN_C_VAR sre::RenderDriverHelper<sred3d12_inst> sred3d12{"Direct3D 12 (joke/fun)"}; 
 
 sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 {
@@ -902,7 +902,41 @@ void sred3d12_inst::_waitforgpu()
     }
 }
 
-extern void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc);
+static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_NONE
+        desc.BlendEnable = FALSE;
+        desc.LogicOpEnable = FALSE;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_BLEND
+        desc.BlendEnable = TRUE;
+        desc.LogicOpEnable = FALSE;
+        
+        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD
+        desc.BlendEnable = TRUE;
+
+        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
+        desc.DestBlend = D3D12_BLEND_ZERO;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_ADD
+        desc.BlendEnable = TRUE;
+
+        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        desc.DestBlend = D3D12_BLEND_ONE;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
+        desc.BlendEnable = TRUE;
+
+        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
+        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    }
+};
 
 bool sred3d12_inst::_pipelinesetup()
 {
@@ -1314,7 +1348,6 @@ void sred3d12_inst::flush_queueinstances2(texture_type* texture, const sre::Rend
 
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN); break;
         case SRE_DRAW2_STRIP: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); break;
         case SRE_DRAW2_TRIANGLE: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); break;
         default: abort();
@@ -1410,7 +1443,9 @@ bool sred3d12_inst::texture_setup(texture_type* texture, sre::pixelFormat format
     HRESULT hr;
 
     D3D12_HEAP_PROPERTIES heap_properties{};
-    heap_properties.Type = D3D12_HEAP_TYPE_GPU_UPLOAD;
+    heap_properties.Type = D3D12_HEAP_TYPE_CUSTOM;
+    heap_properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+    heap_properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
 
     D3D12_RESOURCE_DESC texture_desc{};
     texture_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -1474,44 +1509,6 @@ bool sred3d12_inst::texture_update(texture_type* texture, const sre::rect2Di* re
     return SUCCEEDED(hr);
 }
 
-//
-
-static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_NONE
-        desc.BlendEnable = FALSE;
-        desc.LogicOpEnable = FALSE;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_BLEND
-        desc.BlendEnable = TRUE;
-        desc.LogicOpEnable = FALSE;
-        
-        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
-        desc.DestBlend = D3D12_BLEND_ZERO;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_ADD
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        desc.DestBlend = D3D12_BLEND_ONE;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
-        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    }
-};
-
 // ImGui
 
 #if 1
@@ -1540,7 +1537,7 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         static void imgui_srvfree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu);
     };
 
-    extern "C" sreD3D12ImGuiData sred3d12imgui{};
+    SRE_EXTERN_C_VAR sreD3D12ImGuiData sred3d12imgui{};
 
     void sreD3D12ImGuiData::imgui_srvalloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* ocpu, D3D12_GPU_DESCRIPTOR_HANDLE* ogpu)
     {

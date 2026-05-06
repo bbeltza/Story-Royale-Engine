@@ -5,7 +5,7 @@
 #include "d3d9.hpp"
 #include <SDL_syswm.h>
 
-extern "C" sre::RenderDriverHelper<sreD3D9::Instance> sred3d9{"Direct3D 9"};
+SRE_EXTERN_C_VAR sre::RenderDriverHelper<sreD3D9::Instance> sred3d9{"Direct3D 9"};
 
 using namespace sreD3D9;
 
@@ -237,10 +237,9 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     D3DPRIMITIVETYPE primtype;
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED:
         case SRE_DRAW2_STRIP:
             primcount = static_cast<UINT>(1 + (point_count-3));
-            primtype = instance->mode == SRE_DRAW2_JOINED ? D3DPT_TRIANGLEFAN : D3DPT_TRIANGLESTRIP;
+            primtype = D3DPT_TRIANGLESTRIP;
             break;
         case SRE_DRAW2_TRIANGLE:
             primcount = static_cast<UINT>(point_count/3);

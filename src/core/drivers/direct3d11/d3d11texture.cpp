@@ -2,8 +2,6 @@
 
 using namespace sreD3D11;
 
-static std::atomic_int count;
-
 bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat)
 {
 	HRESULT hr;
@@ -34,10 +32,6 @@ bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, i
 	}
 
 	*outformat = SDL_PIXELFORMAT_RGBA32;
-	/*
-	count++;
-	sre::log("set up: %d", count.load());
-	*/
 	return SUCCEEDED(hr);
 }
 bool Instance::texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch)
@@ -55,11 +49,6 @@ bool Instance::texture_update(Texture* texture, const sre::rect2Di* region, cons
 
 void Instance::texture_destroy(Texture* texture)
 {
-	/*
-	count--;
-	sre::log("destroyed: %d", count.load());
-	*/
-
 	if (texture->dxtexture)
 		texture->dxtexture->Release();
 	if (texture->dxsrv)

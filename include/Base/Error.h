@@ -49,6 +49,8 @@ int sre_error(sreErrorCategory category, ...);
 // Drop a critical error, and possibly crash the program. Critical errors tell the program that it cannot proceed anymore
 int sre_CRITICAL(sreErrorCategory category, ...);
 
+typedef void (*sreErrorCallback)(sreErrorCategory, const char* msg);
+
 // Set a callback function that will be run everytime an error occurs (unimplemented)
 // @param level The level of the error, whether the error comes from `sre_error` or `sre_CRITICAL`, so either `SRE_ERROR` or `SRE_CRITICAL`
 // @param callback The callback function to be run

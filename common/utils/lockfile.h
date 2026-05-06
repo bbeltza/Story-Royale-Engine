@@ -19,7 +19,7 @@
 
 #endif
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 
 #define fclose_unlocked _fclose_nolock
 #define fflush_unlocked _fflush_nolock

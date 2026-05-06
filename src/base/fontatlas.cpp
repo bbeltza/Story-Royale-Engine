@@ -113,7 +113,7 @@ void FontAtlas::render_text(const FontRenderData& renderdata, const FontRenderTe
             if (last_space)
             {
                 extentdiff = linedat->extent - lastextent_space;
-                spacediff = &renderdata.text[i] - last_space - 1;
+                spacediff = static_cast<int>(&renderdata.text[i] - last_space - 1);
                 linedat->num_chars -= spacediff;
                 linedat->extent = lastextent_space;
             }

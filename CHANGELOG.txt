@@ -7,12 +7,20 @@
     - Error API improvements: A small bugfix from sre::error/critical... And error callbacks
     - OpenGL 3.2's backend uses geometry shaders now! This is a way to still implement instancing when all you know that you have is data shared per-instance... It should also perform better than before
                     (although it doesn't still perform the best out of OpenGL 1.1)
-    - sreGUI: sreGUI::Image supports now regions (By enabling the F_REGION flag)
-    - New Font API! The font class has finally (will be) been remade! with more features and more control.
+    - sreGUI: sreGUI::Image supports now regions (By enabling the F_REGION flag), I really needed it...
+    - New Font API! The font class has finally been remade! with more features and more control.
                     Unicode support has been dropped for now, there will be new objects called UnicodeSets that allow you to render text with unicode codepoints.
                     Font rendering is possible thanks to FontAtlases, you can make your own without needing a Font object, or a ttf file, with just an image.
                     Indeed, the font atlas doesn't know anything about the original Font, all that Font does is build a FontAtlas (and soon a UnicodeSet) from font data.
                     Using the library freetype, instead of SDL_ttf previously, which is build on top of that. Story Royale's engine doesn't use SDL_ttf anymore!
+    - stb vorbis is no longer a 3rd party dependency. It is now compiled within base. (in stb.c, if there's any other stb dependency then it'll also be compiled there)
+    - sre_defer changes: - sre_defer is improved now, it can allocate bytes for you! With the `argsize` parameter. Or not do it if `argsize` is 0
+                         - sre_defer_response was renamed to sre_defer_res. The internals have been improved (generally for both, ex: sre_defer_response created a whole semaphore per call,
+                            which is a very heavy thing to do, now it's created per thread storage which is passed by the main thread's event handler to respond to the call)
+                            Note that sre_defer_res doesn't take any `argsize` type argument, it doesn't allocate any extra bytes and just passes the actual pointer
+                         - Defer.hpp is now inside Defer.h
+    - Extras: - SRE_DRAW2_JOINED support is dropped.
+              - sre::col4 no longer inherits sre::col3 (that caused the whole structure's layout to not be "non-standard", which is a stupid thing, but sucks), however, you can still access it as a sre::col3 with it's `color3` with its implicit operator
 - April 26th 2026: 0.103.26
     - Changelog file: All of the major changes can and will be seen in this file. It's, I think generally better than seeing the commits made spred accross every file
     - Ideas file:

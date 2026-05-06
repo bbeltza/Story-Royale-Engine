@@ -44,7 +44,7 @@ bool sre::window_isfullscreen() { return 0 != (SDL_GetWindowFlags(engine.sdl_win
 bool sre::window_ishidden() { return 0 != (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN); }
 
 // Deferred functions (they require to be run on the main thread otherwise it's undefined behavior)
-#include <Core/Defer.hpp>
+#include <Core/Defer.h>
 
 void sre::window_setsize(int w, int h)
 {

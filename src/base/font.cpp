@@ -153,7 +153,7 @@ bool Font::load(const sre::byte* data, sre::size_t size)
     FT_Open_Args createinfo{};
     createinfo.flags = FT_OPEN_MEMORY;
     createinfo.memory_base = facebytes;
-    createinfo.memory_size = size;
+    createinfo.memory_size = static_cast<FT_Long>(size);
     
     FT_Face ftface;
     fterr = FT_Open_Face(s_ftlibrary, &createinfo, 0, &ftface);
@@ -188,7 +188,7 @@ bool Font::load(const sre::byte* data, sre::size_t size)
             sre::error(SRE_ERR_FAIL, "FT_Load_Char failed");
             return false;
         }
-        
+
         SDL_Surface* sdlsurface = SDL_CreateRGBSurfaceWithFormat(0, (int)ftface->glyph->bitmap.width, (int)ftface->glyph->bitmap.rows, 0, SDL_PIXELFORMAT_INDEX1MSB);
         SDL_SetPaletteColors(sdlsurface->format->palette, colors, 0, 2);
         for (unsigned i = 0; i < ftface->glyph->bitmap.rows; i++)

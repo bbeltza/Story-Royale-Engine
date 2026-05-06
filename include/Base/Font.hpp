@@ -1,5 +1,6 @@
 #pragma once
 #include <standard>
+#include <atomic>
 
 #include <Base/Sampler.hpp>
 #include <Datatypes/Rect.hpp>
@@ -18,16 +19,22 @@ namespace sre
     using fontRenderCallback = void (*)(void* pointer, sre::RenderInstance1* renderdata, int character, unsigned index);
     struct FontRenderData
     {
+        constexpr FontRenderData(const char* text, int textlen=-1, sre::flags32 renderflags=0, sre::col4 color=sre::WHITE, fontRenderCallback callback=NULL):
+            text(text), textlen(textlen), renderflags(renderflags), color(color), modifier_callback(callback) {}
+
         const char* text;
         int textlen;
         sre::flags32 renderflags;
         sre::col4 color;
 
-        fontRenderCallback modifier_callback = NULL;
+        fontRenderCallback modifier_callback;
     };
 
     struct FontRenderTextData
     {
+        constexpr FontRenderTextData(sre::rect2Dut area, sre::alignment h=sre::ALIGN_LEFT, sre::alignment v=sre::ALIGN_TOP, int count=-1):
+            area(area), h_alignment(h), v_alignment(v), char_count(count) {}
+
         sre::rect2Dut area;
         sre::alignment h_alignment;
         sre::alignment v_alignment;
@@ -74,7 +81,7 @@ namespace sre
                     assert(ref.load() > 0);
             }
 
-            std::atomic<int> ref = 1;
+            std::atomic<int> ref{1};
 
             FT_FaceRec_* ftface{};
             FontAtlas atlas;

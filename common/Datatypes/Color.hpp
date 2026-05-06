@@ -41,36 +41,51 @@ namespace sre
 		static constexpr col3 fromNormalized(double r, double g, double b) { return col3{ static_cast<T>(r * 255), static_cast<T>(g * 255), static_cast<T>(b * 255) }; }
 	};
 
-	struct alignas(int) col4: public col3
+	struct alignas(int) col4
 	{
+		using T = col3::T;
+
 		constexpr col4() = default;
-		constexpr col4(T r, T g, T b): col3(r, g, b) {}
-		constexpr col4(T r, T g, T b, T alpha): col3(r, g, b), a(alpha) {}
-		constexpr col4(T rgb): col3(rgb) {}
-		constexpr col4(T rgb, T alpha): col3(rgb), a(alpha) {}
-		constexpr col4(const col4& copy): col3(copy), a(copy.a) {}
+		constexpr col4(T r, T g, T b): color3(r, g, b) {}
+		constexpr col4(T r, T g, T b, T alpha): color3(r, g, b), a(alpha) {}
+		constexpr col4(T rgb): color3(rgb) {}
+		constexpr col4(T rgb, T alpha): color3(rgb), a(alpha) {}
+		constexpr col4(const col4& copy): color3(copy), a(copy.a) {}
 
 
-		constexpr col4(const col3& copy): col3(copy) {}
-		constexpr col4(const col3& copy, T alpha): col3(copy), a(alpha) {}
+		constexpr col4(const col3& copy): color3(copy) {}
+		constexpr col4(const col3& copy, T alpha): color3(copy), a(alpha) {}
 
+		union
+		{
+			col3 color3{};
+			struct
+			{
+				T r;
+				T g;
+				T b;
+			};
+		};
 		T a{0xFF};
 
-		inline void add(const col4& other) { col3::add(other); a = add_component(a, other.a); }
-		inline void sub(const col4& other) { col3::sub(other); a = sub_component(a, other.a); }
-		inline void mul(const col4& other) { col3::mul(other); a = mul_component(a, other.a); }
+		inline void add(const col4& other) { color3.add(other); a = col3::add_component(a, other.a); }
+		inline void sub(const col4& other) { color3.sub(other); a = col3::sub_component(a, other.a); }
+		inline void mul(const col4& other) { color3.mul(other); a = col3::mul_component(a, other.a); }
 		inline void operator +=(const col4& other) { return add(other); }
 		inline void operator -=(const col4& other) { return sub(other); }
 		inline void operator *=(const col4& other) { return mul(other); }
 		
-		constexpr col4 getAdd(const col4& other) const { return { col3::getAdd(other), add_component(a, other.a) }; }
-		constexpr col4 getSub(const col4& other) const { return { col3::getSub(other), sub_component(a, other.a) }; }
-		constexpr col4 getMul(const col4& other) const { return { col3::getMul(other), mul_component(a, other.a) }; }
+		constexpr col4 getAdd(const col4& other) const { return { color3.getAdd(other), col3::add_component(a, other.a) }; }
+		constexpr col4 getSub(const col4& other) const { return { color3.getSub(other), col3::sub_component(a, other.a) }; }
+		constexpr col4 getMul(const col4& other) const { return { color3.getMul(other), col3::mul_component(a, other.a) }; }
 		constexpr col4 operator +(const col4& other) const { return getAdd(other); }
 		constexpr col4 operator -(const col4& other) const { return getSub(other); }
 		constexpr col4 operator *(const col4& other) const { return getMul(other); }
 
 		constexpr col4 operator *(float) const { return col4(); }
+
+		inline operator col3&() { return color3; }
+		constexpr operator const col3&() const { return color3; }
 
 		constexpr bool operator ==(const col4& other) const { return r == other.r && g == other.g && b == other.b && a == other.a; }
 		constexpr bool operator !=(const col4& other) const { return !operator ==(other); }

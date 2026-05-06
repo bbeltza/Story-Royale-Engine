@@ -50,6 +50,9 @@ typedef struct sregl_cominst
 {
     SDL_GLContext context;
     SDL_Window* window;
+    #if _WIN32
+        HDC hdc;
+    #endif
 } sregl_cominst;
 
 // Texture structure (it is or will certainly be shared across every OpenGL implementation)
@@ -79,7 +82,14 @@ extern void sregl_set_vsync(bool enable);
 extern void sregl_set_clipstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle);
 extern bool sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmode);
 
-#define SREGL_PRESENT(x) SDL_GL_SwapWindow(x.window);
+#if _WIN32 // Use SwapBuffers directly on Windows
+           // If the window is about to get destroyed, and present runs, the HDC is invalidated
+           // If SDL error logging is ever enabled (which is always right now) this gets logged in and it's really annoying.
+           // We honestly don't care if the handle is invalid, as long as it doesn't crash our program. It also only runs one more time before stopping
+    #define SREGL_PRESENT(x) SwapBuffers(x.hdc)
+#else
+    #define SREGL_PRESENT(x) SDL_GL_SwapWindow(x.window)
+#endif
 #define SREGL_CLEAR(glfuncs, color) SRE_GLCALLF(glfuncs.ClearColor(color[0], color[1], color[2], 1)); \
                                     SRE_GLCALLF(glfuncs.Clear(GL_COLOR_BUFFER_BIT))
 

@@ -23,6 +23,4 @@ void __create_window()
 	);
 
     //SDL_SetWindowMinimumSize(engine.sdl_windowhndl, 200, 200);
-    engine.osize_x = DEFAULT_WIDTH;
-    engine.osize_y = DEFAULT_HEIGHT;
 }

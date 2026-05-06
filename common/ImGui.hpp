@@ -6,6 +6,7 @@
 #endif
 
 #include <SDL_video.h>
+#include <SDL_events.h>
 
 namespace sre
 {
@@ -14,6 +15,8 @@ namespace sre
     {
         virtual int initialize(SDL_Window* window, void* renderdriver, int renderindex) = 0;
         virtual void shutdown() = 0;
+
+        virtual bool on_event(SDL_Event* ev) = 0;
 
         virtual void begin_frame(void) = 0;
         virtual void end_frame(void) = 0;

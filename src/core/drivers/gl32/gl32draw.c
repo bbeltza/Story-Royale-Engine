@@ -34,7 +34,7 @@ void sregl32_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
     }
     
     SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, sizeof(sre_RenderInstance1)*inst_counti, instances, GL_DYNAMIC_DRAW));
-    SRE_GLCALL(inst->glfuncs.DrawArrays(GL_POINTS, 0, instance_count));
+    SRE_GLCALL(inst->glfuncs.DrawArrays(GL_POINTS, 0, (GLsizei)instance_count));
 }
 
 void sregl32_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
@@ -47,7 +47,6 @@ void sregl32_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
     GLenum mode;
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: mode = GL_TRIANGLE_FAN; break;
         case SRE_DRAW2_STRIP: mode = GL_TRIANGLE_STRIP; break;
         case SRE_DRAW2_TRIANGLE: mode = GL_TRIANGLES; break;
         default: assert(0); return;

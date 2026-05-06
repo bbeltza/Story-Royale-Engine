@@ -252,7 +252,7 @@ void __setup_renderer()
 void __update_viewport(int w, int h)
 {
 	int integer_scale;
-	
+
 	if (engine.osize_x == w && engine.osize_y == h) // Have to check for any scale changes
 		return;
 
@@ -476,6 +476,8 @@ extern "C" void __initialize_imgui(void* _imgui)
 	sre::logmsg("ImGui has successfully been initialized!", SRE_LOG_INFO);
 	engine.imgui = imgui_interface;
 }
+
+extern "C" bool __onevent_imgui(SDL_Event* ev) { assert(engine.imgui != NULL); return SRE_pIMGUI->on_event(ev); }
 
 static void __shutdown_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->shutdown(); }
 static void __endframe_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->end_frame(); }

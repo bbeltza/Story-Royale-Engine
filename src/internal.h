@@ -17,10 +17,12 @@ SRE_CAPI_BEGIN
 		uint32_t flags, renderflags;
 	};
 
-	enum _engine_event
+	enum _engine_eventcode
 	{
-		ENGINE_EVENT_DEFER,
-		ENGINE_EVENT_RETDEFER,
+		ENGINE_EVENT_DEFERV, // defer, passed by value (`argsize` = 0)
+		ENGINE_EVENT_DEFERP, // defer, passed as a pointer directly in the event's `data2` (`argsize` <= sizeof(void*))
+		ENGINE_EVENT_DEFERPM, // defer, passed as an allocated pointer, the pointer being `data2`
+		ENGINE_EVENT_DEFERRES, // defer with response yielding (`sre_defer_res`)
 		ENGINE_EVENT_RENDER,
 		ENGINE_EVENT_ENTRY
 	};
@@ -75,6 +77,7 @@ SRE_CAPI_BEGIN
 		sre_timeStamp last_dt;
 		sre_timeStamp target_dt;
 		sre_timeStamp phys_target_dt;
+		Uint32 user_event;
 		SDL_threadID main_thrd;
 
 		long long framestart_time;
@@ -149,6 +152,7 @@ SRE_CAPI_BEGIN
 	extern void __cleanup_renderer();
 
 	extern void __initialize_imgui(void* imgui);
+	extern bool __onevent_imgui(SDL_Event* ev);
 	
 	extern void __setup_audio_device();
 

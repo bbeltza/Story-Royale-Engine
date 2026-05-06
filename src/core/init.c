@@ -15,13 +15,10 @@
 
 #include <Hints.h>
 
-extern bool sre_coroutinecoreinit();
-extern void sre_coroutinecorequit();
-
 static void __invoke_entry(void* userdata) // Invoking the entry-point won't be a thread anymore. It'll actually be a coroutine
 {
     SDL_Event finish_event = { 0 };
-    finish_event.type = SDL_USEREVENT;
+    finish_event.type = engine.user_event;
     finish_event.user.code = ENGINE_EVENT_ENTRY;
     
     sre_initialize();
@@ -37,6 +34,10 @@ static int __run_coroutine(void* run)
 
 static inline void __setup_engine_data()
 {
+    engine.user_event = SDL_RegisterEvents(1);
+    if (engine.user_event == (Uint32)-1)
+        sre_CRITICAL(SRE_ERR_CORE, "SDL_RegisterEvents(1) failed and returned -1 ; This means there are no available user events to register... Which is required for the engine to work");
+
     engine.phys_target_dt = 1 / 128.0;
 
     engine.input_last_touchid = -1;
@@ -78,7 +79,7 @@ void __initialize_engine()
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0"); // Don't interpret touch events as mouse events
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
 
-#ifdef SDL_VIDEO_DRIVER_WAYLAND
+#ifdef SDL_VIDEO_DRIVER_WAYLAND // Use wayland, if possible
     SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland");
 #endif
 #ifdef SDL_VIDEO_DRIVER_WINDOWS // Replace the "SDL_app" window class name
@@ -91,7 +92,8 @@ void __initialize_engine()
         sre_error(SRE_ERR_SDL, SDL_GetError());
         exit(-1);
     }
-    IMG_Init(IMG_INIT_PNG);
+    
+    IMG_Init(IMG_INIT_PNG); 
 
     __setup_audio_device();
     __create_window();

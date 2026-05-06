@@ -26,14 +26,14 @@
 
 
 #if _WIN32
-    #define SRE_EXPORT_HINT SRE_EXTERN_C __declspec(dllexport)
+    #define SRE_EXPORT_HINT SRE_EXTERN_C_VAR __declspec(dllexport)
 #elif __GNUC__ && 0 // It's probably.. not needed yet :)
     #define SRE_EXPORT_HINT __attribute__((__visibility__("default")))
 #else
     #define SRE_EXPORT_HINT
 #endif
 
-typedef int (*sreArgumentHandler)(const char* arg, int argc, const char* argv[]);
+typedef int (*sreArgumentHandler)(const char* arg, int argc, char* argv[]);
 
 // Get the address of a hint declared by the user, `name` is a null-terminated string of the hint name and shouldn't include the `SRE_HINT_` prefix
 // @return This method returns the address of the hint declared by the user with `SRE_EXPORT_HINT`, or `NULL` if the hint hasn't been declared by the user

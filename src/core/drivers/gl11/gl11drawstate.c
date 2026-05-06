@@ -196,7 +196,6 @@ void sregl11_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
 
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: inst->glfuncs11.Begin(GL_TRIANGLE_FAN); break;
         case SRE_DRAW2_STRIP: inst->glfuncs11.Begin(GL_TRIANGLE_STRIP); break;
         case SRE_DRAW2_TRIANGLE: inst->glfuncs11.Begin(GL_TRIANGLES); break;
         default: assert(0); return;
