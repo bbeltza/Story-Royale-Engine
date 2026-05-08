@@ -18,7 +18,9 @@
 
         static void win32_renderflush(void* userdata)
         {
-            while (SDL_TryLockMutex(win32_rendermtx) == SDL_MUTEX_TIMEDOUT)
+            int res;
+            (void)res;
+            while (SDL_TryLockMutex(win32_rendermtx) != 0)
             {
                 if (win32_expose)
                     goto ENDWAKE;
@@ -38,13 +40,12 @@
 
 #ifndef WIN32_HANDLE_WINDOW_BLOCKING
         static SDL_sem* sdl_rendersem;
-        static sre_sptr sem_renderflush(void* userdata)
+        static void sem_renderflush(void* userdata)
         {
             assert(sdl_rendersem != NULL);
             
             __render_flush();
             SDL_SemPost(sdl_rendersem);
-            return 0;
         }
 #endif
 
@@ -56,7 +57,8 @@ static int game_loop(void* running)
     ticks(&engine.framestart_time);
 
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
-        SDL_LockMutex(win32_rendermtx);
+        int res = SDL_LockMutex(win32_rendermtx);
+        assert(res == 0);
     #endif
 
     while (*(volatile int*)running)
@@ -84,7 +86,8 @@ static int game_loop(void* running)
             if (__update_ecs())
             {
                 sre_defer(win32_renderflush, 0, NULL);
-                SDL_CondWaitTimeout(win32_rendercond, win32_rendermtx, 5000);
+                int res = SDL_CondWaitTimeout(win32_rendercond, win32_rendermtx, 5000);
+                assert(res >= 0);
             }
         #else
             if (__update_ecs())
@@ -142,8 +145,6 @@ static int win32_eventwatch(void* userdata, SDL_Event* ev)
 
 void __run_engine()
 {
-    static int running = 1;
-    SDL_Thread* gameloop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
     #if _WIN32
         SDL_AddEventWatch(win32_eventwatch, NULL);
@@ -154,6 +155,8 @@ void __run_engine()
     #else
         sdl_rendersem = SDL_CreateSemaphore(0);
     #endif
+    static int running = 1;
+    SDL_Thread* gameloop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
     SDL_Event ev;
     while (SDL_WaitEvent(&ev))

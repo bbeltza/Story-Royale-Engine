@@ -17,6 +17,7 @@ namespace sreGUI
         };
 
         Image() = default;
+        Image(const sre::RSampler& sampler): texture(sampler) {}
         Image(sre::RSampler&& sampler): texture(std::move(sampler)) {}
 
         sre::RSampler texture;
@@ -24,7 +25,6 @@ namespace sreGUI
         sre::rect2Di region{0, 0};
 
         void fit(Transform& transform);
-    protected:
         void on_render(const sre::rect2Dut &dimensions) override;
     };
 }

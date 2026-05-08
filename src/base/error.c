@@ -210,8 +210,6 @@ int sre_errorEx(sreErrorLevel level, sreErrorCategory category, va_list fmt_va)
     default:
         break;
     }
-    // Some more code to maybe log the error somewhere???
-    err_logsingle(err);
 
     return -1;
 }

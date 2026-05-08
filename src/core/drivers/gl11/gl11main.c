@@ -36,7 +36,7 @@ static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
         return setupstatus;
     
     #if GL_ARB_texture_non_power_of_two
-        sre_log("%d", SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle"));
+        //sre_log("%d", SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle"));
         if (!SDL_GL_ExtensionSupported("GL_ARB_texture_non_power_of_two"))
         {
             sregl_commondestroy(&inst->common);
@@ -53,7 +53,6 @@ static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
     #endif
 
     SRE_GLCALLF(inst->glfuncs.Enable(GL_TEXTURE_2D));
-    SRE_GLCALLF(inst->glfuncs.Enable(GL_TEXTURE0));
 
     *vft = &sregl11vft;
     return SRE_RENDERSTATUS_SUCCEEDED;
