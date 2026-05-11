@@ -14,6 +14,13 @@ typedef struct sregl11_inst
     GLfloat scale_cache;
 } sregl11_inst;
 
+typedef struct sregl11_texture
+{
+    sregl_texture texture;
+    float xrange;
+    float yrange;
+} sregl11_texture;
+
 SRE_CAPI_BEGIN
 
 extern void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);

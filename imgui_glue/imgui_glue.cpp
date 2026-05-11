@@ -45,7 +45,7 @@ static sre::ImGuiRenderInterface<>* render_drivers[] = {
     IMGUI_RENDERDRIVERPTR(gl21),
     IMGUI_RENDERDRIVERPTR(gl11),
     IMGUI_RENDERDRIVERPTR(sdlrenderer),
-    #if _WIN32
+    #ifdef SRE_USEDRIVER_D3D12
         IMGUI_RENDERDRIVERPTR(d3d12)
     #endif
 };

@@ -24,9 +24,6 @@ static const struct sre_RenderVFT sregl11vft = {
 
 static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Window* window)
 {
-    #if !defined(GL_ARB_texture_non_power_of_two) || !GL_ARB_texture_non_power_of_two
-        return SRE_RENDERSTATUS_UNSUPPORTED;
-    #endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
@@ -34,16 +31,6 @@ static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
     int setupstatus = sregl_commonsetup(&inst->common, window, &inst->glfuncs);
     if (setupstatus != SRE_RENDERSTATUS_SUCCEEDED)
         return setupstatus;
-    
-    #if GL_ARB_texture_non_power_of_two
-        //sre_log("%d", SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle"));
-        if (!SDL_GL_ExtensionSupported("GL_ARB_texture_non_power_of_two"))
-        {
-            sregl_commondestroy(&inst->common);
-            sre_log(SRE_LOG_INFO "OpenGL 1.1: GL_ARB_texture_non_power_of_two is not supported. This means non-power of two textures aren't supported in the current video driver. It is needed");
-            return SRE_RENDERSTATUS_UNSUPPORTED;
-        }
-    #endif
     
     if (!sregl_loadfunctions11(&inst->glfuncs11, SDL_GL_GetProcAddress))
     #if 0
@@ -61,6 +48,6 @@ static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
 struct sre_RenderDriverData sregl11 = {
     .initialize = sregl11_main,
     .renderer_size = sizeof(sregl11_inst),
-    .texture_size = sizeof(sregl_texture),
+    .texture_size = sizeof(sregl11_texture),
     .name = "OpenGL Legacy 1.1"
 };

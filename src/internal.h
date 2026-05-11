@@ -42,11 +42,19 @@ SRE_CAPI_BEGIN
 		size_t last;
 	};
 	
-	#define SRE_VIDEOV(x, func) (*x)->func(x+1)
-	#define SRE_VIDEO(x, func, ...) (*x)->func(x+1, __VA_ARGS__)
+	#define SRE_VIDEOV(x, func) (x)->vfptr->func((x)->driverdata)
+	#define SRE_VIDEO(x, func, ...) (x)->vfptr->func((x)->driverdata, __VA_ARGS__)
 	struct _engine_renderdata
 	{
-		const struct sre_RenderVFT** vfptr;
+		struct
+		{
+			const struct sre_RenderVFT* vfptr;
+			char driverdata[
+				#ifdef __cplusplus
+					1
+				#endif
+			];
+		}* driver;
 		
 		size_t texture_size;
 		struct _texture_env textures;

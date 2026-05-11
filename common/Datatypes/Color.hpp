@@ -45,7 +45,7 @@ namespace sre
 	{
 		using T = col3::T;
 
-		constexpr col4() = default;
+		constexpr col4(): color3() {}
 		constexpr col4(T r, T g, T b): color3(r, g, b) {}
 		constexpr col4(T r, T g, T b, T alpha): color3(r, g, b), a(alpha) {}
 		constexpr col4(T rgb): color3(rgb) {}
@@ -58,7 +58,7 @@ namespace sre
 
 		union
 		{
-			col3 color3{};
+			col3 color3;
 			struct
 			{
 				T r;
@@ -81,8 +81,6 @@ namespace sre
 		constexpr col4 operator +(const col4& other) const { return getAdd(other); }
 		constexpr col4 operator -(const col4& other) const { return getSub(other); }
 		constexpr col4 operator *(const col4& other) const { return getMul(other); }
-
-		constexpr col4 operator *(float) const { return col4(); }
 
 		inline operator col3&() { return color3; }
 		constexpr operator const col3&() const { return color3; }

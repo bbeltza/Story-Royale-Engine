@@ -58,6 +58,8 @@ namespace sre
         // Load font from a set of rectangle regions, where `region[chr-33]` corresponds to the region in the texture where character `chr` is
         FontAtlas(const sre::RSampler& texture, const sre::Glyph glyphs[CHARACTER_COUNT], sre::unit lineskip, bool normalize=true);
         
+        sre::RSampler texture() const { return m_atlas; }
+
         void render_text(const FontRenderData& renderdata, const FontRenderTextData& textdata, const UnicodeSet* unicodeset=NULL, void* userdata=NULL);
         void render_line(const FontRenderData& renderdata, sre::vec2ut topleft_begin, const UnicodeSet* unicodeset=NULL, void* userdata=NULL);
     private:

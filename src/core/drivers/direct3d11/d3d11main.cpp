@@ -58,6 +58,19 @@ Instance::Instance(SDL_Window* window, int* outstatus)
             D3D11_SDK_VERSION,
             &m_dxdevice, &feature, &m_dxdevicecontext
         ));
+
+        #if WINVER <= _WIN32_WINNT_WIN10
+            #define USE_DXGI_SWAPEFFECT DXGI_SWAP_EFFECT_FLIP_DISCARD
+        #elif WINVER <= _WIN32_WINNT_WIN8
+            #define USE_DXGI_SWAPEFFECT DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+        #else
+            #define USE_DXGI_SWAPEFFECT static_cast<DXGI_SWAP_EFFECT>(3)
+        #endif
+
+        #if WINVER < _WIN32_WINNT_WIN10
+            #define DXGI_SWAP_EFFECT_FLIP_DISCARD DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+
+        #endif
         
         DXGI_SWAP_CHAIN_DESC swapchain_desc{};
         swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -65,7 +78,7 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         swapchain_desc.BufferCount = 2;
         swapchain_desc.SampleDesc.Count = 1;
         swapchain_desc.Windowed = TRUE;
-        swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        swapchain_desc.SwapEffect = USE_DXGI_SWAPEFFECT;
         swapchain_desc.OutputWindow = wminfo.info.win.window;
 
         SRE_DXCALL(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
@@ -76,7 +89,7 @@ Instance::Instance(SDL_Window* window, int* outstatus)
 
             sre::log(SRE_LOG_INFO "[Direct3D11]: Switching to legacy swapchain...");
 
-            // Double-buffering might not be supported, create a legacy single-buffered swap-chain
+            // Double-buffering and thus FLIP swap effects might not be supported, create a legacy single-buffered swap-chain
             //swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
             swapchain_desc.BufferCount = 1;
             swapchain_desc.Flags = 0;

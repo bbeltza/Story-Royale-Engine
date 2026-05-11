@@ -326,9 +326,11 @@ void sre::Log::flush()
             #if _WIN32
                 HANDLE hcon = GetStdHandle(msg.category == LOGCATEGORY_INFO ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
                 
-                DWORD dmode;
-                GetConsoleMode(hcon, &dmode);
-                if (!(dmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+                #ifdef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+                    DWORD dmode;
+                    GetConsoleMode(hcon, &dmode);
+                    if (!(dmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+                #endif
                 {
                     static constexpr WORD cat_attribs[] = {
                         0,

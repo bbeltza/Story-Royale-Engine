@@ -48,7 +48,7 @@ void __cleanup_textures()
             }
             if (isinfreelist) continue;
 
-            SRE_VIDEO(engine.video.vfptr, texture_destroy, sampler->driverdata);
+            SRE_VIDEO(engine.video.driver, texture_destroy, sampler->driverdata);
         }
 
         engine.video.textures.last = ARENA_TEXTURE_COUNT;
@@ -105,7 +105,7 @@ struct d_setup_texture
 static sre_sptr d_setup_texture(void* _data)
 {
     const struct d_setup_texture* data = _data;
-    return SRE_VIDEO(engine.video.vfptr,
+    return SRE_VIDEO(engine.video.driver,
         texture_setup,
         data->sampler->driverdata,
         data->formathint,
@@ -125,7 +125,7 @@ struct d_update_texture
 static sre_sptr d_update_texture(void* _data)
 {
     const struct d_update_texture* data = _data;
-    return SRE_VIDEO(engine.video.vfptr,
+    return SRE_VIDEO(engine.video.driver,
         texture_update,
         data->sampler->driverdata,
         data->region, data->pixels, data->pitch
@@ -140,7 +140,7 @@ struct d_destroy_texture
 static void d_destroy_texture(void* _data)
 {
     sre_Sampler* sampler = _data;
-    SRE_VIDEO(engine.video.vfptr, texture_destroy, sampler->driverdata);
+    SRE_VIDEO(engine.video.driver, texture_destroy, sampler->driverdata);
     texture_free(sampler);
 }
 
@@ -217,7 +217,7 @@ int sre_sampler_aquire(sre_Sampler* sampler)
 int sre_sampler_release(sre_Sampler* sampler)
 {
     if (!sampler) return 0;
-    if (!engine.video.vfptr) return 0;
+    if (!engine.video.driver) return 0;
 
     int ref = SDL_AtomicAdd((SDL_atomic_t*)&sampler->refcount, -1);
     if (ref != 1)
