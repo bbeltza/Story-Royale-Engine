@@ -21,7 +21,7 @@
                          - Defer.hpp is now inside Defer.h
     - Extras: - SRE_DRAW2_JOINED support is dropped.
               - sre::col4 no longer inherits sre::col3 (that caused the whole structure's layout to not be "non-standard", which is a stupid thing, but sucks), however, you can still access it as a sre::col3 with it's `color3` with its implicit operator
-              - OpenGL 1.1's render driver non-power-of-two textures are fixed, and handled.
+              - OpenGL 1.1's and Direct3D9's render drivers' power-of-two only texture support is available now, and handled.
 - April 26th 2026: 0.103.26
     - Changelog file: All of the major changes can and will be seen in this file. It's, I think generally better than seeing the commits made spred accross every file
     - Ideas file:

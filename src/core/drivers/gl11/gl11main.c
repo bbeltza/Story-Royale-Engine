@@ -39,6 +39,8 @@ static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
         return SRE_RENDERSTATUS_UNSUPPORTED;
     #endif
 
+    inst->hasARB_texture_non_power_of_two = SDL_GL_ExtensionSupported("GL_ARB_texture_non_power_of_two") == SDL_TRUE;
+
     SRE_GLCALLF(inst->glfuncs.Enable(GL_TEXTURE_2D));
 
     *vft = &sregl11vft;

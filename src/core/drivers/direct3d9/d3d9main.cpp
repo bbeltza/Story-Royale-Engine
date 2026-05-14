@@ -9,6 +9,21 @@ SRE_EXTERN_C_VAR sre::RenderDriverHelper<sreD3D9::Instance> sred3d9{"Direct3D 9"
 
 using namespace sreD3D9;
 
+int Instance::_checkdevice(UINT adapter, D3DDEVTYPE devicetype)
+{
+    HRESULT hr;
+    SRE_DXCALL(m_dxd3d9->GetDeviceCaps(adapter, devicetype, &m_devcaps));
+    if (hr == D3DERR_NOTAVAILABLE)
+        return SRE_RENDERSTATUS_UNSUPPORTED;
+    if (hr != S_OK)
+       return SRE_RENDERSTATUS_FAILED;
+
+    if (!(m_devcaps.TextureCaps | D3DPTEXTURECAPS_ALPHA)) // Textures have to support alpha... Please!!...
+        return SRE_RENDERSTATUS_UNSUPPORTED;
+
+    return SRE_RENDERSTATUS_SUCCEEDED;
+}
+
 Instance::Instance(SDL_Window* window, int* outstatus)
 {
     SDL_SysWMinfo wminfo;
@@ -30,6 +45,55 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         return;
     }
 
+    UINT adaptercount = m_dxd3d9->GetAdapterCount();
+    UINT adapter = static_cast<UINT>(-1);
+    D3DDEVTYPE devtype = D3DDEVTYPE_HAL;
+
+    if (!adaptercount)
+    {
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+        return;
+    }
+
+    for (UINT i = 0; i < adaptercount; i++)
+    {
+        switch (_checkdevice(i, D3DDEVTYPE_HAL))
+        {
+            case SRE_RENDERSTATUS_FAILED: return;
+            case SRE_RENDERSTATUS_UNSUPPORTED: continue;
+            default: break;
+        }
+
+        adapter = i;
+        break;
+    }
+
+    /* REF devices need a LOT of adjustments over resources, so it's just better to not support it
+    if (adapter == static_cast<UINT>(-1))
+    {
+        // Check for REF devices, there are not HAL devices available
+        devtype = D3DDEVTYPE_REF;
+        for (UINT i = 0; i < adaptercount; i++)
+        {
+            switch (_checkdevice(i, D3DDEVTYPE_REF))
+            {
+                case SRE_RENDERSTATUS_FAILED: return;
+                case SRE_RENDERSTATUS_UNSUPPORTED: continue;
+                default: break;
+            }
+
+            adapter = i;
+            break;
+        }
+    }
+    */
+
+    if (adapter == static_cast<UINT>(-1))
+    {
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+        return;
+    }
+
     m_pparamcache.hDeviceWindow = wminfo.info.win.window;
     m_pparamcache.BackBufferFormat = D3DFMT_UNKNOWN;
     m_pparamcache.BackBufferCount = 1; // Use two buffers? Or one? I've seen performance be better on only 1 back-buffer
@@ -38,13 +102,21 @@ Instance::Instance(SDL_Window* window, int* outstatus)
     m_pparamcache.Flags = D3DPRESENTFLAG_VIDEO;
     m_pparamcache.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
-    SRE_DXCALLC(m_dxd3d9->CreateDevice(D3DADAPTER_DEFAULT,
-                                   D3DDEVTYPE_HAL,
-                                   NULL,
-                                   D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_NOWINDOWCHANGES | D3DCREATE_FPU_PRESERVE,
-                                   &m_pparamcache,
-                                   &m_dxdevice
+    SRE_DXCALL(m_dxd3d9->CreateDevice(adapter,
+                                       devtype,
+                                       wminfo.info.win.window,
+                                       D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_NOWINDOWCHANGES | D3DCREATE_FPU_PRESERVE,
+                                       &m_pparamcache,
+                                       &m_dxdevice
     ));
+
+    if (hr == D3DERR_NOTAVAILABLE)
+    {
+        *outstatus = SRE_RENDERSTATUS_UNSUPPORTED;
+        return;
+    }
+    if (hr != S_OK)
+        return;
 
     if (!_shadersetup())
         return;
@@ -186,6 +258,18 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
 
     UINT UINT_instcount = static_cast<UINT>(instance_count);
 
+    if (texture && (texture->potratiox != 1.0f || texture->potratioy != 1.0f))
+    {
+        // The interface spec will state that `instances` is in memory free to use by the driver, and only to be used in this single function call, so you're totally free to modify it.
+        // Setting it as non-const will be possible too
+        for (UINT i = 0; i < UINT_instcount; i++)
+        {
+            sre::vec2f potratio{texture->potratiox, texture->potratioy};
+            const_cast<sre::RenderInstance1*>(instances)[i].uv *= potratio;
+            const_cast<sre::RenderInstance1*>(instances)[i].uv_offset *= potratio;
+        }
+    }
+
     void* mapped;
     SRE_DXCALL(m_d1data.dxbuff_inst->Lock(0, sizeof(sre::RenderInstance1)*UINT_instcount, &mapped, D3DLOCK_DISCARD));
         memcpy(mapped, instances, sizeof(sre::RenderInstance1)*UINT_instcount);
@@ -222,6 +306,15 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
         SRE_DXCALL(m_dxdevice->SetTexture(0, texture ? texture->dxtexture : m_dxbasictexture));
+    }
+
+    if (texture && (texture->potratiox != 1.0f || texture->potratioy != 1.0f))
+    {
+        for (size_t i = 0; i < point_count; i++)
+        {
+            sre::vec2f potratio{texture->potratiox, texture->potratioy};
+            const_cast<sre::RenderInstance2*>(instance)->points[i].uv *= potratio;
+        }
     }
 
     void* mapped_points;
@@ -345,12 +438,30 @@ void Instance::set_vsync(bool enable)
 }
 
 //
+
+extern "C" int sregl11_padbypowerof2(int x);
                 
 bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat)
 {
     HRESULT hr;
+    float potratiox = 1.0f;
+    float potratioy = 1.0f;
+
+    if (!(m_devcaps.TextureCaps | D3DPTEXTURECAPS_NONPOW2CONDITIONAL))
+    {
+        int ow = w;
+        int oh = h;
+
+        w = sregl11_padbypowerof2(w);
+        h = sregl11_padbypowerof2(h);
+
+        potratiox = ow / static_cast<float>(w);
+        potratioy = oh / static_cast<float>(h);
+    }
+
     SRE_DXCALLF(m_dxdevice->CreateTexture(w, h, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture->dxtexture, NULL ));
-    texture->height_cache = h;
+    texture->potratiox = potratiox;
+    texture->potratioy = potratioy;
     *outformat = SDL_PIXELFORMAT_BGRA32;
     return true;
 }
@@ -367,10 +478,10 @@ bool Instance::texture_update(Texture* texture, const sre::rect2Di* region, cons
 
     SRE_DXCALLF(texture->dxtexture->LockRect(0, &locked, &rect, D3DLOCK_NOOVERWRITE));
         if (!pitch || locked.Pitch == pitch)
-            memcpy(locked.pBits, pixels, locked.Pitch * texture->height_cache); // Texture update with identical pitch
+            memcpy(locked.pBits, pixels, locked.Pitch * region->size.y); // Texture update with identical pitch
         else
         {
-            for (int i = 0; i < texture->height_cache; i++)
+            for (int i = 0; i < region->size.y; i++)
                 memcpy(static_cast<BYTE*>(locked.pBits) + i*locked.Pitch, static_cast<const BYTE*>(pixels) + i*pitch, pitch);
         }
     SRE_DXCALLF(texture->dxtexture->UnlockRect(0));

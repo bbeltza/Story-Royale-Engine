@@ -12,6 +12,8 @@ typedef struct sregl11_inst
 
     GLfloat camera_cache[2];
     GLfloat scale_cache;
+
+    bool hasARB_texture_non_power_of_two;
 } sregl11_inst;
 
 typedef struct sregl11_texture

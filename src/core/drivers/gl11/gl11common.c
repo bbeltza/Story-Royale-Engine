@@ -46,7 +46,7 @@ void sregl11_set_vsync(void* _inst, bool enable)
     // ORing it by the number bitshifted by every number is unecessary to my point of view, it's already hard to explain, but that is because the number's result is accumulated so you're ORing the number that has been ORed before.
     // So we have now a number that ressembles like this: 0000001111111111 (this obviously depends on the numbers, and is a shorter representation)
     // So when incrementing it by 1, you'd get something like this: 0000010000000000 ; This number is 1024, and it's a power of two! Now you'd just return that number
-static int padbypowerof2(int x)
+extern int sregl11_padbypowerof2(int x) // PS: This function is marked as "extern", d3d9 will use it too
 {
     assert(x > 0);
     
@@ -67,14 +67,23 @@ bool sregl11_texture_setup(void* _inst, void* _texture, sre_pixelFormat format, 
     sregl11_inst* inst = _inst;
     sregl11_texture* texture = _texture;
 
-    int rw = padbypowerof2(w);
-    int rh = padbypowerof2(h);
-    texture->xrange = (float)w / rw;
-    texture->yrange = (float)h / rh;
-    assert(texture->xrange <= 1.0f);
-    assert(texture->yrange <= 1.0f);
-
-    return sregl_texture_setup(&inst->glfuncs, &texture->texture, format, rw, rh, outformat);
+    float xrange = 1.0f;
+    float yrange = 1.0f;
+    if (!inst->hasARB_texture_non_power_of_two)
+    {
+        int ow = w;
+        int oh = h;
+        w = sregl11_padbypowerof2(ow);
+        h = sregl11_padbypowerof2(oh);
+        xrange = (float)ow / w;
+        yrange = (float)oh / h;
+        assert(xrange <= 1.0f);
+        assert(yrange <= 1.0f);
+    }
+    
+    texture->xrange = xrange;
+    texture->yrange = yrange;
+    return sregl_texture_setup(&inst->glfuncs, &texture->texture, format, w, h, outformat);
 }
 
 bool sregl11_texture_update(void* _inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch)
