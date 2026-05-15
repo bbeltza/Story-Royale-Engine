@@ -1,3 +1,4 @@
+#include <Core/Window.h>
 #include "../internal.h"
 
 extern const char __game_title[];
@@ -21,3 +22,5 @@ void __create_window()
 		SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL // D3D12's debug layer breaks when having the OpenGL flag, I don't know what to do now since you need that flag to use OpenGL. Maybe let the render driver chose extra flags?
 	);
 }
+
+sre_Window* sre_mainwindow(void) { return (sre_Window*)(engine.sdl_windowhndl); }

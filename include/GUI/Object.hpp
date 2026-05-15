@@ -220,6 +220,9 @@ namespace sreGUI
     public:
         bool is_hovering() const { return s_querying == this; }
         static bool hovering_anything() { return s_querying != NULL; /*This should be the equivalent of !((Object*)nullptr)->is_hovering()*/ }
+
+        template <typename T=Object>
+        static const T* get_hovering() { return dynamic_cast<const T*>(s_querying); }
     protected:
         virtual void update() {}
         virtual void pre_render() {}
