@@ -3,24 +3,17 @@
 #include <C_API.h>
 #include <ints.h>
 
-#ifndef __cplusplus
-    #include <Datatypes/CRect.h>
-    #include <Datatypes/CColor.h>
-    #include <Datatypes/Units.h>
+#include <Datatypes/Color.h>
+#include <Datatypes/Rect.h>
 
-    SRE_RECT2DMAKE(sre_unit, ut);
-    SRE_RECT2DMAKE(int, i);
-    SRE_VEC2MAKE(float, f);
-#else
-    #include <Datatypes/Rect.hpp>
-    #include <Datatypes/Color.hpp>
+SRE_RECT2DMAKESFFX(sre_unit, ut);
+SRE_RECT2DMAKESFFX(int, i);
+SRE_VEC2MAKESFFX(float, f);
+#ifdef __cplusplus
     #include <Datatypes/Flags.hpp>
     
-    typedef sre::rect2Dut sre_rect2Dut;
-    typedef sre::rect2Di sre_rect2Di;
     typedef sre::vec2ut sre_vec2ut;
     typedef sre::vec2f sre_vec2f;
-    typedef sre::col4 sre_col4;
 #endif
 
 #include <Base/Pixel.h>

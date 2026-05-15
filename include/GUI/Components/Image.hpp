@@ -3,7 +3,7 @@
 
 #include <GUI/Component.hpp>
 #include <Base/Sampler.hpp>
-#include <Datatypes/Color.hpp>
+#include <Datatypes/Color.h>
 
 namespace sreGUI
 {

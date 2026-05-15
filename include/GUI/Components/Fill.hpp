@@ -2,7 +2,7 @@
 #define SREGUI_FILL_HPP
 
 #include <GUI/Component.hpp>
-#include <Datatypes/Color.hpp>
+#include <Datatypes/Color.h>
 
 namespace sreGUI
 {

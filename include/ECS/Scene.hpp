@@ -4,8 +4,8 @@
 #include <Core/Object.hpp>
 #include <Base/Signal.hpp>
 
-#include <Datatypes/Color.hpp>
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Color.h>
+#include <Datatypes/Vector.h>
 
 #include <ECS/Camera.hpp>
 

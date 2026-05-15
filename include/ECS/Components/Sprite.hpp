@@ -1,8 +1,8 @@
 #pragma once
 #include <ECS/Component.hpp>
 
-#include <Datatypes/Rect.hpp>
-#include <Datatypes/Color.hpp>
+#include <Datatypes/Rect.h>
+#include <Datatypes/Color.h>
 
 #include <Base/File.hpp>
 #include <Base/Sampler.hpp>

@@ -1,7 +1,7 @@
 #pragma once
 #include <ECS/Component.hpp>
 
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 #include <Datatypes/TimeStamp.h>
 
 namespace sreECS

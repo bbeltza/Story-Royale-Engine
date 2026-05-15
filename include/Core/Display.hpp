@@ -1,6 +1,6 @@
 #ifndef SRE_DISPLAY_HPP
 #define SRE_DISPLAY_HPP
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 
 namespace sre
 {

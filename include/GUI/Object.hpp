@@ -3,7 +3,7 @@
 
 #include <list>
 
-#include <Datatypes/Rect.hpp>
+#include <Datatypes/Rect.h>
 #include <Datatypes/Flags.hpp>
 
 #include <Core/Object.hpp>

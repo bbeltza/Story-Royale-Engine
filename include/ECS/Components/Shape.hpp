@@ -2,8 +2,8 @@
 #include <ECS/Component.hpp>
 #include <ECS/Entity.hpp>
 
-#include <Datatypes/Rect.hpp>
-#include <Datatypes/Color.hpp>
+#include <Datatypes/Rect.h>
+#include <Datatypes/Color.h>
 #include <Datatypes/Flags.hpp>
 
 namespace sreECS
