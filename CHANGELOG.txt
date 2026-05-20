@@ -1,3 +1,30 @@
+(If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- May Xth 2026: 0.104.XX
+    - New hints: - SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
+                    but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers
+                        that aren't meant to be included in the game but are made out of curiosity, which will also allow me to test this feature.)
+                 - SRE_HINT_ARG_HANDLER & SRE_HINT_ARG_HANDLERS: The way you handle command line arguments in your game, finally!
+    - Error API improvements: A small bugfix from sre::error/critical... And error callbacks
+    - OpenGL 3.2's backend uses geometry shaders now! This is a way to still implement instancing when all you know that you have is data shared per-instance... It should also perform better than before
+                    (although it doesn't still perform the best out of OpenGL 1.1)
+    - sreGUI: sreGUI::Image supports now regions (By enabling the F_REGION flag), I really needed it...
+    - New Font API! The font class has finally been remade! with more features and more control.
+                    Unicode support has been dropped for now, there will be new objects called UnicodeSets that allow you to render text with unicode codepoints.
+                    Font rendering is possible thanks to FontAtlases, you can make your own without needing a Font object, or a ttf file, with just an image.
+                    Indeed, the font atlas doesn't know anything about the original Font, all that Font does is build a FontAtlas (and soon a UnicodeSet) from font data.
+                    Using the library freetype, instead of SDL_ttf previously, which is build on top of that. Story Royale's engine doesn't use SDL_ttf anymore!
+    - stb vorbis is no longer a 3rd party dependency. It is now compiled within base. (in stb.c, if there's any other stb dependency then it'll also be compiled there)
+    - sre_defer changes: - sre_defer is improved now, it can allocate bytes for you! With the `argsize` parameter. Or not do it if `argsize` is 0
+                         - sre_defer_response was renamed to sre_defer_res. The internals have been improved (generally for both, ex: sre_defer_response created a whole semaphore per call,
+                            which is a very heavy thing to do, now it's created per thread storage which is passed by the main thread's event handler to respond to the call)
+                            Note that sre_defer_res doesn't take any `argsize` type argument, it doesn't allocate any extra bytes and just passes the actual pointer
+                         - Defer.hpp is now inside Defer.h
+    - Extras: - SRE_DRAW2_JOINED support is dropped.
+              - sre::col4 no longer inherits sre::col3 (that caused the whole structure's layout to not be "non-standard", which is a stupid thing, but sucks), however, you can still access it as a sre::col3 with it's `color3` with its implicit operator
+              - OpenGL 1.1's and Direct3D9's render drivers' power-of-two only texture support is available now, and handled.
+              - The datatype C bindings (CVector, CColor, CRect...) are now in the original header, so they now have the .h extension instead of the .hpp one. Please migrate if you've used them
+                    (Using SRE_VEC2MAKE or the Rect variation of it in C++ will make a template alias with that name and type)
+              - D3D11's shaders are no longer compiled "backwards compatible". This was not necessary since they are not used in D3D9's drivers, and there was already the usage of SV_VertexID which didn't make it compatible with that version already.
 - April 26th 2026: 0.103.26
     - Changelog file: All of the major changes can and will be seen in this file. It's, I think generally better than seeing the commits made spred accross every file
     - Ideas file:

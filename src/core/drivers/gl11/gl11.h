@@ -12,7 +12,16 @@ typedef struct sregl11_inst
 
     GLfloat camera_cache[2];
     GLfloat scale_cache;
+
+    bool hasARB_texture_non_power_of_two;
 } sregl11_inst;
+
+typedef struct sregl11_texture
+{
+    sregl_texture texture;
+    float xrange;
+    float yrange;
+} sregl11_texture;
 
 SRE_CAPI_BEGIN
 
@@ -29,7 +38,7 @@ extern void sregl11_set_clipstate(void* _inst, const sre_rect2Di* rectangle);
 extern void sregl11_set_vsync(void* _inst, bool enable);
 
 extern bool sregl11_texture_setup(void* _inst, void* _texture, sre_pixelFormat formathint, int w, int h, sre_pixelFormat* outformat);
-extern bool sregl11_texture_update(void* _inst, void* _texture, const void* pixels, int pitch);
+extern bool sregl11_texture_update(void* _inst, void* _texture, const sre_rect2Di* region, const void* pixels, int pitch);
 extern void sregl11_texture_destroy(void* _inst, void* _texture);
 
 SRE_CAPI_END

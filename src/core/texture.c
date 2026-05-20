@@ -1,5 +1,6 @@
 #include <Core/Render.h>
 #include <Core/Defer.h>
+#include <Base/Error.h>
 
 #include "../internal.h"
 
@@ -10,6 +11,7 @@ struct sre_Sampler
     int refcount;
     int w, h;
     sre_pixelFormat format;
+    char driverdata[];
 };
 
 struct _texture_container
@@ -46,7 +48,7 @@ void __cleanup_textures()
             }
             if (isinfreelist) continue;
 
-            SRE_VIDEO(engine.video.vfptr, texture_destroy, sampler+1);
+            SRE_VIDEO(engine.video.driver, texture_destroy, sampler->driverdata);
         }
 
         engine.video.textures.last = ARENA_TEXTURE_COUNT;
@@ -103,9 +105,9 @@ struct d_setup_texture
 static sre_sptr d_setup_texture(void* _data)
 {
     const struct d_setup_texture* data = _data;
-    return SRE_VIDEO(engine.video.vfptr,
+    return SRE_VIDEO(engine.video.driver,
         texture_setup,
-        data->sampler+1,
+        data->sampler->driverdata,
         data->formathint,
         data->w, data->h,
         data->outformat
@@ -115,6 +117,7 @@ static sre_sptr d_setup_texture(void* _data)
 struct d_update_texture
 {
     sre_Sampler* sampler;
+    const sre_rect2Di* region;
     const void* pixels;
     int pitch;
 };
@@ -122,10 +125,10 @@ struct d_update_texture
 static sre_sptr d_update_texture(void* _data)
 {
     const struct d_update_texture* data = _data;
-    return SRE_VIDEO(engine.video.vfptr,
+    return SRE_VIDEO(engine.video.driver,
         texture_update,
-        data->sampler+1,
-        data->pixels, data->pitch
+        data->sampler->driverdata,
+        data->region, data->pixels, data->pitch
     );
 }
 
@@ -136,10 +139,9 @@ struct d_destroy_texture
 
 static void d_destroy_texture(void* _data)
 {
-    struct d_destroy_texture* data = _data;
-    SRE_VIDEO(engine.video.vfptr, texture_destroy, data->sampler+1);
-    texture_free(data->sampler);
-    sre_delete(data);
+    sre_Sampler* sampler = _data;
+    SRE_VIDEO(engine.video.driver, texture_destroy, sampler->driverdata);
+    texture_free(sampler);
 }
 
 //
@@ -147,7 +149,7 @@ static void d_destroy_texture(void* _data)
 sre_Sampler* sre_sampler(sre_pixelFormat formathint, int w, int h)
 {
     sre_Sampler* sampler = texture_alloc(); assert(sampler != NULL);
-    if (!sre_defer_response(d_setup_texture, &(struct d_setup_texture){ sampler, formathint, w, h, &sampler->format }))
+    if (!sre_defer_res(d_setup_texture, &(struct d_setup_texture){ sampler, formathint, w, h, &sampler->format }))
     {
         texture_free(sampler);
         return false;
@@ -159,9 +161,35 @@ sre_Sampler* sre_sampler(sre_pixelFormat formathint, int w, int h)
     return sampler;
 }
 
-bool sre_sampler_update(sre_Sampler* sampler, const void* pixels, int pitch)
+bool sre_sampler_update(sre_Sampler* sampler, const sre_rect2Di* region, const void* pixels, int pitch)
 {
-    return sre_defer_response(d_update_texture, &(struct d_update_texture){ sampler, pixels, pitch });
+    if (!sampler)
+        return sre_error(SRE_ERR_INVALID_PARAMETER, "Parameter `sampler` is NULL") && false;
+    if (!pixels)
+        return sre_error(SRE_ERR_INVALID_PARAMETER, "Parameter `pixels` is NULL") && false;
+
+    sre_rect2Di outregion;
+    if (!region)
+    {
+        outregion = (sre_rect2Di){
+            .position = { 0, 0 },
+            .size = { sampler->w, sampler->h }
+        };
+    }
+    else
+    {
+        outregion = *region;
+        if (outregion.x < 0 || outregion.y < 0)
+            return sre_error(SRE_ERR_INVALID_VALUE, "`region`'s coordinates are negative. This is not possible since base coordinates start at the top-left corner of the texture, so writing to negative coordinates would overflow") && false;
+        
+        if (outregion.w <= 0 || outregion.h <= 0)
+            return sre_error(SRE_ERR_INVALID_VALUE, "`region`'s size is lower or equal to zero. You won't be able to write to a texture") && false;
+
+        if ((outregion.x + outregion.w) > sampler->w || (outregion.y + outregion.h) > sampler->h)
+            return sre_error(SRE_ERR_INVALID_VALUE, "`region` overflows the total texture area.") && false;
+    }
+
+    return sre_defer_res(d_update_texture, &(struct d_update_texture){ sampler, &outregion, pixels, pitch });
 }
 
 bool sre_sampler_query(sre_Sampler* sampler, int size[2], sre_pixelFormat* format)
@@ -189,15 +217,12 @@ int sre_sampler_aquire(sre_Sampler* sampler)
 int sre_sampler_release(sre_Sampler* sampler)
 {
     if (!sampler) return 0;
-    if (!engine.video.vfptr) return 0;
+    if (!engine.video.driver) return 0;
 
     int ref = SDL_AtomicAdd((SDL_atomic_t*)&sampler->refcount, -1);
     if (ref != 1)
         return ref;
-    
-    struct d_destroy_texture* ddata = sre_new(sizeof(struct d_destroy_texture));
-    ddata->sampler = sampler;
 
-    sre_defer(d_destroy_texture, ddata);
+    sre_defer(d_destroy_texture, 0, sampler);
     return ref;
 }

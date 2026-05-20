@@ -13,7 +13,7 @@ namespace sreD3D11
     };
 }
 
-extern "C" sreD3D11::ImGuiData sred3d11imgui{};
+SRE_EXTERN_C_VAR sreD3D11::ImGuiData sred3d11imgui{};
 
 int sreD3D11::ImGuiData::Init(driver_type* inst, SDL_Window* window)
 {

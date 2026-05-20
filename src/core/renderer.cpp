@@ -54,7 +54,7 @@ static const sre_RenderDriverData* render_drivers[] = {
 	&NAME_RENDERDRIVER(gl11),
 	&NAME_RENDERDRIVER(sdlrenderer)
 
-	#if _WIN32
+	#ifdef SRE_USEDRIVER_D3D12
 	,	&NAME_RENDERDRIVER(d3d12),
 	#endif
 };
@@ -72,11 +72,11 @@ static int render_setupenv(const sre_RenderDriverData* driver)
 	assert(driver->renderer_size >= sizeof(void*));
 	assert(driver->texture_size >= sizeof(int));
 
-	operator delete(engine.video.vfptr);
-	engine.video.vfptr = static_cast<const sre_RenderVFT**>(operator new(sizeof(void*) + driver->renderer_size));
-	*engine.video.vfptr = NULL;
+	operator delete(engine.video.driver);
+	engine.video.driver = static_cast<decltype(engine.video.driver)>(operator new(sizeof(void*) + driver->renderer_size));
+	engine.video.driver->vfptr = NULL;
 
-	return driver->initialize(engine.video.vfptr, engine.video.vfptr+1, engine.sdl_windowhndl);
+	return driver->initialize(&engine.video.driver->vfptr, engine.video.driver->driverdata, engine.sdl_windowhndl);
 }
 
 static const sre_RenderDriverData* render_choosedriver(int hint)
@@ -98,7 +98,13 @@ static const sre_RenderDriverData* render_choosedriver(int hint)
 	#else
 		case SRE_RENDERDRIVER_DIRECTX_9: driver = &sred3d9; break;
 		case SRE_RENDERDRIVER_DIRECTX_11: driver = &sred3d11; break;
-		case SRE_RENDERDRIVER_DIRECTX_12: driver = &sred3d12; break;
+		case SRE_RENDERDRIVER_DIRECTX_12:
+		#ifdef SRE_USEDRIVER_D3D12
+			driver = &sred3d12;
+		#else
+			sre::error(SRE_ERR_CORE, "Direct3D12 is not supported in the current build");
+		#endif
+			break;
 	#endif
 		case -1: break;
 		default:
@@ -160,30 +166,58 @@ void __cleanup_renderer()
 		__shutdown_imgui();
 
 	__cleanup_textures();
-	SRE_VIDEOV(engine.video.vfptr, destructor);
-	operator delete(engine.video.vfptr);
-	engine.video.vfptr = NULL;
+	SRE_VIDEOV(engine.video.driver, destructor);
+	operator delete(engine.video.driver);
+	engine.video.driver = NULL;
 }
 
 void __setup_renderer()
 {
 	int renderhint = -1;
+	const sre_RenderDriverData* driverdata = NULL;
 	{
-		const void* hint = sre::gethint("RENDERDRIVER");
-		if (hint)
+		auto externalhint = static_cast<const sre_RenderDriverData*const*>(sre::gethint("EXTERN_RENDERDRIVER"));
+		if (externalhint)
 		{
-			unsigned hintvalue = *static_cast<const unsigned*>(hint);
-			renderhint = hintvalue;
+			driverdata = *externalhint;
+			if (!driverdata)
+				sre::critical(SRE_ERR_CORE, "SRE_HINT_EXTERN_RENDERDRIVER is NULL...");
+
+			sre::log("FOUND external render driver: \"%s\"", driverdata->name);
+			int status = render_setupenv(driverdata);
+			
+			if (status == SRE_RENDERSTATUS_FAILED)
+				sre::critical(SRE_ERR_FAIL, "External render driver failed to initialize!");
+
+			if (status == SRE_RENDERSTATUS_UNSUPPORTED)
+			{
+				sre::log(SRE_LOG_WARN "External render driver '%s' is unsupported", driverdata->name);
+				driverdata = NULL;
+			}
 		}
+
+		// Look for the existing render drivers now
+		if (!driverdata)
+		{
+			const void* hint = sre::gethint("RENDERDRIVER");
+			if (hint)
+			{
+				unsigned hintvalue = *static_cast<const unsigned*>(hint);
+				renderhint = hintvalue;
+			}
+			
+			driverdata = render_choosedriver(renderhint);
+		}
+		else
+			engine.video.index = -1;
 	}
 
-	const sre_RenderDriverData* driverdata = render_choosedriver(renderhint);
 	if (!driverdata)
 		render_panic();
 
-	assert((*engine.video.vfptr) != NULL && "Maybe forgot to set up the vft? (virtual function table)");
+	assert(engine.video.driver->vfptr != NULL && "Maybe forgot to set up the vft? (virtual function table)");
 
-	#define _CHECKFORFUNC(x) if (!(*engine.video.vfptr)->x) { sre::error(SRE_ERR_CORE, "Render driver setup error: function '" #x "' is missing"); render_panic(); }
+	#define _CHECKFORFUNC(x) if (!engine.video.driver->vfptr->x) { sre::error(SRE_ERR_CORE, "Render driver setup error: function '" #x "' is missing"); render_panic(); }
 		_CHECKFORFUNC(destructor);
 		_CHECKFORFUNC(flush_queueinstances1);
 		_CHECKFORFUNC(flush_queueinstances2);
@@ -203,25 +237,28 @@ void __setup_renderer()
 	engine.video.texture_size = driverdata->texture_size;
 	engine.video.blendmode = SRE_BLEND_DEFAULT;
 
-	engine.video.index = -1;
-	for (int i = 0; i < ut_arrcount(render_drivers); i++) // Very fancy
+	if (engine.video.index == 0)
 	{
-		if (render_drivers[i] == driverdata)
+		engine.video.index = -1;
+		for (int i = 0; i < ut_arrcount(render_drivers); i++) // Very fancy
 		{
-			engine.video.index = i;
-			break;
-		}
-	} assert(engine.video.index >= 0);
+			if (render_drivers[i] == driverdata)
+			{
+				engine.video.index = i;
+				break;
+			}
+		} assert(engine.video.index >= 0);
+	}
 
 	engine.scale = 1;
 
-	SRE_VIDEO(engine.video.vfptr, set_vsync, true);
+	SRE_VIDEO(engine.video.driver, set_vsync, true);
 }
 
 void __update_viewport(int w, int h)
 {
 	int integer_scale;
-	
+
 	if (engine.osize_x == w && engine.osize_y == h) // Have to check for any scale changes
 		return;
 
@@ -250,7 +287,7 @@ void __update_viewport(int w, int h)
 	engine.vcenter_x = center.x;
 	engine.vcenter_y = center.y;
 
-	SRE_VIDEO(engine.video.vfptr, set_viewportstate, w, h, scale);
+	SRE_VIDEO(engine.video.driver, set_viewportstate, w, h, scale);
 }
 
 #define m reinterpret_cast<sre::RenderVectors&>(engine.video._vector_data)
@@ -259,7 +296,8 @@ void __render_flush()
 {
 	assert(SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN);
 
-	if (m.renderqueues.empty()) return;
+	if (!engine.video.wantclear && m.renderqueues.empty()) return;
+	engine.video.wantclear = false;
 
 	using namespace sre;
 
@@ -274,8 +312,8 @@ void __render_flush()
 	sre::vec2ut camoffset = sre::vec2ut{engine.vcenter_x, engine.vcenter_y} - (currscn != NULL ? currscn->camera.processed_position() : 0);
 	camoffset = (camoffset*engine.scale).ceil();
 
-	SRE_VIDEO(engine.video.vfptr, clear, bg);
-	SRE_VIDEO(engine.video.vfptr, set_camerastate, camoffset.x, camoffset.y);
+	SRE_VIDEO(engine.video.driver, clear, bg);
+	SRE_VIDEO(engine.video.driver, set_camerastate, camoffset.x, camoffset.y);
 	
 	engine.video.blendmode = -1;
 	engine.video.clip_rect = { 0, 0 };
@@ -296,12 +334,12 @@ void __render_flush()
 		{
 			if (queue.blendmode != engine.video.blendmode)
 			{
-				SRE_VIDEO(engine.video.vfptr, set_blendstate, static_cast<sre::blendMode>(queue.blendmode));
+				SRE_VIDEO(engine.video.driver, set_blendstate, static_cast<sre::blendMode>(queue.blendmode));
 				engine.video.blendmode = queue.blendmode;
 			}
 			if (queue.clip_rect != engine.video.clip_rect)
 			{
-				SRE_VIDEO(engine.video.vfptr, set_clipstate, &queue.clip_rect);
+				SRE_VIDEO(engine.video.driver, set_clipstate, &queue.clip_rect);
 				engine.video.clip_rect = queue.clip_rect;
 			}
 
@@ -315,7 +353,7 @@ void __render_flush()
 			{
 			case 1:
 				assert(insti1 + queue.count <= m.rinst1cache.size());
-				SRE_VIDEO(engine.video.vfptr,
+				SRE_VIDEO(engine.video.driver,
 							flush_queueinstances1,
 							queue.texture,
 							&m.rinst1cache.at(insti1),
@@ -326,7 +364,7 @@ void __render_flush()
 				insti1 += queue.count;
 				break;
 			case 2:
-				SRE_VIDEO(engine.video.vfptr,
+				SRE_VIDEO(engine.video.driver,
 							flush_queueinstances2,
 							queue.texture,
 							&reinterpret_cast<RenderInstance2&>(m.rinst2cache.at(insti2)),
@@ -350,7 +388,7 @@ void __render_flush()
 	if (engine.imgui)
 		__endframe_imgui();
 
-	SRE_VIDEOV(engine.video.vfptr, present);
+	SRE_VIDEOV(engine.video.driver, present);
 }
 
 // All sre::render_ functions
@@ -427,7 +465,7 @@ extern "C" void __initialize_imgui(void* _imgui)
 {
 	sre::ImGuiInterface* imgui_interface = static_cast<sre::ImGuiInterface*>(_imgui);
 
-	int status = imgui_interface->initialize(engine.sdl_windowhndl, engine.video.vfptr+1, engine.video.index);
+	int status = imgui_interface->initialize(engine.sdl_windowhndl, engine.video.driver->driverdata, engine.video.index);
 	switch (status)
 	{
 		case SRE_RENDERSTATUS_SUCCEEDED: break;
@@ -444,6 +482,8 @@ extern "C" void __initialize_imgui(void* _imgui)
 	sre::logmsg("ImGui has successfully been initialized!", SRE_LOG_INFO);
 	engine.imgui = imgui_interface;
 }
+
+extern "C" bool __onevent_imgui(SDL_Event* ev) { assert(engine.imgui != NULL); return SRE_pIMGUI->on_event(ev); }
 
 static void __shutdown_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->shutdown(); }
 static void __endframe_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->end_frame(); }

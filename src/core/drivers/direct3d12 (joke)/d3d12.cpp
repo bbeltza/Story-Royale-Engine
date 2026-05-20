@@ -1,4 +1,4 @@
-// This is all of the code present for d3d12, it will be thousands of lines long, I'm not thinking of expanding not separating it
+// This is all of the code present for d3d12, it will be thousands of lines long, I'm not thinking of expanding nor separating it
 // Thus the class definitions will be put here
 #include <Core/Render.h>
 
@@ -13,10 +13,10 @@
 
 // All shader bytecode
 static const BYTE D1_VS[] = {
-     68,  88,  66,  67, 102,  84, 
-    131, 191, 101, 133, 128,  44, 
-    174, 114, 251, 175, 152,  14, 
-     85, 220,   1,   0,   0,   0, 
+     68,  88,  66,  67, 249, 198, 
+     35, 249, 216,  94,  34, 143, 
+     70,  60, 249,  56, 199,  97, 
+    181, 147,   1,   0,   0,   0, 
     176,   6,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
      40,   1,   0,   0,  12,   2, 
@@ -26,7 +26,7 @@ static const BYTE D1_VS[] = {
       1,   0,   0,   0,  72,   0, 
       0,   0,   1,   0,   0,   0, 
      28,   0,   0,   0,   0,   4, 
-    254, 255,   0,  17,   0,   0, 
+    254, 255,   0,   1,   0,   0, 
     196,   0,   0,   0,  60,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -115,8 +115,8 @@ static const BYTE D1_VS[] = {
       0,   0,   0,   0,   0,   0, 
       3,   0,   0,   0,   2,   0, 
       0,   0,   3,  12,   0,   0, 
-     83,  86,  95,  80, 111, 115, 
-    105, 116, 105, 111, 110,   0, 
+     83,  86,  95,  80,  79,  83, 
+     73,  84,  73,  79,  78,   0, 
      67,  79,  76,  79,  82,   0, 
      84,  69,  88,  67,  79,  79, 
      82,  68,   0, 171,  83,  72, 
@@ -246,7 +246,7 @@ static const BYTE D1_VS[] = {
       0,   0,   0,   0,   2,   0, 
       0,   0,  70, 128,  32,   0, 
       0,   0,   0,   0,   4,   0, 
-      0,   0,  65,   0,   0,   5, 
+      0,   0,  66,   0,   0,   5, 
      50,   0,  16,   0,   0,   0, 
       0,   0,  70,   0,  16,   0, 
       0,   0,   0,   0,  56,   0, 
@@ -302,10 +302,10 @@ static const BYTE D1_VS[] = {
 };
 
 static const BYTE D2_VS[] = {
-     68,  88,  66,  67, 144, 147, 
-    172,  23, 248, 148,  69, 234, 
-    104, 166, 100,  69, 134, 200, 
-    253,  59,   1,   0,   0,   0, 
+     68,  88,  66,  67, 206, 142, 
+      9, 127,  42, 167, 125, 178, 
+     68, 102,  34, 224,  38, 111, 
+    122,  70,   1,   0,   0,   0, 
      12,   4,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
      40,   1,   0,   0, 152,   1, 
@@ -315,7 +315,7 @@ static const BYTE D2_VS[] = {
       1,   0,   0,   0,  72,   0, 
       0,   0,   1,   0,   0,   0, 
      28,   0,   0,   0,   0,   4, 
-    254, 255,   0,  17,   0,   0, 
+    254, 255,   0,   1,   0,   0, 
     196,   0,   0,   0,  60,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -385,8 +385,8 @@ static const BYTE D2_VS[] = {
       0,   0,   0,   0,   3,   0, 
       0,   0,   2,   0,   0,   0, 
       3,  12,   0,   0,  83,  86, 
-     95,  80, 111, 115, 105, 116, 
-    105, 111, 110,   0,  67,  79, 
+     95,  80,  79,  83,  73,  84, 
+     73,  79,  78,   0,  67,  79, 
      76,  79,  82,   0,  84,  69, 
      88,  67,  79,  79,  82,  68, 
       0, 171,  83,  72,  68,  82, 
@@ -414,7 +414,7 @@ static const BYTE D2_VS[] = {
      16,   0,   1,   0,   0,   0, 
     166, 138,  32,   0,   0,   0, 
       0,   0,   2,   0,   0,   0, 
-     65,   0,   0,   5,  50,   0, 
+     66,   0,   0,   5,  50,   0, 
      16,   0,   0,   0,   0,   0, 
      70,   0,  16,   0,   0,   0, 
       0,   0,   0,   0,   0,   8, 
@@ -478,10 +478,10 @@ static const BYTE D2_VS[] = {
 };
 
 static const BYTE C_PS[] = {
-     68,  88,  66,  67,  85, 143, 
-      4, 154,  26, 237, 247,  69, 
-    188,  94,  49, 161,  59,  78, 
-    191,   7,   1,   0,   0,   0, 
+     68,  88,  66,  67,   8,  18, 
+      4,  70, 226,  56, 206,  34, 
+     66,  59, 102,  69, 166, 221, 
+     96, 254,   1,   0,   0,   0, 
     140,   2,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
     204,   0,   0,   0,  64,   1, 
@@ -491,7 +491,7 @@ static const BYTE C_PS[] = {
       0,   0,   0,   0,   0,   0, 
       0,   0,   2,   0,   0,   0, 
      28,   0,   0,   0,   0,   4, 
-    255, 255,   0,  17,   0,   0, 
+    255, 255,   0,   1,   0,   0, 
     103,   0,   0,   0,  92,   0, 
       0,   0,   3,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -527,8 +527,8 @@ static const BYTE C_PS[] = {
       0,   0,   0,   0,   3,   0, 
       0,   0,   2,   0,   0,   0, 
       3,   3,   0,   0,  83,  86, 
-     95,  80, 111, 115, 105, 116, 
-    105, 111, 110,   0,  67,  79, 
+     95,  80,  79,  83,  73,  84, 
+     73,  79,  78,   0,  67,  79, 
      76,  79,  82,   0,  84,  69, 
      88,  67,  79,  79,  82,  68, 
       0, 171,  79,  83,  71,  78, 
@@ -538,8 +538,8 @@ static const BYTE C_PS[] = {
       0,   0,   0,   0,   0,   0, 
       3,   0,   0,   0,   0,   0, 
       0,   0,  15,   0,   0,   0, 
-     83,  86,  95,  84,  97, 114, 
-    103, 101, 116,   0, 171, 171, 
+     83,  86,  95,  84,  65,  82, 
+     71,  69,  84,   0, 171, 171, 
      83,  72,  68,  82, 148,   0, 
       0,   0,  64,   0,   0,   0, 
      37,   0,   0,   0,  90,   0, 
@@ -726,7 +726,7 @@ public:
     void set_vsync(bool enable) { caches.vsync = enable; }
                 
     bool texture_setup(texture_type* texture, sre::pixelFormat format, int x, int y, sre::pixelFormat* outformat);
-    bool texture_update(texture_type* texture, const void* pixels, int pitch);
+    bool texture_update(texture_type* texture, const sre::rect2Di* region, const void* pixels, int pitch);
     void texture_destroy(texture_type* texture);
 
 private:
@@ -741,7 +741,7 @@ private:
     bool _pipelinesetup();
 };
 
-extern "C" sre::RenderDriverHelper<sred3d12_inst> sred3d12{"Direct3D 12 (joke/fun)"}; 
+SRE_EXTERN_C_VAR sre::RenderDriverHelper<sred3d12_inst> sred3d12{"Direct3D 12 (joke/fun)"}; 
 
 sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 {
@@ -761,7 +761,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 
     HRESULT hr;
 
-    // TODO: Load these functions dynamically, and maybe look if I can try and find adapters
+    // Load these functions dynamically, maybe look someday if I can try and find adapters
     {
         IDXGIFactory4* dxfactory = NULL;
         
@@ -849,9 +849,10 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
         return;
 
     UINT32 WHITE = UINT32_MAX;
+    sre::rect2Di whiteregion{ 0, 1 };
     if (!texture_setup(reinterpret_cast<texture_type*>(basictexture), SDL_PIXELFORMAT_UNKNOWN, 1, 1, NULL))
         return;
-    if (!texture_update(reinterpret_cast<texture_type*>(basictexture), &WHITE, 4))
+    if (!texture_update(reinterpret_cast<texture_type*>(basictexture), &whiteregion, &WHITE, 4))
         return;
     
     *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
@@ -901,7 +902,41 @@ void sred3d12_inst::_waitforgpu()
     }
 }
 
-extern void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc);
+static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_NONE
+        desc.BlendEnable = FALSE;
+        desc.LogicOpEnable = FALSE;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_BLEND
+        desc.BlendEnable = TRUE;
+        desc.LogicOpEnable = FALSE;
+        
+        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD
+        desc.BlendEnable = TRUE;
+
+        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
+        desc.DestBlend = D3D12_BLEND_ZERO;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_ADD
+        desc.BlendEnable = TRUE;
+
+        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        desc.DestBlend = D3D12_BLEND_ONE;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    },
+    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
+        desc.BlendEnable = TRUE;
+
+        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
+        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        desc.BlendOp = D3D12_BLEND_OP_ADD;
+    }
+};
 
 bool sred3d12_inst::_pipelinesetup()
 {
@@ -924,7 +959,7 @@ bool sred3d12_inst::_pipelinesetup()
     };
     static const D3D12_ROOT_PARAMETER CBUFFERS[] = {
         /* global cb */ { D3D12_ROOT_PARAMETER_TYPE_CBV, {0, 0}, D3D12_SHADER_VISIBILITY_VERTEX },
-        /* textures  */ { D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, {sre::countof(DESCRANGES), DESCRANGES}, D3D12_SHADER_VISIBILITY_PIXEL}
+        /* textures  */ { D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, {1, DESCRANGES}, D3D12_SHADER_VISIBILITY_PIXEL}
     };
 
     HRESULT hr;
@@ -1313,7 +1348,6 @@ void sred3d12_inst::flush_queueinstances2(texture_type* texture, const sre::Rend
 
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN); break;
         case SRE_DRAW2_STRIP: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); break;
         case SRE_DRAW2_TRIANGLE: dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); break;
         default: abort();
@@ -1352,7 +1386,7 @@ UINT sred3d12_inst::_srvallocate()
             ID3D12DescriptorHeap* old_dheaps[2] = { dxsrvheaps[0], dxsrvheaps[1] };
 
             D3D12_DESCRIPTOR_HEAP_DESC dheap_desc{};
-            dheap_desc.NumDescriptors = srvcap; // I guess this will be resized and recreated... Ughh
+            dheap_desc.NumDescriptors = srvcap;
             dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             SRE_DXCALL(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxsrvheaps[0])));
             dheap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -1409,7 +1443,9 @@ bool sred3d12_inst::texture_setup(texture_type* texture, sre::pixelFormat format
     HRESULT hr;
 
     D3D12_HEAP_PROPERTIES heap_properties{};
-    heap_properties.Type = D3D12_HEAP_TYPE_GPU_UPLOAD;
+    heap_properties.Type = D3D12_HEAP_TYPE_CUSTOM;
+    heap_properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+    heap_properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
 
     D3D12_RESOURCE_DESC texture_desc{};
     texture_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -1454,55 +1490,24 @@ bool sred3d12_inst::texture_setup(texture_type* texture, sre::pixelFormat format
     }
 }
 
-bool sred3d12_inst::texture_update(texture_type* texture, const void* pixels, int pitch)
+bool sred3d12_inst::texture_update(texture_type* texture, const sre::rect2Di* region, const void* pixels, int pitch)
 {
     HRESULT hr;
 
+    D3D12_BOX box{};
+    box.left = region->position.x;
+    box.top = region->position.y;
+    box.right = region->position.x + region->size.x;
+    box.bottom = region->position.y + region->size.y;
+	box.back = 1;
+
     SRE_DXCALL(texture->dxresource->Map(0, NULL, NULL));
-    SRE_DXCALL(texture->dxresource->WriteToSubresource(0, NULL, pixels, pitch, 1));
+    SRE_DXCALL(texture->dxresource->WriteToSubresource(0, &box, pixels, pitch, 1));
     
     D3D12_RANGE range{};
     texture->dxresource->Unmap(0, &range);
     return SUCCEEDED(hr);
 }
-
-//
-
-static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_NONE
-        desc.BlendEnable = FALSE;
-        desc.LogicOpEnable = FALSE;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_BLEND
-        desc.BlendEnable = TRUE;
-        desc.LogicOpEnable = FALSE;
-        
-        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
-        desc.DestBlend = D3D12_BLEND_ZERO;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_ADD
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        desc.DestBlend = D3D12_BLEND_ONE;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
-        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    }
-};
 
 // ImGui
 
@@ -1532,7 +1537,7 @@ static void (*blend_functions[5])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
         static void imgui_srvfree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu);
     };
 
-    extern "C" sreD3D12ImGuiData sred3d12imgui{};
+    SRE_EXTERN_C_VAR sreD3D12ImGuiData sred3d12imgui{};
 
     void sreD3D12ImGuiData::imgui_srvalloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* ocpu, D3D12_GPU_DESCRIPTOR_HANDLE* ogpu)
     {

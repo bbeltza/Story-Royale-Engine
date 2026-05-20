@@ -42,6 +42,8 @@ include(sre/installhelper)
 add_subdirectory(src)
 add_subdirectory(imgui_glue)
 
+include(sre/imgui_glue)
+
 project(sre_private)
 add_library(sre_private INTERFACE)
 target_link_libraries(sre_private INTERFACE sre_werror)
@@ -73,3 +75,11 @@ install_wrapper(DIRECTORY common DESTINATION share/sre)
 install_wrapper(DIRECTORY scripts DESTINATION share/sre PATTERN __pycache__ EXCLUDE)
 install_wrapper(DIRECTORY gen_src DESTINATION share/sre)
 install_wrapper(DIRECTORY cmake DESTINATION .)
+
+set(TEXT_FILES
+        README.md
+        VERSION.txt
+        LICENSE.txt
+        CHANGELOG.txt
+)
+install_wrapper(FILES ${TEXT_FILES} DESTINATION share/sre)

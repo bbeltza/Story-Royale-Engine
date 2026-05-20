@@ -20,4 +20,3 @@ SRE_BUILD_SRC(sre_core
 )
 
 add_subdirectory(drivers)
-target_link_libraries(sre_core PRIVATE sre_drivers)

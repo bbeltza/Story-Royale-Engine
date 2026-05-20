@@ -1,4 +1,6 @@
 #include "gl11.h"
+#include <math.h>
+#include <assert.h>
 
 // common drawing
 
@@ -37,16 +39,57 @@ void sregl11_set_vsync(void* _inst, bool enable)
 
 // all of the texture functions
 
-bool sregl11_texture_setup(void* _inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat)
+// From SDL_utils.c (SDL_powerof2)
+// This trick comes down by trying to fill said number's bits lower than the most significant one, to later increment it, getting a number with a single bit in it aka a power of two:
+    // You first subtract the number by 1, this alters many of the lower bits, and in case it is a power of two, it disables the most significant bit off, and gives already the target number two increment back (which is already the input number)
+    // Then you can see that you do multiple bitmask ORs to the number, by the number bitshifted by a power of two incremented each time.
+    // ORing it by the number bitshifted by every number is unecessary to my point of view, it's already hard to explain, but that is because the number's result is accumulated so you're ORing the number that has been ORed before.
+    // So we have now a number that ressembles like this: 0000001111111111 (this obviously depends on the numbers, and is a shorter representation)
+    // So when incrementing it by 1, you'd get something like this: 0000010000000000 ; This number is 1024, and it's a power of two! Now you'd just return that number
+extern int sregl11_padbypowerof2(int x) // PS: This function is marked as "extern", d3d9 will use it too
 {
-    sregl11_inst* inst = _inst;
-    return sregl_texture_setup(&inst->glfuncs, texture, format, w, h, outformat);
+    assert(x > 0);
+    
+    int value = x;
+    value -= 1;
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    value += 1;
+
+    return value;
 }
 
-bool sregl11_texture_update(void* _inst, void* texture, const void* pixels, int pitch)
+bool sregl11_texture_setup(void* _inst, void* _texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat)
 {
     sregl11_inst* inst = _inst;
-    return sregl_texture_update(&inst->glfuncs, texture, pixels, pitch);
+    sregl11_texture* texture = _texture;
+
+    float xrange = 1.0f;
+    float yrange = 1.0f;
+    if (!inst->hasARB_texture_non_power_of_two)
+    {
+        int ow = w;
+        int oh = h;
+        w = sregl11_padbypowerof2(ow);
+        h = sregl11_padbypowerof2(oh);
+        xrange = (float)ow / w;
+        yrange = (float)oh / h;
+        assert(xrange <= 1.0f);
+        assert(yrange <= 1.0f);
+    }
+    
+    texture->xrange = xrange;
+    texture->yrange = yrange;
+    return sregl_texture_setup(&inst->glfuncs, &texture->texture, format, w, h, outformat);
+}
+
+bool sregl11_texture_update(void* _inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch)
+{
+    sregl11_inst* inst = _inst;
+    return sregl_texture_update(&inst->glfuncs, texture, region, pixels, pitch);
 }
 
 void sregl11_texture_destroy(void* _inst, void* texture)

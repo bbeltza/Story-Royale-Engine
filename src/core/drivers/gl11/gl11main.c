@@ -31,13 +31,15 @@ static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
     int setupstatus = sregl_commonsetup(&inst->common, window, &inst->glfuncs);
     if (setupstatus != SRE_RENDERSTATUS_SUCCEEDED)
         return setupstatus;
-
+    
     if (!sregl_loadfunctions11(&inst->glfuncs11, SDL_GL_GetProcAddress))
     #if 0
         return SRE_RENDERSTATUS_FAILED;
     #else
         return SRE_RENDERSTATUS_UNSUPPORTED;
     #endif
+
+    inst->hasARB_texture_non_power_of_two = SDL_GL_ExtensionSupported("GL_ARB_texture_non_power_of_two") == SDL_TRUE;
 
     SRE_GLCALLF(inst->glfuncs.Enable(GL_TEXTURE_2D));
 
@@ -48,6 +50,6 @@ static int sregl11_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
 struct sre_RenderDriverData sregl11 = {
     .initialize = sregl11_main,
     .renderer_size = sizeof(sregl11_inst),
-    .texture_size = sizeof(sregl_texture),
+    .texture_size = sizeof(sregl11_texture),
     .name = "OpenGL Legacy 1.1"
 };

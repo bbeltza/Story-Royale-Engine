@@ -1,4 +1,13 @@
-project(sre)
+if (NOT EXISTS ${SRE_DIR}/VERSION.txt)
+    message(WARNING "VERSION.txt NOT FOUND. Engine directory corrupt?")
+else()
+    file(READ ${SRE_DIR}/VERSION.txt SRE_VER LIMIT 8)
+    set(PROJ_SRE_VER VERSION ${SRE_VER})
+
+    set(SRE_VERSION ${SRE_VER} CACHE STRING "The Engine version: ${SRE_VER}")
+endif()
+
+project(sre ${PROJ_SRE_VER})
 add_library(sre INTERFACE)
 
 project(sre_noconsole)
@@ -11,10 +20,13 @@ set(SRE_MODULES
     sre_main # Contains the entry point, as well as some argument helpers
     sre_core # Engine core library
     sre_base # Engine base library
+    sre_drivers # All of the engine's (render) drivers
     sreECS # Scene and entity manager library
     sreECS_presets # Scene and entity presets (only has components and camera controllers...) (optional)
     sreGUI # GUI manager library
     sreGUI_presets # UI presets (optional)
+
+    sre_imgui # ImGui
 )
 
 if(NOT BUILD_SHARED_LIBS)
@@ -24,10 +36,9 @@ endif()
 
 set(SRE_3RDPARTYLIBS
     SDL2::SDL2${_SDL_LIB_SUFFIX}
-    SDL2_ttf::SDL2_ttf${_SDL_LIB_SUFFIX}
     SDL2_image::SDL2_image${_SDL_LIB_SUFFIX}
     
-    stb
+    freetype
     #zlib${_ZLIB_SUFFIX}
 )
 

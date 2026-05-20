@@ -11,4 +11,10 @@
         #define SRE_EXTERN_C extern
     #endif
 
+    #if defined(__cplusplus) && _MSC_VER
+        #define SRE_EXTERN_C_VAR extern "C"
+    #else
+        #define SRE_EXTERN_C_VAR
+    #endif
+
 #endif

@@ -15,7 +15,7 @@ namespace sreD3D9
     };
 }
 
-extern "C" sreD3D9::ImGuiData sred3d9imgui{};
+SRE_EXTERN_C_VAR sreD3D9::ImGuiData sred3d9imgui{};
 
 int sreD3D9::ImGuiData::Init(driver_type* inst, SDL_Window* window)
 {

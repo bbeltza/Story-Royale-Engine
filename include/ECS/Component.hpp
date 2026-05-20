@@ -1,7 +1,7 @@
 #ifndef SREECS_COMPONENT_HPP
 #define SREECS_COMPONENT_HPP
 
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 #include <Datatypes/Flags.hpp>
 
 namespace sre

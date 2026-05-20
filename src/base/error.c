@@ -28,6 +28,15 @@ struct sreErrStack
     char* ptr; // array of sreErr structures, but because its size can vary, it's a char pointer. Might be promoted to an int pointer since sreErr is may need to be aligned
 };
 
+static struct
+{
+    sreErrorCallback critical;
+    sreErrorCallback error;
+
+    bool critical_override;
+    bool error_override;
+} s_errcallbacks;
+
 static void errstack_destroy(void* _errstack)
 {
     struct sreErrStack* errstack = _errstack;
@@ -74,7 +83,7 @@ static const char* err_getfmtstr(unsigned cat)
         "Fail: %s",                                     /* SRE_ERR_FAIL */
         "SDL Error: %s",                                /* SRE_ERR_SDL */
         
-        "Failed opening file '%s': %s",                  /* SRE_ERR_FILE_OPEN */
+        "Failed opening file '%s': %s",                  /* SRE_ERR_FILE_OPENING */
 
         "DirectX error: %s '%s' (%X)",
         "DirectX error: %s '%s' (%X) | line: %d | file: %s"
@@ -181,8 +190,26 @@ int sre_errorEx(sreErrorLevel level, sreErrorCategory category, va_list fmt_va)
         return 0;
 
     struct sreErr* err = sre_pusherror(level, category, fmt_va);
-    // Some more code to maybe log the error somewhere???
-    err_logsingle(err);
+
+    switch (level)
+    {
+    case SRE_ERROR:
+        if (s_errcallbacks.error)
+            s_errcallbacks.error(category, err->msg);
+        
+        if (!s_errcallbacks.error_override || !s_errcallbacks.error)
+            err_logsingle(err);
+        break;
+    case SRE_CRITICAL:
+        if (s_errcallbacks.critical)
+            s_errcallbacks.critical(category, err->msg);
+        
+        if (!s_errcallbacks.critical_override || !s_errcallbacks.critical)
+            err_logsingle(err);
+        break;
+    default:
+        break;
+    }
 
     return -1;
 }
@@ -217,4 +244,22 @@ int sre_logerror()
 {
     struct sreErr* err = err_getlast();
     return err_logsingle(err);
+}
+
+// Set error callback
+void sre_errorcallback(sreErrorLevel level, sreErrorCallback callback, bool override)
+{
+    switch (level)
+    {
+        // If level is none of the sreErrorLevel members (SRE_ERROR ; SRE_CRITICAL) then it is a no-op
+        default: return;
+        case SRE_ERROR:
+            s_errcallbacks.error = callback;
+            s_errcallbacks.error_override = override;
+            break;
+        case SRE_CRITICAL:
+            s_errcallbacks.critical = callback;
+            s_errcallbacks.critical_override = override;
+            break;
+    }
 }

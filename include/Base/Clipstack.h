@@ -2,7 +2,7 @@
 #define SRE_CLIPSTACK_H
 
 #ifdef __cplusplus
-    #include <Datatypes/Rect.hpp>
+    #include <Datatypes/Rect.h>
     #include <deque>
 
     namespace sre

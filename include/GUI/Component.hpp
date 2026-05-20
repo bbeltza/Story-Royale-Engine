@@ -1,7 +1,7 @@
 #ifndef SREGUI_COMPONENT_HPP
 #define SREGUI_COMPONENT_HPP
 
-#include <Datatypes/Rect.hpp>
+#include <Datatypes/Rect.h>
 #include <Datatypes/Flags.hpp>
 
 namespace sre

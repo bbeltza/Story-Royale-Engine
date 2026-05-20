@@ -2,10 +2,6 @@
 	path = 3rdparty/SDL
 	url = https://github.com/libsdl-org/SDL.git
 	branch = SDL2
-[submodule "3rdparty/SDL_ttf"]
-	path = 3rdparty/SDL_ttf
-	url = https://github.com/libsdl-org/SDL_ttf.git
-	branch = SDL2
 [submodule "3rdparty/SDL_image"]
 	path = 3rdparty/SDL_image
 	url = https://github.com/libsdl-org/SDL_image.git

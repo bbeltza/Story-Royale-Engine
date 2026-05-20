@@ -1,6 +1,6 @@
 #ifndef SRE_INPUT_HPP
 #define SRE_INPUT_HPP
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 #include <Base/Signal.hpp>
 #include <SDL_keycode.h>
 

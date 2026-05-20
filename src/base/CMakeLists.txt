@@ -12,11 +12,13 @@ SRE_BUILD_SRC(sre_base
     "audio.cpp"
     "drawgrid.cpp"
     "font.cpp"
-    "fontrenderer.cpp"
+    "fontatlas.cpp"
     "image.cpp"
     "ini.cpp"
     "tween.cpp"
 
     "error.c"
     "log.cc"
+
+    "stb.c"
 )

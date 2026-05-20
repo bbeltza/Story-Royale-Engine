@@ -1,5 +1,5 @@
 #include <Core/Display.hpp>
-#include <Core/Defer.hpp>
+#include <Core/Defer.h>
 #include <Core/Render.h>
 #include "../internal.h"
 
@@ -34,6 +34,6 @@ void sre::display_autoscale_off()
 void sre::display_vsync(bool enable)
 {
     sre_defer([](void* enable) { 
-        SRE_VIDEO(engine.video.vfptr, set_vsync, enable != NULL);
-     }, reinterpret_cast<void*>(enable));
+        SRE_VIDEO(engine.video.driver, set_vsync, enable != NULL);
+     }, 0, reinterpret_cast<void*>(enable));
 }

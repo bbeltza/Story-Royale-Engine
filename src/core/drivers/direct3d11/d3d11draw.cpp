@@ -6,14 +6,18 @@ void Instance::present()
 {
     HRESULT hr;
     UINT flags;
-    if (m_caches.vsync)
-    {
+    #ifdef DXGI_PRESENT_DO_NOT_WAIT
+        if (m_caches.vsync)
+        {
+            flags = 0;
+        }
+        else
+        {
+            flags = DXGI_PRESENT_DO_NOT_WAIT;
+        }
+    #else
         flags = 0;
-    }
-    else
-    {
-        flags = DXGI_PRESENT_DO_NOT_WAIT;
-    }
+    #endif
 
     hr = m_dxswapchain->Present(m_caches.vsync, flags);
     if (FAILED(hr))
@@ -31,6 +35,8 @@ void Instance::present()
 
 bool Instance::clear(float color[3])
 {
+    if (m_dxrendertargetview == NULL) sre::critical(SRE_ERR_INVALID_STATE, "Assertion 'm_dxrendertargetview != NULL' failed");
+
     const FLOAT color4[4] = {
         color[0], color[1], color[2], 0.0f
     };
@@ -112,9 +118,8 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     D3D11_PRIMITIVE_TOPOLOGY topology;
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN; sre::log(SRE_LOG_WARN "SRE_DRAW2_JOINED is unimplemented on d3d11, and may soon become unsupported. It only renders points right now."); break;
-        case SRE_DRAW2_STRIP: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
-        case SRE_DRAW2_TRIANGLE: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
+        case SRE_DRAW2_STRIP: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
+        case SRE_DRAW2_TRIANGLE: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
         default: abort();
     }
 

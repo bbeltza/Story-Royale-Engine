@@ -2,7 +2,7 @@
 #define SREECS_ENTITY_HPP
 
 #include <Core/Object.hpp>
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 
 #include <cassert>
 #include <ints.h>

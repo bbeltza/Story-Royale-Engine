@@ -3,14 +3,14 @@
 
 namespace sre
 {
-    enum Alignment
+    enum alignment: char
     {
-        A_LEFT,
-        A_CENTER,
-        A_RIGHT,
+        ALIGN_LEFT,
+        ALIGN_CENTER,
+        ALIGN_RIGHT,
 
-        A_TOP = A_LEFT,
-        A_BOTTOM = A_RIGHT
+        ALIGN_TOP = ALIGN_LEFT,
+        ALIGN_BOTTOM = ALIGN_RIGHT
     };
 }
 

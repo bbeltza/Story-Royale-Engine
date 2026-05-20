@@ -31,11 +31,11 @@ void List::process_children(const sre::rect2Dut& parent, sre::rect2Dut children[
     offs -= abspadding;
     switch (alignment)
     {
-        case sre::A_LEFT: return;
-        case sre::A_CENTER:
+        case sre::ALIGN_LEFT: return;
+        case sre::ALIGN_CENTER:
             offs = absolute/2 - offs/2;
             break;
-        case sre::A_RIGHT:
+        case sre::ALIGN_RIGHT:
             offs = absolute - offs;
             break;
         default:

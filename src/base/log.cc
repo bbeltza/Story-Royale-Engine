@@ -78,17 +78,18 @@ namespace sre
 
     static int map_cat_prio(int category)
     {
-        using namespace sre;
         switch (category)
         {
-            case LOGCATEGORY_INFO:
-                return ANDROID_LOG_INFO;
             case LOGCATEGORY_DEBUG:
                 return ANDROID_LOG_DEBUG;
+            case LOGCATEGORY_INFO:
+                return ANDROID_LOG_INFO;
             case LOGCATEGORY_WARN:
                 return ANDROID_LOG_WARN;
             case LOGCATEGORY_ERROR:
                 return ANDROID_LOG_ERROR;
+            case LOGCATEGORY_CRITICAL:
+                return ANDROID_LOG_FATAL;
             default:
                 abort();
         }
@@ -325,9 +326,11 @@ void sre::Log::flush()
             #if _WIN32
                 HANDLE hcon = GetStdHandle(msg.category == LOGCATEGORY_INFO ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
                 
-                DWORD dmode;
-                GetConsoleMode(hcon, &dmode);
-                if (!(dmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+                #ifdef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+                    DWORD dmode;
+                    GetConsoleMode(hcon, &dmode);
+                    if (!(dmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+                #endif
                 {
                     static constexpr WORD cat_attribs[] = {
                         0,
@@ -349,22 +352,25 @@ void sre::Log::flush()
                 }                
             #endif
 
-            static const char RESET_ESC[] = "\033[0m";
-            char escape[] = "\033[1;1;30m";
-            switch (msg.category)
             {
-                case LOGCATEGORY_DEBUG: break; // "30"
-                case LOGCATEGORY_INFO: escape[7] = '6'; break;
-                case LOGCATEGORY_WARN: escape[7] = '3'; break;
-                case LOGCATEGORY_ERROR: escape[7] = '1'; break;
-                case LOGCATEGORY_CRITICAL: escape[7] = '1'; escape[2] = '2'; break;
-                default: break;
-            }
+                static const char RESET_ESC[] = "\033[0m";
+                char escape[] = "\033[1;1;39m";
+                switch (msg.category)
+                {
+                    case LOGCATEGORY_DEBUG: break; // "30"
+                    case LOGCATEGORY_INFO: escape[7] = '6'; break;
+                    case LOGCATEGORY_WARN: escape[7] = '3'; break;
+                    case LOGCATEGORY_ERROR: escape[7] = '1'; break;
+                    case LOGCATEGORY_CRITICAL: escape[7] = '1'; escape[2] = '2'; break;
+                    default: break;
+                }
 
-            fwrite_unlocked(escape, 1, sizeof(escape), console);
-                fwrite_unlocked(header_buf, 1, header_size, console);
-            fwrite_unlocked(RESET_ESC, 1, sizeof(RESET_ESC), console);
-                fwrite_unlocked(msg.buffer, 1, msg.size, console);
+                fwrite_unlocked(escape, 1, sizeof(escape), console);
+                    fwrite_unlocked(header_buf, 1, header_size, console);
+                fwrite_unlocked(RESET_ESC, 1, sizeof(RESET_ESC), console);
+                    fwrite_unlocked(msg.buffer, 1, msg.size, console);
+            }
+            
             #if _WIN32
                 WIN32_FINISHCONSOLE:
             #endif

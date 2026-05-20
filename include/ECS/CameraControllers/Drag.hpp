@@ -1,7 +1,7 @@
 #pragma once
 #include <ECS/Camera.hpp>
 
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 #include <Base/Action.h>
 #include <Core/Event.hpp>
 

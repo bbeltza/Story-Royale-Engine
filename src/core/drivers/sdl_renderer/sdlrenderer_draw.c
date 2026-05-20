@@ -177,7 +177,7 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, void* _texture, const sre
             );
         } break;
         case SRE_DRAW2_STRIP:
-        case SRE_DRAW2_JOINED: {
+        /*case SRE_DRAW2_JOINED:*/ {
             assert(point_count >= 3);
             size_t indice_count = (point_count-3) * 3 + 3;
             uint16_t *indices = SDL_stack_alloc(uint16_t, indice_count); // 16-bit indices for now, enough for having a maximum of 65536 points c:

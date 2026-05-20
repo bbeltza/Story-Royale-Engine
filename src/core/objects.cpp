@@ -13,6 +13,7 @@
 static void* const PTR_MAX = reinterpret_cast<void*>(UINTPTR_MAX); 
 static sre::Object* obj_head = static_cast<sre::Object*>(PTR_MAX); // PTR_MAX to make sure an object is in a queue, otherwise, m_nextdestroyed is NULL
 //static size_t queue_count = 0;
+static bool isin_destroyqueue = false;
 
 namespace sre
 {
@@ -58,17 +59,27 @@ void sre::Object::destroy()
 		return;
 
 	SDL_LockMutex(engine.destroyqueue_mutex);
-	m_nextdestroyed = obj_head;
-	obj_head = this;
-	//queue_count++;
+    if (isin_destroyqueue)
+    {
+        // Don't mess up the queue! Commit suicide
+        delete this;
+    }
+    else
+    {
+        m_nextdestroyed = obj_head;
+        obj_head = this;
+        //queue_count++;
+    }
 	SDL_UnlockMutex(engine.destroyqueue_mutex);
 }
 
 void sre::ECS::destroy_queue()
 {
     SDL_LockMutex(engine.destroyqueue_mutex);
+    isin_destroyqueue = true;
     while (obj_head != PTR_MAX)
         delete obj_head;
+    isin_destroyqueue = false;
     SDL_UnlockMutex(engine.destroyqueue_mutex);
 }
 

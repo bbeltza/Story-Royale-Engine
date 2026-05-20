@@ -4,24 +4,32 @@
 #include <Core/Defer.h>
 #include <Base/Log.h>
 
-#if _WIN32 && 01
+#if _WIN32 && 1
     #define WIN32_HANDLE_WINDOW_BLOCKING
 #endif
 
 #if _WIN32
     #include "time/win32.c"
 
-    static int win32_quit; // Check if the SDL_QUIT event has been sent before rendering (on windows and OpenGL, rendering causes an error after a window closes)
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
-        static CONDITION_VARIABLE win32_rendercond;
-        static SRWLOCK win32_rendersrw;
+        static SDL_cond* win32_rendercond;
+        static SDL_mutex* win32_rendermtx;
+        static bool win32_expose;
 
         static void win32_renderflush(void* userdata)
-        {           
-            AcquireSRWLockExclusive(&win32_rendersrw);
-            if (!win32_quit) __render_flush();
-            WakeAllConditionVariable(&win32_rendercond);
-            ReleaseSRWLockExclusive(&win32_rendersrw);
+        {
+            int res;
+            (void)res;
+            while (SDL_TryLockMutex(win32_rendermtx) != 0)
+            {
+                if (win32_expose)
+                    goto ENDWAKE;
+            }
+            __render_flush();
+            SDL_UnlockMutex(win32_rendermtx);
+
+        ENDWAKE:
+            SDL_CondBroadcast(win32_rendercond);
         }
     #endif
 #elif __unix__
@@ -35,15 +43,8 @@
         static void sem_renderflush(void* userdata)
         {
             assert(sdl_rendersem != NULL);
-
-            #if _WIN32
-                if (win32_quit)
-                    goto POST;
-            #endif
-
             
             __render_flush();
-            POST:
             SDL_SemPost(sdl_rendersem);
         }
 #endif
@@ -56,10 +57,11 @@ static int game_loop(void* running)
     ticks(&engine.framestart_time);
 
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
-        AcquireSRWLockExclusive(&win32_rendersrw);
+        int res = SDL_LockMutex(win32_rendermtx);
+        assert(res == 0);
     #endif
 
-    while (*(int*)running)
+    while (*(volatile int*)running)
     {
         sre_timeStamp elapsed;
         SDL_Event ev;
@@ -79,16 +81,18 @@ static int game_loop(void* running)
 
         __queue_events();
         
+        engine.video.wantclear = true;
         #ifdef WIN32_HANDLE_WINDOW_BLOCKING
             if (__update_ecs())
             {
-                sre_defer(win32_renderflush, NULL);
-                SleepConditionVariableSRW(&win32_rendercond, &win32_rendersrw, 5000, 0);
+                sre_defer(win32_renderflush, 0, NULL);
+                int res = SDL_CondWaitTimeout(win32_rendercond, win32_rendermtx, 5000);
+                assert(res >= 0);
             }
         #else
             if (__update_ecs())
             {
-                sre_defer(sem_renderflush, NULL);
+                sre_defer(sem_renderflush, 0, NULL);
                 SDL_SemWait(sdl_rendersem);
             }
         #endif
@@ -102,15 +106,15 @@ static int game_loop(void* running)
             wait(elapsed);
     }
 
+    #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+        SDL_UnlockMutex(win32_rendermtx);
+    #endif
     return 0;
 }
 
 #if _WIN32
 static int win32_eventwatch(void* userdata, SDL_Event* ev)
-{
-    if (ev->type == SDL_QUIT)
-        win32_quit = 1;
-    
+{   
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
             SDL_threadID thrd = SDL_ThreadID();
             if (thrd != engine.main_thrd)
@@ -121,12 +125,13 @@ static int win32_eventwatch(void* userdata, SDL_Event* ev)
                 switch (ev->window.event)
                 {
                     case SDL_WINDOWEVENT_EXPOSED:
-                        if (TryAcquireSRWLockExclusive(&win32_rendersrw))
+                        if (SDL_TryLockMutex(win32_rendermtx) == 0)
                         {
+                            win32_expose = true;
                             __render_flush();
-                            ReleaseSRWLockExclusive(&win32_rendersrw);
+                            SDL_UnlockMutex(win32_rendermtx);
                         }
-                        WakeAllConditionVariable(&win32_rendercond);
+                        SDL_CondBroadcast(win32_rendercond);
                         break;
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                         __update_viewport(ev->window.data1, ev->window.data2);
@@ -138,53 +143,49 @@ static int win32_eventwatch(void* userdata, SDL_Event* ev)
 }
 #endif
 
-
 void __run_engine()
 {
-    SDL_RegisterEvents(1);
-
-    static int running = 1;
-    SDL_Thread* gameloop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
     #if _WIN32
         SDL_AddEventWatch(win32_eventwatch, NULL);
     #endif
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
-        InitializeConditionVariable(&win32_rendercond);
-        InitializeSRWLock(&win32_rendersrw);
+        win32_rendercond = SDL_CreateCond();
+        win32_rendermtx = SDL_CreateMutex();
     #else
         sdl_rendersem = SDL_CreateSemaphore(0);
     #endif
+    static int running = 1;
+    SDL_Thread* gameloop = SDL_CreateThread(game_loop, "Game Loop", &running);
 
     SDL_Event ev;
     while (SDL_WaitEvent(&ev))
     {
         if (ev.type == SDL_QUIT)
-            break;
-        
-        switch (ev.type)
         {
-        case SDL_WINDOWEVENT:
-            switch (ev.window.event)
-            {
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                __update_viewport(ev.window.data1, ev.window.data2);
-                break;
-            case SDL_WINDOWEVENT_FOCUS_LOST:
-                SDL_ResetKeyboard();
-                break;
-            }
+            running = 0;
             break;
-        case SDL_USEREVENT:
+        }
+
+        if (ev.type == engine.user_event)
+        {
             switch (ev.user.code)
             {
-            case ENGINE_EVENT_DEFER:
+            case ENGINE_EVENT_DEFERV:
                 ((sre_deferFunction)ev.user.data1)(ev.user.data2);
                 break;
-            case ENGINE_EVENT_RETDEFER: {
-                struct _engine_retdefer* defer = ev.user.data2;
-                defer->ret = ((sre_deferResponseFunction)ev.user.data1)(defer->userdata);
-                SDL_SemPost(defer->sem);
+            case ENGINE_EVENT_DEFERP:
+                ((sre_deferFunction)ev.user.data1)(&ev.user.data2);
+                break;
+            case ENGINE_EVENT_DEFERPM:
+                extern void sre_delete(void*);
+                ((sre_deferFunction)ev.user.data1)(ev.user.data2);
+                sre_delete(ev.user.data2);
+                break;
+            case ENGINE_EVENT_DEFERRES: {
+                void** deferdata = ev.user.data2;
+                deferdata[1] = (void*)((sre_deferresFunction)ev.user.data1)(deferdata[1]);
+                SDL_SemPost(deferdata[0]);
             } break;
             case ENGINE_EVENT_ENTRY: {
                     int w, h;
@@ -195,19 +196,47 @@ void __run_engine()
                     SDL_RaiseWindow(engine.sdl_windowhndl);
                 } break;
             }
+            continue;
+        }
+
+        switch (ev.type)
+        {
+        case SDL_WINDOWEVENT:
+            switch (ev.window.event)
+            {
+            #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+                case SDL_WINDOWEVENT_EXPOSED:
+                    win32_expose = false;
+                    break;
+            #endif
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                __update_viewport(ev.window.data1, ev.window.data2);
+                break;
+            case SDL_WINDOWEVENT_FOCUS_LOST:
+                SDL_ResetKeyboard();
+                break;
+            }
             break;
         default:
             __poll_input(&ev);
             break;
         }
 
+        if (engine.imgui && !__onevent_imgui(&ev))
+            continue;
+        
         __signal_events(&ev); // In this case the QUIT event won't be fired
                               // I'll make sure to make it fire once I make the QUIT event
     }
 
-    running = 0;
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING
+        SDL_LockMutex(win32_rendermtx);
+        SDL_CondBroadcast(win32_rendercond);
+        SDL_UnlockMutex(win32_rendermtx);
         SDL_WaitThread(gameloop, NULL);
+
+        SDL_DestroyCond(win32_rendercond);
+        SDL_DestroyMutex(win32_rendermtx);
     #else
         SDL_SemPost(sdl_rendersem);
         SDL_WaitThread(gameloop, NULL);

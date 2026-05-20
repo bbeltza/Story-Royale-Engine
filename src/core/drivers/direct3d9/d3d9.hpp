@@ -56,7 +56,7 @@ namespace sreD3D9
     struct Texture
     {
         IDirect3DTexture9* dxtexture;
-        int height_cache;
+        float potratiox, potratioy;
     };
 
     struct Instance: sre::RenderDriver
@@ -86,6 +86,8 @@ namespace sreD3D9
         D3DPRESENT_PARAMETERS m_pparamcache{};
         FLOAT m_viewportcache[16];
         FLOAT m_cameracache[2];
+
+        D3DCAPS9 m_devcaps;
     public:
         void flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags);
         void flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
@@ -100,7 +102,7 @@ namespace sreD3D9
         void set_vsync(bool enable);
                 
         bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
-        bool texture_update(Texture* texture, const void* pixels, int pitch);
+        bool texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch);
         void texture_destroy(Texture* texture);
     private:
         bool _shadersetup();
@@ -113,6 +115,9 @@ namespace sreD3D9
         }
 
         void _invalidateimgui();
+
+        // @returns One of the render states to return
+        int _checkdevice(UINT adapter, D3DDEVTYPE type);
     };
 }
 

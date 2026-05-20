@@ -41,13 +41,13 @@ bool sregl11_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
                                                                                                                             \
                                     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)                                            \
                                     {                                                                                       \
-                                        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, texture ? texture->gltex : 0)); \
+                                        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, texture ? texture->texture.gltex : 0)); \
                                     }                       
 
 void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl11_inst* inst = _inst;
-    sregl_texture* texture = _texture;
+    sregl11_texture* texture = _texture;
 
     SREGL11_CHECK_FORSWITCHES()
 
@@ -144,7 +144,7 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
             v[5] = maxy;
             v[6] = minx;
             v[7] = maxy;
-
+            
             GLfloat c = cosf(dinst->angle);
             GLfloat s = sinf(dinst->angle);
             for (int i = 0; i < 8; i+=2)
@@ -165,21 +165,26 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
             GLfloat maxu = minu + dinst->uv.x;
             GLfloat maxv = minv + dinst->uv.y;
 
+            minu *= texture->xrange;
+            maxu *= texture->xrange;
+            minv *= texture->yrange;
+            maxv *= texture->yrange;
+
             inst->glfuncs11.TexCoord2f(minu, minv);
-            inst->glfuncs11.Vertex2fv(v + 0);
+            inst->glfuncs11.Vertex2f(v[0], v[1]);
             inst->glfuncs11.TexCoord2f(maxu, minv);
-            inst->glfuncs11.Vertex2fv(v + 2);
+            inst->glfuncs11.Vertex2f(v[2], v[3]);
             inst->glfuncs11.TexCoord2f(maxu, maxv);
-            inst->glfuncs11.Vertex2fv(v + 4);
+            inst->glfuncs11.Vertex2f(v[4], v[5]);
             inst->glfuncs11.TexCoord2f(minu, maxv);
-            inst->glfuncs11.Vertex2fv(v + 6);
+            inst->glfuncs11.Vertex2f(v[6], v[7]);
         }
         else
         {
-            inst->glfuncs11.Vertex2fv(v + 0);
-            inst->glfuncs11.Vertex2fv(v + 2);
-            inst->glfuncs11.Vertex2fv(v + 4);
-            inst->glfuncs11.Vertex2fv(v + 6);
+            inst->glfuncs11.Vertex2f(v[0], v[1]);
+            inst->glfuncs11.Vertex2f(v[2], v[3]);
+            inst->glfuncs11.Vertex2f(v[4], v[5]);
+            inst->glfuncs11.Vertex2f(v[6], v[7]);
         }
     }
 
@@ -190,23 +195,25 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
 void sregl11_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl11_inst* inst = _inst;
-    sregl_texture* texture = _texture;
+    sregl11_texture* texture = _texture;
 
     SREGL11_CHECK_FORSWITCHES()
 
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: inst->glfuncs11.Begin(GL_TRIANGLE_FAN); break;
         case SRE_DRAW2_STRIP: inst->glfuncs11.Begin(GL_TRIANGLE_STRIP); break;
         case SRE_DRAW2_TRIANGLE: inst->glfuncs11.Begin(GL_TRIANGLES); break;
         default: assert(0); return;
     }
 
+    float rangex = texture ? texture->xrange : 1;
+    float rangey = texture ? texture->yrange : 1;
+
     inst->glfuncs11.Color4ubv(&instance->color.r);
     for (size_t i = 0; i < point_count; i++)
     {
         const sre_RenderPoint* pt = &instance->points[i];
-        inst->glfuncs11.TexCoord2f(pt->uv.x, pt->uv.y);
+        inst->glfuncs11.TexCoord2f(pt->uv.x * rangex, pt->uv.y * rangey);
         inst->glfuncs11.Vertex2f(pt->pos.x, pt->pos.y);
     }
 

@@ -1,6 +1,6 @@
 #ifndef SRE_WINDOW_HPP
 #define SRE_WINDOW_HPP
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 #include <Datatypes/Flags.hpp>
 
 namespace sre

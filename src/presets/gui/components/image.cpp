@@ -19,15 +19,27 @@ void Image::fit(Transform& transform)
 
 void Image::on_render(const sre::rect2Dut &dimensions)
 {
-    if (!texture) return;
+    sre::vec2f uv{1};
+    sre::vec2f uvoffs{0};
+    if (flags.has(F_REGION) && texture)
+    {
+        sre::vec2f sizef{texture->size()};
+        if (region.size.x)
+            uv.x = region.size.x / sizef.x;
+        if (region.size.y)
+            uv.y = region.size.y / sizef.y;
+        uvoffs = region.position / sizef;
+    }
 
+    // This would in theory draw a plain rectangle if there is no texture attached
     sre::render_draw1(
         0, {{
             dimensions,
             sre::vec2ut::ZERO,
             modulate,
             0,
-            {1, 1}
+            uv,
+            uvoffs
         }},
         texture.get()
     );

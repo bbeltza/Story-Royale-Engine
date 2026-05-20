@@ -2,20 +2,21 @@
 
 using namespace sreGUI;
 
-std::unordered_map<std::string, sre::Font> Text::font_map;
-
-void Text::load(const std::string& path)
-{
-    if (!font_map.count(path)) font_map.emplace(path, path.c_str());
-    
-    m_font = &font_map.at(path);
-}
-
-#define FONTCHECK if (!m_font) return;
-
 void Text::on_render(const sre::rect2Dut& dimensions)
 {
-    FONTCHECK
+    if (!m_fonthandle.valid())
+        return;
 
-    m_font->render(dimensions, color, m_str.c_str(), count, h_alignment, v_alignment);
+    sre::FontAtlas& atlas = m_fonthandle.get_atlas();
+    atlas.render_text(sre::FontRenderData{
+        m_str.c_str(),
+        -1, 0,
+        color,
+        modifier_callback
+    }, sre::FontRenderTextData{
+        dimensions,
+        h_alignment,
+        v_alignment,
+        count
+    }, NULL, modifier_pointer);
 }

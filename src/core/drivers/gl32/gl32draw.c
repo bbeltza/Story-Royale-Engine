@@ -5,6 +5,7 @@
                                                 switch_flags |= SRE_RENDER_SWITCHCAMERA | SRE_RENDER_SWITCHTEXTURE;                                                                                             \
                                                 SRE_GLCALL(inst->glfuncs21.UseProgram(inst->ddata.program));                                                                                                   \
                                                 SRE_GLCALL(inst->glfuncs32.BindVertexArray(inst->ddata.vao));                                                                                                  \
+                                                SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ARRAY_BUFFER, inst->ddata.vbo));                                                                                                  \
                                             }                                                                                                                                                                   \
                                                                                                                                                                                                                 \
                                             if (switch_flags & SRE_RENDER_SWITCHCAMERA)                                                                                                                         \
@@ -24,30 +25,16 @@ void sregl32_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
     sregl_texture* texture = _texture;
 
     SREGL32_CHECK_FORSWITCHES(d1data);
-    
-    while (instance_count)
+
+    GLsizeiptr inst_counti = (GLsizeiptr)instance_count;
+    if (inst->d1data.vbosize < inst_counti)
     {
-        unsigned colors[4*255];
-        GLsizeiptr max_count = instance_count > 255 ? 255 : instance_count;
-
-        for (GLsizeiptr i = 0; i < max_count; i++)
-        {
-            sre_col4 packed = instances[i].color;
-            colors[4*i + 0] = packed.r;
-            colors[4*i + 1] = packed.g;
-            colors[4*i + 2] = packed.b;
-            colors[4*i + 3] = packed.a;
-        }
-        SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->d1data.instcolubo));
-        SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(int[4])*max_count, colors));
-
-        SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->d1data.instubo));
-        SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(sre_RenderInstance1)*max_count, instances));
-        SRE_GLCALL(inst->glfuncs32.DrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)max_count));
-
-        instance_count -= max_count;
-        instances += max_count;
-    } 
+        inst->d1data.vbosize = inst_counti*2;
+        SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, sizeof(sre_RenderInstance1)*inst->d1data.vbosize, NULL, GL_DYNAMIC_DRAW));
+    }
+    
+    SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, sizeof(sre_RenderInstance1)*inst_counti, instances, GL_DYNAMIC_DRAW));
+    SRE_GLCALL(inst->glfuncs.DrawArrays(GL_POINTS, 0, (GLsizei)instance_count));
 }
 
 void sregl32_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
@@ -60,7 +47,6 @@ void sregl32_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
     GLenum mode;
     switch (instance->mode)
     {
-        case SRE_DRAW2_JOINED: mode = GL_TRIANGLE_FAN; break;
         case SRE_DRAW2_STRIP: mode = GL_TRIANGLE_STRIP; break;
         case SRE_DRAW2_TRIANGLE: mode = GL_TRIANGLES; break;
         default: assert(0); return;
@@ -70,12 +56,10 @@ void sregl32_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
     if (inst->d2data.vbosize < point_counti)
     {
         inst->d2data.vbosize = point_counti*2;
-        SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, sizeof(instance->points[0])*inst->d2data.vbosize, instance->points, GL_DYNAMIC_DRAW));
+        SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, sizeof(instance->points[0])*inst->d2data.vbosize, NULL, GL_DYNAMIC_DRAW));
     }
-    else
-    {
-        SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_counti, instance->points));
-    }
+
+    SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_counti, instance->points));
     SRE_GLCALL(inst->glfuncs21.Uniform4i(inst->d2data.coluniform, instance->color.r, instance->color.g, instance->color.b, instance->color.a));
     SRE_GLCALL(inst->glfuncs.DrawArrays(mode, 0, (GLsizei)point_count));
 }

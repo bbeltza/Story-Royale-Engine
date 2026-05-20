@@ -7,6 +7,18 @@
     - SRE_HINT_WINDOW_SIZE: It's an array of two integers (so you can declare it as a vec2i, just a C array or an std::array<int>, or heck even a long long if you're careful about endianess!). The array defines the dimensions of the window on startup.
                                 Obviously, you know, the first element of the array will contain the width, and the second element the height. Very simple. More of these hints will be also there.
                                 If there's no SRE_HINT_WINDOW_SIZE, then the engine will create a window with a default size of 800x600 pixels.
+    - SRE_HINT_EXTERN_RENDERDRIVER: It's a pointer to a `sre_RenderDriverData` (sre::RenderDriverHelper too on C++) containing the driver data of an external render driver to use.
+                                      The render driver will have to fill all of the members from the `sre_RenderDriverData` structure (for sre::RenderDriverHelper, you'd have to implement every single function)
+                                        and optionally add a name tag to identify the driver
+                                      If SRE_HINT_RENDERDRIVER is present, then it is ignored and SRE_HINT_EXTERN_RENDERDRIVER will be looked first. If the initialization function for the external driver returns `SRE_RENDERSTATUS_UNSUPPORTED`
+                                        then it'll look at the SRE_HINT_RENDERDRIVER hint later.
+                                      For the ImGui glue, you will be able to specify another hint called SRE_HINT_IMGUI_EXTERN_RENDERDRIVER containing the ImGui data related to the external driver, otherwise. If the glue library detects that
+                                        there's an external driver (which will go on after), then it'll not be initialized. The SRE_HINT_IMGUI_EXTERN_RENDERDRIVER is only checked if the ImGui glue library detects that there's an external driver.
+                                      For the ImGui initialization function, to know if there's an external driver, the `index` parameter will be set to `-1`. In this case, handle all of the code necessary to setup ImGui with that external driver.
+                                    I'm planning on having some official render drivers that are outside of the engine, like probably vulkan, but are just things to have fun with if I ever have any free time. So the external driver feature with this
+                                        hint will indeed be used to access them!
+    - SRE_HINT_SRGB: A boolean value indicating to the render driver whether to use an sRGB color or not. It is by default set to `false`.
+
 
 - Continuing the port to android (I was just too stuck with the graphics so I couldn't be locked in it)
 - More reference counting systems, specially on sreECS and sreGUI objects

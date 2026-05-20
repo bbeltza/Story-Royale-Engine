@@ -18,15 +18,12 @@ bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture
     return true;
 }
 
-bool sregl_texture_update(struct sregl_functions* glfuncs, sregl_texture* texture, const void* pixels, int pitch)
+bool sregl_texture_update(struct sregl_functions* glfuncs, sregl_texture* texture, const sre_rect2Di* region, const void* pixels, int pitch)
 {
-    int w, h;
     SRE_GLCALLF(glfuncs->BindTexture(GL_TEXTURE_2D, texture->gltex));
-    SRE_GLCALLF(glfuncs->GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w));
-    SRE_GLCALLF(glfuncs->GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h));
     SRE_GLCALLF(glfuncs->PixelStorei(GL_PACK_ROW_LENGTH, pitch / 4));
 
-    SRE_GLCALLF(glfuncs->TexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
+    SRE_GLCALLF(glfuncs->TexSubImage2D(GL_TEXTURE_2D, 0, region->x, region->y, region->w, region->h, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
 
     return true;
 }

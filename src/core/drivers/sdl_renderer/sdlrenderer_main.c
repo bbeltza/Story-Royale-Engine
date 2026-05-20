@@ -24,7 +24,6 @@ static int sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SD
 {
     sresdlrenderer_inst* inst = _inst;
     
-    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
     inst->renderer = SDL_CreateRenderer(window, -1, 0);
     if (!inst->renderer)
     {

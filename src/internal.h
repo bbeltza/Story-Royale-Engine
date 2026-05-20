@@ -17,19 +17,14 @@ SRE_CAPI_BEGIN
 		uint32_t flags, renderflags;
 	};
 
-	enum _engine_event
+	enum _engine_eventcode
 	{
-		ENGINE_EVENT_DEFER,
-		ENGINE_EVENT_RETDEFER,
+		ENGINE_EVENT_DEFERV, // defer, passed by value (`argsize` = 0)
+		ENGINE_EVENT_DEFERP, // defer, passed as a pointer directly in the event's `data2` (`argsize` <= sizeof(void*))
+		ENGINE_EVENT_DEFERPM, // defer, passed as an allocated pointer, the pointer being `data2`
+		ENGINE_EVENT_DEFERRES, // defer with response yielding (`sre_defer_res`)
 		ENGINE_EVENT_RENDER,
 		ENGINE_EVENT_ENTRY
-	};
-
-	struct _engine_retdefer
-	{
-    	void* userdata;
-    	SDL_sem* sem;
-    	sre_sptr ret;
 	};
 
 	struct _texture_container;
@@ -40,11 +35,19 @@ SRE_CAPI_BEGIN
 		size_t last;
 	};
 	
-	#define SRE_VIDEOV(x, func) (*x)->func(x+1)
-	#define SRE_VIDEO(x, func, ...) (*x)->func(x+1, __VA_ARGS__)
+	#define SRE_VIDEOV(x, func) (x)->vfptr->func((x)->driverdata)
+	#define SRE_VIDEO(x, func, ...) (x)->vfptr->func((x)->driverdata, __VA_ARGS__)
 	struct _engine_renderdata
 	{
-		const struct sre_RenderVFT** vfptr;
+		struct
+		{
+			const struct sre_RenderVFT* vfptr;
+			char driverdata[
+				#ifdef __cplusplus
+					1
+				#endif
+			];
+		}* driver;
 		
 		size_t texture_size;
 		struct _texture_env textures;
@@ -52,6 +55,7 @@ SRE_CAPI_BEGIN
 		int index;
 
 		short blendmode;
+		bool wantclear;
 		sre_rect2Di clip_rect;
 
 		void* _vector_data[4][3];
@@ -74,6 +78,7 @@ SRE_CAPI_BEGIN
 		sre_timeStamp last_dt;
 		sre_timeStamp target_dt;
 		sre_timeStamp phys_target_dt;
+		Uint32 user_event;
 		SDL_threadID main_thrd;
 
 		long long framestart_time;
@@ -148,6 +153,7 @@ SRE_CAPI_BEGIN
 	extern void __cleanup_renderer();
 
 	extern void __initialize_imgui(void* imgui);
+	extern bool __onevent_imgui(SDL_Event* ev);
 	
 	extern void __setup_audio_device();
 

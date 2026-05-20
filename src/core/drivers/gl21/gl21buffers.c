@@ -47,7 +47,7 @@ static const GLchar* DRAW1_VS =
                                 "0, 0, 0, 1"
                             ");"
                             "gl_Position = rot * mat * vec4(i_pos.xy-u_model[1].xy, 0.0, 1.0);"
-                            "gl_Position = ceil(gl_Position * u_viewport[2][2]);"
+                            "gl_Position = (gl_Position * u_viewport[2][2]);"
                             "gl_Position.xy += u_camera;"
                             "gl_Position.w = 1;"
                             "gl_Position = u_viewport * gl_Position;"

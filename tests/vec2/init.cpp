@@ -2,7 +2,7 @@
     #undef NDEBUG // Tests should be interpreted as in debug mode, even on release
 #endif
 #include <Entry.h>
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 
 #include <cassert>
 

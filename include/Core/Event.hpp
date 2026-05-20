@@ -5,7 +5,7 @@
 #include <Base/Signal.hpp>
 #include <ints.h>
 
-#include <Datatypes/Vector.hpp>
+#include <Datatypes/Vector.h>
 
 namespace sre
 {

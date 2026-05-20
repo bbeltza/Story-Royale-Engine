@@ -87,7 +87,7 @@ void sregl21_set_clipstate(void* inst, const sre_rect2Di* rectangle);
 void sregl21_set_vsync(void* inst, bool enable);
 
 bool sregl21_texture_setup(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-bool sregl21_texture_update(void* inst, void* texture, const void* pixels, int pitch);
+bool sregl21_texture_update(void* inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
 void sregl21_texture_destroy(void* inst, void* texture);
 
 bool sregl21setupbuffers(sregl21_inst* instance);
