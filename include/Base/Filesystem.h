@@ -17,8 +17,8 @@ enum sreFDflags
 };
 typedef struct sre_FDfilter
 {
-    char* nametag;
-    char* extension;
+    const char* nametag;
+    const char* extension;
 } sre_FDfilter;
 
 typedef struct sre_FDpath

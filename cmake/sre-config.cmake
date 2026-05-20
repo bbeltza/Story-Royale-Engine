@@ -9,7 +9,4 @@ find_package(freetype REQUIRED)
 
 include(sre/targets)
 include(sre/game_build)
-
-include(sre/drivers)
-target_link_libraries(srelib INTERFACE sre_drivers)
-
+include(sre/imgui_glue)

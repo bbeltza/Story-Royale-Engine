@@ -354,7 +354,7 @@ void sre::Log::flush()
 
             {
                 static const char RESET_ESC[] = "\033[0m";
-                char escape[] = "\033[1;1;30m";
+                char escape[] = "\033[1;1;39m";
                 switch (msg.category)
                 {
                     case LOGCATEGORY_DEBUG: break; // "30"

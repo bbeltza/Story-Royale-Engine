@@ -144,7 +144,7 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
             v[5] = maxy;
             v[6] = minx;
             v[7] = maxy;
-
+            
             GLfloat c = cosf(dinst->angle);
             GLfloat s = sinf(dinst->angle);
             for (int i = 0; i < 8; i+=2)
@@ -171,20 +171,20 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
             maxv *= texture->yrange;
 
             inst->glfuncs11.TexCoord2f(minu, minv);
-            inst->glfuncs11.Vertex2fv(v + 0);
+            inst->glfuncs11.Vertex2f(v[0], v[1]);
             inst->glfuncs11.TexCoord2f(maxu, minv);
-            inst->glfuncs11.Vertex2fv(v + 2);
+            inst->glfuncs11.Vertex2f(v[2], v[3]);
             inst->glfuncs11.TexCoord2f(maxu, maxv);
-            inst->glfuncs11.Vertex2fv(v + 4);
+            inst->glfuncs11.Vertex2f(v[4], v[5]);
             inst->glfuncs11.TexCoord2f(minu, maxv);
-            inst->glfuncs11.Vertex2fv(v + 6);
+            inst->glfuncs11.Vertex2f(v[6], v[7]);
         }
         else
         {
-            inst->glfuncs11.Vertex2fv(v + 0);
-            inst->glfuncs11.Vertex2fv(v + 2);
-            inst->glfuncs11.Vertex2fv(v + 4);
-            inst->glfuncs11.Vertex2fv(v + 6);
+            inst->glfuncs11.Vertex2f(v[0], v[1]);
+            inst->glfuncs11.Vertex2f(v[2], v[3]);
+            inst->glfuncs11.Vertex2f(v[4], v[5]);
+            inst->glfuncs11.Vertex2f(v[6], v[7]);
         }
     }
 

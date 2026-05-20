@@ -69,7 +69,13 @@ extern int sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sre
     }
 
     #if _WIN32
-        inst->hdc = wglGetCurrentDC();    
+        HDC (WINAPI* p_wglGetCurrentDC)(VOID) = (PVOID)GetProcAddress(GetModuleHandle("OpenGL32.dll"), "wglGetCurrentDC");
+        if (!p_wglGetCurrentDC)
+        {
+            SDL_GL_DeleteContext(inst->context);
+            return SRE_RENDERSTATUS_UNSUPPORTED;
+        }
+        inst->hdc = p_wglGetCurrentDC();    
     #endif
     inst->context = ctx;
     inst->window = window;

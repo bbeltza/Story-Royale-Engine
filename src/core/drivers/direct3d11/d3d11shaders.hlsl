@@ -1,9 +1,9 @@
 // Shaders used by d3d11 (They were the original shaders for d3d12 too)
 // They are compiled and put into `d3d11shaders.cpp` as an array of bytes with the command line tool `fxc`
 
-//      fxc /T ps_4_0 /Fh ps.h /E PSmain d3d11shaders.hlsl /Gec
-//      fxc /T vs_4_0 /Fh vs1.h /E D1main d3d11shaders.hlsl /Gec
-//      fxc /T vs_4_0 /Fh vs2.h /E D2main d3d11shaders.hlsl /Gec
+//      fxc /T ps_4_0 /Fh ps.h /E PSmain d3d11shaders.hlsl
+//      fxc /T vs_4_0 /Fh vs1.h /E D1main d3d11shaders.hlsl
+//      fxc /T vs_4_0 /Fh vs2.h /E D2main d3d11shaders.hlsl
 
 struct D1input
 {
@@ -25,7 +25,7 @@ struct D2input
 
 struct PSinput
 {
-    float4 vposition: POSITION;
+    float4 vposition: SV_POSITION;
     float4 color: COLOR;
 
     float2 tuv: TEXCOORD0;
@@ -98,7 +98,7 @@ PSinput D2main(D2input input)
 SamplerState sstate: register(s0);
 Texture2D tex: register(t0);
 
-float4 PSmain(PSinput input): COLOR
+float4 PSmain(PSinput input): SV_TARGET
 {
     return tex.Sample(sstate, input.tuv) * input.color;
 }

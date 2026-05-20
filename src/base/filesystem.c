@@ -73,7 +73,7 @@ static inline bool _mkdir_internal(const char*);
             {
                 assert((size_t)(bufptr - buf) < buffersize);
 
-                CHAR* extptr = extension_filters[i].nametag;
+                const CHAR* extptr = extension_filters[i].nametag;
                 do
                 {
                     *bufptr = *extptr;
@@ -112,7 +112,7 @@ static inline bool _mkdir_internal(const char*);
         {
             WORD offs = max(openfilename.nFileExtension, openfilename.nFileOffset);
             size_t len = strlen(filebuf + offs) + offs + 1;
-            sre_FDpath* fdpath = fdpath_new(len);
+            sre_FDpath* fdpath = fdpath_new((int)len);
             strncpy(fdpath->path, filebuf, len);
             return fdpath;
         }
@@ -131,7 +131,7 @@ static inline bool _mkdir_internal(const char*);
 #else
     static inline sre_FDpath* _filedialog_native(enum sreFDaction action, void* hwnd, const sre_FDfilter extension_filters[], size_t extension_count, int flags)
     {
-        sre_log(SRE_ERR_FAIL, "sre_filedialog is unsupported (currently only supported on Windows)");
+        sre_error(SRE_ERR_FAIL, "sre_filedialog is unsupported (currently only supported on Windows)");
         return NULL;
     }
 #endif

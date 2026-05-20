@@ -1,4 +1,15 @@
-include(sre/drivers)
+SRE_BUILD_SRC(sre_drivers "dummy.c")
+
+function(SRE_DRIVERBUILD TARGET)
+    project(${TARGET})
+    add_library(${TARGET} OBJECT ${ARGN})
+
+    target_include_directories(${TARGET} PRIVATE "../")
+    target_include_directories(${TARGET} PRIVATE "${SRE_DIR}/common/imgui")
+    target_link_libraries(${TARGET} PRIVATE sre)
+    target_link_libraries(${TARGET} PRIVATE sre_private)
+    target_link_libraries(sre_drivers PRIVATE ${TARGET} $<TARGET_OBJECTS:${TARGET}>) # Be careful with includes!
+endfunction()
 
 add_subdirectory(sdl_renderer)
 

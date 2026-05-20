@@ -27,13 +27,6 @@ SRE_CAPI_BEGIN
 		ENGINE_EVENT_ENTRY
 	};
 
-	struct _engine_retdefer
-	{
-    	void* userdata;
-    	SDL_sem* sem;
-    	sre_sptr ret;
-	};
-
 	struct _texture_container;
 	struct _texture_env
 	{
