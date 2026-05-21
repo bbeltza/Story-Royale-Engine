@@ -1,5 +1,5 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
-- May Xth 2026: 0.104.XX
+- May 20th 2026: 0.104.20
     - New hints: - SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
                     but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers
                         that aren't meant to be included in the game but are made out of curiosity, which will also allow me to test this feature.)
