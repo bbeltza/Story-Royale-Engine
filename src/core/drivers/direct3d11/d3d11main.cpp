@@ -150,9 +150,21 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         cbuffer_desc.Usage = D3D11_USAGE_DYNAMIC;
         cbuffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         cbuffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        
+        SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffer));
 
-        for (int i = 0; i < 2; i++) {
-            SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffers[i]));
+        cbuffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
+        cbuffer_desc.CPUAccessFlags = 0;
+        cbuffer_desc.ByteWidth = sizeof(UINT[4]);
+        
+        UINT camvec[2];
+        D3D11_SUBRESOURCE_DATA initialdata{camvec};
+
+        for (int i = 0; i < 4; i++)
+        {
+            camvec[0] = (i & 1) != 0;
+            camvec[1] = (i & 2) != 0;
+            SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, &initialdata, &m_camveccbuffers[i]));
         }
     }
 
@@ -202,6 +214,7 @@ Instance::Instance(SDL_Window* window, int* outstatus)
     m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
     m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
+    m_dxdevicecontext->VSSetConstantBuffers(0, 1, &m_cbuffer);
 
     *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }
@@ -217,8 +230,9 @@ Instance::~Instance()
     for (int i = 0; i < _countof(m_dxblendstates); i++)
         m_dxblendstates[i]->Release();
     
-    for (int i = 0; i < _countof(m_cbuffers); i++)
-        m_cbuffers[i]->Release();
+    m_cbuffer->Release();
+    for (int i = 0; i < _countof(m_camveccbuffers); i++)
+        m_camveccbuffers[i]->Release();
     
     m_dxrasterizerstate->Release();
     m_dxsamplerstate->Release();

@@ -41,6 +41,12 @@ typedef struct sregl32_inst
     struct sregl32_d1data d1data;
     struct sregl32_d2data d2data;
 
+    struct 
+    {
+        GLfloat camera_x;
+        GLfloat camera_y;
+    } cache;
+
     GLuint stateubo;
     GLuint UBO_ALIGNMENT;
     GLuint UBO_STATEALIGN;

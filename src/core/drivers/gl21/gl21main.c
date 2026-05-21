@@ -55,7 +55,8 @@ sre_RenderDriverData sregl21 = {
     .initialize = sregl21_main,
     .renderer_size = sizeof(sregl21_inst),
     .texture_size = sizeof(sregl_texture),
-    .name = "OpenGL 2.1"
+    .name = "OpenGL 2.1",
+    .flags = SRE_RENDERBIT_SUPPORT_LINELOOP
 };
 
 int sregl21_commonsetup(sregl21_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs, struct sregl_functions21* glfuncs21)

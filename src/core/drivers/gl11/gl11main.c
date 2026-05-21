@@ -51,5 +51,6 @@ struct sre_RenderDriverData sregl11 = {
     .initialize = sregl11_main,
     .renderer_size = sizeof(sregl11_inst),
     .texture_size = sizeof(sregl11_texture),
-    .name = "OpenGL Legacy 1.1"
+    .name = "OpenGL Legacy 1.1",
+    .flags = SRE_RENDERBIT_SUPPORT_LINELOOP
 };

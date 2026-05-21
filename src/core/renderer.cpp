@@ -235,6 +235,7 @@ void __setup_renderer()
 
 	new(engine.video._vector_data) sre::RenderVectors{};
 	engine.video.texture_size = driverdata->texture_size;
+	engine.video.flags = driverdata->flags;
 	engine.video.blendmode = SRE_BLEND_DEFAULT;
 
 	if (engine.video.index == 0)
@@ -407,6 +408,15 @@ void sre::render_clipset(sre::rect2Dut zone)
 
 void sre::render_draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture)
 {
+	if (!instcount) // render_draw1 with `instcount` == 0 is a no-op
+		return;
+
+	if (!instances)
+	{
+		sre::error(SRE_ERR_INVALID_VALUE, "`instances` is NULL but `inscount` is non-zero.");
+		return;
+	}
+
 	m.rinst1cache.insert(m.rinst1cache.end(), instances, instances + instcount);
 	
 	auto* back = m.renderqueues.empty() ? NULL : &m.renderqueues.back();
@@ -422,17 +432,53 @@ void sre::render_draw1(sre::flags32 flags, const RenderInstance1 instances[], si
 		});
 	}
 	else
-		back->count+= instcount;
+		back->count += instcount;
 }
 
-void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoint points[], size_t pcount, sre::draw2mode mode, sre::Sampler* texture)
+void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoint points[], size_t pcount, sre::draw2primitive mode, sre::Sampler* texture)
 {
+	if (!pcount)
+		return;
+
+	if (!points)
+	{
+		sre::error(SRE_ERR_INVALID_VALUE, "`points` is NULL but `pcount` is non-zero.");
+		return;
+	}
+
+	bool handle_lineloop = false;
+	switch (mode)
+	{
+		case SRE_PRIMITIVE_TRIANGLES:
+    	case SRE_PRIMITIVE_TRIANGLESTRIP:
+    	case SRE_PRIMITIVE_LINEPERLINE:
+    	case SRE_PRIMITIVE_LINESTRIP:
+    	case SRE_PRIMITIVE_POINTS:
+			break;
+    	case SRE_PRIMITIVE_LINELOOP:
+			if (engine.video.flags & SRE_RENDERBIT_SUPPORT_LINELOOP)
+				break;
+			mode = SRE_PRIMITIVE_LINESTRIP;
+			handle_lineloop = true;
+			break;
+		default:
+			sre::error(SRE_ERR_INVALID_PARAMETER, "`mode`: Unknown primitive mode.");
+			return;
+	}
+
 	sre::RenderInstance2 dummy{
 		mode,
 		color
 	};
 	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<sre::byte*>(&dummy), reinterpret_cast<sre::byte*>(&dummy.points));
 	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
+
+	if (handle_lineloop)
+	{
+		m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points+1));
+		pcount++;
+	}
+
 	m.renderqueues.push_back({
 		pcount,
 		texture,
@@ -453,7 +499,7 @@ extern "C" void sre_render_clipset(const sre_rect2Dut* zone) { sre::render_clips
 extern "C" void sre_render_blend(sre_blendMode blend) { sre::render_blend(blend); }
 
 extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Sampler* texture) { sre::render_draw1(flags, instances, instcount, texture); }
-extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2mode mode, sre_Sampler* texture) { sre::render_draw2(flags, *color, points, pcount, mode, texture); }
+extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Sampler* texture) { sre::render_draw2(flags, *color, points, pcount, mode, texture); }
 
 extern "C" void sre_render_fill(const sre_col4* color) { sre::render_fill(*color); }
 

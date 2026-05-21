@@ -299,8 +299,11 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
 
     if (switch_flags & SRE_RENDER_SWITCHCAMERA)
     {
-        sre::vec2f camera = flags & SRE_DRAWFLAG_CAMERA ? sre::vec2f{m_cameracache[0], m_cameracache[1]} : sre::vec2f::ZERO;
-        SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(4, &camera.x, 1));
+        float camera[4] = {flags & SRE_DRAWFLAG_CAMERAX ? m_cameracache[0] : 0,
+                           flags & SRE_DRAWFLAG_CAMERAY ? m_cameracache[1] : 0,
+                           0, 1
+                        };
+        SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(4, camera, 1));
     }
 
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
@@ -326,23 +329,35 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     SRE_DXCALL(m_d2data.dxbuff_vert->Unlock());
     SRE_DXCALL(m_d2data.dxbuff_inst->Unlock());
 
-    UINT primcount;
+    size_t primcount;
     D3DPRIMITIVETYPE primtype;
     switch (instance->mode)
     {
-        case SRE_DRAW2_STRIP:
-            primcount = static_cast<UINT>(1 + (point_count-3));
-            primtype = D3DPT_TRIANGLESTRIP;
-            break;
-        case SRE_DRAW2_TRIANGLE:
-            primcount = static_cast<UINT>(point_count/3);
+        case SRE_PRIMITIVE_TRIANGLES:
+            primcount = point_count/3;
             primtype = D3DPT_TRIANGLELIST;
             break;
+        case SRE_PRIMITIVE_TRIANGLESTRIP:
+            primcount = 1 + (point_count-3);
+            primtype = D3DPT_TRIANGLESTRIP;
+            break;
+        case SRE_PRIMITIVE_LINEPERLINE:
+            primcount = point_count/2;
+            primtype = D3DPT_LINELIST;
+            break;
+        case SRE_PRIMITIVE_LINESTRIP:
+            primcount = 1 + (point_count-2);
+            primtype = D3DPT_LINESTRIP;
+            break;
+        case SRE_PRIMITIVE_POINTS:
+            primcount = point_count;
+            primtype = D3DPT_POINTLIST;
+            break;
         default:
-            return;
+            abort();
     }
 
-    SRE_DXCALL(m_dxdevice->DrawPrimitive(primtype, 0, primcount));
+    SRE_DXCALL(m_dxdevice->DrawPrimitive(primtype, 0, static_cast<UINT>(primcount)));
 }
 
 //

@@ -55,5 +55,6 @@ const struct sre_RenderDriverData sregl32 = {
     .initialize = sregl32_main,
     .renderer_size = sizeof(sregl32_inst),
     .texture_size = sizeof(sregl_texture),
-    .name = "OpenGL 3.2 Core"
+    .name = "OpenGL 3.2 Core",
+    .flags = SRE_RENDERBIT_SUPPORT_LINELOOP
 };

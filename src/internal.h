@@ -53,6 +53,7 @@ SRE_CAPI_BEGIN
 		struct _texture_env textures;
 
 		int index;
+		unsigned flags;
 
 		short blendmode;
 		bool wantclear;

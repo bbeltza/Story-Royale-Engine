@@ -86,3 +86,19 @@ extern void sregl_commondestroy(sregl_cominst* inst)
 {
     SDL_GL_DeleteContext(inst->context);
 }
+
+extern GLenum sregl_mapmode(sre_draw2primitive d2mode)
+{
+    switch (d2mode)
+    {
+        case SRE_PRIMITIVE_TRIANGLES: return GL_TRIANGLES;
+        case SRE_PRIMITIVE_TRIANGLESTRIP: return GL_TRIANGLE_STRIP;
+        case SRE_PRIMITIVE_LINEPERLINE: return GL_LINES;
+        case SRE_PRIMITIVE_LINESTRIP: return GL_LINE_STRIP;
+        case SRE_PRIMITIVE_LINELOOP: return GL_LINE_LOOP;
+        case SRE_PRIMITIVE_POINTS: return GL_POINTS;
+        default: abort(); return 0;
+    }
+
+    return 0;
+}

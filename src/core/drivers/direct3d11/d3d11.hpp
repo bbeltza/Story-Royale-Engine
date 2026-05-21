@@ -109,7 +109,8 @@ namespace sreD3D11
             DrawBuffer m_d2bufferc; // Color draw2 buffer
             DrawBuffer m_d2bufferp; // Vertex draw2 buffer
 
-            ID3D11Buffer* m_cbuffers[2];
+            ID3D11Buffer* m_cbuffer;
+            ID3D11Buffer* m_camveccbuffers[4];
 
             ID3D11ShaderResourceView* m_basictexture;
 

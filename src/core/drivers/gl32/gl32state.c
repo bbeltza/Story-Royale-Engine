@@ -23,19 +23,15 @@ bool sregl32_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
     sregl32_inst* inst = _inst;
     SRE_GLCALLF(inst->glfuncs.Viewport(0, 0, w, h));
 
-    struct sregl32_stateubo state = {
-        {
-            2.0f/w, 0.0f, 0.0f, 0.0f,  
-            0.0f, -2.0f/h, 0.0f, 0.0f,  
-            0.0f, 0.0f, scale, 0.0f,  
-            -1.0f, 1.0f, 0.0f, 1.0f,  
-        }
+    GLfloat proj[16] = {
+        2.0f/w, 0.0f, 0.0f, 0.0f,  
+        0.0f, -2.0f/h, 0.0f, 0.0f,  
+        0.0f, 0.0f, scale, 0.0f,  
+        -1.0f, 1.0f, 0.0f, 1.0f,  
     };
-    
 
     SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->stateubo));
-    SRE_GLCALLF(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, inst->UBO_STATEALIGN*0, sizeof(state), &state));
-    SRE_GLCALLF(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, inst->UBO_STATEALIGN*1, sizeof(state), &state));
+    SRE_GLCALLF(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, offsetof(struct sregl32_stateubo, viewport), sizeof(proj), proj));
     SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, 0));
     return true;
 }
@@ -43,8 +39,7 @@ bool sregl32_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
 bool sregl32_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 {
     sregl32_inst* inst = _inst;
-    GLfloat camera[2] = {x, y};
-    SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->stateubo));
-    SRE_GLCALLF(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, inst->UBO_STATEALIGN + offsetof(struct sregl32_stateubo, camera), sizeof(camera), camera));
+    inst->cache.camera_x = x;
+    inst->cache.camera_y = y;
     return true;
 }

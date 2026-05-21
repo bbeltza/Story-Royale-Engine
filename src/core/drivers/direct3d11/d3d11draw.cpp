@@ -73,7 +73,7 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
     }
 
     if (switch_flags & SRE_RENDER_SWITCHCAMERA)
-        m_dxdevicecontext->VSSetConstantBuffers(0, 1, m_cbuffers + ((flags & SRE_DRAWFLAG_CAMERA) != 0));
+        m_dxdevicecontext->VSSetConstantBuffers(1, 1, &m_camveccbuffers[flags & SRE_DRAWFLAG_CAMERA]);
 
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
     {
@@ -113,13 +113,17 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     }
 
     if (switch_flags & SRE_RENDER_SWITCHCAMERA)
-        m_dxdevicecontext->VSSetConstantBuffers(0, 1, m_cbuffers + ((flags & SRE_DRAWFLAG_CAMERA) != 0));
+        m_dxdevicecontext->VSSetConstantBuffers(1, 1, &m_camveccbuffers[flags & SRE_DRAWFLAG_CAMERA]);
 
     D3D11_PRIMITIVE_TOPOLOGY topology;
     switch (instance->mode)
     {
-        case SRE_DRAW2_STRIP: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
-        case SRE_DRAW2_TRIANGLE: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
+        case SRE_PRIMITIVE_TRIANGLES: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
+        case SRE_PRIMITIVE_TRIANGLESTRIP: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
+        case SRE_PRIMITIVE_LINEPERLINE: topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST; break;
+        case SRE_PRIMITIVE_LINESTRIP:
+        case SRE_PRIMITIVE_LINELOOP: topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP; break;
+        case SRE_PRIMITIVE_POINTS: topology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST; break;
         default: abort();
     }
 

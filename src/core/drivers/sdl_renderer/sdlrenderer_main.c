@@ -30,10 +30,6 @@ static int sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SD
         SDL_free(inst);
         return SRE_RENDERSTATUS_FAILED;
     }
-
-    SDL_RendererInfo info;
-    SDL_GetRendererInfo(inst->renderer, &info);
-    //sre_log(SRE_LOGCATEGORY_DEBUG, "%s", info.name);
     
     inst->vbuf = NULL;
     inst->vbuf_size = 0;
@@ -56,5 +52,5 @@ sre_RenderDriverData sresdlrenderer = {
     .initialize = sresdlrenderer_main,
     .renderer_size = sizeof(sresdlrenderer_inst),
     .texture_size = sizeof(sresdlrenderer_texture),
-    .name = "SDLRenderer"
+    .name = "SDL_Renderer"
 };

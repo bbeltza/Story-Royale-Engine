@@ -29,23 +29,12 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 
 	D3D11_VIEWPORT viewport{ 0, 0, static_cast<FLOAT>(w), static_cast<FLOAT>(h), 0, 1 };
 	m_dxdevicecontext->RSSetViewports(1, &viewport);
-	{
-		m_caches.viewport[0] = 2.0f/w;
-		m_caches.viewport[5] = -2.0f/h;
-		m_caches.viewport[10] = scale;
-		m_caches.viewport[12] = -1;
-		m_caches.viewport[13] = 1;
-		m_caches.viewport[15] = 1;
-
-		D3D11_MAPPED_SUBRESOURCE mapped;
-		for (int i = 0; i < 2; i++)
-		{
-			SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[i], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-				memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
-				static_cast<CBuffer*>(mapped.pData)->camera = {};
-			m_dxdevicecontext->Unmap(m_cbuffers[i], 0);
-		}
-	}
+	m_caches.viewport[0] = 2.0f/w;
+	m_caches.viewport[5] = -2.0f/h;
+	m_caches.viewport[10] = scale;
+	m_caches.viewport[12] = -1;
+	m_caches.viewport[13] = 1;
+	m_caches.viewport[15] = 1;
 
 	return true;
 }
@@ -83,10 +72,10 @@ bool Instance::set_camerastate(sre::unit x, sre::unit y)
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mapped;
-	SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[1], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
+	SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
 	memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
 	static_cast<CBuffer*>(mapped.pData)->camera = { x, y };
-	m_dxdevicecontext->Unmap(m_cbuffers[1], 0);
+	m_dxdevicecontext->Unmap(m_cbuffer, 0);
 
 	return SUCCEEDED(hr);
 }

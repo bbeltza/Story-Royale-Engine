@@ -20,6 +20,7 @@ SRE_VEC2MAKESFFX(float, f);
 
 #ifndef __cplusplus
     typedef struct sre_Sampler sre_Sampler;
+    typedef struct sre_RenderTarget sre_RenderTarget;
 #else
     struct sre_Sampler
     {
@@ -65,22 +66,23 @@ typedef enum sre_blendMode
     SRE_BLEND_DEFAULT = SRE_BLEND_BLEND
 } sre_blendMode;
 
-typedef enum sre_draw2mode // Primitive rendering mode for draw2
+typedef enum sre_draw2primitive // Primitive topology mode for draw2
 {
-    SRE_DRAW2_STRIP,
-    SRE_DRAW2_TRIANGLE
-} sre_draw2mode;
+    SRE_PRIMITIVE_TRIANGLES,
+    SRE_PRIMITIVE_TRIANGLESTRIP,
+    SRE_PRIMITIVE_LINEPERLINE,
+    SRE_PRIMITIVE_LINESTRIP,
+    SRE_PRIMITIVE_LINELOOP,
+    SRE_PRIMITIVE_POINTS
+} sre_draw2primitive;
 
 enum sre_drawFlags
 {
-    // Individual camera axis flags. Not out yet
+    // Individual camera axis flags. Not implemented anywhere yet
     SRE_DRAWFLAG_CAMERAX = 1 << 0,
-    SRE_DRAWFLAG_CAMERAY = 1 << 0,
+    SRE_DRAWFLAG_CAMERAY = 1 << 1,
 
-    SRE_DRAWFLAG_CAMERA = SRE_DRAWFLAG_CAMERAX | SRE_DRAWFLAG_CAMERAY,
-    SRE_DRAWFLAG_LINE = 1 << 1, // Draw lines instead of filling the elements, it is not completely implemented right now
-    SRE_DRAWFLAG_SCALED = 1 << 2 // Draw as if it was drawn in non-scaled viewport coordinates, then scale it back to the window to get more a pixelated result if the game has viewport scaling.
-                                    // If it doesn't have any viewport scaling, then it won't do anything. It is a no-op
+    SRE_DRAWFLAG_CAMERA = SRE_DRAWFLAG_CAMERAX | SRE_DRAWFLAG_CAMERAY
 };
 
 enum _sre_drawSwitchFlags
@@ -96,6 +98,7 @@ typedef struct sre_RenderPoint
 {
     sre_vec2ut pos;
     sre_vec2f uv;
+    // sre_col4 color; // RenderPoint might actually bundle the color inside soon...
 } sre_RenderPoint;
 
 typedef struct sre_RenderInstance1
@@ -111,7 +114,7 @@ typedef struct sre_RenderInstance1
 
 typedef struct sre_RenderInstance2
 {
-    sre_draw2mode mode;
+    sre_draw2primitive mode;
     sre_col4 color;
     sre_RenderPoint points[
         #ifdef __cplusplus
@@ -139,8 +142,20 @@ struct sre_RenderVFT
     bool (* texture_setup)(void*, void* texture, sre_pixelFormat formathint, int w, int h, sre_pixelFormat* outformat);
     bool (* texture_update)(void*, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
     void (* texture_destroy)(void*, void* texture);
+
+    bool (* rt_setup)(void*, void* texture);
+    bool (* rt_bind)(void*, void* texture, float clearcolor[4]);
 };
 
+enum sreRenderDriverBits
+{
+    SRE_RENDERBIT_SUPPORT_LINELOOP = 1 << 0, // Support for handling SRE_PRIMITIVE_LINELOOP for draw2 directly. If this bit is not set, then the engine will handle it directly
+                                                // by adding an extra point equal to the first one in `points`, and handing it to the driver with the SRE_PRIMITIVE_LINESTRIP mode.
+    // SRE_RENDERBIT_SUPPORT_RENDERTARGETS = 1 << 1
+    // SRE_RENDERBIT_HANDLE_NULLTEXTURE = 1 << 2 // Whether to handle draw commands in which `texture` is NULL, meaning there are no texture bound you want to draw a flat surface.
+                                                    // If this flag is not set, then you won't get a NULL as `texture`, and the engine will create a flat texture and pass it instead.
+                                                    // This flag is commented for now.
+};
 
 // Structure used to define driver initialization data
 //
@@ -161,6 +176,7 @@ typedef struct sre_RenderDriverData
     size_t texture_size; // The size, in bytes to allocate for every texture
 
     const char* name; // Name tag of the render driver. It is technically optional, but very recommended
+    unsigned flags; // sreRenderDriverBits
 } sre_RenderDriverData;
 
 SRE_CAPI_BEGIN
@@ -182,7 +198,7 @@ void sre_render_clipset(const sre_rect2Dut* zone);
 void sre_render_blend(sre_blendMode blend);
 
 void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Sampler* texture);
-void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2mode mode, sre_Sampler* texture);
+void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Sampler* texture);
 
 void sre_render_fill(const sre_col4* color);
 
@@ -201,7 +217,7 @@ SRE_CAPI_END
     {
         using Sampler = sre_Sampler;
         using blendMode = sre_blendMode;
-        using draw2mode = sre_draw2mode;
+        using draw2primitive = sre_draw2primitive;
 
         using RenderInstance1 = sre_RenderInstance1; // Render instance for all rectangle draw calls
         using RenderInstance2 = sre_RenderInstance2; // Render instance for all line & complex geometry draw calls
@@ -214,16 +230,16 @@ SRE_CAPI_END
         inline void render_blend() { render_blend(SRE_BLEND_DEFAULT); }
 
         void render_draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture=NULL);
-        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint points[], size_t pcount, sre::draw2mode mode=SRE_DRAW2_TRIANGLE, Sampler* texture=NULL);
+        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint points[], size_t pcount, sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES, Sampler* texture=NULL);
 
         template <size_t n>
         void render_draw1(sre::flags32 flags, const RenderInstance1 (&instances)[n], Sampler* texture=NULL) { render_draw1(flags, instances, n, texture); }
         
         template <size_t n>
-        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint (&points)[n], sre::draw2mode mode=SRE_DRAW2_TRIANGLE, Sampler* texture=NULL) { return render_draw2(flags, color, points, n, mode, texture); }
+        void render_draw2(sre::flags32 flags, sre::col4 color, const RenderPoint (&points)[n], sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES, Sampler* texture=NULL) { return render_draw2(flags, color, points, n, mode, texture); }
 
         template <size_t n>
-        void render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&positions)[n], sre::draw2mode mode=SRE_DRAW2_TRIANGLE)
+        void render_draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&positions)[n], sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES)
         {
             RenderPoint points[n];
             for (auto i = 0; i < n; i++)
@@ -239,7 +255,7 @@ SRE_CAPI_END
         template <typename R, typename T=typename R::texture_type>
         struct RenderDriverHelper: sre_RenderDriverData
         {
-            RenderDriverHelper(const char* name=NULL): sre_RenderDriverData{
+            RenderDriverHelper(const char* name=NULL, unsigned flags=0): sre_RenderDriverData{
                 [](const sre_RenderVFT** interface, void* inst, SDL_Window* window) -> int
                 {
                     static const sre_RenderVFT this_interface = {
@@ -264,7 +280,8 @@ SRE_CAPI_END
                         [](void* inst, void* texture) { static_cast<R*>(inst)->texture_destroy(static_cast<T*>(texture)); }
                     };
 
-                    int status = -1;
+                    int status = -1; // outstatus has a default value of 0, this allows constructors to return directly if they fail
+                                        // Otherwise, you should write to it.
                     new(inst) R(window, &status);
                     if (status != SRE_RENDERSTATUS_SUCCEEDED) return status;
 
@@ -274,7 +291,8 @@ SRE_CAPI_END
                 sizeof(R),
                 sizeof(T),
 
-                name
+                name,
+                flags
             } {}
         };
 

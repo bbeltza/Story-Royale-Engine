@@ -69,8 +69,9 @@ void sregl21_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
     
     if (switch_flags & SRE_RENDER_SWITCHCAMERA)
     {
-        bool usecam = flags & SRE_DRAWFLAG_CAMERA;
-        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw2data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
+        bool usecamx = flags & SRE_DRAWFLAG_CAMERAX;
+        bool usecamy = flags & SRE_DRAWFLAG_CAMERAY;
+        SRE_GLCALL(inst->glfuncs21.Uniform2f(inst->draw2data.common_uniforms.camera, usecamx ? inst->cache.camera[0] : 0, usecamy ? inst->cache.camera[1] : 0));
     }
 
     if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
@@ -89,13 +90,6 @@ void sregl21_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
         SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_count, instance->points));
     }
 
-    GLenum mode;
-    switch (instance->mode)
-    {
-        case SRE_DRAW2_STRIP: mode = GL_TRIANGLE_STRIP; break;
-        case SRE_DRAW2_TRIANGLE: mode = GL_TRIANGLES; break;
-        default: assert(0);
-    }
-
+    GLenum mode = sregl_mapmode(instance->mode);
     SRE_GLCALL(inst->glfuncs.DrawArrays(mode, 0, (GLsizei)point_count));
 }

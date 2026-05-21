@@ -71,6 +71,8 @@ extern bool sregl_loadfunctions21(struct sregl_functions21* funcs, void* (*pGetP
 extern bool sregl_loadfunctions32(struct sregl_functions32* funcs, void* (*pGetProcAddress)(const char* proc));
 extern bool sregl_loadfunctions11(struct sregl_functions11* funcs, void* (*pGetProcAddress)(const char* proc));
 
+extern GLenum sregl_mapmode(sre_draw2primitive d2mode);
+
 extern int sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs);
 extern void sregl_commondestroy(sregl_cominst* inst);
 

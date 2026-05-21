@@ -11,7 +11,10 @@
                                             if (switch_flags & SRE_RENDER_SWITCHCAMERA)                                                                                                                         \
                                             {                                                                                                                                                                   \
                                                 bool switchcam = flags & SRE_DRAWFLAG_CAMERA;                                                                                                                   \
-                                                SRE_GLCALL(inst->glfuncs32.BindBufferRange(GL_UNIFORM_BUFFER, 0, inst->stateubo, inst->UBO_STATEALIGN*switchcam, sizeof(struct sregl32_stateubo)));  \
+                                                GLfloat camera[2] = { (flags & SRE_DRAWFLAG_CAMERAX) ? inst->cache.camera_x : 0, (flags & SRE_DRAWFLAG_CAMERAY) ? inst->cache.camera_y : 0 };                   \
+                                                SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->stateubo));                                                                                      \
+                                                SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, offsetof(struct sregl32_stateubo, camera), sizeof(camera), camera));                                \
+                                                SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, 0));                                                                                                   \
                                             }                                                                                                                                                                   \
                                                                                                                                                                                                                 \
                                             if (switch_flags & SRE_RENDER_SWITCHTEXTURE)                                                                                                                        \
@@ -44,14 +47,7 @@ void sregl32_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
 
     SREGL32_CHECK_FORSWITCHES(d2data);
 
-    GLenum mode;
-    switch (instance->mode)
-    {
-        case SRE_DRAW2_STRIP: mode = GL_TRIANGLE_STRIP; break;
-        case SRE_DRAW2_TRIANGLE: mode = GL_TRIANGLES; break;
-        default: assert(0); return;
-    }
-
+    GLenum mode = sregl_mapmode(instance->mode);
     GLsizeiptr point_counti = (GLsizeiptr)point_count;
     if (inst->d2data.vbosize < point_counti)
     {

@@ -12,16 +12,47 @@ bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin,
     const sre::vec2ut scr_size = sre::display_size();
     //const sre::vec2ut scr_center = sre::display_center();
     
-    int numgridsx = (int)ceil(scr_size.x / size.x);
-    int numgridsy = (int)ceil(scr_size.y / size.y);
+    const int numgridsx = (int)ceil(scr_size.x / size.x);
+    const int numgridsy = (int)ceil(scr_size.y / size.y);
 
-    ut_dynsalloc(sre::RenderPoint, points, numgridsx + numgridsy);
+    const int pointcountx = numgridsx * 2;
+    const int pointcounty = numgridsy * 2;
 
-    #if 0
-    sre::render_draw2(
-        0, color, points, numgridsx + numgridsy
-    );
-    #endif
+    const sre::unit minx = 0;
+    const sre::unit miny = 0;
+    const sre::unit maxx = scr_size.x;
+    const sre::unit maxy = scr_size.y;
+
+    ut_dynsalloc(sre::RenderPoint, points, ut_max(pointcountx, pointcounty));
+    // Vertical lines (that depend on the X axis)
+    for (int i = 0, ptindex = 0; i < numgridsx; i++, ptindex += 2)
+    {
+        sre::unit x = i * size.x + origin.x;
+        points[ptindex+0] = {
+            sre::vec2ut{x, miny},
+            sre::vec2ut{0, 0}
+        };
+        points[ptindex+1] = {
+            sre::vec2ut{x, maxy},
+            sre::vec2ut{0, 0}
+        };
+    }
+    sre::render_draw2(SRE_DRAWFLAG_CAMERAX, color, points, pointcountx, SRE_PRIMITIVE_LINEPERLINE);
+
+    // Horizontal lines (that depend on the Y axis)
+    for (int i = 0, ptindex = 0; i < numgridsy; i++, ptindex += 2)
+    {
+        sre::unit y = i * size.y + origin.y;
+        points[ptindex+0] = {
+            sre::vec2ut{minx, y},
+            sre::vec2ut{0, 0}
+        };
+        points[ptindex+1] = {
+            sre::vec2ut{maxx, y},
+            sre::vec2ut{0, 0}
+        };
+    }
+    sre::render_draw2(SRE_DRAWFLAG_CAMERAY, color, points, pointcounty, SRE_PRIMITIVE_LINEPERLINE);
 
     return true;
 }

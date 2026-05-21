@@ -102,12 +102,25 @@ void sreImGui_glue::begin_frame()
     ImGui::ShowDemoWindow();
 }
 
+#include <Base/Log.h>
+
 void sreImGui_glue::end_frame()
 {
     render->NewFrame(renderinst);
-
+    
     ImGui::Render();
+
+    /* Exploring ImGui::GetDrawData()...
+    auto p_drawdata = ImGui::GetDrawData();
+    for (auto& cmdlist : p_drawdata->CmdLists)
+    {
+        for (auto& cmdbuf : cmdlist->CmdBuffer)
+            sre::log("%zu", cmdbuf.IdxOffset);
+    }
+    */
+
     render->RenderDrawData(renderinst, ImGui::GetDrawData());
+
 }
 
 //

@@ -30,12 +30,16 @@ bool sregl11_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
 
 #define SREGL11_CHECK_FORSWITCHES() if (switch_flags & SRE_RENDER_SWITCHCAMERA)                                             \
                                     {                                                                                       \
-                                        SRE_GLCALL(inst->glfuncs11.LoadIdentity());                                                       \
-                                        if (flags & SRE_DRAWFLAG_CAMERA)                                                    \
+                                        SRE_GLCALL(inst->glfuncs11.LoadIdentity());                                         \
+                                        if (flags & SRE_DRAWFLAG_CAMERAX)                                                   \
                                         {                                                                                   \
-                                            SRE_GLCALL(inst->glfuncs11.Translatef(inst->camera_cache[0], inst->camera_cache[1], 0));      \
+                                            SRE_GLCALL(inst->glfuncs11.Translatef(inst->camera_cache[0], 0, 0));            \
                                         }                                                                                   \
-                                        SRE_GLCALL(inst->glfuncs11.Scalef(inst->scale_cache, inst->scale_cache, 1));                      \
+                                        if (flags & SRE_DRAWFLAG_CAMERAY)                                                   \
+                                        {                                                                                   \
+                                            SRE_GLCALL(inst->glfuncs11.Translatef(0, inst->camera_cache[1], 0));            \
+                                        }                                                                                   \
+                                        SRE_GLCALL(inst->glfuncs11.Scalef(inst->scale_cache, inst->scale_cache, 1));        \
                                                                                                                             \
                                     }                                                                                       \
                                                                                                                             \
@@ -199,12 +203,8 @@ void sregl11_flush_queueinstances2(void* _inst, void* _texture, const sre_Render
 
     SREGL11_CHECK_FORSWITCHES()
 
-    switch (instance->mode)
-    {
-        case SRE_DRAW2_STRIP: inst->glfuncs11.Begin(GL_TRIANGLE_STRIP); break;
-        case SRE_DRAW2_TRIANGLE: inst->glfuncs11.Begin(GL_TRIANGLES); break;
-        default: assert(0); return;
-    }
+    GLenum primitivemode = sregl_mapmode(instance->mode);
+    inst->glfuncs11.Begin(primitivemode);
 
     float rangex = texture ? texture->xrange : 1;
     float rangey = texture ? texture->yrange : 1;
