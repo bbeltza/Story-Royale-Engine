@@ -1,5 +1,27 @@
 #include "gl21.h"
 
+#include <math.h>
+
+static inline void sregl21switchcheck(sregl21_inst* inst, sregl_texture* texture, sre_u32 flags, sre_u32 switch_flags)
+{
+    if (switch_flags & SRE_RENDER_SWITCHTYPE)
+    {
+        (void)0; // Nothing to do
+    }
+
+    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+    {
+        bool usecamx = flags & SRE_DRAWFLAG_CAMERAX;
+        bool usecamy = flags & SRE_DRAWFLAG_CAMERAY;
+        SRE_GLCALL(inst->glfuncs21.Uniform2f(inst->uniforms.camera, usecamx ? inst->cache.camera[0] : 0, usecamy ? inst->cache.camera[1] : 0));
+    }
+
+    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
+    {
+        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->common21.basic_texture : texture->gltex));
+    }
+}
+
 void sregl21_present(void* _inst)
 {
     sregl21_inst* inst = _inst;
@@ -13,82 +35,92 @@ bool sregl21_clear(void* _inst, float color[3])
     return true;
 }
 
-static GLfloat NO_CAM[2];
-
 void sregl21_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl21_inst* inst = _inst;
     sregl_texture* texture = _texture;
-
-    if (switch_flags & SRE_RENDER_SWITCHTYPE)
-    {
-        switch_flags |= SRE_RENDER_SWITCHTEXTURE | SRE_RENDER_SWITCHCAMERA; // Have to switch everything if there's a type check in here!
-        sregl21bindbuffer1(inst, inst->draw1data.vbo);
-        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw1data.program));
-        SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst->draw1data.ibo));
-    }
     
-    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
-    {
-        bool usecam = flags & SRE_DRAWFLAG_CAMERA;
-        SRE_GLCALL(inst->glfuncs21.Uniform2fv(inst->draw1data.common_uniforms.camera, 1, usecam ? inst->cache.camera : NO_CAM));
-    }
+    sregl21switchcheck(inst, texture, flags, switch_flags);
 
-    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
-    {
-        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->common21.basic_texture : texture->gltex));
-    }
-
+    size_t vertex_count = instance_count*4;
+    sregl21_vtassemblerreserve(inst, &inst->vtassembler, vertex_count);
     for (size_t i = 0; i < instance_count; i++)
     {
         const sre_RenderInstance1* dinst = &instances[i];
 
-        GLfloat model[4*3] = {
-            dinst->rectangle.x, dinst->rectangle.y, dinst->rectangle.w, dinst->rectangle.h,
-            dinst->anchor.x,    dinst->anchor.y,    dinst->angle,       0,
-            dinst->uv.x,        dinst->uv.y,        dinst->uv_offset.x, dinst->uv_offset.y
-        };
+        sre_vec2f v[4];
 
-        SRE_GLCALL(inst->glfuncs21.UniformMatrix3x4fv(inst->draw1data.depend_uniforms.model, 1, GL_FALSE, model));
-        SRE_GLCALL(inst->glfuncs21.Uniform4i(inst->draw1data.common_uniforms.color, dinst->color.r, dinst->color.g, dinst->color.b, dinst->color.a));
-        SRE_GLCALL(inst->glfuncs.DrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL));
+        // Vertex assembling code mostly taken from gl11/drawstate.c
+        // Might want to make a better helper function to correctly assembling vertices if needed, so that render implementations don't have to bother a lot doing so
+        if (dinst->angle/360 == (int)dinst->angle/360)
+        {
+            GLfloat minx;
+            GLfloat miny;
+            GLfloat maxx;
+            GLfloat maxy;
+            minx = dinst->rectangle.x - dinst->anchor.x * dinst->rectangle.w;        
+            miny = dinst->rectangle.y - dinst->anchor.y * dinst->rectangle.h;
+            maxx = minx + dinst->rectangle.w;
+            maxy = miny + dinst->rectangle.h;
+
+            v[0] = (sre_vec2f){ minx, miny };
+            v[1] = (sre_vec2f){ maxx, miny };
+            v[2] = (sre_vec2f){ maxx, maxy };
+            v[3] = (sre_vec2f){ minx, maxy };
+        }
+        else
+        {
+            GLfloat minx = (0.0f - dinst->anchor.x) * dinst->rectangle.w;
+            GLfloat miny = (0.0f - dinst->anchor.y) * dinst->rectangle.h;
+            GLfloat maxx = (1.0f - dinst->anchor.x) * dinst->rectangle.w;
+            GLfloat maxy = (1.0f - dinst->anchor.y) * dinst->rectangle.h;
+
+            v[0] = (sre_vec2f){ minx, miny };
+            v[1] = (sre_vec2f){ maxx, miny };
+            v[2] = (sre_vec2f){ maxx, maxy };
+            v[3] = (sre_vec2f){ minx, maxy };
+            
+            GLfloat c = cosf(dinst->angle);
+            GLfloat s = sinf(dinst->angle);
+            for (int i = 0; i < 4; i++)
+            {
+                sre_vec2f pos = v[i];
+
+                v[i].x = (c*pos.x - s*pos.y) + dinst->rectangle.x;
+                v[i].y = (s*pos.x + c*pos.y) + dinst->rectangle.y;
+            }
+        }
+
+        GLfloat minu = dinst->uv_offset.x;
+        GLfloat minv = dinst->uv_offset.y;
+        GLfloat maxu = minu + dinst->uv.x;
+        GLfloat maxv = minv + dinst->uv.y;
+
+        size_t ix4 = i*4;
+        inst->vtassembler.arr[ix4 + 0] = (sregl21_vertex){ v[0], { minu, minv }, dinst->color };
+        inst->vtassembler.arr[ix4 + 1] = (sregl21_vertex){ v[1], { maxu, minv }, dinst->color };
+        inst->vtassembler.arr[ix4 + 2] = (sregl21_vertex){ v[2], { maxu, maxv }, dinst->color };
+        inst->vtassembler.arr[ix4 + 3] = (sregl21_vertex){ v[3], { minu, maxv }, dinst->color };
     }
+
+    sregl21_vtassemblerdata(inst, &inst->vtassembler, vertex_count);
+    SRE_GLCALL(inst->glfuncs.DrawArrays(GL_QUADS, 0, (GLsizei)(vertex_count)));
 }
 
 void sregl21_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
 {
     sregl21_inst* inst = _inst;
     sregl_texture* texture = _texture;
-
-    if (switch_flags & SRE_RENDER_SWITCHTYPE)
-    {
-        switch_flags |= SRE_RENDER_SWITCHTEXTURE | SRE_RENDER_SWITCHCAMERA;
-        sregl21bindbuffer2(inst, inst->draw2data.vbo);
-        SRE_GLCALL(inst->glfuncs21.UseProgram(inst->draw2data.program));
-    }
     
-    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+    sregl21switchcheck(inst, texture, flags, switch_flags);
+    sregl21_vtassemblerreserve(inst, &inst->vtassembler, point_count);
+
+    for (size_t i = 0; i < point_count; i++)
     {
-        bool usecamx = flags & SRE_DRAWFLAG_CAMERAX;
-        bool usecamy = flags & SRE_DRAWFLAG_CAMERAY;
-        SRE_GLCALL(inst->glfuncs21.Uniform2f(inst->draw2data.common_uniforms.camera, usecamx ? inst->cache.camera[0] : 0, usecamy ? inst->cache.camera[1] : 0));
+        inst->vtassembler.arr[i] = (sregl21_vertex){ {instance->points[i].pos.x, instance->points[i].pos.y}, instance->points[i].uv, instance->color };
     }
 
-    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
-    {
-        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->common21.basic_texture : texture->gltex));
-    }
-
-    SRE_GLCALL(inst->glfuncs21.Uniform4i(inst->draw2data.common_uniforms.color, instance->color.r, instance->color.g, instance->color.b, instance->color.a));
-    if ((GLsizei)point_count > inst->draw2data.bufsize)
-    {
-        inst->draw2data.bufsize *= 2;
-        SRE_GLCALL(inst->glfuncs21.BufferData(GL_ARRAY_BUFFER, inst->draw2data.bufsize*sizeof(sre_RenderPoint), instance->points, GL_DYNAMIC_DRAW));
-    }
-    else
-    {
-        SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, sizeof(instance->points[0])*point_count, instance->points));
-    }
+    sregl21_vtassemblerdata(inst, &inst->vtassembler, point_count);
 
     GLenum mode = sregl_mapmode(instance->mode);
     SRE_GLCALL(inst->glfuncs.DrawArrays(mode, 0, (GLsizei)point_count));

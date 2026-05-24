@@ -23,7 +23,7 @@
 #define SRE_GLCALL(x) SRE_GLCALLR(x)
 
 #define SRE_GLGETERROR inst->glfuncs.GetError // Macro to the variable to hold glGetError, it's usually inst->glfuncs.GetError but it can be changed
-#define SRE_GLLOG(...) fprintf(stderr, __VA_ARGS__)
+#define SRE_GLLOG(...) sre_log(SRE_LOG_INFO __VA_ARGS__)
 
 
 struct sregl_functions

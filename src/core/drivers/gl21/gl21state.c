@@ -13,10 +13,7 @@ bool sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
         -1.0f, 1.0f, 0.0f, 1.0f
     };
 
-    SRE_GLCALLF(inst->glfuncs21.UseProgram(inst->draw1data.program));
-    SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw1data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
-    SRE_GLCALLF(inst->glfuncs21.UseProgram(inst->draw2data.program));
-    SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->draw2data.common_uniforms.viewport, 1, GL_FALSE, VIEWPORT));
+    SRE_GLCALLF(inst->glfuncs21.UniformMatrix4fv(inst->uniforms.viewport, 1, GL_FALSE, VIEWPORT));
     return true;
 }
 

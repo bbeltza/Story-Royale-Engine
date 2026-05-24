@@ -16,7 +16,6 @@ bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, i
 		tex_desc.SampleDesc.Quality = 0;
 		tex_desc.Usage = D3D11_USAGE_DEFAULT;
 		tex_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		//tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 		SRE_DXCALL(m_dxdevice->CreateTexture2D(&tex_desc, NULL, &texture->dxtexture));
 	}

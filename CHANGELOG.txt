@@ -7,8 +7,22 @@
                                     - SRE_PRIMITIVE_LINESTRIP: Draw connected lines
                                     - SRE_PRIMITIVE_LINELOOP: Draw looped lines (connected lines that wrap to the first point)
                                     - SRE_PRIMITIVE_POINTS: Draw points separately.
-                               - Advanced camera flags released: SRE_DRAWFLAG_CAMERAX and SRE_DRAWFLAG_CAMERAY ; You're now able to control which axis is in world space when drawing.
+                              - Advanced camera flags released: SRE_DRAWFLAG_CAMERAX and SRE_DRAWFLAG_CAMERAY ; You're now able to control which axis is in world space when drawing.
                                                                     Note that SRE_DRAWFLAG_CAMERA still exists, it's just a combination of these two flags for conveniency.
+                              - A few render driver optimizations/tweaks: - D3D12 has a texture staging mechanism now, and it uses GPU upload memory for its buffers, if available.
+                                                                                Otherwise it would fallback to normal upload memory. GPU_UPLOAD memory is faster for the GPU but not always available.
+                                                                                I might want to use it back for textures too but the staging "mechanism" is still quite valid.
+                                                                            - Additionaly, a bottleneck involving waiting for the GPU was fixed: Having 2 framebuffers in this implementation, the CPU
+                                                                                was waiting for the current frame's commands to be executed while it could've prepared the commands for the other frame,
+                                                                                or even do other things! It is now properly implemented, giving a similar performance to the one from d3d11, 
+                                                                                although still a little bit inferior.
+                                                                          - D3D11 and D3D9 tweaks. D3D9 finally supports buffer resizing for its draw commands and its interface for it is more intuitive.
+                                                                                D3D11 and 12 might also want to take some of that interface (I made a template function in d3d9's driver that will automatically
+                                                                                multiply the count parameter by the size of the type, making it less error-prone)
+                                                                          - OpenGL 2.1 tweaks: draw1 and draw2 use the same vertex buffer now, indeed they even use the same shaders! It's made so that draw1
+                                                                                implements a sort of vertex-assembling system found in SDL renderer and OpenGL 1.1 drivers which, will implement instancing more
+                                                                                correctly. It's more preferably called "batching" since that's the action of assembling multiple vertices into a single bigger buffer
+                                                                                but this will still reduce the amount of draw calls, again. OpenGL 2.1's implementation was flawed and quite old.
 - May 20th 2026: 0.104.20
     - New hints: - SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
                     but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers

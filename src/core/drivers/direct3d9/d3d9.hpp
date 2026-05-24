@@ -13,43 +13,30 @@ namespace sreD3D9
         ~DLLS() { FreeLibrary(d3d9); }
     };
 
-    struct DrawData
+    // Dnyamic buffer abstraction also seen in d3d11's and d3d12's drivers
+    struct DBuff
     {
-        IDirect3DVertexDeclaration9* dxdecl;
-        IDirect3DVertexBuffer9* dxbuff_vert;
-        IDirect3DVertexBuffer9* dxbuff_inst;
+        IDirect3DVertexBuffer9* dxbuff{};
 
-        void releaseresources()
+        UINT pos;
+        UINT cap;
+
+        void reset() { pos = 0; }
+        bool init(IDirect3DDevice9* dxdevice, UINT capacity);
+        UINT append(IDirect3DDevice9* dxdevice, const void* data, UINT size);
+
+        template <typename T>
+        bool init(IDirect3DDevice9* dxdevice, UINT count) { return init(dxdevice, count*sizeof(T)); }
+        template <typename T>
+        UINT append(IDirect3DDevice9* dxdevice, const void* data, UINT count) { return append(dxdevice, data, count*sizeof(T)); }
+
+        inline void release()
         {
-            if (!dxdecl)
-                return;
-
-            dxdecl->Release();
-            dxbuff_vert->Release();
-            dxbuff_inst->Release();
-
-            dxdecl = NULL;
-            dxbuff_vert = NULL;
-            dxbuff_inst = NULL;
-        }
-    };
-
-    struct Draw1Data: DrawData
-    {
-        IDirect3DIndexBuffer9* dxibuff;
-
-        void releaseresources()
-        {
-            DrawData::releaseresources();
-            _released1resources();
-        }
-    private:
-        void _released1resources()
-        {
-            if (!dxibuff)
-                return;
-            dxibuff->Release();
-            dxibuff = NULL;
+            if (dxbuff)
+            {
+                dxbuff->Release();
+                dxbuff = NULL;
+            }
         }
     };
 
@@ -80,8 +67,44 @@ namespace sreD3D9
 
         IDirect3DTexture9* m_dxbasictexture{};
 
-        Draw1Data m_d1data{};
-        DrawData m_d2data{};
+        struct {
+            IDirect3DVertexDeclaration9* dxvertexdecl{};
+            IDirect3DVertexBuffer9* dxpervertexbuf{};
+            IDirect3DIndexBuffer9* dxindexbuf{};
+
+            DBuff perinstancebuf{};
+
+            void releaseresources()
+            {
+                perinstancebuf.release();
+                if (dxvertexdecl)
+                {
+                    dxvertexdecl->Release();
+                    dxindexbuf->Release();
+                    dxpervertexbuf->Release();
+
+                    dxvertexdecl = NULL;
+                    dxindexbuf = NULL;
+                    dxpervertexbuf = NULL;
+                }
+            }
+        } m_d1data{};
+        struct {
+            IDirect3DVertexDeclaration9* dxvertexdecl{};
+            DBuff pervertexbuf{};
+            DBuff perinstancebuf{};
+
+            void releaseresources()
+            {
+                perinstancebuf.release();
+                pervertexbuf.release();
+                if (dxvertexdecl)
+                {
+                    dxvertexdecl->Release();
+                    dxvertexdecl = NULL;
+                }
+            }
+        } m_d2data{};
 
         D3DPRESENT_PARAMETERS m_pparamcache{};
         FLOAT m_viewportcache[16];

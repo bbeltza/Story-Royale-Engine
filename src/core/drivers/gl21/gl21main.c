@@ -22,8 +22,8 @@ static int sregl21_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
 {
     sregl21_inst* inst = _inst;
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
     int setupstatus = sregl21_commonsetup(&inst->common21, window, &inst->glfuncs, &inst->glfuncs21);
     if (setupstatus != SRE_RENDERSTATUS_SUCCEEDED)
@@ -48,6 +48,7 @@ static void sregl21_destroy(void* _inst)
 {
     sregl21_inst* inst = _inst;
 
+    sregl21_vtassemblerfree(&inst->vtassembler);
     sregl21_commondestroy(&inst->common21);
 }
 

@@ -165,22 +165,23 @@ bool Instance::_statesetup()
         D3DDECL_END()
     };
 
-    SRE_DXCALLF(m_dxdevice->CreateVertexDeclaration(D1_DECLARATION, &m_d1data.dxdecl));
-    SRE_DXCALLF(m_dxdevice->CreateVertexDeclaration(D2_DECLARATION, &m_d2data.dxdecl));
+    SRE_DXCALLF(m_dxdevice->CreateVertexDeclaration(D1_DECLARATION, &m_d1data.dxvertexdecl));
+    SRE_DXCALLF(m_dxdevice->CreateVertexDeclaration(D2_DECLARATION, &m_d2data.dxvertexdecl));
 
-    // Buffer resizing? Maybe?? (this now is unsafe...)
-    SRE_DXCALLF(m_dxdevice->CreateVertexBuffer(sizeof(FLOAT[2*4]), D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &m_d1data.dxbuff_vert, NULL));
-    SRE_DXCALLF(m_dxdevice->CreateVertexBuffer(sizeof(sre::RenderInstance1)*255, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &m_d1data.dxbuff_inst, NULL));
-    
-    SRE_DXCALLF(m_dxdevice->CreateVertexBuffer(sizeof(sre::RenderPoint)*255, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &m_d2data.dxbuff_vert, NULL));
-    SRE_DXCALLF(m_dxdevice->CreateVertexBuffer(sizeof(sre::col4), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &m_d2data.dxbuff_inst, NULL));
+    SRE_DXCALLF(m_dxdevice->CreateVertexBuffer(sizeof(FLOAT[2*4]), 0, 0, D3DPOOL_DEFAULT, &m_d1data.dxpervertexbuf, NULL));
+    SRE_DXCALLF(m_dxdevice->CreateIndexBuffer(sizeof(USHORT)*6, 0, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &m_d1data.dxindexbuf, NULL));
 
-    SRE_DXCALLF(m_dxdevice->CreateIndexBuffer(sizeof(USHORT)*6, D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &m_d1data.dxibuff, NULL));
+    if (!m_d1data.perinstancebuf.init<sre::RenderInstance1>(m_dxdevice, 255))
+        return false;
+    if (!m_d2data.pervertexbuf.init<sre::RenderPoint>(m_dxdevice, 25))
+        return false;
+    if (!m_d2data.perinstancebuf.init<sre::col4>(m_dxdevice, 255))
+        return false;
 
     {
         FLOAT* mapped_vertices = NULL;
         USHORT* mapped_indices = NULL;
-        SRE_DXCALLF(m_d1data.dxbuff_vert->Lock(0, 0, reinterpret_cast<void**>(&mapped_vertices), D3DLOCK_DISCARD));
+        SRE_DXCALLF(m_d1data.dxpervertexbuf->Lock(0, 0, reinterpret_cast<void**>(&mapped_vertices), D3DLOCK_DISCARD));
             mapped_vertices[0] = 0.0f;
             mapped_vertices[1] = 0.0f;
 
@@ -192,22 +193,21 @@ bool Instance::_statesetup()
         
             mapped_vertices[6] = 1.0f;
             mapped_vertices[7] = 0.0f;
-        SRE_DXCALLF(m_d1data.dxbuff_vert->Unlock());
-        SRE_DXCALLF(m_d1data.dxibuff->Lock(0, 0, reinterpret_cast<void**>(&mapped_indices), D3DLOCK_DISCARD));
+        SRE_DXCALLF(m_d1data.dxpervertexbuf->Unlock());
+        SRE_DXCALLF(m_d1data.dxindexbuf->Lock(0, 0, reinterpret_cast<void**>(&mapped_indices), D3DLOCK_DISCARD));
             mapped_indices[0] = 0;
             mapped_indices[1] = 1;
             mapped_indices[2] = 2;
             mapped_indices[3] = 2;
             mapped_indices[4] = 3;
             mapped_indices[5] = 0;
-        SRE_DXCALLF(m_d1data.dxibuff->Unlock());
+        SRE_DXCALLF(m_d1data.dxindexbuf->Unlock());
     }
 
     SRE_DXCALLF(m_dxdevice->SetPixelShader(m_dxcps));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_LIGHTING, FALSE));
-
 
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP));
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP));
@@ -237,11 +237,10 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
     HRESULT hr;
     if (switch_flags & SRE_RENDER_SWITCHTYPE)
     {
-        SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d1data.dxdecl));
+        SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d1data.dxvertexdecl));
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd1vs));
-        SRE_DXCALL(m_dxdevice->SetIndices(m_d1data.dxibuff));
-        SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d1data.dxbuff_vert, 0, sizeof(FLOAT[2])));
-        SRE_DXCALL(m_dxdevice->SetStreamSource(1, m_d1data.dxbuff_inst, 0, sizeof(sre::RenderInstance1)));
+        SRE_DXCALL(m_dxdevice->SetIndices(m_d1data.dxindexbuf));
+        SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d1data.dxpervertexbuf, 0, sizeof(FLOAT[2])));
         SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(1, D3DSTREAMSOURCE_INSTANCEDATA | 1));
     }
 
@@ -270,11 +269,8 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
         }
     }
 
-    void* mapped;
-    SRE_DXCALL(m_d1data.dxbuff_inst->Lock(0, sizeof(sre::RenderInstance1)*UINT_instcount, &mapped, D3DLOCK_DISCARD));
-        memcpy(mapped, instances, sizeof(sre::RenderInstance1)*UINT_instcount);
-    SRE_DXCALL(m_d1data.dxbuff_inst->Unlock());
-
+    UINT offset = m_d1data.perinstancebuf.append<sre::RenderInstance1>(m_dxdevice, instances, UINT_instcount);
+    SRE_DXCALL(m_dxdevice->SetStreamSource(1, m_d1data.perinstancebuf.dxbuff, offset, sizeof(sre::RenderInstance1)));
     SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, D3DSTREAMSOURCE_INDEXEDDATA | UINT_instcount));
 
     SRE_DXCALL(m_dxdevice->SetPixelShader(m_dxcps));
@@ -289,11 +285,8 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
     {
         SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, 1));
         SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(1, 1));
-        
-        SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d2data.dxbuff_vert, 0, sizeof(sre::RenderPoint)));
-        SRE_DXCALL(m_dxdevice->SetStreamSource(1, m_d2data.dxbuff_inst, 0, 0));
 
-        SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d2data.dxdecl));
+        SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d2data.dxvertexdecl));
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd2vs));
     }
 
@@ -320,14 +313,10 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
         }
     }
 
-    void* mapped_points;
-    void* mapped_color;
-    SRE_DXCALL(m_d2data.dxbuff_vert->Lock(0, static_cast<UINT>(sizeof(instance->points[0])*point_count), &mapped_points, D3DLOCK_DISCARD));
-    SRE_DXCALL(m_d2data.dxbuff_inst->Lock(0, static_cast<UINT>(sizeof(instance->color)), &mapped_color, D3DLOCK_DISCARD));
-        memcpy(mapped_color, &instance->color, sizeof(instance->color));
-        memcpy(mapped_points, instance->points, sizeof(instance->points[0])*point_count);
-    SRE_DXCALL(m_d2data.dxbuff_vert->Unlock());
-    SRE_DXCALL(m_d2data.dxbuff_inst->Unlock());
+    UINT offsetp = m_d2data.pervertexbuf.append<sre::RenderPoint>(m_dxdevice, instance->points, static_cast<UINT>(point_count));
+    UINT offsetc = m_d2data.perinstancebuf.append<sre::col4>(m_dxdevice, &instance->color, 1);
+    SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d2data.pervertexbuf.dxbuff, offsetp, sizeof(sre::RenderPoint)));
+    SRE_DXCALL(m_dxdevice->SetStreamSource(1, m_d2data.perinstancebuf.dxbuff, offsetc, 0));
 
     size_t primcount;
     D3DPRIMITIVETYPE primtype;
@@ -506,4 +495,40 @@ bool Instance::texture_update(Texture* texture, const sre::rect2Di* region, cons
 void Instance::texture_destroy(Texture* texture)
 {
     texture->dxtexture->Release();
+}
+
+//
+
+bool DBuff::init(IDirect3DDevice9* dxdevice, UINT capacity)
+{
+    HRESULT hr;
+    SRE_DXCALLF(dxdevice->CreateVertexBuffer(capacity, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &dxbuff, NULL));
+    
+    this->pos = 0;
+    this->cap = capacity;
+    return true;
+}
+
+UINT DBuff::append(IDirect3DDevice9* dxdevice, const void* data, UINT size)
+{
+    HRESULT hr;
+    UINT newpos = pos + size;
+    void* pdata;
+    if (newpos > cap)
+    {
+        // Wait for the device to finish using the buffer, if it hasn't been?
+        //SRE_DXCALLF(dxbuff->Lock(0, 0, &pdata, 0));
+        //SRE_DXCALLF(dxbuff->Unlock());
+        release();
+        if (!init(dxdevice, cap*2 + size))
+            return false;
+    }
+
+    SRE_DXCALLF(dxbuff->Lock(pos, size, &pdata, D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE));
+        memcpy(pdata, data, size);
+    SRE_DXCALLF(dxbuff->Unlock());
+
+    UINT oldpos = pos;
+    pos = newpos;
+    return oldpos;
 }

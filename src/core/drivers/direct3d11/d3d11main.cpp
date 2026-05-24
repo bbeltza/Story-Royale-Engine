@@ -90,7 +90,6 @@ Instance::Instance(SDL_Window* window, int* outstatus)
             sre::log(SRE_LOG_INFO "[Direct3D11]: Switching to legacy swapchain...");
 
             // Double-buffering and thus FLIP swap effects might not be supported, create a legacy single-buffered swap-chain
-            //swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
             swapchain_desc.BufferCount = 1;
             swapchain_desc.Flags = 0;
             swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
