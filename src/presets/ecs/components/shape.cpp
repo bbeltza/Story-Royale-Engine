@@ -59,7 +59,7 @@ void Shape::on_render(Entity &entity)
 	default:
 	{
 		sre::rect2Dut render_rect = real_rect(entity);
-		sre::render_draw1(
+		sre::render::draw1(
 			SRE_DRAWFLAG_CAMERA,
 			{{ render_rect, sre::vec2ut::CENTER, color }}
 		);
@@ -75,7 +75,7 @@ bool Shape::on_query(Entity& entity, sre::vec2ut screen_coords) const
 }
 
 
-void Shape::on_pupdate(Entity& entity)
+void Shape::on_pupdate(Entity& entity, sre::timeStamp dt)
 {    
     if (!flags.has(F_CANCOLLIDE))
         return;

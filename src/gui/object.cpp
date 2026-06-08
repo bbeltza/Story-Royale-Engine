@@ -1,3 +1,4 @@
+#include <GUI/Layer.hpp>
 #include <GUI/Object.hpp>
 #include <GUI/Component.hpp>
 #include <Core/Display.hpp>
@@ -7,25 +8,12 @@
 
 #include <utils/mem.h>
 
-#include "../internal.h"
-
 using namespace sreGUI;
 
-Object* sreGUI::get_root() { return currlayer; }
-
-const Object* Object::s_querying = NULL;
-sre::ClipStackUT Object::s_clipstack;
-
-Object::Object()
+Object::Object(Object* parent)
 {
-    if (!m_parent)
-    {
-        // Root objects couldn't be queried before, so they are have the query flag disabled by default now as they can be hovered
-        flags.toggle_off(F_QUERY);
-        return;
-    }
-
-    m_parent->children.push_back(this);
+    if (parent)
+        set_parent(parent);
 }
 
 Object::~Object()
@@ -34,53 +22,35 @@ Object::~Object()
         m_parent->children.remove(this);
     
     while (!children.empty())
-        delete children.front();
+        children.front()->destroy();
     
-    if (engine.current_guilayer == this) engine.current_guilayer = NULL;
+    if (m_attachedlyr)
+    {
+        assert(m_attachedlyr->root == this);
+        m_attachedlyr->root = NULL;
+        m_attachedlyr = NULL;
+    }  
 }
 
-void Object::set_parent(Object* parent)
+Object* Object::set_parent(Object* parent)
 {
-    if (engine.current_guilayer == this)
+    if (m_attachedlyr)
     {
-        sre::error(SRE_ERR_INVALID_STATE, "Calling set_parent() on root Object, this is unimplemented");
-        return;
+        sre::error(SRE_ERR_INVALID_STATE, "Calling set_parent() on root Object, it's an impossible operation. Please, detach it from being the root object and proceed.");
+        return this;
     }
+    if (m_parent == parent)
+        return this;
     if (!parent)
-    {
-        sre::log(SRE_LOG_WARN "Calling set_parent(NULL), it is not implemented, use set_root() instead");
-        return;
-    }
-    if (m_parent == parent) return;
+        sre::log(SRE_LOG_WARN "Calling set_parent(NULL) ; This is going to detach the object entirely from everything, so it is entirely yours!");
 
-    if (m_parent) m_parent->children.remove(this);
-    m_parent = parent;
-    parent->children.push_back(this);
-}
-
-void Object::set_root(bool destroy_old)
-{
-    if (engine.current_guilayer == this)
-    {
-        sre::log(SRE_LOG_WARN "Calling sreGUI::Object::set_rot() on root layer");
-        return;
-    }
     if (m_parent)
-    {
         m_parent->children.remove(this);
-        m_parent = NULL;
-    }
-    if (engine.current_guilayer && destroy_old)
-        currlayer->destroy();
-    
-    engine.current_guilayer = this;
-}
+    if (parent)
+        parent->children.push_back(this);
+    m_parent = parent;
 
-void Object::remove_root(bool destroy_old)
-{
-    if (engine.current_guilayer && destroy_old)
-        currlayer->destroy();
-    engine.current_guilayer = NULL;
+    return this;
 }
 
 void Object::CContainer::setup(Component* const components[], size_t count)
@@ -110,27 +80,67 @@ void Object::CContainer::setup(Component* const components[], size_t count)
 }
 
 //
+// Global GUI object functions (That wrap the layer ones)
 
-bool Object::call_query(sre::vec2ut pt) const
+const std::deque<const sreGUI::Object*>& sreGUI::get_hovering(Layer* lyr)
 {
-    s_querying = NULL;
+    if (!lyr)
+        lyr = sreGUI::get_default_layer();
+    assert(lyr != NULL);
+
+    return lyr->get_hovering();
+}
+
+void sreGUI::set_root(Object* object, Layer* lyr)
+{
+    if (!lyr)
+        lyr = sreGUI::get_default_layer();
+    assert(lyr != NULL);
+
+    lyr->set_root(object);
+}
+Object* sreGUI::get_root(Layer* lyr)
+{
+    if (!lyr)
+        lyr = sreGUI::get_default_layer();
+    assert(lyr != NULL);
+
+    return lyr->get_root();
+}
+
+sre::unit sreGUI::get_insets(Layer* lyr)
+{
+    if (!lyr)
+        lyr = sreGUI::get_default_layer();
+    assert(lyr != NULL);
+
+    return lyr->get_insets();
+}
+void sreGUI::set_insets(sre::unit insets, Layer* lyr)
+{
+    if (!lyr)
+        lyr = sreGUI::get_default_layer();
+    assert(lyr != NULL);
+
+    lyr->set_insets(insets);
+}
+
+//
+
+void Object::call_query(sre::vec2ut pt, std::deque<const Object*>& stack)
+{
+    m_state.toggle_off(S_INCURSOR | S_HOVERING);
     if (!flags.has(F_ENABLED))
-        return false;
-
-    for (auto it = children.rbegin(); it != children.rend(); it++)
-    {
-        Object* obj = *it;
-
-        if (obj->call_query(pt)) return true;
-    }
+        return;
 
     if (flags.has(F_QUERY) && m_absolute.simple_intersects(pt))
     {
-        s_querying = this;
-        return true;
+        m_state.toggle_on(S_INCURSOR);
+        stack.push_back(this);
     }
 
-    return false;
+    for (auto& obj : children)
+        obj.call_query(pt, stack);
 }
 
 void Object::call_process()
@@ -200,7 +210,7 @@ void Object::call_update()
     updated.fire();
 }
 
-void Object::call_render()
+void Object::call_render(sre::ClipStackUT& clipstack)
 {
     if (!flags.has(F_ENABLED)) return;
 
@@ -210,8 +220,8 @@ void Object::call_render()
 
     if (has_clip)
     {
-        s_clipstack.push(m_absolute);
-        sre::render_clipset(s_clipstack.top());
+        clipstack.push(m_absolute);
+        sre::render::set_scissors(clipstack.top());
     }
     
     for (auto& comp : components)
@@ -221,23 +231,26 @@ void Object::call_render()
     }
     
     for (auto& obj : children)
-    {
-        obj.call_render();
-    }
+        obj.call_render(clipstack);
 
     if (has_clip)
     {
-        if (s_clipstack.pop())
-            sre::render_clipset(s_clipstack.top());
+        if (clipstack.pop())
+            sre::render::set_scissors(clipstack.top());
         else
-            sre::render_clipreset();
+            sre::render::reset_scissors();
     }
 
     post_render();
 
     rendered.fire();
-}
 
-static sre::unit s_insets;
-sre::unit sreGUI::get_insets() { return s_insets; }
-void sreGUI::set_insets(sre::unit insets) { s_insets = insets; }
+    /*
+    sre::render::draw2(0, sre::RED, {
+        m_absolute.position,
+        m_absolute.position + sre::vec2ut{ m_absolute.size.x, 0 },
+        m_absolute.position + m_absolute.size,
+        m_absolute.position + sre::vec2ut{ 0, m_absolute.size.y }
+    }, SRE_PRIMITIVE_LINELOOP);
+    */
+}

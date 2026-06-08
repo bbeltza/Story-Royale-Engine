@@ -46,7 +46,7 @@ namespace sreD3D9
         float potratiox, potratioy;
     };
 
-    struct Instance: sre::RenderDriver
+    struct Instance
     {
         using texture_type = Texture;
         friend struct ImGuiData;
@@ -57,6 +57,7 @@ namespace sreD3D9
         DLLS m_dlls;
     private:
         bool m_needsetup = true;
+        bool m_usepot = false;
         IDirect3D9* m_dxd3d9;
 
         IDirect3DDevice9* m_dxdevice;
@@ -66,6 +67,7 @@ namespace sreD3D9
         IDirect3DVertexShader9* m_dxd2vs;
 
         IDirect3DTexture9* m_dxbasictexture{};
+        sre::vec2f m_potratio{1.0f, 1.0f};
 
         struct {
             IDirect3DVertexDeclaration9* dxvertexdecl{};
@@ -108,23 +110,23 @@ namespace sreD3D9
 
         D3DPRESENT_PARAMETERS m_pparamcache{};
         FLOAT m_viewportcache[16];
-        FLOAT m_cameracache[2];
 
         D3DCAPS9 m_devcaps;
     public:
-        void flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags);
-        void flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
+        void draw1(const sre::RenderInstance1* instances, size_t instance_count);
+        void draw2(const sre::RenderInstance2* instance, size_t point_count);
             
-        void present();
-        bool clear(float color[3]);
+        void begin(const float color[4]);
+        void end();
     
-        bool set_viewportstate(int w, int h, sre::unit scale);
-        bool set_blendstate(sre::blendMode blending);
-        bool set_camerastate(sre::unit x, sre::unit y);
-        void set_clipstate(const sre::rect2Di* rectangle);
+        void set_camerastate(sre::vec2ut camera);
         void set_vsync(bool enable);
+        void set_texturestate(texture_type* texture);
+        void set_viewportstate(int w, int h, sre::unit scale);
+        void set_blendstate(sre::blendMode blending);
+        void set_scissorstate(const sre::rect2Di* rectangle);
                 
-        bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
+        bool texture_setup(Texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat);
         bool texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch);
         void texture_destroy(Texture* texture);
     private:

@@ -45,6 +45,7 @@ static sre::ImGuiRenderInterface<>* render_drivers[] = {
     IMGUI_RENDERDRIVERPTR(gl21),
     IMGUI_RENDERDRIVERPTR(gl11),
     IMGUI_RENDERDRIVERPTR(sdlrenderer),
+    NULL,
     #ifdef SRE_USEDRIVER_D3D12
         IMGUI_RENDERDRIVERPTR(d3d12)
     #endif
@@ -71,6 +72,9 @@ int sreImGui_glue::initialize(SDL_Window* window, void* renderdriver, int render
     else
         driver = render_drivers[renderindex];
     
+    if (!driver)
+        return SRE_RENDERSTATUS_UNSUPPORTED;
+
     if (!ImGui_ImplSDL2_InitForOther(window))
         return SRE_RENDERSTATUS_FAILED;
     

@@ -4,6 +4,7 @@
 
 #include "d3d9.hpp"
 #include <SDL_syswm.h>
+#include <assert.h>
 
 SRE_EXTERN_C_VAR sre::RenderDriverHelper<sreD3D9::Instance> sred3d9{"Direct3D 9"};
 
@@ -214,6 +215,8 @@ bool Instance::_statesetup()
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
 
+    SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(0, m_viewportcache, 4));
+
     m_needsetup = false;
     return true;
 }
@@ -232,10 +235,10 @@ void Instance::_resetdevice()
 
 //
 
-void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags)
+void Instance::draw1(const sre::RenderInstance1* instances, size_t instance_count)
 {
     HRESULT hr;
-    if (switch_flags & SRE_RENDER_SWITCHTYPE)
+    if (1)
     {
         SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d1data.dxvertexdecl));
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd1vs));
@@ -244,28 +247,18 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
         SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(1, D3DSTREAMSOURCE_INSTANCEDATA | 1));
     }
 
-    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
-    {
-        sre::vec2f camera = flags & SRE_DRAWFLAG_CAMERA ? sre::vec2f{m_cameracache[0], m_cameracache[1]} : sre::vec2f::ZERO;
-        SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(4, &camera.x, 1));
-    }
-
-    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
-    {
-        SRE_DXCALL(m_dxdevice->SetTexture(0, texture ? texture->dxtexture : m_dxbasictexture));
-    }
-
     UINT UINT_instcount = static_cast<UINT>(instance_count);
 
-    if (texture && (texture->potratiox != 1.0f || texture->potratioy != 1.0f))
+    if (m_usepot)
     {
+        assert(m_potratio.x != 1.0f || m_potratio.y != 1.0f);
+
         // The interface spec will state that `instances` is in memory free to use by the driver, and only to be used in this single function call, so you're totally free to modify it.
         // Setting it as non-const will be possible too
         for (UINT i = 0; i < UINT_instcount; i++)
         {
-            sre::vec2f potratio{texture->potratiox, texture->potratioy};
-            const_cast<sre::RenderInstance1*>(instances)[i].uv *= potratio;
-            const_cast<sre::RenderInstance1*>(instances)[i].uv_offset *= potratio;
+            const_cast<sre::RenderInstance1*>(instances)[i].uv *= m_potratio;
+            const_cast<sre::RenderInstance1*>(instances)[i].uv_offset *= m_potratio;
         }
     }
 
@@ -277,11 +270,11 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
     SRE_DXCALL(m_dxdevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2*UINT_instcount));
 }
 
-void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
+void Instance::draw2(const sre::RenderInstance2* instance, size_t point_count)
 {
     HRESULT hr;
 
-    if (switch_flags & SRE_RENDER_SWITCHTYPE)
+    if (1)
     {
         SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, 1));
         SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(1, 1));
@@ -290,26 +283,13 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd2vs));
     }
 
-    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
+    if (m_usepot)
     {
-        float camera[4] = {flags & SRE_DRAWFLAG_CAMERAX ? m_cameracache[0] : 0,
-                           flags & SRE_DRAWFLAG_CAMERAY ? m_cameracache[1] : 0,
-                           0, 1
-                        };
-        SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(4, camera, 1));
-    }
-
-    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
-    {
-        SRE_DXCALL(m_dxdevice->SetTexture(0, texture ? texture->dxtexture : m_dxbasictexture));
-    }
-
-    if (texture && (texture->potratiox != 1.0f || texture->potratioy != 1.0f))
-    {
+        assert(m_potratio.x != 1.0f || m_potratio.y != 1.0f);
+        
         for (size_t i = 0; i < point_count; i++)
         {
-            sre::vec2f potratio{texture->potratiox, texture->potratioy};
-            const_cast<sre::RenderInstance2*>(instance)->points[i].uv *= potratio;
+            const_cast<sre::RenderInstance2*>(instance)->points[i].uv *= m_potratio;
         }
     }
 
@@ -350,15 +330,8 @@ void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance
 }
 
 //
-            
-void Instance::present()
-{
-    HRESULT hr;
-    SRE_DXCALL(m_dxdevice->EndScene());
-    SRE_DXCALL(m_dxdevice->Present(NULL, NULL, NULL, NULL));
-}
 
-bool Instance::clear(float color[3])
+void Instance::begin(const float clear[4])
 {
     HRESULT hr;
     if (m_needsetup)
@@ -367,61 +340,62 @@ bool Instance::clear(float color[3])
             abort();
     }
 
-    SRE_DXCALLF(m_dxdevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(color[0], color[1], color[2], 1), 0, 0));
-    SRE_DXCALLF(m_dxdevice->BeginScene());
-    return true;
+    SRE_DXCALL(m_dxdevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(clear[0], clear[1], clear[2], clear[3]), 0, 0));
+    SRE_DXCALL(m_dxdevice->BeginScene());
+}
+
+void Instance::end()
+{
+    HRESULT hr;
+    SRE_DXCALL(m_dxdevice->EndScene());
+    SRE_DXCALL(m_dxdevice->Present(NULL, NULL, NULL, NULL));
 }
 
 //
     
-bool Instance::set_viewportstate(int w, int h, sre::unit scale)
+void Instance::set_viewportstate(int w, int h, sre::unit scale)
 {
     m_pparamcache.BackBufferWidth = w;
     m_pparamcache.BackBufferHeight = h;
     _resetdevice();
 
-    HRESULT hr;
-    float VPMATRIX[] = {
+    FLOAT VPMATRIX[] = {
         2.0f/w, 0.0f, 0.0f, 0.0f,
         0.0f, -2.0f/h, 0.0f, 0.0f,
         0.0f, 0.0f, scale, 0.0f,
         -1.0f, 1.0f, 0.0f, 1.0f
     };
-    SRE_DXCALLF(m_dxdevice->SetVertexShaderConstantF(0, VPMATRIX, 4));
-    return true;
+    memcpy(m_viewportcache, VPMATRIX, sizeof(m_viewportcache));
 }
 
 static D3DBLEND D3D9_BLENDMODES[][2] = {
-    { D3DBLEND_ONE, D3DBLEND_ZERO }, // Not used, just some padding to index with `blending` properly. BLEND_NONE will disable blending completely
     { D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA },
     { D3DBLEND_SRCALPHA, D3DBLEND_ONE },
     { D3DBLEND_DESTCOLOR, D3DBLEND_ZERO },
     { D3DBLEND_DESTCOLOR, D3DBLEND_INVSRCALPHA }
 };
 
-bool Instance::set_blendstate(sre::blendMode blending)
+void Instance::set_blendstate(sre::blendMode mode)
 {
     HRESULT hr;
-    if (blending == SRE_BLEND_NONE)
+    if (0)
     {
-        SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE));
-        return true;
+        SRE_DXCALL(m_dxdevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE));
+        return;
     }
     
-    SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
-    SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_SRCBLEND, D3D9_BLENDMODES[blending][0]));
-    SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_DESTBLEND, D3D9_BLENDMODES[blending][1]));
-    return true;
+    SRE_DXCALL(m_dxdevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
+    SRE_DXCALL(m_dxdevice->SetRenderState(D3DRS_SRCBLEND, D3D9_BLENDMODES[mode][0]));
+    SRE_DXCALL(m_dxdevice->SetRenderState(D3DRS_DESTBLEND, D3D9_BLENDMODES[mode][1]));
 }
 
-bool Instance::set_camerastate(sre::unit x, sre::unit y)
+void Instance::set_camerastate(sre::vec2ut camera)
 {
-    m_cameracache[0] = x;
-    m_cameracache[1] = y;
-    return true;
+    HRESULT hr;
+    SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(4, &camera.x, 1));
 }
 
-void Instance::set_clipstate(const sre::rect2Di* rectangle)
+void Instance::set_scissorstate(const sre::rect2Di* rectangle)
 {
     RECT rect = {
         rectangle->position.x,
@@ -441,11 +415,27 @@ void Instance::set_vsync(bool enable)
     _resetdevice();
 }
 
+void Instance::set_texturestate(texture_type* texture)
+{
+    HRESULT hr;
+    SRE_DXCALL(m_dxdevice->SetTexture(0, texture ? texture->dxtexture : m_dxbasictexture));
+    if (texture && (texture->potratiox != 1.0f || texture->potratioy != 1.0f))
+    {
+        m_usepot = true;
+        m_potratio.x = texture->potratiox;
+        m_potratio.y = texture->potratioy;
+    }
+    else
+    {
+        m_usepot = false;
+    }
+}
+
 //
 
 extern "C" int sregl11_padbypowerof2(int x);
                 
-bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat)
+bool Instance::texture_setup(Texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat)
 {
     HRESULT hr;
     float potratiox = 1.0f;

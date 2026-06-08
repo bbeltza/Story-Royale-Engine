@@ -4,15 +4,16 @@ static void sregl21_destroy(void* _inst);
 
 static const struct sre_RenderVFT sregl21_vft = {
     sregl21_destroy,
-    sregl21_flush_queueinstances1,
-    sregl21_flush_queueinstances2,
-    sregl21_present,
-    sregl21_clear,
+    sregl21_draw1,
+    sregl21_draw2,
+    sregl21_begin,
+    sregl21_end,
     sregl21_set_viewportstate,
+    sregl21_set_vsync,
+    sregl21_set_texturestate,
     sregl21_set_blendstate,
     sregl21_set_camerastate,
-    sregl21_set_clipstate,
-    sregl21_set_vsync,
+    sregl21_set_scissorstate,
     sregl21_texture_setup,
     sregl21_texture_update,
     sregl21_texture_destroy
@@ -22,8 +23,8 @@ static int sregl21_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Windo
 {
     sregl21_inst* inst = _inst;
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
     int setupstatus = sregl21_commonsetup(&inst->common21, window, &inst->glfuncs, &inst->glfuncs21);
     if (setupstatus != SRE_RENDERSTATUS_SUCCEEDED)

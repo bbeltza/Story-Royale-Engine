@@ -38,10 +38,7 @@ static inline void __setup_engine_data()
     if (engine.user_event == (Uint32)-1)
         sre_CRITICAL(SRE_ERR_CORE, "SDL_RegisterEvents(1) failed and returned -1 ; This means there are no available user events to register... Which is required for the engine to work");
 
-    engine.phys_target_dt = 1 / 128.0;
-
     engine.input_last_touchid = -1;
-    engine.destroyqueue_mutex = SDL_CreateMutex();
 
     engine.main_thrd = SDL_ThreadID();
 
@@ -99,6 +96,8 @@ void __initialize_engine()
     __create_window();
     __setup_renderer();
 
+    __setup_objects();
+
     __setup_engine_data();
 
     atexit(__end_engine);
@@ -106,15 +105,16 @@ void __initialize_engine()
 
 void __end_engine()
 {
+    if (SDL_ThreadID() != engine.main_thrd)
+        sre_CRITICAL(SRE_ERR_FAIL, "Engine destruction NOT being run on the main thread. This will thus cause lots of problems. Are you trying to call exit()?");
+
     engine.cor_running = false;
     SDL_WaitThread(engine.coroutine_thread, NULL);
-
-    __cleanup_ecs();  
     
+    __cleanup_objects();
     __cleanup_renderer();
     
     SDL_CloseAudioDevice(engine.audio_device);
-    SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
 
     IMG_Quit();

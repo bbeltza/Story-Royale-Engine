@@ -1,7 +1,7 @@
 #ifndef SREECS_ENTITY_HPP
 #define SREECS_ENTITY_HPP
 
-#include <Core/Object.hpp>
+#include <Core/Object.h>
 #include <Datatypes/Vector.h>
 
 #include <cassert>
@@ -16,19 +16,15 @@ namespace sreECS
     {
         friend struct Scene;
 
-        // Total allocated size in the Scene's arena
-        size_t m_size;
         // Current scene parent
-        Scene* m_parent;
-
+        Scene* m_parent = NULL;
     protected:
-        Entity(): Entity(0, 0) {}
-        Entity(sre::unit x, sre::unit y, long z_index=0);
+        Entity(sre::unit x=0, sre::unit y=0, long z_index=0);
+        Entity(Scene* scene, sre::unit x=0, sre::unit y=0, long z_index=0);
         virtual ~Entity();
-        void operator delete(void*);
 
         Entity(const Entity& copy) = delete;
-        Entity(Entity&& moving); // For world reparenting, might start using it I don't know..
+        //Entity(Entity&& moving); // For world reparenting, might start using it I don't know..
 
     public:
         // The current position of the entity

@@ -45,12 +45,16 @@ namespace sreD3D11
     struct alignas(16) CBuffer
     {
         FLOAT viewport[16];
-        sre::vec2f camera;
+    };
+
+    struct alignas(16) CCamBuffer
+    {
+        FLOAT x;
+        FLOAT y;
     };
 
     struct InstCaches
     {
-        FLOAT viewport[16]{};
         bool vsync{};
     };
 
@@ -101,7 +105,7 @@ namespace sreD3D11
 
             Shaders m_shaders{};
 
-            ID3D11BlendState* m_dxblendstates[5];
+            ID3D11BlendState* m_dxblendstates[4];
             ID3D11RasterizerState* m_dxrasterizerstate;
             ID3D11SamplerState* m_dxsamplerstate;
 
@@ -110,28 +114,28 @@ namespace sreD3D11
             DrawBuffer m_d2bufferp; // Vertex draw2 buffer
 
             ID3D11Buffer* m_cbuffer;
-            ID3D11Buffer* m_camveccbuffers[4];
+            ID3D11Buffer* m_ccambuffer;
 
             ID3D11ShaderResourceView* m_basictexture;
 
             InstCaches m_caches;
         public:
-            // Instance drawing functions
-            void flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags);
-            void flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
+            void draw1(const sre::RenderInstance1* instances, size_t instance_count);
+            void draw2(const sre::RenderInstance2* instance, size_t point_count);
             
-            void present();
-            bool clear(float color[3]);
+            void begin(const float clear[4]);
+            void end();
     
-            // State functions
-            bool set_viewportstate(int w, int h, sre::unit scale);
-            bool set_blendstate(sre::blendMode blending);
-            bool set_camerastate(sre::unit x, sre::unit y);
-            void set_clipstate(const sre::rect2Di* rectangle);
-            void set_vsync(bool enable) { m_caches.vsync = enable; }
+            void set_camerastate(sre::vec2ut camera);
+            void set_vsync(bool enable) {
+                m_caches.vsync = enable;
+            }
+            void set_texturestate(texture_type* texture);
+            void set_viewportstate(int w, int h, sre::unit scale);
+            void set_blendstate(sre::blendMode blending);
+            void set_scissorstate(const sre::rect2Di* rectangle);
                 
-            // Texture functions
-            bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
+            bool texture_setup(Texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat);
             bool texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch);
             void texture_destroy(Texture* texture);
         private:

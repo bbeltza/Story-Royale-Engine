@@ -1,219 +1,135 @@
+#include <ECS/Layer.hpp>
 #include <ECS/Scene.hpp>
 #include <ECS/Entity.hpp>
 #include <ECS/Component.hpp>
 
+#include <Core/Runtime.hpp>
 #include <Core/Display.hpp>
 #include <Core/Input.hpp>
 
-#include "../internal.h"
+#include <Base/Error.h>
+#include <Base/Log.h>
 
-#ifdef _CRT_BEGIN_C_HEADER
-    #define malloc_aligned(size) _aligned_malloc(size, _Arena::PAGE_SIZE)
-    #define free_aligned(block) _aligned_free(block)
-#elif _POSIX_C_SOURCE >= 200112L || XOPEN_SOURCE >= 600
-    static inline void* _malloc_aligned(size_t size, size_t alignment) // Need a stupid function for posix because posix_memalign doesn't return the pointer but instead it is passed as a parameter
-    {
-        void* block;
-        if (posix_memalign(&block, alignment, size) != 0)
-            return NULL;
+#include <algorithm>
 
-        return block;
-    }
-    #define malloc_aligned(size) _malloc_aligned(size, _Arena::PAGE_SIZE)
-    #define free_aligned(block) free(block)
-#else
-    #define malloc_aligned(size) operator new(size)
-    #define free_aligned(block) operator delete(block)
-#endif
-
-sre::vec2ut sreECS::mouse_worldcoords() { return Scene::current()->camera.toWorldSpace(sre::mouse_screencoords()); }
+sre::vec2ut sreECS::mouse_worldcoords() { return sreECS::get_current()->camera.toWorldSpace(sre::mouse_screencoords()); }
 
 using namespace sreECS;
-
-const Entity* Scene::s_querying = NULL;
-
-Scene::_Arena* Scene::new_arena()
-{
-    _Arena* buff = static_cast<_Arena*>(malloc_aligned(sizeof(*buff)));
-    buff->next = NULL;
-
-    return buff;
-}
-
-Scene::Scene(): m_arenabuff(new_arena()), m_entity_end(reinterpret_cast<Entity*>(m_arenabuff->data))
-{
-}
 
 Scene::~Scene()
 {
     for (Entity& ent : *this)
-        ent.~Entity();
-
-    assert(m_arenabuff != NULL);
-    do
-    {
-        _Arena* next = m_arenabuff->next;
-        free_aligned(m_arenabuff);
-        m_arenabuff = next;
-    } while (m_arenabuff);
+        ent.destroy();
     
-    if (engine.current_world == this)
-        engine.current_world = NULL;
+    if (m_attachedlyr)
+        m_attachedlyr->m_current = NULL;
+    m_attachedlyr = NULL;
 }
 
-void Scene::make_current(Scene* scene, bool destroy_old)
+Entity* Scene::add_child(Entity* entity)
 {
-    if (engine.current_world && destroy_old)
-        static_cast<Scene*>(engine.current_world)->destroy();
-    
-    engine.current_world = scene;
+    if (!entity) // Scene::add_child(NULL) is a no-op
+        return NULL;
+
+    if (entity->m_parent)
+    {
+        sre::error(SRE_ERR_UNAVAILABLE, "add_child(NULL) with an already parented entity.");
+        return NULL;
+    }    
+
+    entity->m_parent = this;
+    m_entities.push_back(entity);
+    return entity;
 }
 
-Scene* Scene::current()
+//
+
+void sreECS::set_physics_dt(sre::timeStamp dt, Layer* lyr)
 {
-    return static_cast<Scene*>(engine.current_world);
+    if (!lyr)
+        lyr = sreECS::get_default_layer();
+    assert(lyr != NULL);
+
+    lyr->set_physics_dt(dt);
 }
 
-Entity* Scene::alloc_entity(size_t size, size_t* _realsize)
+sre::timeStamp sreECS::get_physics_dt(Layer* lyr)
 {
-    assert(size >= sizeof(Entity));
+    if (!lyr)
+        lyr = sreECS::get_default_layer();
+    assert(lyr != NULL);
 
-    Entity* result = NULL;
-    size_t realsize = size;
+    return lyr->get_physics_dt();
+}
 
-    // TODO: add code that detects if `size` is larger than the arena page size and if so just mallocate outsize the arena
-    if (realsize > _Arena::SIZE)
-    {
-        result = static_cast<Entity*>(operator new(realsize));
-        goto ENTITY_SETUP;
-    }
-    //
+void sreECS::set_current(Scene* scene, Layer* lyr)
+{
+    if (!lyr)
+        lyr = sreECS::get_default_layer();
+    assert(lyr != NULL);
 
-    for (auto& ent : m_freelist)
-    {
-        if (ent->m_size < realsize)
-            continue;
+    lyr->set_current(scene);
+}
 
-        result = ent;
-        if (ent->m_size == realsize)
-        {
-            ent = m_freelist.back();
-            m_freelist.pop_back();
-        }
-        else
-        {
-            size_t newsize = ent->m_size - realsize;
+Scene* sreECS::get_current(Layer* lyr)
+{
+    if (!lyr)
+        lyr = sreECS::get_default_layer();
+    assert(lyr != NULL);
 
-            ent += realsize;
-            ent->m_size = newsize;
-        }
-    }
+    return lyr->get_current();
+}
 
-    if (result) goto ENTITY_SETUP;
+//
 
-    if (m_entities.empty())
-    {
-        result = reinterpret_cast<Entity*>(m_arenabuff->data);
-        m_entity_end = reinterpret_cast<Entity*>(m_arenabuff->data + realsize);
-    }
-    else
-    {
-        result = m_entity_end;
-        sre::sptr remaining_diff = (reinterpret_cast<sre::byte*>(result) + realsize) - (m_arenabuff->data + m_arenabuff->SIZE);
-        if (remaining_diff > 0)
-        {
-            // Append remaining chunk into the freelist in case of it being used
-            m_entity_end->m_size = remaining_diff;
-            m_freelist.push_back(m_entity_end);
-            //
+sre::vec2ut Scene::process_camera()
+{
+    if (!camera.effect || !camera.effect->enabled)
+        return camera.position;
 
-            _Arena* arena = new_arena();
-            arena->next = m_arenabuff;
-            m_arenabuff = arena;
-            m_entity_end = reinterpret_cast<Entity*>(arena->data);
-            result = m_entity_end;
-        }
-        m_entity_end = reinterpret_cast<Entity*>(reinterpret_cast<sre::byte*>(m_entity_end) + realsize);
-    }
-    
-    ENTITY_SETUP:
-    assert(result != NULL);
-
-    m_entities.push_back(result);
-
-    if (_realsize) *_realsize = realsize;
-
-    result->m_parent = this;
-    result->m_size = realsize;
-
-    return result;
+    return camera.position + camera.effect->on_process(sre::dt);
 }
 
 void Scene::call_update()
 {
-    { // Update phase region
-        update();
-        for (auto& ent : *this)
+    update();
+    for (auto& ent : *this)
+    {
+        for (auto& comp : ent)
         {
-            for (auto& comp : ent)
-            {
-                if (comp.enabled())
-                    comp.on_update(ent);
-            }
+            if (comp.enabled())
+                comp.on_update(ent);
         }
-        camera.update();
     }
-
-    static sre::timeStamp dt_accumulated;
-    dt_accumulated += engine.last_dt;
-    if (dt_accumulated < 0)
-        camera.clamp_position(); // At least clamp the camera to the border whenever there are no updates
-    else do { // pUpdate phase region
-        dt_accumulated -= engine.phys_target_dt;
-
-        pupdate();
-        for (auto& ent : *this)
-        {
-            const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position;
-
-            for (auto& comp : ent)
-            {
-                if (comp.enabled())
-                    comp.on_pupdate(ent);
-            }
-
-            const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position - ent.lastVelocity;
-        }
-        camera.pupdate();
-    }  while (dt_accumulated > 0);
-
-    if (camera.effect && camera.effect->enabled)
-        camera.m_processed = camera.position + camera.effect->on_process(engine.last_dt);
-    else
-        camera.m_processed = camera.position;
+    camera.update();
 
     updated.fire();
 }
 
+void Scene::call_pupdate(sre::timeStamp dt)
+{
+    pupdate(dt);
+    for (auto& ent : *this)
+    {
+        const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position;
+
+        for (auto& comp : ent)
+        {
+            if (comp.enabled())
+                comp.on_pupdate(ent, dt);
+        }
+
+        const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position - ent.lastVelocity;
+    }
+    camera.pupdate(dt);
+}
+
 void Scene::call_render()
 {
-    // Sort entities by z_index. Cannot use default std::sort because of the need to access the entity buffer with entity_at()
-    // So I made my own sorting algorithm :r) (It's literally just gnome sort ahahah)
-    for (auto i2 = m_entities.begin();;)
-    {
-        auto i1 = i2++;
-        if (i2 == m_entities.end())
-            break;
-
-        Entity*& entity1 = *i1;
-        Entity*& entity2 = *i2;
-
-        if (entity1->z_index > entity2->z_index)
-        {
-            std::swap(entity1, entity2); // Might still keep up the xor swapping!!
-            i2--;
-        }
-    }
+    //
+    std::sort(m_entities.begin(), m_entities.end(), [](Entity* e1, Entity* e2) {
+        return e1->z_index < e2->z_index;
+    });
 
     this->pre_render();
 
@@ -231,9 +147,9 @@ void Scene::call_render()
     rendered.fire();
 }
 
-bool Scene::call_query(sre::vec2ut coords) const
+bool Scene::call_query(sre::vec2ut coords)
 {
-    s_querying = NULL;
+    m_querying = NULL;
 
     for (auto it = rbegin(); it != rend(); ++it)
     {
@@ -242,7 +158,7 @@ bool Scene::call_query(sre::vec2ut coords) const
         {
             if (comp.on_query(entity, coords))
             {
-                s_querying = &entity;
+                m_querying = &entity;
                 return true;
             }
         }

@@ -9,35 +9,28 @@
     #define SDL_stack_free(block) _freea(block)
 #endif
 
-bool sresdlrenderer_clear(void* _inst, float color[3])
+void sresdlrenderer_begin(void* _inst, const float clear[4])
 {
     sresdlrenderer_inst* inst = _inst;
     SDL_SetRenderDrawColor(inst->renderer,
-        (Uint8)(color[0] * 255),
-        (Uint8)(color[1] * 255),
-        (Uint8)(color[2] * 255),
-        SDL_ALPHA_OPAQUE
+        (Uint8)(clear[0] * 255),
+        (Uint8)(clear[1] * 255),
+        (Uint8)(clear[2] * 255),
+        (Uint8)(clear[3] * 255)
     );
 
-    return SDL_RenderClear(inst->renderer) == 0;
+    SDL_RenderClear(inst->renderer);
 }
 
-void sresdlrenderer_present(void* _inst)
+void sresdlrenderer_end(void* _inst)
 {
     sresdlrenderer_inst* inst = _inst;
     SDL_RenderPresent(inst->renderer);
 }
 
-void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
+void sresdlrenderer_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count)
 {
-    (void)switch_flags;
-
-    static const uint8_t DRAW1_INDICES[6] = {
-        0, 1, 2,
-        2, 3, 0
-    };
     sresdlrenderer_inst* inst = _inst;
-    sresdlrenderer_texture* texture = _texture;
 
     if (inst->vbuf_size < instance_count)
     {
@@ -80,8 +73,8 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
             dinst->rectangle.h * inst->scaling
         };
 
-        srect.x = srect.x + (flags & SRE_DRAWFLAG_CAMERAX ? inst->camera.x : 0);
-        srect.y = srect.y + (flags & SRE_DRAWFLAG_CAMERAY ? inst->camera.y : 0);
+        srect.x = srect.x + inst->camera.x;
+        srect.y = srect.y + inst->camera.y;
         srect.w = srect.w;
         srect.h = srect.h;
 
@@ -147,21 +140,20 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
     }
     
     int int_count = (int)instance_count;
-    int res = SDL_RenderGeometry(inst->renderer, texture ? texture->texture : NULL, inst->vbuf, int_count*4, inst->ibuf->i, 6*int_count);
+    int res = SDL_RenderGeometry(inst->renderer, inst->cur_texture, inst->vbuf, int_count*4, inst->ibuf->i, 6*int_count);
     assert(res == 0);
 }
 
-void sresdlrenderer_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switchflags)
+void sresdlrenderer_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count)
 {
     sresdlrenderer_inst* inst = _inst;
-    sresdlrenderer_texture* texture = _texture;
     int res;
 
     sre_vec2f *vertices = SDL_stack_alloc(sre_vec2f, point_count);
     for (size_t i = 0; i < point_count; i++)
     {
-        vertices[i].x = (instance->points[i].pos.x * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERAX ? inst->camera.x : 0);
-        vertices[i].y = (instance->points[i].pos.y * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERAY ? inst->camera.y : 0);
+        vertices[i].x = (instance->points[i].pos.x * inst->scaling) + inst->camera.x;
+        vertices[i].y = (instance->points[i].pos.y * inst->scaling) + inst->camera.y;
     }
 
     switch (instance->mode)
@@ -169,7 +161,7 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, void* _texture, const sre
         case SRE_PRIMITIVE_TRIANGLES: {
             res = SDL_RenderGeometryRaw(
                 inst->renderer,
-                !texture ? NULL : texture->texture,
+                inst->cur_texture,
                 &vertices->x, sizeof(sre_vec2f),
                 (const SDL_Color*)&instance->color, 0,
                 &instance->points->uv.x, sizeof(sre_RenderPoint),
@@ -193,7 +185,7 @@ void sresdlrenderer_flush_queueinstances2(void* _inst, void* _texture, const sre
 
             res = SDL_RenderGeometryRaw(
                 inst->renderer,
-                !texture ? NULL : texture->texture,
+                inst->cur_texture,
                 &vertices->x, sizeof(sre_vec2f),
                 (const SDL_Color*)&instance->color, 0,
                 &instance->points->uv.x, sizeof(sre_RenderPoint),

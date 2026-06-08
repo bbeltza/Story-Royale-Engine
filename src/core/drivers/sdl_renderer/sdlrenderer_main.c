@@ -5,15 +5,16 @@
 static void sresdlrenderer_destroy(void* _inst);
 const struct sre_RenderVFT sresdlrenderer_vft = {
     sresdlrenderer_destroy,
-    sresdlrenderer_flush_queueinstances1,
-    sresdlrenderer_flush_queueinstances2,
-    sresdlrenderer_present,
-    sresdlrenderer_clear,
+    sresdlrenderer_draw1,
+    sresdlrenderer_draw2,
+    sresdlrenderer_begin,
+    sresdlrenderer_end,
     sresdlrenderer_set_viewportstate,
+    sresdlrenderer_set_vsync,
+    sresdlrenderer_set_texturestate,
     sresdlrenderer_set_blendstate,
     sresdlrenderer_set_camerastate,
-    sresdlrenderer_set_clipstate,
-    sresdlrenderer_set_vsync,
+    sresdlrenderer_set_scissorstate,
     sresdlrenderer_setup_texture,
     sresdlrenderer_update_texture,
     sresdlrenderer_destroy_texture
@@ -23,7 +24,7 @@ const struct sre_RenderVFT sresdlrenderer_vft = {
 static int sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SDL_Window* window)
 {
     sresdlrenderer_inst* inst = _inst;
-    
+
     inst->renderer = SDL_CreateRenderer(window, -1, 0);
     if (!inst->renderer)
     {
@@ -31,6 +32,7 @@ static int sresdlrenderer_main(const struct sre_RenderVFT** vft, void* _inst, SD
         return SRE_RENDERSTATUS_FAILED;
     }
     
+    inst->cur_texture = NULL;
     inst->vbuf = NULL;
     inst->vbuf_size = 0;
     inst->ibuf = NULL;

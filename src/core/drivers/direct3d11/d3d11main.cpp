@@ -152,26 +152,14 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         
         SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffer));
 
-        cbuffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
-        cbuffer_desc.CPUAccessFlags = 0;
-        cbuffer_desc.ByteWidth = sizeof(UINT[4]);
-        
-        UINT camvec[2];
-        D3D11_SUBRESOURCE_DATA initialdata{camvec};
-
-        for (int i = 0; i < 4; i++)
-        {
-            camvec[0] = (i & 1) != 0;
-            camvec[1] = (i & 2) != 0;
-            SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, &initialdata, &m_camveccbuffers[i]));
-        }
+        cbuffer_desc.ByteWidth = sizeof(CCamBuffer);
+        SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_ccambuffer));
     }
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 4; i++)
     {
         #define SRE_D3D11_BLEND_DESC(srcFactor, dstFactor, op) { FALSE, FALSE, { {TRUE, srcFactor, dstFactor, op, D3D11_BLEND_ONE, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL} } }
         static D3D11_BLEND_DESC BLENDSTATES[5] = {
-            { FALSE, FALSE, { {FALSE} } }, // TODO: None blend mode SHOULD be removed
             /* BLEND */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD),
             /* ADD   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD),
             /* MOD   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_DEST_COLOR, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD),
@@ -214,6 +202,7 @@ Instance::Instance(SDL_Window* window, int* outstatus)
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
     m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
     m_dxdevicecontext->VSSetConstantBuffers(0, 1, &m_cbuffer);
+    m_dxdevicecontext->VSSetConstantBuffers(1, 1, &m_ccambuffer);
 
     *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }
@@ -230,8 +219,7 @@ Instance::~Instance()
         m_dxblendstates[i]->Release();
     
     m_cbuffer->Release();
-    for (int i = 0; i < _countof(m_camveccbuffers); i++)
-        m_camveccbuffers[i]->Release();
+    m_ccambuffer->Release();
     
     m_dxrasterizerstate->Release();
     m_dxsamplerstate->Release();

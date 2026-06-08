@@ -3,19 +3,6 @@
 #include <Core/Window.hpp>
 #include <Base/Image.hpp>
 
-bool sre::window_seticon(const sre::Image& img)
-{
-    SDL_Surface* surface = static_cast<SDL_Surface*>(img.handle());
-    if (!surface) return false;
-
-    SDL_ClearError();
-    SDL_SetWindowIcon(engine.sdl_windowhndl, surface);
-    if (SDL_GetError()[0])
-        return false;
-    
-    return true;
-}
-
 bool sre::window_togglefullscreen()
 {
     bool fullscreen = !window_isfullscreen();

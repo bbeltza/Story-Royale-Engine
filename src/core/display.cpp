@@ -1,8 +1,6 @@
 #include <Core/Display.hpp>
 #include <Core/Defer.h>
-#include <Core/Render.h>
 #include "../internal.h"
-
 
 sre::vec2ut sre::display_center() { return { engine.vcenter_x, engine.vcenter_y}; }
 sre::vec2ut sre::display_size() { return { engine.vsize_x, engine.vsize_y }; }
@@ -29,11 +27,4 @@ void sre::display_autoscale_off()
 {
     engine.auto_scalex = 0;
     engine.auto_scaley = 0;
-}
-
-void sre::display_vsync(bool enable)
-{
-    sre_defer([](void* enable) { 
-        SRE_VIDEO(engine.video.driver, set_vsync, enable != NULL);
-     }, 0, reinterpret_cast<void*>(enable));
 }

@@ -6,7 +6,7 @@
 
 using namespace sreECS;
 
-void EntityControl::on_pupdate(Camera& camera)
+void EntityControl::on_pupdate(Camera& camera, sre::timeStamp dt)
 {
     sre::vec2ut diff = m_target - m_entity->position;
 
@@ -19,5 +19,5 @@ void EntityControl::on_pupdate(Camera& camera)
     if (!smoothness)
         camera.position = m_target;
     else
-        camera.position.setlerp(m_target, sre::pdt / smoothness);
+        camera.position.setlerp(m_target, dt / smoothness);
 }

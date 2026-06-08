@@ -9,15 +9,16 @@ static void sregl32_destroy(void* _inst)
 
 const struct sre_RenderVFT sregl32_vft = {
     sregl32_destroy,
-    sregl32_flush_queueinstances1,
-    sregl32_flush_queueinstances2,
-    sregl32_present,
-    sregl32_clear,
+    sregl32_draw1,
+    sregl32_draw2,
+    sregl32_begin,
+    sregl32_end,
     sregl32_set_viewportstate,
+    sregl32_set_vsync,
+    sregl32_set_texturestate,
     sregl32_set_blendstate,
     sregl32_set_camerastate,
-    sregl32_set_clipstate,
-    sregl32_set_vsync,
+    sregl32_set_scissorstate,
     sregl32_texture_setup,
     sregl32_texture_update,
     sregl32_texture_destroy

@@ -1,4 +1,5 @@
 #include <Core/Render.h>
+#include <Core/Display.hpp>
 #include <Core/Runtime.hpp>
 #include <Base/Error.h>
 #include <Base/Log.h>
@@ -13,14 +14,53 @@
 
 namespace sre
 {
-	struct RenderQueue
+	enum RenderCmdType
 	{
-	    size_t count;
-	    sre::Sampler* texture;
-	    char type; // 1 for RenderInstance1, or 2 for RenderInstance2
-	    short blendmode;
-	    sre::flags32 flags;
-		sre::rect2Di clip_rect;
+		CMD_BEGIN,
+		CMD_DRAW1,
+		CMD_DRAW2,
+
+		CMD_STATE_SCISSOR,
+		CMD_STATE_TEXTURE,
+		CMD_STATE_CAMERA,
+		CMD_STATE_BLEND
+	};
+
+	struct RenderCmd
+	{
+		RenderCmd(RenderCmdType type): type(type) {};
+		RenderCmd(const RenderCmd& cpy) {
+			SDL_memcpy(this, &cpy, sizeof(RenderCmd));
+		}
+
+		RenderCmdType type;
+		union {
+			struct {
+				float clear[4];
+			} begin;
+			struct {
+				// Positions from either `rinst1cache` or `rinst2cache` depending on `type`.
+				// If `type` is CMD_DRAW1, then the units will be in `RenderInstance1` elements from `rinst1cache`
+				// If `type` is CMD_DRAW2, then the units will be in BYTES, from `rinst2cache`
+				// If it's none of them, then don't use this struct, the contents of it are undetermined 
+
+				size_t begin;
+				size_t size;
+			} draw;
+			struct {
+				sre::rect2Di rect;
+			} scissor;
+			struct {
+				void* texture;
+			} texture;
+			struct {
+				sre::unit x;
+				sre::unit y;
+			} camera;
+			struct {
+				sre::blendMode mode;
+			} blend;
+		};
 	};
 
 	struct RenderVectors // What _vector_data in engine.video contains
@@ -28,14 +68,15 @@ namespace sre
 		std::vector<RenderInstance1> rinst1cache;
 		std::vector<sre::byte> rinst2cache; // sre::byte to be more like a point buffer. RenderInstance2's size varies
             
-        // Render queue, what will be inserted in the draw functions
-        std::vector<RenderQueue> renderqueues;
+        // Render cmd, what will be inserted in the draw functions
+        std::vector<RenderCmd> rendercmds;
 	};
 }
 
 #define NAME_RENDERDRIVER(x) sre##x
 #define DECL_RENDERDRIVER(x) extern "C" const sre_RenderDriverData NAME_RENDERDRIVER(x)
 
+DECL_RENDERDRIVER(swrender);
 DECL_RENDERDRIVER(sdlrenderer);
 DECL_RENDERDRIVER(gl11);
 DECL_RENDERDRIVER(gl21);
@@ -52,7 +93,8 @@ static const sre_RenderDriverData* render_drivers[] = {
 	&NAME_RENDERDRIVER(gl32),
 	&NAME_RENDERDRIVER(gl21),
 	&NAME_RENDERDRIVER(gl11),
-	&NAME_RENDERDRIVER(sdlrenderer)
+	&NAME_RENDERDRIVER(sdlrenderer),
+	&NAME_RENDERDRIVER(swrender)
 
 	#ifdef SRE_USEDRIVER_D3D12
 	,	&NAME_RENDERDRIVER(d3d12),
@@ -84,6 +126,7 @@ static const sre_RenderDriverData* render_choosedriver(int hint)
 	const sre_RenderDriverData* driver = NULL;
 	switch (hint)
 	{
+		case SRE_RENDERDRIVER_SOFTWARE: driver = &sreswrender; break;
 		case SRE_RENDERDRIVER_SDLRENDERER: driver = &sresdlrenderer; break;
 		case SRE_RENDERDRIVER_OPENGL_11: driver = &sregl11; break;
 		case SRE_RENDERDRIVER_OPENGL_21: driver = &sregl21; break;
@@ -219,24 +262,26 @@ void __setup_renderer()
 
 	#define _CHECKFORFUNC(x) if (!engine.video.driver->vfptr->x) { sre::error(SRE_ERR_CORE, "Render driver setup error: function '" #x "' is missing"); render_panic(); }
 		_CHECKFORFUNC(destructor);
-		_CHECKFORFUNC(flush_queueinstances1);
-		_CHECKFORFUNC(flush_queueinstances2);
-		_CHECKFORFUNC(present);
-		_CHECKFORFUNC(clear);
+		_CHECKFORFUNC(draw1);
+		_CHECKFORFUNC(draw2);
+		_CHECKFORFUNC(begin);
+		_CHECKFORFUNC(end);
 		_CHECKFORFUNC(set_viewportstate);
+		_CHECKFORFUNC(set_vsync);
+		_CHECKFORFUNC(set_texturestate);
 		_CHECKFORFUNC(set_blendstate);
 		_CHECKFORFUNC(set_camerastate);
-		_CHECKFORFUNC(set_clipstate);
-		_CHECKFORFUNC(set_vsync);
+		_CHECKFORFUNC(set_scissorstate);
 		_CHECKFORFUNC(texture_setup);
 		_CHECKFORFUNC(texture_update);
-		_CHECKFORFUNC(texture_destroy);
+		_CHECKFORFUNC(texture_destroy);	
 	#undef _CHECKFORFUNC
 
 	new(engine.video._vector_data) sre::RenderVectors{};
 	engine.video.texture_size = driverdata->texture_size;
 	engine.video.flags = driverdata->flags;
-	engine.video.blendmode = SRE_BLEND_DEFAULT;
+	engine.video.state = {};
+	engine.video.state.currentvsync = true;
 
 	if (engine.video.index == 0)
 	{
@@ -296,117 +341,195 @@ void __update_viewport(int w, int h)
 void __render_flush()
 {
 	assert(SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN);
-
-	if (!engine.video.wantclear && m.renderqueues.empty()) return;
-	engine.video.wantclear = false;
+	if (m.rendercmds.empty()) return;
 
 	using namespace sre;
 
-	float bg[4] = {0, 0, 0, 1};
-	if (engine.current_world)
-	{
-		bg[0] = currscn->background.r / 255.0f;
-		bg[1] = currscn->background.g / 255.0f;
-		bg[2] = currscn->background.b / 255.0f;
-	}
-
-	sre::vec2ut camoffset = sre::vec2ut{engine.vcenter_x, engine.vcenter_y} - (currscn != NULL ? currscn->camera.processed_position() : 0);
-	camoffset = (camoffset*engine.scale).ceil();
-
-	SRE_VIDEO(engine.video.driver, clear, bg);
-	SRE_VIDEO(engine.video.driver, set_camerastate, camoffset.x, camoffset.y);
-	
-	engine.video.blendmode = -1;
-	engine.video.clip_rect = { 0, 0 };
 	// Perform flushes
-		size_t insti1 = 0;
-		size_t insti2 = 0;
+		bool hasbegun = false;
 
-		static const sre::RenderQueue _DUMMY_QUEUE = {
-			SIZE_MAX,
-			reinterpret_cast<sre::Sampler*>(PTRDIFF_MAX),
-			INT8_MAX,
-			INT16_MAX,
-			UINT32_MAX
-		};
-
-		const auto* last_queue = &_DUMMY_QUEUE;
-		for (auto& queue : m.renderqueues)
+		for (const auto& cmd : m.rendercmds)
 		{
-			if (queue.blendmode != engine.video.blendmode)
+			if (!hasbegun)
 			{
-				SRE_VIDEO(engine.video.driver, set_blendstate, static_cast<sre::blendMode>(queue.blendmode));
-				engine.video.blendmode = queue.blendmode;
-			}
-			if (queue.clip_rect != engine.video.clip_rect)
-			{
-				SRE_VIDEO(engine.video.driver, set_clipstate, &queue.clip_rect);
-				engine.video.clip_rect = queue.clip_rect;
+				assert(cmd.type == CMD_BEGIN && "The first command MUST be CMD_BEGIN");
+
+				if (engine.video.state.desiredvsync != engine.video.state.currentvsync)
+				{
+					SRE_VIDEO(engine.video.driver, set_vsync, engine.video.state.desiredvsync);
+					engine.video.state.currentvsync = engine.video.state.desiredvsync;
+				}
+				
+				SRE_VIDEO(engine.video.driver, begin, cmd.begin.clear);
+				SRE_VIDEO(engine.video.driver, set_blendstate, SRE_BLEND_DEFAULT);
+				SRE_VIDEO(engine.video.driver, set_camerastate, 0, 0);
+				hasbegun = true;
+				continue;
 			}
 
-			sre::u32 switchflags = (queue.type != last_queue->type ? SRE_RENDER_SWITCHTYPE : 0)
-								 | ((queue.flags&SRE_DRAWFLAG_CAMERA) != (last_queue->flags&SRE_DRAWFLAG_CAMERA) || last_queue == &_DUMMY_QUEUE ? SRE_RENDER_SWITCHCAMERA : 0 )
-								 | (queue.texture != last_queue->texture ? SRE_RENDER_SWITCHTEXTURE : 0);
-			queue.texture = queue.texture ? queue.texture+1 : NULL;
-
-			last_queue = &queue;
-			switch (queue.type)
+			switch (cmd.type)
 			{
-			case 1:
-				assert(insti1 + queue.count <= m.rinst1cache.size());
-				SRE_VIDEO(engine.video.driver,
-							flush_queueinstances1,
-							queue.texture,
-							&m.rinst1cache.at(insti1),
-							queue.count,
-							queue.flags,
-							switchflags
-						);
-				insti1 += queue.count;
-				break;
-			case 2:
-				SRE_VIDEO(engine.video.driver,
-							flush_queueinstances2,
-							queue.texture,
-							&reinterpret_cast<RenderInstance2&>(m.rinst2cache.at(insti2)),
-							queue.count,
-							queue.flags,
-							switchflags
-				);
-				insti2 += queue.count*sizeof(RenderInstance2::points[0]) + sizeof(RenderInstance2::color) + sizeof(RenderInstance2::mode);
-			default:
-				break;
+				case CMD_DRAW1:
+					SRE_VIDEO(engine.video.driver, draw1,
+						&m.rinst1cache.at(cmd.draw.begin),
+						cmd.draw.size
+					);
+					break;
+				case CMD_DRAW2:
+					SRE_VIDEO(engine.video.driver, draw2,
+						&reinterpret_cast<const sre_RenderInstance2&>(m.rinst2cache.at(cmd.draw.begin)),
+						cmd.draw.size
+					);
+					break;
+				case CMD_STATE_SCISSOR:
+					SRE_VIDEO(engine.video.driver, set_scissorstate,
+						&cmd.scissor.rect
+					);
+					break;
+				case CMD_STATE_TEXTURE:
+					SRE_VIDEO(engine.video.driver, set_texturestate,
+						cmd.texture.texture
+					);
+					break;
+				case CMD_STATE_CAMERA:
+					SRE_VIDEO(engine.video.driver, set_camerastate,
+						cmd.camera.x,
+						cmd.camera.y
+					);
+					break;
+				case CMD_STATE_BLEND:
+					SRE_VIDEO(engine.video.driver, set_blendstate,
+						cmd.blend.mode
+					);
+					break;
+				default:
+					assert(0 && "Unknown command type! Or command type is CMD_STATE_BEGIN");
 			}
 		}
 
 		m.rinst1cache.clear();
 		m.rinst2cache.clear();
-		m.renderqueues.clear();
-
-		engine.video.blendmode = SRE_BLEND_DEFAULT;
+		m.rendercmds.clear();
 	//
 
 	if (engine.imgui)
 		__endframe_imgui();
 
-	SRE_VIDEOV(engine.video.driver, present);
+	SRE_VIDEOV(engine.video.driver, end);
 }
 
 // All sre::render_ functions
-
-void sre::render_clipreset() { engine.video.clip_rect = {0, 0, engine.osize_x, engine.osize_y}; }
-
-void sre::render_clipset(sre::rect2Dut zone)
+bool sre::render::has_begun() {
+	return !m.rendercmds.empty();
+}
+bool sre::render::begin(sre::col4 clear, sre::vec2ut camera)
 {
-	engine.video.clip_rect = {
-		static_cast<int>(ceil(zone.position.x * engine.scale)),
-		static_cast<int>(ceil(zone.position.y * engine.scale)),
-		static_cast<int>(ceil(zone.size.x * engine.scale)),
-		static_cast<int>(ceil(zone.size.y * engine.scale))
-	};
+	if (has_begun())
+		return false;
+
+	sre::vec2ut center = sre::display_center();
+	engine.video.state.camera_x = ceil((-camera.x + center.x) * engine.scale);
+	engine.video.state.camera_y = ceil((-camera.y + center.y) * engine.scale);
+	engine.video.state.texture = reinterpret_cast<sre_Texture*>(UINTPTR_MAX);
+	engine.video.state.blendmode = SRE_BLEND_DEFAULT;
+	engine.video.state.lastdraw_flags = 0;
+
+	RenderCmd cmd{ CMD_BEGIN };
+	cmd.begin.clear[0] = clear.r / 255.0f;
+	cmd.begin.clear[1] = clear.g / 255.0f;
+	cmd.begin.clear[2] = clear.b / 255.0f;
+	cmd.begin.clear[3] = 1.0f;
+	m.rendercmds.emplace_back(cmd);
+	return true;
 }
 
-void sre::render_draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Sampler* texture)
+#define RENDERCMDCHECK() assert(m.rendercmds.size() != 0 && "MUST call sre::render::begin before calling any render function!!")
+
+void sre::render::set_vsync(bool enable) {
+	engine.video.state.desiredvsync = enable;
+}
+bool sre::render::set_scissors(sre::rect2Dut zone) {
+	if (engine.video.state.scissor == zone)
+		return false;
+	
+	assert(zone.size.x >= 0);
+	assert(zone.size.y >= 0);
+	assert(zone.position.x >= 0);
+	assert(zone.position.y >= 0);
+
+	RENDERCMDCHECK();
+
+	engine.video.state.scissor = zone;
+	RenderCmd cmd{ CMD_STATE_SCISSOR };
+	cmd.scissor.rect = {
+		static_cast<int>(zone.position.x * engine.scale ),
+		static_cast<int>(zone.position.y * engine.scale ),
+		static_cast<int>(zone.size.x * engine.scale ),
+		static_cast<int>(zone.size.y * engine.scale )
+	};
+	m.rendercmds.emplace_back(cmd);
+	return true;
+}
+bool sre::render::set_blendmode(sre::blendMode mode)
+{
+	// TODO: Blend mode implementations should be reliant on blending src, dst operation parameters, etc...
+	// 	 and not just a single blending enum. This would reduce backend overhead more. This enum will thus just become a wrapper around
+	// 	 the aforementioned more advanced future blending function
+	// Also you can see that BLEND_NONE isn't included anymore, it is pretty much gone, it's unecessary since BLEND_BLEND is what's mostly used
+	//		although with the future more advance blending function you'll still be able to replicate it (having src as one and dst as zero)
+	switch (mode)
+	{
+		case SRE_BLEND_BLEND:
+		case SRE_BLEND_ADD:
+		case SRE_BLEND_MOD:
+		case SRE_BLEND_MUL:
+			break;
+		default:
+			return false;
+	}
+
+	RENDERCMDCHECK();
+
+	RenderCmd cmd{ CMD_STATE_BLEND };
+	cmd.blend.mode = mode;
+	m.rendercmds.emplace_back(cmd);
+	return true;
+}
+
+void sre::render::reset_scissors() {
+	sre::render::set_scissors({
+		0.0_ut, 0.0_ut,
+		engine.vsize_x, engine.vsize_y
+	});
+}
+
+static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
+{
+	using namespace sre;
+	if (engine.video.state.texture != texture)
+	{
+		RenderCmd cmd{ CMD_STATE_TEXTURE };
+		cmd.texture.texture = texture ? texture + 1 : NULL;
+		m.rendercmds.emplace_back(cmd);
+
+		engine.video.state.texture = texture;
+	}
+
+	if (engine.video.state.lastdraw_flags != flags.get())
+	{
+		if ((engine.video.state.lastdraw_flags & SRE_DRAWFLAG_CAMERA) != (flags.get() & SRE_DRAWFLAG_CAMERA))
+		{
+			RenderCmd cmd{ CMD_STATE_CAMERA };
+			cmd.camera.x = engine.video.state.camera_x * flags.has(SRE_DRAWFLAG_CAMERAX);
+			cmd.camera.y = engine.video.state.camera_y * flags.has(SRE_DRAWFLAG_CAMERAY);
+			m.rendercmds.emplace_back(cmd);
+		}
+
+		engine.video.state.lastdraw_flags = flags.get();
+	}
+}
+
+void sre::render::draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Texture* texture)
 {
 	if (!instcount) // render_draw1 with `instcount` == 0 is a no-op
 		return;
@@ -417,25 +540,25 @@ void sre::render_draw1(sre::flags32 flags, const RenderInstance1 instances[], si
 		return;
 	}
 
-	m.rinst1cache.insert(m.rinst1cache.end(), instances, instances + instcount);
-	
-	auto* back = m.renderqueues.empty() ? NULL : &m.renderqueues.back();
-	if (!back || back->texture != texture || back->type != 1 || back->flags != flags || back->blendmode != engine.video.blendmode || back->clip_rect != engine.video.clip_rect)
+	RENDERCMDCHECK();
+	handle_render_switches(flags, texture);
+
+	RenderCmd* lastcmd = &m.rendercmds.back();
+	if (lastcmd->type != CMD_DRAW1)
 	{
-		m.renderqueues.push_back({
-			instcount,
-			texture,
-			1,
-			engine.video.blendmode,
-			flags,
-			engine.video.clip_rect
-		});
+		RenderCmd cmd{ CMD_DRAW1 };
+		cmd.draw.begin = m.rinst1cache.size();
+		cmd.draw.size = 0;
+		m.rendercmds.emplace_back(cmd);
+		
+		lastcmd = &m.rendercmds.back();
 	}
-	else
-		back->count += instcount;
+
+	lastcmd->draw.size += instcount;
+	m.rinst1cache.insert(m.rinst1cache.end(), instances, instances + instcount);
 }
 
-void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoint points[], size_t pcount, sre::draw2primitive mode, sre::Sampler* texture)
+void sre::render::draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoint points[], size_t pcount, sre::draw2primitive mode, sre::Texture* texture)
 {
 	if (!pcount)
 		return;
@@ -466,11 +589,15 @@ void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoi
 			return;
 	}
 
-	sre::RenderInstance2 dummy{
+	RENDERCMDCHECK();
+	handle_render_switches(flags, texture);
+
+	size_t bytebegin = m.rinst2cache.size();
+	sre::RenderInstance2 instanceheader{
 		mode,
 		color
 	};
-	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<sre::byte*>(&dummy), reinterpret_cast<sre::byte*>(&dummy.points));
+	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<sre::byte*>(&instanceheader), reinterpret_cast<sre::byte*>(&instanceheader.points));
 	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
 
 	if (handle_lineloop)
@@ -479,29 +606,24 @@ void sre::render_draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoi
 		pcount++;
 	}
 
-	m.renderqueues.push_back({
-		pcount,
-		texture,
-		2,
-		engine.video.blendmode,
-		flags,
-		engine.video.clip_rect
-	});
+	RenderCmd cmd{ CMD_DRAW2 };
+	cmd.draw.begin = bytebegin;
+	cmd.draw.size = pcount;
+	m.rendercmds.emplace_back(cmd);
 }
-
-void sre::render_blend(sre::blendMode blend) { engine.video.blendmode = blend; }
 
 // C wrappers
 
-extern "C" void sre_render_clipreset() { sre::render_clipreset(); }
-extern "C" void sre_render_clipset(const sre_rect2Dut* zone) { sre::render_clipset(*zone); }
-
-extern "C" void sre_render_blend(sre_blendMode blend) { sre::render_blend(blend); }
-
-extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Sampler* texture) { sre::render_draw1(flags, instances, instcount, texture); }
-extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Sampler* texture) { sre::render_draw2(flags, *color, points, pcount, mode, texture); }
-
-extern "C" void sre_render_fill(const sre_col4* color) { sre::render_fill(*color); }
+extern "C" void sre_render_set_vsync(bool enable) { sre::render::set_vsync(enable); }
+extern "C" bool sre_render_set_scissors(const sre_rect2Dut* zone) { return sre::render::set_scissors(*zone); }
+extern "C" bool sre_render_set_blendmode(sre_blendMode blendmode) { return sre::render::set_blendmode(blendmode); }
+extern "C" void sre_render_reset_scissors() { sre::render::reset_scissors(); }
+extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Texture* texture) {
+	sre::render::draw1(flags, instances, instcount, texture);
+}
+extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Texture* texture) {
+	sre::render::draw2(flags, *color, points, pcount, mode, texture);
+}
 
 // ImGui setup
 

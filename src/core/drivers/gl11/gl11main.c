@@ -8,15 +8,16 @@ static void sregl11_destroy(void* _inst)
 
 static const struct sre_RenderVFT sregl11vft = {
     sregl11_destroy,
-    sregl11_flush_queueinstances1,
-    sregl11_flush_queueinstances2,
-    sregl11_present,
-    sregl11_clear,
+    sregl11_draw1,
+    sregl11_draw2,
+    sregl11_begin,
+    sregl11_end,
     sregl11_set_viewportstate,
+    sregl11_set_vsync,
+    sregl11_set_texturestate,
     sregl11_set_blendstate,
     sregl11_set_camerastate,
-    sregl11_set_clipstate,
-    sregl11_set_vsync,
+    sregl11_set_scissorstate,
     sregl11_texture_setup,
     sregl11_texture_update,
     sregl11_texture_destroy

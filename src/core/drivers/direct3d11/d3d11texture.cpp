@@ -2,7 +2,7 @@
 
 using namespace sreD3D11;
 
-bool Instance::texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat)
+bool Instance::texture_setup(Texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat)
 {
 	HRESULT hr;
 

@@ -21,6 +21,9 @@
         The interface definition is included in <ImGui.hpp> for C++ only since ImGui is included with C++
         This hint allows the integration with ImGui. In the class that you define, you must initialize ImGui in the `initialize` virutal method
         The `initialize` method returns the same set of codes as render driver initialization functions do. So include <Core/Render.h> for that.
+    - SRE_HINT_ECS_ENTRYPOINT & SRE_HINT_GUI_ENTRYPOINT: These are functions (which will be interpreted with `void f(void)` as the signature) that run before setting up the 
+        new object layer system for the ECS and GUI respectively. It's used by the ECS and GUI modules to initialize all of the necessary data to function, as a way to no
+        longer rely on the internal engine anymore, so you shouldn't use them. But if you don't rely on those modules, then using them as a way of setting different entry points is possible.
 */
 // This is it for now, I'm looking forward to expand this more
 

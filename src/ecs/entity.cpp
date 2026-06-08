@@ -4,7 +4,12 @@
 
 using namespace sreECS;
 
-Entity::Entity(sre::unit x, sre::unit y, long z): position(x, y), z_index(z)
+Entity::Entity(Scene* scene, sre::unit x, sre::unit y, long z): position(x, y), z_index(z) {
+	if (scene)
+		scene->add_child(this);
+}
+
+Entity::Entity(sre::unit x, sre::unit y, long z): Entity(NULL, x, y, z)
 {
 }
 
@@ -20,9 +25,6 @@ Entity::~Entity()
 
 		::operator delete(ptr);
 	}
-
-	if (m_size < Scene::_Arena::SIZE)
-		m_parent->m_freelist.push_back(this);
 	
 	for (auto it = m_parent->m_entities.begin(); it != m_parent->m_entities.end(); it++)
 	{
@@ -32,11 +34,6 @@ Entity::~Entity()
 		m_parent->m_entities.pop_back();
 		break;
 	}
-}
-
-void Entity::operator delete(void* entity)
-{
-	static_cast<Entity*>(entity)->~Entity();
 }
 
 void Entity::setup_components(Component* const components[], size_t count)

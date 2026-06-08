@@ -4,7 +4,7 @@
 
 using namespace sre;
 
-FontAtlas::FontAtlas(const sre::RSampler& texture, sre::vec2i contant_size): m_atlas(texture), m_lineskip(static_cast<sre::unit>(contant_size.y))
+FontAtlas::FontAtlas(const sre::RAIITexture& texture, sre::vec2i contant_size): m_atlas(texture), m_lineskip(static_cast<sre::unit>(contant_size.y))
 {
     if (!m_atlas)
         return;
@@ -36,7 +36,7 @@ FontAtlas::FontAtlas(const sre::RSampler& texture, sre::vec2i contant_size): m_a
     }
 }
 
-FontAtlas::FontAtlas(const sre::RSampler& texture, const sre::Glyph glyphs[CHARACTER_COUNT], sre::unit lineskip, bool normalize): m_atlas(texture), m_lineskip(lineskip)
+FontAtlas::FontAtlas(const sre::RAIITexture& texture, const sre::Glyph glyphs[CHARACTER_COUNT], sre::unit lineskip, bool normalize): m_atlas(texture), m_lineskip(lineskip)
 {
     if (!m_atlas)
         return;
@@ -204,7 +204,7 @@ void FontAtlas::render_line(const FontRenderData& renderdata, sre::vec2ut toplef
         if (renderdata.modifier_callback)
             renderdata.modifier_callback(userdata, data, renderdata.text[i], i);
 
-        sre::render_draw1(renderdata.renderflags, data, m_atlas.get());
+        sre::render::draw1(renderdata.renderflags, data, m_atlas.get());
 
         topleft_begin.x += glyph.advance;
     }

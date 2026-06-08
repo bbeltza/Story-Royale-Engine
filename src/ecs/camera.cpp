@@ -11,12 +11,10 @@ void Camera::update()
         controller->on_update(*this);
 }
 
-void Camera::pupdate()
+void Camera::pupdate(sre::timeStamp dt)
 {
-    if (controller && controller->enabled)
-        controller->on_pupdate(*this);
-
-    clamp_position();
+    if (dt && controller && controller->enabled)
+        controller->on_pupdate(*this, dt);
 }
 
 static const Camera ZERO_CAM;

@@ -30,7 +30,7 @@ void DragControl::on_update(Camera& camera)
     m_lastmouseDelta = m_lastmouseDelta.ZERO;
 }
 
-void DragControl::on_pupdate(Camera&)
+void DragControl::on_pupdate(Camera&, sre::timeStamp dt)
 {
     // Empty.
 }

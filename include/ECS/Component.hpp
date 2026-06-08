@@ -3,6 +3,7 @@
 
 #include <Datatypes/Vector.h>
 #include <Datatypes/Flags.hpp>
+#include <Datatypes/TimeStamp.h>
 
 namespace sre
 {
@@ -39,7 +40,7 @@ namespace sreECS
 	protected:
 		virtual void on_render(Entity& entity) {}
 		virtual void on_update(Entity& entity) {}
-		virtual void on_pupdate(Entity& entity) {}
+		virtual void on_pupdate(Entity& entity, sre::timeStamp dt) {}
 		virtual bool on_query(Entity& entity, sre::vec2ut pt) const { return false; }
 
 	#ifndef IMGUI_DISABLE

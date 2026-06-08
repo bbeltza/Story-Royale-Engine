@@ -1,28 +1,56 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
 - June xxth 2026: 0.105.xx
-    - Rendering refactorings: - Draw2's mode parameter has been change to an enumeration of primitive modes:
-                                    - SRE_PRIMITIVE_TRIANGLES: Draw separate triangles for each 3 points.
-                                    - SRE_PRIMITIVE_TRIANGLESTRIP: Draw triangles that are joined with the two last points for each new point.
-                                    - SRE_PRIMITIVE_LINEPERLINE: Draw a single line of two points for each pair of points.
-                                    - SRE_PRIMITIVE_LINESTRIP: Draw connected lines
-                                    - SRE_PRIMITIVE_LINELOOP: Draw looped lines (connected lines that wrap to the first point)
-                                    - SRE_PRIMITIVE_POINTS: Draw points separately.
-                              - Advanced camera flags released: SRE_DRAWFLAG_CAMERAX and SRE_DRAWFLAG_CAMERAY ; You're now able to control which axis is in world space when drawing.
-                                                                    Note that SRE_DRAWFLAG_CAMERA still exists, it's just a combination of these two flags for conveniency.
-                              - A few render driver optimizations/tweaks: - D3D12 has a texture staging mechanism now, and it uses GPU upload memory for its buffers, if available.
-                                                                                Otherwise it would fallback to normal upload memory. GPU_UPLOAD memory is faster for the GPU but not always available.
-                                                                                I might want to use it back for textures too but the staging "mechanism" is still quite valid.
-                                                                            - Additionaly, a bottleneck involving waiting for the GPU was fixed: Having 2 framebuffers in this implementation, the CPU
+    - Render refactorings: - Draw2's mode parameter has been changed to this set of primitive modes:
+                                      - SRE_PRIMITIVE_TRIANGLES: Draw separate triangles for every 3 points.
+                                      - SRE_PRIMITIVE_TRIANGLESTRIP: Draw triangles that get joined using the two previous points for each new point.
+                                      - SRE_PRIMITIVE_LINEPERLINE: Draw a single line of two points for each pair of points.
+                                      - SRE_PRIMITIVE_LINESTRIP: Draw connected lines
+                                      - SRE_PRIMITIVE_LINELOOP: Draw looped lines (just connected lines that wrap to the first point)
+                                      - SRE_PRIMITIVE_POINTS: Draw points separately.
+                                - More advanced camera flags: SRE_DRAWFLAG_CAMERAX and SRE_DRAWFLAG_CAMERAY ; You're now able to control which axis is in world space when drawing.
+                                                                      Note that SRE_DRAWFLAG_CAMERA still exists, it's just a combination of these two flags for conveniency (and "backwards compatibility").
+                                - sre_Sampler is now called sre_Texture, and all of the corresponding functions that were named after "sampler" are now renamed after "texture"
+                                - sre_pixelFormat is now sre_SDLpixelFormat. (sre::pixelFormat => sre::SDLpixelFormat)
+                                - A few render driver optimizations/tweaks: - D3D12 has a texture staging mechanism now, and it uses GPU upload memory for its buffers, if available.
+                                                                                Otherwise it would fallback to normal upload memory. GPU_UPLOAD memory is faster for the GPU but not available for all hardware.
+                                                                                I might want to use it back for textures too but the staging "mechanism" is still quite conveninent.
+                                                                            - Additionally, a bottleneck involving waiting for the GPU was fixed: Having 2 framebuffers in this implementation the CPU
                                                                                 was waiting for the current frame's commands to be executed while it could've prepared the commands for the other frame,
-                                                                                or even do other things! It is now properly implemented, giving a similar performance to the one from d3d11, 
+                                                                                or even do other things outside! It is now properly implemented, giving a similar performance to d3d11, 
                                                                                 although still a little bit inferior.
-                                                                          - D3D11 and D3D9 tweaks. D3D9 finally supports buffer resizing for its draw commands and its interface for it is more intuitive.
-                                                                                D3D11 and 12 might also want to take some of that interface (I made a template function in d3d9's driver that will automatically
-                                                                                multiply the count parameter by the size of the type, making it less error-prone)
-                                                                          - OpenGL 2.1 tweaks: draw1 and draw2 use the same vertex buffer now, indeed they even use the same shaders! It's made so that draw1
-                                                                                implements a sort of vertex-assembling system found in SDL renderer and OpenGL 1.1 drivers which, will implement instancing more
-                                                                                correctly. It's more preferably called "batching" since that's the action of assembling multiple vertices into a single bigger buffer
-                                                                                but this will still reduce the amount of draw calls, again. OpenGL 2.1's implementation was flawed and quite old.
+                                                                            - D3D11 and D3D9 tweaks. D3D9 finally supports buffer resizing for its draw commands and its interface for it is more intuitive.
+                                                                                  I might on D3D11 and 12 also want to take some of that interface (It's a set of template functions in d3d9's driver that will automatically
+                                                                                  multiply the count parameter by the size of the type, which is less error-prone)
+                                                                            - OpenGL 2.1 tweaks: draw1 and draw2 use the same vertex buffer now, indeed they even use the same shaders! It's made so that draw1
+                                                                                  implements a sort of vertex-assembling system similar in SDL renderer and OpenGL 1.1 drivers which, will implement instancing more
+                                                                                  correctly. It's more preferably called "batching" since it's the action of assembling multiple vertices into a single big buffer
+                                                                                  but this will still reduce the amount of draw calls, again. OpenGL 2.1's implementation was flawed and quite old.
+    - An object layer system has been in the works. It is an object manager handled by the engine in which you add objects to it, and the engine will update them automatically (with its virtual methods).
+            If using the ECS or/and GUI modules, it is not really necessary to rely on that "object manager".
+            The ECS and GUI modules that previously relied on internal engine variables now don't. They have gotten in some way designed to work with these layers. They rely on this new system now by 
+                wrapping a "Layer" class that would be bound to the layer.
+            Most of the functions for the ECS and GUI have been renamed or changed (Also the previously core runtime function sre::set_tickrate for example, is now moved into the sreECS::set_physics_dt)
+             so, migration is most likely needed. Also, if one of your constructors relied on get_parent to get the scene or parent of respectively an entity or GUI object, you really want to migrate to
+             the parent constructor (taking the parent as a parameter in the destructor and passing it through the base class) since there's no proper add_child/add_entity function, which now just wraps
+             `new` and add_child/set_parent so it won't set the parent of that object before the constructor.
+            You may also notice that the global functions in sreECS and sreGUI take an optional parameter to a "Layer" object. It is by default NULL which will just take the default layer bound at the start
+              of the program, but you can add multiple ECS or GUI layer objects and bind them into the engine (e.g.: Have a permanent or semi-permanent UI on top of the current UI), although, it is not fully tested.
+    - Additionaly, after the renderer tweaks have been made,
+        some of the rendering interface has also been repolished: - The functions related to rendering are moved into an sre::render namespace, instead of them being prefixed with `render`
+                                                                  - The C wrappers remain somewhat equal on the "namespace"
+                                                                  - For each frame, a call to `render::begin` is needed now, which would set up the clear color and the built-in camera position
+                                                                       This is not needed if you have the ECS or GUI layers included since they will call that function for you. But, you can still
+                                                                       call it in a connection to sre::beforeRender that runs before any of the object layers are rendered.
+                                                                  - Most frontend functions remain the same, but the backend interface was heavily changed:
+                                                                       - The order of some of the previously equivalent options have been changed, migration is required and has been done to the current render drivers.
+                                                                       - clear and present are now respectively begin and end. They nearly do the same thing though.
+                                                                       - flush_queueinstances1 and 2 are now draw1 and 2. They of course do the same thing: Flush the drawing queue and sending it to the GPU.
+                                                                           However, the flag and texture parameters have been removed, these functions only containing two parameters, only "instance" data.
+                                                                           To setup the texture and previously flag states for drawing, what's said next is used.
+                                                                       - Functions to set the current texture and camera state are now used, they are automatically queued and called by the engine when it detects any
+                                                                           necessary switches. set_camerastate is now called frequently, instead of once per frame, when any switch involving the built-in camera is needed.
+                                                                           (when any of the two SRE_DRAWFLAG_CAMERA camera is changed)
+                                                                       - SRE_BLEND_NONE is removed. Aims for more blending flexibility by supporting custom blending functions are there though. 
 - May 20th 2026: 0.104.20
     - New hints: - SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
                     but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers

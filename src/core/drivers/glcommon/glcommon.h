@@ -76,13 +76,13 @@ extern GLenum sregl_mapmode(sre_draw2primitive d2mode);
 extern int sregl_commonsetup(sregl_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs);
 extern void sregl_commondestroy(sregl_cominst* inst);
 
-extern bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
+extern bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat);
 extern bool sregl_texture_update(struct sregl_functions* glfuncs, sregl_texture* texture, const sre_rect2Di* region, const void* pixels, int pitch);
 extern void sregl_texture_destroy(struct sregl_functions* glfuncs, sregl_texture* texture);
 
 extern void sregl_set_vsync(bool enable);
-extern void sregl_set_clipstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle);
-extern bool sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmode);
+extern void sregl_set_scissorstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle);
+extern void sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmode);
 
 #if _WIN32 // Use SwapBuffers directly on Windows
            // If the window is about to get destroyed, and present runs, the HDC is invalidated
@@ -92,8 +92,8 @@ extern bool sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode 
 #else
     #define SREGL_PRESENT(x) SDL_GL_SwapWindow(x.window)
 #endif
-#define SREGL_CLEAR(glfuncs, color) SRE_GLCALLF(glfuncs.ClearColor(color[0], color[1], color[2], 1)); \
-                                    SRE_GLCALLF(glfuncs.Clear(GL_COLOR_BUFFER_BIT))
+#define SREGL_CLEAR(glfuncs, color) SRE_GLCALL(glfuncs.ClearColor(color[0], color[1], color[2], color[3])); \
+                                    SRE_GLCALL(glfuncs.Clear(GL_COLOR_BUFFER_BIT))
 
 #ifdef __cplusplus
     }

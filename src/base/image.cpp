@@ -7,7 +7,7 @@
 
 using namespace sre;
 
-Image::Image(int w, int h, sre::pixelFormat format):
+Image::Image(int w, int h, sre::SDLpixelFormat format):
     sdl_surface(SDL_CreateRGBSurfaceWithFormat(0, w, h, 0, format))
 {
 }
@@ -74,16 +74,16 @@ void Image::blit(const Image& img, const sre::vec2i& pos, const sre::vec2f& anch
     SDL_UpperBlit(img.sdl_surface, NULL, sdl_surface, &rect);
 }
 
-sre::Sampler* Image::to_sampler() const
+sre::Texture* Image::to_texture() const
 {
     if (!sdl_surface)
         return sre::error(SRE_ERR_CREATE, "Image doesn't contain any surface, it is not valid.") ? nullptr : nullptr;
 
-    sre::Sampler* sampler = sre::sampler(static_cast<sre::pixelFormat>(this->SDLformat()), sdl_surface->w, sdl_surface->h);
+    sre::Texture* sampler = sre::texture(static_cast<sre::SDLpixelFormat>(this->SDLformat()), sdl_surface->w, sdl_surface->h);
     if (!sampler)
         return NULL;
 
-    sre::pixelFormat format = sampler->format();
+    sre::SDLpixelFormat format = sampler->format();
     if (format == SDLformat())
     {
         if (!sampler->update(sdl_surface->pixels, sdl_surface->pitch))

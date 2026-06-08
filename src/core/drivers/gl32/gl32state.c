@@ -1,15 +1,15 @@
 #include "gl32.h"
 
-bool sregl32_set_blendstate(void* _inst, sre_blendMode blendmode)
+void sregl32_set_blendstate(void* _inst, sre_blendMode blendmode)
 {
     sregl32_inst* inst = _inst;
-    return sregl_set_blendstate(&inst->glfuncs, blendmode);
+    sregl_set_blendstate(&inst->glfuncs, blendmode);
 }
 
-void sregl32_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
+void sregl32_set_scissorstate(void* _inst, const sre_rect2Di* rectangle)
 {
     sregl32_inst* inst = _inst;
-    sregl_set_clipstate(&inst->glfuncs, inst->common21.common.window, rectangle);
+    sregl_set_scissorstate(&inst->glfuncs, inst->common21.common.window, rectangle);
 }
 
 void sregl32_set_vsync(void* _inst, bool enable)
@@ -18,10 +18,10 @@ void sregl32_set_vsync(void* _inst, bool enable)
     sregl_set_vsync(enable);
 }
 
-bool sregl32_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
+void sregl32_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
 {
     sregl32_inst* inst = _inst;
-    SRE_GLCALLF(inst->glfuncs.Viewport(0, 0, w, h));
+    SRE_GLCALL(inst->glfuncs.Viewport(0, 0, w, h));
 
     GLfloat proj[16] = {
         2.0f/w, 0.0f, 0.0f, 0.0f,  
@@ -30,16 +30,24 @@ bool sregl32_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
         -1.0f, 1.0f, 0.0f, 1.0f,  
     };
 
-    SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->stateubo));
-    SRE_GLCALLF(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, offsetof(struct sregl32_stateubo, viewport), sizeof(proj), proj));
-    SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, 0));
-    return true;
+    SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->stateubo));
+    SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, offsetof(struct sregl32_stateubo, viewport), sizeof(proj), proj));
+    SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, 0));
 }
 
-bool sregl32_set_camerastate(void* _inst, sre_unit x, sre_unit y)
+void sregl32_set_camerastate(void* _inst, sre_unit x, sre_unit y)
 {
     sregl32_inst* inst = _inst;
-    inst->cache.camera_x = x;
-    inst->cache.camera_y = y;
-    return true;
+    GLfloat cam[2] = { x, y };
+    SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, inst->stateubo));
+    SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_UNIFORM_BUFFER, offsetof(struct sregl32_stateubo, camera), sizeof(cam), cam));
+    SRE_GLCALL(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, 0));
+}
+
+void sregl32_set_texturestate(void* _inst, void* _texture)
+{
+    sregl32_inst* inst = _inst;
+    sregl_texture* texture = _texture;
+
+    SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, texture ? texture->gltex : inst->common21.basic_texture));
 }

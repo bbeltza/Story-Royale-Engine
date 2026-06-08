@@ -1,6 +1,6 @@
 #include "gl32.h"
 
-bool sregl32_texture_setup(void* _inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat)
+bool sregl32_texture_setup(void* _inst, void* texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat)
 {
     sregl32_inst* inst = _inst;
     return sregl_texture_setup(&inst->glfuncs, texture, format, w, h, outformat);

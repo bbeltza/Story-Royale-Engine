@@ -27,7 +27,8 @@ void Button::handle_event(void*, Button* button, sre::Event ev)
     }
 }
 
-Button::Button():
+Button::Button(sreGUI::Object* parent):
+    Object(parent),
     m_event(sre::onEvent.connect(handle_event, this))
 {
 

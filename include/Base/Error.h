@@ -22,6 +22,8 @@ typedef enum sreErrorCategory
     SRE_ERR_INVALID_HINT,
     SRE_ERR_INVALID_STATE,
 
+    SRE_ERR_UNAVAILABLE,
+
     SRE_ERR_FAIL,
     SRE_ERR_SDL,
 

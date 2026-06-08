@@ -14,7 +14,7 @@ namespace sreECS
         sre::vec2ut bounds;
 
     protected:
-        void on_pupdate(Camera& camera) override;
+        void on_pupdate(Camera& camera, sre::timeStamp dt) override;
     private:
         Entity* const m_entity;
         sre::vec2ut m_target;

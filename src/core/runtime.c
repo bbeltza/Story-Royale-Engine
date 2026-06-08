@@ -81,16 +81,15 @@ static int game_loop(void* running)
 
         __queue_events();
         
-        engine.video.wantclear = true;
         #ifdef WIN32_HANDLE_WINDOW_BLOCKING
-            if (__update_ecs())
+            if (__update_objects())
             {
                 sre_defer(win32_renderflush, 0, NULL);
                 int res = SDL_CondWaitTimeout(win32_rendercond, win32_rendermtx, 5000);
                 assert(res >= 0);
             }
         #else
-            if (__update_ecs())
+            if (__update_objects())
             {
                 sre_defer(sem_renderflush, 0, NULL);
                 SDL_SemWait(sdl_rendersem);

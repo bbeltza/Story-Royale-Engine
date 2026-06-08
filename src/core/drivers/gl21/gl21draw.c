@@ -2,45 +2,21 @@
 
 #include <math.h>
 
-static inline void sregl21switchcheck(sregl21_inst* inst, sregl_texture* texture, sre_u32 flags, sre_u32 switch_flags)
+void sregl21_begin(void* _inst, const float clear[4])
 {
-    if (switch_flags & SRE_RENDER_SWITCHTYPE)
-    {
-        (void)0; // Nothing to do
-    }
-
-    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
-    {
-        bool usecamx = flags & SRE_DRAWFLAG_CAMERAX;
-        bool usecamy = flags & SRE_DRAWFLAG_CAMERAY;
-        SRE_GLCALL(inst->glfuncs21.Uniform2f(inst->uniforms.camera, usecamx ? inst->cache.camera[0] : 0, usecamy ? inst->cache.camera[1] : 0));
-    }
-
-    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
-    {
-        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, !texture ? inst->common21.basic_texture : texture->gltex));
-    }
+    sregl21_inst* inst = _inst;
+    SREGL_CLEAR(inst->glfuncs, clear);
 }
 
-void sregl21_present(void* _inst)
+void sregl21_end(void* _inst)
 {
     sregl21_inst* inst = _inst;
     SREGL_PRESENT(inst->common21.common);
 }
 
-bool sregl21_clear(void* _inst, float color[3])
+void sregl21_draw1(void* _inst,const sre_RenderInstance1* instances, size_t instance_count)
 {
     sregl21_inst* inst = _inst;
-    SREGL_CLEAR(inst->glfuncs, color);
-    return true;
-}
-
-void sregl21_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
-{
-    sregl21_inst* inst = _inst;
-    sregl_texture* texture = _texture;
-    
-    sregl21switchcheck(inst, texture, flags, switch_flags);
 
     size_t vertex_count = instance_count*4;
     sregl21_vtassemblerreserve(inst, &inst->vtassembler, vertex_count);
@@ -107,14 +83,11 @@ void sregl21_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
     SRE_GLCALL(inst->glfuncs.DrawArrays(GL_QUADS, 0, (GLsizei)(vertex_count)));
 }
 
-void sregl21_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
+void sregl21_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count)
 {
     sregl21_inst* inst = _inst;
-    sregl_texture* texture = _texture;
     
-    sregl21switchcheck(inst, texture, flags, switch_flags);
     sregl21_vtassemblerreserve(inst, &inst->vtassembler, point_count);
-
     for (size_t i = 0; i < point_count; i++)
     {
         inst->vtassembler.arr[i] = (sregl21_vertex){ {instance->points[i].pos.x, instance->points[i].pos.y}, instance->points[i].uv, instance->color };

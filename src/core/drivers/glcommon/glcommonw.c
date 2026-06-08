@@ -4,7 +4,7 @@
 #undef SRE_GLGETERROR
 #define SRE_GLGETERROR glfuncs->GetError
 
-bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat)
+bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat)
 {
     SRE_GLCALLF(glfuncs->GenTextures(1, &texture->gltex));
     SRE_GLCALLF(glfuncs->BindTexture(GL_TEXTURE_2D, texture->gltex));
@@ -51,7 +51,7 @@ void sregl_set_vsync(bool enable)
         SDL_GL_SetSwapInterval(0);
 }
 
-void sregl_set_clipstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle)
+void sregl_set_scissorstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle)
 {
     int w, h;
     SDL_GL_GetDrawableSize(window, &w, &h);
@@ -72,12 +72,12 @@ void sregl_set_clipstate(struct sregl_functions* glfuncs, SDL_Window* window, co
     //}
 }
 
-bool sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmode)
+void sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmode)
 {
-    if (blendmode == SRE_BLEND_NONE)
+    if (0)
     {
-        SRE_GLCALLF(glfuncs->Disable(GL_BLEND));
-        return true;
+        SRE_GLCALL(glfuncs->Disable(GL_BLEND));
+        return;
     }
 
     GLenum sfactor;
@@ -100,10 +100,10 @@ bool sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmo
             sfactor = GL_DST_COLOR;
             dfactor = GL_ONE_MINUS_SRC_ALPHA;
             break;
-        default: abort(); return false;
+        default: abort(); return;
     }
 
-    SRE_GLCALLF(glfuncs->Enable(GL_BLEND));
-    SRE_GLCALLF(glfuncs->BlendFunc(sfactor, dfactor));
-    return true;
+    SRE_GLCALL(glfuncs->Enable(GL_BLEND));
+    SRE_GLCALL(glfuncs->BlendFunc(sfactor, dfactor));
+    return;
 }

@@ -34,9 +34,8 @@ struct PSinput
 cbuffer CBuniforms: register(b0)
 {
     float4x4 VIEWPORT;
-    float2 CAMERA;
 };
-int2 CAMERA_VEC: register(c0);
+float2 CAMERA: register(c0);
 
 PSinput D1main(D1input input, uint vid: SV_VertexID)
 {
@@ -66,7 +65,7 @@ PSinput D1main(D1input input, uint vid: SV_VertexID)
 
     float4 vert = VERTICES[vid] - float4(input.anchor, 0.0, 0.0);
     vert = mul(vert, mul(transform, rotation));
-    vert = ceil(vert * VIEWPORT[2][2] + float4(CAMERA * CAMERA_VEC, 0, 0));
+    vert = ceil(vert * VIEWPORT[2][2] + float4(CAMERA, 0, 0));
     vert.w = 1;
     vert = mul(VIEWPORT, vert);
 
@@ -82,7 +81,7 @@ PSinput D2main(D2input input)
 {
     float4 vert = float4(input.position, 0, 1);
     vert.xy = ceil(vert.xy * VIEWPORT[2][2]);
-    vert.xy += CAMERA * CAMERA_VEC;
+    vert.xy += CAMERA;
     vert = mul(VIEWPORT, vert);
 
     PSinput output = {

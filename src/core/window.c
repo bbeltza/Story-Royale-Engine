@@ -24,3 +24,28 @@ void __create_window()
 }
 
 sre_Window* sre_mainwindow(void) { return (sre_Window*)(engine.sdl_windowhndl); }
+bool sre_defer_windowcommand(sre_Window* window, enum sreWindowCmd cmd,  ...)
+{
+	if (!window)
+		return false; // Please, call sre_mainwindow() if you refer to the main window
+
+	switch (cmd)
+	{
+		case SRE_WINDOWCMD_SETPOS:
+		case SRE_WINDOWCMD_SETSIZE:
+		case SRE_WINDOWCMD_SETFULLSCREEN:
+		case SRE_WINDOWCMD_SETTITLE:
+		case SRE_WINDOWCMD_MINIMIZE:
+		case SRE_WINDOWCMD_MAXIMIZE:
+		case SRE_WINDOWCMD_HIDE:
+		case SRE_WINDOWCMD_SHOW:
+		case SRE_WINDOWCMD_FLASH:
+			break;
+
+		default:
+			// sre_error(SRE_ERR_INVALID_ENUM, cmd)
+			return false;
+	}
+
+	return true;
+}

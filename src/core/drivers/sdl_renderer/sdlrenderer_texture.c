@@ -1,6 +1,6 @@
 #include "sdlrenderer.h"
 
-bool sresdlrenderer_setup_texture(void* _inst, void* _texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat)
+bool sresdlrenderer_setup_texture(void* _inst, void* _texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat)
 {
     sresdlrenderer_inst* inst = _inst;
     sresdlrenderer_texture* texture = _texture;

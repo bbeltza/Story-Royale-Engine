@@ -2,7 +2,6 @@
 #include <ECS/Component.hpp>
 
 #include <Datatypes/Vector.h>
-#include <Datatypes/TimeStamp.h>
 
 namespace sreECS
 {
@@ -14,6 +13,6 @@ namespace sreECS
         // Normalizes the velocity
         // @param speed the speed to multiply with
         void normalize(sre::unit speed=1.0);
-        void on_pupdate(Entity&) override;
+        void on_pupdate(Entity&, sre::timeStamp dt) override;
     };
 }

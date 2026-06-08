@@ -2,13 +2,13 @@
 #define SRE_PIXEL_H
 
 #include <SDL_pixels.h>
-typedef SDL_PixelFormatEnum sre_pixelFormat;
+typedef SDL_PixelFormatEnum sre_SDLpixelFormat;
 
 #ifdef __cplusplus
 
 namespace sre
 {
-    using pixelFormat = sre_pixelFormat;
+    using SDLpixelFormat = sre_SDLpixelFormat;
 }
 
 #endif

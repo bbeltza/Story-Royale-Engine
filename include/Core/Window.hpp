@@ -5,9 +5,6 @@
 
 namespace sre
 {
-    class Image;
-
-    bool window_seticon(const sre::Image& img);
     bool window_togglefullscreen();
 
     void window_show();
