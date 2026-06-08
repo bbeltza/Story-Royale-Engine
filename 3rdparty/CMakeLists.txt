@@ -12,7 +12,6 @@ set(SDL2_DISABLE_INSTALL ${SRE_NOINSTALL} CACHE BOOL "Disable SDL2 install targe
 
 # SDL libs
 add_subdirectory(SDL)
-
 add_subdirectory(SDL_image)
 
 # Rest of the lib(s)

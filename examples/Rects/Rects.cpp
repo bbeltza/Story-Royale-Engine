@@ -1,7 +1,8 @@
-#include <GUI/object.hpp>
-#include <GUI/Components/transform.hpp>
-#include <GUI/Components/text.hpp>
-#include <GUI/Components/fill.hpp>
+#include <GUI/Object.hpp>
+#include <GUI/Components/Transform.hpp>
+#include <GUI/Components/Text.hpp>
+#include <GUI/Components/Fill.hpp>
+#include <ECS/Scene.hpp>
 
 #include <Core/Runtime.hpp>
 #include <Core/Display.hpp>
@@ -9,7 +10,7 @@
 #include <Core/Input.hpp>
 #include <Core/Render.h>
 
-#include <ECS/scene.hpp>
+#include <Base/File.hpp>
 
 #include <Entry.h>
 
@@ -17,16 +18,24 @@ static double rot = 0;
 
 struct DisplayText: public sreGUI::Object
 {
+    sre::Font font;
+
     DisplayText()
     {
+        {
+            sre::File fontfile{"res://fonts/OpenSans-Regular.ttf"};
+            sre::Chunk fontchunk = fontfile.allocate();
+            font.load(fontchunk->data, fontchunk->size);
+        }
+
         transform.anchor = {0.5, 0}; // NOTE: anchor to be changed to vec2ut after switching to double
         transform.position = {0.5, 0, 0, 10};
         transform.size = { 0.9, 0, 0, 50 };
         
-        text.h_alignment = sre::A_CENTER;
+        text.h_alignment = sre::ALIGN_CENTER;
         text.color = {255, 255, 255};
         text.assign("Hey! This is a Rectangle test, you can move the red rectangle with your mouse, and it should turn green if it touches the white one!\n\nYou can resize the rectangle with your mouse wheel");
-        text.load("res://fonts/OpenSans-Regular.ttf");
+        text.set_font(font);
 
         components.setup(transform, text);
     }
@@ -65,7 +74,7 @@ void DisplayText::post_render()
     sre::vec2ut mPos = sreECS::mouse_worldcoords();
     instances[1].rectangle.position = mPos;
 
-    sre::render_draw1(SRE_DRAWFLAG_CAMERA, instances);
+    sre::render::draw1(SRE_DRAWFLAG_CAMERA, instances);
 }
 
 const int START_WIDTH = 480;
@@ -85,7 +94,7 @@ void sre::initialize()
     setup_settings();
 
     auto display_text = new DisplayText;
-    display_text->set_root();
+    sreGUI::set_root(display_text);
 
     sre::onEvent.connect(handle_events, nullptr);
 }

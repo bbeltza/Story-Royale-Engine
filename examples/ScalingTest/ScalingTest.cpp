@@ -11,14 +11,15 @@ void Render()
     static float t = 0;
     sre::vec2ut mpos = sre::mouse_screencoords();
     
-    sre::render_draw1(SRE_DRAWFLAG_LINE, { {
-                { mpos, {10, 10} },
-                sre::vec2ut::CENTER,
-                sre::WHITE,
-                t
-        } });
+    sre::render::begin(sre::BLACK, sre::vec2ut::ZERO);
+        sre::render::draw1(0, { {
+                    { mpos, {10, 10} },
+                    sre::vec2ut::CENTER,
+                    sre::WHITE,
+                    t
+            } });
 
-    t += UT_PI/360;
+        t += UT_PI * sre::dt;
 }
 
 void sre::initialize()

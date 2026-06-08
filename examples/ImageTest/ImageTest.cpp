@@ -1,7 +1,7 @@
-#include <ECS/scene.hpp>
-#include <ECS/entity.hpp>
+#include <ECS/Scene.hpp>
+#include <ECS/Entity.hpp>
 
-#include <ECS/Components/sprite.hpp>
+#include <ECS/Components/Sprite.hpp>
 
 #include <Core/Event.hpp>
 #include <Entry.h>
@@ -21,8 +21,8 @@ struct TextureEntity : public sreECS::Entity
 
     TextureEntity()
     {
-        sprite.attach(img1.to_sampler());
-        sprite.attach(img2.to_sampler());
+        sprite.attach(img1.to_texture());
+        sprite.attach(img2.to_texture());
         sprite.scale = 4;
 
         setup_components(sprite);
@@ -50,5 +50,5 @@ void sre::initialize()
     sre::window_setresizable(true);
     auto texture_palace = new sreECS::Scene;
     texture_palace->add_entity<TextureEntity>();
-    texture_palace->make_current();
+    sreECS::set_current(texture_palace);
 }

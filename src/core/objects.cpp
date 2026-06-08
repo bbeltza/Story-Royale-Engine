@@ -66,6 +66,11 @@ bool __update_objects()
             obj->render();
         
         sre::afterRender.fire();
+
+        #if SDL_VIDEO_DRIVER_WAYLAND // Wayland doesn't show up windows unless it's getting presented
+            if (!sre::render::has_begun())
+                sre::render::begin(sre::BLACK, sre::vec2ut::ZERO);
+        #endif
         return true;
     }
 
