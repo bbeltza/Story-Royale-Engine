@@ -224,7 +224,6 @@ bool Instance::_statesetup()
 void Instance::_resetdevice()
 {
     HRESULT hr;
-    _invalidateimgui();
     _releaseresources();
     SRE_DXCALL(m_dxdevice->Reset(&m_pparamcache));
     if (FAILED(hr))

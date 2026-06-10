@@ -139,8 +139,6 @@ namespace sreD3D9
             m_d2data.releaseresources();
         }
 
-        void _invalidateimgui();
-
         // @returns One of the render states to return
         int _checkdevice(UINT adapter, D3DDEVTYPE type);
     };

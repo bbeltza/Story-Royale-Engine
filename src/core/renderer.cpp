@@ -198,16 +198,10 @@ static const sre_RenderDriverData* render_choosedriver(int hint)
 		return NULL;
 }
 
-static void __shutdown_imgui();
-static void __endframe_imgui();
-
 extern "C" void __cleanup_textures();
 
 void __cleanup_renderer()
 {
-	if (engine.imgui)
-		__shutdown_imgui();
-
 	__cleanup_textures();
 	SRE_VIDEOV(engine.video.driver, destructor);
 	operator delete(engine.video.driver);
@@ -282,6 +276,7 @@ void __setup_renderer()
 	engine.video.flags = driverdata->flags;
 	engine.video.state = {};
 	engine.video.state.currentvsync = true;
+	SRE_VIDEO(engine.video.driver, set_vsync, true);
 
 	if (engine.video.index == 0)
 	{
@@ -297,8 +292,6 @@ void __setup_renderer()
 	}
 
 	engine.scale = 1;
-
-	SRE_VIDEO(engine.video.driver, set_vsync, true);
 }
 
 void __update_viewport(int w, int h)
@@ -411,9 +404,6 @@ void __render_flush()
 		m.rinst2cache.clear();
 		m.rendercmds.clear();
 	//
-
-	if (engine.imgui)
-		__endframe_imgui();
 
 	SRE_VIDEOV(engine.video.driver, end);
 }
@@ -624,35 +614,3 @@ extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instan
 extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Texture* texture) {
 	sre::render::draw2(flags, *color, points, pcount, mode, texture);
 }
-
-// ImGui setup
-
-#include <ImGui.hpp>
-
-extern "C" void __initialize_imgui(void* _imgui)
-{
-	sre::ImGuiInterface* imgui_interface = static_cast<sre::ImGuiInterface*>(_imgui);
-
-	int status = imgui_interface->initialize(engine.sdl_windowhndl, engine.video.driver->driverdata, engine.video.index);
-	switch (status)
-	{
-		case SRE_RENDERSTATUS_SUCCEEDED: break;
-		case SRE_RENDERSTATUS_UNSUPPORTED:
-			sre::logmsg("ImGui is unsupported in the current render driver", SRE_LOG_WARN);
-			return;
-		case SRE_RENDERSTATUS_FAILED:
-			sre::critical(SRE_ERR_CORE, "Failed initializing ImGui");
-			return;
-		default:
-			abort();
-	}
-
-	sre::logmsg("ImGui has successfully been initialized!", SRE_LOG_INFO);
-	engine.imgui = imgui_interface;
-}
-
-extern "C" bool __onevent_imgui(SDL_Event* ev) { assert(engine.imgui != NULL); return SRE_pIMGUI->on_event(ev); }
-
-static void __shutdown_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->shutdown(); }
-static void __endframe_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->end_frame(); }
-void __beginframe_imgui() { assert(engine.imgui != NULL); SRE_pIMGUI->begin_frame(); }

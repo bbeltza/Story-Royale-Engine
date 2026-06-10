@@ -90,7 +90,7 @@ namespace sre
 {
 	struct Event
 	{
-		#define __CHECK_EVSIZE static_assert(sizeof(Event::_data) >= sizeof(evT), "Should not happen, in case it happens, make Event bigger");
+		#define __CHECK_EVSIZE static_assert(sizeof(Event::_data) >= sizeof(evT), "Should not happen, in case it happens, make Event::_data bigger");
 
 		template <typename evT>
 		Event(const evT& ev): m_type(evT::EVENT_TYPE)
@@ -100,8 +100,7 @@ namespace sre
 		}
 
 		template <typename evT>
-		evT& get()
-		{
+		evT& get() {
 			// Event structs don't need any inheritance, they instead just need to define the static constant EVENT_TYPE
 			// This would also mean that you can make your own events, if they're smaller than Event's set constant capacity.
 			//		It is still not recommended, making custom events for custom systems is possible, but this is only meant to be used with sre::onEvent
@@ -110,6 +109,17 @@ namespace sre
 			static constexpr int evtype = evT::EVENT_TYPE;
 			if (m_type == evtype)
 				return reinterpret_cast<evT&>(*this->_data);
+			
+			throw std::bad_cast();
+		}
+
+		template <typename evT>
+		const evT& get() const {
+			__CHECK_EVSIZE
+
+			static constexpr int evtype = evT::EVENT_TYPE;
+			if (m_type == evtype)
+				return reinterpret_cast<const evT&>(*this->_data);
 			
 			throw std::bad_cast();
 		}

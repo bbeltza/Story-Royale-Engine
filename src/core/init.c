@@ -45,10 +45,6 @@ static inline void __setup_engine_data()
     engine.cor_running = true;
     engine.coroutine_thread = SDL_CreateThread(__run_coroutine, "Coroutine Engine", &engine.cor_running);
     sre_coroutinecreate(false, __invoke_entry, NULL);
-
-    void* imgui_hint = (void*)sre_gethint("IMGUI_GLUE");
-    if (imgui_hint)
-        __initialize_imgui(imgui_hint);
 }
 
 static void sdl_log_callback(void *userdata, int category, SDL_LogPriority priority, const char *message)

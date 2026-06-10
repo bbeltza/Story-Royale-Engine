@@ -51,6 +51,8 @@
                                                                            necessary switches. set_camerastate is now called frequently, instead of once per frame, when any switch involving the built-in camera is needed.
                                                                            (when any of the two SRE_DRAWFLAG_CAMERA camera is changed)
                                                                        - SRE_BLEND_NONE is removed. Aims for more blending flexibility by supporting custom blending functions are there though. 
+    - ImGui is no longer part of the core engine: It's being moved into a separate library (repo: bbeltza/Story-Royale-Engine-ImGui) in which their functions will be implemented correctly to be safely called.
+                                                    When the repository is made, please, look at it if you want to integrate ImGui.
 - May 20th 2026: 0.104.20
     - New hints: - SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
                     but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers

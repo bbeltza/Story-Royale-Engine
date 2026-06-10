@@ -220,9 +220,6 @@ void __run_engine()
             __poll_input(&ev);
             break;
         }
-
-        if (engine.imgui && !__onevent_imgui(&ev))
-            continue;
         
         __signal_events(&ev); // In this case the QUIT event won't be fired
                               // I'll make sure to make it fire once I make the QUIT event

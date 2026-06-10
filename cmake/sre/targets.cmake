@@ -25,8 +25,6 @@ set(SRE_MODULES
     sreECS_presets # Scene and entity presets (only has components and camera controllers...) (optional)
     sreGUI # GUI manager library
     sreGUI_presets # UI presets (optional)
-
-    sre_imgui # ImGui
 )
 
 if(NOT BUILD_SHARED_LIBS)
