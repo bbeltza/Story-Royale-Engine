@@ -12,22 +12,12 @@ struct sregl32_stateubo
     GLfloat camera[2];
 };
 
-struct sregl32_d1data
+struct sregl32_drawdata
 {
     GLuint program;
     GLuint vao;
     GLuint vbo;
 
-    GLsizeiptr vbosize;
-};
-
-struct sregl32_d2data
-{
-    GLuint program;
-    GLuint vao;
-    GLuint vbo;
-
-    GLuint coluniform;
     GLsizeiptr vbosize;
 };
 
@@ -38,8 +28,8 @@ typedef struct sregl32_inst
     struct sregl_functions21 glfuncs21;
     struct sregl_functions32 glfuncs32;
 
-    struct sregl32_d1data d1data;
-    struct sregl32_d2data d2data;
+    struct sregl32_drawdata d1data;
+    struct sregl32_drawdata d2data;
 
     GLuint stateubo;
     GLuint UBO_ALIGNMENT;
@@ -47,7 +37,7 @@ typedef struct sregl32_inst
 } sregl32_inst;
 
 extern void sregl32_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
-extern void sregl32_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count);
+extern void sregl32_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
 extern void sregl32_begin(void* _inst, const float clear[4]);
 extern void sregl32_end(void* _inst);

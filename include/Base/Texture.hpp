@@ -15,9 +15,9 @@ namespace sre
             ~RAIITexture() { m_ptr->release(); }
 
             RAIITexture(const RAIITexture& copy): m_ptr(copy.m_ptr) { m_ptr->aquire(); };
-            RAIITexture(RAIITexture&& right): m_ptr(right.m_ptr) { right.m_ptr = NULL; }
+            RAIITexture(RAIITexture&& right) noexcept: m_ptr(right.m_ptr) { right.m_ptr = NULL; }
 
-            void operator =(RAIITexture&& right) {
+            void operator =(RAIITexture&& right) noexcept {
                 if (m_ptr)
                     m_ptr->release();
                 m_ptr = right.m_ptr;

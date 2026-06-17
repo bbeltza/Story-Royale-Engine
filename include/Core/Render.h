@@ -100,7 +100,7 @@ typedef struct sre_RenderPoint
 {
     sre_vec2ut pos;
     sre_vec2f uv;
-    // sre_col4 color; // RenderPoint might actually bundle the color inside soon...
+    sre_col4 color;
 } sre_RenderPoint;
 
 typedef struct sre_RenderInstance1
@@ -114,23 +114,12 @@ typedef struct sre_RenderInstance1
     sre_vec2f uv_offset;
 } sre_RenderInstance1;
 
-typedef struct sre_RenderInstance2
-{
-    sre_draw2primitive mode;
-    sre_col4 color;
-    sre_RenderPoint points[
-        #ifdef __cplusplus
-            1
-        #endif
-    ];
-} sre_RenderInstance2;
-
 struct sre_RenderVFT
 {
     void (* destructor)(void* _inst);
 
     void (* draw1)(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
-    void (* draw2)(void* _inst, const sre_RenderInstance2* instance, size_t point_count);
+    void (* draw2)(void* _inst, const sre_RenderPoint* pts, size_t point_count, sre_draw2primitive mode);
 
     void (* begin)(void* _inst, const float clear[4]); // Formerly as `clear`
     void (* end)(void* _inst); // Formerly as `present`
@@ -198,7 +187,7 @@ bool sre_render_set_scissors(const sre_rect2Dut* zone);
 bool sre_render_set_blendmode(sre_blendMode blendmode);
 void sre_render_reset_scissors();
 void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Texture* texture);
-void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Texture* texture);
+void sre_render_draw2(sre_u32 flags, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Texture* texture);
 
 //
 SRE_CAPI_END
@@ -218,7 +207,6 @@ SRE_CAPI_END
         using draw2primitive = sre_draw2primitive;
 
         using RenderInstance1 = sre_RenderInstance1; // Render instance for all rectangle draw calls
-        using RenderInstance2 = sre_RenderInstance2; // Render instance for all line & complex geometry draw calls
         using RenderPoint = sre_RenderPoint;
 
         namespace render
@@ -234,7 +222,7 @@ SRE_CAPI_END
 
             // Draw functions
             void draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Texture* texture=NULL);
-            void draw2(sre::flags32 flags, sre::col4 color, const RenderPoint points[], size_t pcount, sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES, Texture* texture=NULL);
+            void draw2(sre::flags32 flags, const RenderPoint points[], size_t pcount, sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES, Texture* texture=NULL);
 
             // Draw template helpers
             template <size_t n>
@@ -243,17 +231,8 @@ SRE_CAPI_END
             }
         
             template <size_t n>
-            void draw2(sre::flags32 flags, sre::col4 color, const RenderPoint (&points)[n], sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES, Texture* texture=NULL) {
-                return draw2(flags, color, points, n, mode, texture);
-            }
-
-            template <size_t n>
-            void draw2(sre::flags32 flags, sre::col4 color, const sre::vec2ut (&positions)[n], sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES) {
-                RenderPoint points[n];
-                for (auto i = 0; i < n; i++)
-                    points[i].pos = positions[i];
-            
-                return draw2(flags, color, points, n, mode);
+            void draw2(sre::flags32 flags, const RenderPoint (&points)[n], sre::draw2primitive mode=SRE_PRIMITIVE_TRIANGLES, Texture* texture=NULL) {
+                return draw2(flags, points, n, mode, texture);
             }
 
             // High level drawing functions
@@ -276,8 +255,8 @@ SRE_CAPI_END
                         [](void* inst, const sre_RenderInstance1* instances, size_t instance_count) {
                             static_cast<R*>(inst)->draw1(instances, instance_count);
                         },
-                        [](void* inst, const sre_RenderInstance2* instance, size_t point_count) {
-                            static_cast<R*>(inst)->draw2(instance, point_count);
+                        [](void* inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode) {
+                            static_cast<R*>(inst)->draw2(points, point_count, mode);
                         },
                         [](void* inst, const float clear[4]) { static_cast<R*>(inst)->begin(clear); },
                         [](void* inst) { static_cast<R*>(inst)->end(); },
@@ -320,7 +299,7 @@ SRE_CAPI_END
             RenderDriver() = default;
         public:
             void draw1(const sre::RenderInstance1* instances, size_t instance_count);
-            void draw2(const sre::RenderInstance2* instance, size_t point_count);
+            void draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode);
             
             void begin(const float clear[4]);
             void end();

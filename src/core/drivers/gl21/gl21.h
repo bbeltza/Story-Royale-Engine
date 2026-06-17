@@ -5,13 +5,6 @@
 
 #include <glcommon/glcommon.h>
 
-typedef struct sregl21_vertex
-{
-    sre_vec2f pos;
-    sre_vec2f uv;
-    sre_col4 col;
-} sregl21_vertex;
-
 struct sregl21_uniforms
 {
     GLint viewport;
@@ -21,7 +14,7 @@ struct sregl21_uniforms
 struct sregl21_vtassembler
 {
     size_t size;
-    sregl21_vertex* arr;
+    sre_RenderPoint* arr;
 };
 
 // Data that's shared accross both OpenGL 2.1 and 3.2
@@ -54,7 +47,7 @@ int sregl21_commonsetup(sregl21_cominst* inst, SDL_Window* window, struct sregl_
 //
 
 extern void sregl21_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
-extern void sregl21_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count);
+extern void sregl21_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
 extern void sregl21_begin(void* _inst, const float clear[4]);
 extern void sregl21_end(void* _inst);

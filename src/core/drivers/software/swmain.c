@@ -98,7 +98,7 @@ void sresw_draw1(void* _inst, const sre_RenderInstance1* instances, size_t insta
     }
 }
 
-void sresw_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count)
+void sresw_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode)
 {
 
 }

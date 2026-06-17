@@ -35,7 +35,7 @@ typedef struct sresw_Instance
 SRE_CAPI_BEGIN
 
 extern void sresw_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
-extern void sresw_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count);
+extern void sresw_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
 extern void sresw_begin(void* _inst, const float clear[4]);
 extern void sresw_end(void* _inst);

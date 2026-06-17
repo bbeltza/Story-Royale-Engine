@@ -10,10 +10,13 @@
 
 using namespace sreGUI;
 
-Object::Object(Object* parent)
+Object::Object(Object* parent, sreGUI::Component*const components[], size_t numcomponents)
 {
     if (parent)
         set_parent(parent);
+
+    if (components)
+        this->components.setup(components, numcomponents);
 }
 
 Object::~Object()
@@ -34,6 +37,12 @@ Object::~Object()
 
 Object* Object::set_parent(Object* parent)
 {
+    if (parent == this)
+    {
+        sre::error(SRE_ERR_INVALID_PARAMETER, "Calling set_parent() on itself. This is illegal behavior.");
+        return NULL;
+    }
+
     if (m_attachedlyr)
     {
         sre::error(SRE_ERR_INVALID_STATE, "Calling set_parent() on root Object, it's an impossible operation. Please, detach it from being the root object and proceed.");
@@ -216,7 +225,7 @@ void Object::call_render(sre::ClipStackUT& clipstack)
 
     bool has_clip = flags.has(F_CLIP);
 
-    pre_render();
+    this->pre_render();
 
     if (has_clip)
     {
@@ -229,6 +238,8 @@ void Object::call_render(sre::ClipStackUT& clipstack)
         if (comp.enabled())
             comp.on_render(m_absolute);
     }
+
+    this->render();
     
     for (auto& obj : children)
         obj.call_render(clipstack);
@@ -241,7 +252,7 @@ void Object::call_render(sre::ClipStackUT& clipstack)
             sre::render::reset_scissors();
     }
 
-    post_render();
+    this->post_render();
 
     rendered.fire();
 

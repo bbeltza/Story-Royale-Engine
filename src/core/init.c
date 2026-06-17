@@ -102,12 +102,21 @@ void __initialize_engine()
 void __end_engine()
 {
     if (SDL_ThreadID() != engine.main_thrd)
-        sre_CRITICAL(SRE_ERR_FAIL, "Engine destruction NOT being run on the main thread. This will thus cause lots of problems. Are you trying to call exit()?");
+        sre_CRITICAL(SRE_ERR_FAIL, "Engine destruction NOT being run on the main thread. This will thus cause lots of issues with object destruction. Are you trying to call exit()? Try with wrapping it into a deferred function with sre_defer/sre::defer");
 
     engine.cor_running = false;
     SDL_WaitThread(engine.coroutine_thread, NULL);
     
     __cleanup_objects();
+
+    { // Send a quit event
+        SDL_Event quit_ev;
+        quit_ev.quit.type = SDL_QUIT;
+        quit_ev.quit.timestamp = SDL_GetTicks();
+        __signal_events(&quit_ev);
+        __queue_events();
+    }
+
     __cleanup_renderer();
     
     SDL_CloseAudioDevice(engine.audio_device);

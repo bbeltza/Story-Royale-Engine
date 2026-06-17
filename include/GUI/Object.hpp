@@ -11,6 +11,8 @@
 #include <Base/Signal.hpp>
 #include <Base/Clipstack.h>
 
+//#include <initializer_list>
+
 namespace sreGUI
 {
     struct Component;
@@ -44,8 +46,11 @@ namespace sreGUI
     public:
         // Instantiating
 
-        Object(sreGUI::Object* parent=NULL);
+        Object(sreGUI::Object* parent=NULL, sreGUI::Component* const components[]=NULL, size_t num_components=0);
         ~Object();
+
+        Object(sreGUI::Object* parent, std::initializer_list<sreGUI::Component*const> components): Object(parent, components.begin(), components.size()) {}
+        Object(std::initializer_list<sreGUI::Component*const> components): Object(NULL, components) {}
 
         // This is a wrapper around `new` and `set_parent` for backwards compatibility with the old previous `add_child` function
         // To create an actual GUI object. use `new` and call `set_parent` on an object
@@ -63,6 +68,13 @@ namespace sreGUI
             return dynamic_cast<T*>(m_parent);
         }
 
+        // Return `this` as the base sreGUI::Object* type
+        inline Object* base() {
+            return this;
+        }
+        inline const Object* base() const {
+            return this;
+        }
     public:
         // Iterating
 
@@ -188,6 +200,7 @@ namespace sreGUI
     protected:
         virtual void update() {}
         virtual void pre_render() {}
+        virtual void render() {}
         virtual void post_render() {}
     private:
         void call_query(sre::vec2ut pt, std::deque<const Object*>& stack);

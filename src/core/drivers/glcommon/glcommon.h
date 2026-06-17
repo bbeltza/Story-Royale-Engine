@@ -93,7 +93,9 @@ extern void sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode 
     #define SREGL_PRESENT(x) SDL_GL_SwapWindow(x.window)
 #endif
 #define SREGL_CLEAR(glfuncs, color) SRE_GLCALL(glfuncs.ClearColor(color[0], color[1], color[2], color[3])); \
-                                    SRE_GLCALL(glfuncs.Clear(GL_COLOR_BUFFER_BIT))
+                                    SRE_GLCALL(glfuncs.Disable(GL_SCISSOR_TEST)); /* Disable scissor testing for clearing */ \
+                                    SRE_GLCALL(glfuncs.Clear(GL_COLOR_BUFFER_BIT)); \
+                                    SRE_GLCALL(glfuncs.Enable(GL_SCISSOR_TEST))
 
 #ifdef __cplusplus
     }

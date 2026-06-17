@@ -35,7 +35,7 @@
              `new` and add_child/set_parent so it won't set the parent of that object before the constructor.
             You may also notice that the global functions in sreECS and sreGUI take an optional parameter to a "Layer" object. It is by default NULL which will just take the default layer bound at the start
               of the program, but you can add multiple ECS or GUI layer objects and bind them into the engine (e.g.: Have a permanent or semi-permanent UI on top of the current UI), although, it is not fully tested.
-    - Additionaly, after the renderer tweaks have been made,
+    - Additionally, after the renderer tweaks have been made,
         some of the rendering interface has also been repolished: - The functions related to rendering are moved into an sre::render namespace, instead of them being prefixed with `render`
                                                                   - The C wrappers remain somewhat equal on the "namespace"
                                                                   - For each frame, a call to `render::begin` is needed now, which would set up the clear color and the built-in camera position
@@ -50,9 +50,22 @@
                                                                        - Functions to set the current texture and camera state are now used, they are automatically queued and called by the engine when it detects any
                                                                            necessary switches. set_camerastate is now called frequently, instead of once per frame, when any switch involving the built-in camera is needed.
                                                                            (when any of the two SRE_DRAWFLAG_CAMERA camera is changed)
-                                                                       - SRE_BLEND_NONE is removed. Aims for more blending flexibility by supporting custom blending functions are there though. 
+                                                                       - SRE_BLEND_NONE is removed. Aims for more blending flexibility by supporting custom blending functions are there though.
+                                                                  - draw2 now takes per-vertex/point colors, intead of taking a single color per call. This makes it more flexible (able to support gradients and etc...),
+                                                                       as well as reducing render driver overhead (specially on d3d where 2 buffers were needed for the color data to be per-instance, without rearranging the vertices yourself).
+                                                                    Additionally, there's a batching mechanism done in the draw2 frontend for certain primitive modes, this will reduce unecessary draw calls that could've been sticked together,
+                                                                        and make draw2 actually very useful (compared to the simpler draw1).
+                                                                    The signature for draw2 in render drivers is: draw2(void* _renderer, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode) -> void | (sre_RenderInstance2 doesn't exist anymore)
     - ImGui is no longer part of the core engine: It's being moved into a separate library (repo: bbeltza/Story-Royale-Engine-ImGui) in which their functions will be implemented correctly to be safely called.
                                                     When the repository is made, please, look at it if you want to integrate ImGui.
+    - sre::ACTION_ enums are removed, now use the C-style SRE_ACTION enums.
+    - Actions don't need the action type specified now in C++, can now simply put a single code and it'll be automatically evaluated to its corresponding type
+    - New hint: SRE_HINT_SDL_WINDOWFLAGS (description in <Hints.h>)
+    - A few helpers were added (look at the commits changes from there) ; Mutex objects are added, they're just a wrapper around SDL_mutex*
+    - GUI objects can now take components as constructor parameters, this reduces lines of code needed to setup in constructor bodies.
+    - You can have custom events more properly (this has been used in SR since I've been starting to rewrite its source tree), you can use structures that will follow the same model as sre::Event structs with the new base template sre::EventBase.
+        It takes a number corresponding to the maximum size of the structure, and an optional typename for the event type enum (the default is the one used in sre::Event). sre::Event is a typedef of sre::EventBase.
+      Just... Don't use your custom events amongst sre::onEvent events...
 - May 20th 2026: 0.104.20
     - New hints: - SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
                     but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers

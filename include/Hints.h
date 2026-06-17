@@ -19,6 +19,11 @@
     - SRE_HINT_ECS_ENTRYPOINT & SRE_HINT_GUI_ENTRYPOINT: These are functions (which will be interpreted with `void f(void)` as the signature) that run before setting up the 
         new object layer system for the ECS and GUI respectively. It's used by the ECS and GUI modules to initialize all of the necessary data to function, as a way to no
         longer rely on the internal engine anymore, so you shouldn't use them. But if you don't rely on those modules, then using them as a way of setting different entry points is possible.
+    - SRE_HINT_SDL_WINDOWFLAGS: int, specifies which flags to use when creating the main window in SDL_CreateWindow. Just be careful with using them!
+                                  Note that the SDL_WINDOW_HIDDEN flag will be automatically added during creation, even if it's not specified, unless 
+                                  the SDL_WINDOW_SHOWN flag is specified. The main window is created by default with the SDL_WINDOW_OPENGL and SDL_WINDOW_HIDDEN flags.
+                                These flags can be used to either have custom vulkan or metal support (with SDL_WINDOW_VULKAN/METAL), or to remove the SDL_WINDOW_OPENGL flag,
+                                  or to add some minimal configuration to it.
 */
 // This is it for now, I'm looking forward to expand this more
 

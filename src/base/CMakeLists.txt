@@ -16,6 +16,7 @@ SRE_BUILD_SRC(sre_base
     "image.cpp"
     "ini.cpp"
     "tween.cpp"
+    "mutex.cpp"
 
     "error.c"
     "log.cc"

@@ -13,11 +13,12 @@ namespace sre
 	{
 		EVENT_DEFAULT,
 
-		EVENT_MOUSEBUTTON,
-		EVENT_MOUSEWHEEL,
-		EVENT_MOUSEMOVE,
-		EVENT_KEYPRESS,
-		EVENT_TOUCH
+		EVENT_MOUSEBUTTON, /* Use `sre::events::MouseButton` */
+		EVENT_MOUSEWHEEL, /* `sre::events::MouseWheel` */
+		EVENT_MOUSEMOVE, /* `sre::events::MouseMove` */
+		EVENT_KEYPRESS, /* `sre::events::Key` */
+		EVENT_TOUCH, /* `sre::events::Touch` */
+		EVENT_QUIT /* No event struct associated, at least for now, might be an `sre::events::Quit` with an error code */
 	};
 
 	enum keyPress
@@ -88,15 +89,16 @@ namespace sre
 
 namespace sre
 {
-	struct Event
+	template <size_t n, typename _eventType=eventType>
+	struct EventBase
 	{
-		#define __CHECK_EVSIZE static_assert(sizeof(Event::_data) >= sizeof(evT), "Should not happen, in case it happens, make Event::_data bigger");
+		#define __CHECK_EVSIZE static_assert(n >= sizeof(evT), "Should not happen, in case it happens, make Event::_data bigger");
 
 		template <typename evT>
-		Event(const evT& ev): m_type(evT::EVENT_TYPE)
+		inline EventBase(const evT& ev): m_type(evT::EVENT_TYPE)
 		{
 			__CHECK_EVSIZE
-			new(_data) evT(ev);
+			new(_data) evT{ev};
 		}
 
 		template <typename evT>
@@ -127,11 +129,13 @@ namespace sre
 		template <typename evT>
 		operator evT&() { return get<evT>(); }
 
-		eventType type() const { return m_type; }
+		_eventType type() const { return m_type; }
 		private:
-			const eventType m_type;
-			char _data[28];
+			const _eventType m_type;
+			char _data[n];
 	};
+
+	using Event = EventBase<28>;
 
 	extern Signal<sre::Event> onEvent;
 }

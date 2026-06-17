@@ -47,6 +47,7 @@ namespace sre
     _strbuf<category, type> _strbuf<category, type>::buffer;
 
     sre::ostream out{&_strbuf<LOGCATEGORY_DEBUG>::buffer};
+    sre::ostream odbg{&_strbuf<LOGCATEGORY_DEBUG>::buffer};
     sre::ostream oinfo{&_strbuf<LOGCATEGORY_INFO>::buffer};
     sre::ostream owarn{&_strbuf<LOGCATEGORY_WARN>::buffer};
 

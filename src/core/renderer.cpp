@@ -28,12 +28,14 @@ namespace sre
 
 	struct RenderCmd
 	{
+
 		RenderCmd(RenderCmdType type): type(type) {};
 		RenderCmd(const RenderCmd& cpy) {
 			SDL_memcpy(this, &cpy, sizeof(RenderCmd));
 		}
 
 		RenderCmdType type;
+		draw2primitive d2mode; // Only used in draw2 commands, cannot be bundled inside RenderCmd::draw due to empty padding on 64-bit platforms.
 		union {
 			struct {
 				float clear[4];
@@ -66,8 +68,8 @@ namespace sre
 	struct RenderVectors // What _vector_data in engine.video contains
 	{
 		std::vector<RenderInstance1> rinst1cache;
-		std::vector<sre::byte> rinst2cache; // sre::byte to be more like a point buffer. RenderInstance2's size varies
-            
+		std::vector<RenderPoint> rinst2pcache;
+        
         // Render cmd, what will be inserted in the draw functions
         std::vector<RenderCmd> rendercmds;
 	};
@@ -271,6 +273,7 @@ void __setup_renderer()
 		_CHECKFORFUNC(texture_destroy);	
 	#undef _CHECKFORFUNC
 
+	static_assert(sizeof(engine.video._vector_data) >= sizeof(sre::RenderVectors), "Please resize __engine_data.video._vector_data!!");
 	new(engine.video._vector_data) sre::RenderVectors{};
 	engine.video.texture_size = driverdata->texture_size;
 	engine.video.flags = driverdata->flags;
@@ -352,10 +355,13 @@ void __render_flush()
 					SRE_VIDEO(engine.video.driver, set_vsync, engine.video.state.desiredvsync);
 					engine.video.state.currentvsync = engine.video.state.desiredvsync;
 				}
+
+				sre::rect2Di scissor{ 0, 0, engine.osize_x, engine.osize_y };
 				
 				SRE_VIDEO(engine.video.driver, begin, cmd.begin.clear);
 				SRE_VIDEO(engine.video.driver, set_blendstate, SRE_BLEND_DEFAULT);
 				SRE_VIDEO(engine.video.driver, set_camerastate, 0, 0);
+				SRE_VIDEO(engine.video.driver, set_scissorstate, &scissor);
 				hasbegun = true;
 				continue;
 			}
@@ -370,8 +376,9 @@ void __render_flush()
 					break;
 				case CMD_DRAW2:
 					SRE_VIDEO(engine.video.driver, draw2,
-						&reinterpret_cast<const sre_RenderInstance2&>(m.rinst2cache.at(cmd.draw.begin)),
-						cmd.draw.size
+						&m.rinst2pcache.at(cmd.draw.begin),
+						cmd.draw.size,
+						cmd.d2mode
 					);
 					break;
 				case CMD_STATE_SCISSOR:
@@ -401,7 +408,7 @@ void __render_flush()
 		}
 
 		m.rinst1cache.clear();
-		m.rinst2cache.clear();
+		m.rinst2pcache.clear();
 		m.rendercmds.clear();
 	//
 
@@ -423,6 +430,7 @@ bool sre::render::begin(sre::col4 clear, sre::vec2ut camera)
 	engine.video.state.texture = reinterpret_cast<sre_Texture*>(UINTPTR_MAX);
 	engine.video.state.blendmode = SRE_BLEND_DEFAULT;
 	engine.video.state.lastdraw_flags = 0;
+	engine.video.state.scissor = { 0, 0, engine.vsize_x, engine.vsize_y };
 
 	RenderCmd cmd{ CMD_BEGIN };
 	cmd.begin.clear[0] = clear.r / 255.0f;
@@ -444,9 +452,15 @@ bool sre::render::set_scissors(sre::rect2Dut zone) {
 	
 	assert(zone.size.x >= 0);
 	assert(zone.size.y >= 0);
-	assert(zone.position.x >= 0);
-	assert(zone.position.y >= 0);
 
+	if (zone.position.x < 0) {
+		zone.size.x += zone.position.x;
+		zone.position.x = 0;
+	}
+	if (zone.position.y < 0) {
+		zone.size.y += zone.position.y;
+		zone.position.y = 0;
+	}
 	RENDERCMDCHECK();
 
 	engine.video.state.scissor = zone;
@@ -467,6 +481,9 @@ bool sre::render::set_blendmode(sre::blendMode mode)
 	// 	 the aforementioned more advanced future blending function
 	// Also you can see that BLEND_NONE isn't included anymore, it is pretty much gone, it's unecessary since BLEND_BLEND is what's mostly used
 	//		although with the future more advance blending function you'll still be able to replicate it (having src as one and dst as zero)
+	if (mode == engine.video.state.blendmode)
+		return false;
+
 	switch (mode)
 	{
 		case SRE_BLEND_BLEND:
@@ -480,6 +497,7 @@ bool sre::render::set_blendmode(sre::blendMode mode)
 
 	RENDERCMDCHECK();
 
+	engine.video.state.blendmode = mode;
 	RenderCmd cmd{ CMD_STATE_BLEND };
 	cmd.blend.mode = mode;
 	m.rendercmds.emplace_back(cmd);
@@ -531,6 +549,27 @@ void sre::render::draw1(sre::flags32 flags, const RenderInstance1 instances[], s
 	}
 
 	RENDERCMDCHECK();
+
+	#if 1 // Enable an optimizaion that removes any previous draw calls if the last instance is big enough (and opaque) to fill the entire screen
+			// Note that if there's render::draw1 call with multiple instances passed in and one of the instances at the middle is enough to fill the screen, this check won't pass to that instance.
+
+	if (!flags && !texture && engine.video.state.blendmode == SRE_BLEND_BLEND && engine.video.state.scissor == sre::rect2Dut{ 0, 0, engine.vsize_x, engine.vsize_y }) {
+		const RenderInstance1* lastinst = &instances[instcount-1];
+		if (lastinst->color.a == 255 &&
+			lastinst->rectangle.size.x >= engine.vsize_x &&
+			lastinst->rectangle.size.y >= engine.vsize_y &&
+			lastinst->rectangle.position.x - lastinst->anchor.x*lastinst->rectangle.size.x <= 0 &&
+			lastinst->rectangle.position.y - lastinst->anchor.y*lastinst->rectangle.size.y <= 0)
+		{
+			m.rendercmds.erase(m.rendercmds.begin()+1, m.rendercmds.end());
+
+			instances = lastinst;
+			instcount = 1;
+		}
+	}
+
+	#endif
+
 	handle_render_switches(flags, texture);
 
 	RenderCmd* lastcmd = &m.rendercmds.back();
@@ -548,7 +587,7 @@ void sre::render::draw1(sre::flags32 flags, const RenderInstance1 instances[], s
 	m.rinst1cache.insert(m.rinst1cache.end(), instances, instances + instcount);
 }
 
-void sre::render::draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPoint points[], size_t pcount, sre::draw2primitive mode, sre::Texture* texture)
+void sre::render::draw2(sre::flags32 flags, const sre::RenderPoint points[], size_t pcount, sre::draw2primitive mode, sre::Texture* texture)
 {
 	if (!pcount)
 		return;
@@ -582,24 +621,26 @@ void sre::render::draw2(sre::flags32 flags, sre::col4 color, const sre::RenderPo
 	RENDERCMDCHECK();
 	handle_render_switches(flags, texture);
 
-	size_t bytebegin = m.rinst2cache.size();
-	sre::RenderInstance2 instanceheader{
-		mode,
-		color
-	};
-	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<sre::byte*>(&instanceheader), reinterpret_cast<sre::byte*>(&instanceheader.points));
-	m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points + pcount));
+	size_t begin = m.rinst2pcache.size();
+	m.rinst2pcache.insert(m.rinst2pcache.end(), points, points + pcount);
 
 	if (handle_lineloop)
 	{
-		m.rinst2cache.insert(m.rinst2cache.end(), reinterpret_cast<const sre::byte*>(points), reinterpret_cast<const sre::byte*>(points+1));
+		m.rinst2pcache.emplace_back(points[0]);
 		pcount++;
 	}
 
-	RenderCmd cmd{ CMD_DRAW2 };
-	cmd.draw.begin = bytebegin;
-	cmd.draw.size = pcount;
-	m.rendercmds.emplace_back(cmd);
+	auto& lastcmd = m.rendercmds.back();
+	if (lastcmd.type == CMD_DRAW2 && lastcmd.d2mode == mode && (mode == SRE_PRIMITIVE_TRIANGLES || mode == SRE_PRIMITIVE_POINTS || mode == SRE_PRIMITIVE_LINEPERLINE)) {
+		lastcmd.draw.size += pcount;
+	}
+	else {
+		RenderCmd cmd{ CMD_DRAW2 };
+		cmd.d2mode = mode;
+		cmd.draw.begin = begin;
+		cmd.draw.size = pcount;
+		m.rendercmds.emplace_back(cmd);
+	}
 }
 
 // C wrappers
@@ -611,6 +652,6 @@ extern "C" void sre_render_reset_scissors() { sre::render::reset_scissors(); }
 extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Texture* texture) {
 	sre::render::draw1(flags, instances, instcount, texture);
 }
-extern "C" void sre_render_draw2(sre_u32 flags, const sre_col4* color, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Texture* texture) {
-	sre::render::draw2(flags, *color, points, pcount, mode, texture);
+extern "C" void sre_render_draw2(sre_u32 flags, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Texture* texture) {
+	sre::render::draw2(flags, points, pcount, mode, texture);
 }

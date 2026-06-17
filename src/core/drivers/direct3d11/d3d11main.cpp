@@ -138,10 +138,10 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         SRE_DXCALLC(m_dxdevice->CreateSamplerState(&sampler_desc, &m_dxsamplerstate));
     }
 
-    if (!(m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 256) &&
-          m_d2bufferc.init(m_dxdevice, sizeof(sre::col4) * 256)           &&
-          m_d2bufferp.init(m_dxdevice, sizeof(sre::vec2ut) * 256)
-    )) return;
+    if (!m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 255))
+        return;
+    if (!m_d2buffer.init(m_dxdevice, sizeof(sre::RenderPoint) * 255))
+        return;
 
     {
         D3D11_BUFFER_DESC cbuffer_desc{};

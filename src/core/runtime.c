@@ -63,11 +63,7 @@ static int game_loop(void* running)
 
     while (*(volatile int*)running)
     {
-        sre_timeStamp elapsed;
-        SDL_Event ev;
-        ev.type = SDL_USEREVENT;
-        ev.user.code = ENGINE_EVENT_RENDER;
-        
+        sre_timeStamp elapsed;        
         engine.frame++;
 
         ticks(&engine.frameend_time);
@@ -222,7 +218,7 @@ void __run_engine()
         }
         
         __signal_events(&ev); // In this case the QUIT event won't be fired
-                              // I'll make sure to make it fire once I make the QUIT event
+                                // The QUIT event will be queued during __end_engine
     }
 
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING

@@ -2,38 +2,37 @@
 #define SRE_ACTION_H
 #include <C_API.h>
 
+#ifdef __cplusplus
+    #include <Core/Input.hpp>
+#endif
+
 SRE_CAPI_BEGIN
 
-#ifndef __cplusplus
-    typedef enum sre_actionInputType
-    {
-        SRE_ACTION_NULL, // Should be the last input inside an action, made to indicate null-termination
-                            // Don't bother using it, use the SRE_MAKE_ACTION() macro instead
-        SRE_ACTION_MOUSE,
-        SRE_ACTION_TOUCH,
-        SRE_ACTION_KEYBOARD, // Keyboard type that uses scancodes
-        SRE_ACTION_VKEYBOARD // Keyboard action type using key codes ("virtual keys")
-    } sre_actionInputType;
-#else
-    namespace sre
-    {
-        enum actionInputType
-        {
-            ACTION_NULL,
-            ACTION_MOUSE,
-            ACTION_TOUCH,
-            ACTION_KEYBOARD,
-            ACTION_VKEYBOARD,
-        };
-    }
-
-    using sre_actionInputType = sre::actionInputType;
-#endif
+typedef enum sre_actionInputType
+{
+    SRE_ACTION_NULL, // Should be the last input inside an action, made to indicate null-termination
+                    // Don't bother using it, use the SRE_MAKE_ACTION() macro instead
+    SRE_ACTION_MOUSE,
+    SRE_ACTION_TOUCH,
+    SRE_ACTION_KEYBOARD, // Keyboard type that uses scancodes
+    SRE_ACTION_VKEYBOARD // Keyboard action type using key codes ("virtual keys")
+} sre_actionInputType;
 
 struct sre_ActionInput
 {
     sre_actionInputType type;
     int code;
+
+    #ifdef __cplusplus
+
+    constexpr sre_ActionInput(sre::mouseButton mb): type(SRE_ACTION_MOUSE), code(mb) {}
+    constexpr sre_ActionInput(sre::scanCode sc): type(SRE_ACTION_KEYBOARD), code(sc) {}
+    constexpr sre_ActionInput(sre::keyCode kc): type(SRE_ACTION_VKEYBOARD), code(kc) {}
+
+    constexpr sre_ActionInput(sre_actionInputType type, int code): type(type), code(code) {}
+    constexpr sre_ActionInput(): type(SRE_ACTION_NULL), code(0) {}
+
+    #endif
 };
 
 #ifdef __cplusplus
@@ -53,8 +52,9 @@ struct sre_Signal;
 // Make a signal that fires when one of the inputs in `action` get pressed
 struct sre_Signal* sre_actionsignal(const sre_Action* action);
 
+#define SRE_MAKE_ACTION(...) {__VA_ARGS__, {SRE_ACTION_NULL, 0}}
 #ifndef __cplusplus
-    #define SRE_MAKE_ACTION(...) {__VA_ARGS__, {SRE_ACTION_NULL, 0}}
+    // Nothing right now
 #else
     extern "C++" {
 
@@ -69,9 +69,6 @@ struct sre_Signal* sre_actionsignal(const sre_Action* action);
             extern sre_Connection* action_signal(const Action& action);
         }
     }
-    
-
-    #define SRE_MAKE_ACTION(...) { __VA_ARGS__, {::sre::ACTION_NULL, 0} }
 #endif
 
 SRE_CAPI_END

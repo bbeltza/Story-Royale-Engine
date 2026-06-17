@@ -21,7 +21,7 @@ bool sregl_texture_setup(struct sregl_functions* glfuncs, sregl_texture* texture
 bool sregl_texture_update(struct sregl_functions* glfuncs, sregl_texture* texture, const sre_rect2Di* region, const void* pixels, int pitch)
 {
     SRE_GLCALLF(glfuncs->BindTexture(GL_TEXTURE_2D, texture->gltex));
-    SRE_GLCALLF(glfuncs->PixelStorei(GL_PACK_ROW_LENGTH, pitch / 4));
+    SRE_GLCALLF(glfuncs->PixelStorei(GL_UNPACK_ROW_LENGTH, pitch / 4));
 
     SRE_GLCALLF(glfuncs->TexSubImage2D(GL_TEXTURE_2D, 0, region->x, region->y, region->w, region->h, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
 
@@ -58,7 +58,6 @@ void sregl_set_scissorstate(struct sregl_functions* glfuncs, SDL_Window* window,
 
     //if (rectangle)
     //{
-        SRE_GLCALL(glfuncs->Enable(GL_SCISSOR_TEST));
         SRE_GLCALL(glfuncs->Scissor(
             rectangle->x,
             h - rectangle->y - rectangle->h,

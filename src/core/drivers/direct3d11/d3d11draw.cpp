@@ -10,8 +10,7 @@ void Instance::begin(const float clear[4])
     m_dxdevicecontext->ClearRenderTargetView(m_dxrendertargetview, clear);
     
     m_d1buffer.reset();
-    m_d2bufferc.reset();
-    m_d2bufferp.reset();
+    m_d2buffer.reset();
 }
 
 void Instance::end()
@@ -64,34 +63,27 @@ void Instance::draw1(const sre::RenderInstance1* instances, size_t instance_coun
     m_dxdevicecontext->DrawInstanced(4, static_cast<UINT>(instance_count), 0, inst_num);
 }
 
-void Instance::draw2(const sre::RenderInstance2* instance, size_t point_count)
+void Instance::draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode)
 {
-    UINT offscol = m_d2bufferc.index;
-    UINT offspos = m_d2bufferp.index;
-    if (m_d2bufferc.append(m_dxdevicecontext, &instance->color, sizeof(instance->color)))
-    {
-        offscol = 0;
-    }
-    if (m_d2bufferp.append(m_dxdevicecontext, instance->points, static_cast<UINT>(sizeof(instance->points[0])*point_count)))
-    {
-        offspos = 0;
+    UINT index = m_d2buffer.index;
+    if (m_d2buffer.append(m_dxdevicecontext, points, static_cast<UINT>(sizeof(*points)*point_count))) {
+        index = 0;
     }
 
-    if (1)
-    {
+    if (1) {
         m_dxdevicecontext->VSSetShader(m_shaders.d2VS, NULL, 0);
         m_dxdevicecontext->IASetInputLayout(m_shaders.d2IL);
     }
 
     {
-        UINT offsets[] = { offscol, offspos };
-        UINT strides[] = { sizeof(sre::col4), sizeof(sre::RenderPoint) };
-        ID3D11Buffer* buffers[] = { m_d2bufferc.dxbuffer, m_d2bufferp.dxbuffer };
-        m_dxdevicecontext->IASetVertexBuffers(0, 2, buffers, strides, offsets);
+        UINT offsets[] = { index };
+        UINT strides[] = { sizeof(sre::RenderPoint) };
+        ID3D11Buffer* buffers[] = { m_d2buffer.dxbuffer };
+        m_dxdevicecontext->IASetVertexBuffers(0, 1, buffers, strides, offsets);
     }
 
     D3D11_PRIMITIVE_TOPOLOGY topology;
-    switch (instance->mode)
+    switch (mode)
     {
         case SRE_PRIMITIVE_TRIANGLES: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
         case SRE_PRIMITIVE_TRIANGLESTRIP: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;

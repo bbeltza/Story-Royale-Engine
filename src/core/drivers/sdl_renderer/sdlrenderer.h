@@ -42,7 +42,7 @@ typedef struct sresdlrenderer_inst
 SRE_CAPI_BEGIN
 
 void sresdlrenderer_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
-void sresdlrenderer_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count);
+void sresdlrenderer_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
 void sresdlrenderer_begin(void* _inst, const float clear[4]);
 void sresdlrenderer_end(void* _inst);

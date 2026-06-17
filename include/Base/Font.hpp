@@ -98,6 +98,7 @@ namespace sre
         void operator =(Font&& right);
 
         bool load(const sre::byte* data, sre::size_t size);
+        bool load_file(const sre::File& file);
         bool valid() const { return m_data != NULL; } 
 
         FontAtlas& get_atlas() const

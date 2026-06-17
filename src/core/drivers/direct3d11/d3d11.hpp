@@ -110,8 +110,7 @@ namespace sreD3D11
             ID3D11SamplerState* m_dxsamplerstate;
 
             DrawBuffer m_d1buffer;
-            DrawBuffer m_d2bufferc; // Color draw2 buffer
-            DrawBuffer m_d2bufferp; // Vertex draw2 buffer
+            DrawBuffer m_d2buffer;
 
             ID3D11Buffer* m_cbuffer;
             ID3D11Buffer* m_ccambuffer;
@@ -121,7 +120,7 @@ namespace sreD3D11
             InstCaches m_caches;
         public:
             void draw1(const sre::RenderInstance1* instances, size_t instance_count);
-            void draw2(const sre::RenderInstance2* instance, size_t point_count);
+            void draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode);
             
             void begin(const float clear[4]);
             void end();

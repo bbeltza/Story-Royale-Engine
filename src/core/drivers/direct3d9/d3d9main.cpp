@@ -162,7 +162,7 @@ bool Instance::_statesetup()
     static const D3DVERTEXELEMENT9 D2_DECLARATION[] = {
         {0, offsetof(sre::RenderPoint, pos), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
         {0, offsetof(sre::RenderPoint, uv), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
-        {1, 0, D3DDECLTYPE_UBYTE4N, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+        {0, offsetof(sre::RenderPoint, color), D3DDECLTYPE_UBYTE4N, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
         D3DDECL_END()
     };
 
@@ -174,9 +174,7 @@ bool Instance::_statesetup()
 
     if (!m_d1data.perinstancebuf.init<sre::RenderInstance1>(m_dxdevice, 255))
         return false;
-    if (!m_d2data.pervertexbuf.init<sre::RenderPoint>(m_dxdevice, 25))
-        return false;
-    if (!m_d2data.perinstancebuf.init<sre::col4>(m_dxdevice, 255))
+    if (!m_d2data.vertexbuf.init<sre::RenderPoint>(m_dxdevice, 255))
         return false;
 
     {
@@ -269,14 +267,13 @@ void Instance::draw1(const sre::RenderInstance1* instances, size_t instance_coun
     SRE_DXCALL(m_dxdevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2*UINT_instcount));
 }
 
-void Instance::draw2(const sre::RenderInstance2* instance, size_t point_count)
+void Instance::draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode)
 {
     HRESULT hr;
 
     if (1)
     {
         SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(0, 1));
-        SRE_DXCALL(m_dxdevice->SetStreamSourceFreq(1, 1));
 
         SRE_DXCALL(m_dxdevice->SetVertexDeclaration(m_d2data.dxvertexdecl));
         SRE_DXCALL(m_dxdevice->SetVertexShader(m_dxd2vs));
@@ -286,20 +283,17 @@ void Instance::draw2(const sre::RenderInstance2* instance, size_t point_count)
     {
         assert(m_potratio.x != 1.0f || m_potratio.y != 1.0f);
         
-        for (size_t i = 0; i < point_count; i++)
-        {
-            const_cast<sre::RenderInstance2*>(instance)->points[i].uv *= m_potratio;
+        for (size_t i = 0; i < point_count; i++) {
+            const_cast<sre::RenderPoint*>(points)[i].uv *= m_potratio;
         }
     }
 
-    UINT offsetp = m_d2data.pervertexbuf.append<sre::RenderPoint>(m_dxdevice, instance->points, static_cast<UINT>(point_count));
-    UINT offsetc = m_d2data.perinstancebuf.append<sre::col4>(m_dxdevice, &instance->color, 1);
-    SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d2data.pervertexbuf.dxbuff, offsetp, sizeof(sre::RenderPoint)));
-    SRE_DXCALL(m_dxdevice->SetStreamSource(1, m_d2data.perinstancebuf.dxbuff, offsetc, 0));
+    UINT offset = m_d2data.vertexbuf.append<sre::RenderPoint>(m_dxdevice, points, static_cast<UINT>(point_count));
+    SRE_DXCALL(m_dxdevice->SetStreamSource(0, m_d2data.vertexbuf.dxbuff, offset, sizeof(sre::RenderPoint)));
 
     size_t primcount;
     D3DPRIMITIVETYPE primtype;
-    switch (instance->mode)
+    switch (mode)
     {
         case SRE_PRIMITIVE_TRIANGLES:
             primcount = point_count/3;

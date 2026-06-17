@@ -1,28 +1,24 @@
 #include "../internal.h"
 
 #include <Core/Event.hpp>
+#include <Base/Mutex.hpp>
 
 namespace sre
 {
     using EventQueue = std::deque<sre::Event>;
 
-    class RAIIMutex
-    {
-        SDL_mutex* mutex = SDL_CreateMutex();
-
-    public:
-        ~RAIIMutex() { SDL_DestroyMutex(mutex); }
-        operator SDL_mutex*() const { return mutex; }
+    struct QuitEventDummy {
+        static constexpr eventType EVENT_TYPE = sre::EVENT_QUIT;
     };
 }
 
 static sre::EventQueue queue;
-static sre::RAIIMutex mutex;
+static sre::Mutex mutex;
 sre::Signal<sre::Event> sre::onEvent;
 
 int __signal_events(SDL_Event* ev)
 {
-    SDL_LockMutex(mutex);
+    std::lock_guard<sre::Mutex> guard{mutex};
 
     switch (ev->type)
     {
@@ -77,11 +73,14 @@ int __signal_events(SDL_Event* ev)
             ev->type != SDL_FINGERUP
         });
         break;
+    
+    case SDL_QUIT:
+        queue.emplace_back(sre::QuitEventDummy{});
+        break;
     default:
         break;
     }
-
-    SDL_UnlockMutex(mutex);
+    
     return 1;
 }
 
@@ -121,11 +120,11 @@ void __queue_events()
 
     while (!queue.empty())
     {
-        SDL_LockMutex(mutex);
+        mutex.lock();
             sre::Event ev = std::move(queue.front());
             queue.pop_front();
-        SDL_UnlockMutex(mutex);
-        // Don't forget to fire with the mutex unlocked, having the mutex locked can cause softlocks
+        mutex.unlock();
+        // Don't forget to fire with the mutex unlocked, having the mutex locked can cause bad locks
         sre::onEvent.fire(ev);
     }
 }

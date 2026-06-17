@@ -183,22 +183,22 @@ void sregl11_draw1(void* _inst, const sre_RenderInstance1* instances, size_t ins
     #endif
 }
 
-void sregl11_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count)
+void sregl11_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode)
 {
     sregl11_inst* inst = _inst;
     sregl11_texture* texture = inst->curtexture;
 
-    GLenum primitivemode = sregl_mapmode(instance->mode);
+    GLenum primitivemode = sregl_mapmode(mode);
     inst->glfuncs11.Begin(primitivemode);
 
     float rangex = texture ? texture->xrange : 1;
     float rangey = texture ? texture->yrange : 1;
 
-    inst->glfuncs11.Color4ubv(&instance->color.r);
     for (size_t i = 0; i < point_count; i++)
     {
-        const sre_RenderPoint* pt = &instance->points[i];
+        const sre_RenderPoint* pt = &points[i];
         inst->glfuncs11.TexCoord2f(pt->uv.x * rangex, pt->uv.y * rangey);
+        inst->glfuncs11.Color4ubv(&pt->color.r);
         inst->glfuncs11.Vertex2f(pt->pos.x, pt->pos.y);
     }
 

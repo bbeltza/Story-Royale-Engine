@@ -236,3 +236,15 @@ bool Font::load(const sre::byte* data, sre::size_t size)
     m_data = fontdata;
     return true;
 }
+
+bool Font::load_file(const sre::File& file)
+{
+    if (!file.valid())
+        return false;
+
+    if (file.begin())
+        return load(file.begin(), file.size());
+
+    sre::Chunk filechunk = file.allocate();
+    return load(filechunk->data, filechunk->size);
+}

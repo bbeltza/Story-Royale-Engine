@@ -26,7 +26,7 @@ typedef struct sregl11_inst
 SRE_CAPI_BEGIN
 
 extern void sregl11_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
-extern void sregl11_draw2(void* _inst, const sre_RenderInstance2* instance, size_t point_count);
+extern void sregl11_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
 extern void sregl11_begin(void* _inst, const float clear[4]);
 extern void sregl11_end(void* _inst);

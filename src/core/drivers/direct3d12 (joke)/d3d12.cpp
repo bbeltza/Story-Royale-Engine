@@ -738,8 +738,7 @@ private:
 
     struct {
         sred3d12_dbuff d1{};
-        sred3d12_dbuff d2c{};
-        sred3d12_dbuff d2p{};
+        sred3d12_dbuff d2{};
     } drawdatas[FRAMEBUFFER_COUNT], *current_drawdata{};
 
     alignas(sred3d12_texture) char basictexture[sizeof(sred3d12_texture)]; // Allocate it as buffer of bytes to initialize it later
@@ -747,7 +746,7 @@ private:
     sred3d12_cache caches{};
 public:
     void draw1(const sre::RenderInstance1* instances, size_t instance_count);
-    void draw2(const sre::RenderInstance2* instance, size_t point_count);
+    void draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode);
             
     void begin(const float clear[4]);
     void end();
@@ -1000,9 +999,9 @@ bool sred3d12_inst::_pipelinesetup()
         /* uv_offset      */ {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
     };
     static const D3D12_INPUT_ELEMENT_DESC D2_INPUTS[] = {
-        /* color  */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1},
-        /* points.pos */ {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-        /* points.uv  */ {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}        
+        /* pos */ {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+        /* uv  */ {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+        /* color  */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
     };
 
     static const D3D12_DESCRIPTOR_RANGE DESCRANGES[] = {
@@ -1119,14 +1118,11 @@ bool sred3d12_inst::_pipelinesetup()
     for (int i = 0; i < sre::countof(drawdatas); i++)
     {
         drawdatas[i].d1.heaptype = buffer_heaptype;
-        drawdatas[i].d2c.heaptype = buffer_heaptype;
-        drawdatas[i].d2p.heaptype = buffer_heaptype;
+        drawdatas[i].d2.heaptype = buffer_heaptype;
 
         if (!drawdatas[i].d1.init(dxdevice, sizeof(sre::RenderInstance1)*255))
             return false;
-        if (!drawdatas[i].d2c.init(dxdevice, sizeof(sre::col4)*255))
-            return false;
-        if (!drawdatas[i].d2p.init(dxdevice, sizeof(sre::RenderPoint)*255))
+        if (!drawdatas[i].d2.init(dxdevice, sizeof(sre::RenderPoint)*255))
             return false;
     }
     
@@ -1239,7 +1235,6 @@ void sred3d12_inst::begin(const float color[4])
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
     dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
     dxcmd_list->RSSetViewports(1, &caches.viewport);
-    dxcmd_list->RSSetScissorRects(1, &scr);
 
     D3D12_RESOURCE_BARRIER rbtransition{};
     rbtransition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1259,8 +1254,7 @@ void sred3d12_inst::begin(const float color[4])
 
     current_drawdata = &drawdatas[current_frameindex];
     current_drawdata->d1.reset();
-    current_drawdata->d2c.reset();
-    current_drawdata->d2p.reset();
+    current_drawdata->d2.reset();;
 
     current_drawtype = 0;
 }
@@ -1420,10 +1414,10 @@ void sred3d12_inst::draw1(const sre::RenderInstance1* instances, size_t instance
     dxcmd_list->DrawInstanced(4, static_cast<UINT>(instance_count), 0, 0);
 }
 
-void sred3d12_inst::draw2(const sre::RenderInstance2* instance, size_t point_count)
+void sred3d12_inst::draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode)
 {
     D3D12_PRIMITIVE_TOPOLOGY topology;
-    switch (instance->mode)
+    switch (mode)
     {
         case SRE_PRIMITIVE_TRIANGLES: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
         case SRE_PRIMITIVE_TRIANGLESTRIP: topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
@@ -1434,7 +1428,7 @@ void sred3d12_inst::draw2(const sre::RenderInstance2* instance, size_t point_cou
     }
 
     ID3D12PipelineState* const* pipelinestate;
-    switch (instance->mode)
+    switch (mode)
     {
         case SRE_PRIMITIVE_TRIANGLES:
         case SRE_PRIMITIVE_TRIANGLESTRIP:
@@ -1457,17 +1451,13 @@ void sred3d12_inst::draw2(const sre::RenderInstance2* instance, size_t point_cou
     dxcmd_list->IASetPrimitiveTopology(topology);
 
     UINT UINT_ptcount = static_cast<UINT>(point_count);
-    UINT indexc = current_drawdata->d2c.append(dxdevice, &instance->color, sizeof(sre::col4));
-    UINT indexp = current_drawdata->d2p.append(dxdevice, instance->points, sizeof(sre::RenderPoint)*UINT_ptcount);
+    UINT index = current_drawdata->d2.append(dxdevice, points, sizeof(sre::RenderPoint)*UINT_ptcount);
 
-    D3D12_VERTEX_BUFFER_VIEW vboviews[2]{};
-    vboviews[0].BufferLocation = current_drawdata->d2c.baseaddr + indexc;
-    vboviews[0].SizeInBytes = sizeof(sre::col4);
-    vboviews[0].StrideInBytes = sizeof(sre::col4);
-    vboviews[1].BufferLocation = current_drawdata->d2p.baseaddr + indexp;
-    vboviews[1].SizeInBytes = sizeof(sre::RenderPoint)*UINT_ptcount;
-    vboviews[1].StrideInBytes = sizeof(sre::RenderPoint);
-    dxcmd_list->IASetVertexBuffers(0, 2, vboviews);
+    D3D12_VERTEX_BUFFER_VIEW view{};
+    view.BufferLocation = current_drawdata->d2.baseaddr + index;
+    view.SizeInBytes = sizeof(sre::RenderPoint)*UINT_ptcount;
+    view.StrideInBytes = sizeof(sre::RenderPoint);
+    dxcmd_list->IASetVertexBuffers(0, 1, &view);
     dxcmd_list->DrawInstanced(UINT_ptcount, 1, 0, 0);
 }
 

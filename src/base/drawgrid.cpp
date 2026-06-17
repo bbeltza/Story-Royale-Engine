@@ -30,14 +30,16 @@ bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin,
         sre::unit x = i * size.x + origin.x;
         points[ptindex+0] = {
             sre::vec2ut{x, miny},
-            sre::vec2ut{0, 0}
+            sre::vec2ut{0, 0},
+            color
         };
         points[ptindex+1] = {
             sre::vec2ut{x, maxy},
-            sre::vec2ut{0, 0}
+            sre::vec2ut{0, 0},
+            color
         };
     }
-    sre::render::draw2(SRE_DRAWFLAG_CAMERAX, color, points, pointcountx, SRE_PRIMITIVE_LINEPERLINE);
+    sre::render::draw2(SRE_DRAWFLAG_CAMERAX, points, pointcountx, SRE_PRIMITIVE_LINEPERLINE);
 
     // Horizontal lines (that depend on the Y axis)
     for (int i = 0, ptindex = 0; i < numgridsy; i++, ptindex += 2)
@@ -45,14 +47,16 @@ bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin,
         sre::unit y = i * size.y + origin.y;
         points[ptindex+0] = {
             sre::vec2ut{minx, y},
-            sre::vec2ut{0, 0}
+            sre::vec2ut{0, 0},
+            color
         };
         points[ptindex+1] = {
             sre::vec2ut{maxx, y},
-            sre::vec2ut{0, 0}
+            sre::vec2ut{0, 0},
+            color
         };
     }
-    sre::render::draw2(SRE_DRAWFLAG_CAMERAY, color, points, pointcounty, SRE_PRIMITIVE_LINEPERLINE);
+    sre::render::draw2(SRE_DRAWFLAG_CAMERAY, points, pointcounty, SRE_PRIMITIVE_LINEPERLINE);
 
     return true;
 }

@@ -28,7 +28,7 @@ typedef struct
     sre_timeStamp duration;
     sre_timeStamp delay; // Unimplemented yet
 
-    sre_easingStyle easing_style; // Animation easing is still not implemented, thus S_LINEAR is the only available option
+    sre_easingStyle easing_style;
     sre_easingDirection easing_direction;
 
     int repeat; // Unimplemented

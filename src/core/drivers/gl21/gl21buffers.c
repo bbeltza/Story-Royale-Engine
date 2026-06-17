@@ -108,7 +108,7 @@ void sregl21_vtassemblerreserve(sregl21_inst* inst, struct sregl21_vtassembler* 
         return;
     }
 
-    size_t bytesize = size * sizeof(sregl21_vertex);
+    size_t bytesize = size * sizeof(sre_RenderPoint);
     sre_delete(vtasm->arr);
     vtasm->arr = sre_new(bytesize);
     vtasm->size = size;
@@ -125,7 +125,7 @@ void sregl21_vtassemblerdata(sregl21_inst* inst, struct sregl21_vtassembler* vta
     assert(size <= vtasm->size);
     assert(size <= inst->mainvbosize);
 
-    SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, size*sizeof(sregl21_vertex), vtasm->arr));
+    SRE_GLCALL(inst->glfuncs21.BufferSubData(GL_ARRAY_BUFFER, 0, size*sizeof(sre_RenderPoint), vtasm->arr));
 }
 
 void sregl21_vtassemblerfree(struct sregl21_vtassembler* vtasm)
@@ -148,9 +148,9 @@ bool sregl21setupbuffers(sregl21_inst* inst)
     SRE_GLCALLF(inst->glfuncs21.EnableVertexAttribArray(1));
     SRE_GLCALLF(inst->glfuncs21.EnableVertexAttribArray(2));
 
-    SRE_GLCALLF(inst->glfuncs21.VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sregl21_vertex), (const void*)offsetof(sregl21_vertex, pos)));
-    SRE_GLCALLF(inst->glfuncs21.VertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sregl21_vertex), (const void*)offsetof(sregl21_vertex, uv)));
-    SRE_GLCALLF(inst->glfuncs21.VertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(sregl21_vertex), (const void*)offsetof(sregl21_vertex, col)));
+    SRE_GLCALLF(inst->glfuncs21.VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, pos)));
+    SRE_GLCALLF(inst->glfuncs21.VertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, uv)));
+    SRE_GLCALLF(inst->glfuncs21.VertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, color)));
 
     if (!sregl21_vtassemblersetup(inst, &inst->vtassembler, 4*255))
         return false;

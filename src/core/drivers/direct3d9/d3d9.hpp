@@ -93,13 +93,11 @@ namespace sreD3D9
         } m_d1data{};
         struct {
             IDirect3DVertexDeclaration9* dxvertexdecl{};
-            DBuff pervertexbuf{};
-            DBuff perinstancebuf{};
+            DBuff vertexbuf{};
 
             void releaseresources()
             {
-                perinstancebuf.release();
-                pervertexbuf.release();
+                vertexbuf.release();
                 if (dxvertexdecl)
                 {
                     dxvertexdecl->Release();
@@ -114,7 +112,7 @@ namespace sreD3D9
         D3DCAPS9 m_devcaps;
     public:
         void draw1(const sre::RenderInstance1* instances, size_t instance_count);
-        void draw2(const sre::RenderInstance2* instance, size_t point_count);
+        void draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode);
             
         void begin(const float color[4]);
         void end();
