@@ -13,18 +13,37 @@ static sre::Font opensans_font{};
 void render()
 {
     sre::FontAtlas& fontatlas = opensans_font.get_atlas();
+    sre::col4 red{ 255, 0, 0, 100 };
+
+    const sre::RenderPoint points[4]{
+        {
+            bounds.position,
+            0,  /* UV, set it to 0 since we don't use textures */
+            red
+        },
+        {
+            bounds.position + sre::vec2ut{bounds.size.x, 0},
+            0,
+            red
+        },
+        {
+            bounds.position + sre::vec2ut{bounds.size.x, bounds.size.y},
+            0,
+            red 
+        },
+        {
+            bounds.position + sre::vec2ut{0, bounds.size.y},
+            0,
+            red
+        }
+    };
 
     sre::render::begin(sre::BLACK, sre::vec2ut::ZERO);
-        sre::render::draw2(0, sre::col4{ 255, 0, 0, 100 }, {
-            bounds.position,
-            bounds.position + sre::vec2ut{bounds.size.x, 0},
-            bounds.position + bounds.size,
-            bounds.position + sre::vec2ut{0, bounds.size.y}
-        }, SRE_PRIMITIVE_LINELOOP);
+        sre::render::draw2(0, points, SRE_PRIMITIVE_LINELOOP);
         fontatlas.render_text(
             sre::FontRenderData{
                 "Hello world from sre::FontAtlas::render_text()!!",
-                -1, // textlen - `-1` means draw all of the text
+                -1, // textlen: `-1` tells the function to draw all of the text
                 0, // Flags used to render (SRE_DRAWFLAG_CAMERERA(X/Y) can be used)
                 sre::WHITE
             },
@@ -34,7 +53,7 @@ void render()
                 sre::ALIGN_CENTER
             },
             NULL, // Unicode set, reserved for future use for unicode support
-            NULL
+            NULL    // User pointer for more advanced callbacks
         );
 }
 

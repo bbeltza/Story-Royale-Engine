@@ -1,5 +1,6 @@
 #include <ECS/CameraControllers/Drag.hpp>
-#include <Core/Display.hpp>
+
+#include <Core/Window.hpp>
 #include <Core/Runtime.hpp>
 
 using namespace sreECS;
@@ -44,7 +45,7 @@ void DragControl::handle_event(void*, DragControl* self, sre::Event ev)
         if (sre::action_pressed(self->m_action)) self->m_lastmouseDelta += ev.get<MouseMove>().delta;
         break;
     case sre::EVENT_TOUCH:
-        self->m_lastmouseDelta += ev.get<Touch>().delta * sre::display_size();
+        self->m_lastmouseDelta += ev.get<Touch>().delta * sre::window_getviewport();
         break;
     default:
         break;

@@ -1,7 +1,8 @@
-#pragma once
-#include <type_traits>
+#ifndef SRE_UT_MATH_HPP
+#define SRE_UT_MATH_HPP
 
-#include "utils/math.h"
+#include <utils/math.h>
+#include <type_traits>
 
 namespace ut
 {
@@ -19,4 +20,11 @@ namespace ut
     constexpr auto lerp(T src, T goal, float alpha) -> decltype(src.lerp(goal, alpha)) { return src.lerp(goal, alpha); }
     template <typename T>
     constexpr arithmetic_type<T> lerp(T src, T goal, float alpha) { return static_cast<T>(ut_lerp(src, goal, alpha)); }
+
+    template <typename Tx, typename Ty>
+    constexpr auto max(Tx&& a, Ty&& b) -> decltype(ut_max(a, b)) { return ut_max(a, b); }
+    template <typename Tx, typename Ty>
+    constexpr auto min(Tx&& a, Ty&& b) -> decltype(ut_min(a, b)) { return ut_min(a, b); }
 }
+
+#endif

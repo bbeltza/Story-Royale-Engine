@@ -1,8 +1,10 @@
 #include <GUI/Layer.hpp>
 #include <GUI/Object.hpp>
 #include <GUI/Component.hpp>
-#include <Core/Display.hpp>
+
 #include <Core/Render.h>
+#include <Core/Window.hpp>
+
 #include <Base/Error.h>
 #include <Base/Log.h>
 
@@ -91,47 +93,55 @@ void Object::CContainer::setup(Component* const components[], size_t count)
 //
 // Global GUI object functions (That wrap the layer ones)
 
-const std::deque<const sreGUI::Object*>& sreGUI::get_hovering(Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreGUI::get_default_layer();
-    assert(lyr != NULL);
 
+#if 1
+    static inline void GET_LAYER_INIT(Layer*& lyr) {
+        if (!lyr)
+            lyr = sreGUI::get_default_layer();
+        assert(lyr != NULL);
+    }
+#else
+    #define GET_LAYER_INIT(l) if (!(l))                            \
+                                (l) = sreGUI::get_default_layer(); \
+                              assert((l) != NULL)
+#endif
+
+#define GET_LAYER_INITL() GET_LAYER_INIT(lyr)
+
+const std::deque<const sreGUI::Object*>& sreGUI::get_hovering(Layer* lyr) {
+    GET_LAYER_INITL();
     return lyr->get_hovering();
 }
 
-void sreGUI::set_root(Object* object, Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreGUI::get_default_layer();
-    assert(lyr != NULL);
-
+void sreGUI::set_root(Object* object, Layer* lyr) {
+    GET_LAYER_INITL();
     lyr->set_root(object);
 }
-Object* sreGUI::get_root(Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreGUI::get_default_layer();
-    assert(lyr != NULL);
-
+Object* sreGUI::get_root(Layer* lyr) {
+    GET_LAYER_INITL();
     return lyr->get_root();
 }
 
-sre::unit sreGUI::get_insets(Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreGUI::get_default_layer();
-    assert(lyr != NULL);
-
+sre::unit sreGUI::get_insets(Layer* lyr) {
+    GET_LAYER_INITL();
     return lyr->get_insets();
 }
-void sreGUI::set_insets(sre::unit insets, Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreGUI::get_default_layer();
-    assert(lyr != NULL);
+sre::unit sreGUI::get_viewport_scale(Layer* lyr) {
+    GET_LAYER_INITL();
+    return lyr->get_viewport_scale();
+}
+sre::rect2Dut sreGUI::get_viewport_area(Layer* lyr) {
+    GET_LAYER_INITL();
+    return lyr->get_viewport_area();
+}
 
+void sreGUI::set_insets(sre::unit insets, Layer* lyr) {
+    GET_LAYER_INITL();
     lyr->set_insets(insets);
+}
+void sreGUI::set_viewport(sre::rect2Dut area, sre::unit scale, Layer* lyr) {
+    GET_LAYER_INITL();
+    lyr->set_viewport(area, scale);
 }
 
 //
@@ -142,7 +152,7 @@ void Object::call_query(sre::vec2ut pt, std::deque<const Object*>& stack)
     if (!flags.has(F_ENABLED))
         return;
 
-    if (flags.has(F_QUERY) && m_absolute.simple_intersects(pt))
+    if (flags.has(F_QUERY) && m_absolute.intersects(pt))
     {
         m_state.toggle_on(S_INCURSOR);
         stack.push_back(this);
@@ -154,6 +164,7 @@ void Object::call_query(sre::vec2ut pt, std::deque<const Object*>& stack)
 
 void Object::call_process()
 {
+    assert(m_parent || m_attachedlyr);
     for (auto& comp : components)
     {
         if (comp.enabled())
@@ -162,7 +173,7 @@ void Object::call_process()
     for (auto& comp : components)
     {
         if (comp.enabled())
-            m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : sre::display_size());
+            m_absolute.position = comp.process_position(m_absolute, m_parent ? m_parent->m_absolute.size : m_attachedlyr->_displaycache);
     }
 }
 
@@ -221,7 +232,7 @@ void Object::call_update()
 
 void Object::call_render(sre::ClipStackUT& clipstack)
 {
-    if (!flags.has(F_ENABLED)) return;
+    if (!flags.has(F_ENABLED)) return;    
 
     bool has_clip = flags.has(F_CLIP);
 

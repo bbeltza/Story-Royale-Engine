@@ -4,7 +4,6 @@
 #include <ECS/Component.hpp>
 
 #include <Core/Runtime.hpp>
-#include <Core/Display.hpp>
 #include <Core/Input.hpp>
 
 #include <Base/Error.h>
@@ -12,7 +11,12 @@
 
 #include <algorithm>
 
-sre::vec2ut sreECS::mouse_worldcoords() { return sreECS::get_current()->camera.toWorldSpace(sre::mouse_screencoords()); }
+sre::vec2ut sreECS::mouse_worldcoords() {
+    sre::vec2ut pt{sre::mouse_screencoords()};
+    pt = sre::process_input_coordinates(pt, 0, 0);
+
+    return sreECS::get_current()->camera.toWorldSpace(pt);
+}
 
 using namespace sreECS;
 

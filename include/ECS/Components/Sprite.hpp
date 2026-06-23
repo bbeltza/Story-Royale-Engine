@@ -31,6 +31,7 @@ namespace sreECS
         sre::size_t current_frame = 0;
 
         void attach(sre::RAIITexture&&);
+        void attach(const sre::RAIITexture&);
     private:
         void on_render(Entity&) override;
 

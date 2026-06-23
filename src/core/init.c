@@ -70,13 +70,14 @@ void __initialize_engine()
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG); // Enable SDL error logging
     SDL_LogSetOutputFunction(sdl_log_callback, NULL);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0"); // Don't interpret touch events as mouse events
-    SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
-
+    //SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
+    
 #ifdef SDL_VIDEO_DRIVER_WAYLAND // Use wayland, if possible
     SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland");
 #endif
-#ifdef SDL_VIDEO_DRIVER_WINDOWS // Replace the "SDL_app" window class name
-    SDL_RegisterApp("Story Royale Engine", 0x0003, NULL);
+#ifdef SDL_VIDEO_DRIVER_WINDOWS
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "system");
+    SDL_RegisterApp("Story Royale Engine", 0x0003, NULL); // Replace the "SDL_app" window class name
 #endif
 
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)

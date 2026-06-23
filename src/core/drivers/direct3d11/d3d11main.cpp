@@ -201,8 +201,12 @@ Instance::Instance(SDL_Window* window, int* outstatus)
     m_dxdevicecontext->PSSetSamplers(0, 1, &m_dxsamplerstate);
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
     m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
-    m_dxdevicecontext->VSSetConstantBuffers(0, 1, &m_cbuffer);
-    m_dxdevicecontext->VSSetConstantBuffers(1, 1, &m_ccambuffer);
+
+    ID3D11Buffer* const cbuffers[] = {
+        m_cbuffer,
+        m_ccambuffer
+    };
+    m_dxdevicecontext->VSSetConstantBuffers(0, 2, cbuffers);
 
     *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }

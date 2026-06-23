@@ -1,5 +1,4 @@
 #include <Core/Render.h>
-#include <Core/Display.hpp>
 #include <Core/Runtime.hpp>
 #include <Base/Error.h>
 #include <Base/Log.h>
@@ -21,9 +20,20 @@ namespace sre
 		CMD_DRAW2,
 
 		CMD_STATE_SCISSOR,
+		CMD_STATE_VIEWPORT,
 		CMD_STATE_TEXTURE,
 		CMD_STATE_CAMERA,
 		CMD_STATE_BLEND
+	};
+
+	enum RenderUpdateBit 
+	{
+		UPD_SCISSOR = ut_bit(0),
+		UPD_VIEWPORT = ut_bit(1),
+		UPD_CAMERA = ut_bit(2),
+		UPD_BLEND = ut_bit(3),
+
+		UPD_ALL = UPD_SCISSOR | UPD_VIEWPORT | UPD_BLEND | UPD_CAMERA
 	};
 
 	struct RenderCmd
@@ -51,7 +61,8 @@ namespace sre
 			} draw;
 			struct {
 				sre::rect2Di rect;
-			} scissor;
+				sre::unit scale; // Only used in set_viewportstate
+			} scissor_viewport;
 			struct {
 				void* texture;
 			} texture;
@@ -295,41 +306,28 @@ void __setup_renderer()
 	}
 
 	engine.scale = 1;
+	engine.scale_ratio = 1;
 }
 
 void __update_viewport(int w, int h)
 {
-	int integer_scale;
-
-	if (engine.osize_x == w && engine.osize_y == h) // Have to check for any scale changes
+	if (engine.osize.x == w && engine.osize.y == h)
 		return;
 
-	if (engine.auto_scalex && engine.auto_scaley)
+	if (engine.autoscalex && engine.autoscaley)
 	{
-		integer_scale = ut_min(w / engine.auto_scalex, h / engine.auto_scaley);
+		int integer_scale = ut_min(w / engine.autoscalex, h / engine.autoscaley);
 		integer_scale = integer_scale ? integer_scale : 1;
-	}
-	else
-	{
-		integer_scale = static_cast<int>(engine.scale);
+		engine.scale = static_cast<sre::unit>(integer_scale);
+		engine.scale_ratio = 1 / engine.scale;
 	}
 
-	sre::unit scale = static_cast<sre::unit>(integer_scale);
-	sre::vec2ut fsize{ w, h };
-	sre::vec2ut size = fsize / scale;
-	
-	sre::vec2ut center = size / 2.0_ut;
+	engine.osize = { w, h };
+	engine.vsize = engine.osize * engine.scale_ratio;
 
-	engine.osize_x = w;
-	engine.osize_y = h;
-	engine.scale_ratio = 1 / scale;
-	engine.scale = scale;
-	engine.vsize_x = size.x;
-	engine.vsize_y = size.y;
-	engine.vcenter_x = center.x;
-	engine.vcenter_y = center.y;
-
-	SRE_VIDEO(engine.video.driver, set_viewportstate, w, h, scale);
+	if (engine.video.driver->vfptr->resize_window) {
+		SRE_VIDEO(engine.video.driver, resize_window, w, h/*, scale*/);
+	}
 }
 
 #define m reinterpret_cast<sre::RenderVectors&>(engine.video._vector_data)
@@ -356,12 +354,10 @@ void __render_flush()
 					engine.video.state.currentvsync = engine.video.state.desiredvsync;
 				}
 
-				sre::rect2Di scissor{ 0, 0, engine.osize_x, engine.osize_y };
-				
 				SRE_VIDEO(engine.video.driver, begin, cmd.begin.clear);
-				SRE_VIDEO(engine.video.driver, set_blendstate, SRE_BLEND_DEFAULT);
-				SRE_VIDEO(engine.video.driver, set_camerastate, 0, 0);
-				SRE_VIDEO(engine.video.driver, set_scissorstate, &scissor);
+				// Removed the state update calls at the beginning. The necessary calls should be called before any draw thanks to new internal state flags
+				// `handle_render_switches` sends all of the state commands now, it's in this source file
+
 				hasbegun = true;
 				continue;
 			}
@@ -381,9 +377,15 @@ void __render_flush()
 						cmd.d2mode
 					);
 					break;
+				case CMD_STATE_VIEWPORT:
+					SRE_VIDEO(engine.video.driver, set_viewportstate,
+						&cmd.scissor_viewport.rect,
+						 cmd.scissor_viewport.scale
+					);
+					break;
 				case CMD_STATE_SCISSOR:
 					SRE_VIDEO(engine.video.driver, set_scissorstate,
-						&cmd.scissor.rect
+						&cmd.scissor_viewport.rect
 					);
 					break;
 				case CMD_STATE_TEXTURE:
@@ -424,13 +426,17 @@ bool sre::render::begin(sre::col4 clear, sre::vec2ut camera)
 	if (has_begun())
 		return false;
 
-	sre::vec2ut center = sre::display_center();
-	engine.video.state.camera_x = ceil((-camera.x + center.x) * engine.scale);
-	engine.video.state.camera_y = ceil((-camera.y + center.y) * engine.scale);
+	// Reset and setup necessary state
 	engine.video.state.texture = reinterpret_cast<sre_Texture*>(UINTPTR_MAX);
 	engine.video.state.blendmode = SRE_BLEND_DEFAULT;
 	engine.video.state.lastdraw_flags = 0;
-	engine.video.state.scissor = { 0, 0, engine.vsize_x, engine.vsize_y };
+	engine.video.state.scissor = { 0, engine.vsize };
+	engine.video.state.viewport.area = engine.video.state.scissor;
+	engine.video.state.viewport.center = engine.vsize * 0.5_ut;
+	engine.video.state.viewport.scale = engine.scale;
+	engine.video.state.camera = ((-camera + engine.video.state.viewport.center) * engine.scale).ceil();
+
+	engine.video.state.state_update = UPD_ALL;
 
 	RenderCmd cmd{ CMD_BEGIN };
 	cmd.begin.clear[0] = clear.r / 255.0f;
@@ -446,9 +452,48 @@ bool sre::render::begin(sre::col4 clear, sre::vec2ut camera)
 void sre::render::set_vsync(bool enable) {
 	engine.video.state.desiredvsync = enable;
 }
+
+sre::vec2ut sre::calc_viewport_size(sre::rect2Dut zone, sre::unit scale) {
+	if (zone.size.x > 0 && zone.size.y > 0)
+		return zone.size;
+
+	sre::unit ratio = !scale ? engine.scale_ratio : 1/scale;
+	return sre::vec2ut{
+		zone.size.x > 0 ? zone.size.x : ut::max(engine.osize.x*ratio + zone.size.x, 0.0_ut),
+		zone.size.y > 0 ? zone.size.y : ut::max(engine.osize.y*ratio + zone.size.y, 0.0_ut)
+	};
+}
+
+bool sre::render::set_viewport(sre::rect2Dut zone, sre::unit scale) {
+	if (scale < 0)
+		return false;
+	if (scale == 0)
+		scale = engine.scale;
+
+	zone.size = sre::calc_viewport_size(zone, scale);
+	if (engine.video.state.viewport.scale == scale && engine.video.state.viewport.area == zone)
+		return false;
+
+	// Viewport changes reset the scissor rects
+	sre::render::reset_scissors();
+	
+	engine.video.state.camera /= engine.video.state.viewport.scale;
+	engine.video.state.camera += engine.video.state.viewport.center;
+	
+	engine.video.state.viewport.area = zone;
+	engine.video.state.viewport.scale = scale;
+	engine.video.state.viewport.center = zone.size * 0.5_ut;
+	engine.video.state.camera = ((-engine.video.state.camera + engine.video.state.viewport.center) * scale).ceil();
+
+	engine.video.state.state_update |= (UPD_CAMERA | UPD_VIEWPORT | UPD_SCISSOR);
+	return true;
+}
+
 bool sre::render::set_scissors(sre::rect2Dut zone) {
 	if (engine.video.state.scissor == zone)
 		return false;
+	
+	RENDERCMDCHECK();
 	
 	assert(zone.size.x >= 0);
 	assert(zone.size.y >= 0);
@@ -461,19 +506,23 @@ bool sre::render::set_scissors(sre::rect2Dut zone) {
 		zone.size.y += zone.position.y;
 		zone.position.y = 0;
 	}
-	RENDERCMDCHECK();
 
 	engine.video.state.scissor = zone;
-	RenderCmd cmd{ CMD_STATE_SCISSOR };
-	cmd.scissor.rect = {
-		static_cast<int>(zone.position.x * engine.scale ),
-		static_cast<int>(zone.position.y * engine.scale ),
-		static_cast<int>(zone.size.x * engine.scale ),
-		static_cast<int>(zone.size.y * engine.scale )
-	};
-	m.rendercmds.emplace_back(cmd);
+	
+	engine.video.state.state_update |= UPD_SCISSOR;
 	return true;
 }
+
+void sre::render::reset_viewport() {
+	bool result = sre::render::set_viewport({0, 0}, 0);
+	(void)result;
+}
+
+void sre::render::reset_scissors() {
+	bool result = sre::render::set_scissors({sre::vec2ut::ZERO, engine.vsize});
+	(void)result;
+}
+
 bool sre::render::set_blendmode(sre::blendMode mode)
 {
 	// TODO: Blend mode implementations should be reliant on blending src, dst operation parameters, etc...
@@ -498,24 +547,57 @@ bool sre::render::set_blendmode(sre::blendMode mode)
 	RENDERCMDCHECK();
 
 	engine.video.state.blendmode = mode;
-	RenderCmd cmd{ CMD_STATE_BLEND };
-	cmd.blend.mode = mode;
-	m.rendercmds.emplace_back(cmd);
+	engine.video.state.state_update |= UPD_BLEND;
 	return true;
 }
 
-void sre::render::reset_scissors() {
-	sre::render::set_scissors({
-		0.0_ut, 0.0_ut,
-		engine.vsize_x, engine.vsize_y
-	});
+//
+
+bool sre::render::get_vsync(bool currently) {
+	return currently ? engine.video.state.currentvsync : engine.video.state.desiredvsync;
 }
+
+sre::blendMode sre::render::get_blendmode() {
+	if (!has_begun())
+		return SRE_BLEND_DEFAULT; // Maybe return SRE_BLEND_UNKNOWN?
+
+	return engine.video.state.blendmode;
+}
+
+sre::unit sre::render::get_viewport_scale() {
+	if (!has_begun())
+		return 0;
+	
+	return engine.video.state.viewport.scale;
+}
+
+sre::rect2Dut sre::render::get_viewport_area() {
+	if (!has_begun())
+		return { 0, 0 };
+	
+	return engine.video.state.viewport.area;
+}
+
+sre::vec2ut sre::render::get_viewport_center() {
+	if (!has_begun())
+		return sre::vec2ut::ZERO;
+	
+	return engine.video.state.viewport.center;
+}
+
+sre::rect2Dut sre::render::get_scissors_area(void) {
+	if (!has_begun())
+		return { 0, 0 };
+	
+	return engine.video.state.scissor;
+}
+
+//
 
 static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 {
 	using namespace sre;
-	if (engine.video.state.texture != texture)
-	{
+	if (engine.video.state.texture != texture) {
 		RenderCmd cmd{ CMD_STATE_TEXTURE };
 		cmd.texture.texture = texture ? texture + 1 : NULL;
 		m.rendercmds.emplace_back(cmd);
@@ -523,18 +605,52 @@ static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 		engine.video.state.texture = texture;
 	}
 
-	if (engine.video.state.lastdraw_flags != flags.get())
-	{
-		if ((engine.video.state.lastdraw_flags & SRE_DRAWFLAG_CAMERA) != (flags.get() & SRE_DRAWFLAG_CAMERA))
-		{
-			RenderCmd cmd{ CMD_STATE_CAMERA };
-			cmd.camera.x = engine.video.state.camera_x * flags.has(SRE_DRAWFLAG_CAMERAX);
-			cmd.camera.y = engine.video.state.camera_y * flags.has(SRE_DRAWFLAG_CAMERAY);
-			m.rendercmds.emplace_back(cmd);
-		}
+	if (engine.video.state.lastdraw_flags != flags.get()) {
+		if ((engine.video.state.lastdraw_flags & SRE_DRAWFLAG_CAMERA) != (flags.get() & SRE_DRAWFLAG_CAMERA)) 
+			engine.video.state.state_update |= UPD_CAMERA;
 
 		engine.video.state.lastdraw_flags = flags.get();
 	}
+
+	int state = engine.video.state.state_update;
+	if (state & UPD_BLEND) {
+		RenderCmd cmd{ CMD_STATE_BLEND };
+		cmd.blend.mode = engine.video.state.blendmode;
+		m.rendercmds.emplace_back(cmd);
+	}
+	if (state & UPD_VIEWPORT) {
+		const auto& zone = engine.video.state.viewport.area;
+		const auto& scale = engine.video.state.viewport.scale;
+		RenderCmd cmd{ CMD_STATE_VIEWPORT };
+		cmd.scissor_viewport.rect = {
+			static_cast<int>(zone.position.x * scale ),
+			static_cast<int>(zone.position.y * scale ),
+			static_cast<int>(zone.size.x * scale ),
+			static_cast<int>(zone.size.y * scale )
+		};
+		cmd.scissor_viewport.scale = scale;
+		m.rendercmds.emplace_back(cmd);
+	}
+	if (state & UPD_SCISSOR) {
+		const auto& zone = engine.video.state.scissor;
+		const auto& scale = engine.video.state.viewport.scale; // The current viewport's scale is needed for the upcoming operations
+		RenderCmd cmd{ CMD_STATE_SCISSOR };
+		cmd.scissor_viewport.rect = {
+			static_cast<int>(zone.position.x * scale ),
+			static_cast<int>(zone.position.y * scale ),
+			static_cast<int>(zone.size.x * scale ),
+			static_cast<int>(zone.size.y * scale )
+		};
+		m.rendercmds.emplace_back(cmd);
+	}
+	if (state & UPD_CAMERA) {
+		RenderCmd cmd{ CMD_STATE_CAMERA };
+		cmd.camera.x = engine.video.state.camera.x * flags.has(SRE_DRAWFLAG_CAMERAX);
+		cmd.camera.y = engine.video.state.camera.y * flags.has(SRE_DRAWFLAG_CAMERAY);
+		m.rendercmds.emplace_back(cmd);
+	}
+
+	engine.video.state.state_update = 0;
 }
 
 void sre::render::draw1(sre::flags32 flags, const RenderInstance1 instances[], size_t instcount, Texture* texture)
@@ -550,14 +666,17 @@ void sre::render::draw1(sre::flags32 flags, const RenderInstance1 instances[], s
 
 	RENDERCMDCHECK();
 
-	#if 1 // Enable an optimizaion that removes any previous draw calls if the last instance is big enough (and opaque) to fill the entire screen
+	#if 0 // Enable an optimizaion that removes any previous draw calls if the last instance is big enough (and opaque) to fill the entire screen
 			// Note that if there's render::draw1 call with multiple instances passed in and one of the instances at the middle is enough to fill the screen, this check won't pass to that instance.
 
-	if (!flags && !texture && engine.video.state.blendmode == SRE_BLEND_BLEND && engine.video.state.scissor == sre::rect2Dut{ 0, 0, engine.vsize_x, engine.vsize_y }) {
+	// This is unreliable right now, with the support of viewports... Since this optimization can do wrong clearings with different viewport sizes and scales...
+	// One very nice solution would be to track the last viewport command (Fallback to `begin` if there aren't any) and remove any drawcalls from that command
+	sre::rect2Dut displayrect{ 0, engine.vsize };
+	if (!flags && !texture && engine.video.state.blendmode == SRE_BLEND_BLEND && engine.video.state.scissor == engine.video.state.viewport.area && engine.video.state.viewport.scale == engine.scale && engine.video.state.scissor == displayrect ) {
 		const RenderInstance1* lastinst = &instances[instcount-1];
 		if (lastinst->color.a == 255 &&
-			lastinst->rectangle.size.x >= engine.vsize_x &&
-			lastinst->rectangle.size.y >= engine.vsize_y &&
+			lastinst->rectangle.size.x >= engine.vsize.x &&
+			lastinst->rectangle.size.y >= engine.vsize.y &&
 			lastinst->rectangle.position.x - lastinst->anchor.x*lastinst->rectangle.size.x <= 0 &&
 			lastinst->rectangle.position.y - lastinst->anchor.y*lastinst->rectangle.size.y <= 0)
 		{
@@ -565,6 +684,8 @@ void sre::render::draw1(sre::flags32 flags, const RenderInstance1 instances[], s
 
 			instances = lastinst;
 			instcount = 1;
+
+			engine.video.state.state_update |= UPD_ALL;
 		}
 	}
 
@@ -646,9 +767,48 @@ void sre::render::draw2(sre::flags32 flags, const sre::RenderPoint points[], siz
 // C wrappers
 
 extern "C" void sre_render_set_vsync(bool enable) { sre::render::set_vsync(enable); }
+extern "C" bool sre_render_set_viewport(const sre_rect2Dut* zone, sre_unit scale) { return sre::render::set_viewport(*zone, scale); }
 extern "C" bool sre_render_set_scissors(const sre_rect2Dut* zone) { return sre::render::set_scissors(*zone); }
 extern "C" bool sre_render_set_blendmode(sre_blendMode blendmode) { return sre::render::set_blendmode(blendmode); }
+
+extern "C" bool sre_render_get_viewport(sre_rect2Dut* area, sre_vec2ut* center, sre_unit* scale) {
+	if (!area && !center && !scale)
+		return false;
+
+	if (!sre::render::has_begun()) {
+		return false;
+	}
+
+	if (area) {
+		*area = engine.video.state.viewport.area;
+	}
+	if (center) {
+		*center = engine.video.state.viewport.center;
+	}
+	if (scale) {
+		*scale = engine.video.state.viewport.scale;
+	}
+
+	return true;
+}
+
+extern "C" bool sre_render_get_scissors(sre_rect2Dut* area) {
+	if (!area)
+		return false;
+
+	if (!sre::render::has_begun()) {
+		return false;
+	}
+
+	*area = engine.video.state.scissor;
+	return true;
+}
+extern "C" bool sre_render_get_vsync(bool currently) { return sre::render::get_vsync(); }
+extern "C" sre_blendMode sre_render_get_blendmode(void) { return sre::render::get_blendmode(); }
+
+extern "C" void sre_render_reset_viewport() { sre::render::reset_viewport(); }
 extern "C" void sre_render_reset_scissors() { sre::render::reset_scissors(); }
+
 extern "C" void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Texture* texture) {
 	sre::render::draw1(flags, instances, instcount, texture);
 }

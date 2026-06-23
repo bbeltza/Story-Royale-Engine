@@ -12,7 +12,7 @@ bool Instance::_setuprendertargets()
 	return true;
 }
 
-void Instance::set_viewportstate(int w, int h, sre::unit scale)
+bool Instance::resize_window(int w, int h)
 {
 	HRESULT hr;
 
@@ -24,10 +24,20 @@ void Instance::set_viewportstate(int w, int h, sre::unit scale)
 	}
 	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, 0));
 
-	if (!_setuprendertargets())
-		abort();
+	return _setuprendertargets() != false;
+}
 
-	D3D11_VIEWPORT viewport{ 0, 0, static_cast<FLOAT>(w), static_cast<FLOAT>(h), 0, 1 };
+void Instance::set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale)
+{
+	HRESULT hr;
+	D3D11_VIEWPORT viewport{
+		static_cast<FLOAT>(rectangle->position.x),
+		static_cast<FLOAT>(rectangle->position.y),
+		static_cast<FLOAT>(rectangle->size.x),
+		static_cast<FLOAT>(rectangle->size.y),
+		0.0f,
+		1.0f
+	};
 	m_dxdevicecontext->RSSetViewports(1, &viewport);
 
 	FLOAT matrix[16] = {
@@ -80,6 +90,6 @@ void Instance::set_camerastate(sre::vec2ut camera)
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mapped;
 	SRE_DXCALL(m_dxdevicecontext->Map(m_ccambuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-	*static_cast<CCamBuffer*>(mapped.pData) = { camera.x, camera.y };
+		*static_cast<CCamBuffer*>(mapped.pData) = { camera.x, camera.y };
 	m_dxdevicecontext->Unmap(m_ccambuffer, 0);
 }

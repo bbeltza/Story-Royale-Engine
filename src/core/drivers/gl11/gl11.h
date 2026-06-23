@@ -31,11 +31,11 @@ extern void sregl11_draw2(void* _inst, const sre_RenderPoint* points, size_t poi
 extern void sregl11_begin(void* _inst, const float clear[4]);
 extern void sregl11_end(void* _inst);
 
-extern void sregl11_set_viewportstate(void* _inst, int w, int h, sre_unit scale);
 extern void sregl11_set_vsync(void* _inst, bool enable);
 extern void sregl11_set_texturestate(void* _inst, void* _texture);
 extern void sregl11_set_blendstate(void* _inst, sre_blendMode blendmode);
 extern void sregl11_set_camerastate(void* _inst, sre_unit x, sre_unit y);
+extern void sregl11_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale);
 extern void sregl11_set_scissorstate(void* _inst, const sre_rect2Di* rectangle);
 
 extern bool sregl11_texture_setup(void* _inst, void* _texture, sre_SDLpixelFormat formathint, int w, int h, sre_SDLpixelFormat* outformat);

@@ -5,9 +5,12 @@
 
 using namespace sreECS;
 
-void Sprite::attach(sre::RAIITexture&& texture)
-{
+void Sprite::attach(sre::RAIITexture&& texture) {
     textures.push_back(std::move(texture));
+}
+
+void Sprite::attach(const sre::RAIITexture& texture) {
+    textures.push_back(texture);
 }
 
 void Sprite::on_render(Entity& entity)

@@ -30,7 +30,6 @@ typedef struct sresdlrenderer_inst
 
     sre_unit scaling;
     sre_vec2ut camera;
-    sre_vec2ut usecamera;
 
     SDL_Vertex* vbuf;
     size_t vbuf_size;
@@ -47,11 +46,11 @@ void sresdlrenderer_draw2(void* _inst, const sre_RenderPoint* points, size_t poi
 void sresdlrenderer_begin(void* _inst, const float clear[4]);
 void sresdlrenderer_end(void* _inst);
 
-void sresdlrenderer_set_viewportstate(void* _inst, int w, int h, sre_unit scale);
 void sresdlrenderer_set_vsync(void* _inst, bool enable);
 void sresdlrenderer_set_texturestate(void* _inst, void* _texture);
 void sresdlrenderer_set_blendstate(void* _inst, sre_blendMode blending);
 void sresdlrenderer_set_camerastate(void* _inst, sre_unit x, sre_unit y);
+void sresdlrenderer_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale);
 void sresdlrenderer_set_scissorstate(void* _inst, const sre_rect2Di* rectangle);
 
 bool sresdlrenderer_setup_texture(void* _inst, void* _texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat);

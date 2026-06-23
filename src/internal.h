@@ -3,24 +3,18 @@
 #include <standard>
 
 #include <C_API.h>
+#include <ints.h>
+
 #include <Datatypes/Units.h>
 #include <Datatypes/TimeStamp.h>
-#include <ints.h>
 
 #include <Core/Render.h>
 #include <Core/Window.h>
 
+#include <utils/mem.h>
+
 #define SRE_VIDEOV(x, func) (x)->vfptr->func((x)->driverdata)
 #define SRE_VIDEO(x, func, ...) (x)->vfptr->func((x)->driverdata, __VA_ARGS__)
-#define SRE_pIMGUI static_cast<::sre::ImGuiInterface*>(engine.imgui)
-
-#if defined(_MSC_VER)
-	#define SRE_ALIGN(x) __declspec(align(x))
-#elif defined(__GNUC__)
-	#define SRE_ALIGN(x) __attribute__((aligned(x)))
-#else
-	#define SRE_ALIGN(x)
-#endif
 
 	struct _win_settings
 	{
@@ -46,7 +40,7 @@
 		sre_Texture** freelist[3];
 		size_t last;
 	};
-	
+
 	struct _engine_renderdata
 	{
 		struct
@@ -72,8 +66,16 @@
 			bool desiredvsync;
 			bool currentvsync;
 
-			sre_unit camera_x;
-			sre_unit camera_y;
+			sre_u8 state_update;
+			sre_u8 _reserved; // padding...
+
+			sre_vec2ut camera;
+
+			struct {
+				sre_rect2Dut area;
+				sre_vec2ut center;
+				sre_unit scale;
+			} viewport;
 
 			sre_Texture* texture;
 		} state;
@@ -107,16 +109,16 @@
 		// Window data
 
 		SDL_Window* sdl_windowhndl;
-		int auto_scalex;
-		int auto_scaley;
+		int autoscalex;
+		int autoscaley;
+		sre_unit scale;				
+		sre_unit scale_ratio;
 		
 		// Renderer data
 		
-		struct _engine_renderdata video;
-
-		int osize_x, osize_y;
-		sre_unit vsize_x, vsize_y;
-		sre_unit vcenter_x, vcenter_y;
+		struct _engine_renderdata video; // TODO: Rename to `render`
+		sre_vec2i osize;
+		sre_vec2ut vsize;
 
 		// Audio data
 
@@ -135,15 +137,11 @@
 
 		// Input data
 
-		sre_unit mouse_x, mouse_y;
+		int input_x, input_y;
 		sre_u16 mouse_press;
 		sre_u16 mouse_framepress;
-		sre_unit scale;
-		sre_unit scale_ratio; /* 1 / engine.scale */
 		sre_u8 keyboard_state[SDL_NUM_SCANCODES / 8];
 		sre_u8 keyboard_framestate[SDL_NUM_SCANCODES / 8];
-
-		// sre_unit uni_x, uni_y; // Might replace `mouse_x` and `mouse_y`
 
 		// Touch finger data (not working yet)
 		SDL_TouchID input_last_touchid;

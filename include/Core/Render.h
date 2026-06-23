@@ -53,9 +53,9 @@ typedef enum sre_renderDriver
 	SRE_RENDERDRIVER_OPENGL_21,
 	SRE_RENDERDRIVER_OPENGL_32,
 
-		SRE_RENDERDRIVER_DIRECTX_9,
-		SRE_RENDERDRIVER_DIRECTX_11,
-		SRE_RENDERDRIVER_DIRECTX_12
+	SRE_RENDERDRIVER_DIRECTX_9,
+	SRE_RENDERDRIVER_DIRECTX_11,
+	SRE_RENDERDRIVER_DIRECTX_12
 } sre_renderDriver;
 
 typedef enum sre_blendMode
@@ -65,6 +65,7 @@ typedef enum sre_blendMode
     SRE_BLEND_MOD,
     SRE_BLEND_MUL,
 
+    SRE_BLEND_UNKNOWN,
     SRE_BLEND_DEFAULT = SRE_BLEND_BLEND
 } sre_blendMode;
 
@@ -124,11 +125,13 @@ struct sre_RenderVFT
     void (* begin)(void* _inst, const float clear[4]); // Formerly as `clear`
     void (* end)(void* _inst); // Formerly as `present`
     
-    void (* set_viewportstate)(void* _inst, int w, int h, sre_unit scale);
+    bool (* resize_window)(void* _inst, int w, int h); // Resize the window (Can be NULL!)
+
     void (* set_vsync)(void* _inst, bool enable);
     void (* set_texturestate)(void* _inst, void* _texture);
     void (* set_blendstate)(void* _inst, sre_blendMode blendmode);
     void (* set_camerastate)(void* _inst, sre_unit x, sre_unit y);
+    void (* set_viewportstate)(void* _inst, const sre_rect2Di* rectangle, sre_unit scale); // Sets the viewport (NOT THE WINDOW SIZE!!!)
     void (* set_scissorstate)(void* _inst, const sre_rect2Di* rectangle);
 
     bool (* texture_setup)(void* _inst, void* _texture, sre_SDLpixelFormat formathint, int w, int h, sre_SDLpixelFormat* outformat);
@@ -141,10 +144,11 @@ enum sreRenderDriverBits
     SRE_RENDERBIT_SUPPORT_LINELOOP = 1 << 0, // Support for handling SRE_PRIMITIVE_LINELOOP for draw2 directly. If this bit is not set, then the engine will handle it directly
                                                 // by adding an extra point equal to the first one in `points`, and handing it to the driver with the SRE_PRIMITIVE_LINESTRIP mode.
     // SRE_RENDERBIT_MULTITHREADED = 1 << 1, // Render driver functions can be run in other threads. Otherwise, every render function such as texture actions will be deferred.
-    // SRE_RENDERBIT_SUPPORT_RENDERTARGETS = 1 << 2
-    // SRE_RENDERBIT_HANDLE_NULLTEXTURE = 1 << 3 // Whether to handle draw commands in which `texture` is NULL, meaning there are no texture bound you want to draw a flat surface.
-                                                    // If this flag is not set, then you won't get a NULL as `texture`, and the engine will create a flat texture and pass it instead.
+    // SRE_RENDERBIT_SUPPORT_RENDERTARGETS = 1 << 2,
+    // SRE_RENDERBIT_HANDLE_NULLTEXTURE = 1 << 3, // Whether to handle draw commands in which `texture` is NULL, meaning there's no texture bound so you want to draw a flat surface.
+                                                    // If this flag is not set, then you won't get a NULL as `texture`, and the engine will have a flat texture for you and pass it instead.
                                                     // This flag is commented for now.
+    SRE_RENDERBIT_HANDLE_DRAW1 = 1 << 4 // There's no proper draw1 function in this driver, if this flag is set. draw1 commands will be converted into draw2 SRE_PRIMITIVE_TRIANGLES commands
 };
 
 // Structure used to define driver initialization data
@@ -183,9 +187,21 @@ int sre_texture_release(sre_Texture* texture);
 // C Render function wrappers
 
 void sre_render_set_vsync(bool enable);
+
+bool sre_render_set_viewport(const sre_rect2Dut* zone, sre_unit scale);
 bool sre_render_set_scissors(const sre_rect2Dut* zone);
 bool sre_render_set_blendmode(sre_blendMode blendmode);
-void sre_render_reset_scissors();
+
+// All of these parameters can be NULL
+// Wraps the three render::get_viewport_area, get_viewport_center and get_viewport_scale
+bool sre_render_get_viewport(sre_rect2Dut* area, sre_vec2ut* center, sre_unit* scale);
+bool sre_render_get_scissors(sre_rect2Dut* area);
+bool sre_render_get_vsync(bool currently);
+sre_blendMode sre_render_get_blendmode(void);
+
+void sre_render_reset_viewport(void);
+void sre_render_reset_scissors(void);
+
 void sre_render_draw1(sre_u32 flags, const sre_RenderInstance1 instances[], size_t instcount, sre_Texture* texture);
 void sre_render_draw2(sre_u32 flags, const sre_RenderPoint points[], size_t pcount, sre_draw2primitive mode, sre_Texture* texture);
 
@@ -208,16 +224,39 @@ SRE_CAPI_END
 
         using RenderInstance1 = sre_RenderInstance1; // Render instance for all rectangle draw calls
         using RenderPoint = sre_RenderPoint;
-
+        
+        // Viewport helper(s)
+        sre::vec2ut calc_viewport_size(sre::rect2Dut zone, sre::unit scale);
+    
         namespace render
         {
+
+            // State functions
+
             void set_vsync(bool enable);
+            bool set_viewport(sre::rect2Dut zone, sre::unit scale=0);
             bool set_scissors(sre::rect2Dut zone);
             bool set_blendmode(sre::blendMode mode);
 
+            bool get_vsync(bool currently=false); // @param currently `truye` if you want to return the current vsync state of the video driver, otherwise, it returns the deferred state set by `set_vsync`
+            sre::blendMode get_blendmode(void);
+            sre::unit     get_viewport_scale(void);
+            sre::rect2Dut get_viewport_area(void);
+            sre::vec2ut   get_viewport_center(void);
+            sre::rect2Dut get_scissors_area(void);
+
+            // WIP (Functions to determine whether next draw calls can be batched)
+            bool can_batch_draw1(sre::flags32 flags, sre::Texture* texture);
+            bool can_batch_draw2(sre::flags32 flags, sre::Texture* texture, sre::draw2primitive mode);
+
+            // Resetters...
+
+            void reset_viewport(); // Equivalent to render::set_viewport( sre::rect2Dut{0, 0, 0, 0}, 0 )
             void reset_scissors();
 
-            bool has_begun();
+            // Drawing commands
+
+            bool has_begun(); // Call this if you want to check whether `render::begin` has ever been called in the current frame
             bool begin(sre::col4 clear, sre::vec2ut camera);
 
             // Draw functions
@@ -235,10 +274,10 @@ SRE_CAPI_END
                 return draw2(flags, points, n, mode, texture);
             }
 
-            // High level drawing functions
-
+            // High level drawing functions (there's only fill, this might also be moved into another header (: )
+            
             inline void fill(sre::col4 color) {
-                draw1(0, {{ {0, 65536}, 0, color }});
+                draw1(0, {{ ::sre::render::get_scissors_area(), sre::vec2ut::ZERO, color }});
             }
         };
 
@@ -261,11 +300,13 @@ SRE_CAPI_END
                         [](void* inst, const float clear[4]) { static_cast<R*>(inst)->begin(clear); },
                         [](void* inst) { static_cast<R*>(inst)->end(); },
 
-                        [](void* inst, int w, int h, sre_unit scale) { return static_cast<R*>(inst)->set_viewportstate(w, h, scale); },
+                        [](void* inst, int w, int h) { return static_cast<R*>(inst)->resize_window(w, h); },
+
                         [](void* inst, bool enable) { static_cast<R*>(inst)->set_vsync(enable); },
                         [](void* inst, void* texture) { static_cast<R*>(inst)->set_texturestate(static_cast<T*>(texture)); },
                         [](void* inst, sre_blendMode blending) { static_cast<R*>(inst)->set_blendstate(blending); },
-                        [](void* inst, sre::unit x, sre::unit y) { static_cast<R*>(inst)->set_camerastate({x, y}); },
+                        [](void* inst, sre_unit x, sre_unit y) { static_cast<R*>(inst)->set_camerastate({x, y}); },
+                        [](void* inst, const sre_rect2Di* rectangle, sre_unit scale) { static_cast<R*>(inst)->set_viewportstate(rectangle, scale); },
                         [](void* inst, const sre_rect2Di* rectangle) { static_cast<R*>(inst)->set_scissorstate(rectangle); },
 
                         [](void* inst, void* texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat) { return static_cast<R*>(inst)->texture_setup(static_cast<T*>(texture), format, w, h, outformat); },

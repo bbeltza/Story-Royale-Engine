@@ -107,7 +107,6 @@ namespace sreD3D9
         } m_d2data{};
 
         D3DPRESENT_PARAMETERS m_pparamcache{};
-        FLOAT m_viewportcache[16];
 
         D3DCAPS9 m_devcaps;
     public:
@@ -116,12 +115,14 @@ namespace sreD3D9
             
         void begin(const float color[4]);
         void end();
-    
-        void set_camerastate(sre::vec2ut camera);
+        
+        bool resize_window(int w, int h);
+
         void set_vsync(bool enable);
+        void set_camerastate(sre::vec2ut camera);
         void set_texturestate(texture_type* texture);
-        void set_viewportstate(int w, int h, sre::unit scale);
         void set_blendstate(sre::blendMode blending);
+        void set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale);
         void set_scissorstate(const sre::rect2Di* rectangle);
                 
         bool texture_setup(Texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat);

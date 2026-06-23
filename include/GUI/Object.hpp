@@ -53,7 +53,8 @@ namespace sreGUI
         Object(std::initializer_list<sreGUI::Component*const> components): Object(NULL, components) {}
 
         // This is a wrapper around `new` and `set_parent` for backwards compatibility with the old previous `add_child` function
-        // To create an actual GUI object. use `new` and call `set_parent` on an object
+        // To create a GUI object. use `new` and call `set_parent` on it to reparent it into another object. Eventually, you can also
+            // use the parent constructor in the Object and pass the parent on it (which requires some setup on the derived class)
         template <typename T = Object, typename... Args>
         T &add_child(Args &&...args) {
             Object* pobj = new T(std::forward<Args>(args)...);
@@ -223,7 +224,11 @@ namespace sreGUI
     Object* get_root(Layer* lyr=NULL);
 
     sre::unit get_insets(Layer* lyr=NULL);
+    sre::unit get_viewport_scale(Layer* lyr=NULL); // This will return 0 if the scale is set to 0 (the default)! You may want to call sre::window_getscale() to get the real scale
+    sre::rect2Dut get_viewport_area(Layer* lyr=NULL);
+
     void set_insets(sre::unit insets, Layer* lyr=NULL);
+    void set_viewport(sre::rect2Dut area, sre::unit scale=0, Layer* lyr=NULL);
 //
     inline bool is_hovering_anything(Layer* lyr=NULL) {
         return !get_hovering(lyr).empty();

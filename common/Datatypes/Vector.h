@@ -12,12 +12,12 @@
 namespace sre
 {
     template <typename T>
-    using vec_valid_t = std::is_arithmetic<T>;
+    using is_valid_vector_t = std::is_arithmetic<T>;
 
     template <typename T>
     struct vec2
     {
-        static_assert(vec_valid_t<T>::value, "sre::vec2 datatype must be an arithmetic type: The type must represent a number");
+        static_assert(is_valid_vector_t<T>::value, "sre::vec2 datatype must be an arithmetic type: The type must represent a number");
         using type = T;
 
         T x = 0;
@@ -37,7 +37,7 @@ namespace sre
         template <typename T2>
         explicit constexpr operator vec2<T2>() const
         {
-            return {
+            return vec2<T2>{
                 static_cast<T2>(x),
                 static_cast<T2>(y)
             };
@@ -82,7 +82,7 @@ namespace sre
         constexpr vec2 round() const { return { std::round(x), std::round(y) }; }
         constexpr vec2 ceil() const { return { std::ceil(x), std::ceil(y) }; }
         constexpr vec2 floor() const { return { std::floor(x), std::floor(y) }; }
-        constexpr vec2 floor_grid(T size) const { return { std::floor(x/size) * size, std::floor(y/size) * size }; }
+        constexpr vec2 floor_scale(T scale) const { return { std::floor(x/scale) * scale, std::floor(y/scale) * scale }; }
         template <typename T2>
         constexpr auto dot(const vec2<T2>& other) const -> decltype(x * other.x) { return x * other.x + y * other.y; }
 
@@ -118,8 +118,10 @@ namespace sre
         constexpr bool operator ==(const vec2& other) const { return x == other.x && y == other.y; }
         constexpr bool operator !=(const vec2& other) const { return x != other.x || y != other.y; }
 
-        constexpr operator const T*() const { return &x; }
-        inline operator T*() { return &x; }
+        constexpr explicit operator bool() const { return x || y; }
+        
+        constexpr const T* ptr() const { return &x; }
+        inline          T* ptr()       { return &x; }
 
         static const vec2 ZERO;
         static const vec2 ONE;
@@ -161,6 +163,8 @@ std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& 
 #define sre_vec2sub(v1, v2) do { (v1).x -= (v2).x; (v1).y -= (v2).y } while (0)
 #define sre_vec2mul(v1, v2) do { (v1).x *= (v2).x; (v1).y *= (v2).y } while (0)
 #define sre_vec2div(v1, v2) do { (v1).x /= (v2).x; (v1).y /= (v2).y } while (0)
+
+#define sre_vec2ptr(v) (&(v).x)
 
 #endif
 

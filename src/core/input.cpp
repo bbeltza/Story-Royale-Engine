@@ -16,8 +16,8 @@ void __poll_input(SDL_Event* event)
         engine.input_last_touchid = event->tfinger.touchId;
         break;
     case SDL_MOUSEMOTION:
-        engine.mouse_x = event->motion.x * engine.scale_ratio;
-        engine.mouse_y = event->motion.y * engine.scale_ratio;
+        engine.input_x = event->motion.x;
+        engine.input_y = event->motion.y;
         break;
     case SDL_MOUSEBUTTONUP:
         engine.mouse_press &= ~SDL_BUTTON(event->button.button);
@@ -37,7 +37,12 @@ bool sre::key_pressed(sre::scanCode code) { return 0 != (engine.keyboard_state[c
 
 bool sre::button_pressed(sre::mouseButton button) { return 0 != (engine.mouse_press & SDL_BUTTON(button)); }
 
-sre::vec2ut sre::mouse_screencoords() { return sre::vec2ut{ engine.mouse_x, engine.mouse_y }; }
+sre::vec2i sre::mouse_screencoords() {
+    int x, y;
+    (void)SDL_GetMouseState(&x, &y);
+
+    return {x, y};
+}
 
 int sre::fingers_pressed()
 {
@@ -48,3 +53,7 @@ int sre::fingers_pressed()
 bool sre::key_justpressed(sre::keyCode code) { return key_pressed(static_cast<sre::scanCode>(SDL_GetScancodeFromKey(code))); }
 bool sre::key_justpressed(sre::scanCode code) { return 0 != (engine.keyboard_framestate[code / 8] & (1 << (code % 8))); }
 bool sre::button_justpressed(sre::mouseButton button) { return 0 != (engine.mouse_framepress & SDL_BUTTON(button)); }
+
+sre::vec2i sre::get_input_coordinates() {
+    return { engine.input_x, engine.input_y }; // These are only the raw mouse coordinates right now...
+}

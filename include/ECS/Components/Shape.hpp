@@ -34,7 +34,7 @@ namespace sreECS
         ~Shape();
 
         // The rect representing the area of the shape by its size, and the offset from the entity by its position
-        sre::rect2Dut rect;
+        sre::rect2Dut rect{ 0, 100 };
         sre::col4 color = sre::WHITE;
 
         ShapeForm shape = S_RECTANGLE;
@@ -46,6 +46,6 @@ namespace sreECS
         bool in_screen_point(Entity& entity, sre::vec2ut) const;
 
         inline sre::rect2Dut real_rect(Entity& entity) const { return {entity.position + rect.position, rect.size}; }
-        inline bool collides(Entity& entity, const sre::rect2Dut &other_Rect) const { return real_rect(entity).intersects(other_Rect); }
+        inline bool collides(Entity& entity, const sre::rect2Dut &other_Rect) const { return real_rect(entity).intersects_from_origin(other_Rect, sre::vec2ut{-0.5_ut}); }
     };
 }

@@ -5,14 +5,14 @@
 
 // state
 
-void sregl11_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
+void sregl11_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale)
 {
     sregl11_inst* inst = _inst;
-    SRE_GLCALL(inst->glfuncs.Viewport(0, 0, w, h));
+    sregl_set_viewportstate(&inst->glfuncs, inst->common.window, rectangle);
 
     SRE_GLCALL(inst->glfuncs11.MatrixMode(GL_PROJECTION));
     SRE_GLCALL(inst->glfuncs11.LoadIdentity());
-    SRE_GLCALL(inst->glfuncs11.Ortho(0, w, h, 0, 0, 1));
+    SRE_GLCALL(inst->glfuncs11.Ortho(0, rectangle->w, rectangle->h, 0, 0, 1));
     SRE_GLCALL(inst->glfuncs11.MatrixMode(GL_MODELVIEW));
     inst->scale_cache = scale;
 }
@@ -203,4 +203,17 @@ void sregl11_draw2(void* _inst, const sre_RenderPoint* points, size_t point_coun
     }
 
     SRE_GLCALL(inst->glfuncs11.End());
+
+    #if 0
+    const GLubyte col[4] = { 255, 0, 0, 255 };
+
+    inst->glfuncs11.Begin(GL_LINE_LOOP);
+    inst->glfuncs11.Color4ubv(col);
+    for (size_t i = 0; i < point_count; i++)
+    {
+        const sre_RenderPoint* pt = &points[i];
+        inst->glfuncs11.Vertex2f(pt->pos.x, pt->pos.y);
+    }
+    SRE_GLCALL(inst->glfuncs11.End());
+    #endif
 }

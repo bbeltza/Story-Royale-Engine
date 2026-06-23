@@ -1,6 +1,5 @@
 #include <Core/Render.h>
 #include <Core/Object.h>
-#include <Core/Display.hpp>
 #include <Core/Runtime.hpp>
 #include <Base/Log.h>
 

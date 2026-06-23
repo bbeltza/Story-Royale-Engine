@@ -613,9 +613,7 @@ namespace sre
 #define SRE_DXRELEASE(iunknown) if (iunknown) (iunknown)->Release()
 #define SRE_DXSAFERELEASE(iunknown) SRE_DXRELEASE(iunknown); iunknown = nullptr
 
-struct sred3d12_cache
-{
-    D3D12_VIEWPORT viewport;
+struct sred3d12_cache {
     bool vsync;
 };
 
@@ -734,11 +732,11 @@ private:
     UINT64 fencevalue = 1;
 
     ID3D12Resource* cbuffer;
-    sred3d12_cbuffer* cbuffermap;
-
+    
     struct {
         sred3d12_dbuff d1{};
         sred3d12_dbuff d2{};
+        sred3d12_dbuff cstagingbuffer;
     } drawdatas[FRAMEBUFFER_COUNT], *current_drawdata{};
 
     alignas(sred3d12_texture) char basictexture[sizeof(sred3d12_texture)]; // Allocate it as buffer of bytes to initialize it later
@@ -751,13 +749,15 @@ public:
     void begin(const float clear[4]);
     void end();
     
-    void set_camerastate(sre::vec2ut camera);
+    bool resize_window(int w, int h);
+
     void set_vsync(bool enable) {
         caches.vsync = enable;
     }
     void set_texturestate(sred3d12_texture* texture);
-    void set_viewportstate(int w, int h, sre::unit scale);
     void set_blendstate(sre::blendMode blending);
+    void set_camerastate(sre::vec2ut camera);
+    void set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale);
     void set_scissorstate(const sre::rect2Di* rectangle);
                 
     bool texture_setup(sred3d12_texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat);
@@ -956,37 +956,13 @@ void sred3d12_inst::_waitforgpu()
     }
 }
 
-static void (*blend_functions[4])(D3D12_RENDER_TARGET_BLEND_DESC& desc) = {
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_BLEND
-        desc.BlendEnable = TRUE;
-        desc.LogicOpEnable = FALSE;
-        
-        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MOD
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
-        desc.DestBlend = D3D12_BLEND_ZERO;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_ADD
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        desc.DestBlend = D3D12_BLEND_ONE;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    },
-    [](D3D12_RENDER_TARGET_BLEND_DESC& desc) { // BLEND_MUL
-        desc.BlendEnable = TRUE;
-
-        desc.SrcBlend = D3D12_BLEND_DEST_COLOR;
-        desc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        desc.BlendOp = D3D12_BLEND_OP_ADD;
-    }
-};
+#define SRE_D3D12_BLEND_DESC(srcFactor, dstFactor, op) {TRUE, FALSE, srcFactor, dstFactor, op, D3D12_BLEND_ONE, D3D12_BLEND_ONE, D3D12_BLEND_OP_ADD, D3D12_LOGIC_OP_CLEAR, D3D12_COLOR_WRITE_ENABLE_ALL}
+        static D3D12_RENDER_TARGET_BLEND_DESC BLENDSTATES[5] = {
+            /* BLEND */ SRE_D3D12_BLEND_DESC(D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD),
+            /* ADD   */ SRE_D3D12_BLEND_DESC(D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_ONE, D3D12_BLEND_OP_ADD),
+            /* MOD   */ SRE_D3D12_BLEND_DESC(D3D12_BLEND_DEST_COLOR, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD),
+            /* MUL   */ SRE_D3D12_BLEND_DESC(D3D12_BLEND_DEST_COLOR, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD)
+        };
 
 bool sred3d12_inst::_pipelinesetup()
 {
@@ -1067,11 +1043,6 @@ bool sred3d12_inst::_pipelinesetup()
     pstate_desc.SampleDesc.Count = 1;
     pstate_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-    pstate_desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-    pstate_desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-    pstate_desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-    pstate_desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-
     pstate_desc.PS.pShaderBytecode = C_PS;
     pstate_desc.PS.BytecodeLength = sizeof(C_PS);
 
@@ -1084,7 +1055,7 @@ bool sred3d12_inst::_pipelinesetup()
     
     for (int i = 0; i < sre::countof(dxpipeline_blendstates1); i++)
     {
-        blend_functions[i](pstate_desc.BlendState.RenderTarget[0]);
+        pstate_desc.BlendState.RenderTarget[0] = BLENDSTATES[i];
         SRE_DXCALL(dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&dxpipeline_blendstates1[i])));
     }
 
@@ -1097,20 +1068,20 @@ bool sred3d12_inst::_pipelinesetup()
 
     for (int i = 0; i < sre::countof(dxpipeline_blendstates2_tri); i++)
     {
-        blend_functions[i](pstate_desc.BlendState.RenderTarget[0]);
+        pstate_desc.BlendState.RenderTarget[0] = BLENDSTATES[i];
         SRE_DXCALL(dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&dxpipeline_blendstates2_tri[i])));
     }
 
     pstate_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
     for (int i = 0; i < sre::countof(dxpipeline_blendstates2_lin); i++)
     {
-        blend_functions[i](pstate_desc.BlendState.RenderTarget[0]);
+        pstate_desc.BlendState.RenderTarget[0] = BLENDSTATES[i];
         SRE_DXCALL(dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&dxpipeline_blendstates2_lin[i])));
     }
     pstate_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
     for (int i = 0; i < sre::countof(dxpipeline_blendstates2_pts); i++)
     {
-        blend_functions[i](pstate_desc.BlendState.RenderTarget[0]);
+        pstate_desc.BlendState.RenderTarget[0] = BLENDSTATES[i];
         SRE_DXCALL(dxdevice->CreateGraphicsPipelineState(&pstate_desc, IID_PPV_ARGS(&dxpipeline_blendstates2_pts[i])));
     }
     //
@@ -1124,12 +1095,16 @@ bool sred3d12_inst::_pipelinesetup()
             return false;
         if (!drawdatas[i].d2.init(dxdevice, sizeof(sre::RenderPoint)*255))
             return false;
+
+        drawdatas[i].cstagingbuffer.heaptype = D3D12_HEAP_TYPE_UPLOAD;
+        if (!drawdatas[i].cstagingbuffer.init(dxdevice, sizeof(sred3d12_cbuffer)*4))
+            return false;
     }
     
 
     {   // Constant buffer
         D3D12_HEAP_PROPERTIES heap_properties{};
-        heap_properties.Type = buffer_heaptype;
+        heap_properties.Type = D3D12_HEAP_TYPE_DEFAULT;
 
         D3D12_RESOURCE_DESC resource_desc{};
         resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
@@ -1149,10 +1124,7 @@ bool sred3d12_inst::_pipelinesetup()
             NULL,
             IID_PPV_ARGS(&cbuffer)
         ));
-    }
-    D3D12_RANGE range{0, 0};
-    SRE_DXCALL(cbuffer->Map(0, &range, reinterpret_cast<void**>(&cbuffermap)));
-    
+    }    
     return SUCCEEDED(hr);
 }
 
@@ -1230,11 +1202,9 @@ void sred3d12_inst::begin(const float color[4])
     SRE_DXCALL(cmdallocator_acquired->Reset());
     SRE_DXCALL(dxcmd_list->Reset(cmdallocator_acquired, NULL));
 
-    D3D12_RECT scr{0, 0, (LONG)caches.viewport.Width, (LONG)caches.viewport.Height};
     dxcmd_list->SetDescriptorHeaps(1, &dxsrvheapsv);
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
     dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
-    dxcmd_list->RSSetViewports(1, &caches.viewport);
 
     D3D12_RESOURCE_BARRIER rbtransition{};
     rbtransition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1255,6 +1225,8 @@ void sred3d12_inst::begin(const float color[4])
     current_drawdata = &drawdatas[current_frameindex];
     current_drawdata->d1.reset();
     current_drawdata->d2.reset();;
+    
+    current_drawdata->cstagingbuffer.reset();
 
     current_drawtype = 0;
 }
@@ -1290,24 +1262,11 @@ void sred3d12_inst::end()
     _waitforgpu();
 }
 
-void sred3d12_inst::set_viewportstate(int w, int h, sre::unit scale)
+bool sred3d12_inst::resize_window(int w, int h)
 {
     _waitforgpu();
 
     HRESULT hr;
-
-    FLOAT fw = static_cast<FLOAT>(w), fh = static_cast<FLOAT>(h);
-
-    caches.viewport.Width = fw;
-    caches.viewport.Height = fh;
-
-    FLOAT mat[16] = {
-        2.0f/fw, 0.0f, 0.0f, 0.0f,
-        0.0f, -2.0f/fh, 0.0f, 0.0f,
-        0.0f, 0.0f, scale, 0.0,
-        -1.0f, 1.0f, 0.0f, 1.0f
-    };
-    memcpy(cbuffermap->viewport, mat, sizeof(mat));
 
     for (int i = 0; i < sre::countof(dxrender_targets); i++)
     {
@@ -1315,14 +1274,16 @@ void sred3d12_inst::set_viewportstate(int w, int h, sre::unit scale)
         dxrender_targets[i]->Release();
         dxrender_targets[i] = NULL;
     }
-    SRE_DXCALL(dxswapchain->ResizeBuffers(sre::countof(dxrender_targets), w, h, DXGI_FORMAT_UNKNOWN, SR_DXGI_SWAPCHAIN_FLAGS));
+    SRE_DXCALLF(dxswapchain->ResizeBuffers(sre::countof(dxrender_targets), w, h, DXGI_FORMAT_UNKNOWN, SR_DXGI_SWAPCHAIN_FLAGS));
 
     D3D12_CPU_DESCRIPTOR_HANDLE cpudesc = dxrtvheap->GetCPUDescriptorHandleForHeapStart();
     for (int i = 0; i < sre::countof(dxrender_targets); i++, cpudesc.ptr+=rtvheap_increment)
     {
-        SRE_DXCALL(dxswapchain->GetBuffer(i, IID_PPV_ARGS(&dxrender_targets[i])));
+        SRE_DXCALLF(dxswapchain->GetBuffer(i, IID_PPV_ARGS(&dxrender_targets[i])));
         dxdevice->CreateRenderTargetView(dxrender_targets[i], NULL, cpudesc);
     }
+
+    return true;
 }
 
 void sred3d12_inst::set_blendstate(sre::blendMode mode)
@@ -1342,6 +1303,52 @@ void sred3d12_inst::set_blendstate(sre::blendMode mode)
 void sred3d12_inst::set_camerastate(sre::vec2ut camera)
 {
     dxcmd_list->SetGraphicsRoot32BitConstants(2, 2, &camera, 0);
+}
+
+void sred3d12_inst::set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale)
+{
+    D3D12_VIEWPORT viewport{
+		static_cast<FLOAT>(rectangle->position.x),
+		static_cast<FLOAT>(rectangle->position.y),
+		static_cast<FLOAT>(rectangle->size.x),
+		static_cast<FLOAT>(rectangle->size.y),
+		0.0f,
+		1.0f
+	};
+    
+    FLOAT mat[16] = {
+        2.0f/viewport.Width, 0.0f, 0.0f, 0.0f,
+        0.0f, -2.0f/viewport.Height, 0.0f, 0.0f,
+        0.0f, 0.0f, scale, 0.0,
+        -1.0f, 1.0f, 0.0f, 1.0f
+    };
+    
+    UINT64 offset = current_drawdata->cstagingbuffer.append(dxdevice, mat, sizeof(mat));
+    if (!offset) {
+        D3D12_RESOURCE_BARRIER barrier{};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Transition.pResource = current_drawdata->cstagingbuffer.dxresource;
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
+
+        dxcmd_list->ResourceBarrier(1, &barrier);
+    }
+
+    D3D12_RESOURCE_BARRIER barrier{}; {
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Transition.pResource = cbuffer;
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+        dxcmd_list->ResourceBarrier(1, &barrier);
+    }
+
+    dxcmd_list->CopyBufferRegion(cbuffer, 0, current_drawdata->cstagingbuffer.dxresource, offset, sizeof(mat)); {
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+        dxcmd_list->ResourceBarrier(1, &barrier);
+    }
+    
+    dxcmd_list->RSSetViewports(1, &viewport);
 }
 
 void sred3d12_inst::set_scissorstate(const sre::rect2Di* rectangle)

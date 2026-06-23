@@ -1,15 +1,15 @@
 #include "gl21.h"
 #include <stdlib.h>
 
-void sregl21_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
+void sregl21_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale)
 {
     sregl21_inst* inst = _inst;
-    SRE_GLCALL(inst->glfuncs.Viewport(0, 0, w, h));
+    sregl_set_viewportstate(&inst->glfuncs, inst->common21.common.window, rectangle);
 
     GLfloat VIEWPORT[4*4] = {
-        (2.0f/w), 0.0f, 0.0f, 0.0f,
-        0.0f, (-2.0f/h), 0.0f, 0.0f,
-        0.0f, 0.0f, scale, 0.0f,
+        2.0f/rectangle->w, 0.0f, 0.0f, 0.0f,
+        0.0f, -2.0f/rectangle->h, 0.0f, 0.0f,
+        0.0f,  0.0f, scale, 0.0f,
         -1.0f, 1.0f, 0.0f, 1.0f
     };
 

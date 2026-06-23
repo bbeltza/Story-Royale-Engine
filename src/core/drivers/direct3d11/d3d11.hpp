@@ -125,13 +125,15 @@ namespace sreD3D11
             void begin(const float clear[4]);
             void end();
     
-            void set_camerastate(sre::vec2ut camera);
+            bool resize_window(int w, int h);
+
             void set_vsync(bool enable) {
                 m_caches.vsync = enable;
             }
             void set_texturestate(texture_type* texture);
-            void set_viewportstate(int w, int h, sre::unit scale);
             void set_blendstate(sre::blendMode blending);
+            void set_camerastate(sre::vec2ut camera);
+            void set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale);
             void set_scissorstate(const sre::rect2Di* rectangle);
                 
             bool texture_setup(Texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat);

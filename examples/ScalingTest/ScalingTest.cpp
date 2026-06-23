@@ -1,17 +1,20 @@
 #include <Core/Runtime.hpp>
-#include <Core/Display.hpp>
 #include <Core/Window.hpp>
 #include <Core/Render.h>
 #include <Core/Input.hpp>
 
 #include <Entry.h>
 
+#include <Base/Log.h>
+
 void Render()
 {
     static float t = 0;
-    sre::vec2ut mpos = sre::mouse_screencoords();
+    sre::vec2ut mpos{sre::mouse_screencoords()};
+    mpos *= sre::window_getscale_ratio();
     
     sre::render::begin(sre::BLACK, sre::vec2ut::ZERO);
+
         sre::render::draw1(0, { {
                     { mpos, {10, 10} },
                     sre::vec2ut::CENTER,
@@ -25,7 +28,7 @@ void Render()
 void sre::initialize()
 {
     sre::window_setresizable(true);
-    sre::display_autoscale_on(380, 180);
+    sre::window_enable_autoscaling(380, 180);
 
     beforeRender.connect(Render, nullptr);
 }

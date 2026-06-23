@@ -1,14 +1,12 @@
 #include "sdlrenderer.h"
 #include <stdlib.h>
 
-void sresdlrenderer_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
+void sresdlrenderer_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale)
 {
     sresdlrenderer_inst* inst = _inst;
-
-    (void)w;
-    (void)h;
     
     inst->scaling = scale;
+    SDL_RenderSetViewport(inst->renderer, (const SDL_Rect*)rectangle);
 }
 
 void sresdlrenderer_set_texturestate(void* _inst, void* _texture)

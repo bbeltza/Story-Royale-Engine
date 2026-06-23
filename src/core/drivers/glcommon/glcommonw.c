@@ -51,24 +51,30 @@ void sregl_set_vsync(bool enable)
         SDL_GL_SetSwapInterval(0);
 }
 
+void sregl_set_viewportstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle)
+{
+    int w, h;
+    SDL_GL_GetDrawableSize(window, &w, &h);
+
+    SRE_GLCALL(glfuncs->Viewport(
+        rectangle->x,
+        h - rectangle->y - rectangle->h,
+        rectangle->w,
+        rectangle->h
+    ));
+}
+
 void sregl_set_scissorstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle)
 {
     int w, h;
     SDL_GL_GetDrawableSize(window, &w, &h);
 
-    //if (rectangle)
-    //{
-        SRE_GLCALL(glfuncs->Scissor(
-            rectangle->x,
-            h - rectangle->y - rectangle->h,
-            rectangle->w,
-            rectangle->h
-        ));
-    //}
-    //else
-    //{
-    //    SRE_GLCALL(glfuncs->Disable(GL_SCISSOR_TEST));
-    //}
+    SRE_GLCALL(glfuncs->Scissor(
+        rectangle->x,
+        h - rectangle->y - rectangle->h,
+        rectangle->w,
+        rectangle->h
+    ));
 }
 
 void sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmode)

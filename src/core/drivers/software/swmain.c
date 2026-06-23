@@ -7,20 +7,21 @@
 
 static void sresw_destroy(void* _inst);
 static const struct sre_RenderVFT sresw_vft = {
-    .destructor = sresw_destroy,
-    .draw1 = sresw_draw1,
-    .draw2 = sresw_draw2,
-    .begin = sresw_begin,
-    .end = sresw_end,
-    .set_viewportstate = sresw_set_viewportstate,
-    .set_vsync = sresw_set_vsync,
-    .set_texturestate = sresw_set_texturestate,
-    .set_blendstate = sresw_set_blendstate,
-    .set_camerastate = sresw_set_camerastate,
-    .set_scissorstate = sresw_set_scissorstate,
-    .texture_setup = sresw_texture_setup,
-    .texture_update = sresw_texture_update,
-    .texture_destroy = sresw_texture_destroy
+    sresw_destroy,
+    sresw_draw1,
+    sresw_draw2,
+    sresw_begin,
+    sresw_end,
+    NULL,
+    sresw_set_vsync,
+    sresw_set_texturestate,
+    sresw_set_blendstate,
+    sresw_set_camerastate,
+    sresw_set_viewportstate,
+    sresw_set_scissorstate,
+    sresw_texture_setup,
+    sresw_texture_update,
+    sresw_texture_destroy
 };
 static int sresw_main(const struct sre_RenderVFT** interface, void* _inst, SDL_Window* window)
 {
@@ -140,16 +141,6 @@ void sresw_end(void* _inst)
 
         SDL_Delay(1000/displaymode.refresh_rate);
     }
-}    
-
-void sresw_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
-{
-    sresw_Instance* inst = _inst;
-    inst->wndsurface = SDL_GetWindowSurface(inst->window);
-
-    inst->state.width = w;
-    inst->state.height = h;
-    inst->state.scale = (int)scale;
 }
 
 void sresw_set_blendstate(void* _inst, sre_blendMode blendmode)
@@ -162,6 +153,15 @@ void sresw_set_camerastate(void* _inst, sre_unit x, sre_unit y)
     sresw_Instance* inst = _inst;
     inst->state.camerax = (int)x;
     inst->state.cameray = (int)y;
+}
+
+void sresw_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale)
+{
+    sresw_Instance* inst = _inst;
+    inst->wndsurface = SDL_GetWindowSurface(inst->window);
+
+    inst->state.viewport = *rectangle;
+    inst->state.scale = (int)scale;
 }
 
 void sresw_set_scissorstate(void* _inst, const sre_rect2Di* rectangle)

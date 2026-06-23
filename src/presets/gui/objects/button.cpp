@@ -1,7 +1,7 @@
 #include <GUI/Presets/Button.hpp>
 
 #include <Core/Event.hpp>
-#include <Core/Display.hpp>
+#include <Core/Window.hpp>
 
 using namespace sreGUI;
 
@@ -15,12 +15,12 @@ void Button::handle_event(void*, Button* button, sre::Event ev)
     case sre::EVENT_MOUSEBUTTON: {
         const MouseButton& mev = ev;
         if (!mev.pressed) return;
-        if (button->m_hover) button->on_press(mev.position);
+        if (button->m_hover) button->on_press(mev.process_position());
     } break;
     case sre::EVENT_TOUCH: {
         const Touch& tev = ev;
         if (tev.pressed) return;
-        if (button->m_hover) button->on_press(tev.uv * sre::display_size());
+        if (button->m_hover) button->on_press(tev.process_position());
     } break;
     default:
         break;

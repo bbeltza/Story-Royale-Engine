@@ -32,7 +32,7 @@ bool Shape::in_screen_point(Entity &entity, sre::vec2ut pt) const
 	case S_RECTANGLE:
 	{
 		sre::rect2Dut _realrect = real_rect(entity);
-		return _realrect.intersects(w->camera.toWorldSpace(pt));
+		return _realrect.intersects_from_origin(w->camera.toWorldSpace(pt), sre::vec2ut{-0.5f});
 	}
 	case S_CIRCLE:
 	{

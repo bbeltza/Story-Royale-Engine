@@ -1,8 +1,9 @@
 #include <GUI/Layer.hpp>
 
-#include <Core/Display.hpp>
 #include <Core/Input.hpp>
 #include <Core/Render.h>
+#include <Core/Event.hpp>
+#include <Core/Window.hpp>
 
 #include <Base/Log.h>
 
@@ -72,8 +73,11 @@ void sreGUI::Layer::update()
         if (!cur)
             return;
         
+        sre::vec2ut pt{sre::get_input_coordinates()};
+        pt = sre::process_input_coordinates(pt, vp_area.position, vp_scale);
+
         hoveringstack.clear();
-        cur->call_query(sre::mouse_screencoords(), hoveringstack); // Gotta replace the sre::mouse_screencoords with something else. Input is very flawed in this engine
+        cur->call_query(pt, hoveringstack);
         // Set the S_HOVERING state to the hovering object at the top
         // since the hovering object container holds `const` objects, we need to const_cast it.
         // There should not be any penalties on doing so
@@ -86,21 +90,34 @@ void sreGUI::Layer::update()
             break;
     }
 
-	root->m_absolute.size = sre::display_size() - sre::vec2ut{insets*2, 0};
+    _displaycache = sre::calc_viewport_size(vp_area, vp_scale);
+
+	root->m_absolute.size = _displaycache - sre::vec2ut{insets*2, 0};
 	root->m_absolute.position = sre::vec2ut::ZERO + sre::vec2ut{insets, 0};
 
     root->call_process();
     root->call_processchildren();
-    root->call_prerender();
+    root->call_prerender(); // FIXME: Rename this to something like "post_process": The name pre_render is really confusing since it doesn't get called in the render
+                                        // loop, considering that the virtual pre_render Object method gets called in the render loop.
 }
 
 void sreGUI::Layer::render()
 {
+    static constexpr sre::col4 LYR_BG = { 0, 0, 0, 255 }; // Normally black. It only has an effect when there's no ECS scenes
+    static constexpr sre::vec2ut LYR_CAM = { 0, 0 }; // Always set to zero
+
     if (!sre::render::has_begun())
-        sre::render::begin(sre::BLACK, sre::vec2ut::ZERO);
+        sre::render::begin(LYR_BG, LYR_CAM);
 
     if (root)
     {
+        assert(vp_scale >= 0);
+        sre::render::set_viewport(vp_area, vp_scale);
+        #if 0
+            sre::render::fill({ 40, 40, 40, 255 });
+        #endif
         root->call_render(this->scissors_stack);
+
+        sre::render::reset_viewport();
     }
 }

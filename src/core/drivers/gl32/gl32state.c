@@ -18,14 +18,14 @@ void sregl32_set_vsync(void* _inst, bool enable)
     sregl_set_vsync(enable);
 }
 
-void sregl32_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
+void sregl32_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale)
 {
     sregl32_inst* inst = _inst;
-    SRE_GLCALL(inst->glfuncs.Viewport(0, 0, w, h));
+    sregl_set_viewportstate(&inst->glfuncs, inst->common21.common.window, rectangle);
 
     GLfloat proj[16] = {
-        2.0f/w, 0.0f, 0.0f, 0.0f,  
-        0.0f, -2.0f/h, 0.0f, 0.0f,  
+        2.0f/rectangle->w, 0.0f, 0.0f, 0.0f,  
+        0.0f, -2.0f/rectangle->h, 0.0f, 0.0f,  
         0.0f, 0.0f, scale, 0.0f,  
         -1.0f, 1.0f, 0.0f, 1.0f,  
     };

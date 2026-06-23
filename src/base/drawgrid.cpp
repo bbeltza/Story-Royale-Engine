@@ -1,5 +1,4 @@
 #include <Core/Render.h>
-#include <Core/Display.hpp>
 
 #include <Base/Grid.hpp>
 
@@ -9,19 +8,19 @@
 
 bool sre::draw_grid(const col4& color, const vec2ut& size, const vec2ut& origin, s32 flags)
 {
-    const sre::vec2ut scr_size = sre::display_size();
+    const sre::rect2Dut vp = sre::render::get_viewport_area();
     //const sre::vec2ut scr_center = sre::display_center();
     
-    const int numgridsx = (int)ceil(scr_size.x / size.x);
-    const int numgridsy = (int)ceil(scr_size.y / size.y);
+    const int numgridsx = (int)ceil(vp.size.x / size.x);
+    const int numgridsy = (int)ceil(vp.size.y / size.y);
 
     const int pointcountx = numgridsx * 2;
     const int pointcounty = numgridsy * 2;
 
     const sre::unit minx = 0;
     const sre::unit miny = 0;
-    const sre::unit maxx = scr_size.x;
-    const sre::unit maxy = scr_size.y;
+    const sre::unit maxx = vp.size.x;
+    const sre::unit maxy = vp.size.y;
 
     ut_dynsalloc(sre::RenderPoint, points, ut_max(pointcountx, pointcounty));
     // Vertical lines (that depend on the X axis)

@@ -204,7 +204,6 @@ bool Instance::_statesetup()
     }
 
     SRE_DXCALLF(m_dxdevice->SetPixelShader(m_dxcps));
-    SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
     SRE_DXCALLF(m_dxdevice->SetRenderState(D3DRS_LIGHTING, FALSE));
 
@@ -212,8 +211,6 @@ bool Instance::_statesetup()
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP));
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
     SRE_DXCALLF(m_dxdevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
-
-    SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(0, m_viewportcache, 4));
 
     m_needsetup = false;
     return true;
@@ -333,7 +330,10 @@ void Instance::begin(const float clear[4])
             abort();
     }
 
+    // Need to disable scissor testing for clearing :-) just like in OpenGL
+    SRE_DXCALL(m_dxdevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE));
     SRE_DXCALL(m_dxdevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(clear[0], clear[1], clear[2], clear[3]), 0, 0));
+    SRE_DXCALL(m_dxdevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE));
     SRE_DXCALL(m_dxdevice->BeginScene());
 }
 
@@ -345,20 +345,37 @@ void Instance::end()
 }
 
 //
-    
-void Instance::set_viewportstate(int w, int h, sre::unit scale)
+
+bool Instance::resize_window(int w, int h)
 {
     m_pparamcache.BackBufferWidth = w;
     m_pparamcache.BackBufferHeight = h;
     _resetdevice();
 
+    return true;
+}
+
+void Instance::set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale)
+{
     FLOAT VPMATRIX[] = {
-        2.0f/w, 0.0f, 0.0f, 0.0f,
-        0.0f, -2.0f/h, 0.0f, 0.0f,
+        2.0f/rectangle->size.x, 0.0f, 0.0f, 0.0f,
+        0.0f, -2.0f/rectangle->size.y, 0.0f, 0.0f,
         0.0f, 0.0f, scale, 0.0f,
         -1.0f, 1.0f, 0.0f, 1.0f
     };
-    memcpy(m_viewportcache, VPMATRIX, sizeof(m_viewportcache));
+
+    D3DVIEWPORT9 viewport{
+        static_cast<DWORD>(rectangle->position.x),
+        static_cast<DWORD>(rectangle->position.y),
+        static_cast<DWORD>(rectangle->size.x),
+        static_cast<DWORD>(rectangle->size.y),
+        0.0f,
+        1.0f
+    };
+
+    HRESULT hr;
+    SRE_DXCALL(m_dxdevice->SetViewport(&viewport));
+    SRE_DXCALL(m_dxdevice->SetVertexShaderConstantF(0, VPMATRIX, 4));
 }
 
 static D3DBLEND D3D9_BLENDMODES[][2] = {

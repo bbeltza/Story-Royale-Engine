@@ -5,7 +5,6 @@
 #include <ECS/Scene.hpp>
 
 #include <Core/Runtime.hpp>
-#include <Core/Display.hpp>
 #include <Core/Window.hpp>
 #include <Core/Input.hpp>
 #include <Core/Render.h>
@@ -66,7 +65,7 @@ void handle_events(void* signal_data, void* connection_data, sre::Event event)
 
 void DisplayText::post_render()
 {
-    if (instances[1].rectangle.intersects(instances[0].rectangle))
+    if (instances[1].rectangle.intersects_from_origin(instances[0].rectangle, sre::vec2ut{-0.5}))
         instances[1].color = sre::GREEN;
     else
         instances[1].color = sre::RED;
@@ -85,7 +84,7 @@ void setup_settings()
 {
     sre::window_setresizable(true);
     sre::window_setsize(START_WIDTH * 2, START_HEIGHT * 2);
-    sre::display_autoscale_on(START_WIDTH, START_HEIGHT);
+    sre::window_enable_autoscaling(START_WIDTH, START_HEIGHT);
     sre::set_framerate(START_FRAMERATE);
 }
 

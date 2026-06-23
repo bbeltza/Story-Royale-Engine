@@ -81,6 +81,7 @@ extern bool sregl_texture_update(struct sregl_functions* glfuncs, sregl_texture*
 extern void sregl_texture_destroy(struct sregl_functions* glfuncs, sregl_texture* texture);
 
 extern void sregl_set_vsync(bool enable);
+extern void sregl_set_viewportstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle);
 extern void sregl_set_scissorstate(struct sregl_functions* glfuncs, SDL_Window* window, const sre_rect2Di* rectangle);
 extern void sregl_set_blendstate(struct sregl_functions* glfuncs, sre_blendMode blendmode);
 

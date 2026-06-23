@@ -18,7 +18,11 @@ namespace sre
 		EVENT_MOUSEMOVE, /* `sre::events::MouseMove` */
 		EVENT_KEYPRESS, /* `sre::events::Key` */
 		EVENT_TOUCH, /* `sre::events::Touch` */
+		EVENT_TEXTINPUT, /* sre::events::TextInput */
+		//EVENT_WINDOWSIZE,
+		
 		EVENT_QUIT /* No event struct associated, at least for now, might be an `sre::events::Quit` with an error code */
+
 	};
 
 	enum keyPress
@@ -31,6 +35,14 @@ namespace sre
 
 namespace sre
 {
+	#define SRE_MAKE_PROCESS_POSITION	sre::vec2ut process_position(sre::vec2ut origin=sre::vec2ut::ZERO, sre::unit scale=0) const {		\
+											return sre::process_input_coordinates(sre::vec2ut{position}, origin, scale);				\
+										}
+	
+	#define SRE_MAKE_PROCESS_DELTA		sre::vec2ut process_delta(sre::vec2ut origin=sre::vec2ut::ZERO, sre::unit scale=0) const {		\
+											return sre::process_input_coordinates(sre::vec2ut{delta}, origin, scale);				\
+										}
+
 	namespace events
 	{
 		struct MouseButton
@@ -43,7 +55,9 @@ namespace sre
 			bool pressed;
 			bool : 1;
 
-			sre::vec2ut position;
+			sre::vec2i position;
+
+			SRE_MAKE_PROCESS_POSITION
 		};
 
 		struct MouseWheel
@@ -52,7 +66,9 @@ namespace sre
 
 			sre::u32 id;
 			sre::vec2i amount;
-			sre::vec2ut position;
+			sre::vec2i position;
+
+			SRE_MAKE_PROCESS_POSITION
 		};
 
 		struct MouseMove
@@ -61,8 +77,11 @@ namespace sre
 
 			sre::u32 id;
 			sre::u32 button_state;
-			sre::vec2ut position;
-			sre::vec2ut delta;
+			sre::vec2i position;
+			sre::vec2i delta;
+
+			SRE_MAKE_PROCESS_POSITION
+			SRE_MAKE_PROCESS_DELTA
 		};
 
 		struct Key
@@ -79,10 +98,21 @@ namespace sre
 		{
 			static constexpr eventType EVENT_TYPE = EVENT_TOUCH;
 
-			sre::vec2ut uv;
+			sre::vec2ut position;
 			sre::vec2ut delta;
 			sre::unit pressure;
 			bool pressed;
+
+			SRE_MAKE_PROCESS_POSITION
+			SRE_MAKE_PROCESS_DELTA
+		};
+
+		struct TextInput
+		{
+			static constexpr eventType EVENT_TYPE = EVENT_TEXTINPUT;
+
+			unsigned int codepoint;
+			char utf8chars[8]; // At most 4 characters representing a unicode codepoint, the rest of them are just filler 0s
 		};
 	}
 }

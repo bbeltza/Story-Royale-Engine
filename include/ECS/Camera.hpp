@@ -49,8 +49,10 @@ namespace sreECS
         void pupdate(sre::timeStamp dt);
         sre::vec2ut process();
         
-        inline void clamp_position() { if (bounds.size != bounds.size.ZERO)
-                                    position.setclamp(bounds.top_left(), bounds.bottom_right()); }
+        inline void clamp_position() {
+            if (bounds.size != bounds.size.ZERO)
+                position.setclamp(bounds.origin(-0.5f), bounds.origin(0.5f));
+        }
     };
 }
 
