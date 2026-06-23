@@ -325,8 +325,8 @@ void __update_viewport(int w, int h)
 	engine.osize = { w, h };
 	engine.vsize = engine.osize * engine.scale_ratio;
 
-	if (engine.video.driver->vfptr->resize_window) {
-		SRE_VIDEO(engine.video.driver, resize_window, w, h/*, scale*/);
+	if (engine.video.driver->vfptr->resize_window) { // TODO: Handle `resize_window`'s boolean result
+		SRE_VIDEO(engine.video.driver, resize_window, w, h);
 	}
 }
 

@@ -20,7 +20,7 @@ SRE_VEC2MAKESFFX(float, f);
 
 #ifndef __cplusplus
     typedef struct sre_Texture sre_Texture;
-    typedef struct sre_RenderTarget sre_RenderTarget;
+    // typedef struct sre_RenderTarget sre_RenderTarget;
 #else
     struct sre_Texture
     {
@@ -33,7 +33,7 @@ SRE_VEC2MAKESFFX(float, f);
         inline int release();
 
         private:
-            sre_Texture() = delete; // Textures are returned using sre::texture_create
+            sre_Texture() = delete; // Textures are returned using sre::texture
 
             int _refcount;
             int _w, _h;
@@ -81,18 +81,12 @@ typedef enum sre_draw2primitive // Primitive topology mode for draw2
 
 enum sre_drawFlags
 {
-    // Individual camera axis flags. Not implemented anywhere yet
+    // Individual camera axis flags
+
     SRE_DRAWFLAG_CAMERAX = 1 << 0,
     SRE_DRAWFLAG_CAMERAY = 1 << 1,
 
     SRE_DRAWFLAG_CAMERA = SRE_DRAWFLAG_CAMERAX | SRE_DRAWFLAG_CAMERAY
-};
-
-enum _sre_drawSwitchFlags
-{
-    SRE_RENDER_SWITCHTYPE = 1 << 0, // Switch from draw1 to draw2, or vice-versa. The render driver can keep the drawing state if two render flushes are from the same draw function, which increases performance
-    SRE_RENDER_SWITCHCAMERA = 1 << 1,
-    SRE_RENDER_SWITCHTEXTURE = 1 << 2
 };
 
 struct SDL_Window;
@@ -148,16 +142,16 @@ enum sreRenderDriverBits
     // SRE_RENDERBIT_HANDLE_NULLTEXTURE = 1 << 3, // Whether to handle draw commands in which `texture` is NULL, meaning there's no texture bound so you want to draw a flat surface.
                                                     // If this flag is not set, then you won't get a NULL as `texture`, and the engine will have a flat texture for you and pass it instead.
                                                     // This flag is commented for now.
-    SRE_RENDERBIT_HANDLE_DRAW1 = 1 << 4 // There's no proper draw1 function in this driver, if this flag is set. draw1 commands will be converted into draw2 SRE_PRIMITIVE_TRIANGLES commands
+    // SRE_RENDERBIT_DONTHANDLE_DRAW1 = 1 << 4 // There's no proper draw1 function in this driver, if this flag is set. draw1 commands will be converted into draw2 SRE_PRIMITIVE_TRIANGLES commands
 };
 
 // Structure used to define driver initialization data
 //
 // You shouldn't bother using this structure in your game at all.
 // But if you want to make your own render driver, then you can use this structure
-// by declaring a global/static variable/constant of this type, and pointing to it with the future SRE_HINT_EXTERN_RENDERDRIVER hint.
+// by declaring a global/static variable/constant of this type, and pointing to it with the experimental SRE_HINT_EXTERN_RENDERDRIVER hint.
 // If you're on C++, you may also want to look at the sre::RenderDriverHelper template, it inherits this structure and lets you implement your render driver
-//  with a custom class as a more "clean" way
+//  with a custom class using a more "object oriented" approach
 typedef struct sre_RenderDriverData
 {
     // Initialization function, should write to `interface` and return either of these values:
@@ -222,8 +216,10 @@ SRE_CAPI_END
         using blendMode = sre_blendMode;
         using draw2primitive = sre_draw2primitive;
 
-        using RenderInstance1 = sre_RenderInstance1; // Render instance for all rectangle draw calls
-        using RenderPoint = sre_RenderPoint;
+        using RenderInstance1 = sre_RenderInstance1; // Render instance for draw1 calls (Rectangles, sprites, all of that...)
+        using RenderPoint = sre_RenderPoint; // Structure representing a point or vertex used in draw2, for more complex geometry
+                                                // You can technically do 3D with it, but note that there's no depth so textures won't
+                                                // be mapped correctly and it looks ugly... It's called affine texture mapping.
         
         // Viewport helper(s)
         sre::vec2ut calc_viewport_size(sre::rect2Dut zone, sre::unit scale);
@@ -238,7 +234,12 @@ SRE_CAPI_END
             bool set_scissors(sre::rect2Dut zone);
             bool set_blendmode(sre::blendMode mode);
 
-            bool get_vsync(bool currently=false); // @param currently `truye` if you want to return the current vsync state of the video driver, otherwise, it returns the deferred state set by `set_vsync`
+            // @param currently `true` if you want to return the current vsync state of the video driver, otherwise, it returns the deferred value set by `set_vsync`
+            //
+            // `set_vsync` does not directly set the vsync state from the render driver, as that is very likely to be thread unsafe, instead, it toggles an internal
+            //  variable that will be checked at the beginning of every render flush on the main thread, and toggle the vsync state if it finds that the desired value
+            //  is different from the last vsync state.
+            bool get_vsync(bool currently=false);
             sre::blendMode get_blendmode(void);
             sre::unit     get_viewport_scale(void);
             sre::rect2Dut get_viewport_area(void);
@@ -314,7 +315,7 @@ SRE_CAPI_END
                         [](void* inst, void* texture) { static_cast<R*>(inst)->texture_destroy(static_cast<T*>(texture)); }
                     };
 
-                    int status = -1; // outstatus has a default value of 0, this allows constructors to return directly if they fail
+                    int status = -1; // outstatus has a default value of -1, this allows constructors to return directly if they fail
                                         // Otherwise for returning success, you should write to it.
                     new(inst) R(window, &status);
                     if (status != SRE_RENDERSTATUS_SUCCEEDED) return status;
@@ -339,17 +340,22 @@ SRE_CAPI_END
         protected:
             RenderDriver() = default;
         public:
+            // NOTE: These functions are NOT defined, if you're not defining the functions, you'll get a LINKING ERROR.
+
             void draw1(const sre::RenderInstance1* instances, size_t instance_count);
             void draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode);
             
             void begin(const float clear[4]);
             void end();
     
-            void set_viewportstate(int w, int h, sre::unit scale);
+            bool resize_window(int w, int h);
+
             void set_vsync(bool enable);
+
             void set_texturestate(texture_type* texture);
             void set_blendstate(sre::blendMode blending);
             void set_camerastate(sre::vec2ut camera);
+            void set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale);
             void set_scissorstate(const sre::rect2Di* rectangle);
                 
             bool texture_setup(texture_type* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat);
