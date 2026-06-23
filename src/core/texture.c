@@ -6,11 +6,11 @@
 
 #include <utils/mem.h>
 
-struct sre_Sampler
+struct sre_Texture
 {
     int refcount;
     int w, h;
-    sre_pixelFormat format;
+    sre_SDLpixelFormat format;
     char driverdata[];
 };
 
@@ -21,7 +21,7 @@ struct _texture_container
 };
 
 #define ARENA_TEXTURE_COUNT 64
-#define TEXTURE_SIZE (sizeof(sre_Sampler) + engine.video.texture_size)
+#define TEXTURE_SIZE (sizeof(sre_Texture) + engine.video.texture_size)
 
 #define FL_BASE 0
 #define FL_SIZE 1
@@ -37,8 +37,8 @@ void __cleanup_textures()
         for (size_t i = 0; i < engine.video.textures.last; i++)
         {
             bool isinfreelist = false;
-            sre_Sampler* sampler = (sre_Sampler*)&current->data[i*TEXTURE_SIZE];
-            for (sre_Sampler** fi = engine.video.textures.freelist[FL_BASE]; fi < engine.video.textures.freelist[FL_SIZE]; fi++)
+            sre_Texture* sampler = (sre_Texture*)&current->data[i*TEXTURE_SIZE];
+            for (sre_Texture** fi = engine.video.textures.freelist[FL_BASE]; fi < engine.video.textures.freelist[FL_SIZE]; fi++)
             {
                 if (*fi != sampler)
                     continue;
@@ -56,7 +56,7 @@ void __cleanup_textures()
     }
 }
 
-sre_Sampler* texture_alloc()
+sre_Texture* texture_alloc()
 {
     if (engine.video.textures.freelist[FL_BASE] != engine.video.textures.freelist[FL_SIZE])
         return *--engine.video.textures.freelist[FL_SIZE];
@@ -72,12 +72,12 @@ sre_Sampler* texture_alloc()
         engine.video.textures.last = 0;
     }
 
-    sre_Sampler* sampler = (sre_Sampler*)&engine.video.textures.head->data[engine.video.textures.last * TEXTURE_SIZE];
+    sre_Texture* sampler = (sre_Texture*)&engine.video.textures.head->data[engine.video.textures.last * TEXTURE_SIZE];
     engine.video.textures.last++;
     return sampler;
 }
 
-void texture_free(sre_Sampler* sampler)
+void texture_free(sre_Texture* sampler)
 {
     if (engine.video.textures.freelist[FL_SIZE] >= engine.video.textures.freelist[FL_CAP])
     {
@@ -97,10 +97,10 @@ void texture_free(sre_Sampler* sampler)
 
 struct d_setup_texture
 {
-    sre_Sampler* sampler;
-    sre_pixelFormat formathint;
+    sre_Texture* sampler;
+    sre_SDLpixelFormat formathint;
     int w, h;
-    sre_pixelFormat* outformat;
+    sre_SDLpixelFormat* outformat;
 };
 static sre_sptr d_setup_texture(void* _data)
 {
@@ -116,7 +116,7 @@ static sre_sptr d_setup_texture(void* _data)
 
 struct d_update_texture
 {
-    sre_Sampler* sampler;
+    sre_Texture* sampler;
     const sre_rect2Di* region;
     const void* pixels;
     int pitch;
@@ -134,21 +134,21 @@ static sre_sptr d_update_texture(void* _data)
 
 struct d_destroy_texture
 {
-    sre_Sampler* sampler;
+    sre_Texture* sampler;
 };
 
 static void d_destroy_texture(void* _data)
 {
-    sre_Sampler* sampler = _data;
+    sre_Texture* sampler = _data;
     SRE_VIDEO(engine.video.driver, texture_destroy, sampler->driverdata);
     texture_free(sampler);
 }
 
 //
 
-sre_Sampler* sre_sampler(sre_pixelFormat formathint, int w, int h)
+sre_Texture* sre_texture(sre_SDLpixelFormat formathint, int w, int h)
 {
-    sre_Sampler* sampler = texture_alloc(); assert(sampler != NULL);
+    sre_Texture* sampler = texture_alloc(); assert(sampler != NULL);
     if (!sre_defer_res(d_setup_texture, &(struct d_setup_texture){ sampler, formathint, w, h, &sampler->format }))
     {
         texture_free(sampler);
@@ -161,7 +161,7 @@ sre_Sampler* sre_sampler(sre_pixelFormat formathint, int w, int h)
     return sampler;
 }
 
-bool sre_sampler_update(sre_Sampler* sampler, const sre_rect2Di* region, const void* pixels, int pitch)
+bool sre_texture_update(sre_Texture* sampler, const sre_rect2Di* region, const void* pixels, int pitch)
 {
     if (!sampler)
         return sre_error(SRE_ERR_INVALID_PARAMETER, "Parameter `sampler` is NULL") && false;
@@ -192,7 +192,7 @@ bool sre_sampler_update(sre_Sampler* sampler, const sre_rect2Di* region, const v
     return sre_defer_res(d_update_texture, &(struct d_update_texture){ sampler, &outregion, pixels, pitch });
 }
 
-bool sre_sampler_query(sre_Sampler* sampler, int size[2], sre_pixelFormat* format)
+bool sre_texture_query(sre_Texture* sampler, int size[2], sre_SDLpixelFormat* format)
 {
     if (!sampler) return false;
 
@@ -209,12 +209,12 @@ bool sre_sampler_query(sre_Sampler* sampler, int size[2], sre_pixelFormat* forma
     return true;
 }
 
-int sre_sampler_aquire(sre_Sampler* sampler)
+int sre_texture_aquire(sre_Texture* sampler)
 {
     return SDL_AtomicAdd((SDL_atomic_t*)&sampler->refcount, 1);
 }
 
-int sre_sampler_release(sre_Sampler* sampler)
+int sre_texture_release(sre_Texture* sampler)
 {
     if (!sampler) return 0;
     if (!engine.video.driver) return 0;

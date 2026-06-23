@@ -26,6 +26,7 @@ typedef struct sresdlrenderer_texture
 typedef struct sresdlrenderer_inst
 {
     SDL_Renderer* renderer;
+    SDL_Texture* cur_texture;
 
     sre_unit scaling;
     sre_vec2ut camera;
@@ -39,21 +40,22 @@ typedef struct sresdlrenderer_inst
 
 SRE_CAPI_BEGIN
 
-void sresdlrenderer_flush_queueinstances1(void* inst, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
-void sresdlrenderer_flush_queueinstances2(void* inst, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
+void sresdlrenderer_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
+void sresdlrenderer_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
-void sresdlrenderer_present(void* inst);
-bool sresdlrenderer_clear(void* inst, float color[3]);
+void sresdlrenderer_begin(void* _inst, const float clear[4]);
+void sresdlrenderer_end(void* _inst);
 
-bool sresdlrenderer_set_viewportstate(void* inst, int w, int h, sre_unit scale);
-bool sresdlrenderer_set_blendstate(void* inst, sre_blendMode blending);
-bool sresdlrenderer_set_camerastate(void* inst, sre_unit x, sre_unit y);
-void sresdlrenderer_set_clipstate(void* inst, const sre_rect2Di* rectangle);
-void sresdlrenderer_set_vsync(void* inst, bool enable);
+void sresdlrenderer_set_vsync(void* _inst, bool enable);
+void sresdlrenderer_set_texturestate(void* _inst, void* _texture);
+void sresdlrenderer_set_blendstate(void* _inst, sre_blendMode blending);
+void sresdlrenderer_set_camerastate(void* _inst, sre_unit x, sre_unit y);
+void sresdlrenderer_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale);
+void sresdlrenderer_set_scissorstate(void* _inst, const sre_rect2Di* rectangle);
 
-bool sresdlrenderer_setup_texture(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-bool sresdlrenderer_update_texture(void* inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
-void sresdlrenderer_destroy_texture(void* inst, void* texture);
+bool sresdlrenderer_setup_texture(void* _inst, void* _texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat);
+bool sresdlrenderer_update_texture(void* _inst, void* _texture, const sre_rect2Di* region, const void* pixels, int pitch);
+void sresdlrenderer_destroy_texture(void* _inst, void* _texture);
 
 SRE_CAPI_END
 

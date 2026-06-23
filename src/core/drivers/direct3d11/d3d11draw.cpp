@@ -2,7 +2,18 @@
 
 using namespace sreD3D11;
 
-void Instance::present()
+void Instance::begin(const float clear[4])
+{
+    if (m_dxrendertargetview == NULL) sre::critical(SRE_ERR_INVALID_STATE, "Assertion 'm_dxrendertargetview != NULL' failed");
+
+	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
+    m_dxdevicecontext->ClearRenderTargetView(m_dxrendertargetview, clear);
+    
+    m_d1buffer.reset();
+    m_d2buffer.reset();
+}
+
+void Instance::end()
 {
     HRESULT hr;
     UINT flags;
@@ -29,41 +40,18 @@ void Instance::present()
 
         sre::error(SRE_ERR_DIRECTX_HR, "IDXGISwapChain::Present() failed: ", DXHRTOSTRING(hr), hr);
     }
-
-    
 }
 
-bool Instance::clear(float color[3])
-{
-    if (m_dxrendertargetview == NULL) sre::critical(SRE_ERR_INVALID_STATE, "Assertion 'm_dxrendertargetview != NULL' failed");
-
-    const FLOAT color4[4] = {
-        color[0], color[1], color[2], 0.0f
-    };
-
-	m_dxdevicecontext->OMSetRenderTargets(1, &m_dxrendertargetview, NULL);
-    m_dxdevicecontext->ClearRenderTargetView(m_dxrendertargetview, color4);
-    
-    m_d1buffer.reset();
-    m_d2bufferc.reset();
-    m_d2bufferp.reset();
-
-    return true;
-}
-
-void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags)
+void Instance::draw1(const sre::RenderInstance1* instances, size_t instance_count)
 {
     UINT inst_num = m_d1buffer.index / sizeof(sre::RenderInstance1);
     if (m_d1buffer.append(m_dxdevicecontext, instances, static_cast<UINT>(sizeof(*instances)*instance_count)))
     {
-        switch_flags |= SRE_RENDER_SWITCHTYPE;    
         inst_num = 0;
     }
 
-    if (switch_flags & SRE_RENDER_SWITCHTYPE)
+    if (1)
     {
-        switch_flags |= SRE_RENDER_SWITCHTEXTURE | SRE_RENDER_SWITCHCAMERA; // Switch everything for now since draw2 doesn't handle the switching state yet
-
         UINT offsets[] = { 0 };
         UINT strides[] = { sizeof(sre::RenderInstance1) };
         m_dxdevicecontext->IASetVertexBuffers(0, 1, &m_d1buffer.dxbuffer, strides, offsets);
@@ -72,64 +60,41 @@ void Instance::flush_queueinstances1(Texture* texture, const sre::RenderInstance
         m_dxdevicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     }
 
-    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
-        m_dxdevicecontext->VSSetConstantBuffers(0, 1, m_cbuffers + ((flags & SRE_DRAWFLAG_CAMERA) != 0));
-
-    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
-    {
-        m_dxdevicecontext->PSSetShaderResources(0, 1, texture ? &texture->dxsrv : &m_basictexture);
-    }
-
     m_dxdevicecontext->DrawInstanced(4, static_cast<UINT>(instance_count), 0, inst_num);
 }
 
-void Instance::flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags)
+void Instance::draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode)
 {
-
-    bool doswitch = false;
-
-    UINT offscol = m_d2bufferc.index;
-    UINT offspos = m_d2bufferp.index;
-    if (m_d2bufferc.append(m_dxdevicecontext, &instance->color, sizeof(instance->color)))
-    {
-        offscol = 0;
-    }
-    if (m_d2bufferp.append(m_dxdevicecontext, instance->points, static_cast<UINT>(sizeof(instance->points[0])*point_count)))
-    {
-        offspos = 0;
+    UINT index = m_d2buffer.index;
+    if (m_d2buffer.append(m_dxdevicecontext, points, static_cast<UINT>(sizeof(*points)*point_count))) {
+        index = 0;
     }
 
-    if (switch_flags & SRE_RENDER_SWITCHTYPE)
-    {
+    if (1) {
         m_dxdevicecontext->VSSetShader(m_shaders.d2VS, NULL, 0);
         m_dxdevicecontext->IASetInputLayout(m_shaders.d2IL);
     }
 
     {
-        UINT offsets[] = { offscol, offspos };
-        UINT strides[] = { sizeof(sre::col4), sizeof(sre::RenderPoint) };
-        ID3D11Buffer* buffers[] = { m_d2bufferc.dxbuffer, m_d2bufferp.dxbuffer };
-        m_dxdevicecontext->IASetVertexBuffers(0, 2, buffers, strides, offsets);
+        UINT offsets[] = { index };
+        UINT strides[] = { sizeof(sre::RenderPoint) };
+        ID3D11Buffer* buffers[] = { m_d2buffer.dxbuffer };
+        m_dxdevicecontext->IASetVertexBuffers(0, 1, buffers, strides, offsets);
     }
 
-    if (switch_flags & SRE_RENDER_SWITCHCAMERA)
-        m_dxdevicecontext->VSSetConstantBuffers(0, 1, m_cbuffers + ((flags & SRE_DRAWFLAG_CAMERA) != 0));
-
     D3D11_PRIMITIVE_TOPOLOGY topology;
-    switch (instance->mode)
+    switch (mode)
     {
-        case SRE_DRAW2_STRIP: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
-        case SRE_DRAW2_TRIANGLE: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
+        case SRE_PRIMITIVE_TRIANGLES: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; break;
+        case SRE_PRIMITIVE_TRIANGLESTRIP: topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; break;
+        case SRE_PRIMITIVE_LINEPERLINE: topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST; break;
+        case SRE_PRIMITIVE_LINESTRIP:
+        case SRE_PRIMITIVE_LINELOOP: topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP; break;
+        case SRE_PRIMITIVE_POINTS: topology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST; break;
         default: abort();
     }
 
     m_dxdevicecontext->IASetPrimitiveTopology(topology);
-
-    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)
-    {
-        m_dxdevicecontext->PSSetShaderResources(0, 1, texture ? &texture->dxsrv : &m_basictexture);
-    }
-
     m_dxdevicecontext->Draw(static_cast<UINT>(point_count), 0);
 }
 

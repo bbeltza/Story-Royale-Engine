@@ -22,9 +22,9 @@ namespace sre
         inline void toggle_on(T flag) { m_data |= flag; }
         inline void toggle_off(T flag) { m_data &= ~flag; }
 
-        template <typename... Args> inline void toggle(Args... args) { toggle(get_pack(args...)); }
-        template <typename... Args> inline void toggle_on(Args... args) { toggle_on(get_pack(args...)); }
-        template <typename... Args> inline void toggle_off(Args... args) { toggle_off(get_pack(args...)); }
+        template <typename... Args> inline void toggle(Args... values) { toggle(get_pack(values...)); }
+        template <typename... Args> inline void toggle_on(Args... values) { toggle_on(get_pack(values...)); }
+        template <typename... Args> inline void toggle_off(Args... values) { toggle_off(get_pack(values...)); }
 
         inline void operator =(T value) { m_data = value; }
         constexpr bool operator ==(const flags& other) const { return m_data == other.m_data; }

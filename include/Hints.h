@@ -16,11 +16,14 @@
                                 Utilities for parsing arguments like this may be built in the future.
                             Optionally, if SRE_HINT_ARG_HANDLERS is present too, being an `int`, then it represents the amount of argument handlers in SRE_HINT_ARG_HANDLER,
                                 assuming it is an array of argument handler functions. If it is not present, then only 1 argument handler is considered to be run.
-    - SRE_HINT_IMGUI_GLUE: Used by sre_imguiglue so if you link it, you don't have to bother with it, nor you should
-        It is a sre::ImGuiInterface inherited object (So it can be of any class type that INHERITS it).
-        The interface definition is included in <ImGui.hpp> for C++ only since ImGui is included with C++
-        This hint allows the integration with ImGui. In the class that you define, you must initialize ImGui in the `initialize` virutal method
-        The `initialize` method returns the same set of codes as render driver initialization functions do. So include <Core/Render.h> for that.
+    - SRE_HINT_ECS_ENTRYPOINT & SRE_HINT_GUI_ENTRYPOINT: These are functions (which will be interpreted with `void f(void)` as the signature) that run before setting up the 
+        new object layer system for the ECS and GUI respectively. It's used by the ECS and GUI modules to initialize all of the necessary data to function, as a way to no
+        longer rely on the internal engine anymore, so you shouldn't use them. But if you don't rely on those modules, then using them as a way of setting different entry points is possible.
+    - SRE_HINT_SDL_WINDOWFLAGS: int, specifies which flags to use when creating the main window in SDL_CreateWindow. Just be careful with using them!
+                                  Note that the SDL_WINDOW_HIDDEN flag will be automatically added during creation, even if it's not specified, unless 
+                                  the SDL_WINDOW_SHOWN flag is specified. The main window is created by default with the SDL_WINDOW_OPENGL and SDL_WINDOW_HIDDEN flags.
+                                These flags can be used to either have custom vulkan or metal support (with SDL_WINDOW_VULKAN/METAL), or to remove the SDL_WINDOW_OPENGL flag,
+                                  or to add some minimal configuration to it.
 */
 // This is it for now, I'm looking forward to expand this more
 

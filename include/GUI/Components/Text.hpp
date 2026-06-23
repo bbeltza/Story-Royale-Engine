@@ -9,7 +9,7 @@ namespace sreGUI
     struct Text: public Component
     {
         Text() = default;
-        Text(const sre::Font& font, const char* text=""): m_fonthandle(font), m_str(text) {}
+        Text(const sre::Font& font, const char* text="", sre::col4 color=sre::WHITE): m_fonthandle(font), m_str(text), color(color) {}
 
         void set_font(const sre::Font& font) { m_fonthandle = font; }
 
@@ -24,9 +24,9 @@ namespace sreGUI
         inline int length() const { return (int)m_str.size(); }
 
         int count = -1;
-        int scale = 0;
+        int scale = 0; // Unused
 
-        sre::col4 color = sre::BLACK;
+        sre::col4 color = sre::WHITE;
 
         sre::alignment h_alignment = sre::ALIGN_LEFT;
         sre::alignment v_alignment = sre::ALIGN_TOP;

@@ -13,43 +13,30 @@ namespace sreD3D9
         ~DLLS() { FreeLibrary(d3d9); }
     };
 
-    struct DrawData
+    // Dnyamic buffer abstraction also seen in d3d11's and d3d12's drivers
+    struct DBuff
     {
-        IDirect3DVertexDeclaration9* dxdecl;
-        IDirect3DVertexBuffer9* dxbuff_vert;
-        IDirect3DVertexBuffer9* dxbuff_inst;
+        IDirect3DVertexBuffer9* dxbuff{};
 
-        void releaseresources()
+        UINT pos;
+        UINT cap;
+
+        void reset() { pos = 0; }
+        bool init(IDirect3DDevice9* dxdevice, UINT capacity);
+        UINT append(IDirect3DDevice9* dxdevice, const void* data, UINT size);
+
+        template <typename T>
+        bool init(IDirect3DDevice9* dxdevice, UINT count) { return init(dxdevice, count*sizeof(T)); }
+        template <typename T>
+        UINT append(IDirect3DDevice9* dxdevice, const void* data, UINT count) { return append(dxdevice, data, count*sizeof(T)); }
+
+        inline void release()
         {
-            if (!dxdecl)
-                return;
-
-            dxdecl->Release();
-            dxbuff_vert->Release();
-            dxbuff_inst->Release();
-
-            dxdecl = NULL;
-            dxbuff_vert = NULL;
-            dxbuff_inst = NULL;
-        }
-    };
-
-    struct Draw1Data: DrawData
-    {
-        IDirect3DIndexBuffer9* dxibuff;
-
-        void releaseresources()
-        {
-            DrawData::releaseresources();
-            _released1resources();
-        }
-    private:
-        void _released1resources()
-        {
-            if (!dxibuff)
-                return;
-            dxibuff->Release();
-            dxibuff = NULL;
+            if (dxbuff)
+            {
+                dxbuff->Release();
+                dxbuff = NULL;
+            }
         }
     };
 
@@ -59,7 +46,7 @@ namespace sreD3D9
         float potratiox, potratioy;
     };
 
-    struct Instance: sre::RenderDriver
+    struct Instance
     {
         using texture_type = Texture;
         friend struct ImGuiData;
@@ -70,6 +57,7 @@ namespace sreD3D9
         DLLS m_dlls;
     private:
         bool m_needsetup = true;
+        bool m_usepot = false;
         IDirect3D9* m_dxd3d9;
 
         IDirect3DDevice9* m_dxdevice;
@@ -79,29 +67,65 @@ namespace sreD3D9
         IDirect3DVertexShader9* m_dxd2vs;
 
         IDirect3DTexture9* m_dxbasictexture{};
+        sre::vec2f m_potratio{1.0f, 1.0f};
 
-        Draw1Data m_d1data{};
-        DrawData m_d2data{};
+        struct {
+            IDirect3DVertexDeclaration9* dxvertexdecl{};
+            IDirect3DVertexBuffer9* dxpervertexbuf{};
+            IDirect3DIndexBuffer9* dxindexbuf{};
+
+            DBuff perinstancebuf{};
+
+            void releaseresources()
+            {
+                perinstancebuf.release();
+                if (dxvertexdecl)
+                {
+                    dxvertexdecl->Release();
+                    dxindexbuf->Release();
+                    dxpervertexbuf->Release();
+
+                    dxvertexdecl = NULL;
+                    dxindexbuf = NULL;
+                    dxpervertexbuf = NULL;
+                }
+            }
+        } m_d1data{};
+        struct {
+            IDirect3DVertexDeclaration9* dxvertexdecl{};
+            DBuff vertexbuf{};
+
+            void releaseresources()
+            {
+                vertexbuf.release();
+                if (dxvertexdecl)
+                {
+                    dxvertexdecl->Release();
+                    dxvertexdecl = NULL;
+                }
+            }
+        } m_d2data{};
 
         D3DPRESENT_PARAMETERS m_pparamcache{};
-        FLOAT m_viewportcache[16];
-        FLOAT m_cameracache[2];
 
         D3DCAPS9 m_devcaps;
     public:
-        void flush_queueinstances1(Texture* texture, const sre::RenderInstance1* instances, size_t instance_count, sre::u32 flags, sre::u32 switch_flags);
-        void flush_queueinstances2(Texture* texture, const sre::RenderInstance2* instance, size_t point_count, sre::u32 flags, sre::u32 switch_flags);
+        void draw1(const sre::RenderInstance1* instances, size_t instance_count);
+        void draw2(const sre::RenderPoint* points, size_t point_count, sre::draw2primitive mode);
             
-        void present();
-        bool clear(float color[3]);
-    
-        bool set_viewportstate(int w, int h, sre::unit scale);
-        bool set_blendstate(sre::blendMode blending);
-        bool set_camerastate(sre::unit x, sre::unit y);
-        void set_clipstate(const sre::rect2Di* rectangle);
+        void begin(const float color[4]);
+        void end();
+        
+        bool resize_window(int w, int h);
+
         void set_vsync(bool enable);
+        void set_camerastate(sre::vec2ut camera);
+        void set_texturestate(texture_type* texture);
+        void set_blendstate(sre::blendMode blending);
+        void set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale);
+        void set_scissorstate(const sre::rect2Di* rectangle);
                 
-        bool texture_setup(Texture* texture, sre::pixelFormat format, int w, int h, sre::pixelFormat* outformat);
+        bool texture_setup(Texture* texture, sre::SDLpixelFormat format, int w, int h, sre::SDLpixelFormat* outformat);
         bool texture_update(Texture* texture, const sre::rect2Di* region, const void* pixels, int pitch);
         void texture_destroy(Texture* texture);
     private:
@@ -113,8 +137,6 @@ namespace sreD3D9
             m_d1data.releaseresources();
             m_d2data.releaseresources();
         }
-
-        void _invalidateimgui();
 
         // @returns One of the render states to return
         int _checkdevice(UINT adapter, D3DDEVTYPE type);

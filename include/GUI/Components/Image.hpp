@@ -2,7 +2,7 @@
 #define SREGUI_IMAGE_HPP
 
 #include <GUI/Component.hpp>
-#include <Base/Sampler.hpp>
+#include <Base/Texture.hpp>
 #include <Datatypes/Color.h>
 
 namespace sreGUI
@@ -16,12 +16,12 @@ namespace sreGUI
             F_REGION = ut_bit(1)
         };
 
-        Image() = default;
-        Image(const sre::RSampler& sampler): texture(sampler) {}
-        Image(sre::RSampler&& sampler): texture(std::move(sampler)) {}
+        Image(sre::col4 modulate=sre::WHITE): modulate(modulate) {}
+        Image(const sre::RAIITexture& texture, sre::col4 modulate=sre::WHITE): texture(texture), modulate(modulate) {}
+        Image(sre::RAIITexture&& texture, sre::col4 modulate=sre::WHITE): texture(std::move(texture)), modulate(modulate) {}
 
-        sre::RSampler texture;
-        sre::col4 modulate = sre::WHITE;
+        sre::RAIITexture texture;
+        sre::col4 modulate;
         sre::rect2Di region{0, 0};
 
         void fit(Transform& transform);

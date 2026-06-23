@@ -16,7 +16,7 @@ namespace sreECS
         sre::unit smoothness = 0.0_ut;
     protected:
         void on_update(Camera& camera) override;
-        void on_pupdate(Camera& camera) override;
+        void on_pupdate(Camera& camera, sre::timeStamp dt) override;
     private:
         sre::vec2ut m_camSpeed;
         sre::vec2ut m_lastmouseDelta;

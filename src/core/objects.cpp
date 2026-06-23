@@ -1,236 +1,248 @@
 #include <Core/Render.h>
-#include <Core/Object.hpp>
-#include <Core/Display.hpp>
+#include <Core/Object.h>
 #include <Core/Runtime.hpp>
+#include <Base/Log.h>
+
+#include <Hints.h>
 
 #include "../internal.h"
 
-#include <ECS/Scene.hpp>
-#include <GUI/Object.hpp>
-
 #include <cassert>
 
-static void* const PTR_MAX = reinterpret_cast<void*>(UINTPTR_MAX); 
-static sre::Object* obj_head = static_cast<sre::Object*>(PTR_MAX); // PTR_MAX to make sure an object is in a queue, otherwise, m_nextdestroyed is NULL
-//static size_t queue_count = 0;
-static bool isin_destroyqueue = false;
+#define OBJLAYER_TOVECTOR() reinterpret_cast<std::vector<sre::Object*>*>(engine._obj_layer_vdata)
+#define OBJLAYERFL_TOVECTOR() reinterpret_cast<std::vector<int>*>(engine._obj_layerfl_vdata)
+#define OBJLAYER_STARTCAPACITY 16
+
+#define DQ_LOCK() SDL_LockMutex(sre::DESTROY_QUEUE_MUTEX)
+#define DQ_UNLOCK() SDL_UnlockMutex(sre::DESTROY_QUEUE_MUTEX)
+
+#define SRE_ENABLE_OBJECT_TRACKER 0
 
 namespace sre
 {
-    class ECS;
-}
-class sre::ECS
-{
-    ECS() = delete;
+    #if SRE_ENABLE_OBJECT_TRACKER
+        std::list<sre::Object*> OBJECT_TRACKER;
+    #endif
 
-    static inline void update_scene();
-    static inline void update_layer();
-    public:
-        static void destroy_queue();
 
-        static void call_query();
+    std::queue<sre::Object*> DESTROY_QUEUE;
+    SDL_mutex* DESTROY_QUEUE_MUTEX;
+    bool IS_IN_DESTROYQUEUE = false;
 
-        static void call_update()
-        {
-            update_scene();
-            update_layer();
-            sre::onUpdate.fire();
+    class objLayer
+    {
+        public:
+            static void delete_object(sre::Object* obj) { delete obj; }
+    };
+
+    void __flush_destroy_queue() {
+        DQ_LOCK();
+        IS_IN_DESTROYQUEUE = true;
+
+        while (!sre::DESTROY_QUEUE.empty()) {
+            sre::objLayer::delete_object(sre::DESTROY_QUEUE.front());
+            sre::DESTROY_QUEUE.pop();
         }
-        static bool call_render();
-        static void render_ui();
-        static void render_scene();
-};
 
-//
-sre::Object::~Object() 
+        IS_IN_DESTROYQUEUE = false;
+        DQ_UNLOCK();
+    }
+}
+
+bool __update_objects()
 {
-    assert(SDL_TryLockMutex(engine.destroyqueue_mutex) != SDL_MUTEX_TIMEDOUT);
-	if (obj_head == this)
-	{
-		obj_head = m_nextdestroyed;
-		//queue_count--;
-	}
-    assert(SDL_UnlockMutex(engine.destroyqueue_mutex) || 1);
+    auto& obj_layer = *OBJLAYER_TOVECTOR();
+    for (auto obj : obj_layer)
+        obj->update();
+
+    sre::onUpdate.fire();
+    sre::__flush_destroy_queue();
+
+    if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_SHOWN)
+    {
+        sre::beforeRender.fire();
+        for (auto obj : obj_layer)
+            obj->render();
+        
+        sre::afterRender.fire();
+
+        #if SDL_VIDEO_DRIVER_WAYLAND // Wayland doesn't show up windows unless it's getting presented
+            if (!sre::render::has_begun())
+                sre::render::begin(sre::BLACK, sre::vec2ut::ZERO);
+        #endif
+        return true;
+    }
+
+    return false;
+}
+
+void __setup_objects()
+{
+    new(engine._obj_layer_vdata) std::vector<sre::Object*>();
+    new(engine._obj_layerfl_vdata) std::vector<int>();
+    OBJLAYER_TOVECTOR()->reserve(OBJLAYER_STARTCAPACITY); 
+    OBJLAYERFL_TOVECTOR()->reserve(OBJLAYER_STARTCAPACITY);
+
+    sre::DESTROY_QUEUE_MUTEX = SDL_CreateMutex();
+
+    using sreECS_entry = void(*)(void);
+
+    auto ecs_entry = reinterpret_cast<const sreECS_entry>(sre::gethint("ECS_ENTRYPOINT"));
+    auto gui_entry = reinterpret_cast<const sreECS_entry>(sre::gethint("GUI_ENTRYPOINT"));
+
+    if (ecs_entry)
+        ecs_entry();
+    if (gui_entry)
+        gui_entry();
+
+    #if SRE_ENABLE_OBJECT_TRACKER
+        sre::log("Objects currently living after `__setup_objects()`: %zu", sre::OBJECT_TRACKER.size());
+    #endif
+}
+
+void __cleanup_objects()
+{
+    auto& obj_layer = *OBJLAYER_TOVECTOR();
+    auto& obj_layerfl = *OBJLAYERFL_TOVECTOR();
+    for (auto obj : obj_layer)
+        sre::objLayer::delete_object(obj);
+    
+    obj_layer.~vector();
+    obj_layerfl.~vector();
+    memset(engine._obj_layer_vdata, 0, sizeof(engine._obj_layer_vdata));
+    sre::__flush_destroy_queue();
+    
+    SDL_DestroyMutex(sre::DESTROY_QUEUE_MUTEX);
+    sre::DESTROY_QUEUE_MUTEX = NULL;
+    
+    #if SRE_ENABLE_OBJECT_TRACKER
+        sre::log("Objects living currently after `__cleanup_objects()`: %zu", sre::OBJECT_TRACKER.size());
+        for (auto& obj : sre::OBJECT_TRACKER)
+        {
+            sre::log("Object still living at %p after `__cleanup_objects()` ; This is known due to an object tracker enabled inside this engine, however, it won't destroy any of the remaining objects. So this is a memory leak", obj);
+        }
+    #endif
+}
+
+// Public API
+
+    // Not much to do on those functions
+
+sre::Object::Object()
+{
+    #if SRE_ENABLE_OBJECT_TRACKER
+        OBJECT_TRACKER.push_back(this);
+        //if (OBJECT_TRACKER.size() == xx) SDL_TriggerBreakpoint();
+        sre::log("Adding new object (%p)... Current count: %zu", this, OBJECT_TRACKER.size());
+    #endif
+}
+
+sre::Object::~Object()
+{
+    #if SRE_ENABLE_OBJECT_TRACKER
+        OBJECT_TRACKER.remove(this);
+        sre::log("Removing existing object (%p)... Current count: %zu", this, OBJECT_TRACKER.size());
+    #endif
 }
 
 void sre::Object::destroy()
 {
-    if (m_nextdestroyed) // Object is already in the queue, don't insert it again
-		return;
+    if (m_destroying)
+        return;
 
-	SDL_LockMutex(engine.destroyqueue_mutex);
-    if (isin_destroyqueue)
+    DQ_LOCK();
+
+    if (IS_IN_DESTROYQUEUE)
     {
-        // Don't mess up the queue! Commit suicide
-        delete this;
+        delete this; // Already queueing object destruction. Commit suicide!
+        goto FINISH;
+    }
+
+    m_destroying = true;
+    sre::DESTROY_QUEUE.push(this);
+
+FINISH:
+    DQ_UNLOCK();
+}
+
+static void* ZERO_DATA_CMP[4];
+#define INIT_CHECK() assert(memcmp(engine._obj_layer_vdata, ZERO_DATA_CMP, sizeof(ZERO_DATA_CMP)) != 0 && "Attempt to call sre::bind_object_layer before or after engine's lifetime") 
+int sre::bind_object_layer(sre::Object& object)
+{
+    INIT_CHECK();
+
+    auto& objects = *OBJLAYER_TOVECTOR();
+    auto& freelist = *OBJLAYERFL_TOVECTOR();
+    if (freelist.empty())
+    {
+        int pos = static_cast<int>(objects.size());
+        objects.push_back(&object);
+        return pos;
     }
     else
     {
-        m_nextdestroyed = obj_head;
-        obj_head = this;
-        //queue_count++;
+        int pos = freelist.back();
+        freelist.pop_back();
+        assert(objects.at(pos) == NULL);
+        objects.at(pos) = &object;
+        return pos;
     }
-	SDL_UnlockMutex(engine.destroyqueue_mutex);
 }
-
-void sre::ECS::destroy_queue()
+void sre::unbind_object_layer(int index)
 {
-    SDL_LockMutex(engine.destroyqueue_mutex);
-    isin_destroyqueue = true;
-    while (obj_head != PTR_MAX)
-        delete obj_head;
-    isin_destroyqueue = false;
-    SDL_UnlockMutex(engine.destroyqueue_mutex);
-}
+    if (index < 0)
+        return;
 
-//
-
-void sre::ECS::call_query()
-{
-    if (!engine.current_guilayer && !engine.current_world) return;
-
-    sre::vec2ut pt{engine.mouse_x, engine.mouse_y};
-
-    if (engine.input_last_touchid < 0) goto callsection;
-    {
-        int finger_count = SDL_GetNumTouchFingers(engine.input_last_touchid);
-        if (!finger_count) goto callsection;
+    auto& objects = *OBJLAYER_TOVECTOR();
+    auto& freelist = *OBJLAYERFL_TOVECTOR();
+    if (objects.at(index) == NULL)
+        return;
     
-        SDL_Finger* lastfinger = SDL_GetTouchFinger(engine.input_last_touchid, finger_count - 1);
+    objects.at(index) = NULL;
+    freelist.push_back(index);
+}
 
-        pt = sre::display_size() * sre::vec2ut{ lastfinger->x, lastfinger->y };
-    }
+// C API wrappers
 
-    callsection:
+struct sre_Object: sre::Object
+{
+    sre_Object(const sre_ObjectTable& ft): funcs([](const sre_ObjectTable& funcs) {
+        return sre_ObjectTable{
+            funcs.destroy ? funcs.destroy : [](void*) {},
+            funcs.update ? funcs.update : [](void*) {},
+            funcs.render ? funcs.render : [](void*) {}
+        };
+    }(ft)) {}
+    const sre_ObjectTable funcs;
 
-    if (
-        engine.current_guilayer && currlayer->call_query(pt) &&
-        engine.current_world && currscn->call_query(pt)
-    )
-        (void)0;
+    ~sre_Object() override { funcs.destroy(this+1); }
+    void update() override { funcs.update(this+1); }
+    void render() override { funcs.render(this+1); }
+};
+
+sre_Object* sre_create_object(const sre_ObjectTable* functiontable, size_t extrasize)
+{
+    extrasize = ((extrasize + (alignof(sre_Object)-1))/alignof(sre_Object)) * alignof(sre_Object);
+    void* ptr = operator new(sizeof(sre_Object) + extrasize);
+    return new(ptr) sre_Object(*functiontable);
+}
+
+void sre_destroy_object(sre_Object* object)
+{
+    if (!object)
+        return;
+    object->destroy();
+}
+
+int sre_bind_objectlayer(sre_Object* object) {
+    if (!object)
+        return -1;
+    
+    return sre::bind_object_layer(*object);
+}
+
+void sre_unbind_objectlayer(int index) {
+    sre::unbind_object_layer(index);
 }
 
 //
-
-void sre::ECS::update_scene()
-{
-    BEGIN:
-
-	sreECS::Scene* current = static_cast<sreECS::Scene*>(engine.current_world);
-	
-	if (!current) return;
-		current->call_update();
-	
-	if (current != engine.current_world) goto BEGIN;
-}
-
-void sre::ECS::update_layer()
-{
-	sreGUI::Object* current = currlayer;
-	
-	if (!current) return;
-	
-    current->call_update();
-
-	current = currlayer;
-	
-    sre::unit insets = sreGUI::get_insets();
-	current->m_absolute.size = sre::display_size() - vec2ut{insets*2, 0};
-	current->m_absolute.position = sre::vec2ut::ZERO + vec2ut{insets, 0};
-	current->call_process();
-	current->call_processchildren();
-	current->call_prerender();
-}
-
-//
-
-void sre::ECS::render_ui()
-{
-    if (engine.current_guilayer)
-        currlayer->call_render();
-}
-
-void sre::ECS::render_scene()
-{
-    assert(engine.current_world != NULL);
-    currscn->call_render();
-}
-
-extern void __render_clearqueues();
-extern void __beginframe_imgui();
-
-bool sre::ECS::call_render()
-{
-    if (SDL_GetWindowFlags(engine.sdl_windowhndl) & SDL_WINDOW_HIDDEN)
-        return false;
-
-	if (engine.imgui)
-		__beginframe_imgui();
-
-    // Render current world
-
-    sre::render_clipreset();
-
-    float bg[3];
-    if (sreECS::Scene *current = static_cast<sreECS::Scene*>(engine.current_world))
-    {
-    	bg[0] = current->background.r / 255.0f;
-    	bg[1] = current->background.g / 255.0f;
-    	bg[2] = current->background.b / 255.0f;
-
-    	//// Aliases for the background and the foreground (kind of old)
-    	const sre::col4& fg = current->foreground;
-
-    	//// Clearing the screen with the background color
-
-    	sre::beforeRender.fire();
-
-    	//// Drawing all the entities (doesn't run if the foreground is full opaque)
-    	if (fg.a < 255)
-    		sre::ECS::render_scene();
-
-    	//// Finally, filling the foreground (doesn't run if the foreground is invisible)
-    	if (fg.a)
-    		sre::render_fill(fg);
-    }
-    else
-    {
-		#if 0 // Debug easier on black backgrounds
-			bg[0] = 0.3f;
-			bg[1] = 0.3f;
-			bg[2] = 0.3f;
-		#else
-			bg[0] = 0.0f;
-    		bg[1] = 0.0f;
-    		bg[2] = 0.0f;
-    	#endif
-    	sre::beforeRender.fire();
-    }
-
-	// Draw the GUI layer
-	sre::ECS::render_ui();
-
-	sre::afterRender.fire();
-
-    return true;
-}
-
-//
-
-bool __update_ecs()
-{
-    sre::ECS::destroy_queue();
-    sre::ECS::call_query();
-    sre::ECS::call_update();
-    sre::ECS::destroy_queue();
-    bool wantrender = sre::ECS::call_render();
-    return wantrender;
-}
-
-void __cleanup_ecs()
-{
-    SDL_LockMutex(engine.destroyqueue_mutex);
-	    delete static_cast<::sreECS::Scene*>(engine.current_world);
-	    delete static_cast<::sreGUI::Object*>(engine.current_guilayer);
-    SDL_UnlockMutex(engine.destroyqueue_mutex);
-}

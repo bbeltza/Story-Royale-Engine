@@ -1,3 +1,5 @@
+#ifndef SRE_UT_LOCKFILE_H
+#define SRE_UT_LOCKFILE_H
 // File locking-related utilities
 
 #if defined(_WIN32)
@@ -51,5 +53,7 @@
 #define getc_unlocked getc
 #define putc_unlocked putc
 #define ungetc_unlocked ungetc
+
+#endif
 
 #endif

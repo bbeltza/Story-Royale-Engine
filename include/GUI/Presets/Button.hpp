@@ -10,7 +10,7 @@ namespace sreGUI
     class Button : public Object
     {
     public:
-        Button();
+        Button(sreGUI::Object* parent=NULL);
         ~Button();
 
         virtual void on_press(sre::vec2ut pos) {}

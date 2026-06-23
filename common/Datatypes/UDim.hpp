@@ -18,6 +18,7 @@ namespace sre
         unit_type scale = 0;
         unit_type offset = 0;
 
+        constexpr udim lerp(const udim& b, float t) const { return { ut_lerp(scale, b.scale, t), ut_lerp(offset, b.offset, t) }; }
         constexpr ::sre::unit to_absolute(unit_type relative) const { return relative * scale + offset; }
     };
 
@@ -38,6 +39,8 @@ namespace sre
 
         udim x;
         udim y;
+
+        constexpr udim2 lerp(const udim2& b, float t) const { return {x.lerp(b.x, t), y.lerp(b.y, t)}; }
 
         inline void setscale(unit_type x, unit_type y) { this->x.scale = x; this->y.scale = y; }
         inline void setscale(const vec2<unit_type>& vec) { return setscale(vec.x, vec.y); }

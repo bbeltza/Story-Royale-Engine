@@ -13,5 +13,7 @@ void sre::initialize()
 
     test3.loop_point = 0;
 
-    test3.fade_in(1);
+    test1.fade_in(1);
+    // test2.fade_in(1);
+    // test3.fade_in(1);
 }

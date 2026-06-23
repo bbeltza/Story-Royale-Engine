@@ -9,15 +9,17 @@ static void sregl32_destroy(void* _inst)
 
 const struct sre_RenderVFT sregl32_vft = {
     sregl32_destroy,
-    sregl32_flush_queueinstances1,
-    sregl32_flush_queueinstances2,
-    sregl32_present,
-    sregl32_clear,
-    sregl32_set_viewportstate,
+    sregl32_draw1,
+    sregl32_draw2,
+    sregl32_begin,
+    sregl32_end,
+    NULL,
+    sregl32_set_vsync,
+    sregl32_set_texturestate,
     sregl32_set_blendstate,
     sregl32_set_camerastate,
-    sregl32_set_clipstate,
-    sregl32_set_vsync,
+    sregl32_set_viewportstate,
+    sregl32_set_scissorstate,
     sregl32_texture_setup,
     sregl32_texture_update,
     sregl32_texture_destroy
@@ -55,5 +57,6 @@ const struct sre_RenderDriverData sregl32 = {
     .initialize = sregl32_main,
     .renderer_size = sizeof(sregl32_inst),
     .texture_size = sizeof(sregl_texture),
-    .name = "OpenGL 3.2 Core"
+    .name = "OpenGL 3.2 Core",
+    .flags = SRE_RENDERBIT_SUPPORT_LINELOOP
 };

@@ -1,12 +1,13 @@
 #include <ECS/CameraControllers/Drag.hpp>
-#include <Core/Display.hpp>
+
+#include <Core/Window.hpp>
 #include <Core/Runtime.hpp>
 
 using namespace sreECS;
 
 const sre::Action DragControl::default_action = SRE_MAKE_ACTION(
-    { sre::ACTION_MOUSE, sre::MB_RIGHT },
-    { sre::ACTION_TOUCH, 0 } // `0` for now since there are no parameters for touch actions
+    { SRE_ACTION_MOUSE, sre::MB_RIGHT },
+    { SRE_ACTION_TOUCH, 0 } // `0` for now since there are no parameters for touch actions
 );
 
 DragControl::DragControl(const sre::Action& action): m_action(action), m_eventconnection(sre::onEvent.connect(handle_event, this))
@@ -30,7 +31,7 @@ void DragControl::on_update(Camera& camera)
     m_lastmouseDelta = m_lastmouseDelta.ZERO;
 }
 
-void DragControl::on_pupdate(Camera&)
+void DragControl::on_pupdate(Camera&, sre::timeStamp dt)
 {
     // Empty.
 }
@@ -44,7 +45,7 @@ void DragControl::handle_event(void*, DragControl* self, sre::Event ev)
         if (sre::action_pressed(self->m_action)) self->m_lastmouseDelta += ev.get<MouseMove>().delta;
         break;
     case sre::EVENT_TOUCH:
-        self->m_lastmouseDelta += ev.get<Touch>().delta * sre::display_size();
+        self->m_lastmouseDelta += ev.get<Touch>().delta * sre::window_getviewport();
         break;
     default:
         break;

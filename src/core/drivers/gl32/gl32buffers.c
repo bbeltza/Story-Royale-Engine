@@ -91,9 +91,9 @@ static const GLchar* D2_VS = "#version 150 core\n"
                                 "vec2 camera;"
                              "};"
                              ""
-                             "uniform ivec4 u_col;"
                              "in vec2 v_pos;"
                              "in vec2 v_uv;"
+                             "in vec4 v_col;"
                              ""
                              "out vec4 f_col;"
                              "out vec2 f_uv;"
@@ -101,7 +101,7 @@ static const GLchar* D2_VS = "#version 150 core\n"
                                 "gl_Position = vec4(v_pos*viewport[2][2] + camera, 0, 1);"
                                 "gl_Position = ceil(gl_Position);"
                                 "gl_Position = viewport * gl_Position;"
-                                "f_col = vec4(u_col)/255;"
+                                "f_col = v_col;"
                                 "f_uv = v_uv;"
                              "}";
 
@@ -154,6 +154,10 @@ bool sregl32setupbuffers(sregl32_inst* inst)
         SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(d1program, 3, "i_color"));
         SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(d1program, 4, "i_texcoord"));
 
+        SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(d2program, 0, "v_pos"));
+        SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(d2program, 1, "v_uv"));
+        SRE_GLCALLF(inst->glfuncs21.BindAttribLocation(d2program, 2, "v_col"));
+
         SRE_GLCALLF(inst->glfuncs21.LinkProgram(d1program));
         if (!SREGL21_CHECKPROGRAM(&inst->glfuncs21, d1program, "d1program")) return false;
         
@@ -169,7 +173,6 @@ bool sregl32setupbuffers(sregl32_inst* inst)
         SRE_GLCALLF(inst->glfuncs32.UniformBlockBinding(d2program, d2stateubi, 0));
         SRE_GLCALLF(inst->glfuncs32.UniformBlockBinding(d1program, d1stateubi, 0));
 
-        inst->d2data.coluniform = SRE_GLCALLF(inst->glfuncs21.GetUniformLocation(d2program, "u_col"));
         inst->d2data.program = d2program;
         inst->d1data.program = d1program;
     }
@@ -181,9 +184,11 @@ bool sregl32setupbuffers(sregl32_inst* inst)
         GLuint ubos[1];
         SRE_GLCALLF(inst->glfuncs21.GenBuffers(1, ubos));
         SRE_GLCALLF(inst->glfuncs21.BindBuffer(GL_UNIFORM_BUFFER, ubos[0]));
-        SRE_GLCALLF(inst->glfuncs21.BufferData(GL_UNIFORM_BUFFER, inst->UBO_STATEALIGN*2, NULL, GL_DYNAMIC_DRAW));
+        SRE_GLCALLF(inst->glfuncs21.BufferData(GL_UNIFORM_BUFFER, inst->UBO_STATEALIGN, NULL, GL_DYNAMIC_DRAW));
         
         inst->stateubo = ubos[0];
+
+        SRE_GLCALL(inst->glfuncs32.BindBufferRange(GL_UNIFORM_BUFFER, 0, inst->stateubo, 0, sizeof(struct sregl32_stateubo)));
     }
     
     {
@@ -218,8 +223,10 @@ bool sregl32setupbuffers(sregl32_inst* inst)
         SRE_GLCALLF(inst->glfuncs32.BindVertexArray(inst->d2data.vao));
         SRE_GLCALLF(inst->glfuncs21.EnableVertexAttribArray(0));
         SRE_GLCALLF(inst->glfuncs21.EnableVertexAttribArray(1));
+        SRE_GLCALLF(inst->glfuncs21.EnableVertexAttribArray(2));
         SRE_GLCALL(inst->glfuncs21.VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, pos)));
         SRE_GLCALL(inst->glfuncs21.VertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, uv)));
+        SRE_GLCALL(inst->glfuncs21.VertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(sre_RenderPoint), (const void*)offsetof(sre_RenderPoint, color)));
     }
 
     return true;

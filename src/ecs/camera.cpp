@@ -1,7 +1,7 @@
 #include <ECS/Scene.hpp>
 #include <ECS/Camera.hpp>
 
-#include <Core/Display.hpp>
+#include <Core/Window.hpp>
 
 using namespace sreECS;
 
@@ -11,12 +11,10 @@ void Camera::update()
         controller->on_update(*this);
 }
 
-void Camera::pupdate()
+void Camera::pupdate(sre::timeStamp dt)
 {
-    if (controller && controller->enabled)
-        controller->on_pupdate(*this);
-
-    clamp_position();
+    if (dt && controller && controller->enabled)
+        controller->on_pupdate(*this, dt);
 }
 
 static const Camera ZERO_CAM;
@@ -27,7 +25,7 @@ sre::vec2ut Camera::toWorldSpace(sre::vec2ut coords) const
     if (_this <= &reinterpret_cast<Scene*>(0)->camera)
         _this = &ZERO_CAM;
 
-    return coords - sre::display_center() + _this->position;
+    return coords - sre::window_getviewport()*0.5_ut + _this->position;
 }
 
 sre::vec2ut Camera::toScreenSpace(sre::vec2ut coords) const
@@ -38,7 +36,7 @@ sre::vec2ut Camera::toScreenSpace(sre::vec2ut coords) const
 
     //const sre::unit scale = sre::display_scale();
 
-    sre::vec2ut pos = coords + sre::display_center() - _this->position;
+    sre::vec2ut pos = coords + sre::window_getviewport()*0.5_ut - _this->position;
 
     return pos;
 }

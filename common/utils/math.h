@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SRE_UT_MATH_H
+#define SRE_UT_MATH_H
 
 #define ut_lerp(a, b, t) (a + (b - a) * t)
 
@@ -31,3 +32,5 @@
 #define UT_PI_180   0.0174532925199432957692 // pi/180
 #define UT_RAD_1DEG UT_PI_180                // Radians in a dregree (just pi/180)
 #define UT_180_PI   (180/UT_PI)
+
+#endif

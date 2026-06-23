@@ -9,7 +9,7 @@ struct D1input
 {
     float4 transform: POSITION0;
     float2 anchor: POSITION1;
-    uint4 color: COLOR;
+    float4 color: COLOR;
     float angle: PSIZE;
 
     float2 tuv: TEXCOORD0;
@@ -18,7 +18,7 @@ struct D1input
 
 struct D2input
 {
-    uint4 color: COLOR;
+    float4 color: COLOR;
     float2 position: POSITION;
     float2 uv: TEXCOORD;
 };
@@ -34,8 +34,8 @@ struct PSinput
 cbuffer CBuniforms: register(b0)
 {
     float4x4 VIEWPORT;
-    float2 CAMERA;
 };
+float2 CAMERA: register(c0);
 
 PSinput D1main(D1input input, uint vid: SV_VertexID)
 {
@@ -69,11 +69,9 @@ PSinput D1main(D1input input, uint vid: SV_VertexID)
     vert.w = 1;
     vert = mul(VIEWPORT, vert);
 
-    float4 color = float4(input.color)/255;
-
     PSinput output = {
         vert,
-        color,
+        input.color,
         VERTICES[vid].xy * input.tuv + input.toffset,
     };
     return output;
@@ -86,10 +84,9 @@ PSinput D2main(D2input input)
     vert.xy += CAMERA;
     vert = mul(VIEWPORT, vert);
 
-    float4 color = float4(input.color)/255;
     PSinput output = {
         vert,
-        color,
+        input.color,
         input.uv
     };
     return output;

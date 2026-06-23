@@ -7,7 +7,7 @@ namespace sreGUI
     struct Slice: public sreGUI::Image
     {
         Slice() = default;
-        Slice(sre::RSampler&& sampler): Image(std::move(sampler)) {}
+        Slice(sre::RAIITexture&& texture): Image(std::move(texture)) {}
 
         sre::rect2Di center_slice;
         protected:

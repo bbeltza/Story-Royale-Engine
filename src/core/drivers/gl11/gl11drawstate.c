@@ -5,51 +5,42 @@
 
 // state
 
-bool sregl11_set_camerastate(void* _inst, sre_unit x, sre_unit y)
+void sregl11_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale)
 {
     sregl11_inst* inst = _inst;
-    inst->camera_cache[0] = x;
-    inst->camera_cache[1] = y;
-    return true;
-}
+    sregl_set_viewportstate(&inst->glfuncs, inst->common.window, rectangle);
 
-bool sregl11_set_viewportstate(void* _inst, int w, int h, sre_unit scale)
-{
-    sregl11_inst* inst = _inst;
-    SRE_GLCALLF(inst->glfuncs.Viewport(0, 0, w, h));
-
-    SRE_GLCALLF(inst->glfuncs11.MatrixMode(GL_PROJECTION));
-    SRE_GLCALLF(inst->glfuncs11.LoadIdentity());
-    SRE_GLCALLF(inst->glfuncs11.Ortho(0, w, h, 0, 0, 1));
-    SRE_GLCALLF(inst->glfuncs11.MatrixMode(GL_MODELVIEW));
+    SRE_GLCALL(inst->glfuncs11.MatrixMode(GL_PROJECTION));
+    SRE_GLCALL(inst->glfuncs11.LoadIdentity());
+    SRE_GLCALL(inst->glfuncs11.Ortho(0, rectangle->w, rectangle->h, 0, 0, 1));
+    SRE_GLCALL(inst->glfuncs11.MatrixMode(GL_MODELVIEW));
     inst->scale_cache = scale;
-    return true;
 }
 
-// draw
+void sregl11_set_camerastate(void* _inst, sre_unit x, sre_unit y)
+{
+    sregl11_inst* inst = _inst;
+    
+    SRE_GLCALL(inst->glfuncs11.LoadIdentity()); 
+    SRE_GLCALL(inst->glfuncs11.Translatef(x, y, 0.0f));                                                                        
+    SRE_GLCALL(inst->glfuncs11.Scalef(inst->scale_cache, inst->scale_cache, 1));
+}
 
-#define SREGL11_CHECK_FORSWITCHES() if (switch_flags & SRE_RENDER_SWITCHCAMERA)                                             \
-                                    {                                                                                       \
-                                        SRE_GLCALL(inst->glfuncs11.LoadIdentity());                                                       \
-                                        if (flags & SRE_DRAWFLAG_CAMERA)                                                    \
-                                        {                                                                                   \
-                                            SRE_GLCALL(inst->glfuncs11.Translatef(inst->camera_cache[0], inst->camera_cache[1], 0));      \
-                                        }                                                                                   \
-                                        SRE_GLCALL(inst->glfuncs11.Scalef(inst->scale_cache, inst->scale_cache, 1));                      \
-                                                                                                                            \
-                                    }                                                                                       \
-                                                                                                                            \
-                                    if (switch_flags & SRE_RENDER_SWITCHTEXTURE)                                            \
-                                    {                                                                                       \
-                                        SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, texture ? texture->texture.gltex : 0)); \
-                                    }                       
-
-void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
+void sregl11_set_texturestate(void* _inst, void* _texture)
 {
     sregl11_inst* inst = _inst;
     sregl11_texture* texture = _texture;
+    
+    SRE_GLCALL(inst->glfuncs.BindTexture(GL_TEXTURE_2D, texture ? texture->texture.gltex : 0));
+    inst->curtexture = texture;
+}
 
-    SREGL11_CHECK_FORSWITCHES()
+// draw                     
+
+void sregl11_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count)
+{
+    sregl11_inst* inst = _inst;
+    sregl11_texture* texture = inst->curtexture;
 
     // Use matrices instead of calculating everything individiually (this one was made before and was found a lot slower than the next one)
     //      Since the other one calls glBegin/glEnd once, it prepares all of the necessary vertex data and sends it
@@ -192,30 +183,37 @@ void sregl11_flush_queueinstances1(void* _inst, void* _texture, const sre_Render
     #endif
 }
 
-void sregl11_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags)
+void sregl11_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode)
 {
     sregl11_inst* inst = _inst;
-    sregl11_texture* texture = _texture;
+    sregl11_texture* texture = inst->curtexture;
 
-    SREGL11_CHECK_FORSWITCHES()
-
-    switch (instance->mode)
-    {
-        case SRE_DRAW2_STRIP: inst->glfuncs11.Begin(GL_TRIANGLE_STRIP); break;
-        case SRE_DRAW2_TRIANGLE: inst->glfuncs11.Begin(GL_TRIANGLES); break;
-        default: assert(0); return;
-    }
+    GLenum primitivemode = sregl_mapmode(mode);
+    inst->glfuncs11.Begin(primitivemode);
 
     float rangex = texture ? texture->xrange : 1;
     float rangey = texture ? texture->yrange : 1;
 
-    inst->glfuncs11.Color4ubv(&instance->color.r);
     for (size_t i = 0; i < point_count; i++)
     {
-        const sre_RenderPoint* pt = &instance->points[i];
+        const sre_RenderPoint* pt = &points[i];
         inst->glfuncs11.TexCoord2f(pt->uv.x * rangex, pt->uv.y * rangey);
+        inst->glfuncs11.Color4ubv(&pt->color.r);
         inst->glfuncs11.Vertex2f(pt->pos.x, pt->pos.y);
     }
 
     SRE_GLCALL(inst->glfuncs11.End());
+
+    #if 0
+    const GLubyte col[4] = { 255, 0, 0, 255 };
+
+    inst->glfuncs11.Begin(GL_LINE_LOOP);
+    inst->glfuncs11.Color4ubv(col);
+    for (size_t i = 0; i < point_count; i++)
+    {
+        const sre_RenderPoint* pt = &points[i];
+        inst->glfuncs11.Vertex2f(pt->pos.x, pt->pos.y);
+    }
+    SRE_GLCALL(inst->glfuncs11.End());
+    #endif
 }

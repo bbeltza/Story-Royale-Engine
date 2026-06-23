@@ -7,18 +7,27 @@
 
 namespace sre
 {
+    template <typename T> using is_valid_rect_t = is_valid_vector_t<T>;
+
     template <typename T>
-    struct rect2D
+    union rect2D
     {
         using type = T;
         using vec = vec2<type>;
 
-        vec position;
-        vec size { 100, 100 };
+        struct {
+            vec position;
+            vec size;
+        };
+        struct {
+            T x;
+            T y;
+            T w;
+            T h;
+        };
 
-        constexpr rect2D() = default;
+        constexpr rect2D(): position(), size() {}
         constexpr rect2D(T x, T y, T w, T h): position(x, y), size(w, h) {}
-        constexpr rect2D(T xy, T wh): position(xy), size(wh) {}
         constexpr rect2D(const vec& position, const vec& size): position(position), size(size) {}
         constexpr rect2D(const rect2D& copy): position(copy.position), size(copy.size) {}
 
@@ -26,75 +35,40 @@ namespace sre
         explicit constexpr rect2D(const rect2D<T2>& other): position(other.position), size(other.size) {}
 
         template <typename T2>
-        explicit constexpr operator rect2D<T2>() const
-        {
-            return {
+        explicit constexpr operator rect2D<T2>() const {
+            return rect2D<T2>{
                 static_cast<typename rect2D<T2>::vec>(position),
                 static_cast<typename rect2D<T2>::vec>(size)
             };
         }
 
-        constexpr bool intersects(const rect2D& other) const {
-            #if __cplusplus < 201300
-                #define abs_size (size.abs() / 2)
-                #define abs_othersize (other.size.abs() / 2)
-            #else
-                const vec abs_size = size.abs() / 2;
-                const vec abs_othersize = other.size.abs() / 2;
-            #endif
-            return ut::abs(position.x - other.position.x) < abs_size.x + abs_othersize.x &&
-                ut::abs(position.y - other.position.y) < abs_size.y + abs_othersize.y;
-        }
-
-        constexpr bool intersects(const vec pt) const {
-            #ifndef abs_size
-                const vec abs_size = size.abs() / 2;
-            #endif
-            return (pt.x >= position.x - abs_size.x && pt.x <= position.x + abs_size.x) &&
-                    (pt.y >= position.y - abs_size.y && pt.y <= position.y + abs_size.y);
-        }
-        
-        constexpr bool simple_intersects(const vec pt) const {
-            #ifdef abs_size
-                #undef abs_size
-                #define abs_size (size.abs())
-            #else
-                const vec abs_size = size.abs();
-            #endif
-            return ( pt.x >= position.x && pt.x <= position.x + abs_size.x ) &&
-                    (pt.y >= position.y && pt.y <= position.y + abs_size.y);
-        }
-
-        #ifdef abs_size
-            #undef abs_size
-            #undef abs_othersize
-        #endif
-
-        constexpr T top() const { return position.y - ut::abs(size.y) / 2; }
-        constexpr T bottom() const { return position.y + ut::abs(size.y) / 2; }
-        constexpr T left() const { return position.x - ut::abs(size.x) / 2; }
-        constexpr T right() const { return position.x + ut::abs(size.x) / 2; }
-
-        constexpr vec top_left() const { return {left(), top()}; }
-        constexpr vec top_right() const { return {right(), top()}; }
-        constexpr vec bottom_left() const { return {left(), bottom()}; }
-        constexpr vec bottom_right() const { return {right(), bottom()}; }
-
-        constexpr vec xrotated_offset(double angle) const { return vec{ ut::abs(size.x) / 2 * cos(ut::rad(angle)), ut::abs(size.x) / 2 * sin(ut::rad(angle)) }; }
-        constexpr vec yrotated_offset(double angle) const { return vec{ ut::abs(size.y) / 2 * cos(ut::rad(angle + 90)), ut::abs(size.y) / 2 * sin(ut::rad(angle + 90)) }; }
-
-        constexpr vec rotated_left(double angle) const { return position - xrotated_offset(angle); }
-        constexpr vec rotated_right(double angle) const { return position + xrotated_offset(angle); }
-        constexpr vec rotated_top(double angle) const { return position - yrotated_offset(angle); }
-        constexpr vec rotated_bottom(double angle) const { return position + yrotated_offset(angle); }
-
-        constexpr vec rotated_topleft(double angle) const { return position - xrotated_offset(angle) - yrotated_offset(angle); }
-        constexpr vec rotated_topright(double angle) const { return position + xrotated_offset(angle) - yrotated_offset(angle); }
-        constexpr vec rotated_bottomleft(double angle) const { return position - xrotated_offset(angle) + yrotated_offset(angle); }
-        constexpr vec rotated_bottomright(double angle) const { return position + xrotated_offset(angle) + yrotated_offset(angle); }
-
         constexpr bool operator ==(const rect2D& other) const { return position == other.position && size == other.size; }
         constexpr bool operator !=(const rect2D& other) const { return position != other.position || size != other.size; }
+
+        constexpr vec origin(sre::vec2ut uv) const { return vec{ position + size*uv }; }
+        constexpr vec origin(sre::unit uv_x, sre::unit uv_y) const { return origin(sre::vec2ut{ uv_x, uv_y }); }
+
+        constexpr rect2D origin_rect(sre::vec2ut uv) const { return rect2D{origin(uv), size}; }
+
+        constexpr const T* ptr() const { return &x; } 
+        inline          T* ptr()       { return &x; } 
+
+        constexpr bool intersects(vec pt) const {
+            return ( x < pt.x && y < pt.y ) &&
+                    ( x+w > pt.x && y+h > pt.y );
+        }
+        constexpr bool intersects(const rect2D& other) const {
+            return (x < other.x+other.w && y < other.y+other.h) &&
+                    (x+w > other.x && y+h > other.y);
+        }
+
+        // Use these methods if your rect's origin is supposed to be in a place other than its top-left corner
+        constexpr bool intersects_from_origin(vec pt, sre::vec2ut uv) const {
+            return origin_rect(uv).intersects(pt);
+        }
+        constexpr bool intersects_from_origin(const rect2D& other, sre::vec2ut uv) const {
+            return origin_rect(uv).intersects(other.origin_rect(uv));
+        }
     };
 
     // A rect2D datatype composed of ints.
@@ -107,13 +81,11 @@ namespace sre
     // A rect2D datatype composed of units ( floats for now )
     using rect2Dut = rect2D<unit>;
 
-    // NOTE: This returns a centered rect!!
     template <typename T>
-    constexpr rect2D<T> from_bounds(const vec2<T>& top_left, const vec2<T>& bottom_right)
-    {
-        return {
-            top_left + (bottom_right - top_left)/2,
-            (bottom_right - top_left)
+    constexpr rect2D<T> from_extents(vec2<T> begin, vec2<T> end) {
+        return rect2D<T>{
+            begin,
+            end - begin
         };
     }
 }
@@ -126,7 +98,7 @@ std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& 
 }
 
 #define SRE_RECT2DMAKE(type, n) using n = ::sre::rect2D<type>
-#define SRE_RECT2DMAKESFFX(type, n) using sre_rect2D##n = ::sre::rect2D<type>
+#define SRE_RECT2DMAKESFFX(type, n) using sre_rect2D##n = ::sre::rect2D<type>; using sre_vec2##n = ::sre::vec2<type>
 
 #else
 // C compatible rect 2D class templates + union

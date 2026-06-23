@@ -38,20 +38,13 @@ static inline void __setup_engine_data()
     if (engine.user_event == (Uint32)-1)
         sre_CRITICAL(SRE_ERR_CORE, "SDL_RegisterEvents(1) failed and returned -1 ; This means there are no available user events to register... Which is required for the engine to work");
 
-    engine.phys_target_dt = 1 / 128.0;
-
     engine.input_last_touchid = -1;
-    engine.destroyqueue_mutex = SDL_CreateMutex();
 
     engine.main_thrd = SDL_ThreadID();
 
     engine.cor_running = true;
     engine.coroutine_thread = SDL_CreateThread(__run_coroutine, "Coroutine Engine", &engine.cor_running);
     sre_coroutinecreate(false, __invoke_entry, NULL);
-
-    void* imgui_hint = (void*)sre_gethint("IMGUI_GLUE");
-    if (imgui_hint)
-        __initialize_imgui(imgui_hint);
 }
 
 static void sdl_log_callback(void *userdata, int category, SDL_LogPriority priority, const char *message)
@@ -77,13 +70,14 @@ void __initialize_engine()
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG); // Enable SDL error logging
     SDL_LogSetOutputFunction(sdl_log_callback, NULL);
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0"); // Don't interpret touch events as mouse events
-    SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
-
+    //SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0"); // Something that... Aparently.. does.. nothing....
+    
 #ifdef SDL_VIDEO_DRIVER_WAYLAND // Use wayland, if possible
     SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland");
 #endif
-#ifdef SDL_VIDEO_DRIVER_WINDOWS // Replace the "SDL_app" window class name
-    SDL_RegisterApp("Story Royale Engine", 0x0003, NULL);
+#ifdef SDL_VIDEO_DRIVER_WINDOWS
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "system");
+    SDL_RegisterApp("Story Royale Engine", 0x0003, NULL); // Replace the "SDL_app" window class name
 #endif
 
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
@@ -99,6 +93,8 @@ void __initialize_engine()
     __create_window();
     __setup_renderer();
 
+    __setup_objects();
+
     __setup_engine_data();
 
     atexit(__end_engine);
@@ -106,15 +102,25 @@ void __initialize_engine()
 
 void __end_engine()
 {
+    if (SDL_ThreadID() != engine.main_thrd)
+        sre_CRITICAL(SRE_ERR_FAIL, "Engine destruction NOT being run on the main thread. This will thus cause lots of issues with object destruction. Are you trying to call exit()? Try with wrapping it into a deferred function with sre_defer/sre::defer");
+
     engine.cor_running = false;
     SDL_WaitThread(engine.coroutine_thread, NULL);
-
-    __cleanup_ecs();  
     
+    __cleanup_objects();
+
+    { // Send a quit event
+        SDL_Event quit_ev;
+        quit_ev.quit.type = SDL_QUIT;
+        quit_ev.quit.timestamp = SDL_GetTicks();
+        __signal_events(&quit_ev);
+        __queue_events();
+    }
+
     __cleanup_renderer();
     
     SDL_CloseAudioDevice(engine.audio_device);
-    SDL_DestroyMutex(engine.destroyqueue_mutex);
     SDL_DestroyWindow(engine.sdl_windowhndl);
 
     IMG_Quit();

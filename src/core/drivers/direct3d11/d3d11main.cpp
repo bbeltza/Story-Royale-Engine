@@ -90,7 +90,6 @@ Instance::Instance(SDL_Window* window, int* outstatus)
             sre::log(SRE_LOG_INFO "[Direct3D11]: Switching to legacy swapchain...");
 
             // Double-buffering and thus FLIP swap effects might not be supported, create a legacy single-buffered swap-chain
-            //swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
             swapchain_desc.BufferCount = 1;
             swapchain_desc.Flags = 0;
             swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
@@ -139,10 +138,10 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         SRE_DXCALLC(m_dxdevice->CreateSamplerState(&sampler_desc, &m_dxsamplerstate));
     }
 
-    if (!(m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 256) &&
-          m_d2bufferc.init(m_dxdevice, sizeof(sre::col4) * 256)           &&
-          m_d2bufferp.init(m_dxdevice, sizeof(sre::vec2ut) * 256)
-    )) return;
+    if (!m_d1buffer.init(m_dxdevice, sizeof(sre::RenderInstance1) * 255))
+        return;
+    if (!m_d2buffer.init(m_dxdevice, sizeof(sre::RenderPoint) * 255))
+        return;
 
     {
         D3D11_BUFFER_DESC cbuffer_desc{};
@@ -150,17 +149,17 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         cbuffer_desc.Usage = D3D11_USAGE_DYNAMIC;
         cbuffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         cbuffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        
+        SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffer));
 
-        for (int i = 0; i < 2; i++) {
-            SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_cbuffers[i]));
-        }
+        cbuffer_desc.ByteWidth = sizeof(CCamBuffer);
+        SRE_DXCALLC(m_dxdevice->CreateBuffer(&cbuffer_desc, NULL, &m_ccambuffer));
     }
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 4; i++)
     {
         #define SRE_D3D11_BLEND_DESC(srcFactor, dstFactor, op) { FALSE, FALSE, { {TRUE, srcFactor, dstFactor, op, D3D11_BLEND_ONE, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL} } }
         static D3D11_BLEND_DESC BLENDSTATES[5] = {
-            { FALSE, FALSE, { {FALSE} } }, // TODO: None blend mode SHOULD be removed
             /* BLEND */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD),
             /* ADD   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD),
             /* MOD   */ SRE_D3D11_BLEND_DESC(D3D11_BLEND_DEST_COLOR, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD),
@@ -203,6 +202,12 @@ Instance::Instance(SDL_Window* window, int* outstatus)
     m_dxdevicecontext->RSSetState(m_dxrasterizerstate);
     m_dxdevicecontext->PSSetShader(m_shaders.cPS, NULL, 0);
 
+    ID3D11Buffer* const cbuffers[] = {
+        m_cbuffer,
+        m_ccambuffer
+    };
+    m_dxdevicecontext->VSSetConstantBuffers(0, 2, cbuffers);
+
     *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
 }
 
@@ -217,8 +222,8 @@ Instance::~Instance()
     for (int i = 0; i < _countof(m_dxblendstates); i++)
         m_dxblendstates[i]->Release();
     
-    for (int i = 0; i < _countof(m_cbuffers); i++)
-        m_cbuffers[i]->Release();
+    m_cbuffer->Release();
+    m_ccambuffer->Release();
     
     m_dxrasterizerstate->Release();
     m_dxsamplerstate->Release();

@@ -6,7 +6,7 @@ using namespace sreGUI;
 
 void Fill::on_render(const sre::rect2Dut& dimensions)
 {
-    sre::render_draw1(
+    sre::render::draw1(
         0, {{
             dimensions,
             sre::vec2ut::ZERO,

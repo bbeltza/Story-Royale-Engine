@@ -1,6 +1,6 @@
 #include "gl21.h"
 
-bool sregl21_texture_setup(void* _inst, void* _texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat)
+bool sregl21_texture_setup(void* _inst, void* _texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat)
 {
     sregl21_inst* inst = _inst;
     return sregl_texture_setup(&inst->glfuncs, _texture, format, w, h, outformat);

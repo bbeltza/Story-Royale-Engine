@@ -4,31 +4,31 @@
 
 // common drawing
 
-void sregl11_present(void* _inst)
+void sregl11_begin(void* _inst, const float clear[4])
+{
+    sregl11_inst* inst = _inst;
+    SREGL_CLEAR(inst->glfuncs, clear);
+}
+
+void sregl11_end(void* _inst)
 {
     sregl11_inst* inst = _inst;
     SREGL_PRESENT(inst->common);
 }
 
-bool sregl11_clear(void* _inst, float color[3])
-{
-    sregl11_inst* inst = _inst;
-    SREGL_CLEAR(inst->glfuncs, color);
-    return true;
-}
 
 // common set_ functions
 
-bool sregl11_set_blendstate(void* _inst, sre_blendMode blendmode)
+void sregl11_set_blendstate(void* _inst, sre_blendMode blendmode)
 {
     sregl11_inst* inst = _inst;
-    return sregl_set_blendstate(&inst->glfuncs, blendmode);
+    sregl_set_blendstate(&inst->glfuncs, blendmode);
 }
 
-void sregl11_set_clipstate(void* _inst, const sre_rect2Di* rectangle)
+void sregl11_set_scissorstate(void* _inst, const sre_rect2Di* rectangle)
 {
     sregl11_inst* inst = _inst;
-    sregl_set_clipstate(&inst->glfuncs, inst->common.window, rectangle);
+    sregl_set_scissorstate(&inst->glfuncs, inst->common.window, rectangle);
 }
 
 void sregl11_set_vsync(void* _inst, bool enable)
@@ -62,7 +62,7 @@ extern int sregl11_padbypowerof2(int x) // PS: This function is marked as "exter
     return value;
 }
 
-bool sregl11_texture_setup(void* _inst, void* _texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat)
+bool sregl11_texture_setup(void* _inst, void* _texture, sre_SDLpixelFormat format, int w, int h, sre_SDLpixelFormat* outformat)
 {
     sregl11_inst* inst = _inst;
     sregl11_texture* texture = _texture;

@@ -5,45 +5,16 @@
 
 #include <glcommon/glcommon.h>
 
-// Common shader uniform names (shared between draw1 and draw2)
-struct sregl21_csu
+struct sregl21_uniforms
 {
     GLint viewport;
     GLint camera;
-    GLint color; // unsigned int vector containing the raw color data (note that color will be converted from 1 byte to 4 bytes each component)
-    GLint sampler; // Unused by draw2. Note that draw2 is planned to support textures pretty soon
-                    // Also note that the fragment shader uses it so it has to still be bound (it is now, to the basic texture)
 };
 
-struct sregl21_d1su
+struct sregl21_vtassembler
 {
-    GLint model; // 4x3 "matrix" containing all of the draw1 state (position, size, anchor and rotation ; Color is already in the common data)
-                    // It's not a model matrix, the shader will still have to rearrange the data to make it work
-};
-
-// Dependencies structure for draw1
-struct sregl21_draw1dep
-{
-    GLuint program;
-    GLuint vbo;
-    GLuint ibo;
-
-    struct sregl21_csu common_uniforms;
-    struct sregl21_d1su depend_uniforms;
-};
-
-struct sregl21_draw2dep
-{
-    GLuint program;
-    GLuint vbo;
-    GLsizei bufsize;
-
-    struct sregl21_csu common_uniforms;
-};
-
-struct sregl21_drawcache
-{
-    GLfloat camera[2];
+    size_t size;
+    sre_RenderPoint* arr;
 };
 
 // Data that's shared accross both OpenGL 2.1 and 3.2
@@ -61,10 +32,11 @@ typedef struct sregl21_inst
     struct sregl_functions21 glfuncs21;
 
     // Draw dependencies
-    struct sregl21_draw1dep draw1data;
-    struct sregl21_draw2dep draw2data;
-
-    struct sregl21_drawcache cache;
+    GLuint mainprogram;
+    GLuint mainvbo;
+    size_t mainvbosize;
+    struct sregl21_uniforms uniforms;
+    struct sregl21_vtassembler vtassembler;
 } sregl21_inst;
 
 SRE_CAPI_BEGIN
@@ -74,28 +46,34 @@ int sregl21_commonsetup(sregl21_cominst* inst, SDL_Window* window, struct sregl_
 
 //
 
-void sregl21_flush_queueinstances1(void* inst, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
-void sregl21_flush_queueinstances2(void* inst, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
+extern void sregl21_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
+extern void sregl21_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
-void sregl21_present(void* inst);
-bool sregl21_clear(void* inst, float color[3]);
+extern void sregl21_begin(void* _inst, const float clear[4]);
+extern void sregl21_end(void* _inst);
 
-bool sregl21_set_viewportstate(void* inst, int w, int h, sre_unit scale);
-bool sregl21_set_blendstate(void* inst, sre_blendMode blending);
-bool sregl21_set_camerastate(void* inst, sre_unit x, sre_unit y);
-void sregl21_set_clipstate(void* inst, const sre_rect2Di* rectangle);
-void sregl21_set_vsync(void* inst, bool enable);
+extern void sregl21_set_vsync(void* _inst, bool enable);
+extern void sregl21_set_texturestate(void* _inst, void* _texture);
+extern void sregl21_set_blendstate(void* _inst, sre_blendMode blendmode);
+extern void sregl21_set_camerastate(void* _inst, sre_unit x, sre_unit y);
+extern void sregl21_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale);
+extern void sregl21_set_scissorstate(void* _inst, const sre_rect2Di* rectangle);
 
-bool sregl21_texture_setup(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-bool sregl21_texture_update(void* inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
-void sregl21_texture_destroy(void* inst, void* texture);
+extern bool sregl21_texture_setup(void* _inst, void* _texture, sre_SDLpixelFormat formathint, int w, int h, sre_SDLpixelFormat* outformat);
+extern bool sregl21_texture_update(void* _inst, void* _texture, const sre_rect2Di* region, const void* pixels, int pitch);
+extern void sregl21_texture_destroy(void* _inst, void* _texture);
 
-bool sregl21setupbuffers(sregl21_inst* instance);
-void sregl21bindbuffer1(sregl21_inst* instance, GLint vbo);
-void sregl21bindbuffer2(sregl21_inst* instance, GLint vbo);
+//
 
-bool SREGL21_CHECKSHADER(struct sregl_functions21* funcs, GLuint shader, const char* tag);
-bool SREGL21_CHECKPROGRAM(struct sregl_functions21* funcs, GLuint program, const char* tag);
+extern bool sregl21setupbuffers(sregl21_inst* instance);
+
+extern bool sregl21_vtassemblersetup(sregl21_inst* inst, struct sregl21_vtassembler* vtasm, size_t initial_size);
+extern void sregl21_vtassemblerreserve(sregl21_inst* inst, struct sregl21_vtassembler* vtasm, size_t size);
+extern void sregl21_vtassemblerdata(sregl21_inst* inst, struct sregl21_vtassembler* vtasm, size_t size);
+extern void sregl21_vtassemblerfree(struct sregl21_vtassembler* vtasm);
+
+extern bool SREGL21_CHECKSHADER(struct sregl_functions21* funcs, GLuint shader, const char* tag);
+extern bool SREGL21_CHECKPROGRAM(struct sregl_functions21* funcs, GLuint program, const char* tag);
 
 SRE_CAPI_END
 

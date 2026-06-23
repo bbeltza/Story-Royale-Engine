@@ -12,22 +12,12 @@ struct sregl32_stateubo
     GLfloat camera[2];
 };
 
-struct sregl32_d1data
+struct sregl32_drawdata
 {
     GLuint program;
     GLuint vao;
     GLuint vbo;
 
-    GLsizeiptr vbosize;
-};
-
-struct sregl32_d2data
-{
-    GLuint program;
-    GLuint vao;
-    GLuint vbo;
-
-    GLuint coluniform;
     GLsizeiptr vbosize;
 };
 
@@ -38,30 +28,33 @@ typedef struct sregl32_inst
     struct sregl_functions21 glfuncs21;
     struct sregl_functions32 glfuncs32;
 
-    struct sregl32_d1data d1data;
-    struct sregl32_d2data d2data;
+    struct sregl32_drawdata d1data;
+    struct sregl32_drawdata d2data;
 
     GLuint stateubo;
     GLuint UBO_ALIGNMENT;
     GLuint UBO_STATEALIGN;
 } sregl32_inst;
 
-void sregl32_flush_queueinstances1(void* inst, void* texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags);
-void sregl32_flush_queueinstances2(void* inst, void* texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switch_flags);
+extern void sregl32_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count);
+extern void sregl32_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode);
 
-void sregl32_present(void* inst);
-bool sregl32_clear(void* inst, float color[3]);
+extern void sregl32_begin(void* _inst, const float clear[4]);
+extern void sregl32_end(void* _inst);
 
-bool sregl32_set_viewportstate(void* inst, int w, int h, sre_unit scale);
-bool sregl32_set_blendstate(void* inst, sre_blendMode blendmode);
-bool sregl32_set_camerastate(void* inst, sre_unit x, sre_unit y);
-void sregl32_set_clipstate(void* inst, const sre_rect2Di* rectangle);
-void sregl32_set_vsync(void* inst, bool enable);
+extern void sregl32_set_vsync(void* _inst, bool enable);
+extern void sregl32_set_texturestate(void* _inst, void* _texture);
+extern void sregl32_set_blendstate(void* _inst, sre_blendMode blendmode);
+extern void sregl32_set_camerastate(void* _inst, sre_unit x, sre_unit y);
+extern void sregl32_set_viewportstate(void* _inst, const sre_rect2Di* rectangle, sre_unit scale);
+extern void sregl32_set_scissorstate(void* _inst, const sre_rect2Di* rectangle);
 
-bool sregl32_texture_setup(void* inst, void* texture, sre_pixelFormat format, int w, int h, sre_pixelFormat* outformat);
-bool sregl32_texture_update(void* inst, void* texture, const sre_rect2Di* region, const void* pixels, int pitch);
-void sregl32_texture_destroy(void* inst, void* texture);
+extern bool sregl32_texture_setup(void* _inst, void* _texture, sre_SDLpixelFormat formathint, int w, int h, sre_SDLpixelFormat* outformat);
+extern bool sregl32_texture_update(void* _inst, void* _texture, const sre_rect2Di* region, const void* pixels, int pitch);
+extern void sregl32_texture_destroy(void* _inst, void* _texture);
 
-bool sregl32setupbuffers(sregl32_inst* instance);
+//
+
+extern bool sregl32setupbuffers(sregl32_inst* instance);
 
 #endif

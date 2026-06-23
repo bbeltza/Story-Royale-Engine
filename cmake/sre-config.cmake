@@ -9,4 +9,3 @@ find_package(freetype REQUIRED)
 
 include(sre/targets)
 include(sre/game_build)
-include(sre/imgui_glue)

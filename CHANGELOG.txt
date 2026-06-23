@@ -1,4 +1,111 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- June 23th 2026: 0.105.23
+    - So... It's been 1 year, one year of working on this engine... How amazing is that!
+    - Render refactorings: - Draw2's mode parameter has been changed to this set of primitive modes:
+                                      - SRE_PRIMITIVE_TRIANGLES: Draw separate triangles for every 3 points.
+                                      - SRE_PRIMITIVE_TRIANGLESTRIP: Draw triangles that get joined using the two previous points for each new point.
+                                      - SRE_PRIMITIVE_LINEPERLINE: Draw a single line of two points for each pair of points.
+                                      - SRE_PRIMITIVE_LINESTRIP: Draw connected lines
+                                      - SRE_PRIMITIVE_LINELOOP: Draw looped lines (just connected lines that wrap to the first point)
+                                      - SRE_PRIMITIVE_POINTS: Draw points separately.
+                                - More advanced camera flags: SRE_DRAWFLAG_CAMERAX and SRE_DRAWFLAG_CAMERAY ; You're now able to control which axis is in world space when drawing.
+                                                                      Note that SRE_DRAWFLAG_CAMERA still exists, it's just a combination of these two flags for conveniency (and "backwards compatibility").
+                                - sre_Sampler is now called sre_Texture, and all of the corresponding functions that were named after "sampler" are now renamed after "texture"
+                                - sre_pixelFormat is now sre_SDLpixelFormat. (sre::pixelFormat => sre::SDLpixelFormat)
+                                - A few render driver optimizations/tweaks: - D3D12 has a texture staging mechanism now, and it uses GPU upload memory for its buffers, if available.
+                                                                                Otherwise it would fallback to normal upload memory. GPU_UPLOAD memory is faster for the GPU but not available for all hardware.
+                                                                                I might want to use it back for textures too but the staging "mechanism" is still quite conveninent.
+                                                                            - Additionally, a bottleneck involving waiting for the GPU was fixed: Having 2 framebuffers in this implementation the CPU
+                                                                                was waiting for the current frame's commands to be executed while it could've prepared the commands for the other frame,
+                                                                                or even do other things outside! It is now properly implemented, giving a similar performance to d3d11, 
+                                                                                although still a little bit inferior.
+                                                                            - D3D11 and D3D9 tweaks. D3D9 finally supports buffer resizing for its draw commands and its interface for it is more intuitive.
+                                                                                  I might on D3D11 and 12 also want to take some of that interface (It's a set of template functions in d3d9's driver that will automatically
+                                                                                  multiply the count parameter by the size of the type, which is less error-prone)
+                                                                            - OpenGL 2.1 tweaks: draw1 and draw2 use the same vertex buffer now, indeed they even use the same shaders! It's made so that draw1
+                                                                                  implements a sort of vertex-assembling system similar in SDL renderer and OpenGL 1.1 drivers which, will implement instancing more
+                                                                                  correctly. It's more preferably called "batching" since it's the action of assembling multiple vertices into a single big buffer
+                                                                                  but this will still reduce the amount of draw calls, again. OpenGL 2.1's implementation was flawed and quite old.
+    - An object layer system has been in the works. It is an object manager handled by the engine in which you add objects to it, and the engine will update them automatically (with its virtual methods).
+            If using the ECS or/and GUI modules, it is not really necessary to rely on that "object manager".
+            The ECS and GUI modules that previously relied on internal engine variables now don't. They have gotten in some way designed to work with these layers. They rely on this new system now by 
+                wrapping a "Layer" class that would be bound to the layer.
+            Most of the functions for the ECS and GUI have been renamed or changed (Also the previously core runtime function sre::set_tickrate for example, is now moved into the sreECS::set_physics_dt)
+             so, migration is most likely needed. Also, if one of your constructors relied on get_parent to get the scene or parent of respectively an entity or GUI object, you really want to migrate to
+             the parent constructor (taking the parent as a parameter in the destructor and passing it through the base class) since there's no proper add_child/add_entity function, which now just wraps
+             `new` and add_child/set_parent so it won't set the parent of that object before the constructor.
+            You may also notice that the global functions in sreECS and sreGUI take an optional parameter to a "Layer" object. It is by default NULL which will just take the default layer bound at the start
+              of the program, but you can add multiple ECS or GUI layer objects and bind them into the engine (e.g.: Have a permanent or semi-permanent UI on top of the current UI), although, it is not fully tested.
+    - Additionally, after the renderer tweaks have been made,
+        some of the rendering interface has also been repolished: - The functions related to rendering are moved into an sre::render namespace, instead of them being prefixed with `render`
+                                                                  - The C wrappers remain somewhat equal on the "namespace"
+                                                                  - For each frame, a call to `render::begin` is needed now, which would set up the clear color and the built-in camera position
+                                                                       This is not needed if you have the ECS or GUI layers included since they will call that function for you. But, you can still
+                                                                       call it in a connection to sre::beforeRender that runs before any of the object layers are rendered.
+                                                                  - Most frontend functions remain the same, but the backend interface was heavily changed:
+                                                                       - The order of some of the previously equivalent options have been changed, migration is required and has been done to the current render drivers.
+                                                                       - clear and present are now respectively begin and end. They nearly do the same thing though.
+                                                                       - flush_queueinstances1 and 2 are now draw1 and 2. They of course do the same thing: Flush the drawing queue and sending it to the GPU.
+                                                                           However, the flag and texture parameters have been removed, these functions only containing two parameters, only "instance" data.
+                                                                           To setup the texture and previously flag states for drawing, what's said next is used.
+                                                                       - Functions to set the current texture and camera state are now used, they are automatically queued and called by the engine when it detects any
+                                                                           necessary switches. set_camerastate is now called frequently, instead of once per frame, when any switch involving the built-in camera is needed.
+                                                                           (when any of the two SRE_DRAWFLAG_CAMERA camera is changed)
+                                                                       - SRE_BLEND_NONE is removed. Aims for more blending flexibility by supporting custom blending functions are there though.
+                                                                  - draw2 now takes per-vertex/point colors, intead of taking a single color per call. This makes it more flexible (able to support gradients and etc...),
+                                                                       as well as reducing render driver overhead (specially on d3d where 2 buffers were needed for the color data to be per-instance, without rearranging the vertices yourself).
+                                                                    Additionally, there's a batching mechanism done in the draw2 frontend for certain primitive modes, this will reduce unecessary draw calls that could've been sticked together,
+                                                                        and make draw2 actually very useful (compared to the simpler draw1).
+                                                                    The signature for draw2 in render drivers is: draw2(void* _renderer, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode) -> void | (sre_RenderInstance2 doesn't exist anymore)
+                                                                  - Support for custom viewports are added! The rendering interface's old function for setting the "viewport" (set_viewportstate) which was acutally used when resizing the window
+                                                                        was split into two functions: `resize_window` and `set_viewportstate` (same name, only sets the viewport now). The location for `set_viewportstate` was moved, now being right
+                                                                        above `set_scissorstate`, so again, need more migrations (This is being said multiple times since the changelogs were being written between different commits, I might want to 
+                                                                        work around this since it makes the changelogs a whole mess...)
+                                                                    In addition, in the render frontend, state setting functions don't send any of the respective commands UNTIL the next draw command. You can see it, there's no command being sent in those functions...
+                                                                        (I'm talking about `render::set_blendmode`, `render::set_scissors` and the recent `render::set_viewport`), all of the commands get sent in `handle_render_switches`, which used to only check for
+                                                                        drawing flag and texture changes compared to the last draw call to switch those two. Now (I know I'm into the internals a lot now but) it also checks for a set of flags that get turned on in those state functions.
+                                                                        This removes unecessary commands when there's no sre::render::draw(1/2) call.
+                                                                    The viewport function also accepts a(n) (optional, in C++) parameter that determines the scale of the contents! This will be talked more after when mentioning important changes done to the input and display functions.
+                                                                    There are also more functions to query the states of the renderer.
+    - ImGui is no longer part of the core engine: It's being moved into a separate library (repo: bbeltza/Story-Royale-Engine-ImGui) in which their functions will be implemented correctly to be safely called.
+                                                    When the repository is made, please, look at it if you want to integrate ImGui.
+    - sre::ACTION_ enums are removed, now use the C-style SRE_ACTION enums.
+    - Actions don't need the action type specified now in C++, can now simply put a single code and it'll be automatically evaluated to its corresponding type
+    - New hint: SRE_HINT_SDL_WINDOWFLAGS (description in <Hints.h>)
+    - A few helpers were added (look at the commits changes from there) ; Mutex objects are added, they're just a wrapper around SDL_mutex*
+    - GUI objects can now take components as constructor parameters, this reduces lines of code needed to setup in constructor bodies.
+    - You can have custom events more conveniently (this has been used in SR since I've been starting to rewrite its source tree), you can use structures that will follow the same model as sre::Event structs with the new base template sre::EventBase.
+        It takes a number corresponding to the maximum size of the structure, and an optional typename for the event type enum (the default is the one used in sre::Event). sre::Event is a typedef of sre::EventBase.
+      Just... Don't use your custom events amongst sre::onEvent events...
+    - New events: - sre::EVENT_QUIT: The event that fires upon exiting, this is now currently the only way to do necessary cleaning up in your game (apart using atexit callbacks. object/GUI/ECS layer destructors and static class destructors...)
+                                        It gets called on the main thread, after destroying all game object layers, but before destroying anything else
+                  - sre::EVENT_TEXTINPUT: Text input event. Text input is now (partially for now) supported, giving you actual unicode codepoints! (Looking to add more unicode support in the engine too) However, you it is partially supported as said, you cannot
+                                            start or stop text input events without going through SDL (SDL_StartTextInput/SDL_StopTextInput)
+
+    - To support custom viewports and scales correctly, a few important changes have been done: - Events that took input with positions now take those positions in ABSOLUTE PIXEL units, instead of the previous scaled units. (So they're also integers instead of unit floats)
+                                                                                                    A workaround was made to convert those coordinates into viewport-space coordinates, those events have a method for that (`process_position` and eventually `process_delta` for input movement...)
+                                                                                                    These methods wrap a more general function called `sre::process_input_coordinates` in <Core/Input.hpp>.
+                                                                                                    Also note that `sre::mouse_screencoords` is now in ABSOLUTE PIXEL units after this change, so you should use the `process_input_coordinates` function to convert it to scaled units.
+                                                                                                - The viewport "specification" is pretty particular too when the size of the given viewport area is <= 0, in this case, it'll take the entire screen's viewport and subtract it by the given offset
+                                                                                                    from the area's size (technically, it gets added since the area's size is negative). So a viewport of { 0, 0, 0, 0 } will basically translate to the entire screen's viewport. And a viewport of,
+                                                                                                    let's say { 10, 10, -20, -20 } will translate to the screen's viewport being 20 (scaled) units smaller and offseted 10 units right and down. So it'll cover the entire screen with a 10 unit padding
+                                                                                                    on each side. (Hope this is clear, I don't know...)
+                                                                                                  As also said, the viewport "spec" also takes a scale value, it CANNOT be lower than 0, if it's equal to 0 then it'll take the game's global scale.
+                                                                                                  A function to calculate the viewport's absolute area that will handle negative area sizes has been made: `sre::calc_viewport_size` in <Core/Render.h>
+                                                                                                - <Core/Display.hpp> was removed, it is still there but cannot be included, since it's now reserved for future use. Practically every function was moved into <Core/Window.hpp>
+                                                                                                    and the function `sre::display_getcenter` was practically removed. A more polished API for window management is also aimed though.
+
+    - Some common header changes and tweaks, most notably: - SRE_ALIGN is now available, instead of only being in "internal.h" (It is used for pre-C11 support for custom struct alignment).
+                                                           - C++'s math util header "utils/math.hpp" has now `max` and `min` functions, adding the rest of the C header functions should be done though.
+                                                           - sre::rect2D has (hopefully) been improved, you can now access the xywh components directly (just like in C) without going through the `position` or `size` members...
+                                                                Also, the rect2D datatype back then was meant to represent a simple rectangle where the position represents the center, instead of the top-left corner like in most rectangle APIs.
+                                                                This is no longer the case, the position is now usually reinterpreted as being at the top-left corner of the rectangle, however, there are methods that allow you to get a point from
+                                                                somewhere relative to the rectangle (e.g.: If your rectangle's position still represents the center, and want to get it's top-left corner, you should call something like rect2D::origin(-0.5, -0.5),
+                                                                the parameter of this function represents a factor to multiply with by the size when offseting the position with it, in this case, -0.5 will subtract half of the size of the rectangle from the position)
+                                                              rect2D::intersects takes the position as it being at the top-left corner of the rectangle, which is simpler and is what the previous `simple_intersects` did, however there's now a `intersects_from_origin`
+                                                                which lets you specify where the origin is (just wraps `rect2D::origin` and `rect2D::intersects` for more convenience)
+                                                           - The sre::vec2 and sre::rect2D datatypes have a `ptr` method that helps you get a pointer of its corresponding template type to the datatype, useful for functions that take a vector or rect as a pointer to
+                                                                a number type, avoiding the need to use reinterpreted casting or to use &vec.x ...
 - May 20th 2026: 0.104.20
     - New hints: - SRE_HINT_EXTERN_RENDERDRIVER (and optionally SRE_HINT_IMGUI_EXTERN_RENDERDRIVER). You can now define external render drivers, meaning you can make your own render driver for your game!
                     but the documentation is still pretty weak and it is not tested properly so take all of this with a grain of salt (I'm eventually going to have separate repositories of render drivers

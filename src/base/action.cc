@@ -21,10 +21,10 @@ bool sre_actionpressed(const sre_Action action)
         bool done;
         switch (current->type)
         {
-            case sre::ACTION_MOUSE: done = sre::button_pressed(static_cast<sre::mouseButton>(current->code)); break;
-            case sre::ACTION_TOUCH: done = sre::fingers_pressed() != 0; break;
-            case sre::ACTION_KEYBOARD: done = sre::key_pressed(static_cast<sre::scanCode>(current->code)); break;
-            case sre::ACTION_VKEYBOARD: done = sre::key_pressed(static_cast<sre::keyCode>(current->code)); break;
+            case SRE_ACTION_MOUSE: done = sre::button_pressed(static_cast<sre::mouseButton>(current->code)); break;
+            case SRE_ACTION_TOUCH: done = sre::fingers_pressed() != 0; break;
+            case SRE_ACTION_KEYBOARD: done = sre::key_pressed(static_cast<sre::scanCode>(current->code)); break;
+            case SRE_ACTION_VKEYBOARD: done = sre::key_pressed(static_cast<sre::keyCode>(current->code)); break;
             default: abort();
         }
 
@@ -51,10 +51,10 @@ bool sre_actionjustpressed(const sre_Action action)
         bool done;
         switch (current->type)
         {
-            case sre::ACTION_MOUSE: done = sre::button_justpressed(static_cast<sre::mouseButton>(current->code)); break;
-            case sre::ACTION_TOUCH: done = engine.lastfingerup; break;
-            case sre::ACTION_KEYBOARD: done = sre::key_justpressed(static_cast<sre::scanCode>(current->code)); break;
-            case sre::ACTION_VKEYBOARD: done = sre::key_justpressed(static_cast<sre::keyCode>(current->code)); break;
+            case SRE_ACTION_MOUSE: done = sre::button_justpressed(static_cast<sre::mouseButton>(current->code)); break;
+            case SRE_ACTION_TOUCH: done = engine.lastfingerup; break;
+            case SRE_ACTION_KEYBOARD: done = sre::key_justpressed(static_cast<sre::scanCode>(current->code)); break;
+            case SRE_ACTION_VKEYBOARD: done = sre::key_justpressed(static_cast<sre::keyCode>(current->code)); break;
             default: abort();
         }
 

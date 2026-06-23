@@ -1,29 +1,27 @@
-- Some game engine hit ideas:
-    - SRE_HINT_ARG_HANDLER & SRE_HINT_ARG_HANDLERS: ARG_HANDLER is a pointer to a function, taking the signature of `main` (although I'm not sure about the return type) that is used to handle command line arguments.
-                                                      so the game can now handle arguments, the function is run on the main thread before any initialization is done so be careful!
-                                                        this might also be used to change hints at runtime (ex: the currently existing renderer driver hint whether you decide on the command line to specify a special argument)
-                                                      if ARG_HANDLERS is present, then ARG_HANDLER will be taken as an array of function pointers with that same signature, ARG_HANDLERS being the amount of argument handlers present in that array.
-                                                      if there's no ARG_HANDLERS, then it is assumed for ARG_HANDLER to have only 1 function, so you could either declare it as an array of a single function or just a function pointer, it doesn't really matter.
-    - SRE_HINT_WINDOW_SIZE: It's an array of two integers (so you can declare it as a vec2i, just a C array or an std::array<int>, or heck even a long long if you're careful about endianess!). The array defines the dimensions of the window on startup.
+- Some game engine hit ideas (designed for more expertise discussion):
+    - SRE_HINT_WINDOW_SIZE: It's an array of two integers (so you can declare it as a vec2i, just a C array or an std::array<int>, or heck even a long long if you're careful about endianness!). The array defines the dimensions of the window on startup.
                                 Obviously, you know, the first element of the array will contain the width, and the second element the height. Very simple. More of these hints will be also there.
                                 If there's no SRE_HINT_WINDOW_SIZE, then the engine will create a window with a default size of 800x600 pixels.
-    - SRE_HINT_EXTERN_RENDERDRIVER: It's a pointer to a `sre_RenderDriverData` (sre::RenderDriverHelper too on C++) containing the driver data of an external render driver to use.
-                                      The render driver will have to fill all of the members from the `sre_RenderDriverData` structure (for sre::RenderDriverHelper, you'd have to implement every single function)
-                                        and optionally add a name tag to identify the driver
-                                      If SRE_HINT_RENDERDRIVER is present, then it is ignored and SRE_HINT_EXTERN_RENDERDRIVER will be looked first. If the initialization function for the external driver returns `SRE_RENDERSTATUS_UNSUPPORTED`
-                                        then it'll look at the SRE_HINT_RENDERDRIVER hint later.
-                                      For the ImGui glue, you will be able to specify another hint called SRE_HINT_IMGUI_EXTERN_RENDERDRIVER containing the ImGui data related to the external driver, otherwise. If the glue library detects that
-                                        there's an external driver (which will go on after), then it'll not be initialized. The SRE_HINT_IMGUI_EXTERN_RENDERDRIVER is only checked if the ImGui glue library detects that there's an external driver.
-                                      For the ImGui initialization function, to know if there's an external driver, the `index` parameter will be set to `-1`. In this case, handle all of the code necessary to setup ImGui with that external driver.
-                                    I'm planning on having some official render drivers that are outside of the engine, like probably vulkan, but are just things to have fun with if I ever have any free time. So the external driver feature with this
-                                        hint will indeed be used to access them!
-    - SRE_HINT_SRGB: A boolean value indicating to the render driver whether to use an sRGB color or not. It is by default set to `false`.
-
+    - SRE_HINT_WINDOW_POS: Same as SRE_HINT_WINDOW_POS, but sets up the main window's position at the start of the game (I'm saying "main window" because these hints will be supported after the new window API where multiple windows are supported).
+                                The window will be positioned at the coordinates given by SRE_HINT_WINDOW_POS with the top-left corner as the origin.
+                                Although not recommended for the hint. Setting up values lower than 0 may place the window inside other monitors if any, since their desktop-space origins may be lower than 0 depending on where it is placed relative to the main monitor.
+                                If this flag is not set, then the window will be created with SDL_WINDOWPOS_CENTERED as the x and y coordinates. Which will often place the window at the center of the main screen.
+    - SRE_HINT_SRGB: A boolean value indicating to the render driver whether to use an sRGB color or not. By default set to `false`.
 
 - Continuing the port to android (I was just too stuck with the graphics so I couldn't be locked in it)
-- More reference counting systems, specially on sreECS and sreGUI objects
-- Line rendering (which I'll work on very soon), and scaled rendering (rendering that takes place on a viewport of the game's scaled resolution. Would be pretty neat for pixel-art)
 - Animation/Keyframe API
+- Render target textures: This will follow up the idea of "scaled" rendering by providing a managed render target object that is built on top of that scaled resolution.
+- Remake the renderer again... : - Have support for "GPU" buffer objects, vertex, index, etc.. buffers... That will be used in a new draw2 signature (draw1 will still exist. It has to be like that, but it will actually be optional as a surprise) <- Actually, yes, draw1 will be optional, being specified in one of the render flags, if so, then it'll rely on simply draw2 commands...
+                                 - Along with the above idea, add these things called "vertex layouts", they are just vertex layouts/attributes that tell where the 3 of the predefined values used in draw2 are in the buffers:
+                                      These are, the position, the color (of each vertex which will be supported), and the texture coordinate. Along with byte-stride parameters that will allow more control over the data sent!
+                                      Wrappers around the current immediate draw2 will still be available, have a dynamic buffer for it that will be appended.
+                                      Also talking about appendation, these buffer objects will provide a friendly interface for managing the buffer (like seen in C++'s stl e.g. std::vector) so that drivers don't have to deal much more with it.
+      (Somewhat in the works) -> - Maybe have a render passing mechanism too, which may allow me to remove lots of state changing overhead, and implement render target textures easier, also making the render queue system seen in core/renderer.cpp more reliable.
+
+- Group the different OpenGL version backends into a single one: Default to 3.2, and depending on what version is supported (from glGetIntegerv(GL_(MAJOR/MINOR)_VERSION, &...)), use one of the different implementations currently available, this means, having the
+    virtual function table passed in the initialization function be different depending on the supported version.
+  This reduces for the love of god the amount of render driver in this engine (From 7? Or 8 with the work in progress software renderer???)
+  A hint to tell what specific GL version to use will also be there.
 
 - Standard audio formats? (The thing is, I said I would be using SDL's audio streams but they used quite a lot of memory on initialization so I don't know...)
-- An old one: aking the game run on a separate process or "module" to the engine?
+- An old one: Making the game run on a separate process or "module" to the engine?

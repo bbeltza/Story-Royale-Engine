@@ -1,0 +1,1 @@
+SRE_DRIVERBUILD(sre_swrender "swmain.c")

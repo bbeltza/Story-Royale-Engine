@@ -47,30 +47,6 @@ long sre_filetell(const sre_File* file);
 size_t sre_filesize(const sre_File* file);
 const sre_byte* sre_filebegin(const sre_File* file);
 
-/*
-
-enum sre_fileConstants
-{
-    SRE_FILEPREFIX_LENGTH = 6
-};
-
-extern const char SRE_FSRES_PREFIX[];
-extern const char SRE_RES_PREFIX[SRE_FILEPREFIX_LENGTH + 1];
-extern const char SRE_USR_PREFIX[SRE_FILEPREFIX_LENGTH + 1];
-
-extern int sre_fileopen(sre_File* file, const char* path, const char* mode);
-extern void sre_fileclose(sre_File* file);
-extern size_t sre_filesize(const sre_File* file);
-
-extern const sre_byte* sre_getresource(const char* path, size_t* size_output);
-
-extern long sre_fileseek(const sre_File* file, long offset, int origin);
-#define sre_filerewind(file) (sre_fileseek(file, 0, SEEK_SET) == 0);
-
-extern bool sre_filewrite(const sre_File* file, const void* rawdata, size_t size);
-
-*/
-
 SRE_CAPI_END
 
 #endif

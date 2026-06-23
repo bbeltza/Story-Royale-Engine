@@ -5,9 +5,6 @@
 
 namespace sre
 {
-    class Image;
-
-    bool window_seticon(const sre::Image& img);
     bool window_togglefullscreen();
 
     void window_show();
@@ -26,6 +23,16 @@ namespace sre
 
     bool window_isfullscreen();
     bool window_ishidden();
+
+    // Functions from, formerly Display.hpp (I'm noting this here since I'm also going to change this header sometime)
+    sre::vec2i  window_getsize(void);
+    sre::vec2ut window_getviewport(void);
+    sre::unit   window_getscale(void);
+    sre::unit   window_getscale_ratio(void); // Return 1 / window_getscale(), this is only there since the engine caches that value for inputs
+
+    bool window_set_manualscale(int scale); // Only call this if autoscaling is disable, autoscaling will override the window's scale
+    bool window_enable_autoscaling(int target_w, int target_h);
+    void window_disable_autoscaling(void);
 }
 
 #endif

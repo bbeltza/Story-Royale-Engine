@@ -80,6 +80,8 @@ static const char* err_getfmtstr(unsigned cat)
         "Invalid hint value from 'SRE_HINT_%s': %X",    /* SRE_ERR_INVALID_HINT */
         "State error: %s",                              /* SRE_ERR_INVALID_STATE */ 
 
+        "%s is unavailable or unimplemented",           /* SRE_ERR_UNAVAILABLE */ 
+
         "Fail: %s",                                     /* SRE_ERR_FAIL */
         "SDL Error: %s",                                /* SRE_ERR_SDL */
         

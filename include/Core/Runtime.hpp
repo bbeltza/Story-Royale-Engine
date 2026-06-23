@@ -12,13 +12,10 @@ namespace sre
 
     intptr_t current_frame();
     unsigned current_framerate();
-    unsigned current_tickrate();
 
     void set_framerate(unsigned fps);
-    void set_tickrate(unsigned tps);
 
     extern const sre::timeStamp& dt;
-    extern const sre::timeStamp& pdt;
 }
 
 #endif

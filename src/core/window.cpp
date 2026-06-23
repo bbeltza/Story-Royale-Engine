@@ -3,19 +3,6 @@
 #include <Core/Window.hpp>
 #include <Base/Image.hpp>
 
-bool sre::window_seticon(const sre::Image& img)
-{
-    SDL_Surface* surface = static_cast<SDL_Surface*>(img.handle());
-    if (!surface) return false;
-
-    SDL_ClearError();
-    SDL_SetWindowIcon(engine.sdl_windowhndl, surface);
-    if (SDL_GetError()[0])
-        return false;
-    
-    return true;
-}
-
 bool sre::window_togglefullscreen()
 {
     bool fullscreen = !window_isfullscreen();
@@ -49,4 +36,49 @@ bool sre::window_ishidden() { return 0 != (SDL_GetWindowFlags(engine.sdl_windowh
 void sre::window_setsize(int w, int h)
 {
     defer([](int w, int h) { SDL_SetWindowSize(engine.sdl_windowhndl, w, h); }, w, h);
+}
+
+sre::vec2i sre::window_getsize(void) {
+    return engine.osize;
+}
+sre::vec2ut sre::window_getviewport(void) {
+    return engine.vsize;
+}
+sre::unit sre::window_getscale(void) {
+    return engine.scale;
+}
+sre::unit sre::window_getscale_ratio(void) {
+    return engine.scale_ratio;
+}
+
+bool sre::window_set_manualscale(int scale) {
+    if (scale <= 0) {
+        return false;
+    }
+
+    engine.scale = static_cast<sre::unit>(scale);
+    engine.scale_ratio = 1/engine.scale;
+    return true;
+}
+
+bool sre::window_enable_autoscaling(int target_w, int target_h) {
+    if (target_w < 0 || target_h < 0 ) {
+        // sre::error
+        return false;
+    }
+    if (!target_w && !target_h) { // Use sre::window_disable_autoscaling
+        return false;
+    }
+
+    // One of the target components can be set to 0, meaning that the autoscaler won't rely on that component to scale the screen
+    target_w = target_w ? target_w : INT_MAX;
+    target_h = target_h ? target_h : INT_MAX;
+
+    engine.autoscalex = target_w;
+    engine.autoscaley = target_h;
+    return true;
+}
+void sre::window_disable_autoscaling(void) {
+    engine.autoscalex = 0;
+    engine.autoscaley = 0;
 }

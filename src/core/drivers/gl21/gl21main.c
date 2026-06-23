@@ -4,15 +4,17 @@ static void sregl21_destroy(void* _inst);
 
 static const struct sre_RenderVFT sregl21_vft = {
     sregl21_destroy,
-    sregl21_flush_queueinstances1,
-    sregl21_flush_queueinstances2,
-    sregl21_present,
-    sregl21_clear,
-    sregl21_set_viewportstate,
+    sregl21_draw1,
+    sregl21_draw2,
+    sregl21_begin,
+    sregl21_end,
+    NULL,
+    sregl21_set_vsync,
+    sregl21_set_texturestate,
     sregl21_set_blendstate,
     sregl21_set_camerastate,
-    sregl21_set_clipstate,
-    sregl21_set_vsync,
+    sregl21_set_viewportstate,
+    sregl21_set_scissorstate,
     sregl21_texture_setup,
     sregl21_texture_update,
     sregl21_texture_destroy
@@ -48,6 +50,7 @@ static void sregl21_destroy(void* _inst)
 {
     sregl21_inst* inst = _inst;
 
+    sregl21_vtassemblerfree(&inst->vtassembler);
     sregl21_commondestroy(&inst->common21);
 }
 
@@ -55,7 +58,8 @@ sre_RenderDriverData sregl21 = {
     .initialize = sregl21_main,
     .renderer_size = sizeof(sregl21_inst),
     .texture_size = sizeof(sregl_texture),
-    .name = "OpenGL 2.1"
+    .name = "OpenGL 2.1",
+    .flags = SRE_RENDERBIT_SUPPORT_LINELOOP
 };
 
 int sregl21_commonsetup(sregl21_cominst* inst, SDL_Window* window, struct sregl_functions* glfuncs, struct sregl_functions21* glfuncs21)

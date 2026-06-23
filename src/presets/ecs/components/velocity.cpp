@@ -25,7 +25,7 @@ void Velocity::normalize(sre::unit speed)
     velocity = velocity / mag * speed;
 }
 
-void Velocity::on_pupdate(Entity& e)
+void Velocity::on_pupdate(Entity& e, sre::timeStamp dt)
 {
-    e.position += velocity * sre::pdt;
+    e.position += velocity * dt;
 }

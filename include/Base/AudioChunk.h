@@ -34,8 +34,11 @@ const sre_AudioChunk* sre_audiofromraw(const sre_AudioChunk* metadata, const voi
 
 struct sre_File;
 const sre_AudioChunk* sre_audiofromfile(const struct sre_File* file);
-const sre_AudioChunk* sre_audiofromcache(const char* resource);
-bool sre_audiotocache(const sre_AudioChunk* chunk, const char* resource);
+
+// Functions to load audio from cache files (WIP)
+
+const sre_AudioChunk* sre_audioloadcache(const void* data, size_t max_size);
+bool sre_audiosavecaches(sre_AudioChunk const* const* audiochunks, size_t numaudiochunks, const struct sre_File* file);
 
 SRE_CAPI_END
 

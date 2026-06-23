@@ -9,35 +9,28 @@
     #define SDL_stack_free(block) _freea(block)
 #endif
 
-bool sresdlrenderer_clear(void* _inst, float color[3])
+void sresdlrenderer_begin(void* _inst, const float clear[4])
 {
     sresdlrenderer_inst* inst = _inst;
     SDL_SetRenderDrawColor(inst->renderer,
-        (Uint8)(color[0] * 255),
-        (Uint8)(color[1] * 255),
-        (Uint8)(color[2] * 255),
-        SDL_ALPHA_OPAQUE
+        (Uint8)(clear[0] * 255),
+        (Uint8)(clear[1] * 255),
+        (Uint8)(clear[2] * 255),
+        (Uint8)(clear[3] * 255)
     );
 
-    return SDL_RenderClear(inst->renderer) == 0;
+    SDL_RenderClear(inst->renderer);
 }
 
-void sresdlrenderer_present(void* _inst)
+void sresdlrenderer_end(void* _inst)
 {
     sresdlrenderer_inst* inst = _inst;
     SDL_RenderPresent(inst->renderer);
 }
 
-void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre_RenderInstance1* instances, size_t instance_count, sre_u32 flags, sre_u32 switch_flags)
+void sresdlrenderer_draw1(void* _inst, const sre_RenderInstance1* instances, size_t instance_count)
 {
-    (void)switch_flags;
-
-    static const uint8_t DRAW1_INDICES[6] = {
-        0, 1, 2,
-        2, 3, 0
-    };
     sresdlrenderer_inst* inst = _inst;
-    sresdlrenderer_texture* texture = _texture;
 
     if (inst->vbuf_size < instance_count)
     {
@@ -80,8 +73,8 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
             dinst->rectangle.h * inst->scaling
         };
 
-        srect.x = srect.x + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0);
-        srect.y = srect.y + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0);
+        srect.x = srect.x + inst->camera.x;
+        srect.y = srect.y + inst->camera.y;
         srect.w = srect.w;
         srect.h = srect.h;
 
@@ -147,62 +140,79 @@ void sresdlrenderer_flush_queueinstances1(void* _inst, void* _texture, const sre
     }
     
     int int_count = (int)instance_count;
-    int res = SDL_RenderGeometry(inst->renderer, texture ? texture->texture : NULL, inst->vbuf, int_count*4, inst->ibuf->i, 6*int_count);
+    int res = SDL_RenderGeometry(inst->renderer, inst->cur_texture, inst->vbuf, int_count*4, inst->ibuf->i, 6*int_count);
     assert(res == 0);
 }
 
-void sresdlrenderer_flush_queueinstances2(void* _inst, void* _texture, const sre_RenderInstance2* instance, size_t point_count, sre_u32 flags, sre_u32 switchflags)
+void sresdlrenderer_draw2(void* _inst, const sre_RenderPoint* points, size_t point_count, sre_draw2primitive mode)
 {
     sresdlrenderer_inst* inst = _inst;
-    sresdlrenderer_texture* texture = _texture;
     int res;
 
     sre_vec2f *vertices = SDL_stack_alloc(sre_vec2f, point_count);
     for (size_t i = 0; i < point_count; i++)
     {
-        vertices[i].x = (instance->points[i].pos.x * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.x : 0);
-        vertices[i].y = (instance->points[i].pos.y * inst->scaling) + (flags & SRE_DRAWFLAG_CAMERA ? inst->camera.y : 0);
+        vertices[i].x = (points[i].pos.x * inst->scaling) + inst->camera.x;
+        vertices[i].y = (points[i].pos.y * inst->scaling) + inst->camera.y;
     }
 
-    switch (instance->mode)
+    switch (mode)
     {
-        case SRE_DRAW2_TRIANGLE: {
+        case SRE_PRIMITIVE_TRIANGLES: {
             res = SDL_RenderGeometryRaw(
                 inst->renderer,
-                !texture ? NULL : texture->texture,
+                inst->cur_texture,
                 &vertices->x, sizeof(sre_vec2f),
-                (const SDL_Color*)&instance->color, 0,
-                &instance->points->uv.x, sizeof(sre_RenderPoint),
+                (const SDL_Color*)&points->color, sizeof(sre_RenderPoint),
+                &points->uv.x, sizeof(sre_RenderPoint),
                 (int)point_count, NULL, 0, 0
             );
         } break;
-        case SRE_DRAW2_STRIP:
-        /*case SRE_DRAW2_JOINED:*/ {
+        case SRE_PRIMITIVE_TRIANGLESTRIP: {
             assert(point_count >= 3);
             size_t indice_count = (point_count-3) * 3 + 3;
-            uint16_t *indices = SDL_stack_alloc(uint16_t, indice_count); // 16-bit indices for now, enough for having a maximum of 65536 points c:
+            uint32_t *indices = SDL_stack_alloc(uint32_t, indice_count); // 16-bit indices for now, enough for having a maximum of 65536 points c:
             indices[0] = 0;
             indices[1] = 1;
             indices[2] = 2;
 
             for (size_t i = 3; i < indice_count; i += 3)
             {
-                indices[i+0] = instance->mode == SRE_DRAW2_STRIP ? (unsigned short)(i/3+0) : 0;
+                indices[i+0] = (unsigned short)(i/3+0);
                 indices[i+1] = (unsigned short)(i/3+1);
                 indices[i+2] = (unsigned short)(i/3+2);
             }
 
             res = SDL_RenderGeometryRaw(
                 inst->renderer,
-                !texture ? NULL : texture->texture,
+                inst->cur_texture,
                 &vertices->x, sizeof(sre_vec2f),
-                (const SDL_Color*)&instance->color, 0,
-                &instance->points->uv.x, sizeof(sre_RenderPoint),
+                (const SDL_Color*)&points->color, sizeof(sre_RenderPoint),
+                &points->uv.x, sizeof(sre_RenderPoint),
                 (int)point_count,
-                indices, (int)indice_count, 2
+                indices, (int)indice_count, 4
             );
             SDL_stack_free(indices);
         } break;
+        case SRE_PRIMITIVE_LINEPERLINE:
+            res = 0;
+            for (size_t i = 0; i < point_count; i += 2) {
+                sre_col4 col = points[i].color;
+                res += SDL_SetRenderDrawColor(inst->renderer, col.r, col.g, col.b, col.a);
+                res += SDL_RenderDrawLineF(inst->renderer,
+                                            vertices[i+0].x, vertices[i+0].y,
+                                            vertices[i+1].x, vertices[i+1].y
+                                        );
+            }
+            break;
+        case SRE_PRIMITIVE_LINESTRIP:
+            res = SDL_SetRenderDrawColor(inst->renderer, points->color.r, points->color.g, points->color.b, points->color.a);
+            res = SDL_RenderDrawLinesF(inst->renderer, (SDL_FPoint*)vertices, (int)point_count);
+            break;
+        case SRE_PRIMITIVE_POINTS:
+            res = SDL_SetRenderDrawColor(inst->renderer, points->color.r, points->color.g, points->color.b, points->color.a);
+            res = SDL_RenderDrawPointsF(inst->renderer, (SDL_FPoint*)vertices, (int)point_count);
+            break;
         default:
             assert(0 && "Not implemented or invalid (SRE_DRAW2_JOINED is not implemented)");
     }

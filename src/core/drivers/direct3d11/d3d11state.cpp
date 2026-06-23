@@ -12,7 +12,7 @@ bool Instance::_setuprendertargets()
 	return true;
 }
 
-bool Instance::set_viewportstate(int w, int h, sre::unit scale)
+bool Instance::resize_window(int w, int h)
 {
 	HRESULT hr;
 
@@ -24,39 +24,45 @@ bool Instance::set_viewportstate(int w, int h, sre::unit scale)
 	}
 	SRE_DXCALL(m_dxswapchain->ResizeBuffers(2, w, h, DXGI_FORMAT_UNKNOWN, 0));
 
-	if (!_setuprendertargets())
-		return false;
-
-	D3D11_VIEWPORT viewport{ 0, 0, static_cast<FLOAT>(w), static_cast<FLOAT>(h), 0, 1 };
-	m_dxdevicecontext->RSSetViewports(1, &viewport);
-	{
-		m_caches.viewport[0] = 2.0f/w;
-		m_caches.viewport[5] = -2.0f/h;
-		m_caches.viewport[10] = scale;
-		m_caches.viewport[12] = -1;
-		m_caches.viewport[13] = 1;
-		m_caches.viewport[15] = 1;
-
-		D3D11_MAPPED_SUBRESOURCE mapped;
-		for (int i = 0; i < 2; i++)
-		{
-			SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[i], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-				memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
-				static_cast<CBuffer*>(mapped.pData)->camera = {};
-			m_dxdevicecontext->Unmap(m_cbuffers[i], 0);
-		}
-	}
-
-	return true;
+	return _setuprendertargets() != false;
 }
 
-bool Instance::set_blendstate(sre::blendMode blending)
+void Instance::set_viewportstate(const sre::rect2Di* rectangle, sre::unit scale)
 {
-	m_dxdevicecontext->OMSetBlendState(m_dxblendstates[blending], NULL, UINT_MAX);
-	return true;
+	HRESULT hr;
+	D3D11_VIEWPORT viewport{
+		static_cast<FLOAT>(rectangle->position.x),
+		static_cast<FLOAT>(rectangle->position.y),
+		static_cast<FLOAT>(rectangle->size.x),
+		static_cast<FLOAT>(rectangle->size.y),
+		0.0f,
+		1.0f
+	};
+	m_dxdevicecontext->RSSetViewports(1, &viewport);
+
+	FLOAT matrix[16] = {
+		2.0f/viewport.Width, 0.0f, 0.0f, 0.0f,
+		0.0f, -2.0f/viewport.Height, 0.0f, 0.0f,
+		0.0f, 0.0f, scale, 0.0f,
+		-1.0f, 1.0f, 0.0f, 1.0f
+	};
+	D3D11_MAPPED_SUBRESOURCE mapped;
+	SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
+		memcpy(mapped.pData, matrix, sizeof(matrix));
+	m_dxdevicecontext->Unmap(m_cbuffer, 0);
 }
 
-void Instance::set_clipstate(const sre::rect2Di* rectangle)
+void Instance::set_blendstate(sre::blendMode mode)
+{
+	m_dxdevicecontext->OMSetBlendState(m_dxblendstates[mode], NULL, UINT_MAX);
+}
+
+void Instance::set_texturestate(Texture* texture)
+{
+	m_dxdevicecontext->PSSetShaderResources(0, 1, texture ? &texture->dxsrv : &m_basictexture);
+}
+
+void Instance::set_scissorstate(const sre::rect2Di* rectangle)
 {
 	if (!rectangle)
 	{
@@ -79,14 +85,11 @@ void Instance::set_clipstate(const sre::rect2Di* rectangle)
 	m_dxdevicecontext->RSSetScissorRects(1, &rect);
 }
 
-bool Instance::set_camerastate(sre::unit x, sre::unit y)
+void Instance::set_camerastate(sre::vec2ut camera)
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mapped;
-	SRE_DXCALL(m_dxdevicecontext->Map(m_cbuffers[1], 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-	memcpy(mapped.pData, m_caches.viewport, sizeof(m_caches.viewport));
-	static_cast<CBuffer*>(mapped.pData)->camera = { x, y };
-	m_dxdevicecontext->Unmap(m_cbuffers[1], 0);
-
-	return SUCCEEDED(hr);
+	SRE_DXCALL(m_dxdevicecontext->Map(m_ccambuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
+		*static_cast<CCamBuffer*>(mapped.pData) = { camera.x, camera.y };
+	m_dxdevicecontext->Unmap(m_ccambuffer, 0);
 }

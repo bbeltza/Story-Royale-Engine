@@ -10,7 +10,7 @@ typedef intptr_t (*sre_deferresFunction)(void* args);
 
 // Push a function to the main thread's event handler
 // This is pretty useful for multithreading, since there are features that aren't fully supported on multiple threads
-// (Like creating a texture), or to manage synchronisation problems
+// (Like communicating to the render driver), or to manage synchronisation problems
 // `argsize` specifies the size in bytes to copy inside `arg`. If `argsize` is higher than the size of a pointer,
 //      then `arg` will be allocated to fit `argsize`. Otherwise, the value will be directly copied into the event structure.
 //      This also means that whatever is passed in `func` won't be the same value as `arg` in the function call.

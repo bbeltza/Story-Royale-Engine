@@ -63,11 +63,7 @@ static int game_loop(void* running)
 
     while (*(volatile int*)running)
     {
-        sre_timeStamp elapsed;
-        SDL_Event ev;
-        ev.type = SDL_USEREVENT;
-        ev.user.code = ENGINE_EVENT_RENDER;
-        
+        sre_timeStamp elapsed;        
         engine.frame++;
 
         ticks(&engine.frameend_time);
@@ -81,16 +77,15 @@ static int game_loop(void* running)
 
         __queue_events();
         
-        engine.video.wantclear = true;
         #ifdef WIN32_HANDLE_WINDOW_BLOCKING
-            if (__update_ecs())
+            if (__update_objects())
             {
                 sre_defer(win32_renderflush, 0, NULL);
                 int res = SDL_CondWaitTimeout(win32_rendercond, win32_rendermtx, 5000);
                 assert(res >= 0);
             }
         #else
-            if (__update_ecs())
+            if (__update_objects())
             {
                 sre_defer(sem_renderflush, 0, NULL);
                 SDL_SemWait(sdl_rendersem);
@@ -221,12 +216,9 @@ void __run_engine()
             __poll_input(&ev);
             break;
         }
-
-        if (engine.imgui && !__onevent_imgui(&ev))
-            continue;
         
         __signal_events(&ev); // In this case the QUIT event won't be fired
-                              // I'll make sure to make it fire once I make the QUIT event
+                                // The QUIT event will be queued during __end_engine
     }
 
     #ifdef WIN32_HANDLE_WINDOW_BLOCKING

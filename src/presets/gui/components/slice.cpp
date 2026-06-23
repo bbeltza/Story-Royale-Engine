@@ -72,5 +72,5 @@ void Slice::on_render(const sre::rect2Dut &dimensions)
         { rects[8], sre::vec2ut::ZERO, modulate, 0,  uvs[8], uvoffsets[8]}
     };
 
-    sre::render_draw1(0, instances, texture.get());
+    sre::render::draw1(0, instances, texture.get());
 }

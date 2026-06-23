@@ -14,7 +14,7 @@ namespace sreECS
         bool enabled = true;
     protected:
         virtual void on_update(Camera& camera) {}
-        virtual void on_pupdate(Camera& camera) = 0;
+        virtual void on_pupdate(Camera& camera, sre::timeStamp dt) = 0;
     };
 
     struct CameraEffect
@@ -44,16 +44,15 @@ namespace sreECS
 
         inline sre::vec2ut toScreenSpace(sre::unit x, sre::unit y) const { return toScreenSpace({x, y}); }
         inline sre::vec2ut toWorldSpace(sre::unit x, sre::unit y) const { return toWorldSpace({x, y}); }
-
-        inline sre::vec2ut processed_position() const { return m_processed; }
     private:
         void update();
-        void pupdate();
+        void pupdate(sre::timeStamp dt);
+        sre::vec2ut process();
         
-        inline void clamp_position() { if (bounds.size != bounds.size.ZERO)
-                                    position.setclamp(bounds.top_left(), bounds.bottom_right()); }
-
-        sre::vec2ut m_processed;
+        inline void clamp_position() {
+            if (bounds.size != bounds.size.ZERO)
+                position.setclamp(bounds.origin(-0.5f), bounds.origin(0.5f));
+        }
     };
 }
 

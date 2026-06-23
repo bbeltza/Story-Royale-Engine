@@ -32,7 +32,7 @@ It's discouraged to use it with numbers as numbers can be 0
 // Depending on the implementation, it may support variable length arrays (e.g. clang & gcc's extensions), or just use alloca
 #define ut_dynsalloc __ut_dynsalloc
 
-#if !defined(__cplusplus)
+#if !defined(__cplusplus) || defined(SRE_CPP_DECLARE_NEWDELETE)
 	#include <stddef.h>
 	#include <string.h>
 	// C operator new and delete wrappers
@@ -40,4 +40,16 @@ It's discouraged to use it with numbers as numbers can be 0
 	extern void sre_delete(void* block);
 
 	#define sre_newclear(size) memset(sre_new(size), 0, size)
+#endif
+
+#if !defined(__cplusplus)
+	#if defined(_MSC_VER)
+		#define SRE_ALIGN(x) __declspec(align(x))
+	#elif defined(__GNUC__)
+		#define SRE_ALIGN(x) __attribute__((aligned(x)))
+	#else
+		#define SRE_ALIGN(x)
+	#endif
+#else
+	#define SRE_ALIGN(x) alignas(x)
 #endif

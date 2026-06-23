@@ -614,8 +614,16 @@ namespace sre
 	using keyMod = SDL_Keymod;
 }
 
+enum sre_inputsrc {
+	SRE_INPUT_UNKNOWN = -1,
+	SRE_INPUT_MOUSE,
+	SRE_INPUT_TOUCH
+};
+
 namespace sre
 {
+	using inputsrc = sre_inputsrc;
+
 	bool key_pressed(sre::keyCode code);
 	bool key_pressed(sre::scanCode code);
 	bool button_pressed(sre::mouseButton button);
@@ -625,15 +633,20 @@ namespace sre
 	bool key_justpressed(sre::keyCode code);
 	bool button_justpressed(sre::mouseButton button);
 
-	sre::vec2ut mouse_screencoords();
+	sre::vec2i mouse_screencoords();
 
 	int fingers_pressed();
 
-	// (Unimplemented) Get the coordinates of the last input that has coordinates
-	//	  It's usually the mouse for computers, or the last touched finger for mobile devices
-	//		But it can be different if for example, you have a laptop with touch support, or a phone with a bluetooth mouse
-	//	The engine will automatically decide which input whose coordinates to return.
-	sre::vec2ut input_coordinates();
+	sre::inputsrc get_input_source();
+	sre::vec2i get_input_coordinates();
+
+	sre::vec2ut process_input_coordinates(sre::vec2ut coords, sre::vec2ut vp_origin, sre::unit scale);
+	
+	/*
+	inline sre::vec2ut process_input_coordinates(sre::vec2i coords, sre::vec2ut vp_origin, sre::unit scale) {
+		return process_input_coordinates(sre::vec2ut{coords}, vp_origin, scale);
+	}
+	*/
 }
 
 #endif

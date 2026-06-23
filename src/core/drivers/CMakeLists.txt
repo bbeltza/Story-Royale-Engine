@@ -11,6 +11,7 @@ function(SRE_DRIVERBUILD TARGET)
     target_link_libraries(sre_drivers PRIVATE ${TARGET} $<TARGET_OBJECTS:${TARGET}>) # Be careful with includes!
 endfunction()
 
+add_subdirectory(software)
 add_subdirectory(sdl_renderer)
 
 add_subdirectory(glcommon)

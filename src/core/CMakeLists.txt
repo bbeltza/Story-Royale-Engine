@@ -14,7 +14,7 @@ SRE_BUILD_SRC(sre_core
 	"init.c"
 	"runtime.c"
 	"runtime.cpp"
-	"display.cpp"
+	# "display.cpp"
 	"window.c"
 	"window.cpp"
 )

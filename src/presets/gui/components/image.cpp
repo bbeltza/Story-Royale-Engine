@@ -32,7 +32,7 @@ void Image::on_render(const sre::rect2Dut &dimensions)
     }
 
     // This would in theory draw a plain rectangle if there is no texture attached
-    sre::render_draw1(
+    sre::render::draw1(
         0, {{
             dimensions,
             sre::vec2ut::ZERO,

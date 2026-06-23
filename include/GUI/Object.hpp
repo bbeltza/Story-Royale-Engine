@@ -2,108 +2,80 @@
 #define SREGUI_OBJECT_HPP
 
 #include <list>
+#include <deque>
 
 #include <Datatypes/Rect.h>
 #include <Datatypes/Flags.hpp>
 
-#include <Core/Object.hpp>
+#include <Core/Object.h>
 #include <Base/Signal.hpp>
 #include <Base/Clipstack.h>
 
-namespace sre
-{
-    struct RenderInterface;
-    class ECS;
-}
+//#include <initializer_list>
 
 namespace sreGUI
 {
     struct Component;
+    class Layer;
 
     class Object : public ::sre::Object
     {
-        friend class sre::ECS;
-
-        static sre::ClipStackUT s_clipstack;
-        static const Object *s_querying;
-        Object * volatile m_parent;
+        friend class Layer;
+        Layer* m_attachedlyr = NULL;
+        Object* m_parent = NULL;
         //          ^^^   m_parent could be optimized away when `add_child` gets called and doesn't assign it
 
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
+        sre::flags16 m_state = {};
     public:
-        enum FlagsEnum
+        enum State
+        {
+            S_INCURSOR = ut_bit(0),
+            S_HOVERING = ut_bit(1)
+        };
+        enum Flags
         {
             F_ENABLED = ut_bit(0),
             F_QUERY = ut_bit(1),
             F_CLIP = ut_bit(2)
         };
+
         // Flags that control the behavior of the object and its children
-        sre::flags32 flags = {F_ENABLED, F_QUERY};
+        sre::flags16 flags = {F_ENABLED, F_QUERY};
         int z_index = 0;
     public:
         // Instantiating
 
-        Object();
+        Object(sreGUI::Object* parent=NULL, sreGUI::Component* const components[]=NULL, size_t num_components=0);
         ~Object();
-        static void *operator new(std::size_t size)
-        {
-            auto ptr = static_cast<Object *>(::operator new(size));
-            #ifndef NDEBUG // Easier for catching lack of initialization bugs
-                memset(static_cast<void*>(ptr), 0, size);
-            #endif
-            ptr->m_parent = NULL;
 
-            return ptr;
-        }
+        Object(sreGUI::Object* parent, std::initializer_list<sreGUI::Component*const> components): Object(parent, components.begin(), components.size()) {}
+        Object(std::initializer_list<sreGUI::Component*const> components): Object(NULL, components) {}
 
-        template <typename T = Object>
-        T &add_child()
-        {
-            auto ptr = alloc_child<T>();
-            ::new (ptr) T; // If T has no constructor and calls T() then it'll be filled with zeros, we don't want that
-            return *ptr;
-        }
-
+        // This is a wrapper around `new` and `set_parent` for backwards compatibility with the old previous `add_child` function
+        // To create a GUI object. use `new` and call `set_parent` on it to reparent it into another object. Eventually, you can also
+            // use the parent constructor in the Object and pass the parent on it (which requires some setup on the derived class)
         template <typename T = Object, typename... Args>
-        T &add_child(Args &&...args)
-        {
-            auto ptr = alloc_child<T>();
-            ::new (ptr) T(std::forward<Args>(args)...);
-            return *ptr;
+        T &add_child(Args &&...args) {
+            Object* pobj = new T(std::forward<Args>(args)...);
+            return *static_cast<T*>(pobj->set_parent(this));
         }
-
-    private:
-        template <typename T>
-        inline T *alloc_child()
-        {
-            static_assert(std::is_base_of<Object, T>::value, "T must be derived from sreGUI::Object");
-            auto ptr = static_cast<Object *>(::operator new(sizeof(T)));
-            #ifndef NDEBUG
-                memset(static_cast<void*>(ptr), 0, sizeof(T));
-            #endif
-            ptr->m_parent = this;
-            return static_cast<T*>(ptr);
-        }
-
     public:
         // Parenting
-
-        // Set the object to the root one, this is the equivalent of calling: set_parent(NULL)
-        void set_root(bool destroy_old=true);
-        void set_parent(Object *parent);
-
-        // Removes the current root object and destroys/cleans it if `destroy_old` is set to `true`
-        static void remove_root(bool destroy_old=true);
+        Object* set_parent(Object *parent);
 
         template <typename T=Object>
-        inline T *get_parent() const
-        {
-            #ifdef assert
-                assert(this != NULL && "Attempting to return parent of NULL object!");
-            #endif
+        inline T *get_parent() const {
             return dynamic_cast<T*>(m_parent);
         }
 
+        // Return `this` as the base sreGUI::Object* type
+        inline Object* base() {
+            return this;
+        }
+        inline const Object* base() const {
+            return this;
+        }
     public:
         // Iterating
 
@@ -218,35 +190,51 @@ namespace sreGUI
             Iterator end() const { return Iterator(m_ptr + m_count); }
         } components;
     public:
-        bool is_hovering() const { return s_querying == this; }
-        static bool hovering_anything() { return s_querying != NULL; /*This should be the equivalent of !((Object*)nullptr)->is_hovering()*/ }
-
-        template <typename T=Object>
-        static const T* get_hovering() { return dynamic_cast<const T*>(s_querying); }
+        inline bool is_hovering(bool hastobeontop=true) const {
+            if (hastobeontop)
+                return m_state.has(S_HOVERING);
+            return m_state.has(S_INCURSOR);
+        }
+        inline sre::flags16 get_state() const {
+            return m_state;
+        }
     protected:
         virtual void update() {}
         virtual void pre_render() {}
+        virtual void render() {}
         virtual void post_render() {}
     private:
-        bool call_query(sre::vec2ut pt) const;
+        void call_query(sre::vec2ut pt, std::deque<const Object*>& stack);
+        void call_render(sre::ClipStackUT& clipstack);
         void call_update();
-        void call_render();
 
         void call_process();
         void call_processchildren();
         void call_prerender();
-
     public:
         sre::Signal<sre::empty_t> updated{this};
         sre::Signal<sre::empty_t> rendered{this};
     };
 
-    Object* get_root();
-    template <typename T>
-    inline T* get_root() { return dynamic_cast<T*>(get_root()); }
+    // Layer functions
 
-    sre::unit get_insets();
-    void set_insets(sre::unit insets); // Set left and right GUI insets. It is shared globally across the program
+    const std::deque<const Object*>& get_hovering(Layer* lyr=NULL);
+
+    void set_root(Object* object, Layer* lyr=NULL);
+    Object* get_root(Layer* lyr=NULL);
+
+    sre::unit get_insets(Layer* lyr=NULL);
+    sre::unit get_viewport_scale(Layer* lyr=NULL); // This will return 0 if the scale is set to 0 (the default)! You may want to call sre::window_getscale() to get the real scale
+    sre::rect2Dut get_viewport_area(Layer* lyr=NULL);
+
+    void set_insets(sre::unit insets, Layer* lyr=NULL);
+    void set_viewport(sre::rect2Dut area, sre::unit scale=0, Layer* lyr=NULL);
+//
+    inline bool is_hovering_anything(Layer* lyr=NULL) {
+        return !get_hovering(lyr).empty();
+    }
+    template <typename T>
+    inline T* get_root(Layer* lyr=NULL) { return dynamic_cast<T*>(get_root(lyr)); }
 }
 
 #endif

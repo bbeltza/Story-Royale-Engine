@@ -5,9 +5,12 @@
 
 using namespace sreECS;
 
-void Sprite::attach(sre::RSampler&& texture)
-{
+void Sprite::attach(sre::RAIITexture&& texture) {
     textures.push_back(std::move(texture));
+}
+
+void Sprite::attach(const sre::RAIITexture& texture) {
+    textures.push_back(texture);
 }
 
 void Sprite::on_render(Entity& entity)
@@ -17,7 +20,7 @@ void Sprite::on_render(Entity& entity)
     auto frame = ut_min(current_frame, textures.size() - 1);
     current_frame = frame;
 
-    sre::RSampler& texture = textures[frame];
+    sre::RAIITexture& texture = textures[frame];
     sre::vec2i texture_size = texture->size();
     
     sre::vec2f texture_fsize{texture_size};
@@ -33,7 +36,7 @@ void Sprite::on_render(Entity& entity)
     );
     sre::s32 flags = SRE_DRAWFLAG_CAMERA;
 
-    sre::render_draw1(
+    sre::render::draw1(
         flags,
         {sre::RenderInstance1{
             render_rect,
