@@ -5,6 +5,25 @@
 //      fxc /T vs_4_0 /Fh vs1.h /E D1main d3d11shaders.hlsl
 //      fxc /T vs_4_0 /Fh vs2.h /E D2main d3d11shaders.hlsl
 
+// For d3d12's root signature: 
+//      fxc /T rootsig_1_0 /E D3D12RootSig /Fh ../"direct3d12 (joke)"/rs.h d3d11shaders.hlsl
+
+#define D3D12RootSig \
+        "RootFlags ( ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |"     \
+                    "DENY_HULL_SHADER_ROOT_ACCESS |"           \
+                    "DENY_DOMAIN_SHADER_ROOT_ACCESS |"         \
+                    "DENY_GEOMETRY_SHADER_ROOT_ACCESS),"       \
+        "CBV(b0, visibility=SHADER_VISIBILITY_VERTEX),"           \
+        "DescriptorTable( SRV(t0),"                               \
+                        "visibility=SHADER_VISIBILITY_PIXEL ),"   \
+        "RootConstants(num32BitConstants=2, b1, visibility=SHADER_VISIBILITY_VERTEX),"    \
+        "StaticSampler( s0, filter=FILTER_MIN_MAG_MIP_POINT," \
+                           "addressU=TEXTURE_ADDRESS_CLAMP," \
+                           "addressV=TEXTURE_ADDRESS_CLAMP," \
+                           "addressW=TEXTURE_ADDRESS_CLAMP," \
+                           "borderColor=STATIC_BORDER_COLOR_TRANSPARENT_BLACK," \
+                           "visibility=SHADER_VISIBILITY_PIXEL)"
+
 struct D1input
 {
     float4 transform: POSITION0;
@@ -31,11 +50,11 @@ struct PSinput
     float2 tuv: TEXCOORD0;
 };
 
-cbuffer CBuniforms: register(b0)
-{
+cbuffer CBuniforms: register(b0) {
     float4x4 VIEWPORT;
 };
-float2 CAMERA: register(c0);
+
+float2 CAMERA: register(b1);
 
 PSinput D1main(D1input input, uint vid: SV_VertexID)
 {

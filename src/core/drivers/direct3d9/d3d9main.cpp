@@ -101,7 +101,7 @@ Instance::Instance(SDL_Window* window, int* outstatus)
     m_pparamcache.SwapEffect = D3DSWAPEFFECT_DISCARD;
     m_pparamcache.Windowed = TRUE;
     m_pparamcache.Flags = D3DPRESENTFLAG_VIDEO;
-    m_pparamcache.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+    m_pparamcache.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 
     SRE_DXCALL(m_dxd3d9->CreateDevice(adapter,
                                        devtype,

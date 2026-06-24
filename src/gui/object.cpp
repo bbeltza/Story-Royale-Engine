@@ -241,7 +241,7 @@ void Object::call_render(sre::ClipStackUT& clipstack)
     if (has_clip)
     {
         clipstack.push(m_absolute);
-        sre::render::set_scissors(clipstack.top());
+        sre::render::set_scissors(clipstack.top(), true);
     }
     
     for (auto& comp : components)

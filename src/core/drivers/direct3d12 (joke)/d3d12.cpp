@@ -602,6 +602,45 @@ static const BYTE C_PS[] = {
       0,   0,   0,   0
 };
 
+static const BYTE C_ROOTSIG[] = {
+     68,  88,  66,  67,   7, 254, 
+    234, 151, 223,  43, 244,  11, 
+    191, 216, 211, 110, 181, 160, 
+    113, 139,   1,   0,   0,   0, 
+    212,   0,   0,   0,   1,   0, 
+      0,   0,  36,   0,   0,   0, 
+     82,  84,  83,  48, 168,   0, 
+      0,   0,   2,   0,   0,   0, 
+      3,   0,   0,   0,  24,   0, 
+      0,   0,   1,   0,   0,   0, 
+    116,   0,   0,   0,  29,   0, 
+      0,   0,   2,   0,   0,   0, 
+      1,   0,   0,   0,  60,   0, 
+      0,   0,   0,   0,   0,   0, 
+      5,   0,   0,   0,  72,   0, 
+      0,   0,   1,   0,   0,   0, 
+      1,   0,   0,   0, 104,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+     80,   0,   0,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+    255, 255, 255, 255,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      3,   0,   0,   0,   3,   0, 
+      0,   0,   0,   0,   0,   0, 
+     16,   0,   0,   0,   4,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0, 255, 255, 
+    127, 127,   0,   0,   0,   0, 
+      0,   0,   0,   0,   5,   0, 
+      0,   0
+};
+
 namespace sre
 {
     template <typename T, size_t N>
@@ -660,7 +699,7 @@ struct sred3d12_texture
     ID3D12Resource* dxstaging{};
     ID3D12Resource* dxresource{};
     UINT srvoffset{};
-    UINT srvid{}; // Last srv capacity value in which gpu_descriptor was set during binding, gpu_descriptor is just a cache value
+    UINT srvid{}; // Capacity of the last srv in which `gpu_descriptor` was set during binding, gpu_descriptor is just a cache value
     D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor{};
 
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
@@ -799,8 +838,8 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
         #ifndef NDEBUG
         if (SDL_GetWindowFlags(window) & SDL_WINDOW_OPENGL)
         {
-            // Give a welcoming warning, but still proceed
-            sre::logmsg("DirectX 12: Enabling the debug layer on an OpenGL window (one that has the SDL_WINDOW_OPENGL flag) is broken, and would thus not allow any device creation. If you still want the debug layer, please remove or comment the SDL_WINDOW_OPENGL flag in the window creation code right at \"src/core/window.c\". Thanks!", SRE_LOG_WARN);
+            // Give a friendly warning, but still proceed
+            sre::logmsg("DirectX 12: Enabling the debug layer on an OpenGL window (one that has the SDL_WINDOW_OPENGL flag) is broken, and would thus not allow any device creation. If you still want the debug layer, please remove or comment the SDL_WINDOW_OPENGL flag in the window creation code right at \"src/core/window.c\" (or use the SRE_HINT_SDL_WINDOWFLAGS hint). Thanks!", SRE_LOG_WARN);
         }
         else
         {
@@ -980,54 +1019,8 @@ bool sred3d12_inst::_pipelinesetup()
         /* color  */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
     };
 
-    static const D3D12_DESCRIPTOR_RANGE DESCRANGES[] = {
-        { D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 }
-    };
-    D3D12_ROOT_PARAMETER ROOT_PARAMS[] = {
-        /* global cb     */ D3D12_ROOT_PARAMETER{ D3D12_ROOT_PARAMETER_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX },
-        /* textures      */ D3D12_ROOT_PARAMETER{ D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, D3D12_SHADER_VISIBILITY_PIXEL},
-        /* camera vector */ D3D12_ROOT_PARAMETER{ D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS, D3D12_SHADER_VISIBILITY_VERTEX }
-    };
-    ROOT_PARAMS[0].Descriptor = { 0, 0 };
-    ROOT_PARAMS[1].DescriptorTable = { 1, DESCRANGES };
-    ROOT_PARAMS[2].Constants = {1, 0, 2};
-
     HRESULT hr;
-
-    {   // Root Signature setup
-        ID3DBlob* rsblob;
-        ID3DBlob* rserr;
-        D3D12_ROOT_SIGNATURE_DESC rsdesc{};
-        rsdesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-        rsdesc.NumParameters = sre::countof(ROOT_PARAMS);
-        rsdesc.pParameters = ROOT_PARAMS;
-
-        D3D12_STATIC_SAMPLER_DESC sampler_desc{};
-        sampler_desc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-        sampler_desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-        sampler_desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-        sampler_desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-        sampler_desc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-        sampler_desc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        sampler_desc.ShaderRegister = 0;
-        sampler_desc.RegisterSpace = 0;
-        rsdesc.NumStaticSamplers = 1;
-        rsdesc.pStaticSamplers = &sampler_desc;
-
-        SRE_DXGETADDR(D3D12SerializeRootSignature, PFN_D3D12_SERIALIZE_ROOT_SIGNATURE, dlls.d3d12);
-        assert(pD3D12SerializeRootSignature != NULL);
-
-        SRE_DXCALL(pD3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
-        if (rserr)
-        {
-            sre::error(SRE_ERR_FAIL, rserr->GetBufferPointer());
-            rserr->Release();
-            return false;
-        }
-
-        SRE_DXCALL(dxdevice->CreateRootSignature(0, rsblob->GetBufferPointer(), rsblob->GetBufferSize(), IID_PPV_ARGS(&dxrootsignature)));
-        rsblob->Release();
-    }
+    SRE_DXCALLF(dxdevice->CreateRootSignature(0, C_ROOTSIG, sizeof(C_ROOTSIG), IID_PPV_ARGS(&dxrootsignature)));
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pstate_desc{};
     pstate_desc.pRootSignature = dxrootsignature;
@@ -1204,7 +1197,6 @@ void sred3d12_inst::begin(const float color[4])
 
     dxcmd_list->SetDescriptorHeaps(1, &dxsrvheapsv);
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
-    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
 
     D3D12_RESOURCE_BARRIER rbtransition{};
     rbtransition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1349,6 +1341,9 @@ void sred3d12_inst::set_viewportstate(const sre::rect2Di* rectangle, sre::unit s
     }
     
     dxcmd_list->RSSetViewports(1, &viewport);
+    // FIXME: Use constant buffer views? (From what I've heard, this function creates the descriptor for you but I believe it is less efficient that making the descriptor yourself with the set descriptor heap)
+    //      This was fine when setting it only once per frame, but now we have to change it for every viewport change occuring.
+    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
 }
 
 void sred3d12_inst::set_scissorstate(const sre::rect2Di* rectangle)

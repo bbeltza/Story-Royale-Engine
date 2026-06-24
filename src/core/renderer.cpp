@@ -434,7 +434,7 @@ bool sre::render::begin(sre::col4 clear, sre::vec2ut camera)
 	engine.video.state.viewport.area = engine.video.state.scissor;
 	engine.video.state.viewport.center = engine.vsize * 0.5_ut;
 	engine.video.state.viewport.scale = engine.scale;
-	engine.video.state.camera = ((-camera + engine.video.state.viewport.center) * engine.scale).ceil();
+	engine.video.state.camera = camera;
 
 	engine.video.state.state_update = UPD_ALL;
 
@@ -477,19 +477,15 @@ bool sre::render::set_viewport(sre::rect2Dut zone, sre::unit scale) {
 	// Viewport changes reset the scissor rects
 	sre::render::reset_scissors();
 	
-	engine.video.state.camera /= engine.video.state.viewport.scale;
-	engine.video.state.camera += engine.video.state.viewport.center;
-	
 	engine.video.state.viewport.area = zone;
 	engine.video.state.viewport.scale = scale;
 	engine.video.state.viewport.center = zone.size * 0.5_ut;
-	engine.video.state.camera = ((-engine.video.state.camera + engine.video.state.viewport.center) * scale).ceil();
 
 	engine.video.state.state_update |= (UPD_CAMERA | UPD_VIEWPORT | UPD_SCISSOR);
 	return true;
 }
 
-bool sre::render::set_scissors(sre::rect2Dut zone) {
+bool sre::render::set_scissors(sre::rect2Dut zone, bool offset_byviewport) {
 	if (engine.video.state.scissor == zone)
 		return false;
 	
@@ -497,6 +493,9 @@ bool sre::render::set_scissors(sre::rect2Dut zone) {
 	
 	assert(zone.size.x >= 0);
 	assert(zone.size.y >= 0);
+
+	if (offset_byviewport)
+		zone.position += engine.video.state.viewport.area.position;
 
 	if (zone.position.x < 0) {
 		zone.size.x += zone.position.x;
@@ -630,6 +629,9 @@ static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 		};
 		cmd.scissor_viewport.scale = scale;
 		m.rendercmds.emplace_back(cmd);
+
+		// Update the absolute camera offset sent to the render driver
+		engine.video.state.cameraoffstet = ((engine.video.state.viewport.center - engine.video.state.camera) * engine.scale).ceil();
 	}
 	if (state & UPD_SCISSOR) {
 		const auto& zone = engine.video.state.scissor;
@@ -645,8 +647,8 @@ static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 	}
 	if (state & UPD_CAMERA) {
 		RenderCmd cmd{ CMD_STATE_CAMERA };
-		cmd.camera.x = engine.video.state.camera.x * flags.has(SRE_DRAWFLAG_CAMERAX);
-		cmd.camera.y = engine.video.state.camera.y * flags.has(SRE_DRAWFLAG_CAMERAY);
+		cmd.camera.x = engine.video.state.cameraoffstet.x * flags.has(SRE_DRAWFLAG_CAMERAX);
+		cmd.camera.y = engine.video.state.cameraoffstet.y * flags.has(SRE_DRAWFLAG_CAMERAY);
 		m.rendercmds.emplace_back(cmd);
 	}
 
@@ -768,7 +770,7 @@ void sre::render::draw2(sre::flags32 flags, const sre::RenderPoint points[], siz
 
 extern "C" void sre_render_set_vsync(bool enable) { sre::render::set_vsync(enable); }
 extern "C" bool sre_render_set_viewport(const sre_rect2Dut* zone, sre_unit scale) { return sre::render::set_viewport(*zone, scale); }
-extern "C" bool sre_render_set_scissors(const sre_rect2Dut* zone) { return sre::render::set_scissors(*zone); }
+extern "C" bool sre_render_set_scissors(const sre_rect2Dut* zone, bool offset_byviewport) { return sre::render::set_scissors(*zone, offset_byviewport); }
 extern "C" bool sre_render_set_blendmode(sre_blendMode blendmode) { return sre::render::set_blendmode(blendmode); }
 
 extern "C" bool sre_render_get_viewport(sre_rect2Dut* area, sre_vec2ut* center, sre_unit* scale) {

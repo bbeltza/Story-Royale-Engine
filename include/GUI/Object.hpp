@@ -23,7 +23,6 @@ namespace sreGUI
         friend class Layer;
         Layer* m_attachedlyr = NULL;
         Object* m_parent = NULL;
-        //          ^^^   m_parent could be optimized away when `add_child` gets called and doesn't assign it
 
         sre::rect2Dut m_absolute = {0, 0, 0, 0};
         sre::flags16 m_state = {};
@@ -31,7 +30,8 @@ namespace sreGUI
         enum State
         {
             S_INCURSOR = ut_bit(0),
-            S_HOVERING = ut_bit(1)
+            S_HOVERING = ut_bit(1),
+            S_FOCUS = ut_bit(2) // Set to whether you're focusing the GUI area on the screen, will be working on that soon.
         };
         enum Flags
         {

@@ -69,6 +69,7 @@
 			sre_u8 state_update;
 			sre_u8 _reserved; // padding...
 
+			sre_vec2ut cameraoffstet;
 			sre_vec2ut camera;
 
 			struct {

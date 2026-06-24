@@ -183,7 +183,7 @@ int sre_texture_release(sre_Texture* texture);
 void sre_render_set_vsync(bool enable);
 
 bool sre_render_set_viewport(const sre_rect2Dut* zone, sre_unit scale);
-bool sre_render_set_scissors(const sre_rect2Dut* zone);
+bool sre_render_set_scissors(const sre_rect2Dut* zone, bool offset_byviewport);
 bool sre_render_set_blendmode(sre_blendMode blendmode);
 
 // All of these parameters can be NULL
@@ -231,7 +231,7 @@ SRE_CAPI_END
 
             void set_vsync(bool enable);
             bool set_viewport(sre::rect2Dut zone, sre::unit scale=0);
-            bool set_scissors(sre::rect2Dut zone);
+            bool set_scissors(sre::rect2Dut zone, bool offset_byviewport=false); // `offset_byviewport` offsets the `zone`'s position parameter by the current viewport's position
             bool set_blendmode(sre::blendMode mode);
 
             // @param currently `true` if you want to return the current vsync state of the video driver, otherwise, it returns the deferred value set by `set_vsync`
