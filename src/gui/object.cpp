@@ -26,8 +26,16 @@ Object::~Object()
     if (m_parent)
         m_parent->children.remove(this);
     
-    while (!children.empty())
-        children.front()->destroy();
+    while (!children.empty()) { // FIXME: Stop using std::lists for this, please...
+        auto front = children.front();
+        if (front->is_static()) {
+            children.pop_front();
+            front->m_parent = NULL;
+        }
+        else {
+            front->destroy();
+        }
+    }
     
     if (m_attachedlyr)
     {
@@ -267,12 +275,13 @@ void Object::call_render(sre::ClipStackUT& clipstack)
 
     rendered.fire();
 
-    /*
-    sre::render::draw2(0, sre::RED, {
-        m_absolute.position,
-        m_absolute.position + sre::vec2ut{ m_absolute.size.x, 0 },
-        m_absolute.position + m_absolute.size,
-        m_absolute.position + sre::vec2ut{ 0, m_absolute.size.y }
+#if 0
+    sre::col4 red{ sre::RED };
+    sre::render::draw2(0, {
+        { m_absolute.position, 0, red },
+        { m_absolute.position + sre::vec2ut{ m_absolute.size.x, 0 }, 0, red },
+        { m_absolute.position + m_absolute.size, 0, red },
+        { m_absolute.position + sre::vec2ut{ 0, m_absolute.size.y }, 0, red }
     }, SRE_PRIMITIVE_LINELOOP);
-    */
+#endif
 }

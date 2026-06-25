@@ -32,7 +32,10 @@ namespace sre
     class objLayer
     {
         public:
-            static void delete_object(sre::Object* obj) { delete obj; }
+            static void delete_object(sre::Object* obj) {
+                assert(obj->m_state == obj->_STATE_DESTROYING);
+                delete obj;
+            }
     };
 
     void __flush_destroy_queue() {
@@ -105,7 +108,7 @@ void __cleanup_objects()
     auto& obj_layer = *OBJLAYER_TOVECTOR();
     auto& obj_layerfl = *OBJLAYERFL_TOVECTOR();
     for (auto obj : obj_layer)
-        sre::objLayer::delete_object(obj);
+        obj->destroy();
     
     obj_layer.~vector();
     obj_layerfl.~vector();
@@ -126,7 +129,7 @@ void __cleanup_objects()
 
 // Public API
 
-    // Not much to do on those functions
+    // Not much to do in those functions
 
 sre::Object::Object()
 {
@@ -147,7 +150,9 @@ sre::Object::~Object()
 
 void sre::Object::destroy()
 {
-    if (m_destroying)
+    assert(m_state != _STATE_STATIC && "Attempting to call `destroy` on a static object. Make sure to reorder your static objects properly inside your class!");
+
+    if (m_state != _STATE_NORMAL)
         return;
 
     DQ_LOCK();
@@ -158,7 +163,7 @@ void sre::Object::destroy()
         goto FINISH;
     }
 
-    m_destroying = true;
+    m_state = _STATE_DESTROYING;
     sre::DESTROY_QUEUE.push(this);
 
 FINISH:
@@ -243,6 +248,12 @@ int sre_bind_objectlayer(sre_Object* object) {
 
 void sre_unbind_objectlayer(int index) {
     sre::unbind_object_layer(index);
+}
+
+//
+
+void sre_make_object_static(sre::Object* object) {
+    
 }
 
 //

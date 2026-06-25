@@ -36,7 +36,13 @@ namespace sre
 {
     class Object
     {
-        int m_destroying = 0;
+        enum _state {
+            _STATE_NORMAL = 0,
+            _STATE_DESTROYING,
+            _STATE_STATIC
+        };
+
+        _state m_state = _STATE_NORMAL;
         protected:
             friend class objLayer;
 
@@ -47,6 +53,23 @@ namespace sre
             virtual void render() {}
         public:
             void destroy();
+            bool is_static() const { return m_state == _STATE_STATIC; }
+
+        public:
+            // Don't call destroy the object whenever `destroy` gets called. Make it static,
+            //  used to tell that an object has automatic duration. Usually, you'd call `new` on it
+            //  and call it a day, but you don't always want heap allocations everywhere... So calling
+            //  this function determines that, you might also want to look at the sre::static_obj template
+            //  which does that for you automatically...
+            // Calling `destroy` on an object and then calling __make_static is undefined behavior.
+            // You should not consider using this function at all...
+            static void __make_static(sre::Object& obj) {
+                /*
+                if (obj.m_state != _STATE_NORMAL)
+                    return;
+                */
+                obj.m_state = _STATE_STATIC;
+            }
     };
 
     inline void safe_destroy(sre::Object*& obj) {
@@ -64,6 +87,42 @@ namespace sre
     // @returns The index of the bound object. Aka the order in which the engine will look into the object
     int bind_object_layer(sre::Object& object);
     void unbind_object_layer(int index);
+
+    // Static object class template (experimental)
+    // Use this if you don't want extra heap allocations over an object, but know that that object is going to live within a scope or struct's lifetime.
+    // Other than that, it works just like a pointer to the object (with its overloaded operators)
+    template <typename T=sre::Object>
+    class static_obj
+    {
+        /* Is this, uhhh... necessary?¿?
+        using value_type = T;
+        using pointer_type = T*;
+        */
+
+        T m_obj;
+    public:
+        template <typename... Args>
+        static_obj(Args&&... args): m_obj(std::forward<Args>(args)...)  {
+            sre::Object::__make_static(m_obj);
+        }
+
+        const T* operator ->() const { return &m_obj; }
+              T* operator ->()       { return &m_obj; }
+    
+        // Should just return the exact same address as the `static_obj` type
+        const T* operator &() const { return &m_obj; }
+              T* operator &()       { return &m_obj; }
+
+        const T& operator *() const { return m_obj; }
+              T& operator *()       { return m_obj; }
+
+    public:
+        const T* ptr() const { return &m_obj; }
+              T* ptr()       { return &m_obj; }
+
+        const T& ref() const { return m_obj; }
+              T& ref()       { return m_obj; }
+    };
 }
 
 #endif

@@ -1,4 +1,9 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- June 25th 2026: 0.105.25:
+    - The engine has been public for over one day now! Nobody saw it!!!
+    - Lazy fixes.
+    - Static objects (that inherit sre::Object/sreECS::Scene-Entity/sreGUI::Object...): No need to longer call `new` to make an object like these, but it's still experimental.
+                                                                                            Other RAII helpers like std::unique_ptr might also be integrated into this system.
 - June 23th 2026: 0.105.23
     - So... It's been 1 year, one year of working on this engine... How amazing is that!
     - Render refactorings: - Draw2's mode parameter has been changed to this set of primitive modes:
