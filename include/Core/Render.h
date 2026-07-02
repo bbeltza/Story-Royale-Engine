@@ -64,8 +64,9 @@ typedef enum sre_blendMode
     SRE_BLEND_ADD,
     SRE_BLEND_MOD,
     SRE_BLEND_MUL,
-
-    SRE_BLEND_UNKNOWN,
+    
+    SRE_NUM_BLENDMODES,
+    SRE_BLEND_UNKNOWN = -1,
     SRE_BLEND_DEFAULT = SRE_BLEND_BLEND
 } sre_blendMode;
 

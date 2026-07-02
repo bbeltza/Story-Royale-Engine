@@ -1,8 +1,14 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- July 2nd 2026: 0.106.02:
+    - srevulkan is available! As an external driver: https://github.com/bbeltza/srevulkan
+    - A few internal renderer improvements in D3D11 and D3D12 (There's triple-buffering in D3D12 now for example...), as well as a new enum value for blend modes (SRE_NUM_BLENDMODES)
+    - More improvements on sreGUI::Components (not sreECS::Components yet though...), and more consistency to its codebase: `on_prerender` is now `on_postprocess`, so migration is needed if
+        that virtual method was used. In addition to that, sreGUI::List support item alignments for both axes (Horizontal and vertical alignments instead of just one).
+    - Time to lock in for my actual game??!?
 - June 25th 2026: 0.105.25:
     - The engine has been public for over one day now! Nobody saw it!!!
     - Lazy fixes.
-    - Static objects (that inherit sre::Object/sreECS::Scene-Entity/sreGUI::Object...): No need to longer call `new` to make an object like these, but it's still experimental.
+    - Static objects (that inherit sre::Object/sreECS::Scene-Entity/sreGUI::Object...): No need to longer call `new` to make an object like this, but it's still experimental.
                                                                                             Other RAII helpers like std::unique_ptr might also be integrated into this system.
 - June 23th 2026: 0.105.23
     - So... It's been 1 year, one year of working on this engine... How amazing is that!

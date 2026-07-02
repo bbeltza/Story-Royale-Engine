@@ -84,8 +84,7 @@ PSinput D1main(D1input input, uint vid: SV_VertexID)
 
     float4 vert = VERTICES[vid] - float4(input.anchor, 0.0, 0.0);
     vert = mul(vert, mul(transform, rotation));
-    vert = ceil(vert * VIEWPORT[2][2] + float4(CAMERA, 0, 0));
-    vert.w = 1;
+    vert.xy = (vert.xy * VIEWPORT[2][2] + CAMERA);
     vert = mul(VIEWPORT, vert);
 
     PSinput output = {
@@ -99,7 +98,7 @@ PSinput D1main(D1input input, uint vid: SV_VertexID)
 PSinput D2main(D2input input)
 {
     float4 vert = float4(input.position, 0, 1);
-    vert.xy = ceil(vert.xy * VIEWPORT[2][2]);
+    vert.xy = (vert.xy * VIEWPORT[2][2]);
     vert.xy += CAMERA;
     vert = mul(VIEWPORT, vert);
 

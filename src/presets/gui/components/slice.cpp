@@ -3,7 +3,7 @@
 
 using namespace sreGUI;
 
-void Slice::on_render(const sre::rect2Dut &dimensions)
+void Slice::on_render(const sre::rect2Dut& dimensions)
 {
     if (!texture)
         return;

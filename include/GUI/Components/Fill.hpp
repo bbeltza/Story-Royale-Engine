@@ -16,7 +16,7 @@ namespace sreGUI
         inline operator sre::col4&() { return color; }
     public:
         sre::col4 color;
-    protected:
+        
         void on_render(const sre::rect2Dut& dimensions) override;
     };
 }

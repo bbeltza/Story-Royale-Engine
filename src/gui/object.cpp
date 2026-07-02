@@ -226,7 +226,7 @@ void Object::call_prerender()
     for (auto& comp : components)
     {
         if (comp.enabled())   
-            comp.on_prerender(m_absolute);
+            comp.on_postprocess(m_absolute);
     }
 }
 

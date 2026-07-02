@@ -11,11 +11,6 @@ namespace sreGUI
 
     struct Image : public Component
     {
-        enum Flags
-        {
-            F_REGION = ut_bit(1)
-        };
-
         Image(sre::col4 modulate=sre::WHITE): modulate(modulate) {}
         Image(const sre::RAIITexture& texture, sre::col4 modulate=sre::WHITE): texture(texture), modulate(modulate) {}
         Image(sre::RAIITexture&& texture, sre::col4 modulate=sre::WHITE): texture(std::move(texture)), modulate(modulate) {}
@@ -25,7 +20,7 @@ namespace sreGUI
         sre::rect2Di region{0, 0};
 
         void fit(Transform& transform);
-        void on_render(const sre::rect2Dut &dimensions) override;
+        void on_render(const sre::rect2Dut& dimensions) override;
     };
 }
 

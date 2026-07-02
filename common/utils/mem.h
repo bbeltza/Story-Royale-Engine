@@ -19,7 +19,7 @@ Creates a null terminated array, of anything, takes any argument to put into an 
 It's discouraged to use it with numbers as numbers can be 0
 */
 #define ut_array(...) {__VA_ARGS__, NULL}
-#define ut_arrcount(arr) (sizeof(arr) / sizeof(arr[0]))
+#define ut_arrcount(arr) (sizeof(arr) / sizeof(*(arr)))
 
 #if defined(_MSC_VER) && !defined(__clang__)
 	#include <malloc.h>

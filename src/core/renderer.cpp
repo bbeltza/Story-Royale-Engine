@@ -233,7 +233,7 @@ void __setup_renderer()
 			if (!driverdata)
 				sre::critical(SRE_ERR_CORE, "SRE_HINT_EXTERN_RENDERDRIVER is NULL...");
 
-			sre::log("FOUND external render driver: \"%s\"", driverdata->name);
+			sre::log(SRE_LOG_INFO "FOUND external render driver: \"%s\"", driverdata->name);
 			int status = render_setupenv(driverdata);
 			
 			if (status == SRE_RENDERSTATUS_FAILED)
@@ -622,10 +622,10 @@ static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 		const auto& scale = engine.video.state.viewport.scale;
 		RenderCmd cmd{ CMD_STATE_VIEWPORT };
 		cmd.scissor_viewport.rect = {
-			static_cast<int>(zone.position.x * scale ),
-			static_cast<int>(zone.position.y * scale ),
-			static_cast<int>(zone.size.x * scale ),
-			static_cast<int>(zone.size.y * scale )
+			static_cast<int>( ceil(zone.position.x * scale) ),
+			static_cast<int>( ceil(zone.position.y * scale) ),
+			static_cast<int>( ceil(zone.size.x * scale) ),
+			static_cast<int>( ceil(zone.size.y * scale) )
 		};
 		cmd.scissor_viewport.scale = scale;
 		m.rendercmds.emplace_back(cmd);
