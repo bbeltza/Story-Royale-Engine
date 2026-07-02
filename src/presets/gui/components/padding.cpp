@@ -8,7 +8,7 @@ void Padding::set_all(const sre::udim& value)
     padding.bottom_right = {value, value};
 }
 
-sre::vec2ut Padding::process_position(const sre::rect2Dut& dimensions, sre::vec2ut)
+sre::vec2ut Padding::process_position(const sre::rect2Dut& dimensions, const sre::vec2ut&)
 {
     m_oldabs = dimensions;
 
@@ -19,7 +19,7 @@ sre::vec2ut Padding::process_position(const sre::rect2Dut& dimensions, sre::vec2
     return dimensions.position + lt;
 }
 
-void Padding::on_prerender(sre::rect2Dut& dimensions)
+void Padding::on_postprocess(sre::rect2Dut& dimensions)
 {
     dimensions = m_oldabs;
 }

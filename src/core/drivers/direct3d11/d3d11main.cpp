@@ -4,7 +4,21 @@
 #include <SDL_hints.h>
 #include <utils/mem.h>
 
+#include <VersionHelpers.h>
+
 SRE_EXTERN_C_VAR sre::RenderDriverHelper<sreD3D11::Instance> sred3d11{"Direct3D 11"};
+
+static DXGI_SWAP_EFFECT choose_swapeffect()
+{
+    /* These two following enums aren't available for older versions of the Windows SDK, hence the hardcoded casted values */
+        /* It should be fine */
+    if (IsWindows10OrGreater())
+        return static_cast<DXGI_SWAP_EFFECT>(4); // DXGI_SWAP_EFFECT_FLIP_DISCARD
+    if (IsWindows8OrGreater())
+        return static_cast<DXGI_SWAP_EFFECT>(3); // DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+
+    return DXGI_SWAP_EFFECT_SEQUENTIAL;
+}
 
 using namespace sreD3D11;
 
@@ -43,7 +57,7 @@ Instance::Instance(SDL_Window* window, int* outstatus)
         // sre::log("Description: %ls ; VendorId: %u ; DeviceId: %u ; SubsysId: %u ; Revision: %u ; DedicatedVideoMemory: %zu ; DedicatedSystemMemory: %zu ; SharedSystemMemory: %zu ; AdapterLuid: %p",
         //     adapterdesc.Description, adapterdesc.VendorId, adapterdesc.DeviceId, adapterdesc.SubSysId, adapterdesc.Revision, adapterdesc.DedicatedVideoMemory, adapterdesc.DedicatedSystemMemory, adapterdesc.SharedSystemMemory, adapterdesc.AdapterLuid);
 
-        UINT device_flags = D3D11_CREATE_DEVICE_SINGLETHREADED | D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+        UINT device_flags = D3D11_CREATE_DEVICE_SINGLETHREADED;
         #ifndef NDEBUG
         device_flags |= D3D11_CREATE_DEVICE_DEBUG;
         #endif
@@ -58,44 +72,17 @@ Instance::Instance(SDL_Window* window, int* outstatus)
             D3D11_SDK_VERSION,
             &m_dxdevice, &feature, &m_dxdevicecontext
         ));
-
-        #if WINVER <= _WIN32_WINNT_WIN10
-            #define USE_DXGI_SWAPEFFECT DXGI_SWAP_EFFECT_FLIP_DISCARD
-        #elif WINVER <= _WIN32_WINNT_WIN8
-            #define USE_DXGI_SWAPEFFECT DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
-        #else
-            #define USE_DXGI_SWAPEFFECT static_cast<DXGI_SWAP_EFFECT>(3)
-        #endif
-
-        #if WINVER < _WIN32_WINNT_WIN10
-            #define DXGI_SWAP_EFFECT_FLIP_DISCARD DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
-
-        #endif
         
         DXGI_SWAP_CHAIN_DESC swapchain_desc{};
         swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapchain_desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        swapchain_desc.BufferCount = 2;
+        swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        swapchain_desc.BufferCount = 3; // Triple buffering now???
         swapchain_desc.SampleDesc.Count = 1;
         swapchain_desc.Windowed = TRUE;
-        swapchain_desc.SwapEffect = USE_DXGI_SWAPEFFECT;
+        swapchain_desc.SwapEffect = choose_swapeffect();
         swapchain_desc.OutputWindow = wminfo.info.win.window;
 
-        SRE_DXCALL(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
-        if (FAILED(hr))
-        {
-            if (hr != DXGI_ERROR_INVALID_CALL)
-                return;
-
-            sre::log(SRE_LOG_INFO "[Direct3D11]: Switching to legacy swapchain...");
-
-            // Double-buffering and thus FLIP swap effects might not be supported, create a legacy single-buffered swap-chain
-            swapchain_desc.BufferCount = 1;
-            swapchain_desc.Flags = 0;
-            swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
-            SRE_DXCALLC(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
-            // m_uselegacy = true;
-        }
+        SRE_DXCALLC(dxfactory->CreateSwapChain(m_dxdevice, &swapchain_desc, &m_dxswapchain));
 
         // Disable alt-enter automatic fullscreen toggling by DXGI. It switches to non-borderless fullscreen and that is not properly implemented
         IDXGIFactory* parentfactory{};

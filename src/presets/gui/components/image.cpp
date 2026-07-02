@@ -17,12 +17,11 @@ void Image::fit(Transform& transform)
     transform.size = sre::udim2::fromoffset(sre::vec2ut{size});
 }
 
-void Image::on_render(const sre::rect2Dut &dimensions)
+void Image::on_render(const sre::rect2Dut& dimensions)
 {
     sre::vec2f uv{1};
     sre::vec2f uvoffs{0};
-    if (flags.has(F_REGION) && texture)
-    {
+    if (texture) {
         sre::vec2f sizef{texture->size()};
         if (region.size.x)
             uv.x = region.size.x / sizef.x;

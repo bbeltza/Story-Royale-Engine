@@ -44,12 +44,12 @@ void Entity::setup_components(Component* const components[], size_t count)
 		if (m_componentcount != count)
 		{
 			operator delete (m_components);
-			m_components = static_cast<Component**>(operator new(sizeof(Component*) * count));
+			m_components = static_cast<Component**>(::operator new(sizeof(Component*) * count));
 		}
 	}
 	else
 	{
-		m_components = static_cast<Component**>(operator new(sizeof(Component*) * count));
+		m_components = static_cast<Component**>(::operator new(sizeof(Component*) * count));
 	}
 
 	m_componentcount = count;

@@ -14,9 +14,13 @@ namespace sreGUI
         sre::udim2 position;
         sre::udim2 size;
         sre::vec2ut anchor;
-    protected:
-        sre::vec2ut process_size(const sre::rect2Dut& dimensions) override;
-        sre::vec2ut process_position(const sre::rect2Dut& dimensions, sre::vec2ut parent_size) override;
+
+        sre::vec2ut process_size(const sre::rect2Dut& dimensions) override {
+            return size.to_absolute(dimensions.size);
+        }
+        sre::vec2ut process_position(const sre::rect2Dut& dimensions, const sre::vec2ut& parent_size) override {
+            return dimensions.position + position.to_absolute(parent_size) - dimensions.size * anchor;
+        }
     };
 }
 

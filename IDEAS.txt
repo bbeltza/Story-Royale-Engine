@@ -23,5 +23,7 @@
   This reduces for the love of god the amount of render driver in this engine (From 7? Or 8 with the work in progress software renderer???)
   A hint to tell what specific GL version to use will also be there.
 
+- Static sre::Objects: Basically, objects that have automatic storage duration (aka, being in stack or static memory, or being defined inside another class), they do not have any effect when getting `destroy()`ed.
+
 - Standard audio formats? (The thing is, I said I would be using SDL's audio streams but they used quite a lot of memory on initialization so I don't know...)
 - An old one: Making the game run on a separate process or "module" to the engine?

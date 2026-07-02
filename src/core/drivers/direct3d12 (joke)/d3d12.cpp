@@ -13,15 +13,15 @@
 
 // All shader bytecode
 static const BYTE D1_VS[] = {
-     68,  88,  66,  67, 154,  96, 
-    158, 231, 166, 251,  50, 105, 
-    214, 166, 245,  21, 187,  11, 
-     24, 145,   1,   0,   0,   0, 
-    216,   6,   0,   0,   5,   0, 
+     68,  88,  66,  67, 151, 178, 
+     34,   6, 164, 235, 137,  33, 
+    219, 113, 174, 120, 104, 216, 
+     99, 250,   1,   0,   0,   0, 
+    196,   6,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
     104,   1,   0,   0,  76,   2, 
       0,   0, 192,   2,   0,   0, 
-     92,   6,   0,   0,  82,  68, 
+     72,   6,   0,   0,  82,  68, 
      69,  70,  44,   1,   0,   0, 
       2,   0,   0,   0, 112,   0, 
       0,   0,   2,   0,   0,   0, 
@@ -131,8 +131,8 @@ static const BYTE D1_VS[] = {
      76,  79,  82,   0,  84,  69, 
      88,  67,  79,  79,  82,  68, 
       0, 171,  83,  72,  68,  82, 
-    148,   3,   0,   0,  64,   0, 
-      1,   0, 229,   0,   0,   0, 
+    128,   3,   0,   0,  64,   0, 
+      1,   0, 224,   0,   0,   0, 
      89,   0,   0,   4,  70, 142, 
      32,   0,   1,   0,   0,   0, 
       1,   0,   0,   0,  89,   0, 
@@ -259,64 +259,61 @@ static const BYTE D1_VS[] = {
      32,   0,   0,   0,   0,   0, 
       2,   0,   0,   0,  70, 128, 
      32,   0,   1,   0,   0,   0, 
-      0,   0,   0,   0,  66,   0, 
-      0,   5,  50,   0,  16,   0, 
-      0,   0,   0,   0,  70,   0, 
+      0,   0,   0,   0,  56,   0, 
+      0,   8, 242,   0,  16,   0, 
+      1,   0,   0,   0,  86,   5, 
      16,   0,   0,   0,   0,   0, 
-     56,   0,   0,   8, 242,   0, 
-     16,   0,   1,   0,   0,   0, 
-     86,   5,  16,   0,   0,   0, 
-      0,   0,  70, 142,  32,   0, 
-      0,   0,   0,   0,   1,   0, 
-      0,   0,  50,   0,   0,  10, 
-    242,   0,  16,   0,   0,   0, 
-      0,   0,  70, 142,  32,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   6,   0,  16,   0, 
-      0,   0,   0,   0,  70,  14, 
-     16,   0,   1,   0,   0,   0, 
-      0,   0,   0,   8, 242,  32, 
-     16,   0,   0,   0,   0,   0, 
-     70,  14,  16,   0,   0,   0, 
-      0,   0,  70, 142,  32,   0, 
-      0,   0,   0,   0,   3,   0, 
-      0,   0,  54,   0,   0,   5, 
-    242,  32,  16,   0,   1,   0, 
-      0,   0,  70,  30,  16,   0, 
-      2,   0,   0,   0,  62,   0, 
-      0,   1,  83,  84,  65,  84, 
-    116,   0,   0,   0,  26,   0, 
-      0,   0,   4,   0,   0,   0, 
-      0,   0,   0,   0,  10,   0, 
-      0,   0,  12,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
       0,   0,   1,   0,   0,   0, 
+     50,   0,   0,  10, 242,   0, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   4,   0,   0,   0, 
-      5,   0,   0,   0,   0,   0, 
+      6,   0,  16,   0,   0,   0, 
+      0,   0,  70,  14,  16,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   8, 242,  32,  16,   0, 
+      0,   0,   0,   0,  70,  14, 
+     16,   0,   0,   0,   0,   0, 
+     70, 142,  32,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+     54,   0,   0,   5, 242,  32, 
+     16,   0,   1,   0,   0,   0, 
+     70,  30,  16,   0,   2,   0, 
+      0,   0,  62,   0,   0,   1, 
+     83,  84,  65,  84, 116,   0, 
+      0,   0,  25,   0,   0,   0, 
+      4,   0,   0,   0,   0,   0, 
+      0,   0,  10,   0,   0,   0, 
+     11,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      4,   0,   0,   0,   5,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   7,   0,   0,   0, 
-      0,   0,   0,   0,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      7,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0
 };
 
 static const BYTE D2_VS[] = {
-     68,  88,  66,  67,  69,  29, 
-    199,  91, 158, 245, 176,  70, 
-     89, 165, 115, 228,  32, 115, 
-      4,  52,   1,   0,   0,   0, 
-     52,   4,   0,   0,   5,   0, 
+     68,  88,  66,  67, 238,  75, 
+     14,  88, 150,  43,  86,   4, 
+      1,  36, 240, 249,  68, 235, 
+    193, 222,   1,   0,   0,   0, 
+     12,   4,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
     104,   1,   0,   0, 216,   1, 
       0,   0,  76,   2,   0,   0, 
-    184,   3,   0,   0,  82,  68, 
+    144,   3,   0,   0,  82,  68, 
      69,  70,  44,   1,   0,   0, 
       2,   0,   0,   0, 112,   0, 
       0,   0,   2,   0,   0,   0, 
@@ -406,9 +403,9 @@ static const BYTE D2_VS[] = {
      78,   0,  67,  79,  76,  79, 
      82,   0,  84,  69,  88,  67, 
      79,  79,  82,  68,   0, 171, 
-     83,  72,  68,  82, 100,   1, 
+     83,  72,  68,  82,  60,   1, 
       0,   0,  64,   0,   1,   0, 
-     89,   0,   0,   0,  89,   0, 
+     79,   0,   0,   0,  89,   0, 
       0,   4,  70, 142,  32,   0, 
       1,   0,   0,   0,   1,   0, 
       0,   0,  89,   0,   0,   4, 
@@ -428,66 +425,59 @@ static const BYTE D2_VS[] = {
       0,   3,  50,  32,  16,   0, 
       2,   0,   0,   0, 104,   0, 
       0,   2,   2,   0,   0,   0, 
-     56,   0,   0,   8,  50,   0, 
+     50,   0,   0,  11,  50,   0, 
      16,   0,   0,   0,   0,   0, 
      70,  16,  16,   0,   1,   0, 
       0,   0, 166, 138,  32,   0, 
       0,   0,   0,   0,   2,   0, 
-      0,   0,  66,   0,   0,   5, 
-     50,   0,  16,   0,   0,   0, 
-      0,   0,  70,   0,  16,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   8,  50,   0,  16,   0, 
-      0,   0,   0,   0,  70,   0, 
+      0,   0,  70, 128,  32,   0, 
+      1,   0,   0,   0,   0,   0, 
+      0,   0,  56,   0,   0,   8, 
+    242,   0,  16,   0,   1,   0, 
+      0,   0,  86,   5,  16,   0, 
+      0,   0,   0,   0,  70, 142, 
+     32,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,  50,   0, 
+      0,  10, 242,   0,  16,   0, 
+      0,   0,   0,   0,  70, 142, 
+     32,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   6,   0, 
      16,   0,   0,   0,   0,   0, 
-     70, 128,  32,   0,   1,   0, 
-      0,   0,   0,   0,   0,   0, 
-     56,   0,   0,   8, 242,   0, 
-     16,   0,   1,   0,   0,   0, 
-     86,   5,  16,   0,   0,   0, 
-      0,   0,  70, 142,  32,   0, 
-      0,   0,   0,   0,   1,   0, 
-      0,   0,  50,   0,   0,  10, 
-    242,   0,  16,   0,   0,   0, 
-      0,   0,  70, 142,  32,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   6,   0,  16,   0, 
-      0,   0,   0,   0,  70,  14, 
-     16,   0,   1,   0,   0,   0, 
-      0,   0,   0,   8, 242,  32, 
+     70,  14,  16,   0,   1,   0, 
+      0,   0,   0,   0,   0,   8, 
+    242,  32,  16,   0,   0,   0, 
+      0,   0,  70,  14,  16,   0, 
+      0,   0,   0,   0,  70, 142, 
+     32,   0,   0,   0,   0,   0, 
+      3,   0,   0,   0,  54,   0, 
+      0,   5, 242,  32,  16,   0, 
+      1,   0,   0,   0,  70,  30, 
      16,   0,   0,   0,   0,   0, 
-     70,  14,  16,   0,   0,   0, 
-      0,   0,  70, 142,  32,   0, 
-      0,   0,   0,   0,   3,   0, 
-      0,   0,  54,   0,   0,   5, 
-    242,  32,  16,   0,   1,   0, 
-      0,   0,  70,  30,  16,   0, 
-      0,   0,   0,   0,  54,   0, 
-      0,   5,  50,  32,  16,   0, 
-      2,   0,   0,   0,  70,  16, 
+     54,   0,   0,   5,  50,  32, 
      16,   0,   2,   0,   0,   0, 
-     62,   0,   0,   1,  83,  84, 
-     65,  84, 116,   0,   0,   0, 
-      9,   0,   0,   0,   2,   0, 
-      0,   0,   0,   0,   0,   0, 
-      6,   0,   0,   0,   6,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   1,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   2,   0, 
+     70,  16,  16,   0,   2,   0, 
+      0,   0,  62,   0,   0,   1, 
+     83,  84,  65,  84, 116,   0, 
+      0,   0,   7,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   6,   0,   0,   0, 
+      4,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       1,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0
 };
 
 static const BYTE C_PS[] = {
@@ -602,6 +592,45 @@ static const BYTE C_PS[] = {
       0,   0,   0,   0
 };
 
+static const BYTE C_ROOTSIG[] = {
+     68,  88,  66,  67,   7, 254, 
+    234, 151, 223,  43, 244,  11, 
+    191, 216, 211, 110, 181, 160, 
+    113, 139,   1,   0,   0,   0, 
+    212,   0,   0,   0,   1,   0, 
+      0,   0,  36,   0,   0,   0, 
+     82,  84,  83,  48, 168,   0, 
+      0,   0,   2,   0,   0,   0, 
+      3,   0,   0,   0,  24,   0, 
+      0,   0,   1,   0,   0,   0, 
+    116,   0,   0,   0,  29,   0, 
+      0,   0,   2,   0,   0,   0, 
+      1,   0,   0,   0,  60,   0, 
+      0,   0,   0,   0,   0,   0, 
+      5,   0,   0,   0,  72,   0, 
+      0,   0,   1,   0,   0,   0, 
+      1,   0,   0,   0, 104,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+     80,   0,   0,   0,   0,   0, 
+      0,   0,   1,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+    255, 255, 255, 255,   1,   0, 
+      0,   0,   0,   0,   0,   0, 
+      2,   0,   0,   0,   0,   0, 
+      0,   0,   3,   0,   0,   0, 
+      3,   0,   0,   0,   3,   0, 
+      0,   0,   0,   0,   0,   0, 
+     16,   0,   0,   0,   4,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0, 255, 255, 
+    127, 127,   0,   0,   0,   0, 
+      0,   0,   0,   0,   5,   0, 
+      0,   0
+};
+
 namespace sre
 {
     template <typename T, size_t N>
@@ -660,7 +689,7 @@ struct sred3d12_texture
     ID3D12Resource* dxstaging{};
     ID3D12Resource* dxresource{};
     UINT srvoffset{};
-    UINT srvid{}; // Last srv capacity value in which gpu_descriptor was set during binding, gpu_descriptor is just a cache value
+    UINT srvid{}; // Capacity of the last srv in which `gpu_descriptor` was set during binding, gpu_descriptor is just a cache value
     D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor{};
 
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
@@ -688,7 +717,7 @@ struct sred3d12_inst: sre::RenderDriver
     sred3d12_inst(SDL_Window* window, int* outstatus);
     ~sred3d12_inst();
 
-    static constexpr int FRAMEBUFFER_COUNT = 2;
+    static constexpr int FRAMEBUFFER_COUNT = 3;
 private:
     sred3d12_dlls dlls;
     // DirectX members
@@ -792,15 +821,14 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 
     HRESULT hr;
 
-    // Load these functions dynamically, maybe look someday if I can try and find adapters
     {
         IDXGIFactory4* dxfactory = NULL;
         
         #ifndef NDEBUG
         if (SDL_GetWindowFlags(window) & SDL_WINDOW_OPENGL)
         {
-            // Give a welcoming warning, but still proceed
-            sre::logmsg("DirectX 12: Enabling the debug layer on an OpenGL window (one that has the SDL_WINDOW_OPENGL flag) is broken, and would thus not allow any device creation. If you still want the debug layer, please remove or comment the SDL_WINDOW_OPENGL flag in the window creation code right at \"src/core/window.c\". Thanks!", SRE_LOG_WARN);
+            // Give a friendly warning, but still proceed
+            sre::logmsg("DirectX 12: Enabling the debug layer on an OpenGL window (one that has the SDL_WINDOW_OPENGL flag) is broken, and would thus not allow any device creation. If you still want the debug layer, please remove or comment the SDL_WINDOW_OPENGL flag in the window creation code right at \"src/core/window.c\" (or use the SRE_HINT_SDL_WINDOWFLAGS hint). Thanks!", SRE_LOG_WARN);
         }
         else
         {
@@ -813,7 +841,8 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
             }
         }
         #endif
-                        
+        
+        // Load these functions dynamically, maybe look someday if I can try and find adapters
         SRE_DXGETADDR(CreateDXGIFactory1, PFN_CREATE_DXGI_FACTORY1, dlls.dxgi);
         SRE_DXGETADDR(D3D12CreateDevice, PFN_D3D12_CREATE_DEVICE, dlls.d3d12);
         if (!pD3D12CreateDevice || !pCreateDXGIFactory1)
@@ -847,7 +876,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
         DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
         swapchain_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         swapchain_desc.SampleDesc.Count = 1;
-        swapchain_desc.BufferCount = 2;
+        swapchain_desc.BufferCount = FRAMEBUFFER_COUNT;
         swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapchain_desc.Flags = SR_DXGI_SWAPCHAIN_FLAGS;
@@ -876,7 +905,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 
     {
         D3D12_DESCRIPTOR_HEAP_DESC dheap_desc{};
-        dheap_desc.NumDescriptors = 2;
+        dheap_desc.NumDescriptors = FRAMEBUFFER_COUNT;
         dheap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
         SRE_DXCALLC(dxdevice->CreateDescriptorHeap(&dheap_desc, IID_PPV_ARGS(&dxrtvheap)));
@@ -980,54 +1009,8 @@ bool sred3d12_inst::_pipelinesetup()
         /* color  */ {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
     };
 
-    static const D3D12_DESCRIPTOR_RANGE DESCRANGES[] = {
-        { D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 }
-    };
-    D3D12_ROOT_PARAMETER ROOT_PARAMS[] = {
-        /* global cb     */ D3D12_ROOT_PARAMETER{ D3D12_ROOT_PARAMETER_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX },
-        /* textures      */ D3D12_ROOT_PARAMETER{ D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, D3D12_SHADER_VISIBILITY_PIXEL},
-        /* camera vector */ D3D12_ROOT_PARAMETER{ D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS, D3D12_SHADER_VISIBILITY_VERTEX }
-    };
-    ROOT_PARAMS[0].Descriptor = { 0, 0 };
-    ROOT_PARAMS[1].DescriptorTable = { 1, DESCRANGES };
-    ROOT_PARAMS[2].Constants = {1, 0, 2};
-
     HRESULT hr;
-
-    {   // Root Signature setup
-        ID3DBlob* rsblob;
-        ID3DBlob* rserr;
-        D3D12_ROOT_SIGNATURE_DESC rsdesc{};
-        rsdesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-        rsdesc.NumParameters = sre::countof(ROOT_PARAMS);
-        rsdesc.pParameters = ROOT_PARAMS;
-
-        D3D12_STATIC_SAMPLER_DESC sampler_desc{};
-        sampler_desc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-        sampler_desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-        sampler_desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-        sampler_desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-        sampler_desc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-        sampler_desc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        sampler_desc.ShaderRegister = 0;
-        sampler_desc.RegisterSpace = 0;
-        rsdesc.NumStaticSamplers = 1;
-        rsdesc.pStaticSamplers = &sampler_desc;
-
-        SRE_DXGETADDR(D3D12SerializeRootSignature, PFN_D3D12_SERIALIZE_ROOT_SIGNATURE, dlls.d3d12);
-        assert(pD3D12SerializeRootSignature != NULL);
-
-        SRE_DXCALL(pD3D12SerializeRootSignature(&rsdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rsblob, &rserr));
-        if (rserr)
-        {
-            sre::error(SRE_ERR_FAIL, rserr->GetBufferPointer());
-            rserr->Release();
-            return false;
-        }
-
-        SRE_DXCALL(dxdevice->CreateRootSignature(0, rsblob->GetBufferPointer(), rsblob->GetBufferSize(), IID_PPV_ARGS(&dxrootsignature)));
-        rsblob->Release();
-    }
+    SRE_DXCALLF(dxdevice->CreateRootSignature(0, C_ROOTSIG, sizeof(C_ROOTSIG), IID_PPV_ARGS(&dxrootsignature)));
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pstate_desc{};
     pstate_desc.pRootSignature = dxrootsignature;
@@ -1204,7 +1187,6 @@ void sred3d12_inst::begin(const float color[4])
 
     dxcmd_list->SetDescriptorHeaps(1, &dxsrvheapsv);
     dxcmd_list->SetGraphicsRootSignature(dxrootsignature);
-    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
 
     D3D12_RESOURCE_BARRIER rbtransition{};
     rbtransition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1349,6 +1331,9 @@ void sred3d12_inst::set_viewportstate(const sre::rect2Di* rectangle, sre::unit s
     }
     
     dxcmd_list->RSSetViewports(1, &viewport);
+    // FIXME: Use constant buffer views? (From what I've heard, this function creates the descriptor for you but I believe it is less efficient that making the descriptor yourself with the set descriptor heap)
+    //      This was fine when setting it only once per frame, but now we have to change it for every viewport change occuring.
+    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
 }
 
 void sred3d12_inst::set_scissorstate(const sre::rect2Di* rectangle)

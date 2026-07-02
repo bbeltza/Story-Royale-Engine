@@ -33,7 +33,7 @@ namespace sreGUI
 
         void* modifier_pointer = NULL;
         sre::fontRenderCallback modifier_callback = NULL;
-    protected:
+
         void on_render(const sre::rect2Dut& dimensions) override;
     private:
         std::string m_str;

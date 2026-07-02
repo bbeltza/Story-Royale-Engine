@@ -4,41 +4,42 @@
 #include <Datatypes/Rect.h>
 #include <Datatypes/Flags.hpp>
 
-namespace sre
-{
-    struct RenderInterface;
-}
-
 namespace sreGUI
 {
     struct Component
     {
         friend class Object;
-
-        enum flagHelpers
-        {
-            F_ENABLED = 1,
-            F_FULL = -2 // Bitmask corresponding all of the free for use flags (it's 2^sizeof(void*) ^ 1, or just -2)
+        enum StateBits {
+            S_ENABLED = ut_bit(0)
         };
-        // Set of custom flags that you can set for the component
-        // The first bit is reserved and must not be used for something else (it's the `F_ENABLED` constant)
-        sre::flagsptr flags{F_ENABLED};
 
-        // Enabling/disabling wrappers (it's fine to use the flags directly)
+        // Custom flags (not managed internally)
+        sre::flags32 flags{};
 
-            inline bool enabled() const { return flags.has(F_ENABLED); }
-            inline void enable() { flags.toggle_on(F_ENABLED); }
-            inline void disable() { flags.toggle_off(F_ENABLED); }
-        //
+        inline void enable() { set_state(S_ENABLED, true); }
+        inline void disable() { set_state(S_ENABLED, false); }
+        constexpr bool enabled() const { return get_state(S_ENABLED); }
 
         constexpr Component() = default;
-        // TODO too: Add custom constructor
+        constexpr Component(const sre::flags32& flags): flags(flags) {}
     protected:
-        virtual void on_render(const sre::rect2Dut& dimensions) {}
-        virtual void on_prerender(sre::rect2Dut& dimensions) {}
         virtual sre::vec2ut process_size(const sre::rect2Dut& dimensions) { return dimensions.size; }
-        virtual sre::vec2ut process_position(const sre::rect2Dut& dimensions, sre::vec2ut parent_size) { return dimensions.position; }
+        virtual sre::vec2ut process_position(const sre::rect2Dut& dimensions, const sre::vec2ut& parent_size) { return dimensions.position; }
         virtual void process_children(const sre::rect2Dut& parent, sre::rect2Dut children[], size_t count) {}
+        virtual void on_postprocess(sre::rect2Dut& dimensions) {}
+        virtual void on_render(const sre::rect2Dut& dimensions) {}
+    protected:
+        inline void set_state(sre::u32 bits, bool enable) {
+            if (enable)
+                m_state.toggle_on(bits);
+            else
+                m_state.toggle_off(bits);
+        }
+        constexpr bool get_state(sre::u32 bits) const {
+            return m_state.has(bits);
+        }
+    private:
+        sre::flags32 m_state{S_ENABLED};
     };
 }
 

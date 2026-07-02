@@ -22,8 +22,9 @@ using namespace sreECS;
 
 Scene::~Scene()
 {
-    for (Entity& ent : *this)
+    for (Entity& ent : *this) { // FIXME: Check for `ent.is_static()`??? It should not be okay though to have a static entity that remains after the lifetime of a scene.
         ent.destroy();
+    }
     
     if (m_attachedlyr)
         m_attachedlyr->m_current = NULL;
