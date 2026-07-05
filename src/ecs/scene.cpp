@@ -49,40 +49,51 @@ Entity* Scene::add_child(Entity* entity)
 
 //
 
-void sreECS::set_physics_dt(sre::timeStamp dt, Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreECS::get_default_layer();
-    assert(lyr != NULL);
+#if 0 // TODO: Abstract this into a header, for both sreGUI and sreECS?? Anyways both layer classes have a lot in common...
+    static inline void GET_LAYER_INIT(Layer*& lyr) {
+        if (!lyr)
+            lyr = sreECS::get_default_layer();
+        assert(lyr != NULL);
+    }
+#else
+    #define GET_LAYER_INIT(l) if (!(l))                            \
+                                (l) = sreECS::get_default_layer(); \
+                              assert((l) != NULL)
+#endif
 
+#define GET_LAYER_INITL() GET_LAYER_INIT(lyr)
+
+void sreECS::set_physics_dt(sre::timeStamp dt, Layer* lyr) {
+    GET_LAYER_INITL();
     lyr->set_physics_dt(dt);
 }
 
-sre::timeStamp sreECS::get_physics_dt(Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreECS::get_default_layer();
-    assert(lyr != NULL);
-
+sre::timeStamp sreECS::get_physics_dt(Layer* lyr) {
+    GET_LAYER_INITL();
     return lyr->get_physics_dt();
 }
 
-void sreECS::set_current(Scene* scene, Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreECS::get_default_layer();
-    assert(lyr != NULL);
-
+void sreECS::set_current(Scene* scene, Layer* lyr) {
+    GET_LAYER_INITL();
     lyr->set_current(scene);
 }
 
-Scene* sreECS::get_current(Layer* lyr)
-{
-    if (!lyr)
-        lyr = sreECS::get_default_layer();
-    assert(lyr != NULL);
-
+Scene* sreECS::get_current(Layer* lyr) {
+    GET_LAYER_INITL();
     return lyr->get_current();
+}
+
+sre::rect2Dut sreECS::get_viewport_area(Layer* lyr) {
+    GET_LAYER_INITL();
+    return lyr->get_viewport_area();
+}
+sre::unit sreECS::get_viewport_scale(Layer* lyr) {
+    GET_LAYER_INITL();
+    return lyr->get_viewport_scale();
+}
+void sreECS::set_viewport(const sre::rect2Dut& area, sre::unit scale, Layer* lyr) {
+    GET_LAYER_INITL();
+    lyr->set_viewport(area, scale);
 }
 
 //

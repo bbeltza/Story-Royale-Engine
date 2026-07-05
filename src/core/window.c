@@ -3,6 +3,8 @@
 
 #include "../internal.h"
 
+#include <Base/Log.h>
+
 extern const char __game_title[];
 
 void __create_window()
@@ -33,8 +35,8 @@ void __create_window()
 	// TODO: Should give the render driver more control on how to create the window and setup its flags!
 	engine.sdl_windowhndl = SDL_CreateWindow(
 		__game_title,
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
 		DEFAULT_WIDTH,
 		DEFAULT_HEIGHT,
 		flags

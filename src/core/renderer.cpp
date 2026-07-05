@@ -436,6 +436,8 @@ bool sre::render::begin(sre::col4 clear, sre::vec2ut camera)
 	engine.video.state.viewport.scale = engine.scale;
 	engine.video.state.camera = camera;
 
+	memset(&engine.video.sentstate, UINT32_MAX, sizeof(engine.video.sentstate));
+
 	engine.video.state.state_update = UPD_ALL;
 
 	RenderCmd cmd{ CMD_BEGIN };
@@ -481,7 +483,12 @@ bool sre::render::set_viewport(sre::rect2Dut zone, sre::unit scale) {
 	engine.video.state.viewport.scale = scale;
 	engine.video.state.viewport.center = zone.size * 0.5_ut;
 
-	engine.video.state.state_update |= (UPD_CAMERA | UPD_VIEWPORT | UPD_SCISSOR);
+	if (scale == engine.video.sentstate.scale && zone == engine.video.sentstate.viewport) {
+		engine.video.state.state_update &= ~(UPD_VIEWPORT | UPD_VIEWPORT);
+		return false;
+	}
+
+	engine.video.state.state_update |= (UPD_CAMERA | UPD_VIEWPORT);
 	return true;
 }
 
@@ -507,7 +514,11 @@ bool sre::render::set_scissors(sre::rect2Dut zone, bool offset_byviewport) {
 	}
 
 	engine.video.state.scissor = zone;
-	
+	if (zone == engine.video.sentstate.scissor) {
+		engine.video.state.state_update &= ~UPD_SCISSOR;
+		return false;
+	}
+
 	engine.video.state.state_update |= UPD_SCISSOR;
 	return true;
 }
@@ -546,6 +557,12 @@ bool sre::render::set_blendmode(sre::blendMode mode)
 	RENDERCMDCHECK();
 
 	engine.video.state.blendmode = mode;
+
+	if (mode == engine.video.sentstate.blendmode) {
+		engine.video.state.state_update &= ~UPD_BLEND;
+		return false;
+	}
+
 	engine.video.state.state_update |= UPD_BLEND;
 	return true;
 }
@@ -613,6 +630,8 @@ static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 
 	int state = engine.video.state.state_update;
 	if (state & UPD_BLEND) {
+		engine.video.sentstate.blendmode = engine.video.state.blendmode;
+
 		RenderCmd cmd{ CMD_STATE_BLEND };
 		cmd.blend.mode = engine.video.state.blendmode;
 		m.rendercmds.emplace_back(cmd);
@@ -620,6 +639,9 @@ static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 	if (state & UPD_VIEWPORT) {
 		const auto& zone = engine.video.state.viewport.area;
 		const auto& scale = engine.video.state.viewport.scale;
+		engine.video.sentstate.viewport = zone;
+		engine.video.sentstate.scale = scale;
+
 		RenderCmd cmd{ CMD_STATE_VIEWPORT };
 		cmd.scissor_viewport.rect = {
 			static_cast<int>( ceil(zone.position.x * scale) ),
@@ -635,7 +657,9 @@ static void handle_render_switches(sre::flags32 flags, sre::Texture* texture)
 	}
 	if (state & UPD_SCISSOR) {
 		const auto& zone = engine.video.state.scissor;
-		const auto& scale = engine.video.state.viewport.scale; // The current viewport's scale is needed for the upcoming operations
+		const auto& scale = engine.video.state.viewport.scale; // The current viewport's scale is needed for the operations below
+		engine.video.sentstate.scissor = zone;
+
 		RenderCmd cmd{ CMD_STATE_SCISSOR };
 		cmd.scissor_viewport.rect = {
 			static_cast<int>(zone.position.x * scale ),

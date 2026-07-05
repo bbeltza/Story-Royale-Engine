@@ -8,9 +8,10 @@
 
 namespace sreECS
 {
-    class Shape : public Component
+    struct Shape : public Component
     {
-    public: // Enums
+    // Enums
+
         enum ShapeForm
         {
             S_RECTANGLE,

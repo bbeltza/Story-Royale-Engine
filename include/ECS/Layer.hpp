@@ -16,6 +16,9 @@ namespace sreECS
         Scene* m_current = NULL;
         sre::timeStamp m_pupdate_dt = 1 / 128.0_ts;
         sre::timeStamp m_pupdate_accum = 0.0_ts;
+
+        sre::rect2Dut vp_area = { 0, 0 };
+        sre::unit vp_scale = 0;
     public: 
         Layer();
         ~Layer();
@@ -32,6 +35,13 @@ namespace sreECS
 
         Scene* get_current() { return m_current; }
         void set_current(Scene* scene);
+
+        sre::rect2Dut get_viewport_area() { return vp_area; }
+        sre::unit get_viewport_scale() { return vp_scale; }
+        void set_viewport(sre::rect2Dut area, sre::unit scale=0) {
+            vp_area = area;
+            vp_scale = scale;
+        }
     };
 }
 

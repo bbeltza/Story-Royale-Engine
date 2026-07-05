@@ -11,6 +11,7 @@ namespace sreECS
 {
     struct Scene;
     struct Component;
+    using ComponentList = std::initializer_list<Component*>;
 
     class Entity: public sre::Object
     {
@@ -19,13 +20,20 @@ namespace sreECS
         // Current scene parent
         Scene* m_parent = NULL;
     protected:
-        Entity(sre::unit x=0, sre::unit y=0, long z_index=0);
-        Entity(Scene* scene, sre::unit x=0, sre::unit y=0, long z_index=0);
+        Entity(Scene* scene, Component* const* components, size_t component_count, sre::vec2ut pos, long z_index);
+
+        Entity(Scene* scene, sre::vec2ut pos={ 0, 0 }, long z_index=0):
+            Entity(scene, NULL, 0, pos, z_index) {}
+        Entity(sre::vec2ut pos={ 0, 0 }, long z_index=0):
+            Entity(NULL, pos, z_index) {}
+        Entity(Scene* scene, ComponentList components, sre::vec2ut pos={0, 0}, long z_index=0):
+            Entity(scene, components.begin(), components.size(), pos, z_index) {}
+        Entity(ComponentList components, sre::vec2ut pos={0, 0}, long z_index=0):
+            Entity(NULL, components) {}
+
         virtual ~Entity();
 
         Entity(const Entity& copy) = delete;
-        //Entity(Entity&& moving); // For world reparenting, might start using it I don't know..
-
     public:
         // The current position of the entity
         sre::vec2ut position;

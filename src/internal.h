@@ -81,6 +81,27 @@
 			sre_Texture* texture;
 		} state;
 
+		// `sentstate` determines the state of the last sent commands
+		// It's to discard sending a few more commands (for example: the user sets a state other than the current in `state`, but then switches back to the previous state)
+		/* This means that when doing something like this: ```
+
+				sre::render::set_viewport({ 10, 10, 320, 180 }, 3);
+				sre::render::draw#(...);
+			...
+				sre::render::reset_viewport();
+				sre::render::set_viewport({ 10, 10, 320, 180 }, 3);
+				sre::render::draw#(...);
+			```
+
+			The engine will only send the first viewport state command from the first call to it. 
+		*/
+		struct {
+			sre_blendMode blendmode;
+			sre_unit scale;
+			sre_rect2Dut scissor;
+			sre_rect2Dut viewport;
+		} sentstate;
+
 		void* _vector_data[4][3];
 	};
 

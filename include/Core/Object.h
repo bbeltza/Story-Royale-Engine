@@ -72,11 +72,17 @@ namespace sre
             }
     };
 
-    inline void safe_destroy(sre::Object*& obj) {
+    
+    template <typename T>
+    inline void safe_destroy(T*& obj) {
+        static_assert(std::is_base_of<sre::Object, T>::value, "`T` MUST inherit sre::Object");
+
         if (!obj)
             return;
         
-        obj->destroy();
+        sre::Object* _base = obj;
+        if (!_base->is_static())
+            _base->destroy();
         obj = NULL;
     }
 

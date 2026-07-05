@@ -11,13 +11,20 @@
 #include <Base/Signal.hpp>
 #include <Base/Clipstack.h>
 
-//#include <initializer_list>
+enum sreGUI_focusMode
+{
+    SREGUI_FOCUS_DISABLED = 0, // Focus is always disabled
+    // SREGUI_FOCUS_ENABLED = 1, // Focus is always enabled
+
+    SREGUI_FOCUS_AUTOMATIC = 2
+};
 
 namespace sreGUI
 {
     struct Component;
     class Layer;
 
+    using focusMode = sreGUI_focusMode;
     using ComponentList = std::initializer_list<sreGUI::Component* const>;
 
     class Object : public ::sre::Object
@@ -228,9 +235,12 @@ namespace sreGUI
     sre::unit get_insets(Layer* lyr=NULL);
     sre::unit get_viewport_scale(Layer* lyr=NULL); // This will return 0 if the scale is set to 0 (the default)! You may want to call sre::window_getscale() to get the real scale
     sre::rect2Dut get_viewport_area(Layer* lyr=NULL);
+    focusMode get_focus_mode(Layer* lyr=NULL);
+    bool is_focusing(Layer* lyr=NULL);
 
     void set_insets(sre::unit insets, Layer* lyr=NULL);
     void set_viewport(sre::rect2Dut area, sre::unit scale=0, Layer* lyr=NULL);
+    void set_focus_mode(focusMode mode, Layer* lyr=NULL);
 //
     inline bool is_hovering_anything(Layer* lyr=NULL) {
         return !get_hovering(lyr).empty();

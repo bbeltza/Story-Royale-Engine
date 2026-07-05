@@ -4,13 +4,14 @@
 
 using namespace sreECS;
 
-Entity::Entity(Scene* scene, sre::unit x, sre::unit y, long z): position(x, y), z_index(z) {
-	if (scene)
+Entity::Entity(Scene* scene, Component* const* components, size_t component_count, sre::vec2ut pos, long z_index):
+	position(pos), z_index(z_index) {
+	
+	if (scene) {
 		scene->add_child(this);
-}
+	}
 
-Entity::Entity(sre::unit x, sre::unit y, long z): Entity(NULL, x, y, z)
-{
+	setup_components(components, component_count);
 }
 
 Entity::~Entity()
@@ -38,9 +39,19 @@ Entity::~Entity()
 
 void Entity::setup_components(Component* const components[], size_t count)
 {
+	if (!components) {
+		if (count)
+			sre::log(SRE_LOG_WARN "Entity::setup_components(): `components` is NULL (meaning a request to detach all of the components is made), but `count` is not 0");
+
+		::operator delete(m_components);
+		m_components = NULL;
+		m_componentcount = 0;
+		return;
+	}
+
 	if (m_components)
 	{
-		sre::log(SRE_LOG_WARN "setup_components(): Current entity already has components attached to it, they will be deattached");
+		sre::log(SRE_LOG_WARN "Entity::setup_components(): Current entity already has components attached to it, they will be deattached");
 		if (m_componentcount != count)
 		{
 			operator delete (m_components);

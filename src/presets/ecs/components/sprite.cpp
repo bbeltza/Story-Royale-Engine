@@ -5,47 +5,87 @@
 
 using namespace sreECS;
 
-void Sprite::attach(sre::RAIITexture&& texture) {
-    textures.push_back(std::move(texture));
+sre::u32 Sprite::add_frames(const Frame* frames, sre::u32 count) {
+    sre::u32 i = num_frames();
+    m_frames.insert(m_frames.end(), frames, frames+count);
+    return i;
 }
 
-void Sprite::attach(const sre::RAIITexture& texture) {
-    textures.push_back(texture);
+sre::u32 Sprite::add_frame(Frame&& frame) {
+    sre::u32 i = num_frames();
+    m_frames.push_back(std::forward<Frame>(frame));
+    return i;
+}
+
+sre::u32 Sprite::remove_frames(sre::u32 index, sre::u32 count) {
+    if (index >= m_frames.size())
+        return 0;
+
+    count = (index + count) > m_frames.size() ? static_cast<sre::u32>(m_frames.size() - index) : count;
+    {
+        auto first = m_frames.begin() + index;
+        m_frames.erase(first, first + count);
+    }
+
+    return count;
 }
 
 void Sprite::on_render(Entity& entity)
 {
-    if (textures.empty()) return;
+    if (m_frames.empty())
+        return;
 
-    auto frame = ut_min(current_frame, textures.size() - 1);
-    current_frame = frame;
+    const auto& frame = m_frames.at(m_frame);
+    const auto oldoffset = base.offset;
+    base.offset += entity.position;
+    frame.render(SRE_DRAWFLAG_CAMERA, base, modulate);
+    base.offset = oldoffset;
+}
 
-    sre::RAIITexture& texture = textures[frame];
-    sre::vec2i texture_size = texture->size();
-    
+void SpriteFrame::render(sre::s32 renderflags, const SpriteFrame& base, sre::col4 modulate) const
+{
+    sre::Texture* cur_texture = texture ? texture.get() : base.texture.get();
+    if (!cur_texture) {
+        return;
+    }
+
+    sre::vec2i texture_size = cur_texture->size();
     sre::vec2f texture_fsize{texture_size};
-    if (region.size.x)
-        texture_size.x = region.size.x;
 
-    if (region.size.y)
-        texture_size.y = region.size.y;
+    sre::rect2Di cur_region = region;
+    if (!cur_region.w) {
+        cur_region.x = base.region.x;
+        cur_region.w = base.region.w;
+    }
+    if (!cur_region.h) {
+        cur_region.y = base.region.y;
+        cur_region.h = base.region.h;
+    }
 
-    sre::rect2Dut render_rect(
-        entity.position + offset,
-        texture_size * scale
-    );
-    sre::s32 flags = SRE_DRAWFLAG_CAMERA;
+    if (cur_region.size.x)
+        texture_size.x = cur_region.size.x;
+    if (cur_region.size.y)
+        texture_size.y = cur_region.size.y;
+
+    sre::vec2ut full_scale = base.scale * scale;
+    if (!full_scale.x || !full_scale.y)
+        return;
+
+    sre::RenderInstance1 drawinst{
+        sre::rect2Dut{
+            base.offset + offset,
+            texture_size * full_scale
+        },
+        sre::vec2ut::CENTER,
+        modulate,
+        0,
+        sre::vec2f{ cur_region.size.x ? (cur_region.size.x/texture_fsize.x) : 1.0f, cur_region.size.y ? (cur_region.size.y/texture_fsize.y) : 1.0f },
+        sre::vec2f{ cur_region.position.x / texture_fsize.x, cur_region.position.y / texture_fsize.y }
+    };
 
     sre::render::draw1(
-        flags,
-        {sre::RenderInstance1{
-            render_rect,
-            sre::vec2ut::CENTER,
-            modulate,
-            0,
-            { region.size.x ? region.size.x / texture_fsize.x : 1, region.size.y ? region.size.y / texture_fsize.y : 1 },
-            { region.position.x / texture_fsize.x, region.position.y / texture_fsize.y }
-        }},
-        texture.get()
+        renderflags,
+        &drawinst, 1,
+        cur_texture
     );
 }

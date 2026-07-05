@@ -51,7 +51,7 @@ namespace sreECS
             using reference = value_type&;
 
             Iterator() = default;
-            Iterator(Entity* const& ptr): m_ptr(&ptr)
+            Iterator(Entity* const& ptr): m_ptr(!ptr ? NULL : &ptr)
             {
             }
 
@@ -95,9 +95,15 @@ namespace sreECS
 
 
         Iterator begin() const {
+            if (m_entities.empty())
+                return { NULL };
+
             return {*m_entities.begin()};
         }
         Iterator end() const {
+            if (m_entities.empty())
+                return { NULL };
+
             return {*(&m_entities.back() + 1)};
         }
 
@@ -140,6 +146,10 @@ namespace sreECS
     // @param lyr The object layer that contains the scene. Must be NULL for now
     // @returns a pointer to a current scene, or `nullptr` if there's no current scene, or if the current scene isn't or doesn't inherit from `T`
     template <typename T> static inline T* get_current(Layer* lyr = NULL) { return dynamic_cast<T*>(get_current(lyr)); }
+
+    sre::rect2Dut get_viewport_area(Layer* lyr=NULL);
+    sre::unit get_viewport_scale(Layer* lyr=NULL);
+    void set_viewport(const sre::rect2Dut& area, sre::unit scale=0, Layer* lyr=NULL);
 }
 
 #endif

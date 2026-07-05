@@ -9,11 +9,12 @@
 //      fxc /T rootsig_1_0 /E D3D12RootSig /Fh ../"direct3d12 (joke)"/rs.h d3d11shaders.hlsl
 
 #define D3D12RootSig \
-        "RootFlags ( ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |"     \
+        "RootFlags ( ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |" \
                     "DENY_HULL_SHADER_ROOT_ACCESS |"           \
                     "DENY_DOMAIN_SHADER_ROOT_ACCESS |"         \
                     "DENY_GEOMETRY_SHADER_ROOT_ACCESS),"       \
-        "CBV(b0, visibility=SHADER_VISIBILITY_VERTEX),"           \
+        "DescriptorTable( CBV(b0),"                               \
+                        "visibility=SHADER_VISIBILITY_VERTEX),"   \
         "DescriptorTable( SRV(t0),"                               \
                         "visibility=SHADER_VISIBILITY_PIXEL ),"   \
         "RootConstants(num32BitConstants=2, b1, visibility=SHADER_VISIBILITY_VERTEX),"    \
@@ -84,7 +85,7 @@ PSinput D1main(D1input input, uint vid: SV_VertexID)
 
     float4 vert = VERTICES[vid] - float4(input.anchor, 0.0, 0.0);
     vert = mul(vert, mul(transform, rotation));
-    vert.xy = (vert.xy * VIEWPORT[2][2] + CAMERA);
+    vert.xy = floor(vert.xy * VIEWPORT[2][2] + CAMERA);
     vert = mul(VIEWPORT, vert);
 
     PSinput output = {

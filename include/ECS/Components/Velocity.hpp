@@ -5,7 +5,7 @@
 
 namespace sreECS
 {
-    class Velocity: public Component
+    struct Velocity: public Component
     {
         public:
         sre::vec2ut velocity;

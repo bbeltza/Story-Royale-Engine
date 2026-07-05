@@ -6,7 +6,8 @@
                                 The window will be positioned at the coordinates given by SRE_HINT_WINDOW_POS with the top-left corner as the origin.
                                 Although not recommended for the hint. Setting up values lower than 0 may place the window inside other monitors if any, since their desktop-space origins may be lower than 0 depending on where it is placed relative to the main monitor.
                                 If this flag is not set, then the window will be created with SDL_WINDOWPOS_CENTERED as the x and y coordinates. Which will often place the window at the center of the main screen.
-    - SRE_HINT_SRGB: A boolean value indicating to the render driver whether to use an sRGB color or not. By default set to `false`.
+    - SRE_HINT_SRGB: A boolean value indicating to the render driver whether to use sRGB color-space or not. By default set to `false`.
+    - SRE_HINT_MAIN_WINDOW_DESC: SRE_HINT_WINDOW_SIZE and SRE_HINT_WINDOW_POS combined, along with a bunch more paremeters
 
 - Continuing the port to android (I was just too stuck with the graphics so I couldn't be locked in it)
 - Animation/Keyframe API

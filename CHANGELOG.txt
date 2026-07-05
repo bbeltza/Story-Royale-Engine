@@ -1,4 +1,15 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- July 5th 2026: 0.106.05:
+    - The GUI layer supports focusing modes (which will change the behavior of objects that are hovered and let you determine whether, for instance the mouse is
+            outside or inside the GUI layer's viewport zone)
+    - Improvements on ECS:
+        - Custom viewports are now supported.
+        - sreECS::Entity's constructor is changed, and improved. Giving the ability to pass components to it like in sreGUI::Objects
+        - Components are all now structs. This makes it more consistent (I don't care about classes...)
+        - sreECS::Sprite was remade, having now a custom frame system that's more flexible. (And a base frame that will inherit all of the other frames)
+    - Fixed sre::safe_destroy() (You could only call it with sre::Object* types), it also checks whether the object is static or not, and destroy it.
+    - A few renderer shader tweaks.
+    - D3D12's joke renderer improvements (I'm really still working on this...): Most notably fence synchronization, being pretty much remade.
 - July 2nd 2026: 0.106.02:
     - srevulkan is available! As an external driver: https://github.com/bbeltza/srevulkan
     - A few internal renderer improvements in D3D11 and D3D12 (There's triple-buffering in D3D12 now for example...), as well as a new enum value for blend modes (SRE_NUM_BLENDMODES)

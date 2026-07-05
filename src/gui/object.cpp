@@ -102,7 +102,7 @@ void Object::CContainer::setup(Component* const components[], size_t count)
 // Global GUI object functions (That wrap the layer ones)
 
 
-#if 1
+#if 0
     static inline void GET_LAYER_INIT(Layer*& lyr) {
         if (!lyr)
             lyr = sreGUI::get_default_layer();
@@ -142,6 +142,14 @@ sre::rect2Dut sreGUI::get_viewport_area(Layer* lyr) {
     GET_LAYER_INITL();
     return lyr->get_viewport_area();
 }
+sreGUI::focusMode sreGUI::get_focus_mode(Layer* lyr) {
+    GET_LAYER_INITL();
+    return lyr->get_focus_mode();
+}
+bool sreGUI::is_focusing(Layer* lyr) {
+    GET_LAYER_INITL();
+    return lyr->is_focusing();
+}
 
 void sreGUI::set_insets(sre::unit insets, Layer* lyr) {
     GET_LAYER_INITL();
@@ -150,6 +158,10 @@ void sreGUI::set_insets(sre::unit insets, Layer* lyr) {
 void sreGUI::set_viewport(sre::rect2Dut area, sre::unit scale, Layer* lyr) {
     GET_LAYER_INITL();
     lyr->set_viewport(area, scale);
+}
+void sreGUI::set_focus_mode(focusMode mode, Layer* lyr) {
+    GET_LAYER_INITL();
+    return lyr->set_focus_mode(mode);
 }
 
 //

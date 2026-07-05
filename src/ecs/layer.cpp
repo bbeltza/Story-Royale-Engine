@@ -34,7 +34,7 @@ sreECS::Layer::~Layer()
     {
         assert(m_current->m_attachedlyr == this);
         m_current->m_attachedlyr = NULL;
-        m_current->destroy();
+        sre::safe_destroy(m_current);
     }
 
     if (defaultlayer == this)
@@ -75,9 +75,13 @@ void sreECS::Layer::render()
     if (!sre::render::has_begun())
         sre::render::begin(m_current->background, campos);
 
+    sre::render::set_viewport(vp_area, vp_scale);
+
     m_current->call_render();
     if (m_current && m_current->foreground.a)
         sre::render::fill(m_current->foreground);
+
+    sre::render::reset_viewport();
 }
 
 //
