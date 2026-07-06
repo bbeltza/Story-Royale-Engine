@@ -6,6 +6,8 @@
 
 #include <cassert>
 
+#include <Core/Defer.h>
+
 #define TEST_FAIL "Test failed (static assertion)"
 
 void sre::initialize()
@@ -46,5 +48,11 @@ void sre::initialize()
         static constexpr vec2i constexprtest{100, 100};
         static_assert(constexprtest.x == 100 && constexprtest.y == 100, TEST_FAIL);
     }
-    //sre::exit(0);
+
+    // TODO: This crashes and the exit doesn't work.
+        // sre::defer is very flawed and SHOULDN'T be used in games at all.
+        // Most functions that have main-thread-only functionality will already be enqueued to the main thread
+        // A possible alternative to sre::defer would be something that gets enqueued to the update/game-loop thread.
+    // Therefore, don't run this, this test is useless anyways
+// sre::defer(std::exit, 0);
 }

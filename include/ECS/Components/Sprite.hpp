@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SREECS_SPRITE_HPP
+#define SREECS_SPRITE_HPP
+
 #include <ECS/Component.hpp>
 
 #include <Datatypes/Rect.h>
@@ -10,13 +12,18 @@ namespace sreECS
 {
     struct SpriteFrame
     {
-        sre::vec2ut scale{ 1, 1 };
-        sre::vec2ut offset{ 0, 0 };
+        sre::vec2ut scale;
+        sre::vec2ut offset;
 
-        sre::rect2Di region{ 0, 0, 0, 0 };
+        sre::rect2Di region;
         sre::RAIITexture texture;
 
         void render(sre::s32 renderflags, const SpriteFrame& base, sre::col4 modulate=sre::WHITE) const;
+
+        constexpr SpriteFrame(const sre::vec2ut& _scale={1, 1}, const sre::vec2ut& _offset={0, 0}, const sre::rect2Di& _region={0, 0, 0, 0}):
+            scale(_scale), offset(_offset), region(_region) {}
+        inline SpriteFrame(const sre::vec2ut& _scale, const sre::vec2ut& _offset, const sre::rect2Di& _region, const sre::RAIITexture& _texture):
+            scale(_scale), offset(_offset), region(_region), texture(_texture) {}
     };
 
     struct Sprite : public Component
@@ -75,8 +82,9 @@ namespace sreECS
         void on_render(Entity& entity) override;
     public:
         inline sre::u32 add_frame(const Frame& frame={}) { return add_frames(&frame, 1); }
-        inline sre::u32 add_frame(const sre::vec2ut scale, const sre::vec2ut offset, const sre::rect2Di region={ 0, 0, 0, 0 }, const sre::RAIITexture& texture={}) {
-            return add_frame({ scale, offset, region, texture });
+        inline sre::u32 add_frame(const sre::vec2ut& scale, const sre::vec2ut& offset, const sre::rect2Di& region={ 0, 0, 0, 0 }, const sre::RAIITexture& texture={}) {
+            Frame frame{ scale, offset, region, texture };
+            return add_frames(&frame, 1);
         }
 
         template <typename... Args>
@@ -94,3 +102,5 @@ namespace sreECS
         std::vector<Frame> m_frames;
     };
 }
+
+#endif

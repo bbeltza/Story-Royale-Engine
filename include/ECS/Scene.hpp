@@ -9,6 +9,8 @@
 
 #include <ECS/Camera.hpp>
 
+#include <Base/Log.h>
+
 namespace sreECS
 {
     class Layer;
@@ -51,7 +53,7 @@ namespace sreECS
             using reference = value_type&;
 
             Iterator() = default;
-            Iterator(Entity* const& ptr): m_ptr(!ptr ? NULL : &ptr)
+            Iterator(Entity* const* ptr): m_ptr(ptr)
             {
             }
 
@@ -98,13 +100,13 @@ namespace sreECS
             if (m_entities.empty())
                 return { NULL };
 
-            return {*m_entities.begin()};
+            return {&m_entities.front()};
         }
         Iterator end() const {
             if (m_entities.empty())
                 return { NULL };
 
-            return {*(&m_entities.back() + 1)};
+            return {&m_entities.back() + 1};
         }
 
         ReverseIterator rbegin() const {

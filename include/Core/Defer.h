@@ -26,6 +26,7 @@ SRE_CAPI_END
 
 #include <utils/sequence.hpp>
 #include <memory>
+#include <tuple>
 namespace sre
 {
     inline bool defer(sre_deferFunction func, size_t argsize, const void* arg) { return sre_defer(func, argsize, arg); }

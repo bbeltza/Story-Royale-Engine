@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SREECS_VELOCITY_HPP
+#define SREECS_VELOCITY_HPP
+
 #include <ECS/Component.hpp>
 
 #include <Datatypes/Vector.h>
@@ -16,3 +18,5 @@ namespace sreECS
         void on_pupdate(Entity&, sre::timeStamp dt) override;
     };
 }
+
+#endif

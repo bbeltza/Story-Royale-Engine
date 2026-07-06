@@ -1,5 +1,5 @@
-#ifndef SREECS_TILESET_HPP
-#define SREECS_TILESET_HPP
+#ifndef SREECS_GRID_HPP
+#define SREECS_GRID_HPP
 
 #include <ECS/Component.hpp>
 #include <Base/Grid.hpp>
