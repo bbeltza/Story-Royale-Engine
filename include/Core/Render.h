@@ -110,6 +110,8 @@ typedef struct sre_RenderInstance1
     sre_vec2f uv_offset;
 } sre_RenderInstance1;
 
+typedef struct sre_BlendState sre_BlendState; // Internal blend state object (You DON'T use it)
+
 struct sre_RenderVFT
 {
     void (* destructor)(void* _inst);
@@ -125,6 +127,7 @@ struct sre_RenderVFT
     void (* set_vsync)(void* _inst, bool enable);
     void (* set_texturestate)(void* _inst, void* _texture);
     void (* set_blendstate)(void* _inst, sre_blendMode blendmode);
+    //void (* set_blendstate)(void* _inst, sre_BlendState* state); // New signature for `set_blendstate`
     void (* set_camerastate)(void* _inst, sre_unit x, sre_unit y);
     void (* set_viewportstate)(void* _inst, const sre_rect2Di* rectangle, sre_unit scale); // Sets the viewport (NOT THE WINDOW SIZE!!!)
     void (* set_scissorstate)(void* _inst, const sre_rect2Di* rectangle);

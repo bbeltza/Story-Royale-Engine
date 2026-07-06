@@ -5,6 +5,8 @@
 
 #include <utils/math.h>
 
+#include <Base/Log.h>
+
 static void sresw_destroy(void* _inst);
 static const struct sre_RenderVFT sresw_vft = {
     sresw_destroy,
@@ -30,8 +32,11 @@ static int sresw_main(const struct sre_RenderVFT** interface, void* _inst, SDL_W
         return SRE_RENDERSTATUS_FAILED;
     
     inst->window = window;
+    inst->wndsurface = NULL;
     *interface = &sresw_vft;
-    return SRE_RENDERSTATUS_SUCCEEDED;
+    
+    sre_log(SRE_LOG_WARN "SOFTWARE RENDER: The software renderer is currently unfinished, and thus incomplete");
+    return SRE_RENDERSTATUS_UNSUPPORTED;
 }
 
 static void sresw_destroy(void* _inst)

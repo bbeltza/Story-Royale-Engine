@@ -21,7 +21,10 @@ namespace sreGUI
         sre::unit vp_scale = 0;
         sre::unit insets = 0;
 
+        sreGUI::focusMode focus_mode = SREGUI_FOCUS_AUTOMATIC;
+
         sre::vec2ut _displaycache; // Cache value that is returned from sre::calc_viewport_size(), to reduce its calls
+        bool _focusing = false;
     public: 
         Layer();
         ~Layer();
@@ -36,12 +39,16 @@ namespace sreGUI
         sre::unit get_insets() { return insets; }
         sre::unit get_viewport_scale() { return vp_scale; } // This will return 0 if the scale is set to 0 (the default)! You may want to call sre::window_getscale() to get the real scale
         sre::rect2Dut get_viewport_area() { return vp_area; }
+        sreGUI::focusMode get_focus_mode() { return focus_mode; }
 
         void set_insets(sre::unit insets) { this->insets = insets; }
         void set_viewport(sre::rect2Dut area, sre::unit scale=0) {
             vp_area = area;
             vp_scale = scale;
         }
+        void set_focus_mode(sreGUI::focusMode mode) { this->focus_mode = mode; }
+
+        bool is_focusing() { return _focusing; }
     };
 }
 

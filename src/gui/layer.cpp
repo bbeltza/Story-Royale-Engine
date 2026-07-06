@@ -36,7 +36,7 @@ sreGUI::Layer::~Layer()
     {
         assert(root->m_attachedlyr == this);
         root->m_attachedlyr = NULL;
-        root->destroy();
+        sre::safe_destroy(root);
     }
 
     if (defaultlayer == this)
@@ -69,20 +69,36 @@ void sreGUI::Layer::update()
 {    
     for (;;)
     {
+        hoveringstack.clear();
+
         sreGUI::Object* cur = root;
         if (!cur)
             return;
-        
-        sre::vec2ut pt{sre::get_input_coordinates()};
-        pt = sre::process_input_coordinates(pt, vp_area.position, vp_scale);
+            
+        if (focus_mode == SREGUI_FOCUS_DISABLED) {
+            _focusing = false;
+        } else {
+            sre::vec2ut pt{sre::get_input_coordinates()};
+            pt = sre::process_input_coordinates(pt, vp_area.position, vp_scale);
+            if (focus_mode == SREGUI_FOCUS_AUTOMATIC) {
+                _focusing = (pt.x >= 0 &&
+                             pt.y >= 0 &&
+                             pt.x <= vp_area.w &&
+                             pt.y <= vp_area.h);
+            }
+            else {
+                _focusing = true;
+            }
 
-        hoveringstack.clear();
-        cur->call_query(pt, hoveringstack);
-        // Set the S_HOVERING state to the hovering object at the top
-        // since the hovering object container holds `const` objects, we need to const_cast it.
-        // There should not be any penalties on doing so
-        if (!hoveringstack.empty())
-            const_cast<sreGUI::Object*>(hoveringstack.back())->m_state.toggle_on(sreGUI::Object::S_HOVERING);
+            if (_focusing) {
+                cur->call_query(pt, hoveringstack);
+                // Set the S_HOVERING state to the hovering object at the top
+                // since the hovering object container holds `const` objects, we need to const_cast it.
+                // There should not be any penalties on doing so
+                if (!hoveringstack.empty())
+                    const_cast<sreGUI::Object*>(hoveringstack.back())->m_state.toggle_on(sreGUI::Object::S_HOVERING);
+            }
+        }
 
         cur->call_update();
 

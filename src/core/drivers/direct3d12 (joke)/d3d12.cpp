@@ -13,15 +13,15 @@
 
 // All shader bytecode
 static const BYTE D1_VS[] = {
-     68,  88,  66,  67, 151, 178, 
-     34,   6, 164, 235, 137,  33, 
-    219, 113, 174, 120, 104, 216, 
-     99, 250,   1,   0,   0,   0, 
-    196,   6,   0,   0,   5,   0, 
+     68,  88,  66,  67,   3, 200, 
+     33, 155, 101, 120, 123,  65, 
+     68,  99,  79, 203,  55,  64, 
+     96,  24,   1,   0,   0,   0, 
+    216,   6,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
     104,   1,   0,   0,  76,   2, 
       0,   0, 192,   2,   0,   0, 
-     72,   6,   0,   0,  82,  68, 
+     92,   6,   0,   0,  82,  68, 
      69,  70,  44,   1,   0,   0, 
       2,   0,   0,   0, 112,   0, 
       0,   0,   2,   0,   0,   0, 
@@ -131,8 +131,8 @@ static const BYTE D1_VS[] = {
      76,  79,  82,   0,  84,  69, 
      88,  67,  79,  79,  82,  68, 
       0, 171,  83,  72,  68,  82, 
-    128,   3,   0,   0,  64,   0, 
-      1,   0, 224,   0,   0,   0, 
+    148,   3,   0,   0,  64,   0, 
+      1,   0, 229,   0,   0,   0, 
      89,   0,   0,   4,  70, 142, 
      32,   0,   1,   0,   0,   0, 
       1,   0,   0,   0,  89,   0, 
@@ -259,49 +259,52 @@ static const BYTE D1_VS[] = {
      32,   0,   0,   0,   0,   0, 
       2,   0,   0,   0,  70, 128, 
      32,   0,   1,   0,   0,   0, 
-      0,   0,   0,   0,  56,   0, 
-      0,   8, 242,   0,  16,   0, 
-      1,   0,   0,   0,  86,   5, 
+      0,   0,   0,   0,  65,   0, 
+      0,   5,  50,   0,  16,   0, 
+      0,   0,   0,   0,  70,   0, 
      16,   0,   0,   0,   0,   0, 
-     70, 142,  32,   0,   0,   0, 
-      0,   0,   1,   0,   0,   0, 
-     50,   0,   0,  10, 242,   0, 
-     16,   0,   0,   0,   0,   0, 
-     70, 142,  32,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      6,   0,  16,   0,   0,   0, 
-      0,   0,  70,  14,  16,   0, 
-      1,   0,   0,   0,   0,   0, 
-      0,   8, 242,  32,  16,   0, 
-      0,   0,   0,   0,  70,  14, 
-     16,   0,   0,   0,   0,   0, 
-     70, 142,  32,   0,   0,   0, 
-      0,   0,   3,   0,   0,   0, 
-     54,   0,   0,   5, 242,  32, 
+     56,   0,   0,   8, 242,   0, 
      16,   0,   1,   0,   0,   0, 
-     70,  30,  16,   0,   2,   0, 
-      0,   0,  62,   0,   0,   1, 
-     83,  84,  65,  84, 116,   0, 
-      0,   0,  25,   0,   0,   0, 
-      4,   0,   0,   0,   0,   0, 
-      0,   0,  10,   0,   0,   0, 
-     11,   0,   0,   0,   0,   0, 
+     86,   5,  16,   0,   0,   0, 
+      0,   0,  70, 142,  32,   0, 
+      0,   0,   0,   0,   1,   0, 
+      0,   0,  50,   0,   0,  10, 
+    242,   0,  16,   0,   0,   0, 
+      0,   0,  70, 142,  32,   0, 
       0,   0,   0,   0,   0,   0, 
-      1,   0,   0,   0,   0,   0, 
+      0,   0,   6,   0,  16,   0, 
+      0,   0,   0,   0,  70,  14, 
+     16,   0,   1,   0,   0,   0, 
+      0,   0,   0,   8, 242,  32, 
+     16,   0,   0,   0,   0,   0, 
+     70,  14,  16,   0,   0,   0, 
+      0,   0,  70, 142,  32,   0, 
+      0,   0,   0,   0,   3,   0, 
+      0,   0,  54,   0,   0,   5, 
+    242,  32,  16,   0,   1,   0, 
+      0,   0,  70,  30,  16,   0, 
+      2,   0,   0,   0,  62,   0, 
+      0,   1,  83,  84,  65,  84, 
+    116,   0,   0,   0,  26,   0, 
+      0,   0,   4,   0,   0,   0, 
+      0,   0,   0,   0,  10,   0, 
+      0,   0,  12,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      4,   0,   0,   0,   5,   0, 
+      0,   0,   1,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   4,   0,   0,   0, 
+      5,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      7,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
+      0,   0,   7,   0,   0,   0, 
+      0,   0,   0,   0,   1,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0
+      0,   0,   0,   0,   0,   0, 
+      0,   0,   0,   0,   0,   0
 };
 
 static const BYTE D2_VS[] = {
@@ -593,29 +596,31 @@ static const BYTE C_PS[] = {
 };
 
 static const BYTE C_ROOTSIG[] = {
-     68,  88,  66,  67,   7, 254, 
-    234, 151, 223,  43, 244,  11, 
-    191, 216, 211, 110, 181, 160, 
-    113, 139,   1,   0,   0,   0, 
-    212,   0,   0,   0,   1,   0, 
+     68,  88,  66,  67,  91, 223, 
+    153,  75, 249, 105,  37, 148, 
+    115, 120, 218, 122, 172, 225, 
+     79, 165,   1,   0,   0,   0, 
+    224,   0,   0,   0,   1,   0, 
       0,   0,  36,   0,   0,   0, 
-     82,  84,  83,  48, 168,   0, 
-      0,   0,   2,   0,   0,   0, 
+     82,  84,  83,  48, 180,   0, 
+      0,   0,   1,   0,   0,   0, 
       3,   0,   0,   0,  24,   0, 
       0,   0,   1,   0,   0,   0, 
-    116,   0,   0,   0,  29,   0, 
-      0,   0,   2,   0,   0,   0, 
+    128,   0,   0,   0,  29,   0, 
+      0,   0,   0,   0,   0,   0, 
       1,   0,   0,   0,  60,   0, 
       0,   0,   0,   0,   0,   0, 
-      5,   0,   0,   0,  72,   0, 
+      5,   0,   0,   0,  88,   0, 
       0,   0,   1,   0,   0,   0, 
-      1,   0,   0,   0, 104,   0, 
-      0,   0,   0,   0,   0,   0, 
-      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0, 116,   0, 
       0,   0,   1,   0,   0,   0, 
-     80,   0,   0,   0,   0,   0, 
+     68,   0,   0,   0,   2,   0, 
       0,   0,   1,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
+      0,   0, 255, 255, 255, 255, 
+      1,   0,   0,   0,  96,   0, 
+      0,   0,   0,   0,   0,   0, 
+      1,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
     255, 255, 255, 255,   1,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -712,12 +717,12 @@ struct sred3d12_dlls
 struct sred3d12_inst: sre::RenderDriver
 {
     using texture_type = sred3d12_texture;
-    friend struct sreD3D12ImGuiData;
 
     sred3d12_inst(SDL_Window* window, int* outstatus);
     ~sred3d12_inst();
 
     static constexpr int FRAMEBUFFER_COUNT = 3;
+    static constexpr int FENCE_FRAMES_AHEAD = FRAMEBUFFER_COUNT - 1;
 private:
     sred3d12_dlls dlls;
     // DirectX members
@@ -746,7 +751,6 @@ private:
 
     // Some DirectX state members
     UINT current_blendstate;
-    UINT current_drawtype;
     UINT current_frameindex = 0;
 
     UINT rtvheap_increment;
@@ -758,9 +762,11 @@ private:
 
     ID3D12Fence* dxfence;
     HANDLE hfence;
-    UINT64 fencevalue = 1;
+    UINT64 fencevalue = FENCE_FRAMES_AHEAD;
 
     ID3D12Resource* cbuffer;
+    UINT cbv_offset, cbv_lastcap;
+    D3D12_GPU_DESCRIPTOR_HANDLE cbv_handle;
     
     struct {
         sred3d12_dbuff d1{};
@@ -768,8 +774,7 @@ private:
         sred3d12_dbuff cstagingbuffer;
     } drawdatas[FRAMEBUFFER_COUNT], *current_drawdata{};
 
-    alignas(sred3d12_texture) char basictexture[sizeof(sred3d12_texture)]; // Allocate it as buffer of bytes to initialize it later
-
+    sred3d12_texture flattexture;
     sred3d12_cache caches{};
 public:
     void draw1(const sre::RenderInstance1* instances, size_t instance_count);
@@ -796,7 +801,7 @@ private:
     UINT _srvallocate();
     void _srvfree(UINT offs);
     
-    void _waitforgpu(); // Wait for the GPU to finish all commands
+    void _waitforgpu(UINT64 value); // Wait for the GPU to finish all commands
 
     bool _pipelinesetup();
 };
@@ -899,7 +904,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
     {
         D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16;
         SRE_DXCALL(dxdevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16)));
-        if (SUCCEEDED(hr))
+        if (SUCCEEDED(hr) && options16.GPUUploadHeapSupported)
             buffer_heaptype = D3D12_HEAP_TYPE_GPU_UPLOAD;
     }
 
@@ -922,11 +927,25 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
     if (!hfence)
         return;
     
+    cbv_offset = _srvallocate();
+    cbv_lastcap = 0;
+
+    {
+        D3D12_CPU_DESCRIPTOR_HANDLE cpudescriptor = dxsrvheapsv->GetCPUDescriptorHandleForHeapStart();
+        cpudescriptor.ptr += cbv_offset;
+
+        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvdesc{};
+        cbvdesc.BufferLocation = cbuffer->GetGPUVirtualAddress();
+        cbvdesc.SizeInBytes = sizeof(sred3d12_cbuffer);
+
+        dxdevice->CreateConstantBufferView(&cbvdesc, cpudescriptor);
+    }
+
     UINT32 WHITE = UINT32_MAX;
     sre::rect2Di whiteregion{ 0, 1 };
-    if (!texture_setup(reinterpret_cast<texture_type*>(basictexture), SDL_PIXELFORMAT_UNKNOWN, 1, 1, NULL))
+    if (!texture_setup(&flattexture, SDL_PIXELFORMAT_UNKNOWN, 1, 1, NULL))
         return;
-    if (!texture_update(reinterpret_cast<texture_type*>(basictexture), &whiteregion, &WHITE, 4))
+    if (!texture_update(&flattexture, &whiteregion, &WHITE, 4))
         return;
     
     *outstatus = SRE_RENDERSTATUS_SUCCEEDED;
@@ -934,9 +953,10 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 
 sred3d12_inst::~sred3d12_inst()
 {
-    _waitforgpu();
+    dxcmd_queue->Signal(dxfence, ++fencevalue);
+    _waitforgpu(fencevalue);
 
-    texture_destroy(reinterpret_cast<texture_type*>(basictexture));
+    texture_destroy(&flattexture);
 
     for (int i = 0; i < sre::countof(dxcmd_allocators); i++)
         dxcmd_allocators[i]->Release();
@@ -972,15 +992,12 @@ sred3d12_inst::~sred3d12_inst()
     CloseHandle(hfence);
 }
 
-void sred3d12_inst::_waitforgpu()
+void sred3d12_inst::_waitforgpu(UINT64 value)
 {  
-    HRESULT hr;
-    UINT64 oldvalue = fencevalue++;
-    SRE_DXCALL(dxcmd_queue->Signal(dxfence, fencevalue));
-    
-    UINT64 value = dxfence->GetCompletedValue();
-    if (value < oldvalue) {
-        SRE_DXCALLC(dxfence->SetEventOnCompletion(oldvalue, hfence));
+    HRESULT hr;    
+    UINT64 completedvalue = dxfence->GetCompletedValue();
+    if (completedvalue != value) {
+        SRE_DXCALLC(dxfence->SetEventOnCompletion(value, hfence));
         WaitForSingleObject(hfence, INFINITE);
     }
 }
@@ -1178,6 +1195,8 @@ sred3d12_dbuff::~sred3d12_dbuff()
 void sred3d12_inst::begin(const float color[4])
 {
     HRESULT hr{};
+    _waitforgpu(fencevalue - FENCE_FRAMES_AHEAD);
+
     current_frameindex = dxswapchain->GetCurrentBackBufferIndex();
 
     ID3D12CommandAllocator* cmdallocator_acquired = dxcmd_allocators[current_frameindex];
@@ -1209,8 +1228,6 @@ void sred3d12_inst::begin(const float color[4])
     current_drawdata->d2.reset();;
     
     current_drawdata->cstagingbuffer.reset();
-
-    current_drawtype = 0;
 }
 
 void sred3d12_inst::end()
@@ -1232,6 +1249,7 @@ void sred3d12_inst::end()
     
     ID3D12CommandList* cmd_lists[] = { dxcmd_list };
     dxcmd_queue->ExecuteCommandLists(1, cmd_lists);
+    SRE_DXCALL(dxcmd_queue->Signal(dxfence, ++fencevalue));
     SRE_DXCALL(dxswapchain->Present(caches.vsync, !caches.vsync ? DXGI_PRESENT_ALLOW_TEARING : 0));
     if (hr == DXGI_ERROR_DEVICE_REMOVED)
     {
@@ -1240,13 +1258,12 @@ void sred3d12_inst::end()
         abort();
         return;
     }
-    
-    _waitforgpu();
 }
 
 bool sred3d12_inst::resize_window(int w, int h)
 {
-    _waitforgpu();
+    dxcmd_queue->Signal(dxfence, ++fencevalue);
+    _waitforgpu(fencevalue);
 
     HRESULT hr;
 
@@ -1268,22 +1285,11 @@ bool sred3d12_inst::resize_window(int w, int h)
     return true;
 }
 
-void sred3d12_inst::set_blendstate(sre::blendMode mode)
-{
+void sred3d12_inst::set_blendstate(sre::blendMode mode) {
     current_blendstate = mode;
-    
-    ID3D12PipelineState** ppstatearr;
-    switch (current_drawtype)
-    {
-        case 1: ppstatearr = dxpipeline_blendstates1; break;
-        default: return;
-    }
-
-    dxcmd_list->SetPipelineState(ppstatearr[mode]);
 }
 
-void sred3d12_inst::set_camerastate(sre::vec2ut camera)
-{
+void sred3d12_inst::set_camerastate(sre::vec2ut camera) {
     dxcmd_list->SetGraphicsRoot32BitConstants(2, 2, &camera, 0);
 }
 
@@ -1306,34 +1312,39 @@ void sred3d12_inst::set_viewportstate(const sre::rect2Di* rectangle, sre::unit s
     };
     
     UINT64 offset = current_drawdata->cstagingbuffer.append(dxdevice, mat, sizeof(mat));
+    constexpr UINT outbarriercount = 1;
+    UINT inbarriercount = 1;
+    D3D12_RESOURCE_BARRIER barriers[2]{};
     if (!offset) {
-        D3D12_RESOURCE_BARRIER barrier{};
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Transition.pResource = current_drawdata->cstagingbuffer.dxresource;
-        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
-
-        dxcmd_list->ResourceBarrier(1, &barrier);
+        barriers[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barriers[1].Transition.pResource = current_drawdata->cstagingbuffer.dxresource;
+        barriers[1].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+        barriers[1].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
+        inbarriercount++;
     }
-
-    D3D12_RESOURCE_BARRIER barrier{}; {
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Transition.pResource = cbuffer;
-        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-        dxcmd_list->ResourceBarrier(1, &barrier);
+    
+    {
+        barriers[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barriers[0].Transition.pResource = cbuffer;
+        barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+        barriers[0].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+        dxcmd_list->ResourceBarrier(inbarriercount, barriers);
     }
 
     dxcmd_list->CopyBufferRegion(cbuffer, 0, current_drawdata->cstagingbuffer.dxresource, offset, sizeof(mat)); {
-        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-        dxcmd_list->ResourceBarrier(1, &barrier);
+        barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+        barriers[0].Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+        dxcmd_list->ResourceBarrier(outbarriercount, barriers);
     }
     
     dxcmd_list->RSSetViewports(1, &viewport);
-    // FIXME: Use constant buffer views? (From what I've heard, this function creates the descriptor for you but I believe it is less efficient that making the descriptor yourself with the set descriptor heap)
-    //      This was fine when setting it only once per frame, but now we have to change it for every viewport change occuring.
-    dxcmd_list->SetGraphicsRootConstantBufferView(0, cbuffer->GetGPUVirtualAddress());
+
+    if (cbv_lastcap != srvcap) {
+        cbv_lastcap = srvcap;
+        cbv_handle = dxsrvheapsv->GetGPUDescriptorHandleForHeapStart();
+        cbv_handle.ptr += cbv_offset;
+    }
+    dxcmd_list->SetGraphicsRootDescriptorTable(0, cbv_handle);
 }
 
 void sred3d12_inst::set_scissorstate(const sre::rect2Di* rectangle)
@@ -1349,7 +1360,7 @@ void sred3d12_inst::set_scissorstate(const sre::rect2Di* rectangle)
 
 void sred3d12_inst::set_texturestate(texture_type* texture)
 {
-    texture = texture ? texture : reinterpret_cast<sred3d12_texture*>(basictexture);
+    texture = texture ? texture : &flattexture;
 
     if (texture->needsupdate)
     {
@@ -1388,11 +1399,9 @@ void sred3d12_inst::set_texturestate(texture_type* texture)
 
 void sred3d12_inst::draw1(const sre::RenderInstance1* instances, size_t instance_count)
 {
-    if (1)
-    {
+    if (1) {
         dxcmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
         dxcmd_list->SetPipelineState(dxpipeline_blendstates1[current_blendstate]);
-        current_drawtype = 1;
     }
 
     UINT UINT_instcount = static_cast<UINT>(instance_count);
@@ -1424,19 +1433,17 @@ void sred3d12_inst::draw2(const sre::RenderPoint* points, size_t point_count, sr
     {
         case SRE_PRIMITIVE_TRIANGLES:
         case SRE_PRIMITIVE_TRIANGLESTRIP:
-            current_drawtype = 2;
             pipelinestate = dxpipeline_blendstates2_tri;
             break;
         case SRE_PRIMITIVE_LINEPERLINE:
         case SRE_PRIMITIVE_LINESTRIP:
-            current_drawtype = 3;
             pipelinestate = dxpipeline_blendstates2_lin;
             break;
         case SRE_PRIMITIVE_POINTS:
-            current_drawtype = 4;
             pipelinestate = dxpipeline_blendstates2_pts;
             break;
-        default: abort();
+        default:
+            abort();
     }
         
     dxcmd_list->SetPipelineState(pipelinestate[current_blendstate]);
@@ -1523,11 +1530,7 @@ void sred3d12_inst::texture_destroy(texture_type* texture)
     {
         // If the GPU hasn't finished every single command, wait for them
         // Any of these resources may still be in use in the last frames' commands that surely haven't been finished yet
-        if (dxfence->GetCompletedValue() < fencevalue)
-        {
-            dxfence->SetEventOnCompletion(fencevalue, hfence);
-            WaitForSingleObject(hfence, INFINITE);
-        }
+        _waitforgpu(fencevalue);
 
         assert(texture->dxstaging != NULL);
         texture->dxresource->Release();

@@ -1,11 +1,13 @@
-#pragma once
+#ifndef SREECS_VELOCITY_HPP
+#define SREECS_VELOCITY_HPP
+
 #include <ECS/Component.hpp>
 
 #include <Datatypes/Vector.h>
 
 namespace sreECS
 {
-    class Velocity: public Component
+    struct Velocity: public Component
     {
         public:
         sre::vec2ut velocity;
@@ -16,3 +18,5 @@ namespace sreECS
         void on_pupdate(Entity&, sre::timeStamp dt) override;
     };
 }
+
+#endif
