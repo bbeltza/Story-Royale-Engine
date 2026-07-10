@@ -85,9 +85,11 @@ namespace sre
         constexpr vec2 floor_scale(T scale) const { return { std::floor(x/scale) * scale, std::floor(y/scale) * scale }; }
         template <typename T2>
         constexpr auto dot(const vec2<T2>& other) const -> decltype(x * other.x) { return x * other.x + y * other.y; }
+        template <typename T2>
+        constexpr auto det(const vec2<T2>& other) const -> decltype(x * other.y) { return x * other.y - y * other.x; }
 
-        constexpr double magnitude() const { return hypot(x, y); }
-        constexpr double getNormalized() const { return getDiv(magnitude()); }
+        constexpr auto magnitude() const -> decltype(hypot(x, y)) { return hypot(x, y); }
+        constexpr auto getNormalized() const -> decltype(getDiv(magnitude())) { return getDiv(magnitude()); }
 
         inline void normalize() { div(static_cast<T>(magnitude())); }
         inline void setclamp(const vec2& min, const vec2& max) { ut_setclamp(x, min.x, max.y); ut_setclamp(y, min.y, max.y); }

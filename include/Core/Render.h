@@ -104,7 +104,12 @@ typedef struct sre_RenderInstance1
     sre_rect2Dut rectangle;
     sre_vec2ut anchor;
     sre_col4 color;
-    float angle;
+    float angle; // TODO: Replace this with a 2x2 transformation matrix?? This way, render drivers don't have to calculate the sine/cosine of the angle and
+                    // instead you'll have to do it manually, giving you even more flexibility for transforming the object... E.g: Skewing the rectangle
+                    // However, since this contains transformation data, the member `rectangle` will no longer be necessary and there will, thus be a single position value to it...
+                 // So the transform would simply just be a 3x2 matrix: [ x1, y1 ]
+                                                                     // [ x2, y2 ]
+                                                                     // [ x3, y3 ]
 
     sre_vec2f uv;
     sre_vec2f uv_offset;

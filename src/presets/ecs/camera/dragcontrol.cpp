@@ -42,10 +42,11 @@ void DragControl::handle_event(void*, DragControl* self, sre::Event ev)
     {
     using namespace sre::events;
     case sre::EVENT_MOUSEMOVE:
-        if (sre::action_pressed(self->m_action)) self->m_lastmouseDelta += ev.get<MouseMove>().delta;
+        if (sre::action_pressed(self->m_action))
+            self->m_lastmouseDelta += ev.get<MouseMove>().process_delta() * self->sensibility;
         break;
     case sre::EVENT_TOUCH:
-        self->m_lastmouseDelta += ev.get<Touch>().delta * sre::window_getviewport();
+        self->m_lastmouseDelta += ev.get<Touch>().delta * self->sensibility;
         break;
     default:
         break;

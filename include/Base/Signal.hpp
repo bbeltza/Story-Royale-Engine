@@ -115,7 +115,7 @@ namespace sre
 		template <typename Fn, typename S, typename C>
 		Connection::ptr connect(Fn fn(S*, C*), void* userdata) { return connect(reinterpret_cast<Fn(*)(S*, C*, T*)>(fn), userdata); }
 		template <typename Fn>
-		Connection::ptr connect(Fn fn(), void* userdata) { return connect(reinterpret_cast<Fn(*)(void*, void*, T*)>(fn), userdata); }
+		Connection::ptr connect(Fn fn()) { return connect(reinterpret_cast<Fn(*)(void*, void*, T*)>(fn), NULL); }
 	};
 
 	using empty_t = std::nullptr_t*;

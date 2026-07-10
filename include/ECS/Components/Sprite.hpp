@@ -33,7 +33,7 @@ namespace sreECS
         Frame base;
         sre::col4 modulate = sre::WHITE;
 
-        // Adds new frames, self explainatory
+        // Adds new frames, self explanatory
         // @returns For `add_frame` The new index of that frame, for `add_frames`, the first index of the frame arrays. Call `get_frame()` or `get_frame_ptr` to get the contents of the frame from its index
         sre::u32 add_frames(const Frame* frames, sre::u32 count);
         sre::u32 add_frame(Frame&& frame);

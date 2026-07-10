@@ -19,7 +19,7 @@ namespace sreECS
 
         // Current scene parent
         Scene* m_parent = NULL;
-    protected:
+    public:
         Entity(Scene* scene, Component* const* components, size_t component_count, sre::vec2ut pos, long z_index);
 
         Entity(Scene* scene, sre::vec2ut pos={ 0, 0 }, long z_index=0):
@@ -30,7 +30,7 @@ namespace sreECS
             Entity(scene, components.begin(), components.size(), pos, z_index) {}
         Entity(ComponentList components, sre::vec2ut pos={0, 0}, long z_index=0):
             Entity(NULL, components) {}
-
+    
         virtual ~Entity();
 
         Entity(const Entity& copy) = delete;

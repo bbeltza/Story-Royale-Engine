@@ -27,6 +27,11 @@ Entity::~Entity()
 		::operator delete(ptr);
 	}
 	
+	if (!m_parent) {
+		sre::log(SRE_LOG_WARN "Entity at '0x%p' does not have a parent, when being destroyed", this);
+		return;
+	}
+
 	for (auto it = m_parent->m_entities.begin(); it != m_parent->m_entities.end(); it++)
 	{
 		if (*it != this) continue;
