@@ -7,7 +7,7 @@
 
 #include <Base/Log.h>
 
-void Render()
+void render()
 {
     static float t = 0;
     sre::vec2ut mpos{sre::mouse_screencoords()};
@@ -30,5 +30,5 @@ void sre::initialize()
     sre::window_setresizable(true);
     sre::window_enable_autoscaling(380, 180);
 
-    beforeRender.connect(Render, nullptr);
+    beforeRender.connect(::render);
 }

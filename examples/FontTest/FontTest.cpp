@@ -66,5 +66,5 @@ void sre::initialize()
     }
 
     sre::window_setsize(200, 200);
-    sre::beforeRender.connect(::render, nullptr);
+    sre::beforeRender.connect(::render);
 }
