@@ -14,6 +14,7 @@ namespace sreECS
         ~DragControl();
 
         sre::unit smoothness = 0.0_ut;
+        sre::vec2ut sensibility = 1.0_ut;
     protected:
         void on_update(Camera& camera) override;
         void on_pupdate(Camera& camera, sre::timeStamp dt) override;

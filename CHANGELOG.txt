@@ -1,4 +1,7 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- July 10th 2026: 0.106.10 (Small patch):
+    - sre::Signal<T*>::connect()'s overload of a function taking no arguments now doesn't take the `userdata` parameter. It is useless for this overload.
+    - vec2 fixes (magnitue/getNormalized return values are now automatic, also seeing that getNormalized returned the wrong type... `det` was also added for determinant calculations)
 - July 5th 2026: 0.106.05:
     - The GUI layer supports focusing modes (which will change the behavior of objects that are hovered and let you determine whether, for instance the mouse is
             outside or inside the GUI layer's viewport zone)

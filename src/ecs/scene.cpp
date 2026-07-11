@@ -124,13 +124,13 @@ void Scene::call_update()
 
 void Scene::call_pupdate(sre::timeStamp dt)
 {
-    pupdate(dt);
-    for (auto& ent : *this)
-    {
+    for (auto& ent : *this) {
         const_cast<sre::vec2ut&>(ent.lastVelocity) = ent.position;
+    }
 
-        for (auto& comp : ent)
-        {
+    pupdate(dt);
+    for (auto& ent : *this) {
+        for (auto& comp : ent) {
             if (comp.enabled())
                 comp.on_pupdate(ent, dt);
         }
@@ -147,10 +147,10 @@ void Scene::call_render()
         return e1->z_index < e2->z_index;
     });
 
-    this->pre_render();
+    this->render();
 
     for (auto& ent : *this)
-    {      
+    {
         for (auto& comp : ent)
         {
             if (comp.enabled())

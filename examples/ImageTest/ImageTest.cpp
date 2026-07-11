@@ -21,9 +21,9 @@ struct TextureEntity : public sreECS::Entity
 
     TextureEntity()
     {
-        sprite.attach(img1.to_texture());
-        sprite.attach(img2.to_texture());
-        sprite.scale = 4;
+        sprite.reserve_frames(2);
+        sprite.add_frame({ 1, 1 }, { 0, 0 }, { 0, 0, 0, 0 }, img1.to_texture());
+        sprite.add_frame({ 1, 1 }, { 0, -1 }, { 0, 0, 0, 0 }, img2.to_texture());
 
         setup_components(sprite);
     }
@@ -37,9 +37,11 @@ static void mouse(void*, TextureEntity* ent, sre::Event event)
         case sre::EVENT_MOUSEBUTTON: {
             using namespace sre::events;
             const auto& mbevent = event.get<MouseButton>();
-            if (mbevent.pressed && mbevent.button == sre::MB_LEFT)
-                ent->sprite.current_frame++;
-                ent->sprite.current_frame %= 2;
+            if (mbevent.pressed && mbevent.button == sre::MB_LEFT) {
+                if (!ent->sprite.next()) {
+                    ent->sprite.set(0);
+                }
+            }
         } break;
     }
 }
@@ -47,7 +49,9 @@ static void mouse(void*, TextureEntity* ent, sre::Event event)
 #include <Core/Window.hpp>
 void sre::initialize()
 {
+    sre::window_set_manualscale(4);
     sre::window_setresizable(true);
+
     auto texture_palace = new sreECS::Scene;
     texture_palace->add_entity<TextureEntity>();
     sreECS::set_current(texture_palace);
