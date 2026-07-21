@@ -42,10 +42,6 @@ namespace sreECS
 		virtual void on_update(Entity& entity) {}
 		virtual void on_pupdate(Entity& entity, sre::timeStamp dt) {}
 		virtual bool on_query(Entity& entity, sre::vec2ut pt) const { return false; }
-
-	#ifndef IMGUI_DISABLE
-		virtual void ImGuiUpdate() {}
-	#endif
 	};
 }
 

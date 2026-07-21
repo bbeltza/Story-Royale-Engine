@@ -50,8 +50,15 @@ namespace sreECS
         sre::vec2ut process();
         
         inline void clamp_position() {
-            if (bounds.size != bounds.size.ZERO)
-                position.setclamp(bounds.origin(-0.5f), bounds.origin(0.5f));
+            /* `bounds.size` can be set to -0.0f to still clamp the position but never move the camera */
+
+            sre::unit ZERO{};
+            if (std::memcmp(&bounds.size.x, &ZERO, sizeof(bounds.size.x)) != 0) {
+                ut_setclamp(position.x, bounds.x - bounds.w*0.5_ut, bounds.x + bounds.w*0.5_ut);
+            }
+            if (std::memcmp(&bounds.size.y, &ZERO, sizeof(bounds.size.y)) != 0) {
+                ut_setclamp(position.y, bounds.y - bounds.h*0.5_ut, bounds.y + bounds.h*0.5_ut);
+            }
         }
     };
 }

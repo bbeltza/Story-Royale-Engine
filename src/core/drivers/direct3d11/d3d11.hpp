@@ -60,16 +60,23 @@ namespace sreD3D11
 
     struct DrawBuffer
     {
-        ID3D11Buffer* dxbuffer;
-        UINT index;
-        UINT capacity;
+        ID3D11Buffer* dxbuffer = NULL;
+        UINT position = 0;
+        UINT capacity = 0;
 
-        ~DrawBuffer() { dxbuffer->Release(); }
+        ~DrawBuffer() {
+            if (dxbuffer)
+                dxbuffer->Release();
+        }
 
-        bool init(ID3D11Device* dxdevice, UINT base_capacity);
-        void reset() { index = 0; }
-        bool resize(ID3D11Device* dxdevice, UINT new_width);
+        void reset() { position = 0; }
+        bool resize(ID3D11Device* dxdevice, UINT capacity);
         bool append(ID3D11DeviceContext* dxdevicecontext, const void* data, UINT size);
+
+        template <typename T>
+        bool append(ID3D11DeviceContext* dxdevicecontext, const T* data, UINT count) {
+            return append(dxdevicecontext, static_cast<const void*>(data), count * sizeof(T));
+        }
     };
 
     struct DLLS
@@ -109,8 +116,7 @@ namespace sreD3D11
             ID3D11RasterizerState* m_dxrasterizerstate;
             ID3D11SamplerState* m_dxsamplerstate;
 
-            DrawBuffer m_d1buffer;
-            DrawBuffer m_d2buffer;
+            DrawBuffer m_drawbuffer;
 
             ID3D11Buffer* m_cbuffer;
             ID3D11Buffer* m_ccambuffer;

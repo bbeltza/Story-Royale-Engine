@@ -594,11 +594,14 @@ sre::rect2Dut sre::render::get_viewport_area() {
 	return engine.video.state.viewport.area;
 }
 
-sre::vec2ut sre::render::get_viewport_center() {
+sre::vec2ut sre::render::get_viewport_center(bool viewport_relative) {
 	if (!has_begun())
 		return sre::vec2ut::ZERO;
 	
-	return engine.video.state.viewport.center;
+	if (viewport_relative)
+		return engine.video.state.viewport.center;
+	else
+		return engine.video.state.viewport.center + engine.video.state.viewport.area.position/2;
 }
 
 sre::rect2Dut sre::render::get_scissors_area(void) {

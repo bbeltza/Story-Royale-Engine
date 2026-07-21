@@ -71,7 +71,7 @@ void Shape::on_render(Entity &entity)
 
 bool Shape::on_query(Entity& entity, sre::vec2ut screen_coords) const
 {
-    return in_screen_point(entity, screen_coords);
+    return flags.has(F_CANQUERY) && in_screen_point(entity, screen_coords);
 }
 
 

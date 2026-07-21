@@ -1,4 +1,13 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- July 21th 2026: 0.106.21:
+    - Probably the last update before the engine gets to be for the new game's... A website and blog will be in the works too! I'm finding more motivation and potential on the new game.
+    - `sre::render::get_viewport_center` accepts a new parameter (optional), letting you specify whether the center is relative to the viewport or not (thus the screen). Defaults to `true`. (the old behavior)
+    - sreECS::Camera: Bounds checking using the `bounds` member can now be done in one of the two individual X - Y axes.
+        Additionally, the `bounds.size` member can be `-0.0f` if you still want camera bounds checking on the specified axis (which is disabled if it's `0.0f`)
+            which can be useful if you don't want to move the camera on that axis.
+    - The sreECS::Shape::F_CANQUERY flag wasn't used at all, now fixed (although whatever... I never use it..)
+    - Fixed a bug in D3D11's backend where the drawing buffer wasn't being resized enough (notably on draw2), so it caused overflows.
+           It's fixed. It's also reworked a little bit so that the backend uses only a single buffer for both `draw1` and `draw2` (we do not need two, it's something to be fixed in the other backends aswell. Stuff that I learned on my srevulkan grind...)
 - July 10th 2026: 0.106.10 (Small patch):
     - sre::Signal<T*>::connect()'s overload of a function taking no arguments now doesn't take the `userdata` parameter. It is useless for this overload.
     - vec2 fixes (magnitue/getNormalized return values are now automatic, also seeing that getNormalized returned the wrong type... `det` was also added for determinant calculations)

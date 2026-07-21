@@ -252,7 +252,7 @@ SRE_CAPI_END
             sre::blendMode get_blendmode(void);
             sre::unit     get_viewport_scale(void);
             sre::rect2Dut get_viewport_area(void);
-            sre::vec2ut   get_viewport_center(void);
+            sre::vec2ut   get_viewport_center(bool viewport_relative=true);
             sre::rect2Dut get_scissors_area(void);
 
             // WIP (Functions to determine whether next draw calls can be batched)
