@@ -25,14 +25,12 @@ namespace sre
             T w;
             T h;
         };
+        T _data[4]; // Placeholder made to access the members of this union directly from the constructor (avoid accessing the anonymous struct members from there)
 
-        constexpr rect2D(): position(), size() {}
-        constexpr rect2D(T x, T y, T w, T h): position(x, y), size(w, h) {}
-        constexpr rect2D(const vec& position, const vec& size): position(position), size(size) {}
-        constexpr rect2D(const rect2D& copy): position(copy.position), size(copy.size) {}
-
-        template <typename T2>
-        explicit constexpr rect2D(const rect2D<T2>& other): position(other.position), size(other.size) {}
+        constexpr rect2D(): _data{} {}
+        constexpr rect2D(T x, T y, T w, T h): _data{ x, y, w, h } {}
+        constexpr rect2D(const vec& position, const vec& size): _data{ position.x, position.y, size.x, size.y } {}
+        constexpr rect2D(const rect2D& copy): rect2D{ copy.position, copy.size } {}
 
         template <typename T2>
         explicit constexpr operator rect2D<T2>() const {
@@ -50,8 +48,8 @@ namespace sre
 
         constexpr rect2D origin_rect(sre::vec2ut uv) const { return rect2D{origin(uv), size}; }
 
-        constexpr const T* ptr() const { return &x; } 
-        inline          T* ptr()       { return &x; } 
+        constexpr const T* ptr() const { return _data; } 
+        inline          T* ptr()       { return _data; } 
 
         constexpr bool intersects(vec pt) const {
             return ( x < pt.x && y < pt.y ) &&

@@ -11,6 +11,7 @@ namespace sre
 
         public:
             constexpr RAIITexture() = default;
+            constexpr RAIITexture(std::nullptr_t) {};
             RAIITexture(sre::Texture* texture, bool aquire=false): m_ptr(texture) { if (aquire) texture->aquire(); }
             ~RAIITexture() { m_ptr->release(); }
 
@@ -28,7 +29,8 @@ namespace sre
                 if (m_ptr)
                     m_ptr->release();
                 m_ptr = copy.m_ptr;
-                m_ptr->aquire();
+                if (m_ptr)
+                    m_ptr->aquire();
             }
             
             sre::Texture* get() const { return m_ptr; }

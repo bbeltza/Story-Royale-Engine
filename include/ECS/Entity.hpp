@@ -93,6 +93,15 @@ namespace sreECS
         */
         void setup_components(Component* const components[], size_t count);
 
+        // Wrapper around `setup_components` that allows you to use an `int`
+        inline void setup_components(Component* const components[], int count) {
+            if (count < 0) {
+                count = 0;
+            }
+
+            setup_components(components, static_cast<size_t>(count));
+        }
+
         // Iterators
         struct Iterator
         {

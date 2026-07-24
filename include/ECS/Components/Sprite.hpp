@@ -8,6 +8,9 @@
 
 #include <Base/Texture.hpp>
 
+// Render Instance declaration to avoid including <Core/Render.h>, for `sreECS::SpriteFrame::get_renderinstance`, please include Render.h to use it.
+struct sre_RenderInstance1;
+
 namespace sreECS
 {
     struct SpriteFrame
@@ -18,6 +21,7 @@ namespace sreECS
         sre::rect2Di region;
         sre::RAIITexture texture;
 
+        sre_RenderInstance1 get_renderinstance(const SpriteFrame& base, sre::col4 modulate, sre::Texture*& out_texture) const;
         void render(sre::s32 renderflags, const SpriteFrame& base, sre::col4 modulate=sre::WHITE) const;
 
         constexpr SpriteFrame(const sre::vec2ut& _scale={1, 1}, const sre::vec2ut& _offset={0, 0}, const sre::rect2Di& _region={0, 0, 0, 0}):

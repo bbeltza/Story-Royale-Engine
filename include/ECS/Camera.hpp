@@ -4,6 +4,8 @@
 #include <Datatypes/Rect.h>
 #include <Datatypes/TimeStamp.h>
 
+#include <cstring>
+
 namespace sreECS
 {
 	struct Camera;

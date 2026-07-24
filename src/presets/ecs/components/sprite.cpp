@@ -42,14 +42,14 @@ void Sprite::on_render(Entity& entity)
     base.offset = oldoffset;
 }
 
-void SpriteFrame::render(sre::s32 renderflags, const SpriteFrame& base, sre::col4 modulate) const
+sre::RenderInstance1 SpriteFrame::get_renderinstance(const SpriteFrame& base, sre::col4 modulate, sre::Texture*& out_texture) const
 {
-    sre::Texture* cur_texture = texture ? texture.get() : base.texture.get();
-    if (!cur_texture) {
-        return;
+    out_texture = texture ? texture.get() : base.texture.get();
+    if (!out_texture) {
+        return {};
     }
-
-    sre::vec2i texture_size = cur_texture->size();
+    
+    sre::vec2i texture_size = out_texture->size();
     sre::vec2f texture_fsize{texture_size};
 
     sre::rect2Di cur_region = region;
@@ -68,10 +68,12 @@ void SpriteFrame::render(sre::s32 renderflags, const SpriteFrame& base, sre::col
         texture_size.y = cur_region.size.y;
 
     sre::vec2ut full_scale = base.scale * scale;
-    if (!full_scale.x || !full_scale.y)
-        return;
+    if (!full_scale.x || !full_scale.y) {
+        out_texture = NULL;
+        return {};
+    }
 
-    sre::RenderInstance1 drawinst{
+    return {
         sre::rect2Dut{
             base.offset + offset,
             texture_size * full_scale
@@ -82,6 +84,14 @@ void SpriteFrame::render(sre::s32 renderflags, const SpriteFrame& base, sre::col
         sre::vec2f{ cur_region.size.x ? (cur_region.size.x/texture_fsize.x) : 1.0f, cur_region.size.y ? (cur_region.size.y/texture_fsize.y) : 1.0f },
         sre::vec2f{ cur_region.position.x / texture_fsize.x, cur_region.position.y / texture_fsize.y }
     };
+}
+
+void SpriteFrame::render(sre::s32 renderflags, const SpriteFrame& base, sre::col4 modulate) const
+{
+    sre::Texture* cur_texture = NULL;
+    sre::RenderInstance1 drawinst = get_renderinstance(base, modulate, cur_texture);
+    if (!cur_texture)
+        return;
 
     sre::render::draw1(
         renderflags,

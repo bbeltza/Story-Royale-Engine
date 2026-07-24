@@ -5,11 +5,6 @@
 #include <Datatypes/Flags.hpp>
 #include <Datatypes/TimeStamp.h>
 
-namespace sre
-{
-	struct RenderInterface;
-}
-
 namespace sreECS
 {
 	class Entity;
