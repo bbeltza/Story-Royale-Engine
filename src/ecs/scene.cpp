@@ -38,7 +38,7 @@ Entity* Scene::add_child(Entity* entity)
 
     if (entity->m_parent)
     {
-        sre::error(SRE_ERR_UNAVAILABLE, "add_child(NULL) with an already parented entity.");
+        sre::error(SRE_ERR_UNAVAILABLE, "add_child() with an already parented entity");
         return NULL;
     }    
 

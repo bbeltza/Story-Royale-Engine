@@ -18,7 +18,7 @@ namespace sreECS
 
         void on_render(sreECS::Entity& entity) override
         {
-            sre::draw_grid(color, size, entity.position, 1);
+            sre::draw_grid(color, size, entity.position, 0x03);
         };
     };
 }
