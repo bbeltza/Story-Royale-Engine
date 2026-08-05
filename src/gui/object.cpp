@@ -12,13 +12,13 @@
 
 using namespace sreGUI;
 
-Object::Object(Object* parent, sreGUI::Component*const components[], size_t numcomponents)
+Object::Object(Object* parent, sreGUI::Component*const components[], size_t num_components)
 {
     if (parent)
         set_parent(parent);
 
     if (components)
-        this->components.setup(components, numcomponents);
+        this->components.setup(components, num_components);
 }
 
 Object::~Object()
@@ -99,8 +99,7 @@ void Object::CContainer::setup(Component* const components[], size_t count)
 }
 
 //
-// Global GUI object functions (That wrap the layer ones)
-
+// Global GUI object functions (They wrap the layer ones)
 
 #if 0
     static inline void GET_LAYER_INIT(Layer*& lyr) {
@@ -171,7 +170,7 @@ void Object::call_query(sre::vec2ut pt, std::deque<const Object*>& stack)
     m_state.toggle_off(S_INCURSOR | S_HOVERING);
     if (!flags.has(F_ENABLED))
         return;
-
+        
     if (flags.has(F_QUERY) && m_absolute.intersects(pt))
     {
         m_state.toggle_on(S_INCURSOR);

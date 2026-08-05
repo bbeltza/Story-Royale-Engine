@@ -34,6 +34,8 @@ namespace sreECS
         // The camera, whence its coordinates point to the center of the screen
         Camera camera;
     public:
+        const Layer* get_layer() const { return m_attachedlyr; }
+              Layer* get_layer()       { return m_attachedlyr; }
         // Entities
 
         Entity* add_child(Entity* entity);

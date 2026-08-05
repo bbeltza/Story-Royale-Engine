@@ -55,6 +55,13 @@ namespace sre
 #include <bitset>
 #include <climits>
 
+constexpr int _implicit_conversion(int x) {
+    return x;
+}
+constexpr long long _implicit_conversion(long long x) {
+    return x;
+}
+
 template <typename Char, typename Traits, typename T>
 std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& os, const sre::flags<T>& flags)
 {
@@ -62,6 +69,7 @@ std::basic_ostream<Char, Traits>& operator <<(std::basic_ostream<Char, Traits>& 
     std::bitset<sizeof(data) * CHAR_BIT> bitset{data};
 
     auto oldflags = os.setf(std::ios::hex);
-    os << "{ " << bitset << "(" << data << ") }";
+    os << "{ " << bitset << " (" << _implicit_conversion(data) << ") }";
+    os.setf(oldflags);
     return os;
 }

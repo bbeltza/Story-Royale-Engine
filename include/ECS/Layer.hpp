@@ -36,8 +36,8 @@ namespace sreECS
         Scene* get_current() { return m_current; }
         void set_current(Scene* scene);
 
-        sre::rect2Dut get_viewport_area() { return vp_area; }
-        sre::unit get_viewport_scale() { return vp_scale; }
+        sre::rect2Dut get_viewport_area() const { return vp_area; }
+        sre::unit get_viewport_scale() const { return vp_scale; }
         void set_viewport(sre::rect2Dut area, sre::unit scale=0) {
             vp_area = area;
             vp_scale = scale;

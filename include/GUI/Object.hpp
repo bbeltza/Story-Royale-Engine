@@ -57,10 +57,10 @@ namespace sreGUI
 
         Object(sreGUI::Object* parent=NULL, sreGUI::Component* const components[]=NULL, size_t num_components=0);
         ~Object();
-
+       
         Object(sreGUI::Object* parent, sreGUI::ComponentList components): Object(parent, components.begin(), components.size()) {}
         Object(sreGUI::ComponentList components): Object(NULL, components) {}
-
+        
         // This is a wrapper around `new` and `set_parent` for backwards compatibility with the old previous `add_child` function
         // To create a GUI object. use `new` and call `set_parent` on it to reparent it into another object. Eventually, you can also
             // use the parent constructor in the Object and pass the parent on it (which requires some setup on the derived class)

@@ -5,16 +5,18 @@
 
 using namespace sreGUI;
 
-void Image::fit(Transform& transform)
+bool Image::fit(Transform& transform)
 {
-    if (!texture)
-    {
+    if (!texture) {
         sre::log(SRE_LOG_WARN "Calling Image::fit on NULL image");
-        return;
+        return false;
     }
 
     sre::vec2i size = texture->size();
+    size.x = region.w ? region.w : size.x;
+    size.y = region.h ? region.h : size.y;
     transform.size = sre::udim2::fromoffset(sre::vec2ut{size});
+    return true;
 }
 
 void Image::on_render(const sre::rect2Dut& dimensions)

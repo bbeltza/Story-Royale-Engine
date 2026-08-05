@@ -78,13 +78,14 @@ void sreGUI::Layer::update()
         if (focus_mode == SREGUI_FOCUS_DISABLED) {
             _focusing = false;
         } else {
+            sre::vec2ut area{sre::calc_viewport_size(vp_area, vp_scale)};
             sre::vec2ut pt{sre::get_input_coordinates()};
             pt = sre::process_input_coordinates(pt, vp_area.position, vp_scale);
             if (focus_mode == SREGUI_FOCUS_AUTOMATIC) {
                 _focusing = (pt.x >= 0 &&
                              pt.y >= 0 &&
-                             pt.x <= vp_area.w &&
-                             pt.y <= vp_area.h);
+                             pt.x <= area.x &&
+                             pt.y <= area.y);
             }
             else {
                 _focusing = true;

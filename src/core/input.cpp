@@ -57,3 +57,7 @@ bool sre::button_justpressed(sre::mouseButton button) { return 0 != (engine.mous
 sre::vec2i sre::get_input_coordinates() {
     return { engine.input_x, engine.input_y }; // These are only the raw mouse coordinates right now...
 }
+
+sre::inputsrc sre::get_input_source() {
+    return SRE_INPUT_MOUSE;
+}
