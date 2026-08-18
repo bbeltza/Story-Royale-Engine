@@ -2,6 +2,7 @@ if (NOT EXISTS ${SRE_DIR}/VERSION.txt)
     message(WARNING "VERSION.txt NOT FOUND. Engine directory corrupt?")
 else()
     file(READ ${SRE_DIR}/VERSION.txt SRE_VER LIMIT 8)
+    string(SUBSTRING ${SRE_VER} 0 8 SRE_VER) # Avoid weird bug where file(READ) inserts a newline character at the end of `SRE_VER`. Strip that line from the returned string.
     set(PROJ_SRE_VER VERSION ${SRE_VER})
 
     set(SRE_VERSION ${SRE_VER} CACHE STRING "The Engine version: ${SRE_VER}")
