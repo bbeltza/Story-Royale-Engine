@@ -100,13 +100,13 @@ Instance::Instance(SDL_Window* window, int* outstatus)
     m_pparamcache.BackBufferCount = 1; // Use two buffers? Or one? I've seen performance be better on only 1 back-buffer
     m_pparamcache.SwapEffect = D3DSWAPEFFECT_DISCARD;
     m_pparamcache.Windowed = TRUE;
-    m_pparamcache.Flags = D3DPRESENTFLAG_VIDEO;
+    m_pparamcache.Flags = 0;
     m_pparamcache.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 
     SRE_DXCALL(m_dxd3d9->CreateDevice(adapter,
                                        devtype,
                                        wminfo.info.win.window,
-                                       D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_NOWINDOWCHANGES | D3DCREATE_FPU_PRESERVE,
+                                       D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_NOWINDOWCHANGES | D3DCREATE_PUREDEVICE,
                                        &m_pparamcache,
                                        &m_dxdevice
     ));

@@ -20,15 +20,15 @@ namespace sreECS
         // Current scene parent
         Scene* m_parent = NULL;
     public:
-        Entity(Scene* scene, Component* const* components, size_t component_count, sre::vec2ut pos, long z_index);
+        Entity(Scene* scene, Component* const* components, size_t component_count, sre::vec2ut pos, int z_index);
 
-        Entity(Scene* scene, sre::vec2ut pos={ 0, 0 }, long z_index=0):
+        Entity(Scene* scene, sre::vec2ut pos={ 0, 0 }, int z_index=0):
             Entity(scene, NULL, 0, pos, z_index) {}
-        Entity(sre::vec2ut pos={ 0, 0 }, long z_index=0):
+        Entity(sre::vec2ut pos={ 0, 0 }, int z_index=0):
             Entity(NULL, pos, z_index) {}
-        Entity(Scene* scene, ComponentList components, sre::vec2ut pos={0, 0}, long z_index=0):
+        Entity(Scene* scene, ComponentList components, sre::vec2ut pos={0, 0}, int z_index=0):
             Entity(scene, components.begin(), components.size(), pos, z_index) {}
-        Entity(ComponentList components, sre::vec2ut pos={0, 0}, long z_index=0):
+        Entity(ComponentList components, sre::vec2ut pos={0, 0}, int z_index=0):
             Entity(NULL, components) {}
     
         virtual ~Entity();
@@ -41,7 +41,7 @@ namespace sreECS
         // useful for checking if an entity has been moved
         const sre::vec2ut lastVelocity;
 
-        sre::sptr z_index;
+        int z_index;
 
         // Gets the parent scene of the entity, templated by a derived `T` type from `Scene`
         // 

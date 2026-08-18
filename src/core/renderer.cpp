@@ -467,8 +467,10 @@ sre::vec2ut sre::calc_viewport_size(sre::rect2Dut zone, sre::unit scale) {
 }
 
 bool sre::render::set_viewport(sre::rect2Dut zone, sre::unit scale) {
-	if (scale < 0)
+	if (scale < 0) {
+		sre::error(SRE_ERR_INVALID_PARAMETER, "scale");
 		return false;
+	}
 	if (scale == 0)
 		scale = engine.scale;
 

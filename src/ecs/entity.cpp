@@ -4,7 +4,7 @@
 
 using namespace sreECS;
 
-Entity::Entity(Scene* scene, Component* const* components, size_t component_count, sre::vec2ut pos, long z_index):
+Entity::Entity(Scene* scene, Component* const* components, size_t component_count, sre::vec2ut pos, int z_index):
 	position(pos), z_index(z_index) {
 	
 	if (scene) {
@@ -48,9 +48,11 @@ void Entity::setup_components(Component* const components[], size_t count)
 		if (count)
 			sre::log(SRE_LOG_WARN "Entity::setup_components(): `components` is NULL (meaning a request to detach all of the components is made), but `count` is not 0");
 
-		::operator delete(m_components);
-		m_components = NULL;
+        auto cmpts = m_components;
 		m_componentcount = 0;
+		m_components = NULL;
+		
+        ::operator delete(cmpts);
 		return;
 	}
 

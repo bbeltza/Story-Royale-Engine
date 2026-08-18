@@ -10,7 +10,8 @@ static const char* map_modetostr(int mode)
     switch (mode)
     {
     case SRE_FILE_READ: return "rb";
-    case SRE_FILE_WRITE: return "wb";
+    case SRE_FILE_WRITE:
+    case SRE_FILE_OVERRIDE: return "wb";
     case SRE_FILE_READWRITE: return "rb+";
     case SRE_FILE_READWRITE_CREATE: return "wb+";
     //case SRE_FILE_APPEND: return "ab";

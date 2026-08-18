@@ -842,6 +842,14 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
             if (pD3D12GetDebugInterface && pD3D12GetDebugInterface(IID_PPV_ARGS(&dxdebug)) == S_OK)
             {
                 dxdebug->EnableDebugLayer();
+                #if 1 // Enable GPU validation in the GPU, if available.
+                ID3D12Debug1* dxdebug1 = NULL;
+                if (dxdebug->QueryInterface(&dxdebug1) == S_OK) {
+                    dxdebug1->SetEnableGPUBasedValidation(TRUE);
+                    dxdebug1->Release();
+                }
+                #endif
+                
                 dxdebug->Release();
             }
         }
@@ -900,7 +908,7 @@ sred3d12_inst::sred3d12_inst(SDL_Window* window, int* outstatus)
 
         dxfactory->Release();
     }
-
+    
     {
         D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16;
         SRE_DXCALL(dxdevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16)));
@@ -1581,7 +1589,7 @@ bool sred3d12_inst::texture_setup(texture_type* texture, sre::SDLpixelFormat for
 
     SRE_DXCALLF(dxdevice->CreateCommittedResource(
                                                 &heap_properties, D3D12_HEAP_FLAG_NONE,
-                                                &staging_desc, D3D12_RESOURCE_STATE_COPY_SOURCE,
+                                                &staging_desc, D3D12_RESOURCE_STATE_COMMON,
                                                 NULL, IID_PPV_ARGS(&texture->dxstaging)
     ));
 

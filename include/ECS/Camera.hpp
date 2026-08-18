@@ -31,8 +31,8 @@ namespace sreECS
     {
         friend struct Scene;
 
-        sre::vec2ut position;
-        sre::vec2ut scale; // Unused (for now)
+        sre::vec2ut position = { 0, 0 };
+        sre::vec2ut scale = { 1, 1 }; // Unused (for now)
         sre::rect2Dut bounds = { sre::vec2ut::ZERO, sre::vec2ut::ZERO };
 
         CameraController* controller = NULL;

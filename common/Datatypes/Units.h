@@ -11,6 +11,7 @@ namespace sre
 }
 
 constexpr sre::unit operator ""_ut(long double n) { return static_cast<sre::unit>(n); }
+constexpr sre::unit operator ""_ut(unsigned long long n) { return static_cast<sre::unit>(n); }
 
 #define SRE_UT(x) x##_ut
 
