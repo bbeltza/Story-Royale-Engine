@@ -1,4 +1,11 @@
 (If the last version is ever marked with XXs then it means that the version is not released yet, so there might be notes of features that AREN'T finished yet)
+- August 18th 2026: 0.107.18:
+	- sreECS::Entity::z_index is now an `int`, instead of previously being an `intptr_t`, this would give inconsistent property byte sizes accross 32-bit and 64-bit architectures,
+		the parameter in the constructor was additionally as a `long`.
+	- There's now a new sre::unit conversion operator, for integral literals so you could now type in "0_ut" instead of "0._ut" or "0.0_ut".
+	- The C style `sre_initialize` callback is now available in C++. Entry points are a mess...
+	- There's now GPU based validation enabled in D3D12 when the debug layer is available and enabled.
+	- More bugfixes, notably throughout the previous commits.
 - July 21th 2026: 0.106.21:
     - Probably the last update before the engine gets to be for the new game's... A website and blog will be in the works too! I'm finding more motivation and potential on the new game.
     - `sre::render::get_viewport_center` accepts a new parameter (optional), letting you specify whether the center is relative to the viewport or not (thus the screen). Defaults to `true`. (the old behavior)
