@@ -109,10 +109,17 @@ This is a simple example of a `CMakeLists.txt` from the game:
 cmake_minimum_required(VERSION 3.12)
 project(Game) # This can be anything, it's the name of the target
 
+<<<<<<< HEAD
+# Include this if you have the engine inside the game, the engine HAS to be included before calling any built-in engine methods
+# add_subdirectory(Engine)
+# You may add this too (for the packaged version)
+# include(sre)
+=======
 # Include this if you have the engine inside the game
 # add_subdirectory(Engine)
 
 include(StoryRoyaleEngine)
+>>>>>>> fbde2384ddc944d19c09351501d5ba04f50096f8
 
 # Add all of your C/C++ files here
 set(SOURCES "src/entry.cpp") # You can change the SOURCES name, back then, it was required that SOURCES existed
